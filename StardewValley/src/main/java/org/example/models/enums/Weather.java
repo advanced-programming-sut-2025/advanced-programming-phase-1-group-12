@@ -1,0 +1,24 @@
+package models.enums;
+
+public enum Weather {
+    SUNNY("Sunny"),
+    RAINY("Rain"),
+    STORM("Storm"),
+    SNOW("Snow");
+    private final String name;
+
+    Weather(String name) {
+        this.name = name;
+    }
+
+
+    public static Weather fromString(String name) {
+        for (Weather type : Weather.values()) {
+            if (type.name.equals(name)) {
+                return type;
+            }
+        }
+        return null;
+    }
+
+}

@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="advanced-programming-phase-1-group-12">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/src(3).zip!/" />
+      <root url="jar://$PROJECT_DIR$/StardewValley.zip!/" />
+      <root url="jar://$PROJECT_DIR$/src(1).zip!/" />
+      <root url="jar://$PROJECT_DIR$/src.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
