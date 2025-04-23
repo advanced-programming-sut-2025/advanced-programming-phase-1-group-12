@@ -4,16 +4,27 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public enum LoginRegisterMenuCommands implements Commands {
-    RegisterUser(""),
+    MENU_ENTER("^menu enter (?<menuName>.*)$"),
 
-    LoginUser(""),
+    EXIT("^menu exit$"),
 
-    PickQuestion(""),
+    SHOW_CURRENT_MENU("^show current menu$"),
 
-    ForgetPassword(""),
+    RegisterUser("register -u (?<username>.*) -p (?<password>.*) (?<passwordConfirm>.*) -n (?<nickname>.*) -e" +
+            "(?<email>.*) -g (?<gender>.*)"),
 
-    AnswerForgetPasswordQuestion("");
+    LoginUser("^login -u (?<username>.*) -p (?<password>.*) (–stay-logged-in)?"),
 
+    PickQuestion("^pick question -q (?<questionNumber>.*) -a (?<answer>.*) -c (?<answerConfirm>.*)$"),
+
+    ForgetPassword("forget password -u (?<username>.*)"),
+
+    AnswerForgetPasswordQuestion("answer -a (?<answer>.*)"),
+
+    EMAIL_REGEX("^[a-zA-Z0-9](?!.*\\.\\.)[a-zA-Z0-9._-]*[a-zA-Z0-9]@$"+
+            "[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\\.[a-zA-Z]{2,})+"),
+
+    VALID_PASS("^[a-zA-Z0-9?><,\"';:/|/\\][}{+=)(*&^%$#!]{8,}$");
 
     private final String regex;
     private final Pattern pattern;
@@ -24,7 +35,11 @@ public enum LoginRegisterMenuCommands implements Commands {
     }
 
     public Matcher getMatcher(String input) {
-        return pattern.matcher(input);
+        Matcher matcher = Pattern.compile(getRegex()).matcher(input);
+        if (matcher.matches()) {
+            return matcher;
+        }
+        return null;
     }
 
     public String getRegex() {
