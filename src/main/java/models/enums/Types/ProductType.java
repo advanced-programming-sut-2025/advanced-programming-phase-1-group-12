@@ -1,0 +1,38 @@
+package models.enums.Types;
+
+public enum ProductType{
+    EGG,
+    SARDINE,
+    SALMON,
+    WHEAT,
+    LEEK,
+    DANDELION,
+    MILK,
+    PUMPKIN,
+    WHEAT_FLOUR,
+    SUGAR,
+    TOMATO,
+    CHEESE,
+    CORN,
+    ANY_FISH,
+    RICE,
+    FIBER,
+    COFFEE,
+    POTATO,
+    OIL,
+    BLUEBERRY,
+    MELON,
+    APRICOT,
+    RED_CABBAGE,
+    RADISH,
+    AMARANTH,
+    KALE,
+    PARSNIP,
+    BREAD,
+    CARROT,
+    EGGPLANT,
+    HASH_BROWNS,
+    FLOUNDER,
+    MIDNIGHT_CARP
+}
+
