@@ -19,6 +19,8 @@ public enum LoginRegisterMenuCommands implements Commands {
 
     ForgetPassword("forget password -u (?<username>.*)"),
 
+    CHOOSE_PASSWORD_AFTER_FORGET("^i answered so my new password: (?<newPass>.*)$"),
+
     AnswerForgetPasswordQuestion("answer -a (?<answer>.*)"),
 
     EMAIL_REGEX("^[a-zA-Z0-9](?!.*\\.\\.)[a-zA-Z0-9._-]*[a-zA-Z0-9]@$"+

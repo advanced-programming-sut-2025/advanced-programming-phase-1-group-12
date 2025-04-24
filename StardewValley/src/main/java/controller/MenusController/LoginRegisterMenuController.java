@@ -8,6 +8,7 @@ import models.enums.commands.LoginRegisterMenuCommands;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -133,8 +134,6 @@ public class LoginRegisterMenuController implements MenuController {
     }
     public void loadUsersFromFile(String fileName) {
         File file = new File(fileName);
-
-        // Check if the file exists
         if (!file.exists()) {
             System.out.println("please sign in first");
             return;
@@ -142,16 +141,66 @@ public class LoginRegisterMenuController implements MenuController {
 
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             Gson gson = new Gson();
-            User[] usersArray = gson.fromJson(reader, User[].class);
-
-            // Clear and load users from the file
+            User user = gson.fromJson(reader, User.class);  // Not User[]
             App.getUsers().clear();
-            for (User user : usersArray) {
-                App.getUsers().put(user.getUserName(), user);
-            }
-
+            App.getUsers().put(user.getUserName(), user);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void forgetPassword(String userName) {
+        File file = new File(userName + ".json");
+        if (!file.exists()) {
+            System.out.println("incorrect user name");
+            return;
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(userName + ".json"))) {
+            Gson gson = new Gson();
+            User user = gson.fromJson(reader, User.class);  // Not User[]
+            App.getUsers().clear();
+            App.getUsers().put(user.getUserName(), user);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (App.getUsers().containsKey(userName)) {
+            User currentUser = App.getUsers().get(userName);
+                App.setCurrentPlayer(currentUser);}
+    }
+    public Result changePassword(String username, String oldPass, String newPass) {
+        User user = App.getUsers().get(username);
+        if (user == null) {
+            return new Result("User not found", false);
+        }
+
+        if (!user.getPassword().equals(oldPass)) {
+            return new Result("Old password is incorrect", false);
+        }
+
+        user.setPassword(newPass);  // باید setter داشته باشی برای password
+        saveUser(user, username + ".json");
+        return new Result("Password updated successfully", true);
+    }
+    public Result answerQuestion(Matcher matcher) {
+        String answer = matcher.group("answer");
+        if(answer.equals(App.getCurrentPlayer().getAnswerOfQuestionForSecurity())){
+            return new Result("correct answer. now enter your new password like this : i answered so my new password:"
+                    , true);
+        }
+        return new Result("wrong answer", false);
+    }
+    public void newPassAfterForget(String newPass) {
+        if(newPass.equals("random")){
+            newPass = RandomPassword();
+
+            System.out.println("this will be your password : " + newPass);
+            App.getCurrentPlayer().setPassword(newPass);  // باید setter داشته باشی برای password
+            saveUser(App.getCurrentPlayer(), App.getCurrentPlayer().getUserName() + ".json");
+            System.out.println("password updated successfully");
+            return;
+        }
+        App.getCurrentPlayer().setPassword(newPass);  // باید setter داشته باشی برای password
+        saveUser(App.getCurrentPlayer(), App.getCurrentPlayer().getUserName() + ".json");
+        System.out.println("password updated successfully");
     }
 }

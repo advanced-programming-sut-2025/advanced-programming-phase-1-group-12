@@ -32,6 +32,14 @@ public class LoginRegisterMenu extends AppMenu{
             String username = matcher.group("username");
             String password = matcher.group("password");
             controller.login(username, password);
+        } else if ((matcher = LoginRegisterMenuCommands.ForgetPassword.getMatcher(input)) != null) {
+            controller.forgetPassword(matcher.group("username"));
+        }//hatman dastoor balayee ro ghablesh zade bashe
+        else if ((matcher = LoginRegisterMenuCommands.AnswerForgetPasswordQuestion.getMatcher(input)) != null) {
+            System.out.println(controller.answerQuestion(matcher));
+        } //ghablesh balayee ro zade bashe
+        else if ((matcher = LoginRegisterMenuCommands.CHOOSE_PASSWORD_AFTER_FORGET.getMatcher(input)) != null) {
+            controller.newPassAfterForget(matcher.group("newPass"));
         }
     }
 }

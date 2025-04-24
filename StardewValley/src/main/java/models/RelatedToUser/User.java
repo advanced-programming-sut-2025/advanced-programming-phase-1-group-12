@@ -92,4 +92,12 @@ public class User {
     public String getEmail() {
         return email;
     }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getAnswerOfQuestionForSecurity() {
+        return answerOfQuestionForSecurity;
+    }
 }
