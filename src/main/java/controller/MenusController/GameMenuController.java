@@ -7,7 +7,7 @@ import models.*;
 import java.util.Map;
 
 public class GameMenuController implements MenuController {
-    Game currentMap =
+    Game currentMap
     public Result newGame() { return null;}
 
     public map choosingMap(int MapId){ return null;}
