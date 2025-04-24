@@ -4,7 +4,7 @@ import models.Fundementals.Result;
 
 public class DateController {
     public Result showCurrentTime() {
-        return Result.success("");
+        return Result.success("") ;
     }
     public Result showCurrentDate(){
         return Result.success("");
