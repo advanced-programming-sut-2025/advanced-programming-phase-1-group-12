@@ -12,5 +12,4 @@ public class GameMenu extends AppMenu {
     public void dayOfWeek(){}
     public void cheatAdvancedTime(){}
     public void cheatAdvancedDate(){}
-
 }

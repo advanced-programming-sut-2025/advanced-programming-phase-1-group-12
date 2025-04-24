@@ -187,7 +187,9 @@ public class LoginRegisterMenuController implements MenuController {
             return new Result("correct answer. now enter your new password like this : i answered so my new password:"
                     , true);
         }
+        System.out.println("kkkkk");
         return new Result("wrong answer", false);
+
     }
     public void newPassAfterForget(String newPass) {
         if(newPass.equals("random")){
