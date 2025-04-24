@@ -4,15 +4,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public enum ProfileMenuCommands implements Commands {
-    ChangeUsername(""),
+    //TODO:ba currnt player inja va login ro goftim dar soorat ghalat boodan eslahesh konam
+    ChangeUsername("change username -u (?<username>.*)"),
 
-    ChangeNickname(""),
+    ChangeNickname("change nickname -u (?<nickname>.*)"),
 
-    ChangeEmail(""),
+    ChangeEmail("change email -e (?<email>.*)"),
 
-    ChangePassword(""),
+    ChangePassword("change password -p (?<newPassword>.*) -o (?<oldPassword>.*)"),
 
-    UserInfo("");
+    UserInfo("uesr info");
 
     private final String regex;
     private final Pattern pattern;
@@ -23,7 +24,11 @@ public enum ProfileMenuCommands implements Commands {
     }
 
     public Matcher getMatcher(String input) {
-        return pattern.matcher(input);
+        Matcher matcher = Pattern.compile(getRegex()).matcher(input);
+        if (matcher.matches()) {
+            return matcher;
+        }
+        return null;
     }
 
     public String getRegex() {
