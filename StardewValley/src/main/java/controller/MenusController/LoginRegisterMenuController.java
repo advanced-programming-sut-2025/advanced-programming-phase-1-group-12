@@ -1,10 +1,12 @@
 package controller.MenusController;
 
+import com.google.gson.Gson;
 import models.Fundementals.App;
 import models.Fundementals.Result;
 import models.RelatedToUser.User;
 import models.enums.commands.LoginRegisterMenuCommands;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
@@ -71,6 +73,7 @@ public class LoginRegisterMenuController implements MenuController {
         User newUser = new User(new ArrayList<>(), username, password, email, "","",
                 null, null, null, false, null, null, new ArrayList<>(),
                 0, isFemale, new ArrayList<>(), new ArrayList<>(), nickname);
+        saveUser(newUser, username +".json");
         App.getUsers().put(username, newUser);
         App.setCurrentPlayer(newUser);
 
@@ -98,9 +101,57 @@ public class LoginRegisterMenuController implements MenuController {
     }
 
 
-    public Result login(String username, String password) {}
+    public Result login(String username, String password) {
+        // Load users from the file
+        loadUsersFromFile(username + ".json");
+
+        // Login logic
+        if (App.getUsers().containsKey(username)) {
+            User currentUser = App.getUsers().get(username);
+            if (currentUser.getPassword().equals(password)) {
+                App.setCurrentPlayer(currentUser);
+                return new Result("Login successful", true);
+            } else {
+                return new Result("Incorrect password", false);
+            }
+        } else {
+            return new Result("User not found", false);
+        }
+    }
 
     public void saveSecureHashAlgorithm(String inout){}
 
-    public User checkUserName(String userName){}
+    // public User checkUserName(String userName){}
+
+    public void saveUser(User user ,String fileName){
+        try (FileWriter writer = new FileWriter(fileName)) {
+            Gson gson = new Gson();
+            gson.toJson(user, writer);  // Serialize the User object to JSON
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public void loadUsersFromFile(String fileName) {
+        File file = new File(fileName);
+
+        // Check if the file exists
+        if (!file.exists()) {
+            System.out.println("please sign in first");
+            return;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            Gson gson = new Gson();
+            User[] usersArray = gson.fromJson(reader, User[].class);
+
+            // Clear and load users from the file
+            App.getUsers().clear();
+            for (User user : usersArray) {
+                App.getUsers().put(user.getUserName(), user);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

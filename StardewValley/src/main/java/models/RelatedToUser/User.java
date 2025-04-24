@@ -32,17 +32,18 @@ public class User {
 
     public Refrigrator Refrigrator = new Refrigrator();
 
-    private ArrayList<Ability> abilitis = new ArrayList <Ability>();
+    private ArrayList<Ability> abilitis = new ArrayList<Ability>();
 
-    private int count =0;
+    private int count = 0;
 
     private boolean isFemale;
 
     private ArrayList<RelationShip> relationShips = new ArrayList<>();
 
-    private ArrayList<RelationShip.Trade>trade = new ArrayList<>();
+    private ArrayList<RelationShip.Trade> trade = new ArrayList<>();
 
-    public void collapse(){}
+    public void collapse() {
+    }
 
     public User(ArrayList<Game> games, String userName, String password, String email, String questionForSecurity,
                 String answerOfQuestionForSecurity, Location userLocation, Shack shack, map map, boolean isMarried,
@@ -74,5 +75,21 @@ public class User {
 
     public void setAnswerOfQuestionForSecurity(String answerOfQuestionForSecurity) {
         this.answerOfQuestionForSecurity = answerOfQuestionForSecurity;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getEmail() {
+        return email;
     }
 }
