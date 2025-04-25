@@ -8,7 +8,6 @@ import models.enums.commands.LoginRegisterMenuCommands;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -62,9 +61,10 @@ public class LoginRegisterMenuController implements MenuController {
         if(!email.matches(LoginRegisterMenuCommands.EMAIL_REGEX.getRegex())){
             return new Result( false, "email format is incorrect");
         }
-        if(!username.matches("[a-zA-Z0-9-]*]")){
+        if(!username.matches("[a-zA-Z0-9-]*")){
             return new Result(false, "username foramt is incorrect");
         }
+        //TODO:in bayad save dorost shode bashe ke moghe load bazi harki az ghabl ssabt nam karde biad bala
         if(App.getUsers().containsKey(username)){
             username = generateNewUserName(username);
             return new Result(false, "Username is already in use.this will be your Username:" + username
@@ -88,9 +88,29 @@ public class LoginRegisterMenuController implements MenuController {
         if(!answer.equals(answerConfirm)){
             return new Result(false, "answer and answer confirm don't match");
         }
-        App.getCurrentPlayer().setQuestionForSecurity(question);
-        App.getCurrentPlayer().setAnswerOfQuestionForSecurity(answer);
-        return new Result(true, "You have selected " + question + " for " + answer + ".");
+
+        File file = new File(App.getCurrentPlayer().getUserName() + ".json");
+        if (!file.exists()) {
+            return new Result(false, "error opening file");
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            Gson gson = new Gson();
+            User user = gson.fromJson(reader, User.class);
+            user.setQuestionForSecurity(question);
+            user.setAnswerOfQuestionForSecurity(answer);
+            App.setCurrentPlayer(user);
+            App.getUsers().clear();
+            App.getUsers().put(user.getUserName(), user);
+
+            try (FileWriter writer = new FileWriter(user.getUserName() + ".json")) {
+                gson.toJson(user, writer);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new Result(false, "error during file operation");
+        }
+        return new Result(true, "You have selected " + answer + " for " + question + ".");
     }
 
     public String generateNewUserName(String input) {
@@ -101,24 +121,32 @@ public class LoginRegisterMenuController implements MenuController {
         return input;
     }
 
-
     public Result login(String username, String password) {
-        // Load users from the file
-        loadUsersFromFile(username + ".json");
-
-        // Login logic
-        if (App.getUsers().containsKey(username)) {
-            User currentUser = App.getUsers().get(username);
-            if (currentUser.getPassword().equals(password)) {
-                App.setCurrentPlayer(currentUser);
-                return new Result(true, "Login successful");
-            } else {
-                return new Result(false, "Incorrect password");
-            }
-        } else {
+        File file = new File(username + ".json");
+        if (!file.exists()) {
             return new Result(false, "User not found");
         }
+
+        // Clear previously loaded users
+        App.getUsers().clear();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            Gson gson = new Gson();
+            User user = gson.fromJson(reader, User.class);
+
+            if (!user.getPassword().equals(password)) {
+                return new Result(false, "Incorrect password");
+            }
+
+            App.setCurrentPlayer(user);
+            App.getUsers().put(user.getUserName(), user);
+            return new Result(true, "Login successful");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new Result(false, "Error loading user file");
+        }
     }
+
 
     public void saveSecureHashAlgorithm(String inout){}
 

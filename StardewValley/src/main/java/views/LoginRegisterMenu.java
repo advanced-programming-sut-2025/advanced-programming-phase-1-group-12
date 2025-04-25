@@ -3,6 +3,7 @@ package views;
 import controller.MenusController.LoginRegisterMenuController;
 import models.Fundementals.App;
 import models.Fundementals.Result;
+import models.enums.Menu;
 import models.enums.commands.LoginRegisterMenuCommands;
 
 import java.util.Scanner;
@@ -17,7 +18,11 @@ public class LoginRegisterMenu extends AppMenu{
 
         Matcher matcher;
 
-        if((matcher = LoginRegisterMenuCommands.RegisterUser.getMather(input)) != null){
+        if((matcher = LoginRegisterMenuCommands.EXIT.getMather(input)) != null){
+            App.setCurrentMenu(Menu.Exit);
+        }
+
+        else if((matcher = LoginRegisterMenuCommands.RegisterUser.getMather(input)) != null){
             Result result = controller.register(matcher, scanner);
             System.out.println(result.getMessage());
             if(result.isSuccessful()){
@@ -26,11 +31,19 @@ public class LoginRegisterMenu extends AppMenu{
                 }
             }
         } else if((matcher = LoginRegisterMenuCommands.PickQuestion.getMather(input)) != null){
-            System.out.println(controller.pickQuestion(matcher));
+            Result result = controller.pickQuestion(matcher);
+            System.out.println(result.getMessage());
+            if(result.isSuccessful()){
+                App.setCurrentMenu(Menu.MainMenu);
+            }
         } else if((matcher = LoginRegisterMenuCommands.LoginUser.getMather(input)) != null){
             String username = matcher.group("username");
             String password = matcher.group("password");
-            controller.login(username, password);
+            Result result = controller.login(username, password);
+            System.out.println(result.getMessage());
+            if(result.isSuccessful()){
+                App.setCurrentMenu(Menu.MainMenu);
+            }
         } else if ((matcher = LoginRegisterMenuCommands.ForgetPassword.getMather(input)) != null) {
             controller.forgetPassword(matcher.group("username"));
         }//hatman dastoor balayee ro ghablesh zade bashe

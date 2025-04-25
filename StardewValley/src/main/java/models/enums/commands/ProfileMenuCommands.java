@@ -13,7 +13,7 @@ public enum ProfileMenuCommands implements Commands {
 
     ChangePassword("change password -p (?<newPassword>.*) -o (?<oldPassword>.*)"),
 
-    UserInfo("uesr info");
+    UserInfo("user info");
 
     private final String pattern;
 

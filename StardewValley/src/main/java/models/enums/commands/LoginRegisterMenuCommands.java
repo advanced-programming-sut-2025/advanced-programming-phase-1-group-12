@@ -10,10 +10,10 @@ public enum LoginRegisterMenuCommands implements Commands {
 
     SHOW_CURRENT_MENU("^show current menu$"),
 
-    RegisterUser("^register -u (?<username>.*) -p (?<password>.*) (?<passwordConfirm>.*) -n (?<nickname>.*) -e" +
-            "(?<email>.*) -g (?<gender>.*)$"),
+    RegisterUser("^register -u (?<username>\\S+) -p (?<password>\\S+) (?<passwordConfirm>\\S+) -n (?<nickname>\\S+) -e (?<email>\\S+) -g (?<gender>\\S+)$"),
 
-    LoginUser("^login -u (?<username>.*) -p (?<password>.*) (–stay-logged-in)?$"),
+
+    LoginUser("^login -u (?<username>\\S+) -p (?<password>\\S+)( --stay-logged-in)?$"),
 
     PickQuestion("^pick question -q (?<questionNumber>.*) -a (?<answer>.*) -c (?<answerConfirm>.*)$"),
 
@@ -23,13 +23,14 @@ public enum LoginRegisterMenuCommands implements Commands {
 
     AnswerForgetPasswordQuestion("answer -a (?<answer>.*)"),
 
-    EMAIL_REGEX("^[a-zA-Z0-9](?!.*\\.\\.)[a-zA-Z0-9._-]*[a-zA-Z0-9]@$"+
+    EMAIL_REGEX("[a-zA-Z0-9](?!.*\\.\\.)[a-zA-Z0-9._-]*[a-zA-Z0-9]@"+
             "[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\\.[a-zA-Z]{2,})+"),
-    VALID_PASS("^[a-zA-Z0-9?=.,\";:/[\\]{}()+&*^%$#!]{8,}$");
+
+    VALID_PASS("^[a-zA-Z0-9?=.,\";:/\\[\\]{}()+&*^%$#!]{8,}$");
 
 
 
-private final String regex;
+    private final String regex;
     private final Pattern pattern;
 
     LoginRegisterMenuCommands(String regex) {
