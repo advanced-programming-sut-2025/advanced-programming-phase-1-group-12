@@ -23,6 +23,4 @@ public class UserLocationController {
 
     }
 
-    public Result printMap(Location location, int size) {}
-
 }

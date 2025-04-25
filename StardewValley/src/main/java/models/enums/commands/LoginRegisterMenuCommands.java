@@ -10,10 +10,10 @@ public enum LoginRegisterMenuCommands implements Commands {
 
     SHOW_CURRENT_MENU("^show current menu$"),
 
-    RegisterUser("register -u (?<username>.*) -p (?<password>.*) (?<passwordConfirm>.*) -n (?<nickname>.*) -e" +
-            "(?<email>.*) -g (?<gender>.*)"),
+    RegisterUser("^register -u (?<username>.*) -p (?<password>.*) (?<passwordConfirm>.*) -n (?<nickname>.*) -e" +
+            "(?<email>.*) -g (?<gender>.*)$"),
 
-    LoginUser("^login -u (?<username>.*) -p (?<password>.*) (–stay-logged-in)?"),
+    LoginUser("^login -u (?<username>.*) -p (?<password>.*) (–stay-logged-in)?$"),
 
     PickQuestion("^pick question -q (?<questionNumber>.*) -a (?<answer>.*) -c (?<answerConfirm>.*)$"),
 
@@ -25,20 +25,27 @@ public enum LoginRegisterMenuCommands implements Commands {
 
     EMAIL_REGEX("^[a-zA-Z0-9](?!.*\\.\\.)[a-zA-Z0-9._-]*[a-zA-Z0-9]@$"+
             "[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\\.[a-zA-Z]{2,})+"),
+    VALID_PASS("^[a-zA-Z0-9?=.,\";:/[\\]{}()+&*^%$#!]{8,}$");
 
-    VALID_PASS("^[a-zA-Z0-9?><,\"';:/|/\\][}{+=)(*&^%$#!]{8,}$");
 
-    private final String pattern;
 
-    LoginRegisterMenuCommands(String pattern) {
-        this.pattern = pattern;
+private final String regex;
+    private final Pattern pattern;
+
+    LoginRegisterMenuCommands(String regex) {
+        this.regex = regex;
+        this.pattern = Pattern.compile(regex);
     }
 
     @Override
     public Matcher getMather(String input) {
-        Matcher matcher = Pattern.compile(this.pattern).matcher(input);
+        Matcher matcher = Pattern.compile(String.valueOf(this.pattern)).matcher(input);
 
         if (matcher.matches()) return matcher;
         return null;
+    }
+
+    public String getRegex() {
+        return regex;
     }
 }

@@ -6,9 +6,7 @@ import models.enums.Types.ProductType;
 public class Fish implements Animals {
     Fish fishtype = new Fish();
 
-    public ProductType fishing(StoreProducts fishingPole) {
-
-    }
+    public ProductType fishing(StoreProducts fishingPole) {return null;}
 
     public Fish getFishtype() {
         return fishtype;

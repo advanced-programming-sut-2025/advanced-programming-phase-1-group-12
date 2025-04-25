@@ -15,13 +15,13 @@ public class ProfileMenuController implements MenuController {
 
     public Result changeUserName(String userName){
         if (userName.equals(App.getCurrentPlayer().getUserName())){
-            return new Result("write another new user name . this one equals the old one", false);
+            return new Result(false, "write another new user name . this one equals the old one");
         }
 
         File file = new File(App.getCurrentPlayer().getUserName() + ".json");
         if (!file.exists()) {
             System.out.println("incorrect user name");
-            return new Result("error opening file", false);
+            return new Result(false, "error opening file");
         }
         try (BufferedReader reader = new BufferedReader(new FileReader(App.getCurrentPlayer().getUserName() + ".json"))) {
             App.getCurrentPlayer().setUserName(userName);
@@ -32,18 +32,18 @@ public class ProfileMenuController implements MenuController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new Result("nickName changed successfully", true);
+        return new Result(true, "nickName changed successfully");
     }
 
     public Result changeNickname(String nickName){
         if (nickName.equals(App.getCurrentPlayer().getNickname())){
-            return new Result("write another new nick name . this one equals the old one", false);
+            return new Result(false, "write another new nick name . this one equals the old one");
         }
 
         File file = new File(App.getCurrentPlayer().getUserName() + ".json");
         if (!file.exists()) {
             System.out.println("incorrect user name");
-            return new Result("error opening file", false);
+            return new Result(false, "error opening file");
         }
         try (BufferedReader reader = new BufferedReader(new FileReader(App.getCurrentPlayer().getUserName() + ".json"))) {
             App.getCurrentPlayer().setNickname(nickName);
@@ -54,19 +54,19 @@ public class ProfileMenuController implements MenuController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new Result("nickName changed successfully", true);
+        return new Result(true, "nickName changed successfully");
     }
     public Result changeEmail(String email){
         if (email.equals(App.getCurrentPlayer().getEmail())){
-            return new Result("write another new email . this one equals the old one", false);
+            return new Result(false, "write another new email . this one equals the old one");
         }
         if(!email.matches(LoginRegisterMenuCommands.EMAIL_REGEX.getRegex())){
-            return new Result("email format is incorrect", false);
+            return new Result(false, "email format is incorrect");
         }
         File file = new File(App.getCurrentPlayer().getUserName() + ".json");
         if (!file.exists()) {
             System.out.println("incorrect user name");
-            return new Result("error opening file", false);
+            return new Result(false, "error opening file");
         }
         try (BufferedReader reader = new BufferedReader(new FileReader(App.getCurrentPlayer().getUserName() + ".json"))) {
             App.getCurrentPlayer().setEmail(email);
@@ -77,24 +77,24 @@ public class ProfileMenuController implements MenuController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new Result("email changed successfully", true);
+        return new Result(true, "email changed successfully");
     }
 
     public Result changePassword(String oldPass, String newPass){
         if(!oldPass.equals(App.getCurrentPlayer().getPassword())){
-            return new Result("old password is written wrong", false);
+            return new Result(false, "old password is written wrong");
         }
         if (oldPass.equals(newPass)){
-            return new Result("write another new pass word . this one equals the old one", false);
+            return new Result(false, "write another new pass word . this one equals the old one");
         }
 
         if(!newPass.matches(LoginRegisterMenuCommands.VALID_PASS.getRegex())){
-            return new Result("email format is incorrect", false);
+            return new Result(false, "email format is incorrect");
         }
         File file = new File(App.getCurrentPlayer().getUserName() + ".json");
         if (!file.exists()) {
             System.out.println("incorrect user name");
-            return new Result("error opening file", false);
+            return new Result(false, "error opening file");
         }
         try (BufferedReader reader = new BufferedReader(new FileReader(App.getCurrentPlayer().getUserName() + ".json"))) {
             App.getCurrentPlayer().setPassword(newPass);
@@ -105,7 +105,7 @@ public class ProfileMenuController implements MenuController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new Result("password changed successfully", true);
+        return new Result(true, "password changed successfully");
     }
 
     public void userInfo(){

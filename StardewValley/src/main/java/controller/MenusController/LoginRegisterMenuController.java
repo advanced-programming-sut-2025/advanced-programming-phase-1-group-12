@@ -57,18 +57,18 @@ public class LoginRegisterMenuController implements MenuController {
         }
 
         if(!password.equals(passwordConfirm)){
-            return new Result("password and password confirm are not the same", false);
+            return new Result(false, "password and password confirm are not the same");
         }
         if(!email.matches(LoginRegisterMenuCommands.EMAIL_REGEX.getRegex())){
-            return new Result("email format is incorrect", false);
+            return new Result( false, "email format is incorrect");
         }
         if(!username.matches("[a-zA-Z0-9-]*]")){
-            return new Result("username foramt is incorrect", false);
+            return new Result(false, "username foramt is incorrect");
         }
         if(App.getUsers().containsKey(username)){
             username = generateNewUserName(username);
-            return new Result("Username is already in use.this will be your Username:" + username
-                    , false);
+            return new Result(false, "Username is already in use.this will be your Username:" + username
+                    );
         }
         boolean isFemale = !gender.equals("male");
         User newUser = new User(new ArrayList<>(), username, password, email, "","",
@@ -78,7 +78,7 @@ public class LoginRegisterMenuController implements MenuController {
         App.getUsers().put(username, newUser);
         App.setCurrentPlayer(newUser);
 
-        return new Result("User registered successfully", true);
+        return new Result(true, "User registered successfully");
     }
 
     public Result pickQuestion(Matcher matcher) {
@@ -86,11 +86,11 @@ public class LoginRegisterMenuController implements MenuController {
         String answer = matcher.group("answer");
         String answerConfirm = matcher.group("answerConfirm");
         if(!answer.equals(answerConfirm)){
-            return new Result("answer and answer confirm don't match", false);
+            return new Result(false, "answer and answer confirm don't match");
         }
         App.getCurrentPlayer().setQuestionForSecurity(question);
         App.getCurrentPlayer().setAnswerOfQuestionForSecurity(answer);
-        return new Result("You have selected " + question + " for " + answer + ".", true);
+        return new Result(true, "You have selected " + question + " for " + answer + ".");
     }
 
     public String generateNewUserName(String input) {
@@ -111,12 +111,12 @@ public class LoginRegisterMenuController implements MenuController {
             User currentUser = App.getUsers().get(username);
             if (currentUser.getPassword().equals(password)) {
                 App.setCurrentPlayer(currentUser);
-                return new Result("Login successful", true);
+                return new Result(true, "Login successful");
             } else {
-                return new Result("Incorrect password", false);
+                return new Result(false, "Incorrect password");
             }
         } else {
-            return new Result("User not found", false);
+            return new Result(false, "User not found");
         }
     }
 
@@ -170,25 +170,25 @@ public class LoginRegisterMenuController implements MenuController {
     public Result changePassword(String username, String oldPass, String newPass) {
         User user = App.getUsers().get(username);
         if (user == null) {
-            return new Result("User not found", false);
+            return new Result(false, "User not found");
         }
 
         if (!user.getPassword().equals(oldPass)) {
-            return new Result("Old password is incorrect", false);
+            return new Result(false, "Old password is incorrect");
         }
 
-        user.setPassword(newPass);  // باید setter داشته باشی برای password
+        user.setPassword(newPass);
         saveUser(user, username + ".json");
-        return new Result("Password updated successfully", true);
+        return new Result(true, "Password updated successfully");
     }
     public Result answerQuestion(Matcher matcher) {
         String answer = matcher.group("answer");
         if(answer.equals(App.getCurrentPlayer().getAnswerOfQuestionForSecurity())){
-            return new Result("correct answer. now enter your new password like this : i answered so my new password:"
-                    , true);
+            return new Result(true, "correct answer. now enter your new password like this : i answered so my new password:"
+                    );
         }
         System.out.println("kkkkk");
-        return new Result("wrong answer", false);
+        return new Result(false, "wrong answer");
 
     }
     public void newPassAfterForget(String newPass) {

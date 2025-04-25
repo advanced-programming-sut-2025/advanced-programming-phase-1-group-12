@@ -15,9 +15,9 @@ public class RelationshipController {
 
     public void hug(){}
 
-    public Result askMarriage(RelationShip result, String ring, User user){}
+    public Result askMarriage(RelationShip result, String ring, User user){return  null;}
 
-    public Result respondMarriageRequest(RelationShip result, String ring){}
+    public Result respondMarriageRequest(RelationShip result, String ring){return null;}
 
     public void startTrade(){}
 

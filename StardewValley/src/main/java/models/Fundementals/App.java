@@ -35,7 +35,7 @@ public class App {
         return allGames;
     }
 
-    public Menu getCurrentMenu() {
+    public static Menu getCurrentMenu() {
         return currentMenu;
     }
 

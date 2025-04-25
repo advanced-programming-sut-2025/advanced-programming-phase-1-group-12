@@ -7,19 +7,19 @@ public class ToolsController {
     public void checkBackPack(){}
     public void equipTools(){}
     public Result showCurrentTool(){
-        return Result.success("");
+        return null;
     }
     public Result showToolsAvailable(){
-        return Result.success("");
+        return null;
     }
     public Result updateToolsCheck(String name, boolean isInSmithing){
         if(!isInSmithing){
-            return Result.failure("");
+            return null;
         }
         if(!checkUpdateToolMoney()){
-            return Result.failure("");
+            return null;
         }
-        return Result.success("");
+        return null;
     }
     public boolean checkIsInSmithing(){
         return false;
@@ -34,7 +34,7 @@ public class ToolsController {
         return false;
     }
     public Result checkToolUse(){
-        return Result.success("");
+        return null;
     }
     public boolean isValidUse(){
         return false;

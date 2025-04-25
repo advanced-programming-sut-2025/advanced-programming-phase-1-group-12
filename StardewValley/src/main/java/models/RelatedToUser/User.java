@@ -1,6 +1,7 @@
 package models.RelatedToUser;
 
 import models.*;
+import models.Fundementals.Game;
 import models.Fundementals.Location;
 import models.MapDetails.Shack;
 

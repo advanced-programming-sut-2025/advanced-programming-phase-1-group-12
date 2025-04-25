@@ -17,29 +17,30 @@ public class LoginRegisterMenu extends AppMenu{
 
         Matcher matcher;
 
-        if((matcher = LoginRegisterMenuCommands.RegisterUser.getMatcher(input)) != null){
+        if((matcher = LoginRegisterMenuCommands.RegisterUser.getMather(input)) != null){
             Result result = controller.register(matcher, scanner);
-            System.out.println(result.message());
-            if(result.success()){
+            System.out.println(result.getMessage());
+            if(result.isSuccessful()){
                 for(String question : App.getSecurityQuestions()){
                     System.out.println(question);
                 }
             }
-        }
-        else if((matcher = LoginRegisterMenuCommands.PickQuestion.getMatcher(input)) != null){
+        } else if((matcher = LoginRegisterMenuCommands.PickQuestion.getMather(input)) != null){
             System.out.println(controller.pickQuestion(matcher));
-        } else if((matcher = LoginRegisterMenuCommands.LoginUser.getMatcher(input)) != null){
+        } else if((matcher = LoginRegisterMenuCommands.LoginUser.getMather(input)) != null){
             String username = matcher.group("username");
             String password = matcher.group("password");
             controller.login(username, password);
-        } else if ((matcher = LoginRegisterMenuCommands.ForgetPassword.getMatcher(input)) != null) {
+        } else if ((matcher = LoginRegisterMenuCommands.ForgetPassword.getMather(input)) != null) {
             controller.forgetPassword(matcher.group("username"));
         }//hatman dastoor balayee ro ghablesh zade bashe
-        else if ((matcher = LoginRegisterMenuCommands.AnswerForgetPasswordQuestion.getMatcher(input)) != null) {
+        else if ((matcher = LoginRegisterMenuCommands.AnswerForgetPasswordQuestion.getMather(input)) != null) {
             System.out.println(controller.answerQuestion(matcher));
         } //ghablesh balayee ro zade bashe
-        else if ((matcher = LoginRegisterMenuCommands.CHOOSE_PASSWORD_AFTER_FORGET.getMatcher(input)) != null) {
+        else if ((matcher = LoginRegisterMenuCommands.CHOOSE_PASSWORD_AFTER_FORGET.getMather(input)) != null) {
             controller.newPassAfterForget(matcher.group("newPass"));
+        }else{
+            System.out.println("invalid command");
         }
     }
 }
