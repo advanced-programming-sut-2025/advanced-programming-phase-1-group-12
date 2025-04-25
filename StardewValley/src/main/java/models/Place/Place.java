@@ -1,7 +1,7 @@
 package models.Place;
 
-import models.Fundementals.Location;
+import models.Fundementals.LocationOfRectangle;
 
 public interface Place {
-    Location.LocationOfRectangle locationOfRectangle();
+    LocationOfRectangle locationOfRectangle();
 }

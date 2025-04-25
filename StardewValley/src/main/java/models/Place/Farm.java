@@ -1,16 +1,13 @@
 package models.Place;
 
 import models.Fundementals.Location;
+import models.Fundementals.LocationOfRectangle;
 import models.MapDetails.*;
 import models.RelatedToUser.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 public class Farm implements Place {
 
-    private  Location.LocationOfRectangle farmLocation;
+    private  LocationOfRectangle farmLocation;
 
     private User owner;
     private Lake lake1;
@@ -19,32 +16,83 @@ public class Farm implements Place {
     private Shack shack;
     private Quarry quarry;
 
-    public Farm(Location.LocationOfRectangle farmLocation, User owner, Lake lake1, Lake lake2, GreenHouse greenHouse,
-                Shack shack, Quarry quarry) {
-        //TODO:location of rest will be set similarly
+    public Farm(LocationOfRectangle farmLocation, User owner) {
         this.farmLocation = farmLocation;
         this.owner = owner;
-        this.lake1 = new Lake(new Location.LocationOfRectangle(new Location(farmLocation.getDownRightCorner().getxAxis()-5,
-                farmLocation.getDownRightCorner().getyAxis()-5), farmLocation.getDownRightCorner()));
-        this.lake2 =  new Lake(new Location.LocationOfRectangle(new Location(farmLocation.getTopLeftCorner().getxAxis()+5,
-                farmLocation.getTopLeftCorner().getyAxis()+5), farmLocation.getTopLeftCorner()));
-        this.greenHouse = greenHouse;
-        this.shack = shack;
-        this.quarry = quarry;
+
+        int sectionSize = 5;
+
+        Location lake2TopLeft = farmLocation.getTopLeftCorner();
+        Location lake2DownRight = new Location(lake2TopLeft.getxAxis() + sectionSize, lake2TopLeft.getyAxis() + sectionSize);
+        this.lake2 = new Lake(new LocationOfRectangle(lake2TopLeft, lake2DownRight));
+
+        Location lake1DownRight = farmLocation.getDownRightCorner();
+        Location lake1TopLeft = new Location(lake1DownRight.getxAxis() - sectionSize, lake1DownRight.getyAxis() - sectionSize);
+        this.lake1 = new Lake(new LocationOfRectangle(lake1TopLeft, lake1DownRight));
+
+        Location greenhouseBottomLeft = new Location(farmLocation.getTopLeftCorner().getxAxis(), farmLocation.getDownRightCorner().getyAxis() - sectionSize);
+        Location greenhouseTopRight = new Location(greenhouseBottomLeft.getxAxis() + sectionSize, greenhouseBottomLeft.getyAxis() + sectionSize);
+        this.greenHouse = new GreenHouse(new LocationOfRectangle(greenhouseBottomLeft, greenhouseTopRight));
+
+        Location shackTopRight = new Location(farmLocation.getDownRightCorner().getxAxis(), farmLocation.getTopLeftCorner().getyAxis());
+        Location shackBottomLeft = new Location(shackTopRight.getxAxis() - sectionSize, shackTopRight.getyAxis() + sectionSize);
+        this.shack = new Shack(new LocationOfRectangle(shackBottomLeft, shackTopRight));
+
+        int centerX = (farmLocation.getTopLeftCorner().getxAxis() + farmLocation.getDownRightCorner().getxAxis()) / 2;
+        int centerY = (farmLocation.getTopLeftCorner().getyAxis() + farmLocation.getDownRightCorner().getyAxis()) / 2;
+        Location quarryTopLeft = new Location(centerX - sectionSize / 2, centerY - sectionSize / 2);
+        Location quarryDownRight = new Location(centerX + sectionSize / 2, centerY + sectionSize / 2);
+        this.quarry = new Quarry(new LocationOfRectangle(quarryTopLeft, quarryDownRight));
     }
 
-    public Location.LocationOfRectangle getFarmLocation() {
+
+    public LocationOfRectangle getFarmLocation() {
         return farmLocation;
     }
 
-    public void setFarmLocation(Location.LocationOfRectangle farmLocation) {
+    public void setFarmLocation(LocationOfRectangle farmLocation) {
         this.farmLocation = farmLocation;
     }
 
-    @Override
-    public Location.LocationOfRectangle locationOfRectangle() {
-        return null;
+    public GreenHouse getGreenHouse() {
+        return greenHouse;
     }
 
+    public Lake getLake1() {
+        return lake1;
+    }
+
+    public Lake getLake2() {
+        return lake2;
+    }
+
+    public Quarry getQuarry() {
+        return quarry;
+    }
+
+    public Shack getShack() {
+        return shack;
+    }
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setGreenHouse(GreenHouse greenHouse) {
+        this.greenHouse = greenHouse;
+    }
+
+    public void setLake1(Lake lake1) {
+        this.lake1 = lake1;
+    }
+
+    public void setLake2(Lake lake2) {
+        this.lake2 = lake2;
+    }
+
+    @Override
+    public LocationOfRectangle locationOfRectangle() {
+        return null;
+    }
 
 }

@@ -1,13 +1,21 @@
 package controller.MenusController;
 
+import models.Fundementals.App;
+import models.Fundementals.Game;
+import models.Fundementals.Location;
 import models.RelatedToUser.User;
 import models.Fundementals.Result;
 import models.*;
 import models.enums.Season;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-
+import java.util.Scanner;
 public class GameMenuController implements MenuController {
+
+    Game currentGame = App.getCurrentGame();
+
     public Result newGame() { return null;}
 
     public map choosingMap(int MapId){ return null;}
@@ -37,27 +45,27 @@ public class GameMenuController implements MenuController {
 
     public Result showHour(){
         int currentHour = App.getCurrentGame().getDate().getHour();
-        return new Result(String.format("%s", currentHour), true);
+        return new Result(true, String.format("%s", currentHour));
     }
 
     public Result showDate(){
         int currentDay = App.getCurrentGame().getDate().getDayOfMonth();
         int currentYear = App.getCurrentGame().getDate().getYear();
-        return new Result(String.format("%d/%d", currentYear, currentDay), true);
+        return new Result(true, String.format("%d/%d", currentYear, currentDay));
     }
 
     public Result showDateTime(){
         int currentDay = App.getCurrentGame().getDate().getDayOfMonth();
         int currentYear = App.getCurrentGame().getDate().getYear();
         int currentHour = App.getCurrentGame().getDate().getHour();
-        return new Result(String.format("%d/%d - Time: %d", currentYear,
-                            currentDay, currentHour), true);
+        return new Result( true, String.format("%d/%d - Time: %d", currentYear,
+                currentDay, currentHour));
     }
 
     public Result showDayOfTheWeek(){
         int currentDay = App.getCurrentGame().getDate().getDayOfWeek();
         String StringDay = App.getCurrentGame().getDate().getDayName(currentDay);
-        return new Result(StringDay, true);
+        return new Result( true, StringDay);
     }
 
     public Result cheatAdvancedTime(String time){
@@ -65,10 +73,10 @@ public class GameMenuController implements MenuController {
         try{
             hour = Integer.parseInt(time);
         }catch(NumberFormatException e){
-            return new Result("Wrong Hour!", false);
+            return new Result( false, "Wrong Hour!");
         }
         App.getCurrentGame().getDate().changeAdvancedTime(hour);
-        return new Result("Time changed successfully!", true);
+        return new Result(true,"Time changed successfully!");
     }
 
     public Result cheatAdvancedDay(String day){
@@ -76,35 +84,62 @@ public class GameMenuController implements MenuController {
         try{
             days = Integer.parseInt(day);
         }catch(NumberFormatException e){
-            return new Result("Wrong Day!", false);
+            return new Result(false, "Wrong Day!");
         }
         App.getCurrentGame().getDate().changeAdvancedDay(days);
-        return new Result("Day changed successfully!", true);
+        return new Result(true, "Day changed successfully!");
     }
 
     public Result showSeason(){
         Season season = App.getCurrentGame().getDate().getSeason();
         switch(season){
             case SPRING -> {
-                return new Result("Spring", true);
+                return new Result( true, "Spring");
             }
             case SUMMER -> {
-                return new Result("Summer", true);
+                return new Result(true, "Summer");
             }
             case AUTUMN -> {
-                return new Result("Autumn", true);
+                return new Result(true, "Autumn");
             }
             case WINTER -> {
-                return new Result("Winter", true);
+                return new Result(true, "Winter");
             }
             default -> {
-                return new Result("Wrong Season!", false);
+                return new Result(false, "Wrong Season!");
             }
         }
     }
 
     public Result showWeather(){
-        return new Result(App.getCurrentGame().getDate().getWeather().name(), true);
+        return new Result(true, App.getCurrentGame().getDate().getWeather().name());
     }
 
+    public void printMap(int x, int y, int size) {
+        for (int X = x; X < x + size; X++) {
+            for (int Y = y; Y < y + size; Y++) {
+                Location currentLocation = currentGame.getMainMap().findLocation(X, Y);
+                System.out.print(currentLocation.getTypeOfTile().getNameOfMap()+ " ");
+            }
+            System.out.println(); // Move to next line after each row
+        }
+    }
+
+
+    public Result Play(Scanner scanner, List<String> usernames) {
+
+        ArrayList<User> players = new ArrayList<>();
+        players.add(App.getLoggedInUser());
+        for (String username : usernames) {
+            if (username != null) {
+                User user = App.getUserByUsername(username.trim());
+                if (user != null)
+                    players.add(user);
+
+            }
+        }
+
+
+        return new Result(true, "");
+    }
 }

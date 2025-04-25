@@ -8,19 +8,18 @@ public enum MainMenuCommands implements Commands {
 
     //TODO: oon se command moshtarek to enum hame ezafe she
 
-    private final String regex;
-    private final Pattern pattern;
+    private final String pattern;
 
-    MainMenuCommands(String regex) {
-        this.regex = regex;
-        this.pattern = Pattern.compile(regex);
-    }
-    public Matcher getMatcher(String input) {
-        return pattern.matcher(input);
+    MainMenuCommands(String pattern) {
+        this.pattern = pattern;
     }
 
-    public String getRegex() {
-        return regex;
+    @Override
+    public Matcher getMather(String input) {
+        Matcher matcher = Pattern.compile(this.pattern).matcher(input);
+
+        if (matcher.matches()) return matcher;
+        return null;
     }
 
 }

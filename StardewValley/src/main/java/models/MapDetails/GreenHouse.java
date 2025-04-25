@@ -1,18 +1,26 @@
 package models.MapDetails;
 
-import models.Fundementals.Location;
+import models.Fundementals.LocationOfRectangle;
 import models.Place.Place;
 
 public class GreenHouse implements Place {
-    Location.LocationOfRectangle greenHouseLocation;
+    LocationOfRectangle greenHouseLocation;
 
-    public Location.LocationOfRectangle getGreenHouseLocation() {
+    public GreenHouse(LocationOfRectangle GreenHouseLocation) {
+        this.greenHouseLocation = GreenHouseLocation;
+    }
+
+    public LocationOfRectangle getGreenHouseLocation() {
         return greenHouseLocation;
     }
-    //TODO:set it to 5 * 6 instead of this one
-    public void setGreenHouseLocation(Location.LocationOfRectangle greenHouseLocation) {
+
+    public void setGreenHouseLocation(LocationOfRectangle greenHouseLocation) {
         this.greenHouseLocation = greenHouseLocation;
     }
 
 
+    @Override
+    public LocationOfRectangle locationOfRectangle() {
+        return null;
+    }
 }

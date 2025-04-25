@@ -28,23 +28,17 @@ public enum LoginRegisterMenuCommands implements Commands {
 
     VALID_PASS("^[a-zA-Z0-9?><,\"';:/|/\\][}{+=)(*&^%$#!]{8,}$");
 
-    private final String regex;
-    private final Pattern pattern;
+    private final String pattern;
 
-    LoginRegisterMenuCommands(String regex) {
-        this.regex = regex;
-        this.pattern = Pattern.compile(regex);
+    LoginRegisterMenuCommands(String pattern) {
+        this.pattern = pattern;
     }
 
-    public Matcher getMatcher(String input) {
-        Matcher matcher = Pattern.compile(getRegex()).matcher(input);
-        if (matcher.matches()) {
-            return matcher;
-        }
+    @Override
+    public Matcher getMather(String input) {
+        Matcher matcher = Pattern.compile(this.pattern).matcher(input);
+
+        if (matcher.matches()) return matcher;
         return null;
-    }
-
-    public String getRegex() {
-        return regex;
     }
 }

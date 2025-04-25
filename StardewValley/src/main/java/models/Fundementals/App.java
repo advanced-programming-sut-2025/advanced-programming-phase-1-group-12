@@ -1,6 +1,7 @@
 package models.Fundementals;
 
 import models.Date;
+import models.Fundementals.Game;
 import models.RelatedToUser.User;
 import models.enums.Menu;
 
@@ -20,10 +21,26 @@ public class App {
     private static ArrayList<String> securityQuestions = new ArrayList<>(
             Arrays.asList("what is your favorite color?", "what is your favorite country?")
     );
+    private static ArrayList<Game> allGames;
 
+    public static User getUserByUsername(String username) {
+        for(User user : users.values()){
+            if(user.getUserName().equals(username))
+                return user;
+        }
+        return null;
+    }
 
-    public static Menu getCurrentMenu() {
+    public ArrayList<Game> getAllGames() {
+        return allGames;
+    }
+
+    public Menu getCurrentMenu() {
         return currentMenu;
+    }
+
+    public void setAllGames(ArrayList<Game> allGames) {
+        App.allGames = allGames;
     }
 
     public static ArrayList<Game> getGame() {

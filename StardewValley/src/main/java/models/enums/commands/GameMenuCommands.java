@@ -4,6 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public enum GameMenuCommands implements Commands {
+    PLAY("^\\s*game new -u (?:\\s+(\\w+))?(?:\\s+(\\w+))?(?:\\s+(\\w+))?\\s*$"),
     SEASON("^season$"),
     TIME("^time$"),
     DATE("^date$"),
@@ -21,19 +22,17 @@ public enum GameMenuCommands implements Commands {
     NextTurn(""),
     Walk("");
 
-    private final String regex;
-    private final Pattern pattern;
+    private final String pattern;
 
-    GameMenuCommands(String regex) {
-        this.regex = regex;
-        this.pattern = Pattern.compile(regex);
+    GameMenuCommands(String pattern) {
+        this.pattern = pattern;
     }
 
-    public Matcher getMatcher(String input) {
-        return pattern.matcher(input);
-    }
+    @Override
+    public Matcher getMather(String input) {
+        Matcher matcher = Pattern.compile(this.pattern).matcher(input);
 
-    public String getRegex() {
-        return regex;
+        if (matcher.matches()) return matcher;
+        return null;
     }
 }

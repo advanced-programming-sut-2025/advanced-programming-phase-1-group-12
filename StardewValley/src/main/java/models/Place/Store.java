@@ -1,12 +1,15 @@
 package models.Place;
 
 import models.Fundementals.Location;
+import models.Fundementals.LocationOfRectangle;
 import models.ProductsPackage.StoreProducts;
 
 import java.util.ArrayList;
 
 public class Store implements Place {
-    private Location.LocationOfRectangle shackLocation;
+
+    private LocationOfRectangle shackLocation;
+
     private String owner;
 
     private String nameOfStore;
@@ -17,11 +20,11 @@ public class Store implements Place {
 
     private ArrayList<StoreProducts> storeProducts;
 
-    public Location.LocationOfRectangle getShackLocation() {
+    public LocationOfRectangle getShackLocation() {
         return shackLocation;
     }
 
-    public void setShackLocation(Location.LocationOfRectangle shackLocation) {
+    public void setShackLocation(LocationOfRectangle shackLocation) {
         this.shackLocation = shackLocation;
     }
 
@@ -63,5 +66,10 @@ public class Store implements Place {
 
     public void setStoreProducts(ArrayList<StoreProducts> storeProducts) {
         this.storeProducts = storeProducts;
+    }
+
+    @Override
+    public LocationOfRectangle locationOfRectangle() {
+        return null;
     }
 }

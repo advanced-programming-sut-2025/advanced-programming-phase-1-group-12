@@ -11,6 +11,8 @@ public class Location {
 
     private TypeOfTile typeOfTile;
 
+    private Object objectInTile;
+
     public Location(int xAxis, int yAxis) {
         this.xAxis = xAxis;
         this.yAxis = yAxis;
@@ -32,31 +34,28 @@ public class Location {
         this.yAxis = yAxis;
     }
 
-    public static class LocationOfRectangle {
-        Location topLeftCorner;
+    public TypeOfTile getTypeOfTile() {
+        return typeOfTile;
+    }
 
-        Location downRightCorner;
+    public void setTypeOfTile(TypeOfTile typeOfTile) {
+        this.typeOfTile = typeOfTile;
+    }
 
-        public Location getTopLeftCorner() {
-            return topLeftCorner;
-        }
+    public void setWalkable(boolean walkable) {
+        isWalkable = walkable;
+    }
 
-        public void setTopLeftCorner(Location topLeftCorner) {
-            this.topLeftCorner = topLeftCorner;
-        }
+    public boolean isWalkable() {
+        return isWalkable;
+    }
 
-        public Location getDownRightCorner() {
-            return downRightCorner;
-        }
+    public void setObjectInTile(Object objectInTile) {
+        this.objectInTile = objectInTile;
+    }
 
-        public void setDownRightCorner(Location topRightCorner) {
-            this.downRightCorner = topRightCorner;
-        }
-
-        public LocationOfRectangle(Location topLeftCorner, Location downRightCorner) {
-            this.topLeftCorner = topLeftCorner;
-            this.downRightCorner = downRightCorner;
-        }
+    public Object getObjectInTile() {
+        return objectInTile;
     }
 }
 
