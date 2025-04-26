@@ -88,7 +88,7 @@ public class LoginRegisterMenuController implements MenuController {
             return new Result(false, "answer and answer confirm don't match");
         }
 
-        File file = new File(App.getCurrentPlayer().getUserName() + ".json");
+        File file = new File(App.getCurrentPlayer().getUser().getUserName() + ".json");
         if (!file.exists()) {
             return new Result(false, "error opening file");
         }
@@ -98,11 +98,11 @@ public class LoginRegisterMenuController implements MenuController {
             User user = gson.fromJson(reader, User.class);
             user.setQuestionForSecurity(question);
             user.setAnswerOfQuestionForSecurity(answer);
-            App.setCurrentPlayer(user);
+            App.setLoggedInUser(user);
             App.getUsers().clear();
             App.getUsers().put(user.getUserName(), user);
 
-            try (FileWriter writer = new FileWriter(user.getUserName() + ".json")) {
+            try (FileWriter writer = new FileWriter(App.getCurrentPlayer().getUser().getUserName() + ".json")) {
                 gson.toJson(user, writer);
             }
         } catch (IOException e) {
@@ -192,11 +192,11 @@ public class LoginRegisterMenuController implements MenuController {
         }
         if (App.getUsers().containsKey(userName)) {
             User currentUser = App.getUsers().get(userName);
-                App.setCurrentPlayer(currentUser);}
+                App.setLoggedInUser(currentUser);}
     }
     public Result answerQuestion(Matcher matcher) {
         String answer = matcher.group("answer");
-        if(answer.equals(App.getCurrentPlayer().getAnswerOfQuestionForSecurity())){
+        if(answer.equals(App.getCurrentPlayer().getUser().getAnswerOfQuestionForSecurity())){
             return new Result(true, "correct answer. now enter your new password like this : i answered so my new password:"
                     );
         }
@@ -208,13 +208,13 @@ public class LoginRegisterMenuController implements MenuController {
             newPass = RandomPassword();
 
             System.out.println("this will be your password : " + newPass);
-            App.getCurrentPlayer().setPassword(newPass);  // باید setter داشته باشی برای password
-            saveUser(App.getCurrentPlayer(), App.getCurrentPlayer().getUserName() + ".json");
+            App.getLoggedInUser().setPassword(newPass);  // باید setter داشته باشی برای password
+            saveUser(App.getCurrentPlayer().getUser(), App.getLoggedInUser().getUserName() + ".json");
             System.out.println("password updated successfully");
             return;
         }
-        App.getCurrentPlayer().setPassword(newPass);  // باید setter داشته باشی برای password
-        saveUser(App.getCurrentPlayer(), App.getCurrentPlayer().getUserName() + ".json");
+        App.getLoggedInUser().setPassword(newPass);  // باید setter داشته باشی برای password
+        saveUser(App.getCurrentPlayer().getUser(), App.getLoggedInUser().getUserName() + ".json");
         System.out.println("password updated successfully");
     }
 }

@@ -16,7 +16,7 @@ public class App {
     private static models.enums.Menu currentMenu = Menu.LoginRegisterMenu;
     private static ArrayList<Game> game = new ArrayList<>();
     private static Game currentGame = null;
-    private static User currentPlayer = null;
+    private static Player currentPlayer = null;
     private static Date fullTime;
     private static ArrayList<String> securityQuestions = new ArrayList<>(
             Arrays.asList("what is your favorite color?", "what is your favorite country?")
@@ -59,7 +59,7 @@ public class App {
         return users;
     }
 
-    public static User getCurrentPlayer() {
+    public static Player getCurrentPlayer() {
         return currentPlayer;
     }
 
@@ -67,11 +67,11 @@ public class App {
         return loggedInUser;
     }
 
-    public void setCurrentGame(Game currentGame) {
+    public static void setCurrentGame(Game currentGame) {
         App.currentGame = currentGame;
     }
 
-    public static void setCurrentPlayer(User currentPlayer) {
+    public static void setCurrentPlayer(Player currentPlayer) {
         App.currentPlayer = currentPlayer;
     }
 

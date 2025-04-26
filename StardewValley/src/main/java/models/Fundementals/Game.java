@@ -7,6 +7,7 @@ import models.Place.Farm;
 import models.RelatedToUser.User;
 import models.map;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 public class Game {
@@ -14,10 +15,12 @@ public class Game {
     private Map<User, Integer> score;
     private int gameId;
     private map mainMap = new map();
-    Map<Farm, User> userAndMap;
+    Map<Farm, Player> userAndMap;
+    private ArrayList<Player> players;
+    private static ArrayList<Farm> farms;
 
-    public Game(){
-        MapSetUp.initilizeFarms(mainMap);
+    public Game(ArrayList<Farm> farms) {
+        this.farms = farms;
     }
 
     public int getGameId() {
@@ -28,7 +31,7 @@ public class Game {
         this.gameId = gameId;
     }
 
-    public Map<Farm, User> getUserAndMap() {
+    public Map<Farm, Player> getUserAndMap() {
         return userAndMap;
     }
 
@@ -36,7 +39,7 @@ public class Game {
         return mainMap;
     }
 
-    public void setUserAndMap(Map<Farm, User> userAndMap) {
+    public void setUserAndMap(Map<Farm, Player> userAndMap) {
         this.userAndMap = userAndMap;
     }
 

@@ -11,11 +11,11 @@ import java.io.*;
 public class ProfileMenuController implements MenuController {
 
     public Result changeUserName(String userName) {
-        if (userName.equals(App.getCurrentPlayer().getUserName())) {
+        if (userName.equals(App.getLoggedInUser().getUserName())) {
             return new Result(false, "write another new user name . this one equals the old one");
         }
 
-        File oldFile = new File(App.getCurrentPlayer().getUserName() + ".json");
+        File oldFile = new File(App.getLoggedInUser().getUserName() + ".json");
         if (!oldFile.exists()) {
             System.out.println("incorrect user name");
             return new Result(false, "error opening file");
@@ -25,7 +25,7 @@ public class ProfileMenuController implements MenuController {
             Gson gson = new Gson();
             User user = gson.fromJson(reader, User.class);
             user.setUserName(userName);
-            App.setCurrentPlayer(user);
+            App.setLoggedInUser(user);
             App.getUsers().clear();
             App.getUsers().put(userName, user);
 
@@ -43,11 +43,11 @@ public class ProfileMenuController implements MenuController {
     }
 
     public Result changeNickname(String nickName) {
-        if (nickName.equals(App.getCurrentPlayer().getNickname())) {
+        if (nickName.equals(App.getLoggedInUser().getNickname())) {
             return new Result(false, "write another new nick name . this one equals the old one");
         }
 
-        File file = new File(App.getCurrentPlayer().getUserName() + ".json");
+        File file = new File(App.getLoggedInUser().getUserName() + ".json");
         if (!file.exists()) {
             return new Result(false, "error opening file");
         }
@@ -56,7 +56,7 @@ public class ProfileMenuController implements MenuController {
             Gson gson = new Gson();
             User user = gson.fromJson(reader, User.class);
             user.setNickname(nickName);
-            App.setCurrentPlayer(user);
+            App.setLoggedInUser(user);
             App.getUsers().clear();
             App.getUsers().put(user.getUserName(), user);
 
@@ -72,7 +72,7 @@ public class ProfileMenuController implements MenuController {
     }
 
     public Result changeEmail(String email) {
-        if (email.equals(App.getCurrentPlayer().getEmail())) {
+        if (email.equals(App.getLoggedInUser().getEmail())) {
             return new Result(false, "write another new email . this one equals the old one");
         }
 
@@ -80,7 +80,7 @@ public class ProfileMenuController implements MenuController {
             return new Result(false, "email format is incorrect");
         }
 
-        File file = new File(App.getCurrentPlayer().getUserName() + ".json");
+        File file = new File(App.getLoggedInUser().getUserName() + ".json");
         if (!file.exists()) {
             return new Result(false, "error opening file");
         }
@@ -89,7 +89,7 @@ public class ProfileMenuController implements MenuController {
             Gson gson = new Gson();
             User user = gson.fromJson(reader, User.class);
             user.setEmail(email);
-            App.setCurrentPlayer(user);
+            App.setLoggedInUser(user);
             App.getUsers().clear();
             App.getUsers().put(user.getUserName(), user);
 
@@ -105,7 +105,7 @@ public class ProfileMenuController implements MenuController {
     }
 
     public Result changePassword(String oldPass, String newPass) {
-        if (!oldPass.equals(App.getCurrentPlayer().getPassword())) {
+        if (!oldPass.equals(App.getLoggedInUser().getPassword())) {
             return new Result(false, "old password is written wrong");
         }
 
@@ -117,7 +117,7 @@ public class ProfileMenuController implements MenuController {
             return new Result(false, "password format is incorrect");
         }
 
-        File file = new File(App.getCurrentPlayer().getUserName() + ".json");
+        File file = new File(App.getLoggedInUser().getUserName() + ".json");
         if (!file.exists()) {
             return new Result(false, "error opening file");
         }
@@ -126,7 +126,7 @@ public class ProfileMenuController implements MenuController {
             Gson gson = new Gson();
             User user = gson.fromJson(reader, User.class);
             user.setPassword(newPass);
-            App.setCurrentPlayer(user);
+            App.setLoggedInUser(user);
             App.getUsers().clear();
             App.getUsers().put(user.getUserName(), user);
 
@@ -144,9 +144,9 @@ public class ProfileMenuController implements MenuController {
 
     public void userInfo(){
         System.out.println("user info");
-        System.out.println(App.getCurrentPlayer().getUserName());
-        System.out.println(App.getCurrentPlayer().getNickname());
-        System.out.println(App.getCurrentPlayer().getEmail().length());
+        System.out.println(App.getLoggedInUser().getUserName());
+        System.out.println(App.getLoggedInUser().getNickname());
+        System.out.println(App.getLoggedInUser().getEmail().length());
         //TODO:most money is not written
     }
 }

@@ -2,6 +2,7 @@ package models.Place;
 
 import models.Fundementals.Location;
 import models.Fundementals.LocationOfRectangle;
+import models.Fundementals.Player;
 import models.MapDetails.*;
 import models.RelatedToUser.User;
 
@@ -9,14 +10,14 @@ public class Farm implements Place {
 
     private  LocationOfRectangle farmLocation;
 
-    private User owner;
+    private Player owner;
     private Lake lake1;
     private Lake lake2;
     private GreenHouse greenHouse;
     private Shack shack;
     private Quarry quarry;
 
-    public Farm(LocationOfRectangle farmLocation, User owner) {
+    public Farm(LocationOfRectangle farmLocation, Player owner) {
         this.farmLocation = farmLocation;
         this.owner = owner;
 
@@ -74,7 +75,7 @@ public class Farm implements Place {
         return shack;
     }
 
-    public User getOwner() {
+    public Player getOwner() {
         return owner;
     }
 
@@ -95,4 +96,7 @@ public class Farm implements Place {
         return null;
     }
 
+    public void setOwner(Player player) {
+        this.owner = player;
+    }
 }

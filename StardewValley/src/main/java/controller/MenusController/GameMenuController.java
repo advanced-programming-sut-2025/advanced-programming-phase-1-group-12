@@ -1,23 +1,19 @@
 package controller.MenusController;
 
-import models.Fundementals.App;
-import models.Fundementals.Game;
-import models.Fundementals.Location;
+import models.Fundementals.*;
 import models.Place.Farm;
 import models.RelatedToUser.User;
-import models.Fundementals.Result;
 import models.*;
 import models.enums.*;
+import models.Fundementals.Player;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
+
 public class GameMenuController implements MenuController {
 
     Game currentGame = App.getCurrentGame();
@@ -149,8 +145,8 @@ public class GameMenuController implements MenuController {
         loadAllUsersFromFiles();
 
         ArrayList<Integer> numberOfFarm = new ArrayList<>();
-        ArrayList<User> players = new ArrayList<>();
-        players.add(App.getLoggedInUser());
+        ArrayList<Player> players = new ArrayList<>();
+        players.add(App.getCurrentPlayer());
 
         for (String username : usernames) {
             if (username != null) {
@@ -159,7 +155,9 @@ public class GameMenuController implements MenuController {
                     System.out.println("user not found " + username);
                     continue;
                 }
-                players.add(user);
+                Player newPlayer = new Player(user, null, null, null, false,
+                        null, null, new ArrayList<>(), new ArrayList<>(), null);
+                players.add(newPlayer);
 
                 while (true) {
                     System.out.println("Choosing farm for " + username + ":");
@@ -185,7 +183,7 @@ public class GameMenuController implements MenuController {
             }
         }
 
-        Map<Farm, User> userAndFarm = new HashMap<>();
+        Map<Farm, Player> userAndFarm = new HashMap<>();
         ArrayList<Farm> farms = currentGame.getMainMap().getFarms();
 
         for (int i = 0; i < players.size(); i++) {
@@ -226,6 +224,3 @@ public class GameMenuController implements MenuController {
     }
 }
 
-
-
-}

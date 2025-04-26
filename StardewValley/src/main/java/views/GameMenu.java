@@ -27,10 +27,7 @@ public class GameMenu extends AppMenu {
                     players.add(matcher.group(i).trim());
             }
 
-            Result result = controller.Play(scanner, players);
-            if (!result.getMessage().isEmpty()) {
-                System.out.println(result.getMessage());
-            }
+             controller.Play(scanner, players);
         } else if ((matcher = GameMenuCommands.TIME.getMather(input))!= null) {
             showCurrentTime();
         } else if ((matcher = GameMenuCommands.DATE.getMather(input))!= null) {

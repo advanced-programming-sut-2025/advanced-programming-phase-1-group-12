@@ -48,4 +48,8 @@ public class Player {
         this.relationShips = relationShips;
         this.trade = trade;
     }
+
+    public User getUser() {
+        return user;
+    }
 }

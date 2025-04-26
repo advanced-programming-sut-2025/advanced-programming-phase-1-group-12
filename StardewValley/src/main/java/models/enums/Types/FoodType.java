@@ -1,5 +1,7 @@
 package models.enums.Types;
 
+import models.Eating.Buff;
+
 import java.util.HashMap;
 import java.util.Map;
 
