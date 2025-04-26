@@ -3,12 +3,17 @@ package controller.MenusController;
 import models.Fundementals.App;
 import models.Fundementals.Game;
 import models.Fundementals.Location;
+import models.Place.Farm;
 import models.RelatedToUser.User;
 import models.Fundementals.Result;
 import models.*;
-import models.enums.Season;
-import models.enums.Weather;
+import models.enums.*;
+import com.google.gson.Gson;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +21,6 @@ import java.util.Scanner;
 public class GameMenuController implements MenuController {
 
     Game currentGame = App.getCurrentGame();
-
-    public Result newGame() { return null;}
 
     public map choosingMap(int MapId){ return null;}
 
@@ -140,20 +143,89 @@ public class GameMenuController implements MenuController {
     }
 
 
-    public Result Play(Scanner scanner, List<String> usernames) {
 
+    public void Play(Scanner scanner, List<String> usernames) {
+        Game currentGame = App.getCurrentGame();
+        loadAllUsersFromFiles();
+
+        ArrayList<Integer> numberOfFarm = new ArrayList<>();
         ArrayList<User> players = new ArrayList<>();
         players.add(App.getLoggedInUser());
+
         for (String username : usernames) {
             if (username != null) {
                 User user = App.getUserByUsername(username.trim());
-                if (user != null)
-                    players.add(user);
+                if (user == null) {
+                    System.out.println("user not found " + username);
+                    continue;
+                }
+                players.add(user);
 
+                while (true) {
+                    System.out.println("Choosing farm for " + username + ":");
+                    String input = scanner.nextLine().trim();
+
+                    if (!input.matches("\\d+")) {
+                        System.out.println("Invalid input, please enter a number.");
+                        continue;
+                    }
+                    int farmId = Integer.parseInt(input);
+                    if (farmId > 3 || farmId < 0) {
+                        System.out.println("Wrong farm number!");
+                        continue;
+                    }
+                    if (numberOfFarm.contains(farmId)) {
+                        System.out.println("This farm is already taken, please try again.");
+                        continue;
+                    }
+
+                    numberOfFarm.add(farmId);
+                    break;
+                }
             }
         }
 
+        Map<Farm, User> userAndFarm = new HashMap<>();
+        ArrayList<Farm> farms = currentGame.getMainMap().getFarms();
 
-        return new Result(true, "");
+        for (int i = 0; i < players.size(); i++) {
+            int farmIndex = numberOfFarm.get(i);
+            if (farmIndex < farms.size()) {
+                Farm farm = farms.get(farmIndex);
+                userAndFarm.put(farm, players.get(i));
+                farm.setOwner(players.get(i));
+            }
+        }
+
+        currentGame.setUserAndMap(userAndFarm);
+        System.out.println("All farms have been assigned!");
     }
+
+    private void loadAllUsersFromFiles() {
+        File folder = new File(".");
+        File[] files = folder.listFiles((dir, name) -> name.endsWith(".json"));
+
+        if (files == null) return;
+
+        Gson gson = new Gson();
+        for (File file : files) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                User user = gson.fromJson(reader, User.class);
+                App.getUsers().put(user.getUserName(), user);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public Result newGame() {
+        ArrayList<Farm> farms = new ArrayList<>();
+        Game newGame = new Game(farms);
+        App.setCurrentGame(newGame);
+        return new Result(true, "New game created successfully!");
+    }
+}
+
+
+
 }

@@ -71,12 +71,11 @@ public class LoginRegisterMenuController implements MenuController {
                     );
         }
         boolean isFemale = !gender.equals("male");
-        User newUser = new User(new ArrayList<>(), username, password, email, "","",
-                null, null, null, false, null, null, new ArrayList<>(),
-                0, isFemale, new ArrayList<>(), new ArrayList<>(), nickname);
+        User newUser = new User(new ArrayList<>(), username, nickname, password, email, "",
+                "", isFemale);
         saveUser(newUser, username +".json");
         App.getUsers().put(username, newUser);
-        App.setCurrentPlayer(newUser);
+        App.setLoggedInUser(newUser);
 
         return new Result(true, "User registered successfully");
     }
@@ -138,7 +137,7 @@ public class LoginRegisterMenuController implements MenuController {
                 return new Result(false, "Incorrect password");
             }
 
-            App.setCurrentPlayer(user);
+            App.setLoggedInUser(user);
             App.getUsers().put(user.getUserName(), user);
             return new Result(true, "Login successful");
         } catch (IOException e) {
@@ -195,27 +194,12 @@ public class LoginRegisterMenuController implements MenuController {
             User currentUser = App.getUsers().get(userName);
                 App.setCurrentPlayer(currentUser);}
     }
-    public Result changePassword(String username, String oldPass, String newPass) {
-        User user = App.getUsers().get(username);
-        if (user == null) {
-            return new Result(false, "User not found");
-        }
-
-        if (!user.getPassword().equals(oldPass)) {
-            return new Result(false, "Old password is incorrect");
-        }
-
-        user.setPassword(newPass);
-        saveUser(user, username + ".json");
-        return new Result(true, "Password updated successfully");
-    }
     public Result answerQuestion(Matcher matcher) {
         String answer = matcher.group("answer");
         if(answer.equals(App.getCurrentPlayer().getAnswerOfQuestionForSecurity())){
             return new Result(true, "correct answer. now enter your new password like this : i answered so my new password:"
                     );
         }
-        System.out.println("kkkkk");
         return new Result(false, "wrong answer");
 
     }

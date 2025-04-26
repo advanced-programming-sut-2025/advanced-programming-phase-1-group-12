@@ -35,7 +35,21 @@ public enum GameMenuCommands implements Commands {
     FEED_HAY("^feed hay -n (?<animalName>.*)$"),
     PRODUCES("^produces$"),
     COLLECT ("collect produce -n (?<name>.*)"),
-    SELL_ANIMAL("sell animal -n (?<name>.*)");
+    SELL_ANIMAL("sell animal -n (?<name>.*)"),
+
+    //fishes
+    FISHING("fishing -p (?<fishingPole>.*)"),
+
+    //Faravari commands
+    ARTISAN_USE("artisan use (?<artisanName>.*) (?<itemName>.*)"),
+    ARTISAN_GET("artisan get <artisanName>"),
+
+    //Cooking commands
+    COOKING_REFRIGERATOR("cooking refrigrator -n (?<name>.*)"),
+    COOKING_RECIPES("cooking show recipes"),
+    COOOKING_PREPARE("cooking prepare (?<recipeName>.*)"),
+
+    EAT_FOOD("eat (?<foodName>.*)");
 
 
     private final String pattern;
