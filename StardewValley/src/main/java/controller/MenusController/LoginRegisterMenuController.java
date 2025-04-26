@@ -88,7 +88,7 @@ public class LoginRegisterMenuController implements MenuController {
             return new Result(false, "answer and answer confirm don't match");
         }
 
-        File file = new File(App.getCurrentPlayer().getUser().getUserName() + ".json");
+        File file = new File(App.getLoggedInUser().getUserName() + ".json");
         if (!file.exists()) {
             return new Result(false, "error opening file");
         }
@@ -102,7 +102,7 @@ public class LoginRegisterMenuController implements MenuController {
             App.getUsers().clear();
             App.getUsers().put(user.getUserName(), user);
 
-            try (FileWriter writer = new FileWriter(App.getCurrentPlayer().getUser().getUserName() + ".json")) {
+            try (FileWriter writer = new FileWriter(App.getLoggedInUser().getUserName() + ".json")) {
                 gson.toJson(user, writer);
             }
         } catch (IOException e) {
