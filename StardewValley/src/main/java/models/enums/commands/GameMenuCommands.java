@@ -20,7 +20,21 @@ public enum GameMenuCommands implements Commands {
     LoadGame(""),
     ExitGame(""),
     NextTurn(""),
-    Walk("");
+    Walk(""),
+
+    //Damdari commands
+    //animals
+    BUILD_BUILDING("build -a (?<buildingName>.*) -l <(?<x>\\d+) , (?<y>\\d+)>"),
+    BUY_ANIMAL("buy animal -a (?<animal>.*) -n (?<name>.*)"),
+    PET("pet -n (?<name>.*)"),
+    CHEAT_SET_FRIENDSHIP("cheat set friendship -n (?<animalName>.*) -c (?<amount>.*)"),
+    ANIMALS_LIST("animals"),
+    SHEPHERD_ANIMALS("shepherd animals -n <animal name> -l <x , y>"),
+    FEED_HAY("^feed hay -n (?<animalName>.*)$"),
+    PRODUCES("^produces$"),
+    COLLECT ("collect produce -n (?<name>.*)"),
+    SELL_ANIMAL("sell animal -n (?<name>.*)");
+
 
     private final String pattern;
 
