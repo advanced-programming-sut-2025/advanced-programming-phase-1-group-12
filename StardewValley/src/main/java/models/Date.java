@@ -3,6 +3,10 @@ package models;
 import models.enums.Season;
 import models.enums.Weather;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class Date {
     int hour;
     int year;
@@ -10,6 +14,8 @@ public class Date {
     int dayOfWeek; //Max : 7 days
     Season season; // season changes after 28 days
     Weather weather;
+    Weather tommorowWeather;
+    Map<Season, List<Weather>> weatherOfSeason;
     int currentSeason; // value of each season
 
     //Date setUp
@@ -21,6 +27,8 @@ public class Date {
         this.currentSeason = season.getValue();
         this.year = 1900;
         this.weather = Weather.SUNNY;
+        this.tommorowWeather = Weather.SUNNY;
+        this.weatherOfSeason = initializeWeatherMap();
     }
 
     public void changeAdvancedTime(int hour){
@@ -28,6 +36,7 @@ public class Date {
         if (this.hour > 22){
             this.hour -= 13;
             changeAdvancedDay(1);
+            this.weather = this.tommorowWeather; // the day changes
         }
     }
 
@@ -87,5 +96,45 @@ public class Date {
 
     public Weather getWeather() {
         return weather;
+    }
+
+    public void setWeather(Weather weather) {
+        this.weather = weather;
+    }
+
+    public Map<Season, List<Weather>> initializeWeatherMap() {
+        weatherOfSeason = Map.of(
+                Season.SPRING, List.of(Weather.SUNNY, Weather.RAINY, Weather.STORM),
+                Season.SUMMER, List.of(Weather.SUNNY, Weather.RAINY, Weather.STORM),
+                Season.AUTUMN, List.of(Weather.SUNNY, Weather.RAINY, Weather.STORM),
+                Season.WINTER, List.of(Weather.SUNNY, Weather.SNOW)
+        );
+        return weatherOfSeason;
+    }
+
+    public Weather weatherForecast(Season season) {
+        if (weatherOfSeason == null) {
+            initializeWeatherMap();
+        }
+
+        List<Weather> possibleWeathers = weatherOfSeason.get(season);
+        int randomIndex = (int) (Math.random() * possibleWeathers.size());
+        return possibleWeathers.get(randomIndex);
+    }
+
+    public void setTommorowWeather(Weather weather){
+        this.tommorowWeather = weather;
+    }
+
+    public void setDayOfMonth(int dayOfMonth) {
+        this.dayOfMonth = dayOfMonth;
+    }
+
+    public void setDayOfWeek(int dayOfWeek) {
+        this.dayOfWeek = dayOfWeek;
+    }
+
+    public void setSeason(Season season) {
+        this.season = season;
     }
 }

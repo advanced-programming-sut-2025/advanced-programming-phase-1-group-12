@@ -1,13 +1,16 @@
 package views;
 
 import controller.MenusController.GameMenuController;
+import models.Fundementals.App;
 import models.Fundementals.Result;
 import models.enums.commands.GameMenuCommands;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GameMenu extends AppMenu {
     private final GameMenuController controller = new GameMenuController();
@@ -28,13 +31,69 @@ public class GameMenu extends AppMenu {
             if (!result.getMessage().isEmpty()) {
                 System.out.println(result.getMessage());
             }
+        } else if ((matcher = GameMenuCommands.TIME.getMather(input))!= null) {
+            showCurrentTime();
+        } else if ((matcher = GameMenuCommands.DATE.getMather(input))!= null) {
+            showCurrentDate();
+        } else if ((matcher = GameMenuCommands.DATETIME.getMather(input))!=null) {
+            dateTime();
+        } else if ((matcher = GameMenuCommands.DAY_OF_WEEK.getMather(input))!=null) {
+            dayOfWeek();
+        } else if ((matcher = GameMenuCommands.CHEAT_ADVANCED_TIME.getMather(input))!= null) {
+            cheatAdvancedTime(matcher.group("time"));
+        } else if ((matcher = GameMenuCommands.CHEAT_ADVANCED_DATE.getMather(input))!= null) {
+            cheatAdvancedDate(matcher.group("date"));
+        } else if ((matcher = GameMenuCommands.SEASON.getMather(input))!= null) {
+            showCurrentSeason();
+        } else if ((matcher = GameMenuCommands.WEATHER.getMather(input))!= null) {
+            season();
+        } else if ((matcher = GameMenuCommands.WEATHER_FORECAST.getMather(input))!= null) {
+            weatherForecast();
+        } else if ((matcher = GameMenuCommands.CHEAT_WEATHER_SET.getMather(input))!= null) {
+            cheatWeather(matcher.group("type"));
         }
     }
-    public void showCurrentTime(){}
-    public void showCurrentDate(){}
-    public void showCurrentSeason(){}
-    public void dateTime(){}
-    public void dayOfWeek(){}
-    public void cheatAdvancedTime(){}
-    public void cheatAdvancedDate(){}
+    public void showCurrentTime(){
+        Result result = controller.showHour();
+        System.out.println(result);
+    }
+    public void showCurrentDate(){
+        Result result = controller.showDate();
+        System.out.println(result);
+    }
+    public void showCurrentSeason(){
+        Result result = controller.showSeason();
+        System.out.println(result);
+    }
+    public void dateTime(){
+        Result result = controller.showDateTime();
+        System.out.println(result);
+    }
+    public void dayOfWeek(){
+        Result result = controller.showDayOfTheWeek();
+        System.out.println(result);
+    }
+    public void cheatAdvancedTime(String time){
+        Result result = controller.cheatAdvancedTime(time);
+        System.out.println(result);
+    }
+    public void cheatAdvancedDate(String day){
+        Result result = controller.cheatAdvancedDay(day);
+        System.out.println(result);
+    }
+    
+    public void season(){
+        Result result = controller.showSeason();
+        System.out.println(result);
+    }
+
+    public void weatherForecast(){
+        Result result = controller.weatherForecast(App.getCurrentGame().getDate().getSeason());
+        System.out.println(result);
+    }
+
+    public void cheatWeather(String type){
+        Result result = controller.cheatWeather(type);
+        System.out.println(result);
+    }
 }

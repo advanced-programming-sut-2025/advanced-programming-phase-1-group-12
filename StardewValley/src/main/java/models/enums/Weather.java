@@ -21,4 +21,7 @@ public enum Weather {
         return null;
     }
 
+    public static String getName(Weather type) {
+        return type.name();
+    }
 }

@@ -3,7 +3,6 @@ package models.Eating;
 import models.enums.Types.FoodType;
 
 public class Food {
-
     private String name;
     private FoodType foodType;
 

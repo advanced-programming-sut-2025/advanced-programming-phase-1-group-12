@@ -16,9 +16,8 @@ public class Game {
     private map mainMap = new map();
     Map<Farm, User> userAndMap;
 
-    public Game(Date date){
+    public Game(){
         MapSetUp.initilizeFarms(mainMap);
-        this.date = date;
     }
 
     public int getGameId() {

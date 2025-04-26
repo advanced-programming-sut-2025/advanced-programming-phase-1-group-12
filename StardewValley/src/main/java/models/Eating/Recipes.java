@@ -2,6 +2,7 @@ package models.Eating;
 
 import java.util.ArrayList;
 
+
 public class Recipes {
     private String mapOfRecipes;
     private ArrayList<Food> ingredient;

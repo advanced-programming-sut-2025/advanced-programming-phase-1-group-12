@@ -7,6 +7,7 @@ import models.RelatedToUser.User;
 import models.Fundementals.Result;
 import models.*;
 import models.enums.Season;
+import models.enums.Weather;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,6 +110,19 @@ public class GameMenuController implements MenuController {
                 return new Result(false, "Wrong Season!");
             }
         }
+    }
+
+    public Result weatherForecast(Season season){
+        Weather weather = App.getCurrentGame().getDate().getWeather();
+        return new Result(true, Weather.getName(weather));
+    }
+
+
+    public Result cheatWeather(String type){
+        Weather weather = Weather.fromString(type);
+        App.getCurrentGame().getDate().setTommorowWeather(weather);
+        String result = "Weather cheated successfully!";
+        return new Result(true, result);
     }
 
     public Result showWeather(){
