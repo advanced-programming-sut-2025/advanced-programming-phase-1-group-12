@@ -1,10 +1,13 @@
 package models.Place;
 
+import models.Animal.FarmAnimals;
 import models.Fundementals.Location;
 import models.Fundementals.LocationOfRectangle;
 import models.Fundementals.Player;
 import models.MapDetails.*;
 import models.RelatedToUser.User;
+
+import java.util.ArrayList;
 
 public class Farm implements Place {
 
@@ -16,6 +19,7 @@ public class Farm implements Place {
     private GreenHouse greenHouse;
     private Shack shack;
     private Quarry quarry;
+    private ArrayList<FarmAnimals> farmAnimals = new ArrayList<>();
 
     public Farm(LocationOfRectangle farmLocation, Player owner) {
         this.farmLocation = farmLocation;
@@ -98,5 +102,13 @@ public class Farm implements Place {
 
     public void setOwner(Player player) {
         this.owner = player;
+    }
+
+    public ArrayList<FarmAnimals> getFarmAnimals() {
+        return farmAnimals;
+    }
+
+    public void setFarmAnimals(ArrayList<FarmAnimals> farmAnimals) {
+        this.farmAnimals = farmAnimals;
     }
 }

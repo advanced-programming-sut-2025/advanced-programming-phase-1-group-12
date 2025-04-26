@@ -196,7 +196,7 @@ public class LoginRegisterMenuController implements MenuController {
     }
     public Result answerQuestion(Matcher matcher) {
         String answer = matcher.group("answer");
-        if(answer.equals(App.getCurrentPlayer().getUser().getAnswerOfQuestionForSecurity())){
+        if(answer.equals(App.getCurrentPlayerLazy().getUser().getAnswerOfQuestionForSecurity())){
             return new Result(true, "correct answer. now enter your new password like this : i answered so my new password:"
                     );
         }
@@ -209,12 +209,12 @@ public class LoginRegisterMenuController implements MenuController {
 
             System.out.println("this will be your password : " + newPass);
             App.getLoggedInUser().setPassword(newPass);  // باید setter داشته باشی برای password
-            saveUser(App.getCurrentPlayer().getUser(), App.getLoggedInUser().getUserName() + ".json");
+            saveUser(App.getCurrentPlayerLazy().getUser(), App.getLoggedInUser().getUserName() + ".json");
             System.out.println("password updated successfully");
             return;
         }
         App.getLoggedInUser().setPassword(newPass);  // باید setter داشته باشی برای password
-        saveUser(App.getCurrentPlayer().getUser(), App.getLoggedInUser().getUserName() + ".json");
+        saveUser(App.getCurrentPlayerLazy().getUser(), App.getLoggedInUser().getUserName() + ".json");
         System.out.println("password updated successfully");
     }
 }

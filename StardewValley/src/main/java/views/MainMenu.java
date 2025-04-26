@@ -1,6 +1,7 @@
 package views;
 
 import models.Fundementals.App;
+import models.Fundementals.Game;
 import models.enums.Menu;
 import models.enums.commands.MainMenuCommands;
 
@@ -31,7 +32,7 @@ public class MainMenu extends AppMenu{
         } else if ((matcher = MainMenuCommands.Logout.getMather(input)) != null) {
                 //TODO:is this right?
                 App.setLoggedInUser(null);
-                App.setCurrentPlayer(null);
+                App.getCurrentGame().setCurrentPlayer(null);
                 App.setCurrentMenu(Menu.LoginRegisterMenu);
         } else{
             System.out.println("invalid command");

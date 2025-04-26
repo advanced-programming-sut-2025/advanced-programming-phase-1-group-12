@@ -47,7 +47,7 @@ public enum GameMenuCommands implements Commands {
     //Cooking commands
     COOKING_REFRIGERATOR("cooking refrigrator -n (?<name>.*)"),
     COOKING_RECIPES("cooking show recipes"),
-    COOOKING_PREPARE("cooking prepare (?<recipeName>.*)"),
+    COOKING_PREPARE("cooking prepare (?<recipeName>.*)"),
 
     EAT_FOOD("eat (?<foodName>.*)");
 

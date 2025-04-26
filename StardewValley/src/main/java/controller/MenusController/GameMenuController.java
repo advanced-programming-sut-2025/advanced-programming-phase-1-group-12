@@ -146,7 +146,7 @@ public class GameMenuController implements MenuController {
 
         ArrayList<Integer> numberOfFarm = new ArrayList<>();
         ArrayList<Player> players = new ArrayList<>();
-        players.add(App.getCurrentPlayer());
+        players.add(App.getCurrentPlayerLazy());
 
         for (String username : usernames) {
             if (username != null) {
@@ -156,7 +156,7 @@ public class GameMenuController implements MenuController {
                     continue;
                 }
                 Player newPlayer = new Player(user, null, null, null, false,
-                        null, null, new ArrayList<>(), new ArrayList<>(), null);
+                        null, null, new ArrayList<>(), new ArrayList<>(), null, null);
                 players.add(newPlayer);
 
                 while (true) {

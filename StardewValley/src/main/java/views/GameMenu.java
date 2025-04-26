@@ -7,10 +7,8 @@ import models.enums.commands.GameMenuCommands;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class GameMenu extends AppMenu {
     private final GameMenuController controller = new GameMenuController();
@@ -52,45 +50,45 @@ public class GameMenu extends AppMenu {
     }
     public void showCurrentTime(){
         Result result = controller.showHour();
-        System.out.println(result);
+        System.out.println(result.getMessage());
     }
     public void showCurrentDate(){
         Result result = controller.showDate();
-        System.out.println(result);
+        System.out.println(result.getMessage());
     }
     public void showCurrentSeason(){
         Result result = controller.showSeason();
-        System.out.println(result);
+        System.out.println(result.getMessage());
     }
     public void dateTime(){
         Result result = controller.showDateTime();
-        System.out.println(result);
+        System.out.println(result.getMessage());
     }
     public void dayOfWeek(){
         Result result = controller.showDayOfTheWeek();
-        System.out.println(result);
+        System.out.println(result.getMessage());
     }
     public void cheatAdvancedTime(String time){
         Result result = controller.cheatAdvancedTime(time);
-        System.out.println(result);
+        System.out.println(result.getMessage());
     }
     public void cheatAdvancedDate(String day){
         Result result = controller.cheatAdvancedDay(day);
-        System.out.println(result);
+        System.out.println(result.getMessage());
     }
     
     public void season(){
         Result result = controller.showSeason();
-        System.out.println(result);
+        System.out.println(result.getMessage());
     }
 
     public void weatherForecast(){
         Result result = controller.weatherForecast(App.getCurrentGame().getDate().getSeason());
-        System.out.println(result);
+        System.out.println(result.getMessage());
     }
 
     public void cheatWeather(String type){
         Result result = controller.cheatWeather(type);
-        System.out.println(result);
+        System.out.println(result.getMessage());
     }
 }

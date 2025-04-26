@@ -16,7 +16,6 @@ public class App {
     private static models.enums.Menu currentMenu = Menu.LoginRegisterMenu;
     private static ArrayList<Game> game = new ArrayList<>();
     private static Game currentGame = null;
-    private static Player currentPlayer = null;
     private static Date fullTime;
     private static ArrayList<String> securityQuestions = new ArrayList<>(
             Arrays.asList("what is your favorite color?", "what is your favorite country?")
@@ -29,6 +28,10 @@ public class App {
                 return user;
         }
         return null;
+    }
+
+    public static Player getCurrentPlayerLazy() {
+        return App.getCurrentGame().getCurrentPlayer();
     }
 
     public ArrayList<Game> getAllGames() {
@@ -59,20 +62,12 @@ public class App {
         return users;
     }
 
-    public static Player getCurrentPlayer() {
-        return currentPlayer;
-    }
-
     public static User getLoggedInUser() {
         return loggedInUser;
     }
 
     public static void setCurrentGame(Game currentGame) {
         App.currentGame = currentGame;
-    }
-
-    public static void setCurrentPlayer(Player currentPlayer) {
-        App.currentPlayer = currentPlayer;
     }
 
     public static void setFullTime(Date fullTime) {

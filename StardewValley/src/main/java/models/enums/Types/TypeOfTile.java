@@ -10,7 +10,11 @@ public enum TypeOfTile {
     TREE('T'),
     STONE('S'),
     QUARRY('Q'),
-    HOUSE('H');
+    HOUSE('H'),
+
+    //this is used for seeing if we can buy an animal
+    COOP('C'),
+    BARN('B');
 
     private final char nameOfMap;
 

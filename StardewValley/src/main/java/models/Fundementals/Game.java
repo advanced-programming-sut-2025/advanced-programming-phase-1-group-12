@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class Game {
+    private Player currentPlayer = null;
     private Date date;
     private Map<User, Integer> score;
     private int gameId;
@@ -21,6 +22,14 @@ public class Game {
 
     public Game(ArrayList<Farm> farms) {
         this.farms = farms;
+    }
+
+    public Player getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    public void setCurrentPlayer(Player currentPlayer) {
+        this.currentPlayer = currentPlayer;
     }
 
     public int getGameId() {

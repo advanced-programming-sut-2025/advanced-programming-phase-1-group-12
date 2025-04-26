@@ -3,13 +3,14 @@ package models.enums;
 import java.util.Map;
 
 public enum Animal {
+    //by cage, I mean coop
     CHICKEN(800, Map.of("Egg", 50, "Large Egg", 95), true,
             "Lives in a Coop (capacity 4). Produces eggs daily if cared for. Can live in upgraded Coops."),
 
     DUCK(1200, Map.of("Duck Egg", 95, "Duck Feather", 250), true,
             "Lives in a Big Coop (capacity 8). Produces products every 2 days. Happier ducks are more likely to produce feathers. Can also live in Deluxe Coop."),
 
-    RABBIT(8000, Map.of("Wool", 340, "Rabbit's Foot", 565), true,
+    RABBIT(8000, Map.of("Wool", 340, "Rabbit's Pie", 565), true,
             "Lives in a Deluxe Coop (capacity 12). Produces every 4 days. Happier rabbits are more likely to produce Rabbit's Foot."),
 
     DINOSAUR(14000, Map.of("Dinosaur Egg", 350), true,
@@ -47,7 +48,7 @@ public enum Animal {
         return products;
     }
 
-    public boolean getCoopOrBarv() {
+    public boolean getCoopOrBarn() {
         return isCoop;
     }
 
