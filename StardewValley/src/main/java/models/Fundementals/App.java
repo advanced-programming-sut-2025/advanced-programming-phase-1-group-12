@@ -87,4 +87,17 @@ public class App {
     }
 
 
+    //useful functions
+    public static boolean isLocationInPlace(Location location, LocationOfRectangle place){
+        return location.getxAxis() >= place.getTopLeftCorner().getxAxis() &&
+                location.getxAxis() <= place.getTopLeftCorner().getxAxis() + place.getWidth() &&
+                location.getyAxis() >= place.getTopLeftCorner().getyAxis() &&
+                location.getyAxis() <= place.getTopLeftCorner().getyAxis() + place.getLength();
+    }
+
+    public static boolean isNextToUs(Location location){
+        Location ourLocation = App.getCurrentPlayerLazy().getUserLocation();
+        return ((location.getyAxis() - ourLocation.getyAxis()) <= 1 && (location.getyAxis() - ourLocation.getyAxis()) >= -1)
+                && ((location.getxAxis() - ourLocation.getxAxis()) <= 1 && (location.getxAxis() - ourLocation.getxAxis()) >= -1);
+    }
 }

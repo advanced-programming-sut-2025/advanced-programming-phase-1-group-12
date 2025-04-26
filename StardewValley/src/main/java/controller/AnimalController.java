@@ -2,7 +2,6 @@ package controller;
 
 import models.Animal.FarmAnimals;
 import models.Fundementals.*;
-import models.enums.*;
 
 public class AnimalController {
 
@@ -15,16 +14,11 @@ public class AnimalController {
 
     public FarmAnimals animalNextToUs(Location location){
         for(FarmAnimals animals : App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()){
-            if(isNextToUs(animals.getPosition())){
+            if(App.isNextToUs(animals.getPosition())){
                 return animals;
             }
         }
         return null;
     }
 
-    public boolean isNextToUs(Location location){
-        Location ourLocation = App.getCurrentPlayerLazy().getUserLocation();
-        return ((location.getyAxis() - ourLocation.getyAxis()) <= 1 && (location.getyAxis() - ourLocation.getyAxis()) >= -1)
-                && ((location.getxAxis() - ourLocation.getxAxis()) <= 1 && (location.getxAxis() - ourLocation.getxAxis()) >= -1);
-    }
 }
