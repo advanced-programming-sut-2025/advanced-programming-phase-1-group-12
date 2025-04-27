@@ -15,13 +15,19 @@ public class Game {
     private Date date;
     private Map<User, Integer> score;
     private int gameId;
-    private map mainMap = new map();
-    Map<Farm, Player> userAndMap;
+    private map mainMap;
+    private Map<Farm, Player> userAndMap;
     private ArrayList<Player> players;
-    private static ArrayList<Farm> farms;
+    private ArrayList<Farm> farms;
 
     public Game(ArrayList<Farm> farms) {
+        this.mainMap = new map();
         this.farms = farms;
+        this.date = new Date();
+    }
+
+    public ArrayList<Player> getPlayers() {
+        return players;
     }
 
     public Player getCurrentPlayer() {
@@ -52,10 +58,19 @@ public class Game {
         this.userAndMap = userAndMap;
     }
 
-    public Location[] getTilesOfMap() {return null;}
+    public Location[] getTilesOfMap() {
+        return null;
+    }
 
-    public Date getDate(){
+    public Date getDate() {
         return this.date;
     }
 
+    public void setFarms(ArrayList<Farm> farms) {
+        this.farms = farms;
+    }
+
+    public void setPlayer(ArrayList<Player> players) {
+        this.players = players;
+    }
 }

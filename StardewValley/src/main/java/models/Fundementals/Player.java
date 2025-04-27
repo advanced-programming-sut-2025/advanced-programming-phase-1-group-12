@@ -61,7 +61,12 @@ public class Player {
         return ownedFarm;
     }
 
+    public void setOwnedFarm(Farm ownedFarm) {
+        this.ownedFarm = ownedFarm;
+    }
+
     public Location getUserLocation() {
         return userLocation;
     }
+
 }

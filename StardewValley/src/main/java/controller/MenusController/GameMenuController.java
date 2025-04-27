@@ -1,5 +1,6 @@
 package controller.MenusController;
 
+import controller.MapSetUp.MapSetUp;
 import models.Fundementals.*;
 import models.Place.Farm;
 import models.RelatedToUser.User;
@@ -18,83 +19,94 @@ public class GameMenuController implements MenuController {
 
     Game currentGame = App.getCurrentGame();
 
-    public map choosingMap(int MapId){ return null;}
-
-    public Result loadGame(){ return null;}
-
-    public void savingMap(Map<map, User>userAndTheirMap){}
-
-    public Result deleteGame(int MapId){ return null;}
-
-    public void nextTurn(){ }
-
-    //TODO:sper chiz ro bezanim baraye geragten babash
-
-    public void readingMap(){ }
-
-    public void energyUnlimited(){}
-
-    public Result sellProducts(String productName, int Count){
+    public map choosingMap(int MapId) {
         return null;
     }
 
-    public void tradeHistory(User user){}
+    public Result loadGame() {
+        return null;
+    }
+
+    public void savingMap(Map<map, User> userAndTheirMap) {
+    }
+
+    public Result deleteGame(int MapId) {
+        return null;
+    }
+
+    public void nextTurn() {
+    }
+
+    //TODO:sper chiz ro bezanim baraye geragten babash
+
+    public void readingMap() {
+    }
+
+    public void energyUnlimited() {
+    }
+
+    public Result sellProducts(String productName, int Count) {
+        return null;
+    }
+
+    public void tradeHistory(User user) {
+    }
 
 
     // Samin: date comands are here
 
-    public Result showHour(){
+    public Result showHour() {
         int currentHour = App.getCurrentGame().getDate().getHour();
         return new Result(true, String.format("%s", currentHour));
     }
 
-    public Result showDate(){
+    public Result showDate() {
         int currentDay = App.getCurrentGame().getDate().getDayOfMonth();
         int currentYear = App.getCurrentGame().getDate().getYear();
         return new Result(true, String.format("%d/%d", currentYear, currentDay));
     }
 
-    public Result showDateTime(){
+    public Result showDateTime() {
         int currentDay = App.getCurrentGame().getDate().getDayOfMonth();
         int currentYear = App.getCurrentGame().getDate().getYear();
         int currentHour = App.getCurrentGame().getDate().getHour();
-        return new Result( true, String.format("%d/%d - Time: %d", currentYear,
+        return new Result(true, String.format("%d/%d - Time: %d", currentYear,
                 currentDay, currentHour));
     }
 
-    public Result showDayOfTheWeek(){
+    public Result showDayOfTheWeek() {
         int currentDay = App.getCurrentGame().getDate().getDayOfWeek();
         String StringDay = App.getCurrentGame().getDate().getDayName(currentDay);
-        return new Result( true, StringDay);
+        return new Result(true, StringDay);
     }
 
-    public Result cheatAdvancedTime(String time){
+    public Result cheatAdvancedTime(String time) {
         int hour;
-        try{
+        try {
             hour = Integer.parseInt(time);
-        }catch(NumberFormatException e){
-            return new Result( false, "Wrong Hour!");
+        } catch (NumberFormatException e) {
+            return new Result(false, "Wrong Hour!");
         }
         App.getCurrentGame().getDate().changeAdvancedTime(hour);
-        return new Result(true,"Time changed successfully!");
+        return new Result(true, "Time changed successfully!");
     }
 
-    public Result cheatAdvancedDay(String day){
+    public Result cheatAdvancedDay(String day) {
         int days;
-        try{
+        try {
             days = Integer.parseInt(day);
-        }catch(NumberFormatException e){
+        } catch (NumberFormatException e) {
             return new Result(false, "Wrong Day!");
         }
         App.getCurrentGame().getDate().changeAdvancedDay(days);
         return new Result(true, "Day changed successfully!");
     }
 
-    public Result showSeason(){
+    public Result showSeason() {
         Season season = App.getCurrentGame().getDate().getSeason();
-        switch(season){
+        switch (season) {
             case SPRING -> {
-                return new Result( true, "Spring");
+                return new Result(true, "Spring");
             }
             case SUMMER -> {
                 return new Result(true, "Summer");
@@ -111,20 +123,20 @@ public class GameMenuController implements MenuController {
         }
     }
 
-    public Result weatherForecast(Season season){
+    public Result weatherForecast(Season season) {
         Weather weather = App.getCurrentGame().getDate().getWeather();
         return new Result(true, Weather.getName(weather));
     }
 
 
-    public Result cheatWeather(String type){
+    public Result cheatWeather(String type) {
         Weather weather = Weather.fromString(type);
         App.getCurrentGame().getDate().setTommorowWeather(weather);
         String result = "Weather cheated successfully!";
         return new Result(true, result);
     }
 
-    public Result showWeather(){
+    public Result showWeather() {
         return new Result(true, App.getCurrentGame().getDate().getWeather().name());
     }
 
@@ -132,72 +144,87 @@ public class GameMenuController implements MenuController {
         for (int X = x; X < x + size; X++) {
             for (int Y = y; Y < y + size; Y++) {
                 Location currentLocation = currentGame.getMainMap().findLocation(X, Y);
-                System.out.print(currentLocation.getTypeOfTile().getNameOfMap()+ " ");
+                System.out.print(currentLocation.getTypeOfTile().getNameOfMap() + " ");
             }
             System.out.println(); // Move to next line after each row
         }
     }
 
-
-
     public void Play(Scanner scanner, List<String> usernames) {
-        Game currentGame = App.getCurrentGame();
+        if (App.getCurrentGame() == null) {
+            Game newGame = new Game(new ArrayList<>());
+            App.setCurrentGame(newGame);
+        }
         loadAllUsersFromFiles();
 
-        ArrayList<Integer> numberOfFarm = new ArrayList<>();
+        ArrayList<Integer> chosenFarmNumbers = new ArrayList<>();
         ArrayList<Player> players = new ArrayList<>();
+
+        // اضافه کردن بازیکن فعلی لاگین شده
         players.add(App.getCurrentPlayerLazy());
 
+        // ساخت بازیکنان جدید بر اساس لیست یوزرنیم‌ها
         for (String username : usernames) {
-            if (username != null) {
-                User user = App.getUserByUsername(username.trim());
-                if (user == null) {
-                    System.out.println("user not found " + username);
+            if (username == null || username.isBlank()) continue;
+
+            User user = App.getUserByUsername(username.trim());
+            if (user == null) {
+                System.out.println("User not found: " + username);
+                continue;
+            }
+
+            System.out.println("User: " + username);
+            Player newPlayer = new Player(user, null, null, null, false,
+                    null, null, new ArrayList<>(), new ArrayList<>(), null, null);
+            players.add(newPlayer);
+
+            while (true) {
+                System.out.println("Choosing farm for " + username + ":");
+                String input = scanner.nextLine().trim();
+
+                if (!input.matches("\\d+")) {
+                    System.out.println("Invalid input, please enter a number.");
                     continue;
                 }
-                Player newPlayer = new Player(user, null, null, null, false,
-                        null, null, new ArrayList<>(), new ArrayList<>(), null, null);
-                players.add(newPlayer);
-
-                while (true) {
-                    System.out.println("Choosing farm for " + username + ":");
-                    String input = scanner.nextLine().trim();
-
-                    if (!input.matches("\\d+")) {
-                        System.out.println("Invalid input, please enter a number.");
-                        continue;
-                    }
-                    int farmId = Integer.parseInt(input);
-                    if (farmId > 3 || farmId < 0) {
-                        System.out.println("Wrong farm number!");
-                        continue;
-                    }
-                    if (numberOfFarm.contains(farmId)) {
-                        System.out.println("This farm is already taken, please try again.");
-                        continue;
-                    }
-
-                    numberOfFarm.add(farmId);
-                    break;
+                int farmId = Integer.parseInt(input);
+                if (farmId < 0 || farmId >= 4) {
+                    System.out.println("Farm number must be between 0 and 3!");
+                    continue;
                 }
+                if (chosenFarmNumbers.contains(farmId)) {
+                    System.out.println("This farm is already taken, please try again.");
+                    continue;
+                }
+                chosenFarmNumbers.add(farmId);
+                break;
             }
         }
 
-        Map<Farm, Player> userAndFarm = new HashMap<>();
-        ArrayList<Farm> farms = currentGame.getMainMap().getFarms();
+        // نسبت دادن Farmها به بازیکنان
+        Map<Farm, Player> farmOwnership = new HashMap<>();
+        ArrayList<Farm> farms = App.getCurrentGame().getMainMap().getFarms();
 
         for (int i = 0; i < players.size(); i++) {
-            int farmIndex = numberOfFarm.get(i);
+            int farmIndex = (i < chosenFarmNumbers.size()) ? chosenFarmNumbers.get(i) : i;
             if (farmIndex < farms.size()) {
                 Farm farm = farms.get(farmIndex);
-                userAndFarm.put(farm, players.get(i));
-                farm.setOwner(players.get(i));
+                Player player = players.get(i);
+                farmOwnership.put(farm, player);
+                farm.setOwner(player);
+                player.setOwnedFarm(farm);
             }
         }
 
-        currentGame.setUserAndMap(userAndFarm);
+        App.getCurrentGame().setUserAndMap(farmOwnership);
+        App.getCurrentGame().setPlayer(players);
+        App.getCurrentGame().setCurrentPlayer(players.getFirst());
+
+        MapSetUp.showMapWithFarms(App.getCurrentGame().getMainMap());
+
+        MapSetUp.initializeFarms();
         System.out.println("All farms have been assigned!");
     }
+
 
     private void loadAllUsersFromFiles() {
         File folder = new File(".");
@@ -223,4 +250,3 @@ public class GameMenuController implements MenuController {
         return new Result(true, "New game created successfully!");
     }
 }
-
