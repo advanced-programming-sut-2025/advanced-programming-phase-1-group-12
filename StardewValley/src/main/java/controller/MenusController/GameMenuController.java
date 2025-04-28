@@ -17,8 +17,6 @@ import java.util.*;
 
 public class GameMenuController implements MenuController {
 
-    Game currentGame = App.getCurrentGame();
-
     public map choosingMap(int MapId) {
         return null;
     }
@@ -143,7 +141,7 @@ public class GameMenuController implements MenuController {
     public void printMap(int x, int y, int size) {
         for (int X = x; X < x + size; X++) {
             for (int Y = y; Y < y + size; Y++) {
-                Location currentLocation = currentGame.getMainMap().findLocation(X, Y);
+                Location currentLocation = App.getCurrentGame().getMainMap().findLocation(X, Y);
                 System.out.print(currentLocation.getTypeOfTile().getNameOfMap() + " ");
             }
             System.out.println(); // Move to next line after each row
@@ -151,19 +149,20 @@ public class GameMenuController implements MenuController {
     }
 
     public void Play(Scanner scanner, List<String> usernames) {
-        if (App.getCurrentGame() == null) {
-            Game newGame = new Game(new ArrayList<>());
-            App.setCurrentGame(newGame);
-        }
+
+        Game newGame = new Game();
+        App.setCurrentGame(newGame);
+        MapSetUp.initializeFarms();
+
         loadAllUsersFromFiles();
 
         ArrayList<Integer> chosenFarmNumbers = new ArrayList<>();
         ArrayList<Player> players = new ArrayList<>();
 
-        // اضافه کردن بازیکن فعلی لاگین شده
-        players.add(App.getCurrentPlayerLazy());
+        Player mainPlayer = new Player(App.getLoggedInUser(), null, null, false,
+                null, null, new ArrayList<>(), new ArrayList<>(), null, null);
+        players.add(mainPlayer);
 
-        // ساخت بازیکنان جدید بر اساس لیست یوزرنیم‌ها
         for (String username : usernames) {
             if (username == null || username.isBlank()) continue;
 
@@ -174,7 +173,7 @@ public class GameMenuController implements MenuController {
             }
 
             System.out.println("User: " + username);
-            Player newPlayer = new Player(user, null, null, null, false,
+            Player newPlayer = new Player(user, null, null, false,
                     null, null, new ArrayList<>(), new ArrayList<>(), null, null);
             players.add(newPlayer);
 
@@ -196,11 +195,24 @@ public class GameMenuController implements MenuController {
                     continue;
                 }
                 chosenFarmNumbers.add(farmId);
+                Farm newFarm = App.getCurrentGame().getMainMap().getFarms().get(farmId);
+                newFarm.setOwner(newPlayer);
                 break;
             }
         }
 
-        // نسبت دادن Farmها به بازیکنان
+        Map<Farm, Player> farmOwnership = getFarmPlayerMap(players, chosenFarmNumbers);
+
+        App.getCurrentGame().setUserAndMap(farmOwnership);
+        App.getCurrentGame().setPlayers(players);
+        App.getCurrentGame().setCurrentPlayer(players.getFirst());
+
+        MapSetUp.showMapWithFarms(App.getCurrentGame().getMainMap());
+
+        System.out.println("All farms have been assigned!");
+    }
+
+    private static Map<Farm, Player> getFarmPlayerMap(ArrayList<Player> players, ArrayList<Integer> chosenFarmNumbers) {
         Map<Farm, Player> farmOwnership = new HashMap<>();
         ArrayList<Farm> farms = App.getCurrentGame().getMainMap().getFarms();
 
@@ -214,15 +226,7 @@ public class GameMenuController implements MenuController {
                 player.setOwnedFarm(farm);
             }
         }
-
-        App.getCurrentGame().setUserAndMap(farmOwnership);
-        App.getCurrentGame().setPlayer(players);
-        App.getCurrentGame().setCurrentPlayer(players.getFirst());
-
-        MapSetUp.showMapWithFarms(App.getCurrentGame().getMainMap());
-
-        MapSetUp.initializeFarms();
-        System.out.println("All farms have been assigned!");
+        return farmOwnership;
     }
 
 
@@ -242,11 +246,5 @@ public class GameMenuController implements MenuController {
             }
         }
     }
-
-    public Result newGame() {
-        ArrayList<Farm> farms = new ArrayList<>();
-        Game newGame = new Game(farms);
-        App.setCurrentGame(newGame);
-        return new Result(true, "New game created successfully!");
-    }
 }
+

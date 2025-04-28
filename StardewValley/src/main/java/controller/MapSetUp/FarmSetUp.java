@@ -15,7 +15,6 @@ import java.util.*;
 
 
 public class FarmSetUp {
-    Game mainGame = App.getCurrentGame();
 
     static Random rand = new Random();
     public ArrayList<Location> randomTree(Farm farm){
@@ -45,21 +44,23 @@ public class FarmSetUp {
         ArrayList<Location> allInFarm = new ArrayList<>();
         Set<Location> occupied = new HashSet<>();
 
-        LocationOfRectangle farmRect = farm.getFarmLocation();
-        for (Location location : mainGame.getTilesOfMap()) {
+        LocationOfRectangle farmRect = farm.getLocation();
+        for (Location location : App.getCurrentGame().getMainMap().getTilesOfMap()) {
             if (location.getxAxis() >= farmRect.getTopLeftCorner().getxAxis() &&
                     location.getxAxis() <= farmRect.getDownRightCorner().getxAxis() &&
                     location.getyAxis() >= farmRect.getTopLeftCorner().getyAxis() &&
                     location.getyAxis() <= farmRect.getDownRightCorner().getyAxis()) {
-                allInFarm.add(location);
+                if(location.getTypeOfTile() == TypeOfTile.GROUND) {
+                    allInFarm.add(location);
+                }
             }
         }
 
-        occupied.addAll(getLocationsOfRectangle(farm.getLake1().locationOfRectangle()));
-        occupied.addAll(getLocationsOfRectangle(farm.getLake2().locationOfRectangle()));
-        occupied.addAll(getLocationsOfRectangle(farm.getGreenHouse().locationOfRectangle()));
-        occupied.addAll(getLocationsOfRectangle(farm.getShack().locationOfRectangle()));
-        occupied.addAll(getLocationsOfRectangle(farm.getQuarry().locationOfRectangle()));
+        occupied.addAll(getLocationsOfRectangle(farm.getLake1().getLocation()));
+        occupied.addAll(getLocationsOfRectangle(farm.getLake2().getLocation()));
+        occupied.addAll(getLocationsOfRectangle(farm.getGreenHouse().getLocation()));
+        occupied.addAll(getLocationsOfRectangle(farm.getShack().getLocation()));
+        occupied.addAll(getLocationsOfRectangle(farm.getQuarry().getLocation()));
 
         ArrayList<Location> available = new ArrayList<>();
         for (Location loc : allInFarm) {
@@ -73,7 +74,7 @@ public class FarmSetUp {
 
     private ArrayList<Location> getLocationsOfRectangle(LocationOfRectangle rect) {
         ArrayList<Location> result = new ArrayList<>();
-        for (Location loc : mainGame.getTilesOfMap()) {
+        for (Location loc : App.getCurrentGame().getMainMap().getTilesOfMap()) {
             if (loc.getxAxis() >= rect.getTopLeftCorner().getxAxis() &&
                     loc.getxAxis() <= rect.getDownRightCorner().getxAxis() &&
                     loc.getyAxis() >= rect.getTopLeftCorner().getyAxis() &&
@@ -84,12 +85,12 @@ public class FarmSetUp {
         return result;
     }
 
-    public Farm makeFarm(Farm newFarm) {
+    public void makeFarm(Farm newFarm) {
         lakeSetUp(newFarm.getLake1());
         lakeSetUp(newFarm.getLake2());
         quarrySetUp(newFarm.getQuarry());
-        ShackSetUp(newFarm.getShack());
         GreenHouse(newFarm.getGreenHouse());
+        ShackSetUp(newFarm.getShack());
 
         for(Location location : randomTree(newFarm)){
             location.setTypeOfTile(TypeOfTile.TREE);
@@ -97,16 +98,15 @@ public class FarmSetUp {
         for(Location location : randomStone(newFarm)){
             location.setTypeOfTile(TypeOfTile.STONE);
         }
-        return newFarm;
     }
 
     public void lakeSetUp(Lake lake){
-        for(int x = 0; x < lake.locationOfRectangle().getLength(); x++){
-            for(int y = 0 ; y < lake.locationOfRectangle().getWidth(); y++){
-                for(Location location : mainGame.getTilesOfMap()){
-                    if(location.getyAxis() == lake.locationOfRectangle().getDownRightCorner().getyAxis() + y &&
-                            location.getxAxis() == lake.locationOfRectangle().getTopLeftCorner().getxAxis() + x){
-                        location.setTypeOfTile(TypeOfTile.LAKE);
+        for(int x = 0; x < lake.getLocation().getLength(); x++){
+            for(int y = 0 ; y < lake.getLocation().getWidth(); y++){
+                for(Location location : App.getCurrentGame().getMainMap().getTilesOfMap()){
+                    if(location.getyAxis() == lake.getLocation().getDownRightCorner().getyAxis() - y &&
+                            location.getxAxis() == lake.getLocation().getTopLeftCorner().getxAxis() + x){
+                       location.setTypeOfTile(TypeOfTile.LAKE);
                     }
                 }
             }
@@ -114,11 +114,11 @@ public class FarmSetUp {
     }
 
     public void quarrySetUp(Quarry quarry){
-        for(int x = 0; x < quarry.locationOfRectangle().getLength(); x++){
-            for(int y = 0 ; y < quarry.locationOfRectangle().getWidth(); y++){
-                for(Location location : mainGame.getTilesOfMap()){
-                    if(location.getyAxis() == quarry.locationOfRectangle().getDownRightCorner().getyAxis() + y &&
-                            location.getxAxis() == quarry.locationOfRectangle().getTopLeftCorner().getxAxis() + x){
+        for(int x = 0; x < quarry.getLocation().getLength(); x++){
+            for(int y = 0 ; y < quarry.getLocation().getWidth(); y++){
+                for(Location location : App.getCurrentGame().getMainMap().getTilesOfMap()){
+                    if(location.getyAxis() == quarry.getLocation().getDownRightCorner().getyAxis() - y &&
+                            location.getxAxis() == quarry.getLocation().getTopLeftCorner().getxAxis() + x){
                         location.setTypeOfTile(TypeOfTile.QUARRY);
                     }
                 }
@@ -127,11 +127,11 @@ public class FarmSetUp {
     }
 
     public void ShackSetUp(Shack shack){
-        for(int x = 0; x < shack.locationOfRectangle().getLength(); x++){
-            for(int y = 0 ; y < shack.locationOfRectangle().getWidth(); y++){
-                for(Location location : mainGame.getTilesOfMap()){
-                    if(location.getyAxis() == shack.locationOfRectangle().getDownRightCorner().getyAxis() + y &&
-                            location.getxAxis() == shack.locationOfRectangle().getTopLeftCorner().getxAxis() + x){
+        for (int x = 0; x < shack.getLocation().getLength(); x++) {
+            for (int y = 0; y < shack.getLocation().getWidth(); y++) {
+                for (Location location : App.getCurrentGame().getMainMap().getTilesOfMap()) {
+                    if (location.getyAxis() == shack.getLocation().getDownRightCorner().getyAxis() - y &&
+                            location.getxAxis() == shack.getLocation().getTopLeftCorner().getxAxis() + x) {
                         location.setTypeOfTile(TypeOfTile.HOUSE);
                     }
                 }
@@ -139,12 +139,13 @@ public class FarmSetUp {
         }
     }
 
+
     public void GreenHouse(GreenHouse greenHouse){
-        for(int x = 0; x < greenHouse.locationOfRectangle().getLength(); x++){
-            for(int y = 0 ; y < greenHouse.locationOfRectangle().getWidth(); y++){
-                for(Location location : mainGame.getTilesOfMap()){
-                    if(location.getyAxis() == greenHouse.locationOfRectangle().getDownRightCorner().getyAxis() + y &&
-                            location.getxAxis() ==greenHouse.locationOfRectangle().getTopLeftCorner().getxAxis() + x){
+        for(int x = 0; x < greenHouse.getLocation().getLength(); x++){
+            for(int y = 0 ; y < greenHouse.getLocation().getWidth(); y++){
+                for(Location location : App.getCurrentGame().getMainMap().getTilesOfMap()){
+                    if(location.getyAxis() == greenHouse.getLocation().getDownRightCorner().getyAxis() - y &&
+                            location.getxAxis() == greenHouse.getLocation().getTopLeftCorner().getxAxis() + x){
                         location.setTypeOfTile(TypeOfTile.GREENHOUSE);
                     }
                 }

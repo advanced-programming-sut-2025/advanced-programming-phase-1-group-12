@@ -1,5 +1,7 @@
 package models.Fundementals;
 
+import java.util.ArrayList;
+
 public class LocationOfRectangle {
     private Location topLeftCorner;
 
@@ -8,6 +10,8 @@ public class LocationOfRectangle {
     private int length;
 
     private int width;
+
+    private ArrayList<Location> locationsInRectangle = new ArrayList<>();
 
 
     public Location getTopLeftCorner() {
@@ -29,8 +33,13 @@ public class LocationOfRectangle {
     public LocationOfRectangle(Location topLeftCorner, Location downRightCorner) {
         this.topLeftCorner = topLeftCorner;
         this.downRightCorner = downRightCorner;
-        this.length =  downRightCorner.getxAxis() - topLeftCorner.getxAxis() ;
-        this.width = - downRightCorner.getyAxis() + topLeftCorner.getyAxis() ;
+        this.length = this.downRightCorner.getxAxis() - this.topLeftCorner.getxAxis() ;
+        this.width =  this.downRightCorner.getyAxis() - this.topLeftCorner.getyAxis() ;
+        for(int i = 0 ; i < this.length ; i++){
+            for(int j = 0 ; j < this.width ; j++){
+                this.locationsInRectangle.add(topLeftCorner);
+            }
+        }
     }
 
     public int getLength() {
@@ -40,4 +49,5 @@ public class LocationOfRectangle {
     public int getWidth() {
         return width;
     }
+
 }

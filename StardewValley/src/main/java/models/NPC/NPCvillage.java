@@ -7,9 +7,10 @@ import java.util.ArrayList;
 
 public class NPCvillage implements Place {
     ArrayList<NPC> NPCs = new ArrayList<>();
+    LocationOfRectangle locationOfRectangle;
 
     @Override
-    public LocationOfRectangle locationOfRectangle() {
-        return null;
+    public LocationOfRectangle getLocation() {
+        return this.locationOfRectangle;
     }
 }

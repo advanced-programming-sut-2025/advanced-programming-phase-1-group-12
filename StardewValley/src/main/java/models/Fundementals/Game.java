@@ -8,27 +8,18 @@ import models.RelatedToUser.User;
 import models.map;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Game {
     private Player currentPlayer = null;
     private Date date;
-    private Map<User, Integer> score;
+    private Map<User, Integer> score = new HashMap<>();
     private int gameId;
-    private map mainMap;
-    private Map<Farm, Player> userAndMap;
-    private ArrayList<Player> players;
-    private ArrayList<Farm> farms;
-
-    public Game(ArrayList<Farm> farms) {
-        this.mainMap = new map();
-        this.farms = farms;
-        this.date = new Date();
-    }
-
-    public ArrayList<Player> getPlayers() {
-        return players;
-    }
+    private map mainMap = new map();
+    Map<Farm, Player> userAndMap = new HashMap<>();
+    private ArrayList<Player> players = new ArrayList<>();
+    private static ArrayList<Farm> farms = new ArrayList<>();
 
     public Player getCurrentPlayer() {
         return currentPlayer;
@@ -58,19 +49,41 @@ public class Game {
         this.userAndMap = userAndMap;
     }
 
-    public Location[] getTilesOfMap() {
-        return null;
-    }
+    public Location[] getTilesOfMap() {return null;}
 
-    public Date getDate() {
+    public Date getDate(){
         return this.date;
     }
 
-    public void setFarms(ArrayList<Farm> farms) {
-        this.farms = farms;
+    public void setDate(Date date) {
+        this.date = date;
     }
 
-    public void setPlayer(ArrayList<Player> players) {
+    public Map<User, Integer> getScore() {
+        return score;
+    }
+
+    public void setScore(Map<User, Integer> score) {
+        this.score = score;
+    }
+
+    public void setMainMap(map mainMap) {
+        this.mainMap = mainMap;
+    }
+
+    public ArrayList<Player> getPlayers() {
+        return players;
+    }
+
+    public void setPlayers(ArrayList<Player> players) {
         this.players = players;
+    }
+
+    public static ArrayList<Farm> getFarms() {
+        return farms;
+    }
+
+    public static void setFarms(ArrayList<Farm> farms) {
+        Game.farms = farms;
     }
 }

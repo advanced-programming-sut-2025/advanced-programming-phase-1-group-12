@@ -1,28 +1,22 @@
 package models.MapDetails;
 
-import models.Fundementals.Location;
 import models.Fundementals.LocationOfRectangle;
 import models.Place.Place;
 
 public class Shack implements Place {
     LocationOfRectangle shackLocation;
 
-    public Shack(LocationOfRectangle shackLocation) {
-        this.shackLocation = shackLocation;
+    public Shack(LocationOfRectangle quarryLocation){
+        this.shackLocation = quarryLocation;
     }
 
-
-    public LocationOfRectangle getShackLocation() {
-        return shackLocation;
-    }
-
-    public void setShackLocation(LocationOfRectangle shackLocation) {
-        this.shackLocation = shackLocation;
+    public void setShackLocation(LocationOfRectangle quarryLocation) {
+        this.shackLocation = quarryLocation;
     }
 
     @Override
-    public LocationOfRectangle locationOfRectangle() {
-        return null;
+    public LocationOfRectangle getLocation() {
+        return this.shackLocation;
     }
 
 }

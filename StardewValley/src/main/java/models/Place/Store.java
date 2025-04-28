@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class Store implements Place {
 
-    private LocationOfRectangle shackLocation;
+    private LocationOfRectangle locationOfRectangle;
 
     private String owner;
 
@@ -20,12 +20,12 @@ public class Store implements Place {
 
     private ArrayList<StoreProducts> storeProducts;
 
-    public LocationOfRectangle getShackLocation() {
-        return shackLocation;
+    public LocationOfRectangle getLocationOfRectangle() {
+        return locationOfRectangle;
     }
 
-    public void setShackLocation(LocationOfRectangle shackLocation) {
-        this.shackLocation = shackLocation;
+    public void setLocationOfRectangle(LocationOfRectangle locationOfRectangle) {
+        this.locationOfRectangle = locationOfRectangle;
     }
 
     public String getOwner() {
@@ -68,8 +68,9 @@ public class Store implements Place {
         this.storeProducts = storeProducts;
     }
 
+
     @Override
-    public LocationOfRectangle locationOfRectangle() {
-        return null;
+    public LocationOfRectangle getLocation() {
+        return this.locationOfRectangle;
     }
 }

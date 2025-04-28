@@ -11,6 +11,7 @@ public enum TypeOfTile {
     STONE('S'),
     QUARRY('Q'),
     HOUSE('H'),
+    GROUND('.'),
 
     //this is used for seeing if we can buy an animal
     COOP('C'),

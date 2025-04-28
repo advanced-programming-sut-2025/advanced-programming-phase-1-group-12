@@ -3,7 +3,7 @@ package models.Animal;
 import models.Fundementals.Location;
 import models.enums.Animal;
 
-public class FarmAnimals {
+public class FarmAnimals implements Animals{
     //Animal enum with its information:
     private Animal animal;
 
@@ -11,6 +11,8 @@ public class FarmAnimals {
 
     // handle it in tile type
     private Location home;
+
+    private String name;
 
     private Location position;
 
@@ -34,4 +36,7 @@ public class FarmAnimals {
     public Location getPosition() {return position;}
 
     public void setPosition(Location position) {this.position = position;}
+
+
+    public String getName() {return name;}
 }

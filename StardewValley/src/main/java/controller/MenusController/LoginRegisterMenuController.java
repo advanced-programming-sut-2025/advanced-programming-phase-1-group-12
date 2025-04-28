@@ -73,8 +73,6 @@ public class LoginRegisterMenuController implements MenuController {
         boolean isFemale = !gender.equals("male");
         User newUser = new User(new ArrayList<>(), username, nickname, password, email, "",
                 "", isFemale);
-        saveUser(newUser, username +".json");
-        App.getUsers().put(username, newUser);
         App.setLoggedInUser(newUser);
 
         return new Result(true, "User registered successfully");
@@ -99,7 +97,7 @@ public class LoginRegisterMenuController implements MenuController {
             user.setQuestionForSecurity(question);
             user.setAnswerOfQuestionForSecurity(answer);
             App.setLoggedInUser(user);
-            App.getUsers().clear();
+            saveUser(user, user.getUserName() +".json");
             App.getUsers().put(user.getUserName(), user);
 
             try (FileWriter writer = new FileWriter(App.getLoggedInUser().getUserName() + ".json")) {
@@ -109,6 +107,7 @@ public class LoginRegisterMenuController implements MenuController {
             e.printStackTrace();
             return new Result(false, "error during file operation");
         }
+
         return new Result(true, "You have selected " + answer + " for " + question + ".");
     }
 

@@ -4,7 +4,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public enum GameMenuCommands implements Commands {
-    PLAY("^\\s*game new -u\\s+([\\w-]+)(\\s+([\\w-]+))?(\\s+([\\w-]+))?\\s*$"),
+    PLAY("^\\s*game new -u ([\\w-]+)(?: ([\\w-]+))?(?: ([\\w-]+))?\\s*$"),
+    PRINT("^print map -l (?<X>.*), (?<Y>.*) -s (?<size>.*)$"),
     SEASON("^season$"),
     TIME("^time$"),
     DATE("^date$"),

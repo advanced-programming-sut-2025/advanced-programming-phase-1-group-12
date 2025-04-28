@@ -11,10 +11,10 @@ public class Lake implements Place {
           this.lakeLocation = lakeLocation;
      }
 
+
+
      @Override
-     public LocationOfRectangle locationOfRectangle() {
-          return null;
+     public LocationOfRectangle getLocation() {
+          return this.lakeLocation;
      }
-
-
 }

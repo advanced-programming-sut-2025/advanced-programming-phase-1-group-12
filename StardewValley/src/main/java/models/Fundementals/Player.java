@@ -16,8 +16,6 @@ public class Player {
 
     private Location userLocation;
 
-    private Shack shack;
-
     private map map;
 
     private boolean isMarried;
@@ -37,12 +35,11 @@ public class Player {
     public void collapse() {
     }
 
-    public Player(User user, Location userLocation, Shack shack, map map, boolean isMarried, Energy energy,
+    public Player(User user, Location userLocation, map map, boolean isMarried, Energy energy,
                   Refrigrator refrigrator, ArrayList<Ability> abilitis, ArrayList<RelationShip> relationShips,
                   ArrayList<RelationShip.Trade> trade, Farm ownedFarm) {
         this.user = user;
         this.userLocation = userLocation;
-        this.shack = shack;
         this.map = map;
         this.isMarried = isMarried;
         this.energy = energy;
@@ -61,12 +58,11 @@ public class Player {
         return ownedFarm;
     }
 
-    public void setOwnedFarm(Farm ownedFarm) {
-        this.ownedFarm = ownedFarm;
-    }
-
     public Location getUserLocation() {
         return userLocation;
     }
 
+    public void setOwnedFarm(Farm farm) {
+        this.ownedFarm = farm;
+    }
 }
