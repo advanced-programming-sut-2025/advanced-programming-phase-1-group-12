@@ -106,7 +106,7 @@ public class FarmSetUp {
                 for(Location location : App.getCurrentGame().getMainMap().getTilesOfMap()){
                     if(location.getyAxis() == lake.getLocation().getDownRightCorner().getyAxis() - y &&
                             location.getxAxis() == lake.getLocation().getTopLeftCorner().getxAxis() + x){
-                       location.setTypeOfTile(TypeOfTile.LAKE);
+                        location.setTypeOfTile(TypeOfTile.LAKE);
                     }
                 }
             }

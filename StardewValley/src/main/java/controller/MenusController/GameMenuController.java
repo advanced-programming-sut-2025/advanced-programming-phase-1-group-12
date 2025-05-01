@@ -148,9 +148,10 @@ public class GameMenuController implements MenuController {
                 char tileType = location.getTypeOfTile().getNameOfMap();
                 String bgColor = getBackgroundColorForTile(location.getTypeOfTile());
 
-                String contentChar = tileType + "";
+                char contentChar = tileType;
                 if (location.getObjectInTile() instanceof Player) {
-                    contentChar = "u";
+                    Farm farm = getFarmOfThisLocation(location);
+                    contentChar = farm.getOwner().getUser().getUserName().charAt(0);
                     bgColor = "\u001B[41m";
                 }
 
@@ -166,6 +167,18 @@ public class GameMenuController implements MenuController {
             }
             System.out.println();
         }
+    }
+
+    private Farm getFarmOfThisLocation(Location location) {
+        for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
+            if (location.getxAxis() >= farm.getLocation().getTopLeftCorner().getxAxis() &&
+                    location.getxAxis() <= farm.getLocation().getDownRightCorner().getxAxis() &&
+                    location.getyAxis() >= farm.getLocation().getTopLeftCorner().getyAxis() &&
+                    location.getyAxis() <= farm.getLocation().getDownRightCorner().getyAxis()) {
+                return farm;
+            }
+        }
+        return null;
     }
 
     private String getBackgroundColorForTile(TypeOfTile type) {
@@ -285,6 +298,69 @@ public class GameMenuController implements MenuController {
                 e.printStackTrace();
             }
         }
+    }
+
+    public Result walkPlayer(String x, String y) {
+        Location newLocation = App.getCurrentGame().getMainMap().findLocation(Integer.parseInt(x), Integer.parseInt(y));
+        if(DFS(App.getCurrentGame().getCurrentPlayer().getUserLocation(), newLocation)){
+            App.getCurrentGame().getCurrentPlayer().setUserLocation(newLocation);
+            App.getCurrentGame().getCurrentPlayer().getUserLocation().setObjectInTile(null);
+            App.getCurrentGame().getMainMap().findLocation(Integer.parseInt(x), Integer.parseInt(y)).setObjectInTile(App.getCurrentGame().getCurrentPlayer());
+            return new Result(true, App.getCurrentGame().getCurrentPlayer().getUser().getUserName() + " move to new location " + x + " "+ y);
+        }
+        return new Result(false, "it is not possible to move to new location " + x + " " + y);
+    }
+
+    private boolean DFS(Location userLocation, Location newLocation) {
+        int maxX = 200;
+        int maxY = 200;
+        boolean[][] visited = new boolean[maxX][maxY];
+
+        Farm currentFarm = App.getCurrentGame().getCurrentPlayer().getOwnedFarm();
+
+        return dfsHelper(userLocation.getxAxis(), userLocation.getyAxis(),
+                newLocation.getxAxis(), newLocation.getyAxis(),
+                visited, currentFarm);
+    }
+
+    private boolean dfsHelper(int x, int y, int targetX, int targetY, boolean[][] visited, Farm currentFarm) {
+        if (x < 0 || y < 0 || x >= visited.length || y >= visited[0].length) return false;
+        if (visited[x][y]) return false;
+
+        Location loc = App.getCurrentGame().getMainMap().findLocation(x, y);
+
+        // Must be GROUND
+        if (loc.getTypeOfTile() != TypeOfTile.GROUND) return false;
+
+        // Can't enter other farms
+        if (!isInPlayerFarm(loc, currentFarm)) return false;
+
+        // Check if we reached the destination
+        if (x == targetX && y == targetY) return true;
+
+        visited[x][y] = true;
+
+        // Explore neighbors: up, down, left, right
+        return dfsHelper(x + 1, y, targetX, targetY, visited, currentFarm) ||
+                dfsHelper(x - 1, y, targetX, targetY, visited, currentFarm) ||
+                dfsHelper(x, y + 1, targetX, targetY, visited, currentFarm) ||
+                dfsHelper(x, y - 1, targetX, targetY, visited, currentFarm);
+    }
+
+    // Check if a tile is in the current player's farm
+    private boolean isInPlayerFarm(Location loc, Farm farm) {
+        int x = loc.getxAxis();
+        int y = loc.getyAxis();
+        return x >= farm.getLocation().getTopLeftCorner().getxAxis() &&
+                x <= farm.getLocation().getDownRightCorner().getxAxis() &&
+                y >= farm.getLocation().getTopLeftCorner().getyAxis() &&
+                y <= farm.getLocation().getDownRightCorner().getyAxis();
+    }
+
+
+    public Result showLocation() {
+        return new Result(true, App.getCurrentGame().getCurrentPlayer().getUserLocation().getxAxis() +
+                " " + App.getCurrentGame().getCurrentPlayer().getUserLocation().getyAxis());
     }
 }
 

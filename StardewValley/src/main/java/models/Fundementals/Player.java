@@ -1,9 +1,10 @@
 package models.Fundementals;
 
-import models.BackPack;
 import models.MapDetails.Shack;
+import models.Place.Farm;
 import models.Refrigrator;
 import models.RelatedToUser.Ability;
+import models.RelatedToUser.Energy;
 import models.RelatedToUser.User;
 import models.RelationShip;
 import models.map;
@@ -12,14 +13,15 @@ import java.util.ArrayList;
 
 public class Player {
     private User user;
+
     private Location userLocation;
-    private Shack shack;
+
     private map map;
+
     private boolean isMarried;
-    private int energy;
-    private boolean isEnergyUnlimited;
-    private boolean hasCollapsed;
-    private BackPack backPack;
+
+    private Energy energy;
+
     public Refrigrator Refrigrator = new Refrigrator();
 
     private ArrayList<Ability> abilitis = new ArrayList<Ability>();
@@ -28,56 +30,40 @@ public class Player {
 
     private ArrayList<RelationShip.Trade> trade = new ArrayList<>();
 
-    public Player(User user, Location userLocation, Shack shack, map map, boolean isMarried,
+    private Farm ownedFarm;
+
+    public void collapse() {
+    }
+
+    public Player(User user, Location userLocation, map map, boolean isMarried, Energy energy,
                   Refrigrator refrigrator, ArrayList<Ability> abilitis, ArrayList<RelationShip> relationShips,
-                  ArrayList<RelationShip.Trade> trade) {
+                  ArrayList<RelationShip.Trade> trade, Farm ownedFarm) {
         this.user = user;
         this.userLocation = userLocation;
-        this.shack = shack;
         this.map = map;
         this.isMarried = isMarried;
+        this.energy = energy;
         Refrigrator = refrigrator;
         this.abilitis = abilitis;
         this.relationShips = relationShips;
         this.trade = trade;
-        this.energy = 200;
-        this.isEnergyUnlimited = false;
-        this.hasCollapsed = false;
-        this.backPack = null;
+        this.ownedFarm = ownedFarm;
     }
 
     public User getUser() {
         return user;
     }
 
-    public void setEnergy(int amount){
-        this.energy = amount;
+    public Farm getOwnedFarm() {
+        return ownedFarm;
     }
 
-    public void increaseEnergy(int amount){
-        if(energy + amount > 200 && !isEnergyUnlimited){
-            energy = 200;
-        }else {
-            energy += amount;
-        }
+    public Location getUserLocation() {
+        return userLocation;
     }
 
-    public int getEnergy() {
-        return energy;
-    }
-
-    public void setUnlimited(){
-        this.isEnergyUnlimited = true;
-    }
-
-    public void collapse(){
-        if(energy == 0){
-            this.hasCollapsed = true;
-        }
-    }
-
-    public BackPack getBackPack() {
-        return backPack;
+    public void setOwnedFarm(Farm farm) {
+        this.ownedFarm = farm;
     }
 
     public ArrayList<Ability> getAbilitis() {

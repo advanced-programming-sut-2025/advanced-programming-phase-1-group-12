@@ -30,7 +30,7 @@ public class MapSetUp {
 
         for (int i = 0; i < 4; i++) {
             Location topLeft = new Location(startX, startY);
-            Location downRight = new Location(startX + farmWidth , startY + farmHeight );
+            Location downRight = new Location(startX + farmWidth , startY + farmHeight);
             LocationOfRectangle farmRectangle = new LocationOfRectangle(topLeft, downRight);
 
             Farm newFarm = new Farm(farmRectangle);
