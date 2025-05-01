@@ -23,7 +23,7 @@ public class Farm implements Place {
 
     public Farm(LocationOfRectangle farmLocation) {
         this.farmLocation = farmLocation;
-        int sectionSize = 4; // Size of each structure block (4*4)
+        int sectionSize = 4;
 
         // Top-Left Lake
         Location lakeTopLeftCorner = farmLocation.getTopLeftCorner();
@@ -89,10 +89,6 @@ public class Farm implements Place {
         return farmLocation;
     }
 
-    public void setFarmLocation(LocationOfRectangle farmLocation) {
-        this.farmLocation = farmLocation;
-    }
-
     public GreenHouse getGreenHouse() {
         return greenHouse;
     }
@@ -129,8 +125,8 @@ public class Farm implements Place {
         this.lake2 = lake2;
     }
 
-    public LocationOfRectangle locationOfRectangle() {
-        return null;
+    public void setQuarry(Quarry quarry) {
+        this.quarry = quarry;
     }
 
     public void setOwner(Player player) {

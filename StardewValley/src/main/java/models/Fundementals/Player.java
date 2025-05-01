@@ -65,4 +65,68 @@ public class Player {
     public void setOwnedFarm(Farm farm) {
         this.ownedFarm = farm;
     }
+
+    public ArrayList<Ability> getAbilitis() {
+        return abilitis;
+    }
+
+    public ArrayList<RelationShip.Trade> getTrade() {
+        return trade;
+    }
+
+    public boolean isMarried() {
+        return isMarried;
+    }
+
+    public map getMap() {
+        return map;
+    }
+
+    public Energy getEnergy() {
+        return energy;
+    }
+
+    public ArrayList<RelationShip> getRelationShips() {
+        return relationShips;
+    }
+
+    public Refrigrator getRefrigrator() {
+        return Refrigrator;
+    }
+
+    public void setAbilitis(ArrayList<Ability> abilitis) {
+        this.abilitis = abilitis;
+    }
+
+    public void setEnergy(Energy energy) {
+        this.energy = energy;
+    }
+
+    public void setMap(map map) {
+        this.map = map;
+    }
+
+    public void setMarried(boolean married) {
+        isMarried = married;
+    }
+
+    public void setRefrigrator(Refrigrator refrigrator) {
+        Refrigrator = refrigrator;
+    }
+
+    public void setRelationShips(ArrayList<RelationShip> relationShips) {
+        this.relationShips = relationShips;
+    }
+
+    public void setTrade(ArrayList<RelationShip.Trade> trade) {
+        this.trade = trade;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setUserLocation(Location userLocation) {
+        this.userLocation = userLocation;
+    }
 }
