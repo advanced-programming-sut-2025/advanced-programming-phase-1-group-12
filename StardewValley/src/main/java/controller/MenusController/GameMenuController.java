@@ -238,5 +238,27 @@ public class GameMenuController implements MenuController {
         App.getCurrentGame().getCurrentPlayer().setUnlimited();
         return new Result(true, "Energy unlimited!");
     }
+
+    public Result showInventory(){
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        BackPack backPack = player.getBackPack();
+        StringBuilder result = new StringBuilder("Inventory items: \n");
+        for(Tools tools : backPack.getTools().keySet()){
+            result.append(tools.getName());
+        }
+        return new Result(true, result.toString());
+    }
+
+    public Result trashItem(String name, String amount) {
+        BackPack backPack = App.getCurrentGame().getCurrentPlayer().getBackPack();
+        if(amount == null){
+            backPack.trashAll(name);
+        }
+        else{
+            int intAmount = Integer.parseInt(amount);
+            backPack.trash(name, intAmount);
+        }
+        return new Result(true, "Trashed item successfully!");
+    }
 }
 

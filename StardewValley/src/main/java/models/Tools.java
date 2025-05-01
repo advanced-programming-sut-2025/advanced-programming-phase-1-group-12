@@ -13,6 +13,9 @@ public class Tools {
         this.name = type.name();
         this.level = 0;
     }
+    public String getName() {
+        return name;
+    }
     public ToolTypes getType() {
         return type;
     }

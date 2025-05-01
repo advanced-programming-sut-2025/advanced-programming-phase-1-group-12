@@ -1,5 +1,6 @@
 package models.Fundementals;
 
+import models.BackPack;
 import models.MapDetails.Shack;
 import models.Refrigrator;
 import models.RelatedToUser.Ability;
@@ -16,8 +17,9 @@ public class Player {
     private map map;
     private boolean isMarried;
     private int energy;
-    private boolean isEnergyUmlimited;
+    private boolean isEnergyUnlimited;
     private boolean hasCollapsed;
+    private BackPack backPack;
     public Refrigrator Refrigrator = new Refrigrator();
 
     private ArrayList<Ability> abilitis = new ArrayList<Ability>();
@@ -39,8 +41,9 @@ public class Player {
         this.relationShips = relationShips;
         this.trade = trade;
         this.energy = 200;
-        this.isEnergyUmlimited = false;
+        this.isEnergyUnlimited = false;
         this.hasCollapsed = false;
+        this.backPack = null;
     }
 
     public User getUser() {
@@ -52,7 +55,7 @@ public class Player {
     }
 
     public void increaseEnergy(int amount){
-        if(energy + amount > 200 && !isEnergyUmlimited){
+        if(energy + amount > 200 && !isEnergyUnlimited){
             energy = 200;
         }else {
             energy += amount;
@@ -64,12 +67,16 @@ public class Player {
     }
 
     public void setUnlimited(){
-        this.isEnergyUmlimited = true;
+        this.isEnergyUnlimited = true;
     }
 
     public void collapse(){
         if(energy == 0){
             this.hasCollapsed = true;
         }
+    }
+
+    public BackPack getBackPack() {
+        return backPack;
     }
 }
