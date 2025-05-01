@@ -4,26 +4,24 @@ import models.enums.ToolEnums.BackPackTypes;
 
 import javax.tools.Tool;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BackPack {
-    private List<Tools> tools;
+    private Map<Tools, Integer> tools;
     private BackPackTypes type;
-    private int maxAmount;
     public BackPack(BackPackTypes type) {
-        this.tools = new ArrayList<>();
+        this.tools = new HashMap<>();
         this.type = type;
     }
-    public void setMaxAmount(int maxAmount) {
-        this.maxAmount = maxAmount;
-    }
 
-    public List<Tools> getTools() {
-        return tools;
-    }
-
-    public void setTools(List<Tools> tools) {
+    public void setTools(Map<Tools, Integer> tools) {
         this.tools = tools;
+    }
+
+    public Map<Tools, Integer> getTools() {
+        return tools;
     }
 
     public BackPackTypes getType() {
@@ -34,7 +32,44 @@ public class BackPack {
         this.type = type;
     }
 
-    public int getMaxAmount() {
-        return maxAmount;
+    public void decreaseToolQuantity(String toolName, int amount) {
+        Tools toolToUpdate = null;
+        for (Tools tool : tools.keySet()) {
+            if (tool.getName().equals(toolName)) {
+                toolToUpdate = tool;
+                break;
+            }
+        }
+
+        if (toolToUpdate != null) {
+            int currentQuantity = tools.get(toolToUpdate);
+            if (currentQuantity > amount) {
+                tools.put(toolToUpdate, currentQuantity - amount);
+            } else {
+                tools.remove(toolToUpdate);
+            }
+        } else {
+            System.out.println("Tool '" + toolName + "' not found in inventory.");
+        }
     }
+
+
+    public void trash(String name, int amount) {
+        decreaseToolQuantity(name,amount);
+    }
+
+    public void trashAll(String toolName){
+        Tools toolToUpdate = null;
+        for (Tools tool : tools.keySet()) {
+            if (tool.getName().equals(toolName)) {
+                toolToUpdate = tool;
+                break;
+            }
+        }
+
+        if (toolToUpdate != null) {
+            tools.remove(toolToUpdate);
+        }
+    }
+
 }

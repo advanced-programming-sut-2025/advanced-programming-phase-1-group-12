@@ -27,7 +27,8 @@ public class GameMenu extends AppMenu {
 
              controller.Play(scanner, players);
         } else if ((matcher = GameMenuCommands.PRINT.getMather(input)) != null) {
-            controller.printMap(Integer.parseInt(matcher.group("X")),Integer.parseInt(matcher.group("Y")), Integer.parseInt(matcher.group("size")));
+            controller.printMap(Integer.parseInt(matcher.group("X")),Integer.parseInt(matcher.group("Y")),
+                    Integer.parseInt(matcher.group("size")));
         } else if ((matcher = GameMenuCommands.TIME.getMather(input))!= null) {
             showCurrentTime();
         } else if ((matcher = GameMenuCommands.DATE.getMather(input))!= null) {
@@ -48,6 +49,16 @@ public class GameMenu extends AppMenu {
             weatherForecast();
         } else if ((matcher = GameMenuCommands.CHEAT_WEATHER_SET.getMather(input))!= null) {
             cheatWeather(matcher.group("type"));
+        } else if ((matcher = GameMenuCommands.ENERGY_SHOW.getMather(input))!= null) {
+            showEnergy();
+        } else if ((matcher = GameMenuCommands.ENERGY_SET.getMather(input))!=null) {
+            setEnergy(matcher.group("value"));
+        } else if ((matcher = GameMenuCommands.ENERGY_UNLIMITED.getMather(input))!=null) {
+            setEnergyUnlimited();
+        }else if ((matcher = GameMenuCommands.INVENTORY_SHOW.getMather(input))!= null) {
+            showInventory();
+        } else if ((matcher = GameMenuCommands.INVENTORY_TRASH.getMather(input))!= null) {
+            trashItem(matcher.group("item"),matcher.group("number"));
         }
     }
     public void showCurrentTime(){
@@ -91,6 +102,31 @@ public class GameMenu extends AppMenu {
 
     public void cheatWeather(String type){
         Result result = controller.cheatWeather(type);
+        System.out.println(result.getMessage());
+    }
+
+    public void showEnergy(){
+        Result result = controller.showEnergy();
+        System.out.println(result);
+    }
+
+    public void setEnergy(String amount){
+        Result result = controller.setEnergy(amount);
+        System.out.println(result.getMessage());
+    }
+
+    public void setEnergyUnlimited(){
+        Result result = controller.setUnlimited();
+        System.out.println(result.getMessage());
+    }
+
+    public void showInventory(){
+        Result result = controller.showInventory();
+        System.out.println(result.getMessage());
+    }
+
+    public void trashItem(String name, String amount){
+        Result result = controller.trashItem(name, amount);
         System.out.println(result.getMessage());
     }
 }
