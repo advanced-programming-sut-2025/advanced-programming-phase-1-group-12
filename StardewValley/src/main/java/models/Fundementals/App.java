@@ -34,6 +34,7 @@ public class App {
         return App.getCurrentGame().getCurrentPlayer();
     }
 
+
     public ArrayList<Game> getAllGames() {
         return allGames;
     }

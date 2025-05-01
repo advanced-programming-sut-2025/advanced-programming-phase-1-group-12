@@ -146,7 +146,7 @@ public class GameMenuController implements MenuController {
 
         ArrayList<Integer> numberOfFarm = new ArrayList<>();
         ArrayList<Player> players = new ArrayList<>();
-        players.add(App.getCurrentPlayer());
+        players.add(App.getCurrentGame().getCurrentPlayer());
 
         for (String username : usernames) {
             if (username != null) {
@@ -155,8 +155,8 @@ public class GameMenuController implements MenuController {
                     System.out.println("user not found " + username);
                     continue;
                 }
-                Player newPlayer = new Player(user, null, null, null, false,
-                        null, null, new ArrayList<>(), new ArrayList<>(), null);
+                Player newPlayer = new Player(user, null, null,  null,
+                        false, null, new ArrayList<>(), new ArrayList<>(), null);
                 players.add(newPlayer);
 
                 while (true) {
@@ -221,6 +221,22 @@ public class GameMenuController implements MenuController {
         Game newGame = new Game(farms);
         App.setCurrentGame(newGame);
         return new Result(true, "New game created successfully!");
+    }
+
+    public Result showEnergy(){
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        return new Result(true, String.format("%d", player.getEnergy()));
+    }
+
+    public Result setEnergy(String energy){
+        int amount = Integer.parseInt(energy);
+        App.getCurrentGame().getCurrentPlayer().setEnergy(amount);
+        return new Result(true, "Energy set successfully!");
+    }
+
+    public Result setUnlimited(){
+        App.getCurrentGame().getCurrentPlayer().setUnlimited();
+        return new Result(true, "Energy unlimited!");
     }
 }
 

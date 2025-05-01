@@ -50,6 +50,10 @@ public class GameMenu extends AppMenu {
             cheatWeather(matcher.group("type"));
         } else if ((matcher = GameMenuCommands.ENERGY_SHOW.getMather(input))!= null) {
             showEnergy();
+        } else if ((matcher = GameMenuCommands.ENERGY_SET.getMather(input))!=null) {
+            setEnergy(matcher.group("value"));
+        } else if ((matcher = GameMenuCommands.ENERGY_UNLIMITED.getMather(input))!=null) {
+            setEnergyUnlimited();
         }
     }
     public void showCurrentTime(){
@@ -101,7 +105,13 @@ public class GameMenu extends AppMenu {
         System.out.println(result);
     }
 
-    public void setEnergy(int amount){
-        App.getCurrentPlayer().setEnergy(amount);
+    public void setEnergy(String amount){
+        Result result = controller.setEnergy(amount);
+        System.out.println(result.getMessage());
+    }
+
+    public void setEnergyUnlimited(){
+        Result result = controller.setUnlimited();
+        System.out.println(result.getMessage());
     }
 }
