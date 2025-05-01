@@ -28,6 +28,10 @@ public class GameMenu extends AppMenu {
              controller.Play(scanner, players);
         } else if ((matcher = GameMenuCommands.PRINT.getMather(input)) != null) {
             controller.printMap(Integer.parseInt(matcher.group("X")),Integer.parseInt(matcher.group("Y")), Integer.parseInt(matcher.group("size")));
+        } else if ((matcher = GameMenuCommands.WALK.getMather(input)) != null) {
+            System.out.println(controller.walkPlayer(matcher.group("x"), matcher.group("y")));
+        } else if ((matcher = GameMenuCommands.SHOW_POSITION.getMather(input)) != null) {
+            System.out.println(controller.showLocation());
         } else if ((matcher = GameMenuCommands.TIME.getMather(input))!= null) {
             showCurrentTime();
         } else if ((matcher = GameMenuCommands.DATE.getMather(input))!= null) {

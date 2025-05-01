@@ -6,6 +6,8 @@ import java.util.regex.Pattern;
 public enum GameMenuCommands implements Commands {
     PLAY("^\\s*game new -u ([\\w-]+)(?: ([\\w-]+))?(?: ([\\w-]+))?\\s*$"),
     PRINT("^print map -l (?<X>.*), (?<Y>.*) -s (?<size>.*)$"),
+    SHOW_POSITION("^show location of current player$"),
+    WALK("^walk -l (?<x>.*), (?<y>.*)$"),
     SEASON("^season$"),
     TIME("^time$"),
     DATE("^date$"),
