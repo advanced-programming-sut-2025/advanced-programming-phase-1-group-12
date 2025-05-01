@@ -200,6 +200,7 @@ public class GameMenuController implements MenuController {
                 break;
             }
         }
+        System.out.println("kkkkkkk");
 
         Map<Farm, Player> farmOwnership = getFarmPlayerMap(players, chosenFarmNumbers);
 
