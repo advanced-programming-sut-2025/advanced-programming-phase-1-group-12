@@ -73,8 +73,6 @@ public class LoginRegisterMenuController implements MenuController {
         boolean isFemale = !gender.equals("male");
         User newUser = new User(new ArrayList<>(), username, nickname, password, email, "",
                 "", isFemale);
-        saveUser(newUser, username +".json");
-        App.getUsers().put(username, newUser);
         App.setLoggedInUser(newUser);
 
         return new Result(true, "User registered successfully");
@@ -88,7 +86,7 @@ public class LoginRegisterMenuController implements MenuController {
             return new Result(false, "answer and answer confirm don't match");
         }
 
-        File file = new File(App.getCurrentPlayer().getUser().getUserName() + ".json");
+        File file = new File(App.getLoggedInUser().getUserName() + ".json");
         if (!file.exists()) {
             return new Result(false, "error opening file");
         }
@@ -99,16 +97,17 @@ public class LoginRegisterMenuController implements MenuController {
             user.setQuestionForSecurity(question);
             user.setAnswerOfQuestionForSecurity(answer);
             App.setLoggedInUser(user);
-            App.getUsers().clear();
+            saveUser(user, user.getUserName() +".json");
             App.getUsers().put(user.getUserName(), user);
 
-            try (FileWriter writer = new FileWriter(App.getCurrentPlayer().getUser().getUserName() + ".json")) {
+            try (FileWriter writer = new FileWriter(App.getLoggedInUser().getUserName() + ".json")) {
                 gson.toJson(user, writer);
             }
         } catch (IOException e) {
             e.printStackTrace();
             return new Result(false, "error during file operation");
         }
+
         return new Result(true, "You have selected " + answer + " for " + question + ".");
     }
 
@@ -196,7 +195,7 @@ public class LoginRegisterMenuController implements MenuController {
     }
     public Result answerQuestion(Matcher matcher) {
         String answer = matcher.group("answer");
-        if(answer.equals(App.getCurrentPlayer().getUser().getAnswerOfQuestionForSecurity())){
+        if(answer.equals(App.getCurrentPlayerLazy().getUser().getAnswerOfQuestionForSecurity())){
             return new Result(true, "correct answer. now enter your new password like this : i answered so my new password:"
                     );
         }
@@ -209,12 +208,12 @@ public class LoginRegisterMenuController implements MenuController {
 
             System.out.println("this will be your password : " + newPass);
             App.getLoggedInUser().setPassword(newPass);  // باید setter داشته باشی برای password
-            saveUser(App.getCurrentPlayer().getUser(), App.getLoggedInUser().getUserName() + ".json");
+            saveUser(App.getCurrentPlayerLazy().getUser(), App.getLoggedInUser().getUserName() + ".json");
             System.out.println("password updated successfully");
             return;
         }
         App.getLoggedInUser().setPassword(newPass);  // باید setter داشته باشی برای password
-        saveUser(App.getCurrentPlayer().getUser(), App.getLoggedInUser().getUserName() + ".json");
+        saveUser(App.getCurrentPlayerLazy().getUser(), App.getLoggedInUser().getUserName() + ".json");
         System.out.println("password updated successfully");
     }
 }

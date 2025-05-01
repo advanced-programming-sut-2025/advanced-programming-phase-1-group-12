@@ -1,14 +1,17 @@
 package models.Place;
 
+import models.Animal.FarmAnimals;
 import models.Fundementals.Location;
 import models.Fundementals.LocationOfRectangle;
 import models.Fundementals.Player;
 import models.MapDetails.*;
 import models.RelatedToUser.User;
 
+import java.util.ArrayList;
+
 public class Farm implements Place {
 
-    private  LocationOfRectangle farmLocation;
+    private LocationOfRectangle farmLocation;
 
     private Player owner;
     private Lake lake1;
@@ -16,38 +19,73 @@ public class Farm implements Place {
     private GreenHouse greenHouse;
     private Shack shack;
     private Quarry quarry;
+    private ArrayList<FarmAnimals> farmAnimals = new ArrayList<>();
 
-    public Farm(LocationOfRectangle farmLocation, Player owner) {
+    public Farm(LocationOfRectangle farmLocation) {
         this.farmLocation = farmLocation;
-        this.owner = owner;
+        int sectionSize = 4; // Size of each structure block (4*4)
 
-        int sectionSize = 5;
+        // Top-Left Lake
+        Location lakeTopLeftCorner = farmLocation.getTopLeftCorner();
+        Location lakeBottomRightCorner = new Location(
+                lakeTopLeftCorner.getxAxis() + sectionSize ,
+                lakeTopLeftCorner.getyAxis() + sectionSize
+        );
+        this.lake1 = new Lake(new LocationOfRectangle(lakeTopLeftCorner, lakeBottomRightCorner));
+        // Bottom-Left Lake
+        Location bottomLeftCorner = new Location(
+                farmLocation.getTopLeftCorner().getxAxis() ,
+                farmLocation.getDownRightCorner().getyAxis() - sectionSize
+        );
+        Location bottomLeftLakeDownRight = new Location(
+                bottomLeftCorner.getxAxis() + sectionSize ,
+                bottomLeftCorner.getyAxis() + sectionSize
+        );
+        this.lake2 = new Lake(new LocationOfRectangle(bottomLeftCorner, bottomLeftLakeDownRight));
 
-        Location lake2TopLeft = farmLocation.getTopLeftCorner();
-        Location lake2DownRight = new Location(lake2TopLeft.getxAxis() + sectionSize, lake2TopLeft.getyAxis() + sectionSize);
-        this.lake2 = new Lake(new LocationOfRectangle(lake2TopLeft, lake2DownRight));
+        // Top-Right Shack
+        Location topRightCorner = new Location(
+                farmLocation.getDownRightCorner().getxAxis() - sectionSize ,
+                farmLocation.getTopLeftCorner().getyAxis()
+        );
+        Location shackDownRight = new Location(
+                topRightCorner.getxAxis() + sectionSize ,
+                topRightCorner.getyAxis() + sectionSize
+        );
+        this.shack = new Shack(new LocationOfRectangle(topRightCorner, shackDownRight));
 
-        Location lake1DownRight = farmLocation.getDownRightCorner();
-        Location lake1TopLeft = new Location(lake1DownRight.getxAxis() - sectionSize, lake1DownRight.getyAxis() - sectionSize);
-        this.lake1 = new Lake(new LocationOfRectangle(lake1TopLeft, lake1DownRight));
+        // Bottom-Right Greenhouse
+        Location bottomRightCorner = new Location(
+                farmLocation.getDownRightCorner().getxAxis() - sectionSize ,
+                farmLocation.getDownRightCorner().getyAxis() - sectionSize
+        );
+        Location greenhouseTopLeft = new Location(
+                bottomRightCorner.getxAxis(),
+                bottomRightCorner.getyAxis()
+        );
+        Location greenhouseDownRight = new Location(
+                greenhouseTopLeft.getxAxis() + sectionSize ,
+                greenhouseTopLeft.getyAxis() + sectionSize
+        );
+        this.greenHouse = new GreenHouse(new LocationOfRectangle(greenhouseTopLeft, greenhouseDownRight));
 
-        Location greenhouseBottomLeft = new Location(farmLocation.getTopLeftCorner().getxAxis(), farmLocation.getDownRightCorner().getyAxis() - sectionSize);
-        Location greenhouseTopRight = new Location(greenhouseBottomLeft.getxAxis() + sectionSize, greenhouseBottomLeft.getyAxis() + sectionSize);
-        this.greenHouse = new GreenHouse(new LocationOfRectangle(greenhouseBottomLeft, greenhouseTopRight));
-
-        Location shackTopRight = new Location(farmLocation.getDownRightCorner().getxAxis(), farmLocation.getTopLeftCorner().getyAxis());
-        Location shackBottomLeft = new Location(shackTopRight.getxAxis() - sectionSize, shackTopRight.getyAxis() + sectionSize);
-        this.shack = new Shack(new LocationOfRectangle(shackBottomLeft, shackTopRight));
-
+        // Quarry in Center
         int centerX = (farmLocation.getTopLeftCorner().getxAxis() + farmLocation.getDownRightCorner().getxAxis()) / 2;
         int centerY = (farmLocation.getTopLeftCorner().getyAxis() + farmLocation.getDownRightCorner().getyAxis()) / 2;
-        Location quarryTopLeft = new Location(centerX - sectionSize / 2, centerY - sectionSize / 2);
-        Location quarryDownRight = new Location(centerX + sectionSize / 2, centerY + sectionSize / 2);
+
+        Location quarryTopLeft = new Location(
+                centerX - (sectionSize / 2),
+                centerY - (sectionSize / 2)
+        );
+        Location quarryDownRight = new Location(
+                quarryTopLeft.getxAxis() + sectionSize ,
+                quarryTopLeft.getyAxis() + sectionSize
+        );
         this.quarry = new Quarry(new LocationOfRectangle(quarryTopLeft, quarryDownRight));
     }
 
 
-    public LocationOfRectangle getFarmLocation() {
+    public LocationOfRectangle getLocation() {
         return farmLocation;
     }
 
@@ -91,12 +129,19 @@ public class Farm implements Place {
         this.lake2 = lake2;
     }
 
-    @Override
     public LocationOfRectangle locationOfRectangle() {
         return null;
     }
 
     public void setOwner(Player player) {
         this.owner = player;
+    }
+
+    public ArrayList<FarmAnimals> getFarmAnimals() {
+        return farmAnimals;
+    }
+
+    public void setFarmAnimals(ArrayList<FarmAnimals> farmAnimals) {
+        this.farmAnimals = farmAnimals;
     }
 }

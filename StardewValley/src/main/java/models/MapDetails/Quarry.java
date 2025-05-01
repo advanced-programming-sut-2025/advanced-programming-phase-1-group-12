@@ -11,17 +11,13 @@ public class Quarry implements Place {
         this.quarryLocation = quarryLocation;
     }
 
-    public LocationOfRectangle getQuarryLocation() {
-        return quarryLocation;
-    }
-
     public void setQuarryLocation(LocationOfRectangle quarryLocation) {
         this.quarryLocation = quarryLocation;
     }
 
     @Override
-    public LocationOfRectangle locationOfRectangle() {
-        return null;
+    public LocationOfRectangle getLocation() {
+        return this.quarryLocation;
     }
 
 }

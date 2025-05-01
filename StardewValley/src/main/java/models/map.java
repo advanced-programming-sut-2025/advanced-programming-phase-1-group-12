@@ -1,6 +1,7 @@
 package models;
 
 import controller.MapSetUp.FarmSetUp;
+import models.Fundementals.App;
 import models.Fundementals.Location;
 import models.MapDetails.GreenHouse;
 import models.MapDetails.Lake;
@@ -32,7 +33,7 @@ public class map {
     }
 
     public Location findLocation(int x, int y){
-        for(Location location: tilesOfMap){
+        for(Location location: App.getCurrentGame().getMainMap().getTilesOfMap()){
             if(location.getxAxis() == x){
                 if(location.getyAxis() ==y)
                     return location;

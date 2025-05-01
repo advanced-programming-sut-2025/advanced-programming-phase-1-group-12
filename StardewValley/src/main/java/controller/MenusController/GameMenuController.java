@@ -156,7 +156,7 @@ public class GameMenuController implements MenuController {
                     continue;
                 }
                 Player newPlayer = new Player(user, null, null, null, false,
-                        null, new ArrayList<>(), new ArrayList<>(), null);
+                        null, null, new ArrayList<>(), new ArrayList<>(), null);
                 players.add(newPlayer);
 
                 while (true) {
@@ -221,10 +221,6 @@ public class GameMenuController implements MenuController {
         Game newGame = new Game(farms);
         App.setCurrentGame(newGame);
         return new Result(true, "New game created successfully!");
-    }
-
-    public Result showEnergy(){
-        return new Result(true, String.format("%d", App.getCurrentPlayer().getEnergy()));
     }
 }
 

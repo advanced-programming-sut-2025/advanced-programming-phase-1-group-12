@@ -18,9 +18,8 @@ public class GreenHouse implements Place {
         this.greenHouseLocation = greenHouseLocation;
     }
 
-
     @Override
-    public LocationOfRectangle locationOfRectangle() {
-        return null;
+    public LocationOfRectangle getLocation() {
+        return this.greenHouseLocation;
     }
 }
