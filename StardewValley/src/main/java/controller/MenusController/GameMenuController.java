@@ -8,6 +8,7 @@ import models.*;
 import models.enums.*;
 import models.Fundementals.Player;
 import com.google.gson.Gson;
+import models.enums.Types.TypeOfTile;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -138,17 +139,56 @@ public class GameMenuController implements MenuController {
         return new Result(true, App.getCurrentGame().getDate().getWeather().name());
     }
 
-    public void printMap(int x, int y, int size) {
-        for (int X = x; X < x + size; X++) {
-            for (int Y = y; Y < y + size; Y++) {
-                Location currentLocation = App.getCurrentGame().getMainMap().findLocation(X, Y);
-                System.out.print(currentLocation.getTypeOfTile().getNameOfMap() + " ");
-            }
-            System.out.println(); // Move to next line after each row
-        }
-    }
+//    public void printMap(int x, int y, int size) {
+//
+//        for (int X = x; X < x + size; X++) {
+//            for (int Y = y; Y < y + size; Y++) {
+//                Location currentLocation = App.getCurrentGame().getMainMap().findLocation(X, Y);
+//                System.out.print(currentLocation.getTypeOfTile().getNameOfMap() + " ");
+//            }
+//            System.out.println();
+//        }
+//    }
+        public void printMap(int x, int y, int size) {
+            String[][][] tileBlock = new String[size][size][2]; // Each tile becomes 2 lines
 
-    public void Play(Scanner scanner, List<String> usernames) {
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
+                    Location location = App.getCurrentGame().getMainMap().findLocation(x + i, y + j);
+                    char tileType = location.getTypeOfTile().getNameOfMap();
+                    String colorCode = getColorForTile(location.getTypeOfTile());
+
+                    String colored = colorCode + tileType + "\u001B[0m";
+
+                    tileBlock[i][j][0] = colored + " " + colored;
+                    tileBlock[i][j][1] = colored + " " + colored;
+                }
+            }
+
+            for (int row = 0; row < size; row++) {
+                for (int line = 0; line < 2; line++) {
+                    for (int col = 0; col < size; col++) {
+                        System.out.print(tileBlock[row][col][line] + " ");
+                    }
+                    System.out.println();
+                }
+            }
+        }
+        private String getColorForTile(TypeOfTile type) {
+            return switch (type) {
+                case GREENHOUSE -> "\u001B[32m"; // green
+                case GROUND-> "\u001B[34m"; // blue
+                case HOUSE -> "\u001B[37m"; // white/gray
+                case QUARRY -> "\u001B[33m"; // yellow
+                case STONE -> "\u001B[93m"; // light yellow
+                case TREE -> "\u001B[90m";
+                case LAKE -> "\u001B[0m";
+                default -> "\u001B[91m";
+            };
+        }
+
+
+        public void Play(Scanner scanner, List<String> usernames) {
 
         Game newGame = new Game();
         App.setCurrentGame(newGame);
@@ -200,7 +240,6 @@ public class GameMenuController implements MenuController {
                 break;
             }
         }
-        System.out.println("kkkkkkk");
 
         Map<Farm, Player> farmOwnership = getFarmPlayerMap(players, chosenFarmNumbers);
 

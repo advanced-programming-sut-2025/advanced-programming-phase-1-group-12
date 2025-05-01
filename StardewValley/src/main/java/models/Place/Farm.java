@@ -23,8 +23,7 @@ public class Farm implements Place {
 
     public Farm(LocationOfRectangle farmLocation) {
         this.farmLocation = farmLocation;
-
-        int sectionSize = 5; // Size of each structure block (5x5)
+        int sectionSize = 4; // Size of each structure block (4*4)
 
         // Top-Left Lake
         Location lakeTopLeftCorner = farmLocation.getTopLeftCorner();
@@ -33,7 +32,6 @@ public class Farm implements Place {
                 lakeTopLeftCorner.getyAxis() + sectionSize
         );
         this.lake1 = new Lake(new LocationOfRectangle(lakeTopLeftCorner, lakeBottomRightCorner));
-
         // Bottom-Left Lake
         Location bottomLeftCorner = new Location(
                 farmLocation.getTopLeftCorner().getxAxis() ,

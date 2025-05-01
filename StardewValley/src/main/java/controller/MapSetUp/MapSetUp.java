@@ -13,7 +13,6 @@ import java.util.Random;
 public class MapSetUp {
 
     static FarmSetUp newFarmSetUp = new FarmSetUp();
-    static Random rand = new Random();
 
     public static void initializeFarms() {
         for (int i = 0; i < 200; i++) {
@@ -31,7 +30,7 @@ public class MapSetUp {
 
         for (int i = 0; i < 4; i++) {
             Location topLeft = new Location(startX, startY);
-            Location downRight = new Location(startX + farmWidth - 1, startY + farmHeight - 1);
+            Location downRight = new Location(startX + farmWidth , startY + farmHeight );
             LocationOfRectangle farmRectangle = new LocationOfRectangle(topLeft, downRight);
 
             Farm newFarm = new Farm(farmRectangle);
