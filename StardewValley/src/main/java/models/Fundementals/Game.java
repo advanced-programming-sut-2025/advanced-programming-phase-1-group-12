@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class Game {
     private Player currentPlayer = null;
-    private Date date;
+    private Date date = new Date();
     private Map<User, Integer> score = new HashMap<>();
     private int gameId;
     private map mainMap = new map();
