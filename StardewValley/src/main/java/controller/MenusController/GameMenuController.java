@@ -1,6 +1,7 @@
 package controller.MenusController;
 
 import controller.MapSetUp.MapSetUp;
+import models.Date;
 import models.Fundementals.*;
 import models.Place.Farm;
 import models.RelatedToUser.User;
@@ -10,10 +11,7 @@ import models.Fundementals.Player;
 import com.google.gson.Gson;
 import models.enums.Types.TypeOfTile;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 public class GameMenuController implements MenuController {
@@ -325,7 +323,7 @@ public class GameMenuController implements MenuController {
 
         App.getCurrentGame().setCurrentPlayer(players.get(nextIndex));
         int newHour = App.getCurrentGame().getDate().getHour() + 1;
-        App.getCurrentGame().getDate().setHour(newHour)
+        App.getCurrentGame().getDate().setHour(newHour);
 
         return new Result(true, "Turn moved to " + players.get(nextIndex).getUser().getUserName());
     }
@@ -366,6 +364,116 @@ public class GameMenuController implements MenuController {
             backPack.trash(name, intAmount);
         }
         return new Result(true, "Trashed item successfully!");
+    }
+
+    public Result EXIT() {
+        Game game = App.getCurrentGame();
+        Gson gson = new Gson();
+
+        try (FileWriter writer = new FileWriter("game_" + game.getGameId() + "_mainMap.json")) {
+            gson.toJson(game.getMainMap(), writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try (FileWriter writer = new FileWriter("game_" + game.getGameId() + "_date.json")) {
+            gson.toJson(game.getDate(), writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        int index = 0;
+        for (Player player : game.getPlayers()) {
+            try (FileWriter writer = new FileWriter("game_" + game.getGameId() + "_player_" + index + ".json")) {
+                gson.toJson(player, writer);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            Farm farm = player.getOwnedFarm();
+            if (farm != null) {
+                try (FileWriter writer = new FileWriter("game_" + game.getGameId() + "_farm_" + index + ".json")) {
+                    gson.toJson(farm, writer);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            index++;
+        }
+        App.setCurrentMenu(Menu.MainMenu);
+        App.getCurrentGame().setGameId(App.getGameId());
+        int newId = App.getGameId() + 1;
+        App.setGameId(newId);
+        App.getGame().add(App.getCurrentGame());
+        App.setLoggedInUser(null);
+        App.setCurrentGame(null);
+        return new Result(true, "now you are in Main menu");
+    }
+
+    public Result loadGame(int gameId) {
+
+        File gameDir = new File("savedGames/game_" + gameId);
+        if (!gameDir.exists() || !gameDir.isDirectory()) {
+            return new Result(false, "No saved game found with ID: " + gameId);
+        }
+
+        Gson gson = new Gson();
+        try {
+            // Load MainMap
+            File mapFile = new File(gameDir, "mainMap.json");
+            map mainMap = gson.fromJson(new FileReader(mapFile), map.class);
+
+            // Load Game Date
+            File dateFile = new File(gameDir, "date.json");
+            Date date = gson.fromJson(new FileReader(dateFile), Date.class);
+
+            // Load all farms
+            List<Farm> farms = new ArrayList<>();
+            for (int i = 0; i < 4; i++) {
+                File farmFile = new File(gameDir, "farm_" + i + ".json");
+                if (farmFile.exists()) {
+                    Farm farm = gson.fromJson(new FileReader(farmFile), Farm.class);
+                    farms.add(farm);
+                }
+            }
+
+            // Create a new Game
+            Game game = new Game();
+            game.setMainMap(mainMap);
+            game.setDate(date);
+
+            ArrayList<Player> players = new ArrayList<>();
+            Map<Farm, Player> userAndMap = new HashMap<>();
+
+            // Reconstruct Players and Users
+            for (Farm farm : farms) {
+                Player player = farm.getOwner();
+                if (player == null) continue;
+                players.add(player);
+
+                player.setOwnedFarm(farm);
+                player.setUserLocation(mainMap.findLocation(
+                        farm.getLocation().getTopLeftCorner().getxAxis(),
+                        farm.getLocation().getTopLeftCorner().getyAxis()
+                ));
+                mainMap.findLocation(farm.getLocation().getTopLeftCorner().getxAxis(),
+                        farm.getLocation().getTopLeftCorner().getyAxis()).setObjectInTile(player);
+
+                userAndMap.put(farm, player);
+            }
+
+            game.setPlayers(players);
+            game.setUserAndMap(userAndMap);
+            game.setCurrentPlayer(players.getFirst());
+
+            App.setCurrentGame(game);
+
+            return new Result(true, "Game loaded successfully!");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new Result(false, "Failed to load game due to IO error.");
+        }
     }
 }
 

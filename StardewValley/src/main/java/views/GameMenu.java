@@ -27,6 +27,8 @@ public class GameMenu extends AppMenu {
             }
 
             controller.Play(scanner, players);
+        } else if ((matcher = GameMenuCommands.EXIT.getMather(input)) != null) {
+            System.out.println(controller.EXIT());
         } else if ((matcher = GameMenuCommands.PRINT.getMather(input)) != null) {
             controller.printMap(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y")),
                     Integer.parseInt(matcher.group("size")), scanner);

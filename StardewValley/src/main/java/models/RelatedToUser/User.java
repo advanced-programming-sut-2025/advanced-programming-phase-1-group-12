@@ -2,6 +2,7 @@ package models.RelatedToUser;
 
 import models.*;
 import models.Fundementals.Game;
+import models.Fundementals.Location;
 
 import java.util.ArrayList;
 
@@ -81,4 +82,5 @@ public class User {
     public ArrayList<Game> getGames() {
         return games;
     }
+
 }

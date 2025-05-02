@@ -15,6 +15,7 @@ public class App {
     private static User loggedInUser = null;
     private static models.enums.Menu currentMenu = Menu.LoginRegisterMenu;
     private static ArrayList<Game> game = new ArrayList<>();
+    private static int gameId = 1;
     private static Game currentGame = null;
     private static Date fullTime;
     private static ArrayList<String> securityQuestions = new ArrayList<>(
@@ -87,6 +88,25 @@ public class App {
         return securityQuestions;
     }
 
+    public static int getGameId() {
+        return gameId;
+    }
+
+    public static void setGame(ArrayList<Game> game) {
+        App.game = game;
+    }
+
+    public static void setSecurityQuestions(ArrayList<String> securityQuestions) {
+        App.securityQuestions = securityQuestions;
+    }
+
+    public static void setGameId(int gameId) {
+        App.gameId = gameId;
+    }
+
+    public static void setUsers(Map<String, User> users) {
+        App.users = users;
+    }
 
     //useful functions
     public static boolean isLocationInPlace(Location location, LocationOfRectangle place){

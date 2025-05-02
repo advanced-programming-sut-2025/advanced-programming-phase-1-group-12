@@ -148,8 +148,6 @@ public class LoginRegisterMenuController implements MenuController {
 
     public void saveSecureHashAlgorithm(String inout){}
 
-    // public User checkUserName(String userName){}
-
     public void saveUser(User user ,String fileName){
         try (FileWriter writer = new FileWriter(fileName)) {
             Gson gson = new Gson();
