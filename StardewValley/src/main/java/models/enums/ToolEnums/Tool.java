@@ -7,8 +7,9 @@ public enum Tool {
     WATERING_CAN("Watering Can", 5),
     FISHING_POLE("Fishing Pole", 8),
     SEYTHE("Seythe", 2),
-    MILKPALE("Milk Pale",4),
-    SHEAR("Shear",4);
+    MILKPALE("Milk Pale", 4),
+    SHEAR("Shear", 4);
+
     private final String name;
     private final int energyCost;
 
@@ -17,4 +18,11 @@ public enum Tool {
         this.energyCost = energyCost;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public int getEnergyCost() {
+        return energyCost;
+    }
 }
