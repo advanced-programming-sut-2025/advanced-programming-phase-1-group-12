@@ -5,8 +5,6 @@ import models.Fundementals.Location;
 import models.Fundementals.Result;
 import models.BackPack;
 import models.ToolsPackage.Tools;
-import models.enums.ToolEnums.ToolTypes;
-import models.enums.ToolEnums.Tool;
 import models.enums.Types.TypeOfTile;
 import models.Animal.FarmAnimals;
 import models.enums.Animal;
@@ -149,7 +147,7 @@ public class ToolsController {
             return useWateringCan(targetLocation);
         } else if (toolName.contains("fishing")) {
             return useFishingRod(targetLocation);
-        } else if (toolName.contains("scythe") || toolName.contains("seythe")) {
+        } else if (toolName.contains("scythe")) {
             return useScythe(targetLocation);
         } else if (toolName.contains("milk")) {
             return useMilkPail(targetLocation);
@@ -298,7 +296,7 @@ public class ToolsController {
 
         if (tileType == TypeOfTile.TREE) {
             targetLocation.setTypeOfTile(TypeOfTile.GROUND);
-            // add wood to inventory would go here
+            // add wood to inventory
             return new Result(true, "You chopped down the tree and collected wood");
         }
 

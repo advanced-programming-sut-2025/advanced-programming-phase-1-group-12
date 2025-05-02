@@ -8,6 +8,8 @@ import models.RelatedToUser.Ability;
 import models.RelatedToUser.Energy;
 import models.RelatedToUser.User;
 import models.RelationShip;
+import models.ToolsPackage.Tools;
+import models.enums.ToolEnums.ToolTypes;
 import models.map;
 
 import java.util.ArrayList;
@@ -105,4 +107,5 @@ public class Player {
             this.hasCollapsed = true;
         }
     }
+
 }

@@ -12,7 +12,7 @@ public class Tools {
     public Tools(String name, ToolTypes type, int baseEnergyCost) {
         this.name = name;
         this.type = type;
-        this.level = 0; // Start at normal level
+        this.level = 0;
         this.baseEnergyCost = baseEnergyCost;
     }
 
@@ -44,7 +44,7 @@ public class Tools {
         return Math.max(0, cost);
     }
     public boolean canUpgrade() {
-        return level < 4; // Max level is IRIDIUM (4)
+        return level < 4;
     }
 
     public Result upgrade(int level) {

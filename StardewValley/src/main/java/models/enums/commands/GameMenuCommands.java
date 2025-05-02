@@ -28,12 +28,13 @@ public enum GameMenuCommands implements Commands {
     ENERGY_UNLIMITED("^energy unlimited$"),
     INVENTORY_SHOW("^inventory\\s+show$"),
     INVENTORY_TRASH("inventory trash -i (?<item>.*) -n (?<number>.*)$"),
-    GameNew(""),
-    GameMap(""),
-    LoadGame(""),
-    ExitGame(""),
-    NextTurn(""),
-    Walk(""),
+
+    //tool commands
+    EQUIP_TOOL("^tools equip (?<tool_name>.+)"),
+    SHOW_CURRENT_TOOL("^tools show current$"),
+    SHOW_AVAILABLE_TOOL("^tools show available$"),
+    UPGRADE_TOOL("^tools upgrade (?<tool_name>.+)$"),
+    USE_TOOL("^tools use -d (?<direction>.+)$"),
 
     //Damdari commands
     //animals

@@ -1,6 +1,7 @@
 package views;
 
 import controller.MenusController.GameMenuController;
+import controller.ToolsController;
 import controller.movingPlayer.UserLocationController;
 import models.Fundementals.App;
 import models.Fundementals.Result;
@@ -13,6 +14,7 @@ import java.util.regex.Matcher;
 
 public class GameMenu extends AppMenu {
     private final GameMenuController controller = new GameMenuController();
+    private final ToolsController toolsController = new ToolsController();
 
     @Override
     public void check(Scanner scanner) {
@@ -63,6 +65,22 @@ public class GameMenu extends AppMenu {
             showInventory();
         } else if ((matcher = GameMenuCommands.INVENTORY_TRASH.getMather(input))!= null) {
             trashItem(matcher.group("item"),matcher.group("number"));
+        } else if ((matcher = GameMenuCommands.SHOW_CURRENT_TOOL.getMather(input))!= null) {
+            Result result = toolsController.showCurrentTool();
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.EQUIP_TOOL.getMather(input))!= null) {
+            Result result = toolsController.equipTool(matcher.group("tool_name"));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.SHOW_AVAILABLE_TOOL.getMather(input))!= null) {
+            Result result = toolsController.showToolsAvailable();
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.UPGRADE_TOOL.getMather(input))!= null) {
+            boolean isInSmithing = toolsController.checkIsInSmithing();
+            Result result = toolsController.updateToolsCheck(matcher.group("tool_name"), isInSmithing);
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.USE_TOOL.getMather(input))!= null) {
+            Result result = toolsController.useTool(matcher.group("direction"));
+            System.out.println(result.getMessage());
         }
     }
     public void showCurrentTime(){
