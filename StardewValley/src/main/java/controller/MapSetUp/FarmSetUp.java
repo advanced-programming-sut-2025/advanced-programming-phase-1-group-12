@@ -1,7 +1,6 @@
 package controller.MapSetUp;
 
 import models.Fundementals.App;
-import models.Fundementals.Game;
 import models.Fundementals.Location;
 import models.Fundementals.LocationOfRectangle;
 import models.MapDetails.GreenHouse;
@@ -85,12 +84,32 @@ public class FarmSetUp {
         return result;
     }
 
-    public void makeFarm(Farm newFarm) {
-        lakeSetUp(newFarm.getLake1());
-        lakeSetUp(newFarm.getLake2());
-        quarrySetUp(newFarm.getQuarry());
-        GreenHouse(newFarm.getGreenHouse());
-        ShackSetUp(newFarm.getShack());
+    public void makeFarm(Farm newFarm, int id) {
+        if(id == 0) {
+            lakeSetUp(newFarm.getLake1());
+            lakeSetUp(newFarm.getLake2());
+            quarrySetUp(newFarm.getQuarry());
+            GreenHouse(newFarm.getGreenHouse());
+            ShackSetUp(newFarm.getShack());
+        }else if(id == 1){
+            lakeSetUp(newFarm.getLake1());
+            quarrySetUp(newFarm.getQuarry());
+            quarrySetUp(newFarm.getQuarry2());
+            GreenHouse(newFarm.getGreenHouse());
+            ShackSetUp(newFarm.getShack());
+        } else if (id == 2) {
+            lakeSetUp(newFarm.getLake1());
+            quarrySetUp(newFarm.getQuarry());
+            GreenHouse(newFarm.getGreenHouse());
+            GreenHouse(newFarm.getGreenHouse2());
+            ShackSetUp(newFarm.getShack());
+        }else{
+            lakeSetUp(newFarm.getLake1());
+            quarrySetUp(newFarm.getQuarry());
+            GreenHouse(newFarm.getGreenHouse());
+            ShackSetUp(newFarm.getShack());
+            ShackSetUp(newFarm.getShack2());
+        }
 
         for(Location location : randomTree(newFarm)){
             location.setTypeOfTile(TypeOfTile.TREE);

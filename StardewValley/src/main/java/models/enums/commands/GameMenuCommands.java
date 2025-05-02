@@ -4,10 +4,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public enum GameMenuCommands implements Commands {
+    //Starting Game
     PLAY("^\\s*game new -u ([\\w-]+)(?: ([\\w-]+))?(?: ([\\w-]+))?\\s*$"),
     PRINT("^print map -l (?<X>.*), (?<Y>.*) -s (?<size>.*)$"),
     SHOW_POSITION("^show location of current player$"),
     WALK("^walk -l (?<x>.*), (?<y>.*)$"),
+    EXIT("^exit$"),
+    //weather and ....
     SEASON("^season$"),
     TIME("^time$"),
     DATE("^date$"),

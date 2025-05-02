@@ -219,6 +219,10 @@ public class GameMenuController implements MenuController {
                     null, null, new ArrayList<>(), new ArrayList<>(), null, null);
             players.add(newPlayer);
 
+            System.out.println("Do you want to know what each farm has?");
+            String selection = scanner.nextLine();
+            if(selection.equals("yes"))guideForFarm();
+
             while (true) {
                 System.out.println("Choosing farm for " + username + ":");
                 String input = scanner.nextLine().trim();
@@ -265,6 +269,14 @@ public class GameMenuController implements MenuController {
         System.out.println("All farms have been assigned!");
     }
 
+    private void guideForFarm(){
+        System.out.println("Farm selection guide:\n" +
+                "Farm with ID 0 has two lakes, a Shack, a quarry, and a greenhouse\n" +
+                "Farm with ID 1 has one lake, a Shack, two quarries, and a greenhouse\n" +
+                "Farm with ID 2 has one lake, a Shack, a quarry, and two greenhouses\n" +
+                "Farm with ID 3 has one lake, two Shack, a quarry, and a greenhouse\n" +
+                "Be careful, you do not have the right to change your mind after choosing a farm!");
+    }
     private static Map<Farm, Player> getFarmPlayerMap(ArrayList<Player> players, ArrayList<Integer> chosenFarmNumbers) {
         Map<Farm, Player> farmOwnership = new HashMap<>();
         ArrayList<Farm> farms = App.getCurrentGame().getMainMap().getFarms();
@@ -303,8 +315,9 @@ public class GameMenuController implements MenuController {
     public Result walkPlayer(String x, String y) {
         Location newLocation = App.getCurrentGame().getMainMap().findLocation(Integer.parseInt(x), Integer.parseInt(y));
         if(DFS(App.getCurrentGame().getCurrentPlayer().getUserLocation(), newLocation)){
+            Location location = App.getCurrentGame().getCurrentPlayer().getUserLocation();
+            App.getCurrentGame().getMainMap().findLocation(location.getxAxis(), location.getyAxis()).setObjectInTile(null);
             App.getCurrentGame().getCurrentPlayer().setUserLocation(newLocation);
-            App.getCurrentGame().getCurrentPlayer().getUserLocation().setObjectInTile(null);
             App.getCurrentGame().getMainMap().findLocation(Integer.parseInt(x), Integer.parseInt(y)).setObjectInTile(App.getCurrentGame().getCurrentPlayer());
             return new Result(true, App.getCurrentGame().getCurrentPlayer().getUser().getUserName() + " move to new location " + x + " "+ y);
         }
@@ -312,8 +325,8 @@ public class GameMenuController implements MenuController {
     }
 
     private boolean DFS(Location userLocation, Location newLocation) {
-        int maxX = 200;
-        int maxY = 200;
+        int maxX = 400;
+        int maxY = 400;
         boolean[][] visited = new boolean[maxX][maxY];
 
         Farm currentFarm = App.getCurrentGame().getCurrentPlayer().getOwnedFarm();
@@ -329,25 +342,18 @@ public class GameMenuController implements MenuController {
 
         Location loc = App.getCurrentGame().getMainMap().findLocation(x, y);
 
-        // Must be GROUND
         if (loc.getTypeOfTile() != TypeOfTile.GROUND) return false;
-
-        // Can't enter other farms
         if (!isInPlayerFarm(loc, currentFarm)) return false;
-
-        // Check if we reached the destination
         if (x == targetX && y == targetY) return true;
 
         visited[x][y] = true;
 
-        // Explore neighbors: up, down, left, right
         return dfsHelper(x + 1, y, targetX, targetY, visited, currentFarm) ||
                 dfsHelper(x - 1, y, targetX, targetY, visited, currentFarm) ||
                 dfsHelper(x, y + 1, targetX, targetY, visited, currentFarm) ||
                 dfsHelper(x, y - 1, targetX, targetY, visited, currentFarm);
     }
 
-    // Check if a tile is in the current player's farm
     private boolean isInPlayerFarm(Location loc, Farm farm) {
         int x = loc.getxAxis();
         int y = loc.getyAxis();
