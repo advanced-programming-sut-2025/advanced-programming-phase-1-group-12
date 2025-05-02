@@ -28,8 +28,6 @@ public class GameMenuController implements MenuController {
 
     public Result deleteGame(int MapId){ return null;}
 
-    public void nextTurn(){ }
-
     //TODO:sper chiz ro bezanim baraye geragten babash
 
     public void readingMap(){ }
@@ -130,7 +128,7 @@ public class GameMenuController implements MenuController {
         return new Result(true, App.getCurrentGame().getDate().getWeather().name());
     }
 
-    public void printMap(int x, int y, int size) {
+    public void printMap(int x, int y, int size, Scanner scanner) {
         String[][] tileBlock = new String[size][size];
 
         for (int i = 0; i < size; i++) {
@@ -158,6 +156,9 @@ public class GameMenuController implements MenuController {
             }
             System.out.println();
         }
+        System.out.println("Do you want to enable map guidance?");
+        String selection = scanner.nextLine();
+        if(selection.equals("yes")) helpToReadMap();
     }
 
     private Farm getFarmOfThisLocation(Location location) {
@@ -285,6 +286,12 @@ public class GameMenuController implements MenuController {
         return farmOwnership;
     }
 
+    public void helpToReadMap() {
+        System.out.println("Map Legend:");
+        for (TypeOfTile type : TypeOfTile.values()) {
+            System.out.println(type.getNameOfMap() + " -> " + type.name());
+        }
+    }
 
     private void loadAllUsersFromFiles() {
         File folder = new File(".");
@@ -308,6 +315,20 @@ public class GameMenuController implements MenuController {
                 " " + App.getCurrentGame().getCurrentPlayer().getUserLocation().getyAxis());
     }
 
+    public Result nextTurn() {
+        List<Player> players = App.getCurrentGame().getPlayers();
+        Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
+        App.getCurrentGame().getCurrentPlayer().setEnergy(200);
+
+        int currentIndex = players.indexOf(currentPlayer);
+        int nextIndex = (currentIndex + 1) % players.size();
+
+        App.getCurrentGame().setCurrentPlayer(players.get(nextIndex));
+        int newHour = App.getCurrentGame().getDate().getHour() + 1;
+        App.getCurrentGame().getDate().setHour(newHour)
+
+        return new Result(true, "Turn moved to " + players.get(nextIndex).getUser().getUserName());
+    }
 
     public Result showEnergy(){
         Player player = App.getCurrentGame().getCurrentPlayer();

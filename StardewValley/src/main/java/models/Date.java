@@ -137,4 +137,8 @@ public class Date {
     public void setSeason(Season season) {
         this.season = season;
     }
+
+    public void setHour(int newHour) {
+        this.hour = newHour;
+    }
 }

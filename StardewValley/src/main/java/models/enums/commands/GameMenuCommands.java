@@ -7,9 +7,12 @@ public enum GameMenuCommands implements Commands {
     //Starting Game
     PLAY("^\\s*game new -u ([\\w-]+)(?: ([\\w-]+))?(?: ([\\w-]+))?\\s*$"),
     PRINT("^print map -l (?<X>.*), (?<Y>.*) -s (?<size>.*)$"),
+    HELP("^help reading map$"),
     SHOW_POSITION("^show location of current player$"),
     WALK("^walk -l (?<x>.*), (?<y>.*)$"),
     EXIT("^exit$"),
+    LoadGame(""),
+    NextTurn("^next turn"),
     //weather and ....
     SEASON("^season$"),
     TIME("^time$"),
@@ -28,12 +31,6 @@ public enum GameMenuCommands implements Commands {
     ENERGY_UNLIMITED("^energy unlimited$"),
     INVENTORY_SHOW("^inventory\\s+show$"),
     INVENTORY_TRASH("inventory trash -i (?<item>.*) -n (?<number>.*)$"),
-    GameNew(""),
-    GameMap(""),
-    LoadGame(""),
-    ExitGame(""),
-    NextTurn(""),
-    Walk(""),
 
     //Damdari commands
     //animals

@@ -18,8 +18,11 @@ public class UserLocationController {
         Location newLocation = App.getCurrentGame().getMainMap().findLocation(targetX, targetY);
         Location currentLocation = App.getCurrentGame().getCurrentPlayer().getUserLocation();
         Farm currentFarm = App.getCurrentGame().getCurrentPlayer().getOwnedFarm();
+        if(!isInPlayersFarm(newLocation, currentFarm)) {
+            return new Result(false, "You dont have allow to access this farm.");
+        }
 
-        int minDistance = bfsDistance(currentLocation, newLocation, currentFarm);
+        int minDistance = bfsDistance(currentLocation, newLocation);
 
         if (minDistance != -1) {
             if(minDistance / 20 > App.getCurrentGame().getCurrentPlayer().getEnergy()){
@@ -35,6 +38,8 @@ public class UserLocationController {
             App.getCurrentGame().getMainMap().findLocation(
                     targetX, targetY
             ).setObjectInTile(App.getCurrentGame().getCurrentPlayer());
+            int newEnergy = App.getCurrentGame().getCurrentPlayer().getEnergy() - (minDistance / 20);
+            App.getCurrentGame().getCurrentPlayer().setEnergy(newEnergy);
 
             return new Result(true,
                     App.getCurrentGame().getCurrentPlayer().getUser().getUserName()
@@ -42,10 +47,10 @@ public class UserLocationController {
                             + " (distance = " + minDistance + ")"
             );
         }
-        return new Result(false, "It is not possible to move to location " + x + " " + y);
+        return new Result(false, "It is not possible to move to location " + x + " " + y + " because type of tile is " + newLocation.getTypeOfTile().name());
     }
 
-    private static int bfsDistance(Location start, Location end, Farm currentFarm) {
+    private static int bfsDistance(Location start, Location end) {
         int maxX = 400, maxY = 400;
         boolean[][] visited = new boolean[maxX][maxY];
 
@@ -66,7 +71,7 @@ public class UserLocationController {
             if (x < 0 || y < 0 || x >= maxX || y >= maxY || visited[x][y]) continue;
 
             Location loc = App.getCurrentGame().getMainMap().findLocation(x, y);
-            if (loc.getTypeOfTile() != TypeOfTile.GROUND || !isInPlayerFarm(loc, currentFarm)) continue;
+            if (loc.getTypeOfTile() != TypeOfTile.GROUND) continue;
 
             visited[x][y] = true;
             for (int[] dir : directions) {
@@ -76,13 +81,19 @@ public class UserLocationController {
         return -1;
     }
 
-    private static boolean isInPlayerFarm(Location loc, Farm farm) {
+    private static boolean isInPlayersFarm(Location loc, Farm farm) {
         int x = loc.getxAxis();
         int y = loc.getyAxis();
-        return x >= farm.getLocation().getTopLeftCorner().getxAxis() &&
-                x <= farm.getLocation().getDownRightCorner().getxAxis() &&
-                y >= farm.getLocation().getTopLeftCorner().getyAxis() &&
-                y <= farm.getLocation().getDownRightCorner().getyAxis();
+        for(Farm f : App.getCurrentGame().getFarms()) {
+            if(f == farm) continue;
+            if(x >= f.getLocation().getTopLeftCorner().getxAxis() &&
+                    x <= f.getLocation().getDownRightCorner().getxAxis() &&
+                    y >= f.getLocation().getTopLeftCorner().getyAxis() &&
+                    y <= f.getLocation().getDownRightCorner().getyAxis()){
+                return false;
+            }
+        }
+        return true;
     }
 
 }
