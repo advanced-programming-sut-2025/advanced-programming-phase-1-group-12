@@ -1,11 +1,9 @@
 package models;
 
+import models.Tools.Tools;
 import models.enums.ToolEnums.BackPackTypes;
 
-import javax.tools.Tool;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class BackPack {
