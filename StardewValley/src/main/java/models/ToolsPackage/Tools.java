@@ -1,6 +1,5 @@
-package models.Tools;
+package models.ToolsPackage;
 
-import models.Fundementals.Location;
 import models.Fundementals.Result;
 import models.enums.ToolEnums.ToolTypes;
 
@@ -48,7 +47,7 @@ public class Tools {
         return level < 4; // Max level is IRIDIUM (4)
     }
 
-    public Result upgrade() {
+    public Result upgrade(int level) {
         if (!canUpgrade()) {
             return new Result(false, "This tool is already at its maximum level");
         }

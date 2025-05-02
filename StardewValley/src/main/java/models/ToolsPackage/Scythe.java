@@ -1,9 +1,8 @@
-package models.Tools;
+package models.ToolsPackage;
 
 import models.Fundementals.App;
 import models.Fundementals.Location;
 import models.Fundementals.Result;
-import models.Tools.Tools;
 import models.enums.ToolEnums.ToolTypes;
 
 public class Scythe extends Tools {

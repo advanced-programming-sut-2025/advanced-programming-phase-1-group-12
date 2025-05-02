@@ -1,10 +1,9 @@
-package models.Tools;
+package models.ToolsPackage;
 
 import models.Animal.FarmAnimals;
 import models.Fundementals.App;
 import models.Fundementals.Location;
 import models.Fundementals.Result;
-import models.Tools.Tools;
 import models.enums.Animal;
 import models.enums.ToolEnums.ToolTypes;
 
