@@ -15,30 +15,33 @@ public class MapSetUp {
     static FarmSetUp newFarmSetUp = new FarmSetUp();
 
     public static void initializeFarms() {
-        for (int i = 0; i < 200; i++) {
-            for (int j = 0; j < 200; j++) {
+        for (int i = 0; i < 400; i++) {
+            for (int j = 0; j < 400; j++) {
                 Location location = new Location(i, j);
                 location.setTypeOfTile(TypeOfTile.GROUND);
                 App.getCurrentGame().getMainMap().getTilesOfMap().add(location);
             }
         }
         ArrayList<Farm> farms = new ArrayList<>();
-        int startX = 0;
-        int startY = 0;
         int farmWidth = 30;
         int farmHeight = 30;
+        int id = 0;
 
-        for (int i = 0; i < 4; i++) {
+        int[][] farmCorners = {{0, 0}, {370, 0}, {0, 370}, {370, 370}};
+
+        for (int[] corner : farmCorners) {
+            int startX = corner[0];
+            int startY = corner[1];
+
             Location topLeft = new Location(startX, startY);
-            Location downRight = new Location(startX + farmWidth , startY + farmHeight );
+            Location downRight = new Location(startX + farmWidth, startY + farmHeight);
             LocationOfRectangle farmRectangle = new LocationOfRectangle(topLeft, downRight);
 
             Farm newFarm = new Farm(farmRectangle);
             farms.add(newFarm);
 
-            newFarmSetUp.makeFarm(newFarm);
-            startX += farmWidth + 5;
-            startY += farmHeight + 5;
+            newFarmSetUp.makeFarm(newFarm, id);
+            id++;
         }
         App.getCurrentGame().getMainMap().setFarms(farms);
     }

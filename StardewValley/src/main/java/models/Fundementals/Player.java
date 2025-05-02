@@ -1,9 +1,10 @@
 package models.Fundementals;
 
-import models.BackPack;
 import models.MapDetails.Shack;
+import models.Place.Farm;
 import models.Refrigrator;
 import models.RelatedToUser.Ability;
+import models.RelatedToUser.Energy;
 import models.RelatedToUser.User;
 import models.RelationShip;
 import models.map;
@@ -12,69 +13,118 @@ import java.util.ArrayList;
 
 public class Player {
     private User user;
+
     private Location userLocation;
-    private Shack shack;
+
     private map map;
+
     private boolean isMarried;
-    private int energy;
-    private boolean isEnergyUnlimited;
-    private boolean hasCollapsed;
-    private BackPack backPack;
+
+    private Energy energy;
+
     public Refrigrator Refrigrator = new Refrigrator();
     private ArrayList<Ability> ability;
     private ArrayList<RelationShip> relationShips = new ArrayList<>();
     private ArrayList<RelationShip.Trade> trade = new ArrayList<>();
 
-    public Player(User user, Location userLocation, Shack shack, map map, boolean isMarried,
+    private Farm ownedFarm;
+
+    public void collapse() {
+    }
+
+    public Player(User user, Location userLocation, map map, boolean isMarried, Energy energy,
                   Refrigrator refrigrator, ArrayList<Ability> abilitis, ArrayList<RelationShip> relationShips,
-                  ArrayList<RelationShip.Trade> trade) {
+                  ArrayList<RelationShip.Trade> trade, Farm ownedFarm) {
         this.user = user;
         this.userLocation = userLocation;
-        this.shack = shack;
         this.map = map;
         this.isMarried = isMarried;
+        this.energy = energy;
         Refrigrator = refrigrator;
         this.ability = new ArrayList<>();
         this.relationShips = relationShips;
         this.trade = trade;
-        this.energy = 200;
-        this.isEnergyUnlimited = false;
-        this.hasCollapsed = false;
-        this.backPack = null;
+        this.ownedFarm = ownedFarm;
     }
 
     public User getUser() {
         return user;
     }
 
-    public void setEnergy(int amount){
-        this.energy = amount;
+    public Farm getOwnedFarm() {
+        return ownedFarm;
     }
 
-    public void increaseEnergy(int amount){
-        if(energy + amount > 200 && !isEnergyUnlimited){
-            energy = 200;
-        }else {
-            energy += amount;
-        }
+    public Location getUserLocation() {
+        return userLocation;
     }
 
-    public int getEnergy() {
+    public void setOwnedFarm(Farm farm) {
+        this.ownedFarm = farm;
+    }
+
+    public ArrayList<Ability> getAbilitis() {
+        return abilitis;
+    }
+
+    public ArrayList<RelationShip.Trade> getTrade() {
+        return trade;
+    }
+
+    public boolean isMarried() {
+        return isMarried;
+    }
+
+    public map getMap() {
+        return map;
+    }
+
+    public Energy getEnergy() {
         return energy;
     }
 
-    public void setUnlimited(){
-        this.isEnergyUnlimited = true;
+    public ArrayList<RelationShip> getRelationShips() {
+        return relationShips;
     }
 
-    public void collapse(){
-        if(energy == 0){
-            this.hasCollapsed = true;
-        }
+    public Refrigrator getRefrigrator() {
+        return Refrigrator;
     }
 
-    public BackPack getBackPack() {
-        return backPack;
+    public void setAbilitis(ArrayList<Ability> abilitis) {
+        this.abilitis = abilitis;
+    }
+
+    public void setEnergy(Energy energy) {
+        this.energy = energy;
+    }
+
+    public void setMap(map map) {
+        this.map = map;
+    }
+
+    public void setMarried(boolean married) {
+        isMarried = married;
+    }
+
+    public void setRefrigrator(Refrigrator refrigrator) {
+        Refrigrator = refrigrator;
+    }
+
+    public void setRelationShips(ArrayList<RelationShip> relationShips) {
+        this.relationShips = relationShips;
+    }
+
+    public void setTrade(ArrayList<RelationShip.Trade> trade) {
+        this.trade = trade;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setUserLocation(Location userLocation) {
+        this.userLocation = userLocation;
     }
 
     public Ability getAbilityByName(String name){

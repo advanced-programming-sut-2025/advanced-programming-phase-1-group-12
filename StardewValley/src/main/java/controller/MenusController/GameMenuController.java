@@ -218,7 +218,7 @@ public class GameMenuController implements MenuController {
 
     public Result newGame() {
         ArrayList<Farm> farms = new ArrayList<>();
-        Game newGame = new Game();
+        Game newGame = new Game(farms);
         App.setCurrentGame(newGame);
         return new Result(true, "New game created successfully!");
     }
