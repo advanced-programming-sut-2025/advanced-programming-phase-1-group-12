@@ -1,6 +1,7 @@
 package views;
 
 import controller.MenusController.GameMenuController;
+import controller.movingPlayer.UserLocationController;
 import models.Fundementals.App;
 import models.Fundementals.Result;
 import models.enums.commands.GameMenuCommands;
@@ -28,10 +29,6 @@ public class GameMenu extends AppMenu {
              controller.Play(scanner, players);
         } else if ((matcher = GameMenuCommands.PRINT.getMather(input)) != null) {
             controller.printMap(Integer.parseInt(matcher.group("X")),Integer.parseInt(matcher.group("Y")), Integer.parseInt(matcher.group("size")));
-        } else if ((matcher = GameMenuCommands.SHOW_POSITION.getMather(input)) != null) {
-            System.out.println(controller.showLocation());
-        } else if ((matcher = GameMenuCommands.WALK.getMather(input)) != null) {
-            System.out.println(controller.walkPlayer(matcher.group("x"), matcher.group("y")));
         } else if ((matcher = GameMenuCommands.TIME.getMather(input))!= null) {
             showCurrentTime();
         } else if ((matcher = GameMenuCommands.DATE.getMather(input))!= null) {
@@ -52,11 +49,15 @@ public class GameMenu extends AppMenu {
             weatherForecast();
         } else if ((matcher = GameMenuCommands.CHEAT_WEATHER_SET.getMather(input))!= null) {
             cheatWeather(matcher.group("type"));
+        } else if ((matcher = GameMenuCommands.SHOW_POSITION.getMather(input)) != null) {
+            System.out.println(controller.showLocation());
+        } else if ((matcher = GameMenuCommands.WALK.getMather(input)) != null) {
+            System.out.println(UserLocationController.walkPlayer(matcher.group("x"), matcher.group("y")));
         } else if ((matcher = GameMenuCommands.ENERGY_SHOW.getMather(input))!= null) {
             showEnergy();
         } else if ((matcher = GameMenuCommands.ENERGY_SET.getMather(input))!=null) {
-            setEnergy(matcher.group("value"));
-        } else if ((matcher = GameMenuCommands.ENERGY_UNLIMITED.getMather(input))!=null) {
+            setEnergy(matcher.group("value"));}
+        else if ((matcher = GameMenuCommands.ENERGY_UNLIMITED.getMather(input))!=null) {
             setEnergyUnlimited();
         }else if ((matcher = GameMenuCommands.INVENTORY_SHOW.getMather(input))!= null) {
             showInventory();
@@ -108,12 +109,13 @@ public class GameMenu extends AppMenu {
         System.out.println(result.getMessage());
     }
 
-    public void showEnergy(){
-        Result result = controller.showEnergy();
+    public void showInventory(){
+        Result result = controller.showInventory();
         System.out.println(result.getMessage());
     }
-    public void setEnergy(String amount){
-        Result result = controller.setEnergy(amount);
+
+    public void trashItem(String item, String number){
+        Result result = controller.trashItem(item,number);
         System.out.println(result.getMessage());
     }
 
@@ -122,13 +124,13 @@ public class GameMenu extends AppMenu {
         System.out.println(result.getMessage());
     }
 
-    public void showInventory(){
-        Result result = controller.showInventory();
+    public void setEnergy(String energy){
+        Result result = controller.setEnergy(energy);
         System.out.println(result.getMessage());
     }
 
-    public void trashItem(String item, String number){
-        Result result = controller.trashItem(item, number);
+    public void showEnergy(){
+        Result result = controller.showEnergy();
         System.out.println(result.getMessage());
     }
 }

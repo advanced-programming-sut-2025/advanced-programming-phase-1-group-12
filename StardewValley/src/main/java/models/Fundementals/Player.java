@@ -14,36 +14,44 @@ import java.util.ArrayList;
 
 public class Player {
     private User user;
+
     private Location userLocation;
-    private map map;
+
     private boolean isMarried;
+
     private int energy;
-    private boolean isEnergyUnlimited;
-    private boolean hasCollapsed;
-    private BackPack backPack;
 
     public Refrigrator Refrigrator = new Refrigrator();
-    private ArrayList<Ability> ability;
+
+    private ArrayList<Ability> abilitis = new ArrayList<Ability>();
+
     private ArrayList<RelationShip> relationShips = new ArrayList<>();
+
     private ArrayList<RelationShip.Trade> trade = new ArrayList<>();
+
     private Farm ownedFarm;
 
+    private BackPack backPack;
 
-    public Player(User user, Location userLocation, map map, boolean isMarried,
-                  Refrigrator refrigrator, ArrayList<Ability> abilitis, ArrayList<RelationShip> relationShips,
-                  ArrayList<RelationShip.Trade> trade, Farm ownedFarm) {
+    private boolean isEnergyUnlimited;
+    private boolean hasCollapsed;
+
+
+    public Player(User user, Location userLocation, boolean isMarried,Refrigrator refrigrator,
+                  ArrayList<Ability> abilitis, ArrayList<RelationShip> relationShips, ArrayList<RelationShip.Trade> trade,
+                  Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited, boolean hasCollapsed ) {
         this.user = user;
         this.userLocation = userLocation;
-        this.map = map;
         this.isMarried = isMarried;
         this.energy = 200;
-        this.isEnergyUnlimited = false;
-        this.hasCollapsed = false;
-        this.Refrigrator = refrigrator;
-        this.ability = new ArrayList<>();
+        Refrigrator = refrigrator;
+        this.abilitis = abilitis;
         this.relationShips = relationShips;
         this.trade = trade;
         this.ownedFarm = ownedFarm;
+        this.backPack = backPack;
+        this.isEnergyUnlimited = isEnergyUnlimited;
+        this.hasCollapsed = hasCollapsed;
     }
 
     public User getUser() {
@@ -62,54 +70,18 @@ public class Player {
         this.ownedFarm = farm;
     }
 
-
-    public ArrayList<RelationShip.Trade> getTrade() {
-        return trade;
-    }
-
-    public boolean isMarried() {
-        return isMarried;
-    }
-
-    public map getMap() {
-        return map;
-    }
-
-    public ArrayList<RelationShip> getRelationShips() {
-        return relationShips;
-    }
-
-    public Refrigrator getRefrigrator() {
-        return Refrigrator;
+    public BackPack getBackPack() {
+        return backPack;
     }
 
 
-    public void setMap(map map) {
-        this.map = map;
+    public void setUserLocation(Location userLocation) {
+        this.userLocation = userLocation;
     }
 
-    public void setMarried(boolean married) {
-        isMarried = married;
-    }
 
-    public void setRefrigrator(Refrigrator refrigrator) {
-        Refrigrator = refrigrator;
-    }
-
-    public void setRelationShips(ArrayList<RelationShip> relationShips) {
-        this.relationShips = relationShips;
-    }
-
-    public void setTrade(ArrayList<RelationShip.Trade> trade) {
-        this.trade = trade;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public void setEnergy(int amount){
-        this.energy = amount;
+    public void setEnergy(int energy) {
+        this.energy = energy;
     }
 
     public void increaseEnergy(int amount){
@@ -131,51 +103,6 @@ public class Player {
     public void collapse(){
         if(energy == 0){
             this.hasCollapsed = true;
-        }
-    }
-
-    public BackPack getBackPack() {
-        return backPack;
-    }
-
-    public void setUserLocation(Location userLocation) {
-        this.userLocation = userLocation;
-    }
-
-    public Ability getAbilityByName(String name){
-        for(Ability ability : ability){
-            if(ability.getName().equals(name)){
-                return ability;
-            }
-        }
-        return null;
-    }
-
-    public void farming(){
-        Ability ability = getAbilityByName("farming");
-        if(ability != null){
-            ability.increaseAmount(5);
-        }
-    }
-
-    public void mining(){
-        Ability ability = getAbilityByName("mining");
-        if(ability != null){
-            ability.increaseAmount(10);
-        }
-    }
-
-    public void natureSurfing(){
-        Ability ability = getAbilityByName("nature");
-        if(ability != null){
-            ability.increaseAmount(10);
-        }
-    }
-
-    public void fishing(){
-        Ability ability = getAbilityByName("fishing");
-        if(ability != null){
-            ability.increaseAmount(5);
         }
     }
 }

@@ -20,7 +20,6 @@ public class map {
         return farms;
     }
 
-
     public void setFarms(ArrayList<Farm> farms) {
         this.farms = farms;
     }

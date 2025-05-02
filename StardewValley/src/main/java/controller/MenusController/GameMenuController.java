@@ -1,5 +1,6 @@
 package controller.MenusController;
 
+import controller.MapSetUp.MapSetUp;
 import models.Fundementals.*;
 import models.Place.Farm;
 import models.RelatedToUser.User;
@@ -7,6 +8,7 @@ import models.*;
 import models.enums.*;
 import models.Fundementals.Player;
 import com.google.gson.Gson;
+import models.enums.Types.TypeOfTile;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -129,75 +131,160 @@ public class GameMenuController implements MenuController {
     }
 
     public void printMap(int x, int y, int size) {
-        for (int X = x; X < x + size; X++) {
-            for (int Y = y; Y < y + size; Y++) {
-                Location currentLocation = currentGame.getMainMap().findLocation(X, Y);
-                System.out.print(currentLocation.getTypeOfTile().getNameOfMap()+ " ");
+        String[][] tileBlock = new String[size][size];
+
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                Location location = App.getCurrentGame().getMainMap().findLocation(x + i, y + j);
+                char tileType = location.getTypeOfTile().getNameOfMap();
+                String bgColor = getBackgroundColorForTile(location.getTypeOfTile());
+
+                char contentChar = tileType;
+                if (location.getObjectInTile() instanceof Player) {
+                    Farm farm = getFarmOfThisLocation(location);
+                    contentChar = farm.getOwner().getUser().getUserName().charAt(0);
+                    bgColor = "\u001B[41m";
+                }
+
+                String block = bgColor + " " + contentChar + " " + "\u001B[0m";
+
+                tileBlock[i][j] = block;
             }
-            System.out.println(); // Move to next line after each row
+        }
+
+        for (int row = 0; row < size; row++) {
+            for (int col = 0; col < size; col++) {
+                System.out.print(tileBlock[row][col]);
+            }
+            System.out.println();
         }
     }
 
+    private Farm getFarmOfThisLocation(Location location) {
+        for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
+            if (location.getxAxis() >= farm.getLocation().getTopLeftCorner().getxAxis() &&
+                    location.getxAxis() <= farm.getLocation().getDownRightCorner().getxAxis() &&
+                    location.getyAxis() >= farm.getLocation().getTopLeftCorner().getyAxis() &&
+                    location.getyAxis() <= farm.getLocation().getDownRightCorner().getyAxis()) {
+                return farm;
+            }
+        }
+        return null;
+    }
 
+    private String getBackgroundColorForTile(TypeOfTile type) {
+        return switch (type) {
+            case GREENHOUSE -> "\u001B[42m"; // green background
+            case GROUND -> "\u001B[48;5;180m";
+            case HOUSE -> "\u001B[47m";      // white/gray background
+            case QUARRY -> "\u001B[43m";     // yellow background
+            case STONE -> "\u001B[103m";     // bright yellow background
+            case TREE -> "\u001B[102m";      // bright green background
+            case LAKE -> "\u001B[46m";       // cyan background
+            default -> "\u001B[41m";
+        };
+    }
 
     public void Play(Scanner scanner, List<String> usernames) {
-        Game currentGame = App.getCurrentGame();
+
+        Game newGame = new Game();
+        App.setCurrentGame(newGame);
+        MapSetUp.initializeFarms();
+
         loadAllUsersFromFiles();
 
-        ArrayList<Integer> numberOfFarm = new ArrayList<>();
+        ArrayList<Integer> chosenFarmNumbers = new ArrayList<>();
         ArrayList<Player> players = new ArrayList<>();
-        players.add(App.getCurrentGame().getCurrentPlayer());
 
         for (String username : usernames) {
-            if (username != null) {
-                User user = App.getUserByUsername(username.trim());
-                if (user == null) {
-                    System.out.println("user not found " + username);
+            if (username == null || username.isBlank()) continue;
+
+            User user = App.getUserByUsername(username.trim());
+            if (user == null) {
+                System.out.println("User not found: " + username);
+                continue;
+            }
+
+            System.out.println("User: " + username);
+            Player newPlayer = new Player(user, null, false, null, new ArrayList<>(),
+                    new ArrayList<>(), null, null, null, false, false);
+            players.add(newPlayer);
+
+            System.out.println("Do you want to know what each farm has?");
+            String selection = scanner.nextLine();
+            if(selection.equals("yes"))guideForFarm();
+
+            while (true) {
+                System.out.println("Choosing farm for " + username + ":");
+                String input = scanner.nextLine().trim();
+
+                if (!input.matches("\\d+")) {
+                    System.out.println("Invalid input, please enter a number.");
                     continue;
                 }
-                Player newPlayer = new Player(user, null, null,  false,
-                        null, null, new ArrayList<>(), new ArrayList<>(), null);
-                players.add(newPlayer);
-
-                while (true) {
-                    System.out.println("Choosing farm for " + username + ":");
-                    String input = scanner.nextLine().trim();
-
-                    if (!input.matches("\\d+")) {
-                        System.out.println("Invalid input, please enter a number.");
-                        continue;
-                    }
-                    int farmId = Integer.parseInt(input);
-                    if (farmId > 3 || farmId < 0) {
-                        System.out.println("Wrong farm number!");
-                        continue;
-                    }
-                    if (numberOfFarm.contains(farmId)) {
-                        System.out.println("This farm is already taken, please try again.");
-                        continue;
-                    }
-
-                    numberOfFarm.add(farmId);
-                    break;
+                int farmId = Integer.parseInt(input);
+                if (farmId < 0 || farmId >= 4) {
+                    System.out.println("Farm number must be between 0 and 3!");
+                    continue;
                 }
+                if (chosenFarmNumbers.contains(farmId)) {
+                    System.out.println("This farm is already taken, please try again.");
+                    continue;
+                }
+                chosenFarmNumbers.add(farmId);
+                Farm newFarm = App.getCurrentGame().getMainMap().getFarms().get(farmId);
+                newFarm.setOwner(newPlayer);
+                newFarm.getOwner().setUserLocation(App.getCurrentGame().getMainMap().findLocation(newFarm.getLocation().getTopLeftCorner().getxAxis(), newFarm.getLocation().getTopLeftCorner().getyAxis()));
+                App.getCurrentGame().getMainMap().findLocation(newFarm.getLocation().getTopLeftCorner().getxAxis(), newFarm.getLocation().getTopLeftCorner().getyAxis()).setObjectInTile(newPlayer);
+                break;
             }
         }
 
-        Map<Farm, Player> userAndFarm = new HashMap<>();
-        ArrayList<Farm> farms = currentGame.getMainMap().getFarms();
+        for (Player player : App.getCurrentGame().getPlayers()) {
+            Location tile = App.getCurrentGame().getMainMap().findLocation(
+                    player.getOwnedFarm().getLocation().getTopLeftCorner().getxAxis(),
+                    player.getOwnedFarm().getLocation().getTopLeftCorner().getyAxis());
 
-        for (int i = 0; i < players.size(); i++) {
-            int farmIndex = numberOfFarm.get(i);
-            if (farmIndex < farms.size()) {
-                Farm farm = farms.get(farmIndex);
-                userAndFarm.put(farm, players.get(i));
-                farm.setOwner(players.get(i));
-            }
+            player.setUserLocation(tile);
+            tile.setObjectInTile(player);
         }
 
-        currentGame.setUserAndMap(userAndFarm);
+        Map<Farm, Player> farmOwnership = getFarmPlayerMap(players, chosenFarmNumbers);
+
+        App.getCurrentGame().setUserAndMap(farmOwnership);
+        App.getCurrentGame().setPlayers(players);
+        App.getCurrentGame().setCurrentPlayer(players.getFirst());
+
+        MapSetUp.showMapWithFarms(App.getCurrentGame().getMainMap());
+
         System.out.println("All farms have been assigned!");
     }
+
+    private void guideForFarm(){
+        System.out.println("Farm selection guide:\n" +
+                "Farm with ID 0 has two lakes, a Shack, a quarry, and a greenhouse\n" +
+                "Farm with ID 1 has one lake, a Shack, two quarries, and a greenhouse\n" +
+                "Farm with ID 2 has one lake, a Shack, a quarry, and two greenhouses\n" +
+                "Farm with ID 3 has one lake, two Shack, a quarry, and a greenhouse\n" +
+                "Be careful, you do not have the right to change your mind after choosing a farm!");
+    }
+    private static Map<Farm, Player> getFarmPlayerMap(ArrayList<Player> players, ArrayList<Integer> chosenFarmNumbers) {
+        Map<Farm, Player> farmOwnership = new HashMap<>();
+        ArrayList<Farm> farms = App.getCurrentGame().getMainMap().getFarms();
+
+        for (int i = 0; i < players.size(); i++) {
+            int farmIndex = (i < chosenFarmNumbers.size()) ? chosenFarmNumbers.get(i) : i;
+            if (farmIndex < farms.size()) {
+                Farm farm = farms.get(farmIndex);
+                Player player = players.get(i);
+                farmOwnership.put(farm, player);
+                farm.setOwner(player);
+                player.setOwnedFarm(farm);
+            }
+        }
+        return farmOwnership;
+    }
+
 
     private void loadAllUsersFromFiles() {
         File folder = new File(".");
@@ -216,12 +303,11 @@ public class GameMenuController implements MenuController {
         }
     }
 
-    public Result newGame() {
-        ArrayList<Farm> farms = new ArrayList<>();
-        Game newGame = new Game();
-        App.setCurrentGame(newGame);
-        return new Result(true, "New game created successfully!");
+    public Result showLocation() {
+        return new Result(true, App.getCurrentGame().getCurrentPlayer().getUserLocation().getxAxis() +
+                " " + App.getCurrentGame().getCurrentPlayer().getUserLocation().getyAxis());
     }
+
 
     public Result showEnergy(){
         Player player = App.getCurrentGame().getCurrentPlayer();

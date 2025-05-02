@@ -60,8 +60,31 @@ public class AnimalController {
         }
     }
 
-//    public boolean havePlaceTooKeep(Animal animal){
+    //    public boolean havePlaceTooKeep(Animal animal){
 //
 //    }
+    public Result milking(String animalName){
+        FarmAnimals animal = findAnimalByName(animalName);
+        if(animal == null){
+            return new Result(false, "You do not own an animal with such name!");
+        }
+        if(! (animal.getAnimal().equals(Animal.COW) || animal.getAnimal().equals(Animal.GOAT))){
+            return new Result(false, "This animal is not a cow or goat!");
+        }
+        animal.setFriendShip(animal.getFriendShip() + 5);
+        return new Result(true, "You just milked " + animalName);
+    }
+
+    public Result shear(String animalName){
+        FarmAnimals animal = findAnimalByName(animalName);
+        if(animal == null){
+            return new Result(false, "You do not own an animal with such name!");
+        }
+        if( ! animal.getAnimal().equals(Animal.SHEEP) ){
+            return new Result(false, "This animal is not a sheep!");
+        }
+        animal.setFriendShip(animal.getFriendShip() + 5);
+        return new Result(true, "You just sheared " + animalName);
+    }
 
 }

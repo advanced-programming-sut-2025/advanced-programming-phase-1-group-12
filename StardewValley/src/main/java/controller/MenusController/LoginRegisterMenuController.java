@@ -68,7 +68,7 @@ public class LoginRegisterMenuController implements MenuController {
         if(App.getUsers().containsKey(username)){
             username = generateNewUserName(username);
             return new Result(false, "Username is already in use.this will be your Username:" + username
-                    );
+            );
         }
         boolean isFemale = !gender.equals("male");
         User newUser = new User(new ArrayList<>(), username, nickname, password, email, "",
@@ -191,13 +191,13 @@ public class LoginRegisterMenuController implements MenuController {
         }
         if (App.getUsers().containsKey(userName)) {
             User currentUser = App.getUsers().get(userName);
-                App.setLoggedInUser(currentUser);}
+            App.setLoggedInUser(currentUser);}
     }
     public Result answerQuestion(Matcher matcher) {
         String answer = matcher.group("answer");
         if(answer.equals(App.getCurrentPlayerLazy().getUser().getAnswerOfQuestionForSecurity())){
             return new Result(true, "correct answer. now enter your new password like this : i answered so my new password:"
-                    );
+            );
         }
         return new Result(false, "wrong answer");
 
