@@ -155,8 +155,8 @@ public class GameMenuController implements MenuController {
                     System.out.println("user not found " + username);
                     continue;
                 }
-                Player newPlayer = new Player(user, null, null,  null,
-                        false, null, new ArrayList<>(), new ArrayList<>(), null);
+                Player newPlayer = new Player(user, null, null,  false,
+                        null, null, new ArrayList<>(), new ArrayList<>(), null);
                 players.add(newPlayer);
 
                 while (true) {
@@ -218,7 +218,7 @@ public class GameMenuController implements MenuController {
 
     public Result newGame() {
         ArrayList<Farm> farms = new ArrayList<>();
-        Game newGame = new Game(farms);
+        Game newGame = new Game();
         App.setCurrentGame(newGame);
         return new Result(true, "New game created successfully!");
     }

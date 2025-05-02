@@ -1,5 +1,6 @@
 package models.Fundementals;
 
+import models.BackPack;
 import models.MapDetails.Shack;
 import models.Place.Farm;
 import models.Refrigrator;
@@ -13,34 +14,32 @@ import java.util.ArrayList;
 
 public class Player {
     private User user;
-
     private Location userLocation;
-
     private map map;
-
     private boolean isMarried;
-
-    private Energy energy;
+    private int energy;
+    private boolean isEnergyUnlimited;
+    private boolean hasCollapsed;
+    private BackPack backPack;
 
     public Refrigrator Refrigrator = new Refrigrator();
     private ArrayList<Ability> ability;
     private ArrayList<RelationShip> relationShips = new ArrayList<>();
     private ArrayList<RelationShip.Trade> trade = new ArrayList<>();
-
     private Farm ownedFarm;
 
-    public void collapse() {
-    }
 
-    public Player(User user, Location userLocation, map map, boolean isMarried, Energy energy,
+    public Player(User user, Location userLocation, map map, boolean isMarried,
                   Refrigrator refrigrator, ArrayList<Ability> abilitis, ArrayList<RelationShip> relationShips,
                   ArrayList<RelationShip.Trade> trade, Farm ownedFarm) {
         this.user = user;
         this.userLocation = userLocation;
         this.map = map;
         this.isMarried = isMarried;
-        this.energy = energy;
-        Refrigrator = refrigrator;
+        this.energy = 200;
+        this.isEnergyUnlimited = false;
+        this.hasCollapsed = false;
+        this.Refrigrator = refrigrator;
         this.ability = new ArrayList<>();
         this.relationShips = relationShips;
         this.trade = trade;
@@ -63,9 +62,6 @@ public class Player {
         this.ownedFarm = farm;
     }
 
-    public ArrayList<Ability> getAbilitis() {
-        return abilitis;
-    }
 
     public ArrayList<RelationShip.Trade> getTrade() {
         return trade;
@@ -79,10 +75,6 @@ public class Player {
         return map;
     }
 
-    public Energy getEnergy() {
-        return energy;
-    }
-
     public ArrayList<RelationShip> getRelationShips() {
         return relationShips;
     }
@@ -91,13 +83,6 @@ public class Player {
         return Refrigrator;
     }
 
-    public void setAbilitis(ArrayList<Ability> abilitis) {
-        this.abilitis = abilitis;
-    }
-
-    public void setEnergy(Energy energy) {
-        this.energy = energy;
-    }
 
     public void setMap(map map) {
         this.map = map;
@@ -121,6 +106,36 @@ public class Player {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public void setEnergy(int amount){
+        this.energy = amount;
+    }
+
+    public void increaseEnergy(int amount){
+        if(energy + amount > 200 && !isEnergyUnlimited){
+            energy = 200;
+        }else {
+            energy += amount;
+        }
+    }
+
+    public int getEnergy() {
+        return energy;
+    }
+
+    public void setUnlimited(){
+        this.isEnergyUnlimited = true;
+    }
+
+    public void collapse(){
+        if(energy == 0){
+            this.hasCollapsed = true;
+        }
+    }
+
+    public BackPack getBackPack() {
+        return backPack;
     }
 
     public void setUserLocation(Location userLocation) {

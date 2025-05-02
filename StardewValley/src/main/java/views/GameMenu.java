@@ -52,6 +52,16 @@ public class GameMenu extends AppMenu {
             weatherForecast();
         } else if ((matcher = GameMenuCommands.CHEAT_WEATHER_SET.getMather(input))!= null) {
             cheatWeather(matcher.group("type"));
+        } else if ((matcher = GameMenuCommands.ENERGY_SHOW.getMather(input))!= null) {
+            showEnergy();
+        } else if ((matcher = GameMenuCommands.ENERGY_SET.getMather(input))!=null) {
+            setEnergy(matcher.group("value"));
+        } else if ((matcher = GameMenuCommands.ENERGY_UNLIMITED.getMather(input))!=null) {
+            setEnergyUnlimited();
+        }else if ((matcher = GameMenuCommands.INVENTORY_SHOW.getMather(input))!= null) {
+            showInventory();
+        } else if ((matcher = GameMenuCommands.INVENTORY_TRASH.getMather(input))!= null) {
+            trashItem(matcher.group("item"),matcher.group("number"));
         }
     }
     public void showCurrentTime(){
@@ -95,6 +105,30 @@ public class GameMenu extends AppMenu {
 
     public void cheatWeather(String type){
         Result result = controller.cheatWeather(type);
+        System.out.println(result.getMessage());
+    }
+
+    public void showEnergy(){
+        Result result = controller.showEnergy();
+        System.out.println(result.getMessage());
+    }
+    public void setEnergy(String amount){
+        Result result = controller.setEnergy(amount);
+        System.out.println(result.getMessage());
+    }
+
+    public void setEnergyUnlimited(){
+        Result result = controller.setUnlimited();
+        System.out.println(result.getMessage());
+    }
+
+    public void showInventory(){
+        Result result = controller.showInventory();
+        System.out.println(result.getMessage());
+    }
+
+    public void trashItem(String item, String number){
+        Result result = controller.trashItem(item, number);
         System.out.println(result.getMessage());
     }
 }
