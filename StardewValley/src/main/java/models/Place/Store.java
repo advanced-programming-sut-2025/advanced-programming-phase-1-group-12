@@ -20,6 +20,16 @@ public class Store implements Place {
 
     private ArrayList<StoreProducts> storeProducts;
 
+    public Store(LocationOfRectangle locationOfRectangle, String owner, String nameOfStore, int startHour, int closeHour, ArrayList<StoreProducts> storeProducts) {
+
+        this.locationOfRectangle = locationOfRectangle;
+        this.owner = owner;
+        this.nameOfStore = nameOfStore;
+        StartHour = startHour;
+        CloseHour = closeHour;
+        this.storeProducts = storeProducts;
+    }
+
     public LocationOfRectangle getLocationOfRectangle() {
         return locationOfRectangle;
     }

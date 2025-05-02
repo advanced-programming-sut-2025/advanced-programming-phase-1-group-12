@@ -180,6 +180,7 @@ public class GameMenuController implements MenuController {
             case STONE -> "\u001B[103m";     // bright yellow background
             case TREE -> "\u001B[102m";      // bright green background
             case LAKE -> "\u001B[46m";       // cyan background
+            case STORE -> "\u001B[104m";       // Bright Blue
             default -> "\u001B[41m";
         };
     }
@@ -189,6 +190,7 @@ public class GameMenuController implements MenuController {
         Game newGame = new Game();
         App.setCurrentGame(newGame);
         MapSetUp.initializeFarms();
+        MapSetUp.storesSetUp();
 
         loadAllUsersFromFiles();
 

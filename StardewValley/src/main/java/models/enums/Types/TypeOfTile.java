@@ -12,6 +12,8 @@ public enum TypeOfTile {
     QUARRY('Q'),
     HOUSE('H'),
     GROUND('.'),
+    //TODO:probably not necessary(IDK)
+    STORE('s'),
 
     //this is used for seeing if we can buy an animal
     COOP('C'),
