@@ -10,7 +10,7 @@ public class FarmAnimals implements Animals{
     private int friendShip;
 
     // handle it in tile type
-    private Location home;
+    private AnimalHome home;
 
     private String name;
 
@@ -29,9 +29,9 @@ public class FarmAnimals implements Animals{
     //the max value for friendship is 1000
     public void setFriendShip(int friendShip) {this.friendShip = Math.min(friendShip, 1000);}
 
-    public Location getHome() {return home;}
+    public AnimalHome getHome() {return home;}
 
-    public void setHome(Location home) {this.home = home;}
+    public void setHome(AnimalHome home) {this.home = home;}
 
     public Location getPosition() {return position;}
 

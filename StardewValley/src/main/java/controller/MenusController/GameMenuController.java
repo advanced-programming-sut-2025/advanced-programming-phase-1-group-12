@@ -181,6 +181,8 @@ public class GameMenuController implements MenuController {
             case TREE -> "\u001B[102m";      // bright green background
             case LAKE -> "\u001B[46m";       // cyan background
             case STORE -> "\u001B[104m";       // Bright Blue
+            case BARN -> "\u001B[44m";         // Dark Blue (Standard ANSI)
+            case COOP -> "\u001B[48;5;155m";        // light green
             default -> "\u001B[41m";
         };
     }

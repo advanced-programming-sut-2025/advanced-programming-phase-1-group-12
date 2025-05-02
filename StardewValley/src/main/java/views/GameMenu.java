@@ -1,6 +1,7 @@
 package views;
 
 import controller.MenusController.GameMenuController;
+import controller.StoreController;
 import controller.movingPlayer.UserLocationController;
 import models.Fundementals.App;
 import models.Fundementals.Result;
@@ -13,6 +14,7 @@ import java.util.regex.Matcher;
 
 public class GameMenu extends AppMenu {
     private final GameMenuController controller = new GameMenuController();
+    private StoreController storeController = new StoreController();
 
     @Override
     public void check(Scanner scanner) {
@@ -76,6 +78,10 @@ public class GameMenu extends AppMenu {
             showInventory();
         } else if ((matcher = GameMenuCommands.INVENTORY_TRASH.getMather(input)) != null) {
             trashItem(matcher.group("item"), matcher.group("number"));
+        } else if ((matcher = GameMenuCommands.BUILD_BUILDING.getMather(input)) != null) {
+            int x = Integer.parseInt(matcher.group("x"));
+            int y = Integer.parseInt(matcher.group("y"));
+            System.out.println(storeController.buyAnimalBuilding(matcher.group("buildingName"), App.getCurrentGame().getMainMap().findLocation(x, y)));
         }
     }
 

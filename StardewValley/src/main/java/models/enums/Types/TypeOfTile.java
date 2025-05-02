@@ -16,6 +16,7 @@ public enum TypeOfTile {
     STORE('s'),
 
     //this is used for seeing if we can buy an animal
+    //TODO:big or Deluxe stuff is not shown
     COOP('C'),
     BARN('B');
 
