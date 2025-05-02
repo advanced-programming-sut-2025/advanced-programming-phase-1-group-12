@@ -347,5 +347,28 @@ public class GameMenuController implements MenuController {
         }
         return new Result(true, "Trashed item successfully!");
     }
+
+    public Result talk(String username, String message) {
+        Player player1 = App.getCurrentGame().getCurrentPlayer();
+        Player player2 = App.getCurrentGame().getPlayerByName(username);
+        RelationShip relationShip = player1.findRelationShip(player2);
+        relationShip.talk(message);
+        return new Result(true, "message sent!");
+    }
+
+    public Result talkHistory(String username) {
+        Player player1 = App.getCurrentGame().getCurrentPlayer();
+        Player player2 = App.getCurrentGame().getPlayerByName(username);
+        RelationShip relationShip = player1.findRelationShip(player2);
+        return new Result(true,relationShip.talkHistory());
+    }
+
+    public Result gift(String username, String item, String amount) {
+        int inAmount = Integer.parseInt(amount);
+        Player player1 = App.getCurrentGame().getCurrentPlayer();
+        Player player2 = App.getCurrentGame().getPlayerByName(username);
+        RelationShip relationShip = player1.findRelationShip(player2);
+        return new Result(true, "gifted successfully!");
+    }
 }
 

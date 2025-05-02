@@ -81,6 +81,15 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.USE_TOOL.getMather(input))!= null) {
             Result result = toolsController.useTool(matcher.group("direction"));
             System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.TALK.getMather(input))!= null) {
+            Result result = controller.talk(matcher.group("username"), matcher.group("message"));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.TALK_HISTORY.getMather(input))!= null) {
+            Result result = controller.talkHistory(matcher.group("username"));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.GIFT.getMather(input))!= null) {
+            Result result = controller.gift(matcher.group(),matcher.group(),matcher.group());
+            System.out.println(result.getMessage());
         }
     }
     public void showCurrentTime(){

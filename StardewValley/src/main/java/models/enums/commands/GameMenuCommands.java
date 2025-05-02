@@ -36,6 +36,12 @@ public enum GameMenuCommands implements Commands {
     UPGRADE_TOOL("^tools upgrade (?<tool_name>.+)$"),
     USE_TOOL("^tools use -d (?<direction>.+)$"),
 
+    //relationship commands
+    TALK("^talk -u (?<username>.+) -m (?<message>.+)$"),
+    TALK_HISTORY("^talk history -u (?<username>.+)$"),
+    GIFT("^gift -u (?<username>.+) -i (?<item>.+) -a (?<amount>.+)$"),
+
+
     //Damdari commands
     //animals
     BUILD_BUILDING("build -a (?<buildingName>.*) -l <(?<x>\\d+) , (?<y>\\d+)>"),

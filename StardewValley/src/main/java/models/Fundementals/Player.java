@@ -16,21 +16,13 @@ import java.util.ArrayList;
 
 public class Player {
     private User user;
-
     private Location userLocation;
-
     private boolean isMarried;
-
     private int energy;
-
     public Refrigrator Refrigrator = new Refrigrator();
-
     private ArrayList<Ability> abilitis = new ArrayList<Ability>();
-
     private ArrayList<RelationShip> relationShips = new ArrayList<>();
-
     private ArrayList<RelationShip.Trade> trade = new ArrayList<>();
-
     private Farm ownedFarm;
 
     private BackPack backPack;
@@ -46,7 +38,7 @@ public class Player {
         this.userLocation = userLocation;
         this.isMarried = isMarried;
         this.energy = 200;
-        Refrigrator = refrigrator;
+        this.Refrigrator = refrigrator;
         this.abilitis = abilitis;
         this.relationShips = relationShips;
         this.trade = trade;
@@ -76,6 +68,9 @@ public class Player {
         return backPack;
     }
 
+    public boolean isMarried() {
+        return isMarried;
+    }
 
     public void setUserLocation(Location userLocation) {
         this.userLocation = userLocation;
@@ -106,6 +101,15 @@ public class Player {
         if(energy == 0){
             this.hasCollapsed = true;
         }
+    }
+
+    public RelationShip findRelationShip(Player player2){
+        for(RelationShip relationShip : relationShips){
+            if(relationShip.getPlayer1().equals(player2) || relationShip.getPlayer2().equals(player2)){
+                return relationShip;
+            }
+        }
+        return null;
     }
 
 }

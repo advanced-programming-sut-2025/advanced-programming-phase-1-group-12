@@ -21,6 +21,15 @@ public class Game {
     private ArrayList<Player> players = new ArrayList<>();
     private static ArrayList<Farm> farms = new ArrayList<>();
 
+    public Player getPlayerByName(String playerName) {
+        for (Player player : players) {
+            if(player.getUser().getUserName().equals(playerName)) {
+                return player;
+            }
+        }
+        return null;
+    }
+
     public Player getCurrentPlayer() {
         return currentPlayer;
     }
