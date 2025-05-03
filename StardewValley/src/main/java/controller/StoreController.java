@@ -126,6 +126,7 @@ public class StoreController {
         App.getCurrentPlayerLazy().setMoney(App.getCurrentPlayerLazy().getMoney() - type.getPurchaseCost());
         FarmAnimals newAnimal = new FarmAnimals(type, 0, home, name,
                 App.getCurrentGame().getMainMap().findLocation(home.getLocation().getTopLeftCorner().getxAxis() + 1, home.getLocation().getTopLeftCorner().getyAxis() + 1));
+        //vaghti too khoonan roo haman
         App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals().add(newAnimal);
         home.setCapacityRemained(home.getCapacityRemained() - 1);
 

@@ -4,6 +4,7 @@ import controller.MapSetUp.MapSetUp;
 import models.Date;
 import models.Fundementals.*;
 import models.Place.Farm;
+import models.RelatedToUser.Ability;
 import models.RelatedToUser.User;
 import models.*;
 import models.enums.*;
@@ -212,6 +213,7 @@ public class GameMenuController implements MenuController {
             Player newPlayer = new Player(user, null, false, null, new ArrayList<>(),
                     new ArrayList<>(), null, null, null, false, false, 0);
             players.add(newPlayer);
+            abilitiesSetUp(newPlayer);
 
             System.out.println("Do you want to know what each farm has?");
             String selection = scanner.nextLine();
@@ -261,6 +263,18 @@ public class GameMenuController implements MenuController {
         MapSetUp.showMapWithFarms(App.getCurrentGame().getMainMap());
 
         System.out.println("All farms have been assigned!");
+    }
+
+    public void abilitiesSetUp(Player player) {
+        Ability fishing = new Ability("fishing", 0);
+        Ability farming = new Ability("farming", 0);
+        Ability mining = new Ability("mining", 0);
+        Ability nature = new Ability("nature", 0);
+
+        player.getAbilitis().add(fishing);
+        player.getAbilitis().add(farming);
+        player.getAbilitis().add(mining);
+        player.getAbilitis().add(nature);
     }
 
     private void guideForFarm(){

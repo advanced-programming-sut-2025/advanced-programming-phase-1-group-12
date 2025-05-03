@@ -83,19 +83,25 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.BUILD_BUILDING.getMather(input)) != null) {
             int x = Integer.parseInt(matcher.group("x"));
             int y = Integer.parseInt(matcher.group("y"));
-            System.out.println(storeController.buyAnimalBuilding(matcher.group("buildingName"), App.getCurrentGame().getMainMap().findLocation(x, y)));
+            System.out.println(storeController.buyAnimalBuilding(matcher.group("buildingName"), App.getCurrentGame().getMainMap().findLocation(x, y)).getMessage());
         } else if ((matcher = GameMenuCommands.PET.getMather(input)) != null) {
-            System.out.println(animalController.pet(matcher.group("name")));
+            System.out.println(animalController.pet(matcher.group("name")).getMessage());
         } else if ((matcher = GameMenuCommands.SHEAR.getMather(input)) != null) {
-            System.out.println(animalController.shear(matcher.group("name")));
+            System.out.println(animalController.shear(matcher.group("name")).getMessage());
         } else if ((matcher = GameMenuCommands.MILK.getMather(input)) != null) {
-            System.out.println(animalController.milking(matcher.group("name")));
+            System.out.println(animalController.milking(matcher.group("name")).getMessage());
         } else if ((matcher = GameMenuCommands.ANIMALS_LIST.getMather(input)) != null) {
             animalController.animalsList();
         } else if ((matcher = GameMenuCommands.CHEAT_SET_FRIENDSHIP.getMather(input)) != null) {
-            System.out.println(animalController.cheatFriendship(matcher));
+            System.out.println(animalController.cheatFriendship(matcher).getMessage());
         } else if ((matcher = GameMenuCommands.BUY_ANIMAL.getMather(input)) != null) {
-            System.out.println(storeController.buyAnimal(matcher));
+            System.out.println(storeController.buyAnimal(matcher).getMessage());
+        } else if ((matcher = GameMenuCommands.SHEPHERD_ANIMALS.getMather(input)) != null) {
+            System.out.println(animalController.shepherd(matcher).getMessage());
+        } else if ((matcher = GameMenuCommands.FISHING.getMather(input)) != null) {
+            System.out.println(animalController.fishing(matcher.group("fishingPole")).getMessage());
+        } else if ((matcher = GameMenuCommands.SELL_ANIMAL.getMather(input)) != null) {
+            System.out.println(animalController.sellAnimal(matcher.group("name")).getMessage());
         }
     }
 

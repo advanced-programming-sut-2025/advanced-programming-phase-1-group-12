@@ -1,5 +1,6 @@
 package models;
 
+import models.Animal.Fish;
 import models.enums.ToolEnums.BackPackTypes;
 
 import javax.tools.Tool;
@@ -11,6 +12,7 @@ import java.util.Map;
 public class BackPack {
     private Map<Tools, Integer> tools;
     private BackPackTypes type;
+    ArrayList<Fish>fishes = new ArrayList<>();
     public BackPack(BackPackTypes type) {
         this.tools = new HashMap<>();
         this.type = type;
@@ -72,4 +74,7 @@ public class BackPack {
         }
     }
 
+    public ArrayList<Fish> getFishes() {
+        return fishes;
+    }
 }

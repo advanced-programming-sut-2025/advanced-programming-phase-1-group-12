@@ -8,7 +8,7 @@ public enum Animal {
     //by cage, I mean coop
     CHICKEN(800, Map.of("Egg", 50, "Large Egg", 95), true,
             "Lives in a Coop (capacity 4). Produces eggs daily if cared for. Can live in upgraded Coops.",
-            new ArrayList<>(List.of("coop"))),
+            new ArrayList<>(List.of("coop", "deluxe coop", "big coop"))),
 
     DUCK(1200, Map.of("Duck Egg", 95, "Duck Feather", 250), true,
             "Lives in a Big Coop (capacity 8). Produces products every 2 days. Happier ducks are more likely to produce feathers. Can also live in Deluxe Coop.",
