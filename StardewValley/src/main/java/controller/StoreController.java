@@ -1,6 +1,5 @@
 package controller;
 
-import controller.MenusController.GameMenuController;
 import models.Animal.AnimalHome;
 import models.Animal.FarmAnimals;
 import models.Fundementals.App;
@@ -10,16 +9,17 @@ import models.Fundementals.LocationOfRectangle;
 import models.Fundementals.Result;
 import models.Place.Store;
 import models.ProductsPackage.StoreProducts;
+import models.enums.Animal;
 import models.enums.Types.TypeOfTile;
 
 import java.util.List;
-import java.util.Scanner;
+import java.util.regex.Matcher;
 
 public class StoreController {
 
     public Result buyAnimalBuilding(String buildingName, Location location) {
         if (!App.isLocationInPlace(location, App.getCurrentGame().getMainMap().getStores().get(3).getLocationOfRectangle())) {
-            //TODO:money for building is not decreased.no money is said anywhere!
+            //TODO:money for building is not decreased
             return new Result(false, "You are not in Carpenter's shop");
         }
         if (App.isLocationInPlace(location, App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getLocation())) {
@@ -61,7 +61,7 @@ public class StoreController {
                         new AnimalHome(4, "coop", buildingPlace)
                 );
                 break;
-            case "Deluxe coop":
+            case "deluxe coop":
                 App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes().add(
                         new AnimalHome(12, "Deluxe coop", buildingPlace)
                 );
@@ -74,7 +74,7 @@ public class StoreController {
                 App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getAnimalHomes().add
                         (new AnimalHome(4, "normal barn", buildingPlace));
                 break;
-            case "Deluxe barn":
+            case "deluxe barn":
                 App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getAnimalHomes().add
                         (new AnimalHome(12, "Deluxe barn", buildingPlace));
                 break;
@@ -85,7 +85,6 @@ public class StoreController {
             default:
                 System.out.println("Invalid building name entered");
         }
-
     }
     public boolean isAllLocationGround(LocationOfRectangle place){
         for(Location location : place.getLocationsInRectangle()){
@@ -95,6 +94,50 @@ public class StoreController {
             }
         }
         return true;
+    }
+
+    public Result buyAnimal(Matcher matcher) {
+        //TODO:money for building is not decreased
+        String name = matcher.group("name");
+        String animalType = matcher.group("animal");
+
+        Animal type = findAnimalType(animalType);
+        if(type == null) {
+            return new Result(false, "Animal type " + animalType + " not found");
+        }
+        if (!App.isLocationInPlace(App.getCurrentPlayerLazy().getUserLocation(),
+                App.getCurrentGame().getMainMap().getStores().get(5).getLocationOfRectangle())) {
+            return new Result(false, "You are not in Marnie's Ranch");
+        }
+        if(App.getCurrentPlayerLazy().getMoney() < type.getPurchaseCost()) {
+            return new Result(false, "You do not have enough money to buy this animal");
+        }
+        AnimalHome home = null;
+        for(AnimalHome animalHome : App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes()){
+            if(animalHome.getCapacityRemained() > 0 && type.getPlacesCanStay().contains(animalHome.getType())){
+                home = animalHome;
+                break;
+            }
+        }
+        if(home == null) {
+            return new Result(false, "You can't buy this animal because there is no home for it");
+        }
+        //pay for it
+        App.getCurrentPlayerLazy().setMoney(App.getCurrentPlayerLazy().getMoney() - type.getPurchaseCost());
+        FarmAnimals newAnimal = new FarmAnimals(type, 0, home, name,
+                App.getCurrentGame().getMainMap().findLocation(home.getLocation().getTopLeftCorner().getxAxis() + 1, home.getLocation().getTopLeftCorner().getyAxis() + 1));
+        App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals().add(newAnimal);
+        home.setCapacityRemained(home.getCapacityRemained() - 1);
+
+        return new Result(true, "You bought this animal");
+    }
+    public Animal findAnimalType(String animalType){
+        for(Animal type : Animal.values()){
+            if(animalType.equalsIgnoreCase(type.name())){
+                return type;
+            }
+        }
+        return null;
     }
     public Store findStore(Location location){return null;}
 
@@ -110,6 +153,5 @@ public class StoreController {
     public void addCount(){
 
     }
-
 
 }

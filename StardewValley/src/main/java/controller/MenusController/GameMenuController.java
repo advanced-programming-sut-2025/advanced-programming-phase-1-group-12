@@ -210,7 +210,7 @@ public class GameMenuController implements MenuController {
 
             System.out.println("User: " + username);
             Player newPlayer = new Player(user, null, false, null, new ArrayList<>(),
-                    new ArrayList<>(), null, null, null, false, false);
+                    new ArrayList<>(), null, null, null, false, false, 0);
             players.add(newPlayer);
 
             System.out.println("Do you want to know what each farm has?");

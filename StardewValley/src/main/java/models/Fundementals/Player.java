@@ -26,11 +26,12 @@ public class Player {
     private BackPack backPack;
     private boolean isEnergyUnlimited;
     private boolean hasCollapsed;
+    private int money;
 
 
     public Player(User user, Location userLocation, boolean isMarried, Refrigrator refrigrator,
                   ArrayList<Ability> abilitis, ArrayList<RelationShip> relationShips, ArrayList<RelationShip.Trade> trade,
-                  Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited, boolean hasCollapsed) {
+                  Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited, boolean hasCollapsed, int money) {
         this.user = user;
         this.userLocation = userLocation;
         this.isMarried = isMarried;
@@ -43,6 +44,7 @@ public class Player {
         this.backPack = backPack;
         this.isEnergyUnlimited = isEnergyUnlimited;
         this.hasCollapsed = hasCollapsed;
+        this.money = money;
     }
 
     public User getUser() {
@@ -159,5 +161,13 @@ public class Player {
         if (energy == 0) {
             this.hasCollapsed = true;
         }
+    }
+
+    public int getMoney() {
+        return money;
+    }
+
+    public void setMoney(int money) {
+        this.money = money;
     }
 }

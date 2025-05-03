@@ -94,6 +94,8 @@ public class GameMenu extends AppMenu {
             animalController.animalsList();
         } else if ((matcher = GameMenuCommands.CHEAT_SET_FRIENDSHIP.getMather(input)) != null) {
             System.out.println(animalController.cheatFriendship(matcher));
+        } else if ((matcher = GameMenuCommands.BUY_ANIMAL.getMather(input)) != null) {
+            System.out.println(storeController.buyAnimal(matcher));
         }
     }
 

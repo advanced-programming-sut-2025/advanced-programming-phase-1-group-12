@@ -6,7 +6,6 @@ import models.Fundementals.LocationOfRectangle;
 public class AnimalHome {
     private int CapacityRemained;
 
-
     //normal coop, Deluxe coop, big coop, normal barn, Deluxe barn, big barn:
     private String Type;
 

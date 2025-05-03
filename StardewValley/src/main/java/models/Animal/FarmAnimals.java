@@ -39,4 +39,12 @@ public class FarmAnimals implements Animals{
 
 
     public String getName() {return name;}
+
+    public FarmAnimals(Animal animal, int friendShip, AnimalHome home, String name, Location position) {
+        this.animal = animal;
+        this.friendShip = friendShip;
+        this.home = home;
+        this.name = name;
+        this.position = position;
+    }
 }
