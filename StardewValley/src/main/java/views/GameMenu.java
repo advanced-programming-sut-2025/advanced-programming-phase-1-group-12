@@ -109,25 +109,8 @@ public class GameMenu extends AppMenu {
             String username = matcher.group("username");
             String type = matcher.group("type");
             String item = matcher.group("item");
-            int amount = Integer.parseInt(matcher.group("amount"));
+            createTrade(username, type, item, matcher);
 
-            Integer price = null;
-            String targetItem = null;
-            Integer targetAmount = null;
-
-            // Check if price is specified
-            if (matcher.group("price") != null) {
-                price = Integer.parseInt(matcher.group("price"));
-            }
-
-            // Check if target item and amount are specified
-            if (matcher.group("targetItem") != null && matcher.group("targetAmount") != null) {
-                targetItem = matcher.group("targetItem");
-                targetAmount = Integer.parseInt(matcher.group("targetAmount"));
-            }
-
-            Result result = controller.createTrade(username, type, item, amount, price, targetItem, targetAmount);
-            System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.TRADE_LIST.getMather(input))!= null) {
             Result result = controller.listTrades();
             System.out.println(result.getMessage());
@@ -208,6 +191,23 @@ public class GameMenu extends AppMenu {
 
     public void showEnergy(){
         Result result = controller.showEnergy();
+        System.out.println(result.getMessage());
+    }
+
+    public void createTrade(String username, String type, String item, Matcher matcher){
+        int amount = Integer.parseInt(matcher.group("amount"));
+        Integer price = null;
+        String targetItem = null;
+        Integer targetAmount = null;
+        if (matcher.group("price") != null) {
+            price = Integer.parseInt(matcher.group("price"));
+        }
+        if (matcher.group("targetItem") != null && matcher.group("targetAmount") != null) {
+            targetItem = matcher.group("targetItem");
+            targetAmount = Integer.parseInt(matcher.group("targetAmount"));
+        }
+
+        Result result = controller.createTrade(username, type, item, amount, price, targetItem, targetAmount);
         System.out.println(result.getMessage());
     }
 }
