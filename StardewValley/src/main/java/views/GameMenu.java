@@ -102,6 +102,43 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.RESPOND.getMather(input))!= null) {
             Result result = controller.respond(matcher.group(0), matcher.group("username"));
             System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.START_TRADE.getMather(input))!= null) {
+            Result result = controller.startTrade();
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.TRADE_CREATE.getMather(input))!= null) {
+            String username = matcher.group("username");
+            String type = matcher.group("type");
+            String item = matcher.group("item");
+            int amount = Integer.parseInt(matcher.group("amount"));
+
+            Integer price = null;
+            String targetItem = null;
+            Integer targetAmount = null;
+
+            // Check if price is specified
+            if (matcher.group("price") != null) {
+                price = Integer.parseInt(matcher.group("price"));
+            }
+
+            // Check if target item and amount are specified
+            if (matcher.group("targetItem") != null && matcher.group("targetAmount") != null) {
+                targetItem = matcher.group("targetItem");
+                targetAmount = Integer.parseInt(matcher.group("targetAmount"));
+            }
+
+            Result result = controller.createTrade(username, type, item, amount, price, targetItem, targetAmount);
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.TRADE_LIST.getMather(input))!= null) {
+            Result result = controller.listTrades();
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.TRADE_RESPONSE.getMather(input))!= null) {
+            String response = matcher.group(1); // accept or reject
+            String id = matcher.group("id");
+            Result result = controller.respondToTrade(response, id);
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.TRADE_HISTORY.getMather(input))!= null) {
+            Result result = controller.tradeHistory();
+            System.out.println(result.getMessage());
         }
 
     }
@@ -133,7 +170,7 @@ public class GameMenu extends AppMenu {
         Result result = controller.cheatAdvancedDay(day);
         System.out.println(result.getMessage());
     }
-    
+
     public void season(){
         Result result = controller.showSeason();
         System.out.println(result.getMessage());

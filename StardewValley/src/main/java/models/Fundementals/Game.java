@@ -3,6 +3,7 @@ package models.Fundementals;
 import controller.MapSetUp.MapSetUp;
 import models.Date;
 import models.Fundementals.Location;
+import models.NPC.NPCvillage;
 import models.Place.Farm;
 import models.RelatedToUser.User;
 import models.map;
@@ -20,6 +21,7 @@ public class Game {
     Map<Farm, Player> userAndMap = new HashMap<>();
     private ArrayList<Player> players = new ArrayList<>();
     private static ArrayList<Farm> farms = new ArrayList<>();
+    private NPCvillage npcVillage;
 
     public Player getPlayerByName(String playerName) {
         for (Player player : players) {
@@ -94,5 +96,24 @@ public class Game {
 
     public static void setFarms(ArrayList<Farm> farms) {
         Game.farms = farms;
+    }
+
+    public NPCvillage getNPCvillage() {
+        return npcVillage;
+    }
+
+    public void setNPCvillage(NPCvillage npcVillage) {
+        this.npcVillage = npcVillage;
+    }
+
+    public void initializeNPCvillage() {
+        // Create a village in a fixed location on the map
+        // Using coordinates 20,20 as the top-left corner of a 10x10 village area
+        Location topLeft = new Location(20, 20);
+        Location bottomRight = new Location(30, 30);
+        LocationOfRectangle villageArea = new LocationOfRectangle(topLeft, bottomRight);
+
+        // Create and initialize the NPC village
+        this.npcVillage = new NPCvillage(villageArea);
     }
 }

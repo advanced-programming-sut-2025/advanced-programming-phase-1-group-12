@@ -4,6 +4,7 @@ import models.Fundementals.App;
 import models.Fundementals.Location;
 import models.Fundementals.Result;
 import models.BackPack;
+import models.Item;
 import models.ToolsPackage.Tools;
 import models.enums.Types.TypeOfTile;
 import models.Animal.FarmAnimals;
@@ -34,9 +35,9 @@ public class ToolsController {
     public Result equipTool(String toolName) {
         BackPack backPack = App.getCurrentPlayerLazy().getBackPack();
 
-        for (Tools tool : backPack.getItems().keySet()) {
-            if (tool.getName().equalsIgnoreCase(toolName)) {
-                currentTool = tool;
+        for (Item item : backPack.getItems().keySet()) {
+            if (item.getName().equalsIgnoreCase(toolName)) {
+                currentTool = (Tools) item;
                 return new Result(true, "You equipped the " + toolName);
             }
         }

@@ -1,13 +1,10 @@
-package models;
+package models.RelationShips;
 
 import models.Fundementals.Player;
-import models.RelatedToUser.User;
-import models.ToolsPackage.Tools;
+import models.Item;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class RelationShip {
     private Player player1;

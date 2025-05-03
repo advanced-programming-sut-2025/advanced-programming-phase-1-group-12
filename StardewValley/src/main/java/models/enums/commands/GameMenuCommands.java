@@ -47,6 +47,14 @@ public enum GameMenuCommands implements Commands {
     FLOWER("^flower -u (?<username>.+)$"),
     ASK_MARRIAGE("^ask marriage -u (?<username>.+) -r (?<ring>.+)$"),
     RESPOND("^respond -(accept|reject) -u (?<username>.+)$"),
+
+    // Trade commands
+    START_TRADE("^start trade$"),
+    TRADE_CREATE("^trade -u (?<username>\\S+) -t (?<type>request|offer) -i (?<item>\\S+) -a (?<amount>\\d+)( -p (?<price>\\d+))?( -ti (?<targetItem>\\S+) -ta (?<targetAmount>\\d+))?$"),
+    TRADE_LIST("^trade list$"),
+    TRADE_RESPONSE("^trade response --(accept|reject) -i (?<id>\\S+)$"),
+    TRADE_HISTORY("^trade history$"),
+
     //Damdari commands
     //animals
     BUILD_BUILDING("build -a (?<buildingName>.*) -l <(?<x>\\d+) , (?<y>\\d+)>"),
@@ -72,7 +80,12 @@ public enum GameMenuCommands implements Commands {
     COOKING_RECIPES("cooking show recipes"),
     COOKING_PREPARE("cooking prepare (?<recipeName>.*)"),
 
-    EAT_FOOD("eat (?<foodName>.*)");
+    EAT_FOOD("eat (?<foodName>.*)"),
+
+    // NPC commands
+    MEET_NPC("^meet NPC (?<npcName>.+)$"),
+    GIFT_NPC("^gift NPC (?<npcName>.+) -i (?<item>.+)$"),
+    FRIENDSHIP_NPC_LIST("^friendship NPC list$");
 
 
     private final String pattern;

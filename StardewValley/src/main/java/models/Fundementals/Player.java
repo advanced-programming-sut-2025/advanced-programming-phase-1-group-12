@@ -5,7 +5,7 @@ import models.Place.Farm;
 import models.Refrigrator;
 import models.RelatedToUser.Ability;
 import models.RelatedToUser.User;
-import models.RelationShip;
+import models.RelationShips.RelationShip;
 
 import java.util.ArrayList;
 
@@ -25,15 +25,15 @@ public class Player {
     private Player partner;
 
 
-    public Player(User user, Location userLocation, boolean isMarried,Refrigrator refrigrator,
-                  ArrayList<Ability> abilitis, ArrayList<RelationShip> relationShips, ArrayList<RelationShip.Trade> trade,
+    public Player(User user, Location userLocation, boolean isMarried, Refrigrator refrigrator,
+                  ArrayList<Ability> abilities, ArrayList<RelationShip> relationShips, ArrayList<Trade> trade,
                   Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited, boolean hasCollapsed ) {
         this.user = user;
         this.userLocation = userLocation;
         this.isMarried = isMarried;
         this.energy = 200;
         this.Refrigrator = refrigrator;
-        this.abilitis = abilitis;
+        this.abilitis = abilities;
         this.relationShips = relationShips;
         this.ownedFarm = ownedFarm;
         this.backPack = backPack;

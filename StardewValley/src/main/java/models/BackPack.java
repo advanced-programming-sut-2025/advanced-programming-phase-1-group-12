@@ -11,6 +11,7 @@ public class BackPack {
     private BackPackTypes type;
     public BackPack(BackPackTypes type) {
         this.items = new HashMap<>();
+        this.itemNames = new HashMap<>();
         this.type = type;
     }
 
@@ -76,7 +77,15 @@ public class BackPack {
     }
 
     public void decreaseItem(Item item, int amount) {
-        items.remove(item, amount);
+        if (items.containsKey(item)) {
+            int currentAmount = items.get(item);
+            if (currentAmount <= amount) {
+                items.remove(item);
+                itemNames.remove(item.getName());
+            } else {
+                items.put(item, currentAmount - amount);
+            }
+        }
     }
 
     public Item getItemByName(String toolName) {
