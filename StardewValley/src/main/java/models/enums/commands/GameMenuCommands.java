@@ -44,6 +44,9 @@ public enum GameMenuCommands implements Commands {
     PRODUCES("^produces$"),
     COLLECT ("collect produce -n (?<name>.*)"),
     SELL_ANIMAL("sell animal -n (?<name>.*)"),
+    //pashmesho bezane va shir bedooshe
+    SHEAR("^shear -n (?<name>.*)"),
+    MILK("^milk -n (?<name>.*)"),
 
     //fishes
     FISHING("fishing -p (?<fishingPole>.*)"),

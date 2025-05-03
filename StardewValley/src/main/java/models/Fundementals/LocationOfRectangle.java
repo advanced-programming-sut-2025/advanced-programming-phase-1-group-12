@@ -50,4 +50,7 @@ public class LocationOfRectangle {
         return width;
     }
 
+    public ArrayList<Location> getLocationsInRectangle() {
+        return locationsInRectangle;
+    }
 }

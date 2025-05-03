@@ -8,13 +8,6 @@ import java.util.regex.Matcher;
 
 public class AnimalController {
 
-    public boolean isLocationInPlace(Location location, LocationOfRectangle place){
-        return location.getxAxis() >= place.getTopLeftCorner().getxAxis() &&
-                location.getxAxis() <= place.getTopLeftCorner().getxAxis() + place.getWidth() &&
-                location.getyAxis() >= place.getTopLeftCorner().getyAxis() &&
-                location.getyAxis() <= place.getTopLeftCorner().getyAxis() + place.getLength();
-    }
-
     public FarmAnimals findAnimalByName(String animalName){
         for(FarmAnimals animals : App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()){
             if(animals.getName().equals(animalName)){

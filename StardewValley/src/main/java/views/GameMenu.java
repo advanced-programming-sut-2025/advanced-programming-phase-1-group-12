@@ -1,5 +1,6 @@
 package views;
 
+import controller.AnimalController;
 import controller.MenusController.GameMenuController;
 import controller.StoreController;
 import controller.movingPlayer.UserLocationController;
@@ -15,6 +16,7 @@ import java.util.regex.Matcher;
 public class GameMenu extends AppMenu {
     private final GameMenuController controller = new GameMenuController();
     private StoreController storeController = new StoreController();
+    private AnimalController animalController = new AnimalController();
 
     @Override
     public void check(Scanner scanner) {
@@ -82,6 +84,16 @@ public class GameMenu extends AppMenu {
             int x = Integer.parseInt(matcher.group("x"));
             int y = Integer.parseInt(matcher.group("y"));
             System.out.println(storeController.buyAnimalBuilding(matcher.group("buildingName"), App.getCurrentGame().getMainMap().findLocation(x, y)));
+        } else if ((matcher = GameMenuCommands.PET.getMather(input)) != null) {
+            System.out.println(animalController.pet(matcher.group("name")));
+        } else if ((matcher = GameMenuCommands.SHEAR.getMather(input)) != null) {
+            System.out.println(animalController.shear(matcher.group("name")));
+        } else if ((matcher = GameMenuCommands.MILK.getMather(input)) != null) {
+            System.out.println(animalController.milking(matcher.group("name")));
+        } else if ((matcher = GameMenuCommands.ANIMALS_LIST.getMather(input)) != null) {
+            animalController.animalsList();
+        } else if ((matcher = GameMenuCommands.CHEAT_SET_FRIENDSHIP.getMather(input)) != null) {
+            System.out.println(animalController.cheatFriendship(matcher));
         }
     }
 
