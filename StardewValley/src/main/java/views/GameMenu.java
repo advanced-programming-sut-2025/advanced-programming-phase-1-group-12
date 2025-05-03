@@ -1,6 +1,8 @@
 package views;
 
+import controller.CraftingController;
 import controller.MenusController.GameMenuController;
+import controller.StoreController;
 import controller.movingPlayer.UserLocationController;
 import models.Fundementals.App;
 import models.Fundementals.Result;
@@ -13,6 +15,8 @@ import java.util.regex.Matcher;
 
 public class GameMenu extends AppMenu {
     private final GameMenuController controller = new GameMenuController();
+    private StoreController storeController = new StoreController();
+    private CraftingController craftingController = new CraftingController();
 
     @Override
     public void check(Scanner scanner) {
@@ -29,6 +33,8 @@ public class GameMenu extends AppMenu {
             controller.Play(scanner, players);
         } else if ((matcher = GameMenuCommands.EXIT.getMather(input)) != null) {
             System.out.println(controller.EXIT());
+        } else if ((matcher = GameMenuCommands.LoadGame.getMather(input)) != null) {
+            System.out.println(controller.loadGameById(Integer.parseInt(matcher.group("gameID"))));
         } else if ((matcher = GameMenuCommands.PRINT.getMather(input)) != null) {
             controller.printMap(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y")),
                     Integer.parseInt(matcher.group("size")), scanner);
@@ -76,6 +82,33 @@ public class GameMenu extends AppMenu {
             showInventory();
         } else if ((matcher = GameMenuCommands.INVENTORY_TRASH.getMather(input)) != null) {
             trashItem(matcher.group("item"), matcher.group("number"));
+        } else if ((matcher = GameMenuCommands.BUILD_BUILDING.getMather(input)) != null) {
+            int x = Integer.parseInt(matcher.group("x"));
+            int y = Integer.parseInt(matcher.group("y"));
+            System.out.println(storeController.buyAnimalBuilding(matcher.group("buildingName"), App.getCurrentGame().getMainMap().findLocation(x, y)));
+        } else if ((matcher = GameMenuCommands.CRAFT_INFO.getMather(input)) != null) {
+            System.out.println(craftingController.showCraftInto(matcher.group("craftName")));
+        } else if ((matcher = GameMenuCommands.PLANT.getMather(input)) != null) {
+            System.out.println(craftingController.plant(matcher.group("seed"), matcher.group("direction")));
+        } else if ((matcher = GameMenuCommands.SHOW_PLANT.getMather(input)) != null) {
+            System.out.println(craftingController.showPlant(matcher.group("X"), matcher.group("Y")));
+        } else if ((matcher = GameMenuCommands.FERTILIZE.getMather(input)) != null) {
+            System.out.println(craftingController.fertilize(matcher.group("fertilize"), matcher.group("direction")));
+        } else if ((matcher = GameMenuCommands.REAPING.getMather(input)) != null) {
+            System.out.println(craftingController.reaping(matcher.group("direction")));
+        } else if ((matcher = GameMenuCommands.HOW_MUCH_WATER.getMather(input)) != null) {
+            System.out.println(craftingController.howMuchWater());
+        } else if ((matcher = GameMenuCommands.ADD_TO_INVENTORY.getMather(input)) != null) {
+            System.out.println(craftingController.addItem(matcher.group("itemName"),
+                    Integer.parseInt(matcher.group("count"))));
+        } else if ((matcher = GameMenuCommands.PLACE_ON_GROUND.getMather(input)) != null) {
+            System.out.println(craftingController.putItem(matcher.group("itemName"), matcher.group("direction")));
+        } else if ((matcher = GameMenuCommands.MACK_CRAFT.getMather(input)) != null) {
+            System.out.println(craftingController.makeItem(matcher.group("itemName")));
+        } else if ((matcher = GameMenuCommands.SHOW_RECIPES.getMather(input)) != null) {
+            System.out.println(craftingController.showRecipesforCrafting());
+        } else {
+            System.out.println("invalid command");
         }
     }
 

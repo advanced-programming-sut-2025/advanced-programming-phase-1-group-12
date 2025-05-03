@@ -8,6 +8,7 @@ import models.RelatedToUser.Ability;
 import models.RelatedToUser.Energy;
 import models.RelatedToUser.User;
 import models.RelationShip;
+import models.enums.Types.SeedSeason;
 import models.map;
 
 import java.util.ArrayList;
@@ -146,6 +147,7 @@ public class Player {
     public void setEnergyUnlimited(boolean energyUnlimited) {
         isEnergyUnlimited = energyUnlimited;
     }
+
 
     public void setHasCollapsed(boolean hasCollapsed) {
         this.hasCollapsed = hasCollapsed;

@@ -1,5 +1,6 @@
 package models.Place;
 
+import models.Animal.AnimalHome;
 import models.Animal.FarmAnimals;
 import models.Fundementals.Location;
 import models.Fundementals.LocationOfRectangle;
@@ -22,6 +23,7 @@ public class Farm implements Place {
     private Quarry quarry;
     private Quarry quarry2;
     private ArrayList<FarmAnimals> farmAnimals = new ArrayList<>();
+    private ArrayList<AnimalHome> animalHomes = new ArrayList<>();
 
     public Farm(LocationOfRectangle farmLocation) {
         this.farmLocation = farmLocation;
@@ -208,4 +210,11 @@ public class Farm implements Place {
         this.shack2 = shack2;
     }
 
+    public ArrayList<AnimalHome> getAnimalHomes() {
+        return animalHomes;
+    }
+
+    public void setAnimalHomes(ArrayList<AnimalHome> animalHomes) {
+        this.animalHomes = animalHomes;
+    }
 }

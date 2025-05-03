@@ -11,8 +11,20 @@ public enum GameMenuCommands implements Commands {
     SHOW_POSITION("^show location of current player$"),
     WALK("^walk -l (?<x>.*), (?<y>.*)$"),
     EXIT("^exit$"),
-    LoadGame(""),
+    LoadGame("^load game with (?<gameID>.+)$"),
     NextTurn("^next turn"),
+    //farming
+    CRAFT_INFO("^craftinfo -n (?<craftName>.+)$"),
+    PLANT("^plant -s (?<seed>.+) -d (?<direction>.+)$"),
+    SHOW_PLANT("^show plant -l (?<X>.+), (?<Y>.+)$"),
+    FERTILIZE("^fertilize -f (?<fertilize>.+) -d (?<direction>.+)$"),
+    HOW_MUCH_WATER("^how much water$"),
+    REAPING("^Reaping (?<direction>.+)$"),
+    //crafting
+    SHOW_RECIPES("^crafting show recipes$"),
+    MACK_CRAFT("^crafting craft (?<itemName>.+)"),
+    PLACE_ON_GROUND("lace item -n (?<itemName>.+) -d (?<direction>.+)$"),
+    ADD_TO_INVENTORY("^heat add item -n (?<itemName>.+) -c (?<count>.+)"),
     //weather and ....
     SEASON("^season$"),
     TIME("^time$"),

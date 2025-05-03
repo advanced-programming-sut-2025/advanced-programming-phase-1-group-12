@@ -35,4 +35,3 @@ public enum ProductType{
     FLOUNDER,
     MIDNIGHT_CARP
 }
-

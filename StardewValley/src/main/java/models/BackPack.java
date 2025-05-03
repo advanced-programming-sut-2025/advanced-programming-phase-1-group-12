@@ -1,6 +1,8 @@
 package models;
 
 import models.enums.ToolEnums.BackPackTypes;
+import models.enums.Types.FertilizeType;
+import models.enums.Types.SeedSeason;
 
 import javax.tools.Tool;
 import java.util.ArrayList;
@@ -11,9 +13,14 @@ import java.util.Map;
 public class BackPack {
     private Map<Tools, Integer> tools;
     private BackPackTypes type;
+    private ArrayList<SeedSeason> seeds = new ArrayList<>();
+    private ArrayList<FertilizeType> fertilize = new ArrayList<>();
+    private int water;
+
     public BackPack(BackPackTypes type) {
         this.tools = new HashMap<>();
         this.type = type;
+        this.water = 100;
     }
 
     public void setTools(Map<Tools, Integer> tools) {
@@ -72,4 +79,27 @@ public class BackPack {
         }
     }
 
+    public ArrayList<SeedSeason> getSeeds() {
+        return seeds;
+    }
+
+    public void setSeeds(ArrayList<SeedSeason> seeds) {
+        this.seeds = seeds;
+    }
+
+    public ArrayList<FertilizeType> getFertilize() {
+        return fertilize;
+    }
+
+    public void setFertilize(ArrayList<FertilizeType> fertilize) {
+        this.fertilize = fertilize;
+    }
+
+    public int getWater() {
+        return water;
+    }
+
+    public void setWater(int water) {
+        this.water = water;
+    }
 }
