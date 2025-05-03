@@ -40,8 +40,13 @@ public enum GameMenuCommands implements Commands {
     TALK("^talk -u (?<username>.+) -m (?<message>.+)$"),
     TALK_HISTORY("^talk history -u (?<username>.+)$"),
     GIFT("^gift -u (?<username>.+) -i (?<item>.+) -a (?<amount>.+)$"),
-
-
+    GIFT_LIST("^gift list$"),
+    GIFT_RATE("^gift rate -i (?<gift-number>.+) -r (?<rate>.+)$"),
+    GIFT_HISTORY("^gift history -u (?<username>.+)$"),
+    HUG("^hug -u (?<username>.+)$"),
+    FLOWER("^flower -u (?<username>.+)$"),
+    ASK_MARRIAGE("^ask marriage -u (?<username>.+) -r (?<ring>.+)$"),
+    RESPOND("^respond -(accept|reject) -u (?<username>.+)$"),
     //Damdari commands
     //animals
     BUILD_BUILDING("build -a (?<buildingName>.*) -l <(?<x>\\d+) , (?<y>\\d+)>"),

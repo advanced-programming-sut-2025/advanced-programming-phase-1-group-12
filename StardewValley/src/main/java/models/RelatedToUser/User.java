@@ -81,4 +81,8 @@ public class User {
     public ArrayList<Game> getGames() {
         return games;
     }
+
+    public Boolean isFemale() {
+        return isFemale;
+    }
 }

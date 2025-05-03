@@ -90,7 +90,20 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.GIFT.getMather(input))!= null) {
             Result result = controller.gift(matcher.group(),matcher.group(),matcher.group());
             System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.HUG.getMather(input))!= null) {
+            Result result = controller.hug(matcher.group("username"));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.FLOWER.getMather(input))!= null) {
+            Result result= controller.flower(matcher.group("username"));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.ASK_MARRIAGE.getMather(input))!= null) {
+            Result result = controller.askMarriage(matcher.group("username"), matcher.group("ring"));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.RESPOND.getMather(input))!= null) {
+            Result result = controller.respond(matcher.group(0), matcher.group("username"));
+            System.out.println(result.getMessage());
         }
+
     }
     public void showCurrentTime(){
         Result result = controller.showHour();

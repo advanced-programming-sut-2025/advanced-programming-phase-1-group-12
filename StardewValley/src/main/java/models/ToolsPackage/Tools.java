@@ -1,24 +1,21 @@
 package models.ToolsPackage;
 
 import models.Fundementals.Result;
+import models.Item;
 import models.enums.ToolEnums.ToolTypes;
 
-public class Tools {
-    private String name;
+public class Tools extends Item {
     private ToolTypes type;
     private int level;
     private int baseEnergyCost;
 
     public Tools(String name, ToolTypes type, int baseEnergyCost) {
-        this.name = name;
+        super(name);
         this.type = type;
         this.level = 0;
         this.baseEnergyCost = baseEnergyCost;
     }
 
-    public String getName() {
-        return name;
-    }
 
     public ToolTypes getType() {
         return type;

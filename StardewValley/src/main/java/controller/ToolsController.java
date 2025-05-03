@@ -34,7 +34,7 @@ public class ToolsController {
     public Result equipTool(String toolName) {
         BackPack backPack = App.getCurrentPlayerLazy().getBackPack();
 
-        for (Tools tool : backPack.getTools().keySet()) {
+        for (Tools tool : backPack.getItems().keySet()) {
             if (tool.getName().equalsIgnoreCase(toolName)) {
                 currentTool = tool;
                 return new Result(true, "You equipped the " + toolName);
@@ -67,7 +67,7 @@ public class ToolsController {
 
     public Result showToolsAvailable() {
         BackPack backPack = App.getCurrentPlayerLazy().getBackPack();
-        Map<Tools, Integer> tools = backPack.getTools();
+        Map<Tools, Integer> tools = backPack.getItems();
 
         if (tools.isEmpty()) {
             return new Result(false, "You don't have any tools in your backpack");

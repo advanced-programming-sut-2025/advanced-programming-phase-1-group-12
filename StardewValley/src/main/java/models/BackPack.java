@@ -1,25 +1,25 @@
 package models;
 
-import models.ToolsPackage.Tools;
 import models.enums.ToolEnums.BackPackTypes;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class BackPack {
-    private Map<Tools, Integer> tools;
+    private Map<Item, Integer> items;
+    private Map<String, Item> itemNames;
     private BackPackTypes type;
     public BackPack(BackPackTypes type) {
-        this.tools = new HashMap<>();
+        this.items = new HashMap<>();
         this.type = type;
     }
 
-    public void setTools(Map<Tools, Integer> tools) {
-        this.tools = tools;
+    public void setItems(Map<Item, Integer> items) {
+        this.items = items;
     }
 
-    public Map<Tools, Integer> getTools() {
-        return tools;
+    public Map<Item, Integer> getItems() {
+        return items;
     }
 
     public BackPackTypes getType() {
@@ -31,20 +31,20 @@ public class BackPack {
     }
 
     public void decreaseToolQuantity(String toolName, int amount) {
-        Tools toolToUpdate = null;
-        for (Tools tool : tools.keySet()) {
-            if (tool.getName().equals(toolName)) {
-                toolToUpdate = tool;
+        Item toolToUpdate = null;
+        for (Item item : items.keySet()) {
+            if (item.getName().equals(toolName)) {
+                toolToUpdate = item;
                 break;
             }
         }
 
         if (toolToUpdate != null) {
-            int currentQuantity = tools.get(toolToUpdate);
+            int currentQuantity = items.get(toolToUpdate);
             if (currentQuantity > amount) {
-                tools.put(toolToUpdate, currentQuantity - amount);
+                items.put(toolToUpdate, currentQuantity - amount);
             } else {
-                tools.remove(toolToUpdate);
+                items.remove(toolToUpdate);
             }
         } else {
             System.out.println("Tool '" + toolName + "' not found in inventory.");
@@ -57,17 +57,30 @@ public class BackPack {
     }
 
     public void trashAll(String toolName){
-        Tools toolToUpdate = null;
-        for (Tools tool : tools.keySet()) {
-            if (tool.getName().equals(toolName)) {
-                toolToUpdate = tool;
+        Item toolToUpdate = null;
+        for (Item item : items.keySet()) {
+            if (item.getName().equals(toolName)) {
+                toolToUpdate = item;
                 break;
             }
         }
 
         if (toolToUpdate != null) {
-            tools.remove(toolToUpdate);
+            items.remove(toolToUpdate);
         }
+    }
+
+    public void addItem(Item item, int amount) {
+        items.put(item, amount);
+        itemNames.put(item.getName(), item);
+    }
+
+    public void decreaseItem(Item item, int amount) {
+        items.remove(item, amount);
+    }
+
+    public Item getItemByName(String toolName) {
+        return itemNames.get(toolName);
     }
 
 }

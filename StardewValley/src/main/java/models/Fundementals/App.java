@@ -3,6 +3,7 @@ package models.Fundementals;
 import models.Date;
 import models.Fundementals.Game;
 import models.RelatedToUser.User;
+import models.ToolsPackage.Tools;
 import models.enums.Menu;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ public class App {
             Arrays.asList("what is your favorite color?", "what is your favorite country?")
     );
     private static ArrayList<Game> allGames;
+    private static Map<String, Tools> allTools;
 
     public static User getUserByUsername(String username) {
         for(User user : users.values()){
@@ -85,6 +87,10 @@ public class App {
 
     public static ArrayList<String> getSecurityQuestions() {
         return securityQuestions;
+    }
+
+    public static Tools getToolByName(String toolName) {
+        return allTools.get(toolName);
     }
 
 

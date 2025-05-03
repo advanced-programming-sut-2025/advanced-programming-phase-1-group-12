@@ -5,7 +5,6 @@ import models.Fundementals.*;
 import models.Place.Farm;
 import models.RelatedToUser.User;
 import models.*;
-import models.ToolsPackage.Tools;
 import models.enums.*;
 import models.Fundementals.Player;
 import com.google.gson.Gson;
@@ -330,8 +329,8 @@ public class GameMenuController implements MenuController {
         Player player = App.getCurrentGame().getCurrentPlayer();
         BackPack backPack = player.getBackPack();
         StringBuilder result = new StringBuilder("Inventory items: \n");
-        for(Tools tools : backPack.getTools().keySet()){
-            result.append(tools.getName());
+        for(Item items : backPack.getItems().keySet()){
+            result.append(items.getName());
         }
         return new Result(true, result.toString());
     }
@@ -368,7 +367,51 @@ public class GameMenuController implements MenuController {
         Player player1 = App.getCurrentGame().getCurrentPlayer();
         Player player2 = App.getCurrentGame().getPlayerByName(username);
         RelationShip relationShip = player1.findRelationShip(player2);
-        return new Result(true, "gifted successfully!");
+        Item gift  = player1.getBackPack().getItemByName(item);
+        if(item.get)
+        relationShip.gift(gift);
+        return new Result(true, "gifted successfully! you can rate now!");
+    }
+
+    public Result hug(String username){
+        Player player1 = App.getCurrentGame().getCurrentPlayer();
+        Player player2 = App.getCurrentGame().getPlayerByName(username);
+        RelationShip relationShip = player1.findRelationShip(player2);
+        relationShip.hug();
+        return new Result(true, "hugged successfully!");
+    }
+
+    public Result flower(String username){
+        Player player1 = App.getCurrentGame().getCurrentPlayer();
+        Player player2 = App.getCurrentGame().getPlayerByName(username);
+        RelationShip relationShip = player1.findRelationShip(player2);
+        relationShip.flower();
+        return new Result(true, "flowered successfully!");
+    }
+
+    public Result askMarriage(String username, String ring){
+        Player player1 = App.getCurrentGame().getCurrentPlayer();
+        Player player2 = App.getCurrentGame().getPlayerByName(username);
+        RelationShip relationShip = player1.findRelationShip(player2);
+        if(relationShip.askMarriage(ring)){
+            return new Result(true, "marriage asked successfully!");
+        }
+        else{
+            return new Result(false, "cant ask marriage!");
+        }
+    }
+
+    public Result respond(String answer, String username){
+        Player player1 = App.getCurrentGame().getCurrentPlayer();
+        Player player2 = App.getCurrentGame().getPlayerByName(username);
+        RelationShip relationShip = player1.findRelationShip(player2);
+        if(answer.equals("accept")){
+            relationShip.marriage(relationShip.getAskedRing());
+            return new Result(true, "marriage accepted!");
+        }else {
+            relationShip.reject();
+            return new Result(false, "booo!");
+        }
     }
 }
 

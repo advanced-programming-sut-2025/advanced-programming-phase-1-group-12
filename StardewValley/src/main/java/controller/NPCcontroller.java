@@ -10,7 +10,6 @@ public class NPCcontroller {
 
     public void meetNPC(NPC npc){}
 
-    public void giftNPC(NPC npc, RelationShip.Gift gift){}
 
     public void handleMissions(){}
 
