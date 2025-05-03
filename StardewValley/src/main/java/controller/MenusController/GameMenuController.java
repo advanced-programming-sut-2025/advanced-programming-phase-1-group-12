@@ -467,9 +467,7 @@ public class GameMenuController implements MenuController {
             game.setCurrentPlayer(players.getFirst());
 
             App.setCurrentGame(game);
-
             return new Result(true, "Game loaded successfully!");
-
         } catch (IOException e) {
             e.printStackTrace();
             return new Result(false, "Failed to load game due to IO error.");
