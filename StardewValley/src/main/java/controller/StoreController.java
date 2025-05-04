@@ -97,7 +97,6 @@ public class StoreController {
     }
 
     public Result buyAnimal(Matcher matcher) {
-        //TODO:money for building is not decreased
         String name = matcher.group("name");
         String animalType = matcher.group("animal");
 
