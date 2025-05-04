@@ -323,8 +323,10 @@ public class GameMenuController implements MenuController {
             App.getCurrentGame().setCurrentPlayer(players.get(nextIndex2));
         }
 
-        int newHour = App.getCurrentGame().getDate().getHour() + 1;
-        App.getCurrentGame().getDate().setHour(newHour);
+//        int newHour = App.getCurrentGame().getDate().getHour() + 1;
+        App.getCurrentGame().getDate().changeAdvancedTime(1);
+
+//        App.getCurrentGame().getDate().setHour(newHour);
 
         return new Result(true, "Turn moved to " + players.get(nextIndex).getUser().getUserName());
     }

@@ -265,7 +265,50 @@ public class CraftingController {
     //TODO: giant product, mixing seed, trees, attacking from animal
 
     public Result putItem(String itemName, String direction) {
-        //TODO: class item need
+        int Direction = Integer.parseInt(direction);
+        Location currentLocation = App.getCurrentGame().getCurrentPlayer().getUserLocation();
+        int x, y;
+
+        switch (Direction) {
+            case 1 -> {
+                x = currentLocation.getxAxis() - 1;
+                y = currentLocation.getyAxis() + 1;
+            }
+            case 2 -> {
+                x = currentLocation.getxAxis();
+                y = currentLocation.getyAxis() + 1;
+            }
+            case 3 -> {
+                x = currentLocation.getxAxis() + 1;
+                y = currentLocation.getyAxis() + 1;
+            }
+            case 4 -> {
+                x = currentLocation.getxAxis() - 1;
+                y = currentLocation.getyAxis();
+            }
+            case 6 -> {
+                x = currentLocation.getxAxis() + 1;
+                y = currentLocation.getyAxis();
+            }
+            case 7 -> {
+                x = currentLocation.getxAxis() - 1;
+                y = currentLocation.getyAxis() - 1;
+            }
+            case 8 -> {
+                x = currentLocation.getxAxis();
+                y = currentLocation.getyAxis() - 1;
+            }
+            case 9 -> {
+                x = currentLocation.getxAxis() + 1;
+                y = currentLocation.getyAxis() - 1;
+            }
+            default -> {
+                return new Result(false, "Invalid direction");
+            }
+        }
+        Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
+        if (!newLocation.getTypeOfTile().equals(TypeOfTile.SEED))
+            return new Result(false, "there is no seed for reaping!");
         return null;
     }
 
