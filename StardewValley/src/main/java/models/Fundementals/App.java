@@ -94,7 +94,6 @@ public class App {
     }
 
 
-    //useful functions
     public static boolean isLocationInPlace(Location location, LocationOfRectangle place){
         return location.getxAxis() >= place.getTopLeftCorner().getxAxis() &&
                 location.getxAxis() <= place.getTopLeftCorner().getxAxis() + place.getWidth() &&

@@ -455,14 +455,38 @@ public class GameMenuController implements MenuController {
 
     public Result trashItem(String name, String amount) {
         BackPack backPack = App.getCurrentGame().getCurrentPlayer().getBackPack();
-        if(amount == null){
-            backPack.trashAll(name);
+
+        // Find trash can in player's inventory
+        models.ToolsPackage.Tools trashCan = null;
+        for (Item item : backPack.getItems().keySet()) {
+            if (item instanceof models.ToolsPackage.Tools) {
+                models.ToolsPackage.Tools tool = (models.ToolsPackage.Tools) item;
+                if (tool.isTrashCan()) {
+                    trashCan = tool;
+                    break;
+                }
+            }
         }
-        else{
+
+        Result result;
+        if (amount == null) {
+            if (trashCan != null) {
+                result = backPack.trashAll(name, trashCan);
+            } else {
+                backPack.trashAll(name);
+                result = new Result(true, "Trashed all " + name + " successfully!");
+            }
+        } else {
             int intAmount = Integer.parseInt(amount);
-            backPack.trash(name, intAmount);
+            if (trashCan != null) {
+                result = backPack.trash(name, intAmount, trashCan);
+            } else {
+                backPack.trash(name, intAmount);
+                result = new Result(true, "Trashed " + intAmount + " " + name + " successfully!");
+            }
         }
-        return new Result(true, "Trashed item successfully!");
+
+        return result;
     }
 
     public Result talk(String username, String message) {

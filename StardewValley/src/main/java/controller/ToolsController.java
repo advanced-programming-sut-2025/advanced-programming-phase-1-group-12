@@ -68,20 +68,29 @@ public class ToolsController {
 
     public Result showToolsAvailable() {
         BackPack backPack = App.getCurrentPlayerLazy().getBackPack();
-        Map<Tools, Integer> tools = backPack.getItems();
+        Map<Item, Integer> items = backPack.getItems();
 
-        if (tools.isEmpty()) {
+        if (items.isEmpty()) {
             return new Result(false, "You don't have any tools in your backpack");
         }
 
         StringBuilder result = new StringBuilder("Available tools:\n");
+        boolean hasTools = false;
 
-        for (Map.Entry<Tools, Integer> entry : tools.entrySet()) {
-            Tools tool = entry.getKey();
-            Integer quantity = entry.getValue();
-            result.append("- ").append(tool.getName())
-                    .append(" (Level: ").append(getLevelName(tool.getLevel()))
-                    .append(") x").append(quantity).append("\n");
+        for (Map.Entry<Item, Integer> entry : items.entrySet()) {
+            Item item = entry.getKey();
+            if (item instanceof Tools) {
+                Tools tool = (Tools) item;
+                Integer quantity = entry.getValue();
+                result.append("- ").append(tool.getName())
+                        .append(" (Level: ").append(getLevelName(tool.getLevel()))
+                        .append(") x").append(quantity).append("\n");
+                hasTools = true;
+            }
+        }
+
+        if (!hasTools) {
+            return new Result(false, "You don't have any tools in your backpack");
         }
 
         return new Result(true, result.toString());
@@ -96,17 +105,22 @@ public class ToolsController {
             return new Result(false, "You need to equip the tool you want to upgrade first");
         }
 
-        if (currentTool.getLevel() >= 4) { // Max level is IRIDIUM (4)
+        if (!currentTool.canUpgrade()) {
             return new Result(false, "Your tool is already at the maximum level");
         }
+
         if (!checkUpdateToolMoney()) {
             return new Result(false, "You don't have enough money to upgrade this tool");
         }
 
-        currentTool.upgrade(currentTool.getLevel() + 1);
+        Result upgradeResult = currentTool.upgrade(currentTool.getLevel() + 1);
 
-        return new Result(true, "Successfully upgraded your " + name + " to " +
-                getLevelName(currentTool.getLevel()));
+        if (upgradeResult.isSuccessful()) {
+            return new Result(true, "Successfully upgraded your " + name + " to " +
+                    getLevelName(currentTool.getLevel()));
+        } else {
+            return upgradeResult;
+        }
     }
 
     public boolean checkIsInSmithing() {
@@ -114,6 +128,7 @@ public class ToolsController {
     }
 
     public boolean checkUpdateToolMoney() {
+        // TODO : check money
         return true;
     }
 
@@ -133,30 +148,10 @@ public class ToolsController {
         if (targetLocation == null) {
             return new Result(false, "Invalid direction");
         }
-        int energyCost = calculateEnergyCost();
-        App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - energyCost);
 
-        String toolName = currentTool.getName().toLowerCase();
+        int skillLevel = 0;
 
-        if (toolName.contains("pickaxe")) {
-            return usePickaxe(targetLocation);
-        } else if (toolName.contains("hoe")) {
-            return useHoe(targetLocation);
-        } else if (toolName.contains("axe")) {
-            return useAxe(targetLocation);
-        } else if (toolName.contains("watering")) {
-            return useWateringCan(targetLocation);
-        } else if (toolName.contains("fishing")) {
-            return useFishingRod(targetLocation);
-        } else if (toolName.contains("scythe")) {
-            return useScythe(targetLocation);
-        } else if (toolName.contains("milk")) {
-            return useMilkPail(targetLocation);
-        } else if (toolName.contains("shear")) {
-            return useShears(targetLocation);
-        }
-
-        return new Result(false, "This tool cannot be used here");
+        return currentTool.use(targetLocation, skillLevel);
     }
 
     private Location getTargetLocation(Location playerLocation, String direction) {
@@ -209,37 +204,9 @@ public class ToolsController {
         if (currentTool == null) {
             return 0;
         }
+        int skillLevel = 0;
 
-        String toolName = currentTool.getName().toLowerCase();
-        int baseCost = 0;
-
-        if (toolName.contains("pickaxe")) {
-            baseCost = 5;
-        } else if (toolName.contains("hoe")) {
-            baseCost = 5;
-        } else if (toolName.contains("axe")) {
-            baseCost = 5;
-        } else if (toolName.contains("watering")) {
-            baseCost = 5;
-        } else if (toolName.contains("fishing")) {
-            if (toolName.contains("fiberglass")) {
-                baseCost = 6;
-            } else if (toolName.contains("iridium")) {
-                baseCost = 4;
-            } else {
-                baseCost = 8;
-            }
-        } else if (toolName.contains("scythe") || toolName.contains("seythe")) {
-            baseCost = 2;
-        } else if (toolName.contains("milk") || toolName.contains("shear")) {
-            baseCost = 4;
-        }
-
-        int levelReduction = currentTool.getLevel();
-
-        int skillBonus = 0;
-        int finalCost = baseCost - levelReduction - skillBonus;
-        return Math.max(0, finalCost);
+        return currentTool.calculateEnergyCost(skillLevel);
     }
 
     public Result checkToolUse() {
@@ -258,107 +225,4 @@ public class ToolsController {
         return currentTool != null && checkEnergy();
     }
 
-    private Result usePickaxe(Location targetLocation) {
-        TypeOfTile tileType = targetLocation.getTypeOfTile();
-
-        if (tileType == TypeOfTile.STONE) {
-            targetLocation.setTypeOfTile(TypeOfTile.GROUND);
-            return new Result(true, "You broke the stone");
-        }
-
-        if (tileType == TypeOfTile.QUARRY) {
-            if (currentTool.getLevel() >= 1) {
-                return new Result(true, "You mined some ore");
-            } else {
-                return new Result(false, "Your pickaxe isn't strong enough to mine this");
-            }
-        }
-
-        if (targetLocation.getObjectInTile() != null) {
-            targetLocation.setObjectInTile(null);
-            return new Result(true, "You removed the object");
-        }
-
-        return new Result(false, "There's nothing here to mine");
-    }
-
-    private Result useHoe(Location targetLocation) {
-        TypeOfTile tileType = targetLocation.getTypeOfTile();
-
-        if (tileType == TypeOfTile.GROUND) {
-            return new Result(true, "You tilled the soil");
-        }
-
-        return new Result(false, "You can't use your hoe here");
-    }
-
-    private Result useAxe(Location targetLocation) {
-        TypeOfTile tileType = targetLocation.getTypeOfTile();
-
-        if (tileType == TypeOfTile.TREE) {
-            targetLocation.setTypeOfTile(TypeOfTile.GROUND);
-            // add wood to inventory
-            return new Result(true, "You chopped down the tree and collected wood");
-        }
-
-        return new Result(false, "There's nothing here to chop");
-    }
-
-    private Result useWateringCan(Location targetLocation) {
-        TypeOfTile tileType = targetLocation.getTypeOfTile();
-
-        if (tileType == TypeOfTile.LAKE) {
-            // not done
-            return new Result(true, "You filled your watering can");
-        }
-
-        return new Result(true, "You watered the soil");
-    }
-
-    private Result useFishingRod(Location targetLocation) {
-        TypeOfTile tileType = targetLocation.getTypeOfTile();
-
-        if (tileType != TypeOfTile.LAKE) {
-            return new Result(false, "You can only fish in water");
-        }
-
-        String rodName = currentTool.getName().toLowerCase();
-        boolean canCatchLegendary = !rodName.contains("training");
-
-        return new Result(true, "You caught a fish");
-    }
-
-    private Result useScythe(Location targetLocation) {
-        return new Result(true, "You swung your scythe");
-    }
-
-    private Result useMilkPail(Location targetLocation) {
-        if (targetLocation.getObjectInTile() instanceof FarmAnimals) {
-            FarmAnimals animal = (FarmAnimals) targetLocation.getObjectInTile();
-
-            if (animal.getAnimal() == Animal.COW || animal.getAnimal() == Animal.GOAT) {
-                animal.setFriendShip(animal.getFriendShip() + 5);
-                return new Result(true, "You milked " + animal.getName());
-            } else {
-                return new Result(false, "You can only milk cows and goats");
-            }
-        }
-
-        return new Result(false, "There's no animal here to milk");
-    }
-
-    private Result useShears(Location targetLocation) {
-        if (targetLocation.getObjectInTile() instanceof FarmAnimals) {
-            FarmAnimals animal = (FarmAnimals) targetLocation.getObjectInTile();
-
-            if (animal.getAnimal() == Animal.SHEEP) {
-                animal.setFriendShip(animal.getFriendShip() + 5);
-                return new Result(true, "You sheared " + animal.getName());
-            } else {
-                return new Result(false, "You can only shear sheep");
-            }
-        }
-
-        return new Result(false, "There's no animal here to shear");
-    }
 }
