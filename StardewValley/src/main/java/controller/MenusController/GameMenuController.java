@@ -7,6 +7,7 @@ import models.Place.Farm;
 import models.RelatedToUser.Ability;
 import models.RelatedToUser.User;
 import models.*;
+import models.ToolsPackage.ToolObject;
 import models.enums.*;
 import models.Fundementals.Player;
 import com.google.gson.Gson;
@@ -366,8 +367,8 @@ public class GameMenuController implements MenuController {
         Player player = App.getCurrentGame().getCurrentPlayer();
         BackPack backPack = player.getBackPack();
         StringBuilder result = new StringBuilder("Inventory items: \n");
-        for(Tools tools : backPack.getTools().keySet()){
-            result.append(tools.getName());
+        for(ToolObject toolObject : backPack.getTools().keySet()){
+            result.append(toolObject.getToolType().getName());
         }
         return new Result(true, result.toString());
     }

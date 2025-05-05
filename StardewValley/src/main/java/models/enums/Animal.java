@@ -1,10 +1,12 @@
 package models.enums;
 
+import models.enums.Types.ProductTypes;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public enum Animal {
+public enum Animal implements ProductTypes {
     //by cage, I mean coop
     CHICKEN(800, Map.of("Egg", 50, "Large Egg", 95), true,
             "Lives in a Coop (capacity 4). Produces eggs daily if cared for. Can live in upgraded Coops.",

@@ -10,6 +10,7 @@ import models.Fundementals.Result;
 import models.Place.Store;
 import models.ProductsPackage.StoreProducts;
 import models.enums.Animal;
+import models.enums.Types.StoreProductsTypes;
 import models.enums.Types.TypeOfTile;
 
 import java.util.List;

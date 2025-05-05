@@ -2,8 +2,9 @@ package models.Animal;
 
 import models.Fundementals.Location;
 import models.Fundementals.LocationOfRectangle;
+import models.enums.Types.ProductTypes;
 
-public class AnimalHome {
+public class AnimalHome implements ProductTypes {
     private int CapacityRemained;
 
     //normal coop, Deluxe coop, big coop, normal barn, Deluxe barn, big barn:

@@ -1,6 +1,8 @@
 package models.enums.ToolEnums;
 
-public enum ToolTypes {
+import models.enums.Types.ProductTypes;
+
+public enum ToolTypes implements ProductTypes {
     NORMAL(5),
     COPPER(4),
     IRON(3),

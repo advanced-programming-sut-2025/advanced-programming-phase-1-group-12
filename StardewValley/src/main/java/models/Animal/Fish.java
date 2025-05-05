@@ -12,7 +12,6 @@ public class Fish extends Item {
     private Quality quality;
 
     public Fish(FishDetails fishtype, Quality quality) {
-        super("Fish");
         this.fishtype = fishtype;
         this.quality = quality;
     }

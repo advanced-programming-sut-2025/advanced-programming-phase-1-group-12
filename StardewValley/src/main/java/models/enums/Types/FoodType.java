@@ -5,7 +5,7 @@ import models.Eating.Buff;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum FoodType {
+public enum FoodType implements ProductTypes {
     FRIED_EGG(50, "Starter", 35, null),
     BAKED_FISH(75, "Starter",100, null),
     SALAD(113, "Starter", 110, null),

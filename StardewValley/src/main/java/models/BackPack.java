@@ -1,16 +1,15 @@
 package models;
 
 import models.Animal.Fish;
+import models.ToolsPackage.ToolObject;
 import models.enums.ToolEnums.BackPackTypes;
 
-import javax.tools.Tool;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class BackPack {
-    private Map<Tools, Integer> tools;
+    private Map<ToolObject, Integer> tools;
     private BackPackTypes type;
     ArrayList<Fish>fishes = new ArrayList<>();
     public BackPack(BackPackTypes type) {
@@ -18,11 +17,11 @@ public class BackPack {
         this.type = type;
     }
 
-    public void setTools(Map<Tools, Integer> tools) {
+    public void setTools(Map<ToolObject, Integer> tools) {
         this.tools = tools;
     }
 
-    public Map<Tools, Integer> getTools() {
+    public Map<ToolObject, Integer> getTools() {
         return tools;
     }
 
@@ -35,9 +34,9 @@ public class BackPack {
     }
 
     public void decreaseToolQuantity(String toolName, int amount) {
-        Tools toolToUpdate = null;
-        for (Tools tool : tools.keySet()) {
-            if (tool.getName().equals(toolName)) {
+        ToolObject toolToUpdate = null;
+        for (ToolObject tool : tools.keySet()) {
+            if (tool.getToolType().getName().equals(toolName)) {
                 toolToUpdate = tool;
                 break;
             }
@@ -61,9 +60,9 @@ public class BackPack {
     }
 
     public void trashAll(String toolName){
-        Tools toolToUpdate = null;
-        for (Tools tool : tools.keySet()) {
-            if (tool.getName().equals(toolName)) {
+        ToolObject toolToUpdate = null;
+        for (ToolObject tool : tools.keySet()) {
+            if (tool.getToolType().getName().equals(toolName)) {
                 toolToUpdate = tool;
                 break;
             }
