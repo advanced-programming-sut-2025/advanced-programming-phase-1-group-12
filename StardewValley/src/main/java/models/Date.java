@@ -1,5 +1,7 @@
 package models;
 
+import models.Animal.FarmAnimals;
+import models.Fundementals.App;
 import models.enums.Season;
 import models.enums.Weather;
 
@@ -38,6 +40,17 @@ public class Date {
             changeAdvancedDay(1);
             this.weather = this.tommorowWeather; // the day changes
         }
+
+    }
+
+    public void manageTimePass(){
+        for(FarmAnimals animal : App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getFarmAnimals()){
+            if(!animal.isHasBeenPetted()){
+                animal.setFriendShip(animal.getFriendShip() - 10);
+                animal.setHasBeenPetted(false);
+            }
+        }
+
     }
 
     public void changeAdvancedDay(int day){

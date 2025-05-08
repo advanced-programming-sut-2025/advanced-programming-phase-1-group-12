@@ -16,6 +16,8 @@ public class FarmAnimals implements Animals{
 
     private Location position;
 
+    private boolean hasBeenPetted;
+
     public Animal getAnimal() {
         return animal;
     }
@@ -39,6 +41,14 @@ public class FarmAnimals implements Animals{
 
 
     public String getName() {return name;}
+
+    public boolean isHasBeenPetted() {
+        return hasBeenPetted;
+    }
+
+    public void setHasBeenPetted(boolean hasBeenPetted) {
+        this.hasBeenPetted = hasBeenPetted;
+    }
 
     public FarmAnimals(Animal animal, int friendShip, AnimalHome home, String name, Location position) {
         this.animal = animal;

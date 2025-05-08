@@ -1,6 +1,6 @@
 package models.enums.Types;
-import models.Animal.AnimalHome;
 import models.Fundementals.App;
+import models.MapDetails.Stones;
 import models.Place.Store;
 import models.enums.Animal;
 import models.enums.ToolEnums.BackPackTypes;
@@ -11,10 +11,10 @@ import models.enums.ToolEnums.TrashcanTypes;
 public enum StoreProductsTypes implements ProductTypes {
 
     // Blacksmith
-    BLACKSMITH_STOCK_COPPER_ORE("Copper Ore", 75, 75, 75, 75, 10000, App.getCurrentGame().getMainMap().getStores().get(0)),
-    BLACKSMITH_STOCK_IRON_ORE("Iron Ore", 150, 150, 150, 150, 10000, App.getCurrentGame().getMainMap().getStores().get(0)),
-    BLACKSMITH_STOCK_COAL("Coal", 150, 150, 150, 150, 10000, App.getCurrentGame().getMainMap().getStores().get(0)),
-    BLACKSMITH_STOCK_GOLD_ORE("Gold Ore", 400, 400, 400, 400, 10000, App.getCurrentGame().getMainMap().getStores().get(0)),
+    BLACKSMITH_STOCK_COPPER_ORE(Stones.CopperOre, 75, 75, 75, 75, 10000, App.getCurrentGame().getMainMap().getStores().get(0)),
+    BLACKSMITH_STOCK_IRON_ORE(Stones.IronOre, 150, 150, 150, 150, 10000, App.getCurrentGame().getMainMap().getStores().get(0)),
+    BLACKSMITH_STOCK_COAL(Stones.Coal, 150, 150, 150, 150, 10000, App.getCurrentGame().getMainMap().getStores().get(0)),
+    BLACKSMITH_STOCK_GOLD_ORE(Stones.GoldOre, 400, 400, 400, 400, 10000, App.getCurrentGame().getMainMap().getStores().get(0)),
 
     // Blacksmith Craftables
     //TODO:no Steel found two of these should be fixed

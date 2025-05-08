@@ -35,6 +35,7 @@ public class AnimalController {
             return new Result(false, "You are not standing next to " + animalName);
         }
         animal.setFriendShip(animal.getFriendShip() + 15);
+        animal.setHasBeenPetted(true);
         return new Result(true, "You just petted " + animalName);
     }
 

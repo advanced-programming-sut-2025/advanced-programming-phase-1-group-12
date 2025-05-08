@@ -1,9 +1,21 @@
 package models.MapDetails;
 
-public enum Stones {
+import models.enums.Types.ProductTypes;
+
+public enum Stones implements ProductTypes {
     KANI,
 
     AHAN,
 
-    NORMAL;
+    NORMAL,
+
+    Coal,
+
+    CopperOre,
+
+    IronOre,
+
+    GoldOre,
+
+
 }
