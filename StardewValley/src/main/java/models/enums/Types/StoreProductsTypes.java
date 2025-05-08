@@ -221,5 +221,33 @@ public enum StoreProductsTypes implements ProductTypes {
         this.dailyLimit = dailyLimit;
         this.shop = shop;
     }
+
+    public ProductTypes getName() {
+        return name;
+    }
+
+    public int getWinterPrice() {
+        return winterPrice;
+    }
+
+    public int getSpringPrice() {
+        return springPrice;
+    }
+
+    public int getSummerPrice() {
+        return summerPrice;
+    }
+
+    public int getFallPrice() {
+        return fallPrice;
+    }
+
+    public int getDailyLimit() {
+        return dailyLimit;
+    }
+
+    public Store getShop() {
+        return shop;
+    }
 }
 

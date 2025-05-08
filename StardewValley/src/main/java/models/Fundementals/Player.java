@@ -1,32 +1,38 @@
 package models.Fundementals;
 
 import models.BackPack;
-import models.MapDetails.Shack;
 import models.Place.Farm;
 import models.Refrigrator;
 import models.RelatedToUser.Ability;
 import models.RelatedToUser.Energy;
 import models.RelatedToUser.User;
-import models.RelationShip;
-import models.map;
+import models.RelationShips.RelationShip;
 
 import java.util.ArrayList;
 
 public class Player {
-
     private User user;
+
     private Location userLocation;
+
     private boolean isMarried;
+
     private int energy;
+
     public Refrigrator Refrigrator = new Refrigrator();
+
     private ArrayList<Ability> abilitis = new ArrayList<Ability>();
+
     private ArrayList<RelationShip> relationShips = new ArrayList<>();
-    private ArrayList<RelationShip.Trade> trade = new ArrayList<>();
+    private ArrayList<Trade> trade = new ArrayList<>();
     private Farm ownedFarm;
+
     private BackPack backPack;
+
     private boolean isEnergyUnlimited;
     private boolean hasCollapsed;
     private int money;
+    private Player partner;
 
 
     public Player(User user, Location userLocation, boolean isMarried, Refrigrator refrigrator,
@@ -44,7 +50,8 @@ public class Player {
         this.backPack = backPack;
         this.isEnergyUnlimited = isEnergyUnlimited;
         this.hasCollapsed = hasCollapsed;
-        this.money = money;
+        this.money = 0;
+        this.partner = null;
     }
 
     public User getUser() {
@@ -67,6 +74,9 @@ public class Player {
         return backPack;
     }
 
+    public boolean isMarried() {
+        return isMarried;
+    }
 
     public void setUserLocation(Location userLocation) {
         this.userLocation = userLocation;
@@ -162,6 +172,52 @@ public class Player {
             this.hasCollapsed = true;
         }
     }
+
+    public RelationShip findRelationShip(Player player2){
+        for(RelationShip relationShip : relationShips){
+            if(relationShip.getPlayer1().equals(player2) || relationShip.getPlayer2().equals(player2)){
+                return relationShip;
+            }
+        }
+        return null;
+    }
+
+    public void setMarried(){
+        isMarried = true;
+    }
+
+    public void decreaseMoney(int amount){
+        if(isMarried){
+            money -= amount / 2;
+            partner.setMoney(partner.getMoney() - amount /2);
+        }
+        else {
+            money -= amount;
+        }
+    }
+    public int getMoney(){
+        return money;
+    }
+    public void increaseMoney(int amount){
+        if(isMarried){
+            money += amount /2;
+            partner.setMoney(partner.getMoney() + amount / 2);
+        }
+        else{
+            money += amount;
+        }
+    }
+
+    public void setPartner(Player partner){
+        this.partner = partner;
+    }
+
+    public void setMoney(int money){
+        this.money = money;
+    }
+
+
+
 
     public int getMoney() {
         return money;

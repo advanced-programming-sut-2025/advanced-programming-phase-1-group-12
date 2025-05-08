@@ -1,12 +1,16 @@
 package controller.MenusController;
 
 import controller.MapSetUp.MapSetUp;
+import controller.NPCcontroller;
+import controller.TradeManager;
 import models.Date;
 import models.Fundementals.*;
 import models.Place.Farm;
 import models.RelatedToUser.Ability;
+import models.RelatedToUser.Ability;
 import models.RelatedToUser.User;
 import models.*;
+import models.RelationShips.RelationShip;
 import models.ToolsPackage.ToolObject;
 import models.enums.*;
 import models.Fundementals.Player;
@@ -28,6 +32,8 @@ public class GameMenuController implements MenuController {
 
     public Result deleteGame(int MapId){ return null;}
 
+    public void nextTurn(){ }
+
     //TODO:sper chiz ro bezanim baraye geragten babash
 
     public void readingMap(){ }
@@ -38,7 +44,122 @@ public class GameMenuController implements MenuController {
         return null;
     }
 
-    public void tradeHistory(User user){}
+    /**
+     * Starts the trade menu and shows available players
+     * @return Result with the list of available players
+     */
+    public Result startTrade() {
+        StringBuilder playerList = new StringBuilder("Available players for trading:\n");
+        Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
+
+        for (Player player : App.getCurrentGame().getPlayers()) {
+            if (!player.equals(currentPlayer)) {
+                playerList.append("- ").append(player.getUser().getUserName()).append("\n");
+            }
+        }
+
+        // Show trade notifications if any
+        String notifications = TradeManager.getTradeNotifications(currentPlayer);
+        if (notifications != null) {
+            playerList.append("\n").append(notifications);
+        }
+
+        return new Result(true, playerList.toString());
+    }
+
+    /**
+     * Creates a new trade request
+     * @param username The username of the target player
+     * @param type The type of trade (request or offer)
+     * @param itemName The name of the item to trade
+     * @param amount The amount of the item
+     * @param price The price (if money trade)
+     * @param targetItemName The name of the target item (if item-for-item trade)
+     * @param targetAmount The amount of the target item
+     * @return Result with the outcome of the trade creation
+     */
+    public Result createTrade(String username, String type, String itemName, int amount, Integer price, String targetItemName, Integer targetAmount) {
+        Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
+        Player targetPlayer = App.getCurrentGame().getPlayerByName(username);
+
+        if (targetPlayer == null) {
+            return new Result(false, "Player not found: " + username);
+        }
+
+        if (currentPlayer.equals(targetPlayer)) {
+            return new Result(false, "You cannot trade with yourself");
+        }
+
+        // Validate item and amount
+        Item item = currentPlayer.getBackPack().get;
+        if (type.equals("offer") && (item == null || amount <= 0)) {
+            return new Result(false, "Invalid item or amount");
+        }
+
+        if (type.equals("request") && amount <= 0) {
+            return new Result(false, "Invalid amount");
+        }
+
+        // Create a new item if it doesn't exist (for request type)
+        if (type.equals("request") && item == null) {
+            item = new Item(itemName);
+        }
+
+        // Check if both price and target item are specified
+        if (price != null && price > 0 && targetItemName != null && targetAmount != null && targetAmount > 0) {
+            return new Result(false, "You cannot specify both price and target item");
+        }
+
+        // Create the trade
+        if (price != null && price > 0) {
+            // Money trade
+            TradeManager.createTrade(currentPlayer, targetPlayer, type, item, amount, price);
+            return new Result(true, "Trade request created successfully");
+        } else if (targetItemName != null && targetAmount != null && targetAmount > 0) {
+            // Item-for-item trade
+            Item targetItem = new Item(targetItemName);
+            TradeManager.createTrade(currentPlayer, targetPlayer, type, item, amount, targetItem, targetAmount);
+            return new Result(true, "Trade request created successfully");
+        } else {
+            return new Result(false, "You must specify either price or target item");
+        }
+    }
+
+    /**
+     * Lists all pending trade requests for the current player
+     * @return Result with the list of pending trades
+     */
+    public Result listTrades() {
+        Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
+        String tradeList = TradeManager.getTradeList(currentPlayer);
+        return new Result(true, tradeList);
+    }
+
+    /**
+     * Responds to a trade request (accept or reject)
+     * @param response The response (accept or reject)
+     * @param id The ID of the trade
+     * @return Result with the outcome of the response
+     */
+    public Result respondToTrade(String response, String id) {
+        if (response.equals("accept")) {
+            String result = TradeManager.acceptTrade(id);
+            return new Result(result.contains("successfully"), result);
+        } else {
+            String result = TradeManager.rejectTrade(id);
+            return new Result(true, result);
+        }
+    }
+
+    /**
+     * Shows the trade history for the current player
+     * @return Result with the trade history
+     */
+    public Result tradeHistory() {
+        Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
+        String history = TradeManager.getTradeHistory(currentPlayer);
+        return new Result(true, history);
+    }
 
 
     // Samin: date comands are here
@@ -332,21 +453,6 @@ public class GameMenuController implements MenuController {
                 " " + App.getCurrentGame().getCurrentPlayer().getUserLocation().getyAxis());
     }
 
-    public Result nextTurn() {
-        List<Player> players = App.getCurrentGame().getPlayers();
-        Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
-        App.getCurrentGame().getCurrentPlayer().setEnergy(200);
-
-        int currentIndex = players.indexOf(currentPlayer);
-        int nextIndex = (currentIndex + 1) % players.size();
-
-        App.getCurrentGame().setCurrentPlayer(players.get(nextIndex));
-        int newHour = App.getCurrentGame().getDate().getHour() + 1;
-        App.getCurrentGame().getDate().setHour(newHour);
-
-        return new Result(true, "Turn moved to " + players.get(nextIndex).getUser().getUserName());
-    }
-
     public Result showEnergy(){
         Player player = App.getCurrentGame().getCurrentPlayer();
         return new Result(true, String.format("%d", player.getEnergy()));
@@ -367,22 +473,136 @@ public class GameMenuController implements MenuController {
         Player player = App.getCurrentGame().getCurrentPlayer();
         BackPack backPack = player.getBackPack();
         StringBuilder result = new StringBuilder("Inventory items: \n");
-        for(ToolObject toolObject : backPack.getTools().keySet()){
-            result.append(toolObject.getToolType().getName());
+        for(ToolObject tools : backPack.get.keySet()){
+            result.append(tools.getName());
         }
         return new Result(true, result.toString());
     }
 
     public Result trashItem(String name, String amount) {
         BackPack backPack = App.getCurrentGame().getCurrentPlayer().getBackPack();
-        if(amount == null){
-            backPack.trashAll(name);
+
+        // Find trash can in player's inventory
+        models.ToolsPackage.Tools trashCan = null;
+        for (Item item : backPack.getItems().keySet()) {
+            if (item instanceof models.ToolsPackage.Tools) {
+                models.ToolsPackage.Tools tool = (models.ToolsPackage.Tools) item;
+                if (tool.isTrashCan()) {
+                    trashCan = tool;
+                    break;
+                }
+            }
+        }
+
+        Result result;
+        if (amount == null) {
+            if (trashCan != null) {
+                result = backPack.trashAll(name, trashCan);
+            } else {
+                backPack.trashAll(name);
+                result = new Result(true, "Trashed all " + name + " successfully!");
+            }
+        } else {
+            int intAmount = Integer.parseInt(amount);
+            if (trashCan != null) {
+                result = backPack.trash(name, intAmount, trashCan);
+            } else {
+                backPack.trash(name, intAmount);
+                result = new Result(true, "Trashed " + intAmount + " " + name + " successfully!");
+            }
+        }
+
+        return result;
+    }
+
+    public Result talk(String username, String message) {
+        Player player1 = App.getCurrentGame().getCurrentPlayer();
+        Player player2 = App.getCurrentGame().getPlayerByName(username);
+        RelationShip relationShip = player1.findRelationShip(player2);
+        relationShip.talk(message);
+        return new Result(true, "message sent!");
+    }
+
+    public Result talkHistory(String username) {
+        Player player1 = App.getCurrentGame().getCurrentPlayer();
+        Player player2 = App.getCurrentGame().getPlayerByName(username);
+        RelationShip relationShip = player1.findRelationShip(player2);
+        return new Result(true,relationShip.talkHistory());
+    }
+
+    public Result gift(String username, String item, String amount) {
+        int inAmount = Integer.parseInt(amount);
+        Player player1 = App.getCurrentGame().getCurrentPlayer();
+        Player player2 = App.getCurrentGame().getPlayerByName(username);
+        RelationShip relationShip = player1.findRelationShip(player2);
+        Item gift  = player1.getBackPack().getItemByName(item);
+        if(gift != null) {
+            relationShip.gift(gift);
+            return new Result(true, "gifted successfully! you can rate now!");
+        } else {
+            return new Result(false, "Item not found in your inventory!");
+        }
+    }
+
+    public Result hug(String username){
+        Player player1 = App.getCurrentGame().getCurrentPlayer();
+        Player player2 = App.getCurrentGame().getPlayerByName(username);
+        RelationShip relationShip = player1.findRelationShip(player2);
+        relationShip.hug();
+        return new Result(true, "hugged successfully!");
+    }
+
+    public Result flower(String username){
+        Player player1 = App.getCurrentGame().getCurrentPlayer();
+        Player player2 = App.getCurrentGame().getPlayerByName(username);
+        RelationShip relationShip = player1.findRelationShip(player2);
+        relationShip.flower();
+        return new Result(true, "flowered successfully!");
+    }
+
+    public Result askMarriage(String username, String ring){
+        Player player1 = App.getCurrentGame().getCurrentPlayer();
+        Player player2 = App.getCurrentGame().getPlayerByName(username);
+        RelationShip relationShip = player1.findRelationShip(player2);
+        if(relationShip.askMarriage(ring)){
+            return new Result(true, "marriage asked successfully!");
         }
         else{
-            int intAmount = Integer.parseInt(amount);
-            backPack.trash(name, intAmount);
+            return new Result(false, "cant ask marriage!");
         }
-        return new Result(true, "Trashed item successfully!");
+    }
+
+    public Result respond(String answer, String username){
+        Player player1 = App.getCurrentGame().getCurrentPlayer();
+        Player player2 = App.getCurrentGame().getPlayerByName(username);
+        RelationShip relationShip = player1.findRelationShip(player2);
+        if(answer.equals("accept")){
+            relationShip.marriage(relationShip.getAskedRing());
+            return new Result(true, "marriage accepted!");
+        }else {
+            relationShip.reject();
+            return new Result(false, "booo!");
+        }
+    }
+
+    // NPC interaction methods
+
+    /**
+     * Handles the meet NPC command
+     * @param npcName The name of the NPC to meet
+     * @return Result with the NPC's dialogue
+     */
+    public Result meetNPC(String npcName) {
+        // Initialize NPC village if it doesn't exist
+        if (App.getCurrentGame().getNPCvillage() == null) {
+            App.getCurrentGame().initializeNPCvillage();
+        }
+
+        // Create controller and process the meet command
+        NPCcontroller controller = new NPCcontroller();
+        String response = controller.meetNPC(npcName);
+
+        return new Result(true, response);
     }
 
     public Result EXIT() {
@@ -492,5 +712,50 @@ public class GameMenuController implements MenuController {
             return new Result(false, "Failed to load game due to IO error.");
         }
     }
-}
 
+    /**
+     * Handles the gift NPC command
+     * @param npcName The name of the NPC to give a gift to
+     * @param itemName The name of the item to give
+     * @return Result with the outcome of the gift
+     */
+    public Result giftNPC(String npcName, String itemName) {
+        // Initialize NPC village if it doesn't exist
+        if (App.getCurrentGame().getNPCvillage() == null) {
+            App.getCurrentGame().initializeNPCvillage();
+        }
+
+        // Create controller and process the gift command
+        NPCcontroller controller = new NPCcontroller();
+        String response = controller.giftNPC(npcName, itemName);
+
+        return new Result(true, response);
+    }
+
+    /**
+     * Handles the friendship NPC list command
+     * @return Result with the list of NPC friendships
+     */
+    public Result friendshipNPCList() {
+        // Initialize NPC village if it doesn't exist
+        if (App.getCurrentGame().getNPCvillage() == null) {
+            App.getCurrentGame().initializeNPCvillage();
+        }
+
+        // Create controller and get the friendship list
+        NPCcontroller controller = new NPCcontroller();
+        String response = controller.getFriendshipList();
+
+        return new Result(true, response);
+    }
+
+    /**
+     * Process daily NPC activities at the start of a new day
+     */
+    public void processDailyNPCActivities() {
+        if (App.getCurrentGame().getNPCvillage() != null) {
+            NPCcontroller controller = new NPCcontroller();
+            controller.processDailyNPCActivities();
+        }
+    }
+}

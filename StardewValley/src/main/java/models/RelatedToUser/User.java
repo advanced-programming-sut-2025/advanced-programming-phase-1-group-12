@@ -83,4 +83,7 @@ public class User {
         return games;
     }
 
+    public Boolean isFemale() {
+        return isFemale;
+    }
 }

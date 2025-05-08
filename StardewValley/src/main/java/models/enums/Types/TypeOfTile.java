@@ -12,8 +12,10 @@ public enum TypeOfTile {
     QUARRY('Q'),
     HOUSE('H'),
     GROUND('.'),
+    PLOUGHED_LAND('P'),
     //TODO:probably not necessary(IDK)
     STORE('s'),
+    SEED('F'),
 
     //this is used for seeing if we can buy an animal
     //TODO:big or Deluxe stuff is not shown
