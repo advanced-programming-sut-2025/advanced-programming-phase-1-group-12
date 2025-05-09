@@ -1,11 +1,12 @@
 package models.enums.Types;
 
+import models.ProductsPackage.ProductTypes;
 import models.enums.Season;
 
 import java.util.Arrays;
 import java.util.List;
 
-public enum SeedSeason {
+public enum SeedSeason implements ProductTypes {
     JAZZ_SEEDS(Arrays.asList(Season.SPRING), "Jazz Seeds"),
     CARROT_SEEDS(Arrays.asList(Season.SPRING), "Carrot Seeds"),
     CAULIFLOWER_SEEDS(Arrays.asList(Season.SPRING), "Cauliflower Seeds"),

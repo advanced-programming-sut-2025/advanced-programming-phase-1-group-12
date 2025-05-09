@@ -1,5 +1,6 @@
 package views;
 
+import controller.AnimalController;
 import controller.MenusController.GameMenuController;
 import controller.ToolsController;
 import controller.movingPlayer.UserLocationController;
@@ -15,6 +16,7 @@ import java.util.regex.Matcher;
 public class GameMenu extends AppMenu {
     private final GameMenuController controller = new GameMenuController();
     private final ToolsController toolsController = new ToolsController();
+    private final AnimalController animalController = new AnimalController();
 
     @Override
     public void check(Scanner scanner) {
@@ -122,6 +124,26 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.TRADE_HISTORY.getMather(input))!= null) {
             Result result = controller.tradeHistory();
             System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.SELL_ANIMAL.getMather(input))!= null) {
+            System.out.println(animalController.sellAnimal(matcher.group("animalName")).getMessage());
+        } else if ((matcher = GameMenuCommands.FISHING.getMather(input))!= null) {
+            System.out.println(animalController.fishing(matcher.group("fishingPole")).getMessage());
+        } else if ((matcher = GameMenuCommands.SHEPHERD_ANIMALS.getMather(input))!= null) {
+            System.out.println(animalController.shepherd(matcher).getMessage());
+        } else if ((matcher = GameMenuCommands.ANIMALS_LIST.getMather(input))!= null) {
+            animalController.animalsList();
+        } else if ((matcher = GameMenuCommands.SHEPHERD_ANIMALS.getMather(input))!= null) {
+            System.out.println(animalController.shepherd(matcher).getMessage());
+        } else if ((matcher = GameMenuCommands.CHEAT_SET_FRIENDSHIP.getMather(input))!= null) {
+            System.out.println(animalController.cheatFriendship(matcher).getMessage());
+        } else if ((matcher = GameMenuCommands.MILK.getMather(input))!= null) {
+            System.out.println(animalController.milking(matcher.group("animalName")).getMessage());
+        } else if ((matcher = GameMenuCommands.SHEAR.getMather(input))!= null) {
+            System.out.println(animalController.shear(matcher.group("animalName")).getMessage());
+        } else if ((matcher = GameMenuCommands.PET.getMather(input))!= null) {
+            System.out.println(animalController.pet(matcher.group("animalName")).getMessage());
+        } else if ((matcher = GameMenuCommands.FEED_HAY.getMather(input))!= null) {
+            System.out.println(animalController.feedHay(matcher.group("animalName")).getMessage());
         }
 
     }

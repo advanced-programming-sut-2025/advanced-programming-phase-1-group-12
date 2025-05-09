@@ -16,7 +16,7 @@ public class App {
     private static User loggedInUser = null;
     private static models.enums.Menu currentMenu = Menu.LoginRegisterMenu;
     private static ArrayList<Game> game = new ArrayList<>();
-    private static Game currentGame = null;
+    private static Game currentGame = new Game();
     private static Date fullTime;
     private static ArrayList<String> securityQuestions = new ArrayList<>(
             Arrays.asList("what is your favorite color?", "what is your favorite country?")

@@ -143,5 +143,7 @@ public class Player {
     }
 
 
-
+    public ArrayList<Ability> getAbilitis() {
+        return abilitis;
+    }
 }

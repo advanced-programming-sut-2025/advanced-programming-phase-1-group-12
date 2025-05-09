@@ -57,16 +57,19 @@ public enum GameMenuCommands implements Commands {
 
     //Damdari commands
     //animals
-    BUILD_BUILDING("build -a (?<buildingName>.*) -l <(?<x>\\d+) , (?<y>\\d+)>"),
+    BUILD_BUILDING("build -a (?<buildingName>.*) -l <(?<x>.*) , (?<y>.*)>"),
     BUY_ANIMAL("buy animal -a (?<animal>.*) -n (?<name>.*)"),
     PET("pet -n (?<name>.*)"),
     CHEAT_SET_FRIENDSHIP("cheat set friendship -n (?<animalName>.*) -c (?<amount>.*)"),
     ANIMALS_LIST("animals"),
-    SHEPHERD_ANIMALS("shepherd animals -n <animal name> -l <x , y>"),
+    SHEPHERD_ANIMALS("shepherd animals -n <animalName> -l <(?<x>.*) , (?<y>.*)>"),
     FEED_HAY("^feed hay -n (?<animalName>.*)$"),
     PRODUCES("^produces$"),
     COLLECT ("collect produce -n (?<name>.*)"),
     SELL_ANIMAL("sell animal -n (?<name>.*)"),
+    //pashmesho bezane va shir bedooshe
+    SHEAR("^shear -n (?<name>.*)"),
+    MILK("^milk -n (?<name>.*)"),
 
     //fishes
     FISHING("fishing -p (?<fishingPole>.*)"),

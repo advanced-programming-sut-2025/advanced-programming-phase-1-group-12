@@ -1,5 +1,7 @@
 package models;
 
+import models.Animal.FarmAnimals;
+import models.Fundementals.App;
 import models.enums.Season;
 import models.enums.Weather;
 
@@ -36,7 +38,23 @@ public class Date {
         if (this.hour > 22){
             this.hour -= 13;
             changeAdvancedDay(1);
+            changesDayAnimal();
             this.weather = this.tommorowWeather; // the day changes
+        }
+    }
+
+    public void changesDayAnimal(){
+        for(FarmAnimals animals : App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()){
+            if(!animals.isHasBeenFedToday()){
+                animals.setFriendShip(animals.getFriendShip() - 10);
+            }
+            if(!animals.isHasBeenFedToday()){
+                animals.setFriendShip(animals.getFriendShip() - 20);
+            } if(!App.isLocationInPlace(animals.getPosition(), animals.getHome().getLocation())){
+                animals.setFriendShip(animals.getFriendShip() - 20);
+            }
+            animals.setHasBeenFedToday(false);
+            animals.setHasBeenPettedToday(false);
         }
     }
 

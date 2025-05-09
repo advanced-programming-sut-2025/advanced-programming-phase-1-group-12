@@ -3,8 +3,10 @@ package models.Place;
 import models.Fundementals.Location;
 import models.Fundementals.LocationOfRectangle;
 import models.ProductsPackage.StoreProducts;
+import models.enums.Season;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class Store implements Place {
 
@@ -18,7 +20,8 @@ public class Store implements Place {
 
     private int CloseHour;
 
-    private ArrayList<StoreProducts> storeProducts;
+    //TODO:baraye print mahsoolat migim boro negahe enum e kon harchi mal in boodo print con
+    private Map<StoreProducts, Integer> seasonLocations;
 
     public LocationOfRectangle getLocationOfRectangle() {
         return locationOfRectangle;
@@ -60,13 +63,6 @@ public class Store implements Place {
         CloseHour = closeHour;
     }
 
-    public ArrayList<StoreProducts> getStoreProducts() {
-        return storeProducts;
-    }
-
-    public void setStoreProducts(ArrayList<StoreProducts> storeProducts) {
-        this.storeProducts = storeProducts;
-    }
 
 
     @Override
