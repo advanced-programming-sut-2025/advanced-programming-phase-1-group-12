@@ -7,6 +7,9 @@ import models.RelatedToUser.User;
 import models.enums.commands.LoginRegisterMenuCommands;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class ProfileMenuController implements MenuController {
 
@@ -103,14 +106,15 @@ public class ProfileMenuController implements MenuController {
 
         return new Result(true, "email changed successfully");
     }
-
     public Result changePassword(String oldPass, String newPass) {
-        if (!oldPass.equals(App.getLoggedInUser().getPassword())) {
+        String oldHashed = hashPassword(oldPass);
+
+        if (!oldHashed.equals(App.getLoggedInUser().getPassword())) {
             return new Result(false, "old password is written wrong");
         }
 
         if (oldPass.equals(newPass)) {
-            return new Result(false, "write another new pass word . this one equals the old one");
+            return new Result(false, "write another new password. this one equals the old one");
         }
 
         if (!newPass.matches(LoginRegisterMenuCommands.VALID_PASS.getRegex())) {
@@ -125,7 +129,7 @@ public class ProfileMenuController implements MenuController {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             Gson gson = new Gson();
             User user = gson.fromJson(reader, User.class);
-            user.setPassword(newPass);
+            user.setPassword(hashPassword(newPass));  // ← هش کردن رمز جدید
             App.setLoggedInUser(user);
             App.getUsers().clear();
             App.getUsers().put(user.getUserName(), user);
@@ -141,6 +145,21 @@ public class ProfileMenuController implements MenuController {
         return new Result(true, "password changed successfully");
     }
 
+    private String hashPassword(String input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not found", e);
+        }
+    }
 
     public void userInfo(){
         System.out.println("user info");

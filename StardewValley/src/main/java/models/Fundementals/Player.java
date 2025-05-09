@@ -6,6 +6,7 @@ import models.Refrigrator;
 import models.RelatedToUser.Ability;
 import models.RelatedToUser.User;
 import models.RelationShips.RelationShip;
+import models.RelationShips.Trade;
 
 import java.util.ArrayList;
 

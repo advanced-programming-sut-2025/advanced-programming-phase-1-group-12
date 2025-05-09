@@ -1,12 +1,17 @@
 package controller.MenusController;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import models.Fundementals.App;
 import models.Fundementals.Result;
 import models.RelatedToUser.User;
 import models.enums.commands.LoginRegisterMenuCommands;
 
 import java.io.*;
+import java.lang.reflect.Modifier;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
@@ -51,7 +56,6 @@ public class LoginRegisterMenuController implements MenuController {
                 password = RandomPassword();
                 System.out.println("you have to accept this one then : " + password);
             }
-            //if it is selected as random they are the same
             passwordConfirm = password;
         }
 
@@ -64,31 +68,42 @@ public class LoginRegisterMenuController implements MenuController {
         if(!username.matches("[a-zA-Z0-9-]*")){
             return new Result(false, "username foramt is incorrect");
         }
-        //TODO:in bayad save dorost shode bashe ke moghe load bazi harki az ghabl ssabt nam karde biad bala
-        if(App.getUsers().containsKey(username)){
+        if (App.getUsers().containsKey(username)) {
             username = generateNewUserName(username);
-            return new Result(false, "Username is already in use.this will be your Username:" + username
-            );
+            System.out.println("Username is already in use.this will be your Username:" + username);
         }
+
         boolean isFemale = !gender.equals("male");
-        User newUser = new User(new ArrayList<>(), username, nickname, password, email, "",
+        password = hashPassword(password);
+        User newUser = new User(null, username, nickname, password, email, "",
                 "", isFemale);
         App.setLoggedInUser(newUser);
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        try (FileWriter writer = new FileWriter(username + ".json")) {
+            gson.toJson(newUser, writer);
+        } catch (IOException e) {
+            return new Result(false, "Error saving user data: " + e.getMessage());
+        }
 
         return new Result(true, "User registered successfully");
+    }
+
+    private static String getMessage(String username) {
+        return "Username is already in use.this will be your Username:" + username;
     }
 
     public Result pickQuestion(Matcher matcher) {
         String question = App.getSecurityQuestions().get(Integer.parseInt(matcher.group("questionNumber")));
         String answer = matcher.group("answer");
         String answerConfirm = matcher.group("answerConfirm");
-        if(!answer.equals(answerConfirm)){
-            return new Result(false, "answer and answer confirm don't match");
+
+        if (!answer.equals(answerConfirm)) {
+            return new Result(false, "Answer and answer confirmation don't match");
         }
 
         File file = new File(App.getLoggedInUser().getUserName() + ".json");
         if (!file.exists()) {
-            return new Result(false, "error opening file");
+            return new Result(false, "Error opening file: User file does not exist");
         }
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
@@ -97,18 +112,15 @@ public class LoginRegisterMenuController implements MenuController {
             user.setQuestionForSecurity(question);
             user.setAnswerOfQuestionForSecurity(answer);
             App.setLoggedInUser(user);
-            saveUser(user, user.getUserName() +".json");
+            saveUser(user, file.getName());
             App.getUsers().put(user.getUserName(), user);
 
-            try (FileWriter writer = new FileWriter(App.getLoggedInUser().getUserName() + ".json")) {
-                gson.toJson(user, writer);
-            }
         } catch (IOException e) {
             e.printStackTrace();
-            return new Result(false, "error during file operation");
+            return new Result(false, "Error during file operation: " + e.getMessage());
         }
 
-        return new Result(true, "You have selected " + answer + " for " + question + ".");
+        return new Result(true, "You have successfully selected \"" + answer + "\" for the question: \"" + question + "\".");
     }
 
     public String generateNewUserName(String input) {
@@ -125,14 +137,13 @@ public class LoginRegisterMenuController implements MenuController {
             return new Result(false, "User not found");
         }
 
-        // Clear previously loaded users
         App.getUsers().clear();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             Gson gson = new Gson();
             User user = gson.fromJson(reader, User.class);
 
-            if (!user.getPassword().equals(password)) {
+            if (!user.getPassword().equals(hashPassword(password))) {
                 return new Result(false, "Incorrect password");
             }
 
@@ -145,19 +156,15 @@ public class LoginRegisterMenuController implements MenuController {
         }
     }
 
-
-    public void saveSecureHashAlgorithm(String inout){}
-
-    // public User checkUserName(String userName){}
-
-    public void saveUser(User user ,String fileName){
-        try (FileWriter writer = new FileWriter(fileName)) {
+    public void saveUser(User user, String fileName) {
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), StandardCharsets.UTF_8))) {
             Gson gson = new Gson();
-            gson.toJson(user, writer);  // Serialize the User object to JSON
+            gson.toJson(user, writer);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
     public void loadUsersFromFile(String fileName) {
         File file = new File(fileName);
         if (!file.exists()) {
@@ -167,7 +174,7 @@ public class LoginRegisterMenuController implements MenuController {
 
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             Gson gson = new Gson();
-            User user = gson.fromJson(reader, User.class);  // Not User[]
+            User user = gson.fromJson(reader, User.class);
             App.getUsers().clear();
             App.getUsers().put(user.getUserName(), user);
         } catch (IOException e) {
@@ -183,7 +190,7 @@ public class LoginRegisterMenuController implements MenuController {
         }
         try (BufferedReader reader = new BufferedReader(new FileReader(userName + ".json"))) {
             Gson gson = new Gson();
-            User user = gson.fromJson(reader, User.class);  // Not User[]
+            User user = gson.fromJson(reader, User.class);
             App.getUsers().clear();
             App.getUsers().put(user.getUserName(), user);
         } catch (IOException e) {
@@ -193,6 +200,7 @@ public class LoginRegisterMenuController implements MenuController {
             User currentUser = App.getUsers().get(userName);
             App.setLoggedInUser(currentUser);}
     }
+
     public Result answerQuestion(Matcher matcher) {
         String answer = matcher.group("answer");
         if(answer.equals(App.getCurrentPlayerLazy().getUser().getAnswerOfQuestionForSecurity())){
@@ -200,20 +208,35 @@ public class LoginRegisterMenuController implements MenuController {
             );
         }
         return new Result(false, "wrong answer");
-
     }
+
     public void newPassAfterForget(String newPass) {
         if(newPass.equals("random")){
             newPass = RandomPassword();
-
             System.out.println("this will be your password : " + newPass);
-            App.getLoggedInUser().setPassword(newPass);  // باید setter داشته باشی برای password
+            App.getLoggedInUser().setPassword(hashPassword(newPass));
             saveUser(App.getCurrentPlayerLazy().getUser(), App.getLoggedInUser().getUserName() + ".json");
             System.out.println("password updated successfully");
             return;
         }
-        App.getLoggedInUser().setPassword(newPass);  // باید setter داشته باشی برای password
+        App.getLoggedInUser().setPassword(hashPassword(newPass));
         saveUser(App.getCurrentPlayerLazy().getUser(), App.getLoggedInUser().getUserName() + ".json");
         System.out.println("password updated successfully");
+    }
+
+    private String hashPassword(String input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not found", e);
+        }
     }
 }

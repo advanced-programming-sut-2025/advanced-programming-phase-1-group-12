@@ -30,10 +30,10 @@ public enum GameMenuCommands implements Commands {
     INVENTORY_TRASH("inventory trash -i (?<item>.*) -n (?<number>.*)$"),
 
     //tool commands
-    EQUIP_TOOL("^tools equip (?<tool_name>.+)"),
+    EQUIP_TOOL("^tools equip (?<toolName>.+)"),
     SHOW_CURRENT_TOOL("^tools show current$"),
     SHOW_AVAILABLE_TOOL("^tools show available$"),
-    UPGRADE_TOOL("^tools upgrade (?<tool_name>.+)$"),
+    UPGRADE_TOOL("^tools upgrade (?<toolName>.+)$"),
     USE_TOOL("^tools use -d (?<direction>.+)$"),
 
     //relationship commands
