@@ -1,24 +1,32 @@
 package models.MapDetails;
 
 import models.Fundementals.Location;
+import models.ProductsPackage.ProductTypes;
 
-public enum TreesTypes {
-    PINE(null, 10),
-    APPLETREE(null, 20);
+public enum TreesTypes implements ProductTypes {
+    //TODO:sapling watering be added
+    PINE(10),
+
+    ApricotSapling(0),
+
+    CherrySapling(1),
+
+    AppleSapling(2),
+
+    OrangeSapling(3),
+
+    PeachSapling(4),
+
+    PomegranateSapling(5),
+
+    APPLETREE(20);
     //TODO:etelaat dige
-    private final Location location;
 
     private final int watering;
 
-    TreesTypes(Location location, int watering) {
-        this.location = location;
+    TreesTypes(int watering) {
         this.watering = watering;
     }
-
-    public Location getLocation() {
-        return location;
-    }
-
     public int getWatering() {
         return watering;
     }

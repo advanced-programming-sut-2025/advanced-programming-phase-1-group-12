@@ -1,13 +1,14 @@
 package models.enums.ToolEnums;
 
 import models.Fundementals.Result;
+import models.ProductsPackage.ProductTypes;
 import models.ToolsPackage.ToolFunction;
 import models.ToolsPackage.UpgradeFunction;
 import models.enums.Types.TypeOfTile;
 import models.Animal.FarmAnimals;
 import models.enums.Animal;
 
-public enum Tool  {
+public enum Tool implements ProductTypes {
     HOE("Hoe", 5) {
         @Override
         public ToolFunction getUseFunction() {

@@ -88,8 +88,10 @@ public enum GameMenuCommands implements Commands {
     // NPC commands
     MEET_NPC("^meet NPC (?<npcName>.+)$"),
     GIFT_NPC("^gift NPC (?<npcName>.+) -i (?<item>.+)$"),
-    FRIENDSHIP_NPC_LIST("^friendship NPC list$");
+    FRIENDSHIP_NPC_LIST("^friendship NPC list$"),
 
+    //store commands
+    SHOW_PRODUCTS("show all products");
 
     private final String pattern;
 

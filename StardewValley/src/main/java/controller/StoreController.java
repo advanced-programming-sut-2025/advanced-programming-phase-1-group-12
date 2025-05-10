@@ -10,6 +10,7 @@ import models.Fundementals.Result;
 import models.Place.Store;
 import models.ProductsPackage.StoreProducts;
 import models.enums.Animal;
+import models.enums.Types.StoreProductsTypes;
 import models.enums.Types.TypeOfTile;
 
 import java.util.List;
@@ -143,11 +144,34 @@ public class StoreController {
 
     public boolean isStoreOpen(Store store, Date date){return false;}
 
-    public void ShowProducts(Store store){}
+    public void ShowProducts(){
+        Store store = null;
+
+        for(Store store1: App.getCurrentGame().getMainMap().getStores()){
+            if(App.isLocationInPlace(App.getCurrentPlayerLazy().getUserLocation(), store1.getLocationOfRectangle())){
+                store = store1;
+            }
+        }
+        if(store == null) {
+            System.out.println("You are not in any store");
+            return;
+        }//TODO:does it print it right?
+        for(StoreProductsTypes type: StoreProductsTypes.values()){
+            if(type.getShop().equals(store)){
+                System.out.println(type.getName().toString());
+            }
+        }
+    }
 
     public void showTotalProducts(List<Store> stores){}
 
-    public void buyProduct(String productName, int Count){}
+    public void buyProduct(String productName, int Count){
+        for(StoreProductsTypes type: StoreProductsTypes.values()){
+            if(type.name().equals(productName)){
+
+            }
+        }
+    }
 
     public StoreProducts getStoreProducts(String productName){return new StoreProducts();}
     public void addCount(){

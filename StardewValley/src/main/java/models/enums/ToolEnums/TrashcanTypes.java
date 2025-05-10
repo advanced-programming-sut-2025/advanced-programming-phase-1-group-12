@@ -1,7 +1,9 @@
 package models.enums.ToolEnums;
 
 
-public enum TrashcanTypes {
+import models.ProductsPackage.ProductTypes;
+
+public enum TrashcanTypes implements ProductTypes {
     COPPER(0.15),
     IRON(0.3),
     GOLD(0.45),

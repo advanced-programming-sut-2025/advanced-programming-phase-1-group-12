@@ -1,6 +1,8 @@
 package models.enums.ToolEnums;
 
-public enum ToolTypes {
+import models.ProductsPackage.ProductTypes;
+
+public enum ToolTypes implements ProductTypes {
     NORMAL(5),
     COPPER(4),
     IRON(3),
@@ -14,4 +16,5 @@ public enum ToolTypes {
     public int getEnergyDamage() {
         return energyDamage;
     }
+
 }

@@ -1,6 +1,7 @@
 package models.enums.Types;
 import models.Animal.AnimalHome;
 import models.Fundementals.App;
+import models.MapDetails.TreesTypes;
 import models.Place.Store;
 import models.ProductsPackage.ProductTypes;
 import models.enums.Animal;
@@ -11,7 +12,7 @@ import models.enums.ToolEnums.TrashcanTypes;
 
 public enum StoreProductsTypes implements ProductTypes {
 
-    // Blacksmith
+    // Blacksmithr
     BLACKSMITH_STOCK_COPPER_ORE("Copper Ore", 75, 75, 75, 75, 10000, App.getCurrentGame().getMainMap().getStores().get(0)),
     BLACKSMITH_STOCK_IRON_ORE("Iron Ore", 150, 150, 150, 150, 10000, App.getCurrentGame().getMainMap().getStores().get(0)),
     BLACKSMITH_STOCK_COAL("Coal", 150, 150, 150, 150, 10000, App.getCurrentGame().getMainMap().getStores().get(0)),
@@ -137,7 +138,7 @@ public enum StoreProductsTypes implements ProductTypes {
     GENERAL_STORE_RARE_SEED(SeedTypes.RARE_SEEDS, 0, 0, 1000, 0, 1, App.getCurrentGame().getMainMap().getStores().get(1)),
 
     // Winter Seeds
-    GENERAL_STORE_POWDERMELON_SEEDS(SeedTypes.POWDERMELON_SEEDS, 0, 0, 0, 20, 10, App.getCurrentGame().getMainMap().getStores().get(1)),
+    GENERAL_STORE_POWDERMELON_SEEDS(SeedTypes.POWDER_MELON_SEEDS, 0, 0, 0, 20, 10, App.getCurrentGame().getMainMap().getStores().get(1)),
 
     // Year-Round Items (General Store)
     PIER_GENERAL_STORE_RICE("Rice", 200, 200, 200, 200, -1, App.getCurrentGame().getMainMap().getStores().get(2)),
@@ -152,12 +153,12 @@ public enum StoreProductsTypes implements ProductTypes {
     GENERAL_STORE_DELUXE_RETAINING_SOIL("Deluxe Retaining Soil", 150, 150, 150, 150, -1, App.getCurrentGame().getMainMap().getStores().get(2)),
     PIER_GENERAL_STORE_GRASS_STARTER(SeedTypes.GrassStarter, 100, 100, 100, 100, -1, App.getCurrentGame().getMainMap().getStores().get(2)),
     GENERAL_STORE_SPEED_GRO("Speed-Gro", 100, 100, 100, 100, -1, App.getCurrentGame().getMainMap().getStores().get(2)),
-    GENERAL_STORE_APPLE_SAPLING("Apple Sapling", 4000, 4000, 4000, 4000, -1, App.getCurrentGame().getMainMap().getStores().get(2)),
-    GENERAL_STORE_APRICOT_SAPLING("Apricot Sapling", 2000, 2000, 2000, 2000, -1, App.getCurrentGame().getMainMap().getStores().get(2)),
-    GENERAL_STORE_CHERRY_SAPLING("Cherry Sapling", 3400, 3400, 3400, 3400, -1, App.getCurrentGame().getMainMap().getStores().get(2)),
-    GENERAL_STORE_ORANGE_SAPLING("Orange Sapling", 4000, 4000, 4000, 4000, -1, App.getCurrentGame().getMainMap().getStores().get(2)),
-    GENERAL_STORE_PEACH_SAPLING("Peach Sapling", 6000, 6000, 6000, 6000, -1, App.getCurrentGame().getMainMap().getStores().get(2)),
-    GENERAL_STORE_POMEGRANATE_SAPLING("Pomegranate Sapling", 6000, 6000, 6000, 6000, -1, App.getCurrentGame().getMainMap().getStores().get(2)),
+    GENERAL_STORE_APPLE_SAPLING(TreesTypes.AppleSapling, 4000, 4000, 4000, 4000, -1, App.getCurrentGame().getMainMap().getStores().get(2)),
+    GENERAL_STORE_APRICOT_SAPLING(TreesTypes.ApricotSapling, 2000, 2000, 2000, 2000, -1, App.getCurrentGame().getMainMap().getStores().get(2)),
+    GENERAL_STORE_CHERRY_SAPLING(TreesTypes.CherrySapling, 3400, 3400, 3400, 3400, -1, App.getCurrentGame().getMainMap().getStores().get(2)),
+    GENERAL_STORE_ORANGE_SAPLING(TreesTypes.OrangeSapling, 4000, 4000, 4000, 4000, -1, App.getCurrentGame().getMainMap().getStores().get(2)),
+    GENERAL_STORE_PEACH_SAPLING(TreesTypes.PeachSapling, 6000, 6000, 6000, 6000, -1, App.getCurrentGame().getMainMap().getStores().get(2)),
+    GENERAL_STORE_POMEGRANATE_SAPLING(TreesTypes.PomegranateSapling, 6000, 6000, 6000, 6000, -1, App.getCurrentGame().getMainMap().getStores().get(2)),
     GENERAL_STORE_BASIC_RETAINING_SOIL("Basic Retaining Soil", 100, 100, 100, 100, -1, App.getCurrentGame().getMainMap().getStores().get(2)),
     GENERAL_STORE_QUALITY_RETAINING_SOIL("Quality Retaining Soil", 150, 150, 150, 150, -1, App.getCurrentGame().getMainMap().getStores().get(2)),
 
@@ -186,7 +187,7 @@ public enum StoreProductsTypes implements ProductTypes {
     SUMMER_POPPY_SEEDS(SeedTypes.PoppySeeds, 0, 100, 150, 0, 5, App.getCurrentGame().getMainMap().getStores().get(2)),
     SUMMER_SPANGLE_SEEDS(SeedTypes.SpangleSeeds, 0, 50, 75, 0, 5, App.getCurrentGame().getMainMap().getStores().get(2)),
     SUMMER_HOPS_STARTER(SeedTypes.HopsStarter, 0, 60, 90, 0, 5, App.getCurrentGame().getMainMap().getStores().get(2)),
-    SUMMER_CORN_SEEDS(, 0, 150, 225, 0, 5, App.getCurrentGame().getMainMap().getStores().get(2)),
+    SUMMER_CORN_SEEDS(SeedTypes.CornSeeds, 0, 150, 225, 0, 5, App.getCurrentGame().getMainMap().getStores().get(2)),
     SUMMER_SUNFLOWER_SEEDS(SeedTypes.SunflowerSeeds, 0, 200, 300, 0, 5, App.getCurrentGame().getMainMap().getStores().get(2)),
     SUMMER_RED_CABBAGE_SEEDS(SeedTypes.RedCabbageSeeds, 0, 100, 150, 0, 5, App.getCurrentGame().getMainMap().getStores().get(2)),
 
@@ -221,5 +222,33 @@ public enum StoreProductsTypes implements ProductTypes {
         this.fallPrice = fallPrice;
         this.dailyLimit = dailyLimit;
         this.shop = shop;
+    }
+
+    public ProductTypes getName() {
+        return name;
+    }
+
+    public int getWinterPrice() {
+        return winterPrice;
+    }
+
+    public int getSpringPrice() {
+        return springPrice;
+    }
+
+    public int getSummerPrice() {
+        return summerPrice;
+    }
+
+    public int getFallPrice() {
+        return fallPrice;
+    }
+
+    public int getDailyLimit() {
+        return dailyLimit;
+    }
+
+    public Store getShop() {
+        return shop;
     }
 }

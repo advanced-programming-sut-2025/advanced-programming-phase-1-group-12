@@ -2,6 +2,7 @@ package views;
 
 import controller.AnimalController;
 import controller.MenusController.GameMenuController;
+import controller.StoreController;
 import controller.ToolsController;
 import controller.movingPlayer.UserLocationController;
 import models.Fundementals.App;
@@ -17,6 +18,7 @@ public class GameMenu extends AppMenu {
     private final GameMenuController controller = new GameMenuController();
     private final ToolsController toolsController = new ToolsController();
     private final AnimalController animalController = new AnimalController();
+    private final StoreController storeController = new StoreController();
 
     @Override
     public void check(Scanner scanner) {
@@ -144,6 +146,10 @@ public class GameMenu extends AppMenu {
             System.out.println(animalController.pet(matcher.group("animalName")).getMessage());
         } else if ((matcher = GameMenuCommands.FEED_HAY.getMather(input))!= null) {
             System.out.println(animalController.feedHay(matcher.group("animalName")).getMessage());
+        } else if ((matcher = GameMenuCommands.BUY_ANIMAL.getMather(input))!= null) {
+            System.out.println(storeController.buyAnimal(matcher).getMessage());
+        } else if ((matcher = GameMenuCommands.SHOW_PRODUCTS.getMather(input))!= null) {
+            storeController.ShowProducts();
         }
 
     }

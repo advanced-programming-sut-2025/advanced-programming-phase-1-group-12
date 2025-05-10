@@ -10,7 +10,6 @@ import models.ToolsPackage.Tools;
 import models.enums.Animal;
 import models.enums.FishDetails;
 import models.enums.ToolEnums.Tool;
-import models.enums.Types.StoreProductsTypes;
 import models.enums.Types.TypeOfTile;
 import models.enums.Weather;
 
@@ -234,7 +233,7 @@ public class AnimalController {
         }
         boolean hasHay = false;
         for (StoreProducts products : App.getCurrentPlayerLazy().getBackPack().getStoreProducts()){
-            if(products.getType().equals(StoreProductsTypes.GENERAL_STORE_HAY)){
+            //if(products.getType().equals(StoreProductsTypes.GENERAL_STORE_HAY)){
                 hasHay = true;
             }
         }

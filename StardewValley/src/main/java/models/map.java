@@ -1,11 +1,7 @@
 package models;
 
-import controller.MapSetUp.FarmSetUp;
 import models.Fundementals.App;
 import models.Fundementals.Location;
-import models.MapDetails.GreenHouse;
-import models.MapDetails.Lake;
-import models.NPC.NPCvillage;
 import models.Place.Farm;
 import models.Place.Store;
 import models.RelatedToUser.User;
