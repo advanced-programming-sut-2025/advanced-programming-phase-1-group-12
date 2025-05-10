@@ -4,12 +4,10 @@ import models.Animal.FarmAnimals;
 import models.Animal.Fish;
 import models.Fundementals.*;
 import models.ProductsPackage.Quality;
-import models.ProductsPackage.StoreProducts;
 import models.RelatedToUser.Ability;
 import models.ToolsPackage.Tools;
 import models.enums.Animal;
 import models.enums.FishDetails;
-import models.enums.ToolEnums.Tool;
 import models.enums.Types.TypeOfTile;
 import models.enums.Weather;
 
@@ -78,12 +76,8 @@ public class AnimalController {
         if(! (animal.getAnimal().equals(Animal.COW) || animal.getAnimal().equals(Animal.GOAT))){
             return new Result(false, "This animal is not a cow or goat!");
         }
-        boolean hasMilkPail = false;
-        for(Tools tools: App.getCurrentPlayerLazy().getBackPack().getTools()){
-            if(tools.getToolType().equals(Tool.MILKPALE)){
-                hasMilkPail = true;
-            }
-        }
+        boolean hasMilkPail = App.getCurrentPlayerLazy().getBackPack().getItemNames().containsKey("Milk Pail");
+
         if(!hasMilkPail){
             return new Result(false, "You do not have a milk pail!");
         }
@@ -99,12 +93,8 @@ public class AnimalController {
         if( ! animal.getAnimal().equals(Animal.SHEEP) ){
             return new Result(false, "This animal is not a sheep!");
         }
-        boolean hasShear = false;
-        for(Tools tools: App.getCurrentPlayerLazy().getBackPack().getTools()){
-            if(tools.getToolType().equals(Tool.SHEAR)){
-                hasShear = true;
-            }
-        }
+        boolean hasShear = App.getCurrentPlayerLazy().getBackPack().getItemNames().containsKey("Shear");
+
         if(!hasShear){
             return new Result(false, "You do not have a shear!");
         }
@@ -231,12 +221,7 @@ public class AnimalController {
         if(animal == null){
             return new Result(false, "Animal not found");
         }
-        boolean hasHay = false;
-        for (StoreProducts products : App.getCurrentPlayerLazy().getBackPack().getStoreProducts()){
-            //if(products.getType().equals(StoreProductsTypes.GENERAL_STORE_HAY)){
-                hasHay = true;
-            }
-        }
+        boolean hasHay = App.getCurrentPlayerLazy().getBackPack().getItemNames().containsKey("Hay");
         if(!hasHay){
             return new Result(false, "You do not have any hay");
         }

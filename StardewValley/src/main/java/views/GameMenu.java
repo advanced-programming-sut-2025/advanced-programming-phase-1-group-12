@@ -6,6 +6,7 @@ import controller.StoreController;
 import controller.ToolsController;
 import controller.movingPlayer.UserLocationController;
 import models.Fundementals.App;
+import models.Fundementals.Location;
 import models.Fundementals.Result;
 import models.enums.commands.GameMenuCommands;
 
@@ -150,6 +151,11 @@ public class GameMenu extends AppMenu {
             System.out.println(storeController.buyAnimal(matcher).getMessage());
         } else if ((matcher = GameMenuCommands.SHOW_PRODUCTS.getMather(input))!= null) {
             storeController.ShowProducts();
+        } else if ((matcher = GameMenuCommands.BUILD_BUILDING.getMather(input))!= null) {
+            Location location = App.getCurrentGame().getMainMap().findLocation(Integer.parseInt(matcher.group("x")), Integer.parseInt(matcher.group("y")) );
+            System.out.println(storeController.buyAnimalBuilding(matcher.group("buildingName"), location).getMessage());
+        } else if((matcher = GameMenuCommands.PURCHASE.getMather(input))!= null) {
+            System.out.println(storeController.buyProduct(matcher.group("productName"), Integer.parseInt(matcher.group("count"))));
         }
 
     }

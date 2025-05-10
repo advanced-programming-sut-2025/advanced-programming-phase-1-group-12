@@ -1,10 +1,7 @@
 package models.Animal;
 
-import models.Item;
 import models.ProductsPackage.Quality;
-import models.ProductsPackage.StoreProducts;
 import models.enums.FishDetails;
-import models.enums.Types.ProductType;
 
 public class Fish  {
     private FishDetails fishtype ;

@@ -10,9 +10,9 @@ import models.Fundementals.Result;
 import models.Place.Store;
 import models.ProductsPackage.StoreProducts;
 import models.enums.Animal;
+import models.enums.Season;
 import models.enums.Types.StoreProductsTypes;
 import models.enums.Types.TypeOfTile;
-
 import java.util.List;
 import java.util.regex.Matcher;
 
@@ -165,15 +165,52 @@ public class StoreController {
 
     public void showTotalProducts(List<Store> stores){}
 
-    public void buyProduct(String productName, int Count){
-        for(StoreProductsTypes type: StoreProductsTypes.values()){
-            if(type.name().equals(productName)){
+    public Result buyProduct(String productName, int Count){
 
+        Store store = null;
+        for(Store store1 : App.getCurrentGame().getMainMap().getStores()){
+            if(App.isLocationInPlace(App.getCurrentPlayerLazy().getUserLocation(), store1.getLocationOfRectangle())){
+                store = store1;
+                break;
             }
         }
+        if(store == null) {
+            return new Result(false, "You are not in any store");
+        }
+        StoreProducts item = null;
+        for(StoreProducts item1 : store.getAllProducts()){
+            if(item1.getName().equals(productName)){
+                item = item1;
+                break;
+            }
+        }
+        if(item == null) {
+            return new Result(false, "The store doesn't have this product");
+        }
+        item.setCurrentDailyLimit(item.getCurrentDailyLimit() - Count);
+        int price = 0;
+        switch(App.getCurrentGame().getDate().getSeason()){
+            case Season.AUTUMN -> price = item.getType().getFallPrice();
+            case Season.WINTER -> price = item.getType().getWinterPrice();
+            case Season.SUMMER -> price = item.getType().getSummerPrice();
+            case Season.SPRING -> price = item.getType().getSpringPrice();
+        }//TODO:handle the ones that are paid differently
+        if(App.getCurrentPlayerLazy().getMoney() < price*Count){
+            return new Result(false, "You do not have enough money to buy this product");
+        }
+        App.getCurrentPlayerLazy().setMoney(App.getCurrentPlayerLazy().getMoney() - price*Count);
+        if(App.getCurrentPlayerLazy().getBackPack().getItemNames().containsKey(productName)){
+            Item addToBackPack = App.getToolByName(productName);
+            App.getCurrentPlayerLazy().getBackPack().getItems().put(addToBackPack,
+                    App.getCurrentPlayerLazy().getBackPack().getItems().get(addToBackPack) + Count);
+            return new Result(true, "You bought this product");
+        }
+        Item item1 = ItemBuilder.builder(productName);
+        App.getCurrentPlayerLazy().getBackPack().getItems().put(item1, Count);
+        return new Result(true, "You bought this product");
+
     }
 
-    public StoreProducts getStoreProducts(String productName){return new StoreProducts();}
     public void addCount(){
 
     }

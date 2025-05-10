@@ -1,7 +1,17 @@
 package models.enums.ToolEnums;
 
 public enum BackPackTypes {
-    PRIMARY, //capacity = 12
-    BIG, //capacity = 24
-    DELUXE  //capacity unlimited
+    PRIMARY("primary"), //capacity = 12
+    BIG("big"), //capacity = 24
+    DELUXE("deluxe");  //capacity unlimited
+
+    private final String name;
+
+    BackPackTypes(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

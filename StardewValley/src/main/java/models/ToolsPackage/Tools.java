@@ -8,25 +8,25 @@ import models.enums.ToolEnums.Tool;
 import models.enums.ToolEnums.ToolTypes;
 
 public class Tools extends Item {
-    private ToolTypes type;
     private int level;
     private int baseEnergyCost;
     private ToolFunction useFunction;
     private UpgradeFunction upgradeFunction;
     private Tool toolType;
+    private ToolTypes type;
 
     // watering can
     private int capacity;
     private int currentWater;
 
-    public Tools(Tool toolType, ToolTypes type) {
+    public Tools(Tool toolType) {
         super(toolType.getName());
         this.toolType = toolType;
-        this.type = type;
         this.level = 0;
         this.baseEnergyCost = toolType.getEnergyCost();
         this.useFunction = toolType.getUseFunction();
         this.upgradeFunction = toolType.getUpgradeFunction();
+        this.type = ToolTypes.NORMAL;
 
         if (toolType == Tool.WATERING_CAN) {
             initializeWateringCanCapacity();
@@ -58,10 +58,6 @@ public class Tools extends Item {
                 this.capacity = 40;
                 break;
         }
-    }
-
-    public ToolTypes getType() {
-        return type;
     }
 
     public int getLevel() {
@@ -139,40 +135,40 @@ public class Tools extends Item {
     }
 
 
-    public static Tools createAxe(ToolTypes type) {
-        return new Tools(Tool.AXE, type);
+    public static Tools createAxe() {
+        return new Tools(Tool.AXE);
     }
 
-    public static Tools createHoe(ToolTypes type) {
-        return new Tools(Tool.HOE, type);
+    public static Tools createHoe() {
+        return new Tools(Tool.HOE);
     }
 
-    public static Tools createPickAxe(ToolTypes type) {
-        return new Tools(Tool.PICKAXE, type);
+    public static Tools createPickAxe() {
+        return new Tools(Tool.PICKAXE);
     }
 
-    public static Tools createWateringCan(ToolTypes type) {
-        return new Tools(Tool.WATERING_CAN, type);
+    public static Tools createWateringCan() {
+        return new Tools(Tool.WATERING_CAN);
     }
 
-    public static Tools createFishingRod(ToolTypes type) {
-        return new Tools(Tool.FISHING_POLE, type);
+    public static Tools createFishingRod() {
+        return new Tools(Tool.FISHING_POLE);
     }
 
-    public static Tools createScythe(ToolTypes type) {
-        return new Tools(Tool.SCYTHE, type);
+    public static Tools createScythe() {
+        return new Tools(Tool.SCYTHE);
     }
 
-    public static Tools createMilkPail(ToolTypes type) {
-        return new Tools(Tool.MILKPALE, type);
+    public static Tools createMilkPail() {
+        return new Tools(Tool.MILKPALE);
     }
 
-    public static Tools createShears(ToolTypes type) {
-        return new Tools(Tool.SHEAR, type);
+    public static Tools createShears() {
+        return new Tools(Tool.SHEAR);
     }
 
-    public static Tools createTrashCan(ToolTypes type) {
-        return new Tools(Tool.TRASH_CAN, type);
+    public static Tools createTrashCan() {
+        return new Tools(Tool.TRASH_CAN);
     }
 
     // Method to check if the tool is a watering can
@@ -225,5 +221,17 @@ public class Tools extends Item {
 
         currentWater -= amount;
         return new Result(true, "Used water from your watering can");
+    }
+
+    public void setToolType(Tool toolType) {
+        this.toolType = toolType;
+    }
+
+    public ToolTypes getType() {
+        return type;
+    }
+
+    public void setType(ToolTypes type) {
+        this.type = type;
     }
 }

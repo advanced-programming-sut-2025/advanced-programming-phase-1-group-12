@@ -1,14 +1,14 @@
 package models.enums.ToolEnums;
 
 import models.Fundementals.Result;
-import models.ProductsPackage.ProductTypes;
 import models.ToolsPackage.ToolFunction;
 import models.ToolsPackage.UpgradeFunction;
+import models.enums.Types.SeedTypes;
 import models.enums.Types.TypeOfTile;
 import models.Animal.FarmAnimals;
 import models.enums.Animal;
 
-public enum Tool implements ProductTypes {
+public enum Tool {
     HOE("Hoe", 5) {
         @Override
         public ToolFunction getUseFunction() {
@@ -38,6 +38,7 @@ public enum Tool implements ProductTypes {
                     return new Result(true, "You broke the stone");
                 }
                 if (tileType == TypeOfTile.QUARRY) {
+                    models.ToolsPackage.Tools tool = (models.ToolsPackage.Tools) location.getObjectInTile();
                     if (tool != null && tool.getLevel() >= 1) {
                         return new Result(true, "You mined some ore");
                     } else {
@@ -82,7 +83,7 @@ public enum Tool implements ProductTypes {
         public ToolFunction getUseFunction() {
             return (location, skillLevel) -> {
                 TypeOfTile tileType = location.getTypeOfTile();
-                ToolObject tool = (ToolObject) location.getObjectInTile();
+                models.ToolsPackage.Tools tool = (models.ToolsPackage.Tools) location.getObjectInTile();
 
                 if (tileType == TypeOfTile.LAKE) {
                     if (tool != null && tool.isWateringCan()) {
@@ -116,78 +117,6 @@ public enum Tool implements ProductTypes {
     },
 
     FISHING_POLE("Fishing Pole", 8) {
-        @Override
-        public ToolFunction getUseFunction() {
-            return (location, skillLevel) -> {
-                TypeOfTile tileType = location.getTypeOfTile();
-                if (tileType != TypeOfTile.LAKE) {
-                    return new Result(false, "You can only fish in water");
-                }
-                return new Result(true, "You caught a fish");
-            };
-        }
-
-        @Override
-        public UpgradeFunction getUpgradeFunction() {
-            return (currentLevel) -> new Result(true, "FishingRod upgraded to level " + (currentLevel + 1));
-        }
-    },
-
-    TRAINING_ROD("Training Rod", 0) {
-        @Override
-        public ToolFunction getUseFunction() {
-            return (location, skillLevel) -> {
-                TypeOfTile tileType = location.getTypeOfTile();
-                if (tileType != TypeOfTile.LAKE) {
-                    return new Result(false, "You can only fish in water");
-                }
-                return new Result(true, "You caught a fish");
-            };
-        }
-
-        @Override
-        public UpgradeFunction getUpgradeFunction() {
-            return (currentLevel) -> new Result(true, "FishingRod upgraded to level " + (currentLevel + 1));
-        }
-    },
-
-    BAMBOO_POLE("Bamboo Pole", 0) {
-        @Override
-        public ToolFunction getUseFunction() {
-            return (location, skillLevel) -> {
-                TypeOfTile tileType = location.getTypeOfTile();
-                if (tileType != TypeOfTile.LAKE) {
-                    return new Result(false, "You can only fish in water");
-                }
-                return new Result(true, "You caught a fish");
-            };
-        }
-
-        @Override
-        public UpgradeFunction getUpgradeFunction() {
-            return (currentLevel) -> new Result(true, "FishingRod upgraded to level " + (currentLevel + 1));
-        }
-    },
-
-    FIBERGLASS_ROD("Fiberglass Rod", 0) {
-        @Override
-        public ToolFunction getUseFunction() {
-            return (location, skillLevel) -> {
-                TypeOfTile tileType = location.getTypeOfTile();
-                if (tileType != TypeOfTile.LAKE) {
-                    return new Result(false, "You can only fish in water");
-                }
-                return new Result(true, "You caught a fish");
-            };
-        }
-
-        @Override
-        public UpgradeFunction getUpgradeFunction() {
-            return (currentLevel) -> new Result(true, "FishingRod upgraded to level " + (currentLevel + 1));
-        }
-    },
-
-    IRIDIUM_ROD("Iridium Rod", 0) {
         @Override
         public ToolFunction getUseFunction() {
             return (location, skillLevel) -> {
@@ -295,4 +224,13 @@ public enum Tool implements ProductTypes {
 
     public abstract ToolFunction getUseFunction();
     public abstract UpgradeFunction getUpgradeFunction();
+
+    public static Tool stringToTool(String name) {
+        for (Tool type : Tool.values()) {
+            if (name.equals(type.name)) {
+                return type;
+            }
+        }
+        return null;
+    }
 }

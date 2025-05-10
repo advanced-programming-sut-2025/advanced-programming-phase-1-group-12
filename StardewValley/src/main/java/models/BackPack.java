@@ -173,4 +173,12 @@ public class BackPack {
     public ArrayList<StoreProducts> getStoreProducts() {
         return storeProducts;
     }
+
+    public Map<String, Item> getItemNames() {
+        return itemNames;
+    }
+
+    public void setItemNames(Map<String, Item> itemNames) {
+        this.itemNames = itemNames;
+    }
 }

@@ -91,7 +91,8 @@ public enum GameMenuCommands implements Commands {
     FRIENDSHIP_NPC_LIST("^friendship NPC list$"),
 
     //store commands
-    SHOW_PRODUCTS("show all products");
+    SHOW_PRODUCTS("show all products"),
+    PURCHASE("purchase (?<productName>.*) -n (?<count>.*)");
 
     private final String pattern;
 

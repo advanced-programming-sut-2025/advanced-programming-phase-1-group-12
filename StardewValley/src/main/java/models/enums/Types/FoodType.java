@@ -1,35 +1,34 @@
 package models.enums.Types;
 
 import models.Eating.Buff;
-import models.ProductsPackage.ProductTypes;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public enum FoodType implements ProductTypes {
-    FRIED_EGG(50, "Starter", 35, null),
-    BAKED_FISH(75, "Starter",100, null),
-    SALAD(113, "Starter", 110, null),
-    OLMELET(100, "Stardrop Saloon", 125, null),
-    PUMPKIN_PIE(255, "Stardrop Saloon", 385, null),
-    SPAGHETTI(75, "Stardrop Saloon", 120, null),
-    PIZZA(150, "Stardrop Saloon", 300, null),
-    TORTILLA(50,"Stardrop Saloon", 50, null),
-    MAKI_ROLL(100,"Stardrop Saloon", 220, null),
-    TRIPLE_SHOT_ESPRESSO(200,"Stardrop Saloon", 450, null),
-    COOKIE(90,"Stardrop Saloon", 140, null),
-    HASH_BROWN(90,"Stardrop Saloon", 120, null),
-    PANCAKES(90,"Stardrop Saloon", 80, null),
-    FRUIT_SALAD(263,"Stardrop Saloon", 450, null),
-    RED_PLATE(240,"Stardrop Saloon", 400, null),
-    BREAD(50,"Stardrop Saloon", 60, null),
-    SALMON_DINNER(125,"Leah reward", 300, null),
-    VEGETABLE_MEDLEY(165,"Foraging Level 2", 120, null),
-    FARMER_LUNCH(200,"Farming level 1", 150, null),
-    SURVIVAL_BURGER(125,"Foraging level 3", 180, null),
-    DISH_O_THE_SEA(150,"Fishing level 2", 220, null),
-    SEAFORM_PUDDING(175,"Fishing level 3", 300, null),
-    MINER_TREAT(125,"Mining level 1", 200, null);
+    FRIED_EGG("Fried Egg", 50, "Starter", 35, null),
+    BAKED_FISH("Baked Fish", 75, "Starter",100, null),
+    SALAD("Salad", 113, "Starter", 110, null),
+    OLMELET("Omelet", 100, "Stardrop Saloon", 125, null),
+    PUMPKIN_PIE("Pumpkin Pie", 255, "Stardrop Saloon", 385, null),
+    SPAGHETTI("Spaghetti", 75, "Stardrop Saloon", 120, null),
+    PIZZA("Pizza", 150, "Stardrop Saloon", 300, null),
+    TORTILLA("Tortilla", 50,"Stardrop Saloon", 50, null),
+    MAKI_ROLL("Maki Roll", 100,"Stardrop Saloon", 220, null),
+    TRIPLE_SHOT_ESPRESSO("Triple Shot Espresso", 200,"Stardrop Saloon", 450, null),
+    COOKIE("Cookie", 90,"Stardrop Saloon", 140, null),
+    HASH_BROWN("Hash Brown", 90,"Stardrop Saloon", 120, null),
+    PANCAKES("Pancakes", 90,"Stardrop Saloon", 80, null),
+    FRUIT_SALAD("Fruit Salad", 263,"Stardrop Saloon", 450, null),
+    RED_PLATE("Red Plate", 240,"Stardrop Saloon", 400, null),
+    BREAD("Bread", 50,"Stardrop Saloon", 60, null),
+    SALMON_DINNER("Salmon Dinner", 125,"Leah reward", 300, null),
+    VEGETABLE_MEDLEY("Vegetable Medley", 165,"Foraging Level 2", 120, null),
+    FARMER_LUNCH("Farmer's Lunch", 200,"Farming level 1", 150, null),
+    SURVIVAL_BURGER("Survival Burger", 125,"Foraging level 3", 180, null),
+    DISH_O_THE_SEA("Dish o' the Sea", 150,"Fishing level 2", 220, null),
+    SEAFORM_PUDDING("Seaform Pudding", 175,"Fishing level 3", 300, null),
+    MINER_TREAT("Miner's Treat", 125,"Mining level 1", 200, null);
 
     private Map<ProductType, Integer> ingredients;
     private int Energy;
@@ -37,12 +36,17 @@ public enum FoodType implements ProductTypes {
     private String source;
     private int sellPrice;
     private Buff buff;
+    private String name;
 
-
-    FoodType(int Energy, String Source, int sellPrice, Buff buff) {
+    FoodType(String name, int Energy, String Source, int sellPrice, Buff buff) {
+        this.name = name;
         this.Energy = Energy;
         this.source = Source;
         this.sellPrice = sellPrice;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void setIngredients(Map<ProductType, Integer> ingredients) {
@@ -171,5 +175,4 @@ public enum FoodType implements ProductTypes {
         i.put(ProductType.MILK, 1);
         MINER_TREAT.setIngredients(i);
     }
-
 }

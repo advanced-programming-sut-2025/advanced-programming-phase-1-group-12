@@ -13,6 +13,8 @@ public enum TypeOfTile {
     HOUSE('H'),
     GROUND('.'),
 
+    STORE('s'),
+
     //this is used for seeing if we can buy an animal
     COOP('C'),
     BARN('B');
