@@ -58,11 +58,12 @@ public class MapSetUp {
                     ownerName);
         }
     }
+
     public static void storesSetUp() {
 
         //in case we may want to make it rectangle instead of square
         int storeWidth = 20;
-        int storeHeight = 20; //   uppest side           down side          left side
+        int storeHeight = 20; //   uppest side down side left side
         int[][] storeCorners = {{0, 50}, {0, 90}, {380, 50}, {380, 90}, {50, 0}, {90, 0}, {50, 380}};
 
         for (int i = 0; i < storeCorners.length; i++) {
@@ -73,12 +74,11 @@ public class MapSetUp {
             Location downRight = new Location(startX + storeWidth, startY + storeHeight);
             LocationOfRectangle storeRectangle = new LocationOfRectangle(topLeft, downRight);
             //setting types as store
-            for(int x = startX; x < startX + storeWidth; x++) {
-                for(int y = startY; y < startY + storeHeight; y++) {
+            for (int x = startX; x < startX + storeWidth; x++) {
+                for (int y = startY; y < startY + storeHeight; y++) {
                     App.getCurrentGame().getMainMap().findLocation(x, y).setTypeOfTile(TypeOfTile.STORE);
                 }
             }
-
             App.getCurrentGame().getMainMap().getStores().add(storeDetailsSetUp(i, storeRectangle));
 
         }
@@ -113,5 +113,20 @@ public class MapSetUp {
                 store = null;
         }
         return store;
+    }
+
+    public static void NPCsetUp() {
+
+        int npcWidth = 40;
+        int npcHeight = 40;
+
+        int StartX = 180;
+        int startY = 180;
+
+        for (int x = StartX; x < StartX + npcWidth; x++) {
+            for (int y = startY; y < startY + npcHeight; y++) {
+                App.getCurrentGame().getMainMap().findLocation(x, y).setTypeOfTile(TypeOfTile.NPC_VILLAGE);
+            }
+        }
     }
 }

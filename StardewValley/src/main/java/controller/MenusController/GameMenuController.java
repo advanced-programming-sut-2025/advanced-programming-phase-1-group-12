@@ -122,7 +122,7 @@ public class GameMenuController implements MenuController {
                 char contentChar = tileType;
                 if (location.getObjectInTile() instanceof Player) {
                     Farm farm = getFarmOfThisLocation(location);
-                    if(farm != null) {
+                    if (farm != null) {
                         contentChar = farm.getOwner().getUser().getUserName().charAt(0);
                         bgColor = "\u001B[41m";
                     }
@@ -170,6 +170,9 @@ public class GameMenuController implements MenuController {
             case BARN -> "\u001B[44m";         // Dark Blue (Standard ANSI)
             case COOP -> "\u001B[48;5;155m";        // light green
             case PLOUGHED_LAND -> "\u001B[48;5;214m"; //orange
+            case NPC_VILLAGE -> "\u001B[48;5;209m"; //Pink
+            case BURNED_GROUND -> "\u001B[40m"; //black
+            case PLANT -> "\\u001B[48;5;88m"; // Dark red
             default -> "\u001B[41m";
         };
     }
@@ -180,6 +183,7 @@ public class GameMenuController implements MenuController {
         App.setCurrentGame(newGame);
         MapSetUp.initializeFarms();
         MapSetUp.storesSetUp();
+        MapSetUp.NPCsetUp();
 
         loadAllUsersFromFiles();
 
@@ -315,18 +319,15 @@ public class GameMenuController implements MenuController {
 
         App.getCurrentGame().setCurrentPlayer(players.get(nextIndex));
         if (App.getCurrentGame().getCurrentPlayer().isHasCollapsed() &&
-                (App.getCurrentGame().getDate().getHour() == 8 || App.getCurrentGame().getDate().getHour() == 9)){
+                (App.getCurrentGame().getDate().getHour() == 8 || App.getCurrentGame().getDate().getHour() == 9)) {
             App.getCurrentGame().getCurrentPlayer().setHasCollapsed(false);
             App.getCurrentGame().getCurrentPlayer().setEnergy(150);
-        }else if (App.getCurrentGame().getCurrentPlayer().isHasCollapsed()){
+        } else if (App.getCurrentGame().getCurrentPlayer().isHasCollapsed()) {
             int nextIndex2 = (nextIndex + 1) % players.size();
             App.getCurrentGame().setCurrentPlayer(players.get(nextIndex2));
         }
 
-//        int newHour = App.getCurrentGame().getDate().getHour() + 1;
         App.getCurrentGame().getDate().changeAdvancedTime(1);
-
-//        App.getCurrentGame().getDate().setHour(newHour);
 
         return new Result(true, "Turn moved to " + players.get(nextIndex).getUser().getUserName());
     }
@@ -457,7 +458,8 @@ public class GameMenuController implements MenuController {
             return new Result(false, "No saved game found with gameId: " + gameIdToLoad);
 
         try {
-            Map<String, Object> saveData = mapper.readValue(file, new TypeReference<>() {});
+            Map<String, Object> saveData = mapper.readValue(file, new TypeReference<>() {
+            });
             List<Map<String, Object>> playersData = (List<Map<String, Object>>) saveData.get("players");
             List<Map<String, Object>> mapData = (List<Map<String, Object>>) saveData.get("mainMap");
             map mainMap = new map();
@@ -479,7 +481,7 @@ public class GameMenuController implements MenuController {
                 int x = (int) playerMap.get("x");
                 int y = (int) playerMap.get("y");
                 int energy = (int) playerMap.get("energy");
-               Location loc = new Location(x, y);
+                Location loc = new Location(x, y);
 
                 User user = App.getUserByUsername(username);
                 Player player = new Player(user, loc, false, null, null, null, null, null, null, false, false);
@@ -509,7 +511,7 @@ public class GameMenuController implements MenuController {
             App.setCurrentGame(loadedGame);
             App.getCurrentGame().setCurrentPlayer(players.get(0));
 
-            for(Player player : App.getCurrentGame().getPlayers()) {
+            for (Player player : App.getCurrentGame().getPlayers()) {
                 Location loc = player.getUserLocation();
                 App.getCurrentGame().getMainMap().findLocation(loc.getxAxis(), loc.getyAxis()).setObjectInTile(player);
                 Farm farm = player.getOwnedFarm();
@@ -529,5 +531,11 @@ public class GameMenuController implements MenuController {
                 new Location(topLeft.get("x"), topLeft.get("y")),
                 new Location(bottomRight.get("x"), bottomRight.get("y"))
         );
+    }
+
+    public Result Thor(int x, int y) {
+        Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
+        location.setTypeOfTile(TypeOfTile.BURNED_GROUND);
+        return new Result(true, "Lightning struck the map at location" + x + ", " + y);
     }
 }

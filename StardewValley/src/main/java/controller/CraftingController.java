@@ -1,14 +1,16 @@
 package controller;
 
 import models.Craft;
-import models.Eating.Recipes;
 import models.Fundementals.App;
 import models.Fundementals.Location;
 import models.Fundementals.Result;
 import models.enums.Season;
-import models.enums.Types.CraftType;
+import models.enums.Types.SeedTypes;
+import models.enums.foraging.CraftType;
 import models.enums.Types.FertilizeType;
-import models.enums.Types.SeedSeason;
+import models.enums.foraging.Plant;
+import models.enums.foraging.Seed;
+import models.enums.foraging.SeedSeason;
 import models.enums.Types.TypeOfTile;
 
 public class CraftingController {
@@ -104,14 +106,17 @@ public class CraftingController {
         }
 
         Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
-        SeedSeason seedSeason = SeedSeason.stringSeed(seed);
-        if (!App.getCurrentGame().getCurrentPlayer().getBackPack().getSeeds().contains(seedSeason)) {
+        SeedTypes seedTypes = SeedTypes.stringToSeed(seed);
+        if (!App.getCurrentGame().getCurrentPlayer().getBackPack().getSeeds().contains(seedTypes)) {
             return new Result(false, "Invalid seed");
         }
 
         if (newLocation.getTypeOfTile().equals(TypeOfTile.PLOUGHED_LAND)) {
             newLocation.setTypeOfTile(TypeOfTile.SEED);
-            newLocation.setObjectInTile(seedSeason);
+            Seed newSeed = new Seed(seedTypes);
+            newLocation.setObjectInTile(newSeed);
+            Plant newPlant = new Plant(newLocation, newSeed, null, false);
+            App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getPlantOfFarm().add(newPlant);
             return new Result(true, seed + " set on newLocation: (" + x + ", " + y + ")");
         } else {
             return new Result(false, "You can only plant on ploughed land.");

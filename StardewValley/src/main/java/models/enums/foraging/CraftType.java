@@ -1,4 +1,4 @@
-package models.enums.Types;
+package models.enums.foraging;
 
 import models.enums.Season;
 
@@ -50,7 +50,7 @@ public enum CraftType {
 
     public final String name;
     public final SeedSeason source;
-    public final String stages;
+    public final int[] stages;
     public final int totalHarvestTime;
     public final boolean oneTime;
     public final int regrowthTime;
@@ -65,7 +65,7 @@ public enum CraftType {
               int baseSellPrice, boolean isEdible, int energy, int baseHealth, List<Season> seasons, boolean canBecomeGiant) {
         this.name = name;
         this.source = source;
-        this.stages = stages;
+        this.stages = parseStages(stages);
         this.totalHarvestTime = totalHarvestTime;
         this.oneTime = oneTime;
         this.regrowthTime = regrowthTime;
@@ -76,6 +76,19 @@ public enum CraftType {
         this.seasons = seasons;
         this.canBecomeGiant = canBecomeGiant;
     }
+
+    private static int[] parseStages(String str) {
+        String[] parts = str.split("-");
+        if (parts.length != 4)
+            throw new IllegalArgumentException("Stages string must have exactly 4 parts, like '1-2-2-2'");
+
+        int[] result = new int[4];
+        for (int i = 0; i < 4; i++) {
+            result[i] = Integer.parseInt(parts[i]);
+        }
+        return result;
+    }
+
 
     public static CraftType nameToCraftType(String name){
         for(CraftType ct : CraftType.values()){

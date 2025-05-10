@@ -2,12 +2,10 @@ package models;
 
 import models.enums.ToolEnums.BackPackTypes;
 import models.enums.Types.FertilizeType;
-import models.enums.Types.SeedSeason;
+import models.enums.foraging.SeedSeason;
 
-import javax.tools.Tool;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class BackPack {

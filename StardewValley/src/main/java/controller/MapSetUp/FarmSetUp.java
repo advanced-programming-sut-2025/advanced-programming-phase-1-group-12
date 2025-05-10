@@ -9,25 +9,28 @@ import models.MapDetails.Quarry;
 import models.MapDetails.Shack;
 import models.Place.Farm;
 import models.enums.Types.TypeOfTile;
+import models.enums.foraging.MineralTypes;
+import models.enums.foraging.Stone;
+import models.enums.foraging.Tree;
+import models.enums.foraging.TreeType;
 
 import java.util.*;
 
 
 public class FarmSetUp {
-
     static Random rand = new Random();
+
     public ArrayList<Location> randomTree(Farm farm){
         int numberOfTrees = rand.nextInt(10) + 5;
-
         return getLocations(farm, numberOfTrees);
     }
 
-    private ArrayList<Location> getLocations(Farm farm, int numberOfTrees) {
+    private ArrayList<Location> getLocations(Farm farm, int number) {
         ArrayList<Location> candidates = getAvailableLocationsInsideFarm(farm);
         Collections.shuffle(candidates);
 
         ArrayList<Location> result = new ArrayList<>();
-        for (int i = 0; i < Math.min(numberOfTrees, candidates.size()); i++) {
+        for (int i = 0; i < Math.min(number, candidates.size()); i++) {
             result.add(candidates.get(i));
         }
         return result;
@@ -35,11 +38,10 @@ public class FarmSetUp {
 
     public ArrayList<Location> randomStone(Farm farm){
         int numberOfStones = rand.nextInt(6) + 3;
-
         return getLocations(farm, numberOfStones);
     }
 
-    private ArrayList<Location> getAvailableLocationsInsideFarm(Farm farm) {
+    public ArrayList<Location> getAvailableLocationsInsideFarm(Farm farm) {
         ArrayList<Location> allInFarm = new ArrayList<>();
         Set<Location> occupied = new HashSet<>();
 
@@ -113,9 +115,11 @@ public class FarmSetUp {
 
         for(Location location : randomTree(newFarm)){
             location.setTypeOfTile(TypeOfTile.TREE);
+            location.setObjectInTile(new Tree(getRandomTreeType()));
         }
         for(Location location : randomStone(newFarm)){
             location.setTypeOfTile(TypeOfTile.STONE);
+            location.setObjectInTile(new Stone(getRandomStoneType()));
         }
     }
 
@@ -171,4 +175,15 @@ public class FarmSetUp {
             }
         }
     }
+
+    public TreeType getRandomTreeType() {
+        TreeType[] values = TreeType.values();
+        return values[rand.nextInt(values.length)];
+    }
+
+    public MineralTypes getRandomStoneType() {
+        MineralTypes[] values = MineralTypes.values();
+        return values[rand.nextInt(values.length)];
+    }
+
 }

@@ -43,6 +43,7 @@ public enum GameMenuCommands implements Commands {
     ENERGY_UNLIMITED("^energy unlimited$"),
     INVENTORY_SHOW("^inventory\\s+show$"),
     INVENTORY_TRASH("inventory trash -i (?<item>.*) -n (?<number>.*)$"),
+    THOR("^cheat Thor -l (?<X>.+) , (?<Y>.+)$"),
 
     //Damdari commands
     //animals

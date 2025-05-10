@@ -1,14 +1,14 @@
-package models.enums.Types;
+package models.enums.foraging;
 
 public enum plantType {
     Tree,
     ForagingTree,
     Source,
+    Seed,
     ForagingSeed,
     Fruit,
     ForagingCrops,
     Crop,
-    Coal,
     MixSeed,
     GiantSeed,
     CropProduct;

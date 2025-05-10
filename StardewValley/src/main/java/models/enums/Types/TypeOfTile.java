@@ -13,6 +13,7 @@ public enum TypeOfTile {
     HOUSE('H'),
     GROUND('.'),
     PLOUGHED_LAND('P'),
+    BURNED_GROUND('b'),
     //TODO:probably not necessary(IDK)
     STORE('s'),
     SEED('F'),
@@ -20,7 +21,9 @@ public enum TypeOfTile {
     //this is used for seeing if we can buy an animal
     //TODO:big or Deluxe stuff is not shown
     COOP('C'),
-    BARN('B');
+    BARN('B'),
+    NPC_VILLAGE('N'),
+    PLANT('p');
 
     private final char nameOfMap;
 

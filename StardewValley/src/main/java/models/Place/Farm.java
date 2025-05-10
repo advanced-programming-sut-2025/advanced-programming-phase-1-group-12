@@ -6,8 +6,11 @@ import models.Fundementals.Location;
 import models.Fundementals.LocationOfRectangle;
 import models.Fundementals.Player;
 import models.MapDetails.*;
+import models.enums.foraging.Plant;
+import models.enums.foraging.Seed;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class Farm implements Place {
 
@@ -24,7 +27,7 @@ public class Farm implements Place {
     private Quarry quarry2;
     private ArrayList<FarmAnimals> farmAnimals = new ArrayList<>();
     private ArrayList<AnimalHome> animalHomes = new ArrayList<>();
-
+    private ArrayList<Plant> PlantOfFarm = new ArrayList<>();
     public Farm(LocationOfRectangle farmLocation) {
         this.farmLocation = farmLocation;
         int sectionSize = 4;
@@ -216,5 +219,13 @@ public class Farm implements Place {
 
     public void setAnimalHomes(ArrayList<AnimalHome> animalHomes) {
         this.animalHomes = animalHomes;
+    }
+
+    public ArrayList<Plant> getPlantOfFarm() {
+        return this.PlantOfFarm;
+    }
+
+    public void setPlantOfFarm(ArrayList<Plant> plantOfFarm) {
+        PlantOfFarm = plantOfFarm;
     }
 }

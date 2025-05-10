@@ -57,5 +57,6 @@ public class Location {
     public Object getObjectInTile() {
         return objectInTile;
     }
+
 }
 

@@ -1,15 +1,11 @@
 package models.Fundementals;
 
 import models.BackPack;
-import models.MapDetails.Shack;
 import models.Place.Farm;
 import models.Refrigrator;
 import models.RelatedToUser.Ability;
-import models.RelatedToUser.Energy;
 import models.RelatedToUser.User;
 import models.RelationShip;
-import models.enums.Types.SeedSeason;
-import models.map;
 
 import java.util.ArrayList;
 
