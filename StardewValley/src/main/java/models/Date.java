@@ -89,7 +89,7 @@ public class Date {
 
             List<MineralTypes> allMinerals = new ArrayList<>(Arrays.asList(MineralTypes.values()));
             List<foragingTrees> allTrees = new ArrayList<>(Arrays.asList(foragingTrees.values()));
-            List<SeedSeason> allSeeds = new ArrayList<>(Arrays.asList(SeedSeason.values()));
+            List<SeedTypes> allSeeds = new ArrayList<>(Arrays.asList(SeedTypes.values()));
             Collections.shuffle(allMinerals);
             Collections.shuffle(allTrees);
             Collections.shuffle(allSeeds);
@@ -120,8 +120,8 @@ public class Date {
 
             for (int i = 0; i < seedCount; i++) {
                 Location location = seedPlacing.get(i);
-                SeedSeason seedSeason = allSeeds.get(i);
-                Seed newSeed = new Seed(null, seedSeason);
+                SeedTypes seedSeason = allSeeds.get(i);
+                Seed newSeed = new Seed(seedSeason);
 
                 location.setTypeOfTile(TypeOfTile.SEED);
                 location.setObjectInTile(newSeed);

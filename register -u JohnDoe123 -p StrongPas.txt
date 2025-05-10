@@ -1,0 +1,52 @@
+register -u JohnDoe123 -p StrongPass123 StrongPass123 -n JohnDoe -e johndoe@example.com -g male
+pick question -q 1 -a alo -c alo
+user logout
+register -u Ali123 -p Password123 Password123 -n Ali -e ali123@example.com -g male
+user logout
+register -u Negar-Shirin -p Complex!Pass123 Complex!Pass123 -n Negar_Shirin -e negar.shirin@longdomain.com -g female
+user logout
+register -u Negar-Shirin -p Complex!Pass123 Complex!Pass123 -n Negar_Shirin -e negar.shirin@longdomain.com -g female
+pick question -q 1 -a alo -c alo
+menu enter game
+game new -u Negar-Shirin Ali123 JohnDoe123
+yes
+0
+no
+1
+no
+2
+print map -l 0, 0 -s 30
+yes
+walk -l 37, 42
+walk -l 10, 2
+print map -l 0, 0 -s 30
+no
+time
+print map -l 0, 0 -s 390
+no
+craftinfo -n Melon
+walk -l 20, 20
+walk -l 30, 50
+walk -l 360, 10
+walk -l 20, 20
+walk -l 330, 20
+walk -l 20, 20
+walk -l 330, 0
+energy show
+energy unlimited
+walk -l 20, 20
+walk -l 30, 50
+walk -l 360, 10
+walk -l 20, 20
+walk -l 330, 20
+walk -l 20, 20
+walk -l 330, 0
+next turn
+time
+exit
+menu enter game
+load game with 1
+print map -l 0, 0 -s 30
+no
+print map -l 20, 20 -s 20
+yes

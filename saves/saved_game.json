@@ -1,0 +1,304 @@
+{
+  "gameId" : 0,
+  "players" : [ {
+    "groupId" : 0,
+    "x" : 360,
+    "y" : 20,
+    "farm" : {
+      "farmAnimals" : [ ],
+      "greenhouse2" : {
+        "bottomRight" : {
+          "x" : 4,
+          "y" : 30
+        },
+        "topLeft" : {
+          "x" : 0,
+          "y" : 26
+        }
+      },
+      "animalHomes" : [ ],
+      "greenhouse1" : {
+        "bottomRight" : {
+          "x" : 30,
+          "y" : 30
+        },
+        "topLeft" : {
+          "x" : 26,
+          "y" : 26
+        }
+      },
+      "quarry2" : {
+        "bottomRight" : {
+          "x" : 4,
+          "y" : 30
+        },
+        "topLeft" : {
+          "x" : 0,
+          "y" : 26
+        }
+      },
+      "quarry1" : {
+        "bottomRight" : {
+          "x" : 17,
+          "y" : 17
+        },
+        "topLeft" : {
+          "x" : 13,
+          "y" : 13
+        }
+      },
+      "shack1" : {
+        "bottomRight" : {
+          "x" : 30,
+          "y" : 4
+        },
+        "topLeft" : {
+          "x" : 26,
+          "y" : 0
+        }
+      },
+      "location" : {
+        "bottomRight" : {
+          "x" : 30,
+          "y" : 30
+        },
+        "topLeft" : {
+          "x" : 0,
+          "y" : 0
+        }
+      },
+      "shack2" : {
+        "bottomRight" : {
+          "x" : 4,
+          "y" : 30
+        },
+        "topLeft" : {
+          "x" : 0,
+          "y" : 26
+        }
+      },
+      "lake2" : {
+        "bottomRight" : {
+          "x" : 4,
+          "y" : 30
+        },
+        "topLeft" : {
+          "x" : 0,
+          "y" : 26
+        }
+      },
+      "lake1" : {
+        "bottomRight" : {
+          "x" : 4,
+          "y" : 4
+        },
+        "topLeft" : {
+          "x" : 0,
+          "y" : 0
+        }
+      }
+    },
+    "username" : "Negar-Shirin",
+    "energy" : 200
+  }, {
+    "groupId" : 0,
+    "x" : 370,
+    "y" : 0,
+    "farm" : {
+      "farmAnimals" : [ ],
+      "greenhouse2" : {
+        "bottomRight" : {
+          "x" : 374,
+          "y" : 30
+        },
+        "topLeft" : {
+          "x" : 370,
+          "y" : 26
+        }
+      },
+      "animalHomes" : [ ],
+      "greenhouse1" : {
+        "bottomRight" : {
+          "x" : 400,
+          "y" : 30
+        },
+        "topLeft" : {
+          "x" : 396,
+          "y" : 26
+        }
+      },
+      "quarry2" : {
+        "bottomRight" : {
+          "x" : 374,
+          "y" : 30
+        },
+        "topLeft" : {
+          "x" : 370,
+          "y" : 26
+        }
+      },
+      "quarry1" : {
+        "bottomRight" : {
+          "x" : 387,
+          "y" : 17
+        },
+        "topLeft" : {
+          "x" : 383,
+          "y" : 13
+        }
+      },
+      "shack1" : {
+        "bottomRight" : {
+          "x" : 400,
+          "y" : 4
+        },
+        "topLeft" : {
+          "x" : 396,
+          "y" : 0
+        }
+      },
+      "location" : {
+        "bottomRight" : {
+          "x" : 400,
+          "y" : 30
+        },
+        "topLeft" : {
+          "x" : 370,
+          "y" : 0
+        }
+      },
+      "shack2" : {
+        "bottomRight" : {
+          "x" : 374,
+          "y" : 30
+        },
+        "topLeft" : {
+          "x" : 370,
+          "y" : 26
+        }
+      },
+      "lake2" : {
+        "bottomRight" : {
+          "x" : 374,
+          "y" : 30
+        },
+        "topLeft" : {
+          "x" : 370,
+          "y" : 26
+        }
+      },
+      "lake1" : {
+        "bottomRight" : {
+          "x" : 374,
+          "y" : 4
+        },
+        "topLeft" : {
+          "x" : 370,
+          "y" : 0
+        }
+      }
+    },
+    "username" : "Ali123",
+    "energy" : 200
+  }, {
+    "groupId" : 0,
+    "x" : 0,
+    "y" : 370,
+    "farm" : {
+      "farmAnimals" : [ ],
+      "greenhouse2" : {
+        "bottomRight" : {
+          "x" : 4,
+          "y" : 400
+        },
+        "topLeft" : {
+          "x" : 0,
+          "y" : 396
+        }
+      },
+      "animalHomes" : [ ],
+      "greenhouse1" : {
+        "bottomRight" : {
+          "x" : 30,
+          "y" : 400
+        },
+        "topLeft" : {
+          "x" : 26,
+          "y" : 396
+        }
+      },
+      "quarry2" : {
+        "bottomRight" : {
+          "x" : 4,
+          "y" : 400
+        },
+        "topLeft" : {
+          "x" : 0,
+          "y" : 396
+        }
+      },
+      "quarry1" : {
+        "bottomRight" : {
+          "x" : 17,
+          "y" : 387
+        },
+        "topLeft" : {
+          "x" : 13,
+          "y" : 383
+        }
+      },
+      "shack1" : {
+        "bottomRight" : {
+          "x" : 30,
+          "y" : 374
+        },
+        "topLeft" : {
+          "x" : 26,
+          "y" : 370
+        }
+      },
+      "location" : {
+        "bottomRight" : {
+          "x" : 30,
+          "y" : 400
+        },
+        "topLeft" : {
+          "x" : 0,
+          "y" : 370
+        }
+      },
+      "shack2" : {
+        "bottomRight" : {
+          "x" : 4,
+          "y" : 400
+        },
+        "topLeft" : {
+          "x" : 0,
+          "y" : 396
+        }
+      },
+      "lake2" : {
+        "bottomRight" : {
+          "x" : 4,
+          "y" : 400
+        },
+        "topLeft" : {
+          "x" : 0,
+          "y" : 396
+        }
+      },
+      "lake1" : {
+        "bottomRight" : {
+          "x" : 4,
+          "y" : 374
+        },
+        "topLeft" : {
+          "x" : 0,
+          "y" : 370
+        }
+      }
+    },
+    "username" : "JohnDoe123",
+    "energy" : 200
+  } ]
+}

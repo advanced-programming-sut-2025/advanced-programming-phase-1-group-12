@@ -5,17 +5,15 @@ import models.Fundementals.Location;
 public class Plant {
     private Location location;
     private Seed seed;
-    private SeedSeason seedSeason;
     private boolean hasBeenFertilized ;
     private int dayPast ;
     private int currentStage ;
     private int age;
     private boolean isForaging;
 
-    public Plant(Location location, Seed seed, SeedSeason seedSeason, boolean isForaging){
+    public Plant(Location location, Seed seed, boolean isForaging){
         this.location = location;
         this.seed = seed;
-        this.seedSeason = seedSeason;
         hasBeenFertilized = false;
         dayPast = 2;
         currentStage = 0;

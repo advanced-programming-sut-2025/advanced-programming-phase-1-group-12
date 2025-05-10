@@ -10,7 +10,6 @@ import models.enums.foraging.CraftType;
 import models.enums.Types.FertilizeType;
 import models.enums.foraging.Plant;
 import models.enums.foraging.Seed;
-import models.enums.foraging.SeedSeason;
 import models.enums.Types.TypeOfTile;
 
 import java.util.Arrays;
@@ -115,9 +114,9 @@ public class CraftingController {
 
         if (newLocation.getTypeOfTile().equals(TypeOfTile.PLOUGHED_LAND)) {
             newLocation.setTypeOfTile(TypeOfTile.SEED);
-            Seed newSeed = new Seed(seedTypes, null);
+            Seed newSeed = new Seed(seedTypes);
             newLocation.setObjectInTile(newSeed);
-            Plant newPlant = new Plant(newLocation, newSeed, null, false);
+            Plant newPlant = new Plant(newLocation, newSeed, false);
             App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getPlantOfFarm().add(newPlant);
             return new Result(true, seed + " set on newLocation: (" + x + ", " + y + ")");
         } else {
@@ -143,9 +142,9 @@ public class CraftingController {
         StringBuilder output = new StringBuilder();
         output.append("Name: ").append(seed.getType().getName()).append("\n");
         output.append("Season: ");
-//        for (Season season : seed) {
-//            output.append(season.name()).append(" ");
-//        }
+        for (Season season : seed.getType().seasons) {
+            output.append(season.name()).append(" ");
+        }
         return new Result(true, output.toString());
     }
 
@@ -254,13 +253,13 @@ public class CraftingController {
             return new Result(false, "there is no seed for reaping!");
 
         Object tileObject = newLocation.getObjectInTile();
-        if (!(tileObject instanceof SeedSeason)) return new Result(false, "Invalid object in tile.");
-        SeedSeason seedSeason = (SeedSeason) tileObject;
+        if (!(tileObject instanceof Seed)) return new Result(false, "Invalid object in tile.");
+        Seed seedSeason = (Seed) tileObject;
 
         App.getCurrentGame().getMainMap().findLocation(x, y).setObjectInTile(null);
         App.getCurrentGame().getMainMap().findLocation(x, y).setTypeOfTile(TypeOfTile.GROUND);
         App.getCurrentGame().getCurrentPlayer().getBackPack().getSeeds().add(seedSeason);
-        return new Result(true, seedSeason.name + " add to back pack of current player");
+        return new Result(true, seedSeason.getType().name() + " add to back pack of current player");
     }
 
     public Result howMuchWater() {
