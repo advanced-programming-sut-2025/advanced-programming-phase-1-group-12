@@ -1,27 +1,28 @@
 package models.enums.Types;
 
 import models.Item;
+import java.util.Map;
 
 public enum Cooking {
-    FriedEgg("Fried Egg", "1 egg", "", "Starter", 35 , 50),
-    BakedFish("Baked Fish", "1 Sardine + 1 Salmon + 1 wheat",  "", "Starter", 100 , 75),
-    Salad("Salad", "1 leek + 1 dandelion", "", "Starter", 110, 113),
-    Omelet("Omelet", "1 egg + 1 milk",  "", "Stardrop Saloon", 125100,100),
-    PumpkinPie("Pumpkin Pie", "1 pumpkin + 1 wheat flour + 1 milk + 1 sugar", "", "Stardrop Saloon", 385, 225),
-    Spaghetti("Spaghetti", "1 wheat flour + 1 tomato", "", "Stardrop Saloon", 120, 75),
-    Pizza("Pizza", "1 wheat flour + 1 tomato + 1 cheese" , "", "Stardrop Saloon", 300 ,150),
-    Tortilla("Tortilla", "1 corn", "", "Stardrop Saloon", 50, 50),
-    MakiRoll("Maki Roll", "1 any fish + 1 rice + 1 fiber", "", "Stardrop Saloon", 220, 100),
-    TripleShotEspresso("Triple Shot Espresso", "3 coffee", "Max Energy + 100 (5 hours)", "Stardrop Saloon", 450, 200);
+    FriedEgg("Fried Egg", Map.of("egg", 1), "", "Starter", 35 , 50),
+    BakedFish("Baked Fish",Map.of("Sardine", 1, "Salmon", 1, "Wheat Flour", 1),  "", "Starter", 100 , 75),
+    Salad("Salad", Map.of("leek", 1 , "Dandelion", 1), "", "Starter", 110, 113),
+    Omelet("Omelet",Map.of("egg", 1, "milk", 1) ,  "", "Stardrop Saloon", 125100,100),
+    PumpkinPie("Pumpkin Pie",Map.of("pumkin", 1 , "Wheat Flour", 1, "milk", 1, "Sugar", 1) , "", "Stardrop Saloon", 385, 225),
+    Spaghetti("Spaghetti", Map.of("Wheat Flour", 1 , "Tomato", 1), "", "Stardrop Saloon", 120, 75),
+    Pizza("Pizza", Map.of("Wheat Flour", 1 , "Tomato", 1, "cheese", 1) , "", "Stardrop Saloon", 300 ,150),
+    Tortilla("Tortilla", Map.of("corn", 1), "", "Stardrop Saloon", 50, 50),
+    MakiRoll("Maki Roll", Map.of("fish", 1, "rice", 1, "fiber", 1), "", "Stardrop Saloon", 220, 100),
+    TripleShotEspresso("Triple Shot Espresso", Map.of("coffee" , 3), "Max Energy + 100 (5 hours)", "Stardrop Saloon", 450, 200);
 
     private final String name;
-    private final String ingredient;
+    private final Map<String , Integer> ingredient;
     private final int energy;
     private final String buffer;
     private final String source;
     private final int baseSellPrice;
 
-    Cooking(String name, String ingredient,String buffer, String source, int baseSellPrice ,int energy) {
+    Cooking(String name, Map<String, Integer> ingredient,String buffer, String source, int baseSellPrice ,int energy) {
     this.name = name;
     this.ingredient = ingredient;
     this.energy = energy;
@@ -43,7 +44,7 @@ public enum Cooking {
         return name;
     }
 
-    public String getIngredient() {
+    public Map<String, Integer> getIngredient() {
         return ingredient;
     }
 
