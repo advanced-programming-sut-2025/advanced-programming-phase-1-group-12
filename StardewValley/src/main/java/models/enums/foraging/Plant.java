@@ -5,24 +5,64 @@ import models.Fundementals.Location;
 public class Plant {
     private Location location;
     private Seed seed;
-    private boolean hasBeenFertilized ;
-    private int dayPast ;
+    private AllCrops allCrops;
+    private boolean hasBeenFertilized;
+    private boolean hasBeenWatering;
+    private int totalTimeNeeded;
+    private int dayPast;
     private int currentStage ;
     private int age;
     private boolean isForaging;
+//    private Quality quality;
 
-    public Plant(Location location, Seed seed, boolean isForaging){
+    public Plant(Location location, Seed seed, boolean isForaging, AllCrops allCrops){
         this.location = location;
         this.seed = seed;
         hasBeenFertilized = false;
         dayPast = 2;
-        currentStage = 0;
-        age = 0;
+        this.currentStage = 0;
+        this.age = 0;
         this.isForaging = isForaging;
+        this.totalTimeNeeded = seed.getType().getDay();
+        this.allCrops = allCrops;
+        this.hasBeenWatering = false;
+//        this.quallity = ....;
     }
 
     public boolean isHasBeenFertilized() {
         return hasBeenFertilized;
+    }
+
+    public int getTotalTimeNeeded() {
+        return totalTimeNeeded;
+    }
+
+    public void setTotalTimeNeeded(int totalTimeNeeded) {
+        this.totalTimeNeeded = totalTimeNeeded;
+    }
+
+    public int getCurrentStage() {
+        return currentStage;
+    }
+
+    public void setCurrentStage(int currentStage) {
+        this.currentStage = currentStage;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public AllCrops getAllCrops() {
+        return allCrops;
+    }
+
+    public void setAllCrops(AllCrops allCrops) {
+        this.allCrops = allCrops;
     }
 
     public Location getLocation() {
@@ -31,10 +71,6 @@ public class Plant {
 
     public void setLocation(Location location) {
         this.location = location;
-    }
-
-    public int getAge() {
-        return age;
     }
 
     public boolean isForaging() {
@@ -49,24 +85,20 @@ public class Plant {
         isForaging = foraging;
     }
 
+    public boolean isHasBeenWatering() {
+        return hasBeenWatering;
+    }
+
+    public void setHasBeenWatering(boolean hasBeenWatering) {
+        this.hasBeenWatering = hasBeenWatering;
+    }
+
     public void setSeed(Seed seed) {
         this.seed = seed;
     }
 
-    public int getCurrentStage() {
-        return currentStage;
-    }
-
     public int getDayPast() {
         return dayPast;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
-    }
-
-    public void setCurrentStage(int currentStage) {
-        this.currentStage = currentStage;
     }
 
     public void setDayPast(int dayPast) {

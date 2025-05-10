@@ -65,15 +65,17 @@ public class Date {
 
     public void updateAllSeeds() {
         for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
-            for (Plant plant : farm.getPlantOfFarm()) {
-                if (!plant.isForaging()) {
-                    if (plant.getSeed().getType().getDay() > plant.getAge()) {
-                        int newAge = plant.getAge() + 1;
-                        plant.setAge(newAge);
-                    } else {
+            for (Seed seed : farm.getSeedOfFarm()) {
+
+            }
+            for(Plant plant : farm.getPlantOfFarm()){
+                if(!plant.isHasBeenFertilized()){
+                    plant.setDayPast(plant.getDayPast() - 1);
+                    if(plant.getDayPast() <= 0){
+                        System.out.println("you lost plant at location: "+ plant.getLocation().getxAxis() + ", " + plant.getLocation().getyAxis());
                         Location currentLocation = plant.getLocation();
-                        currentLocation.setTypeOfTile(TypeOfTile.PLANT);
-                        currentLocation.setObjectInTile(plant);
+                        currentLocation.setTypeOfTile(TypeOfTile.GROUND);
+                        currentLocation.setObjectInTile(null);
                     }
                 }
             }
@@ -83,7 +85,7 @@ public class Date {
     public void foragingAdd() {
         for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
             ArrayList<Location> availableLocation = getGroundLocation(farm);
-            if (availableLocation.size() < 3) continue; // جلوگیری از خطا
+            if (availableLocation.size() < 3) continue;
 
             Collections.shuffle(availableLocation);
 

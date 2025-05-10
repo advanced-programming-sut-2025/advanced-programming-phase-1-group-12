@@ -113,11 +113,12 @@ public class CraftingController {
         }
 
         if (newLocation.getTypeOfTile().equals(TypeOfTile.PLOUGHED_LAND)) {
-            newLocation.setTypeOfTile(TypeOfTile.SEED);
+            newLocation.setTypeOfTile(TypeOfTile.PLANT);
             Seed newSeed = new Seed(seedTypes);
-            newLocation.setObjectInTile(newSeed);
-            Plant newPlant = new Plant(newLocation, newSeed, false);
+            AllCrops allCrops = AllCrops.sourceTypeToCraftType(seedTypes);
+            Plant newPlant = new Plant(newLocation, newSeed, false, allCrops);
             App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getPlantOfFarm().add(newPlant);
+            newLocation.setObjectInTile(newPlant);
             return new Result(true, seed + " set on newLocation: (" + x + ", " + y + ")");
         } else {
             return new Result(false, "You can only plant on ploughed land.");
@@ -129,8 +130,8 @@ public class CraftingController {
         int yAxis = Integer.parseInt(y);
         Location location = App.getCurrentGame().getMainMap().findLocation(xAxis, yAxis);
 
-        if (!location.getTypeOfTile().equals(TypeOfTile.SEED) && !location.getTypeOfTile().equals(TypeOfTile.PLANT)) {
-            return new Result(false, "There is no seed or plant in this location.");
+        if (!location.getTypeOfTile().equals(TypeOfTile.PLANT)) {
+            return new Result(false, "There is no plant in this location.");
         }
 
         Object tileObject = location.getObjectInTile();
@@ -138,13 +139,18 @@ public class CraftingController {
             return new Result(false, "Invalid object in tile.");
         }
 
-        Seed seed = (Seed) tileObject;
+        Plant plant = (Plant) tileObject;
         StringBuilder output = new StringBuilder();
-        output.append("Name: ").append(seed.getType().getName()).append("\n");
+        output.append("Name: ").append(plant.getAllCrops().name).append("\n");
         output.append("Season: ");
-        for (Season season : seed.getType().seasons) {
+        for (Season season : plant.getAllCrops().seasons) {
             output.append(season.name()).append(" ");
         }
+        output.append("to full growth: ").append(plant.getTotalTimeNeeded() - plant.getAge()).append("\n");
+        output.append("Stage is: ").append(plant.getCurrentStage()).append("\n");
+        output.append("was today watering? ").append(plant.isHasBeenWatering()).append("\n");
+//        output.append("Quality: ").append(plant.getQuality).append("\n");
+        output.append("was today fertilizing? ").append(plant.isHasBeenFertilized()).append("\n");
         return new Result(true, output.toString());
     }
 
@@ -199,10 +205,12 @@ public class CraftingController {
             }
         }
         Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
-        if (!newLocation.getTypeOfTile().equals(TypeOfTile.SEED)) {
+        if (!newLocation.getTypeOfTile().equals(TypeOfTile.PLANT)) {
             return new Result(false, "there is no seed for fertilizing!");
+        } else {
+            Plant plant = (Plant) newLocation.getObjectInTile();
+            plant.setHasBeenFertilized(true);
         }
-        //TODO: sorat roshd bala mire
         return new Result(true, "we fertilizing to the seed of location: (" + x + ", " + y + ")");
     }
 
@@ -321,9 +329,22 @@ public class CraftingController {
         return null;
     }
 
-    public Result showRecipesforCrafting(){
+    public Result showRecipesforCrafting() {
         //for(Recipes recipes : App.getCurrentGame().getCurrentPlayer().)
         //TODO: class item need
         return null;
+    }
+
+    public Result showFertilize(){
+        StringBuilder output = new StringBuilder();
+        for(Location location: App.getCurrentGame().getMainMap().getTilesOfMap()){
+            if(location.getTypeOfTile().equals(TypeOfTile.PLANT)){
+                Plant newPlant = (Plant)location.getObjectInTile();
+                if(newPlant.isHasBeenFertilized()){
+                    output.append(newPlant.getAllCrops().name).append(location.getxAxis()).append(location.getyAxis()).append("\n");
+                }
+            }
+        }
+        return new Result(true, output.toString());
     }
 }

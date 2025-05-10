@@ -25,6 +25,7 @@ public enum GameMenuCommands implements Commands {
     MACK_CRAFT("^crafting craft (?<itemName>.+)"),
     PLACE_ON_GROUND("lace item -n (?<itemName>.+) -d (?<direction>.+)$"),
     ADD_TO_INVENTORY("^heat add item -n (?<itemName>.+) -c (?<count>.+)"),
+    WHICH_FERTILIZING("^which tile was fertilized&"),
     //weather and ....
     SEASON("^season$"),
     TIME("^time$"),

@@ -98,6 +98,15 @@ public enum AllCrops {
         return null;
     }
 
+    public static AllCrops sourceTypeToCraftType(SeedTypes seedTypes){
+        for(AllCrops ct : AllCrops.values()){
+            if(ct.source.equals(seedTypes)){
+                return ct;
+            }
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return "CraftType{" +

@@ -110,6 +110,8 @@ public class GameMenu extends AppMenu {
             System.out.println(craftingController.showRecipesforCrafting());
         } else if ((matcher = GameMenuCommands.THOR.getMather(input)) != null) {
             System.out.println(controller.Thor(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
+        } else if ((matcher = GameMenuCommands.WHICH_FERTILIZING.getMather(input)) != null) {
+            System.out.println(craftingController.showFertilize());
         } else {
             System.out.println("invalid command");
         }

@@ -28,6 +28,7 @@ public class Farm implements Place {
     private ArrayList<FarmAnimals> farmAnimals = new ArrayList<>();
     private ArrayList<AnimalHome> animalHomes = new ArrayList<>();
     private ArrayList<Plant> PlantOfFarm = new ArrayList<>();
+    private ArrayList<Seed> SeedOfFarm = new ArrayList<>();
     public Farm(LocationOfRectangle farmLocation) {
         this.farmLocation = farmLocation;
         int sectionSize = 4;
@@ -120,6 +121,13 @@ public class Farm implements Place {
         this.quarry2 = new Quarry(new LocationOfRectangle(bottomLeftCornerGreenQuarry2, bottomLeftLakeDownRightQuarry2));
     }
 
+    public void setSeedOfFarm(ArrayList<Seed> seedOfFarm) {
+        SeedOfFarm = seedOfFarm;
+    }
+
+    public ArrayList<Seed> getSeedOfFarm() {
+        return SeedOfFarm;
+    }
 
     public LocationOfRectangle getLocation() {
         return farmLocation;
