@@ -6,7 +6,7 @@ import models.Fundementals.Location;
 import models.Fundementals.Result;
 import models.enums.Season;
 import models.enums.Types.SeedTypes;
-import models.enums.foraging.CraftType;
+import models.enums.foraging.AllCrops;
 import models.enums.Types.FertilizeType;
 import models.enums.foraging.Plant;
 import models.enums.foraging.Seed;
@@ -33,32 +33,32 @@ public class CraftingController {
     }
 
     public Result showCraftInto(String craftItem) {
-        CraftType craftType = CraftType.nameToCraftType(craftItem);
-        if (craftType == null) {
+        AllCrops allCrops = AllCrops.nameToCraftType(craftItem);
+        if (allCrops == null) {
             return new Result(false, "Invalid craft type");
         }
 
         StringBuilder output = new StringBuilder();
-        output.append("Name: ").append(craftType.name).append("\n");
-        output.append("Source: ").append(craftType.source.name()).append("\n");
-        output.append("Stage: ").append(Arrays.toString(craftType.stages)).append("\n");
-        output.append("Total Harvest Time: ").append(craftType.totalHarvestTime).append("\n");
+        output.append("Name: ").append(allCrops.name).append("\n");
+        output.append("Source: ").append(allCrops.source.name()).append("\n");
+        output.append("Stage: ").append(Arrays.toString(allCrops.stages)).append("\n");
+        output.append("Total Harvest Time: ").append(allCrops.totalHarvestTime).append("\n");
 
-        output.append("One Time: ").append(craftType.oneTime ? "TRUE\n" : "FALSE\n");
-        output.append("Regrowth Time: ").append(craftType.regrowthTime == -1 ? "" : craftType.regrowthTime).append("\n");
+        output.append("One Time: ").append(allCrops.oneTime ? "TRUE\n" : "FALSE\n");
+        output.append("Regrowth Time: ").append(allCrops.regrowthTime == -1 ? "" : allCrops.regrowthTime).append("\n");
 
-        output.append("Base Sell Price: ").append(craftType.baseSellPrice).append("\n");
-        output.append("Edible: ").append(craftType.isEdible ? "TRUE\n" : "FALSE\n");
-        output.append("Base Energy: ").append(craftType.energy).append("\n");
-        output.append("Base Health: ").append(craftType.baseHealth).append("\n");
+        output.append("Base Sell Price: ").append(allCrops.baseSellPrice).append("\n");
+        output.append("Edible: ").append(allCrops.isEdible ? "TRUE\n" : "FALSE\n");
+        output.append("Base Energy: ").append(allCrops.energy).append("\n");
+        output.append("Base Health: ").append(allCrops.baseHealth).append("\n");
 
         output.append("Season: ");
-        for (Season season : craftType.seasons) {
+        for (Season season : allCrops.seasons) {
             output.append(season.name()).append(", ");
         }
         output.append("\n");
 
-        output.append("Can Become Giant: ").append(craftType.canBecomeGiant ? "TRUE" : "FALSE").append("\n");
+        output.append("Can Become Giant: ").append(allCrops.canBecomeGiant ? "TRUE" : "FALSE").append("\n");
 
         return new Result(true, output.toString());
     }

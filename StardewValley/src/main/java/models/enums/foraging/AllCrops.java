@@ -5,7 +5,7 @@ import models.enums.Types.SeedTypes;
 
 import java.util.List;
 
-public enum CraftType {
+public enum AllCrops {
 
     BLUE_JAZZ("Blue Jazz", SeedTypes.JazzSeeds, "1-2-2-2", 7, true, -1, 50, true, 45, 20, List.of(Season.SPRING), false),
     CARROT("Carrot", SeedTypes.CarrotSeed, "1-1-1", 3, true, -1, 35, true, 75, 33, List.of(Season.SPRING), false),
@@ -62,8 +62,8 @@ public enum CraftType {
     public final List<Season> seasons;
     public final boolean canBecomeGiant;
 
-    CraftType(String name, SeedTypes source, String stages, int totalHarvestTime, boolean oneTime, int regrowthTime,
-              int baseSellPrice, boolean isEdible, int energy, int baseHealth, List<Season> seasons, boolean canBecomeGiant) {
+    AllCrops(String name, SeedTypes source, String stages, int totalHarvestTime, boolean oneTime, int regrowthTime,
+             int baseSellPrice, boolean isEdible, int energy, int baseHealth, List<Season> seasons, boolean canBecomeGiant) {
         this.name = name;
         this.source = source;
         this.stages = parseStages(stages);
@@ -89,8 +89,8 @@ public enum CraftType {
     }
 
 
-    public static CraftType nameToCraftType(String name){
-        for(CraftType ct : CraftType.values()){
+    public static AllCrops nameToCraftType(String name){
+        for(AllCrops ct : AllCrops.values()){
             if(ct.name.equals(name)){
                 return ct;
             }

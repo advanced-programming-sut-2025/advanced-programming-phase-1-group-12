@@ -1,38 +1,50 @@
 package models.enums.foraging;
 
+import models.Fundementals.Location;
 import models.enums.Types.SeedTypes;
 
 public class Seed {
-    SeedTypes type;
-    int x;
-    int y;
+
+    private SeedTypes type;
+    private Location location;
+    private int totalTimeNeeded;
+    private boolean fertilized;
 
     public Seed(SeedTypes type) {
         this.type = type;
+        this.fertilized = false;
+        this.totalTimeNeeded = type.getDay();
     }
 
     public void setType(SeedTypes type) {
         this.type = type;
     }
 
-    public int getX() {
-        return x;
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
-    public int getY() {
-        return y;
+    public Location getLocation() {
+        return location;
     }
 
     public SeedTypes getType() {
         return type;
     }
 
-    public void setX(int x) {
-        this.x = x;
+    public boolean isFertilized() {
+        return fertilized;
     }
 
-    public void setY(int y) {
-        this.y = y;
+    public int getTotalTimeNeeded() {
+        return totalTimeNeeded;
     }
 
+    public void setFertilized(boolean fertilized) {
+        this.fertilized = fertilized;
+    }
+
+    public void setTotalTimeNeeded(int totalTimeNeeded) {
+        this.totalTimeNeeded = totalTimeNeeded;
+    }
 }
