@@ -1,7 +1,9 @@
 package models.enums.ToolEnums;
 
+import models.Fundementals.App;
 import models.Fundementals.Result;
 import models.ToolsPackage.ToolFunction;
+import models.ToolsPackage.Tools;
 import models.ToolsPackage.UpgradeFunction;
 import models.enums.Types.TypeOfTile;
 import models.Animal.FarmAnimals;
@@ -33,11 +35,20 @@ public enum Tool  {
             return (location, skillLevel) -> {
                 TypeOfTile tileType = location.getTypeOfTile();
                 if (tileType == TypeOfTile.STONE) {
-                    location.setTypeOfTile(TypeOfTile.GROUND);
-                    return new Result(true, "You broke the stone");
+                    Tools pickaxe = App.getCurrentGame().getCurrentPlayer().getCurrentTool();
+                    if (pickaxe != null && pickaxe.getLevel() >= 1) {
+                        location.setTypeOfTile(TypeOfTile.GROUND);
+                        return new Result(true, "You broke the stone");
+                    }
+                    else {
+                        return new Result(false, "Your pickaxe isn't strong enough to mine this");
+                    }
+
                 }
                 if (tileType == TypeOfTile.QUARRY) {
-                    if (tool != null && tool.getLevel() >= 1) {
+                    Tools pickaxe = App.getCurrentGame().getCurrentPlayer().getCurrentTool();
+                    if (pickaxe != null && pickaxe.getLevel() >= 1) {
+                        //TODO
                         return new Result(true, "You mined some ore");
                     } else {
                         return new Result(false, "Your pickaxe isn't strong enough to mine this");
@@ -81,7 +92,7 @@ public enum Tool  {
         public ToolFunction getUseFunction() {
             return (location, skillLevel) -> {
                 TypeOfTile tileType = location.getTypeOfTile();
-                ToolObject tool = (ToolObject) location.getObjectInTile();
+                Tools tool = (Tools) location.getObjectInTile();
 
                 if (tileType == TypeOfTile.LAKE) {
                     if (tool != null && tool.isWateringCan()) {
@@ -204,7 +215,7 @@ public enum Tool  {
         }
     },
 
-    SCYTHE("Seythe", 2) {
+    SCYTHE("Scythe", 2) {
         @Override
         public ToolFunction getUseFunction() {
             return (location, skillLevel) -> new Result(true, "You swung your scythe");
@@ -216,7 +227,7 @@ public enum Tool  {
         }
     },
 
-    MILKPALE("Milk Pale", 4) {
+    MILKPALE("Milk Pail", 4) {
         @Override
         public ToolFunction getUseFunction() {
             return (location, skillLevel) -> {

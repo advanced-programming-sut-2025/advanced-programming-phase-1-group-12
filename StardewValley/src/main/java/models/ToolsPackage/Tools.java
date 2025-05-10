@@ -81,8 +81,8 @@ public class Tools extends Item {
     }
 
     public int calculateEnergyCost(int skillLevel) {
-        int cost = baseEnergyCost - level;
-        if (skillLevel == 10) {
+        int cost = baseEnergyCost;
+        if (skillLevel == 4) {
             cost -= 1;
         }
         return Math.max(0, cost);
@@ -108,7 +108,6 @@ public class Tools extends Item {
         return result;
     }
 
-    // Method to get the trash can recovery rate based on level
     public double getTrashCanRecoveryRate() {
         if (!isTrashCan()) {
             return 0.0;
@@ -124,17 +123,17 @@ public class Tools extends Item {
             case 4: // Iridium
                 return 0.60;
             default:
-                return 0.0; // Normal trash can doesn't recover any value
+                return 0.0;
         }
     }
 
     public Result use(Location targetLocation, int skillLevel) {
         int energyCost = calculateEnergyCost(skillLevel);
-        if (App.getCurrentPlayerLazy().getEnergy() < energyCost) {
+        if (App.getCurrentGame().getCurrentPlayer().getEnergy() < energyCost) {
             return new Result(false, "Not enough energy to use this tool!");
         }
 
-        App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - energyCost);
+        App.getCurrentGame().getCurrentPlayer().setEnergy(App.getCurrentGame().getCurrentPlayer().getEnergy() - energyCost);
         return useFunction.execute(targetLocation, skillLevel);
     }
 
@@ -175,22 +174,18 @@ public class Tools extends Item {
         return new Tools(Tool.TRASH_CAN, type);
     }
 
-    // Method to check if the tool is a watering can
     public boolean isWateringCan() {
         return toolType == Tool.WATERING_CAN;
     }
 
-    // Method to check if the tool is a trash can
     public boolean isTrashCan() {
         return toolType == Tool.TRASH_CAN;
     }
 
-    // Get the tool type enum
     public Tool getToolType() {
         return toolType;
     }
 
-    // Methods for watering can
     public int getCapacity() {
         return capacity;
     }

@@ -2,20 +2,19 @@ package controller;
 
 import models.Fundementals.App;
 import models.Fundementals.Location;
+import models.Fundementals.Player;
 import models.Fundementals.Result;
 import models.BackPack;
 import models.Item;
 import models.ToolsPackage.Tools;
-import models.enums.Types.TypeOfTile;
-import models.Animal.FarmAnimals;
-import models.enums.Animal;
+import models.enums.ToolEnums.Tool;
+
 
 import java.util.Map;
 import java.util.HashMap;
 
 public class ToolsController {
-
-    private Tools currentTool = null;
+    Player player  = App.getCurrentGame().getCurrentPlayer();
     private static final Map<String, String> DIRECTION_MAP = new HashMap<>();
 
     static {
@@ -29,15 +28,13 @@ public class ToolsController {
         DIRECTION_MAP.put("southwest", "downleft");
     }
 
-    public void checkBackPack() {
-    }
 
     public Result equipTool(String toolName) {
         BackPack backPack = App.getCurrentPlayerLazy().getBackPack();
 
         for (Item item : backPack.getItems().keySet()) {
             if (item.getName().equalsIgnoreCase(toolName)) {
-                currentTool = (Tools) item;
+                player.setCurrentTool((Tools) item);
                 return new Result(true, "You equipped the " + toolName);
             }
         }
@@ -46,12 +43,12 @@ public class ToolsController {
     }
 
     public Result showCurrentTool() {
-        if (currentTool == null) {
+        if (player.getCurrentTool() == null) {
             return new Result(false, "You don't have any tool equipped");
         }
 
-        String levelName = getLevelName(currentTool.getLevel());
-        return new Result(true, "Current tool: " + currentTool.getName() +
+        String levelName = getLevelName(player.getCurrentTool().getLevel());
+        return new Result(true, "Current tool: " + player.getCurrentTool().getName() +
                 " (Level: " + levelName + ")");
     }
 
@@ -101,11 +98,11 @@ public class ToolsController {
             return new Result(false, "You need to be in the Blacksmith's shop to upgrade tools");
         }
 
-        if (currentTool == null || !currentTool.getName().equalsIgnoreCase(name)) {
+        if (player.getCurrentTool() == null || !player.getCurrentTool().getName().equalsIgnoreCase(name)) {
             return new Result(false, "You need to equip the tool you want to upgrade first");
         }
 
-        if (!currentTool.canUpgrade()) {
+        if (!player.getCurrentTool().canUpgrade()) {
             return new Result(false, "Your tool is already at the maximum level");
         }
 
@@ -113,45 +110,78 @@ public class ToolsController {
             return new Result(false, "You don't have enough money to upgrade this tool");
         }
 
-        Result upgradeResult = currentTool.upgrade(currentTool.getLevel() + 1);
+        int currentLevel = player.getCurrentTool().getLevel();
+        int upgradeCost = getUpgradeCost(currentLevel);
+
+        Result upgradeResult = player.getCurrentTool().upgrade(currentLevel + 1);
 
         if (upgradeResult.isSuccessful()) {
+            App.getCurrentGame().getCurrentPlayer().decreaseMoney(upgradeCost);
+
             return new Result(true, "Successfully upgraded your " + name + " to " +
-                    getLevelName(currentTool.getLevel()));
+                    getLevelName(player.getCurrentTool().getLevel()) + " for " + upgradeCost + " gold");
         } else {
             return upgradeResult;
         }
     }
 
-    public boolean checkIsInSmithing() {
+    public boolean checkIsInSmithing() {  //TODO
         return false;
     }
 
     public boolean checkUpdateToolMoney() {
-        // TODO : check money
-        return true;
+        int currentLevel = player.getCurrentTool().getLevel();
+        int upgradeCost = getUpgradeCost(currentLevel);
+
+        return App.getCurrentGame().getCurrentPlayer().getMoney() >= upgradeCost;
     }
 
-    public void updateTools() {
+    private int getUpgradeCost(int currentLevel) {
+        switch (currentLevel) {
+            case 0: // Normal to Copper
+                return 2000;
+            case 1: // Copper to Iron
+                return 5000;
+            case 2: // Iron to Gold
+                return 10000;
+            case 3: // Gold to Iridium
+                return 25000;
+            default:
+                return 0;
+        }
     }
+
 
     public Result useTool(String direction) {
-        if (currentTool == null) {
+        if (player.getCurrentTool() == null) {
             return new Result(false, "You don't have any tool equipped");
         }
         if (!checkEnergy()) {
             return new Result(false, "Not enough energy to use this tool");
         }
-        Location playerLocation = App.getCurrentPlayerLazy().getUserLocation();
+        Location playerLocation = App.getCurrentGame().getCurrentPlayer().getUserLocation();
         Location targetLocation = getTargetLocation(playerLocation, direction);
 
         if (targetLocation == null) {
             return new Result(false, "Invalid direction");
         }
 
-        int skillLevel = 0;
 
-        return currentTool.use(targetLocation, skillLevel);
+        return player.getCurrentTool().use(targetLocation, getSkillLevel());
+    }
+
+    public int getSkillLevel() {
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        int skillLevel;
+        switch (player.getCurrentTool().getToolType()) {
+            case Tool.HOE -> skillLevel = player.getAbilityByName("Farming").getLevel();
+            case Tool.WATERING_CAN-> skillLevel = player.getAbilityByName("Farming").getLevel();
+            case Tool.AXE -> skillLevel = player.getAbilityByName("Foraging").getLevel();
+            case Tool.PICKAXE -> skillLevel = player.getAbilityByName("Mining").getLevel();
+            case Tool.FISHING_POLE -> skillLevel = player.getAbilityByName("Fishing").getLevel();
+            default -> skillLevel = 0;
+        }
+        return skillLevel;
     }
 
     private Location getTargetLocation(Location playerLocation, String direction) {
@@ -188,29 +218,27 @@ public class ToolsController {
         return App.getCurrentGame().getMainMap().findLocation(targetX, targetY);
     }
 
-    public void checkMoves() {
-    }
 
     public boolean checkEnergy() {
-        if (currentTool == null) {
+        if (player.getCurrentTool() == null) {
             return false;
         }
 
         int energyCost = calculateEnergyCost();
-        return App.getCurrentPlayerLazy().getEnergy() >= energyCost;
+        return App.getCurrentGame().getCurrentPlayer().getEnergy() >= energyCost;
     }
 
     private int calculateEnergyCost() {
-        if (currentTool == null) {
+        if (player.getCurrentTool() == null) {
             return 0;
         }
         int skillLevel = 0;
 
-        return currentTool.calculateEnergyCost(skillLevel);
+        return player.getCurrentTool().calculateEnergyCost(skillLevel);
     }
 
     public Result checkToolUse() {
-        if (currentTool == null) {
+        if (player.getCurrentTool() == null) {
             return new Result(false, "You don't have any tool equipped");
         }
 
@@ -218,11 +246,11 @@ public class ToolsController {
             return new Result(false, "You don't have enough energy to use this tool");
         }
 
-        return new Result(true, "You can use your " + currentTool.getName());
+        return new Result(true, "You can use your " + player.getCurrentTool().getName());
     }
 
     public boolean isValidUse() {
-        return currentTool != null && checkEnergy();
+        return player.getCurrentTool() != null && checkEnergy();
     }
 
 }
