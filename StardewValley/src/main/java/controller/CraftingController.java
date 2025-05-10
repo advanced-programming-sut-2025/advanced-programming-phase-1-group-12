@@ -257,17 +257,18 @@ public class CraftingController {
             }
         }
         Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
-        if (!newLocation.getTypeOfTile().equals(TypeOfTile.SEED))
+        if (!newLocation.getTypeOfTile().equals(TypeOfTile.PLANT))
             return new Result(false, "there is no seed for reaping!");
 
         Object tileObject = newLocation.getObjectInTile();
-        if (!(tileObject instanceof Seed)) return new Result(false, "Invalid object in tile.");
-        Seed seedSeason = (Seed) tileObject;
+        if (!(tileObject instanceof Plant))
+            return new Result(false, "Invalid object in tile.");
+        Plant plant = (Plant) tileObject;
 
         App.getCurrentGame().getMainMap().findLocation(x, y).setObjectInTile(null);
         App.getCurrentGame().getMainMap().findLocation(x, y).setTypeOfTile(TypeOfTile.GROUND);
-        App.getCurrentGame().getCurrentPlayer().getBackPack().getSeeds().add(seedSeason);
-        return new Result(true, seedSeason.getType().name() + " add to back pack of current player");
+        App.getCurrentGame().getCurrentPlayer().getBackPack().add(plant);
+        return new Result(true, plant.getType().name() + " add to back pack of current player");
     }
 
     public Result howMuchWater() {
