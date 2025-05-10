@@ -1,14 +1,15 @@
 package models;
 
+import models.Animal.FarmAnimals;
 import models.Fundementals.App;
 import models.Fundementals.Location;
 import models.Fundementals.LocationOfRectangle;
 import models.Place.Farm;
 import models.enums.Season;
+import models.enums.Types.SeedTypes;
 import models.enums.Types.TypeOfTile;
 import models.enums.Weather;
-import models.enums.foraging.Plant;
-import models.enums.foraging.Seed;
+import models.enums.foraging.*;
 
 import java.util.*;
 
@@ -42,10 +43,12 @@ public class Date {
             this.hour -= 13;
             changeAdvancedDay(1);
             this.weather = this.tommorowWeather; // the day changes
+
+            updateAllSeeds();
+            ThunderAndLightning();
+            foragingAdd();
+            changesDayAnimal();
         }
-        updateAllSeeds();
-        ThunderAndLightning();
-        foragingAdd();
     }
 
     public void ThunderAndLightning() {
@@ -78,33 +81,69 @@ public class Date {
     }
 
     public void foragingAdd() {
-        for(Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
-            ArrayList<Location> availableLocation = getGroundLocation();
-        }
-        List<Location> shuffled = new ArrayList<>(availableLocation);
-        Collections.shuffle(shuffled);
+        for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
+            ArrayList<Location> availableLocation = getGroundLocation(farm);
+            if (availableLocation.size() < 3) continue; // جلوگیری از خطا
 
-        for (int i = 0; i < 3; i++) {
-            Location location = shuffled.get(i);
-            location.setTypeOfTile(TypeOfTile.BURNED_GROUND);
-        }
+            Collections.shuffle(availableLocation);
 
+            List<MineralTypes> allMinerals = new ArrayList<>(Arrays.asList(MineralTypes.values()));
+            List<foragingTrees> allTrees = new ArrayList<>(Arrays.asList(foragingTrees.values()));
+            List<SeedSeason> allSeeds = new ArrayList<>(Arrays.asList(SeedSeason.values()));
+            Collections.shuffle(allMinerals);
+            Collections.shuffle(allTrees);
+            Collections.shuffle(allSeeds);
+
+            int count = Math.min(3, availableLocation.size());
+
+            for (int i = 0; i < count; i++) {
+                Location location = availableLocation.get(i);
+                MineralTypes mineral = allMinerals.get(i);
+                Stone newStone = new Stone(mineral);
+
+                location.setTypeOfTile(TypeOfTile.STONE);
+                location.setObjectInTile(newStone);
+            }
+
+            for (int i = 0; i < count; i++) {
+                Location location = availableLocation.get(i);
+                foragingTrees foragingTree = allTrees.get(i);
+                Tree newTree = new Tree(null, foragingTree);
+
+                location.setTypeOfTile(TypeOfTile.TREE);
+                location.setObjectInTile(newTree);
+            }
+
+            ArrayList<Location> seedPlacing = getLocationForSeeding(farm);
+            Collections.shuffle(seedPlacing);
+            int seedCount = Math.min(3, seedPlacing.size());
+
+            for (int i = 0; i < seedCount; i++) {
+                Location location = seedPlacing.get(i);
+                SeedSeason seedSeason = allSeeds.get(i);
+                Seed newSeed = new Seed(null, seedSeason);
+
+                location.setTypeOfTile(TypeOfTile.SEED);
+                location.setObjectInTile(newSeed);
+            }
+        }
     }
 
-//    public void changesDayAnimal(){
-//        for(FarmAnimals animals : App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()){
-//            if(!animals.isHasBeenFedToday()){
-//                animals.setFriendShip(animals.getFriendShip() - 10);
-//            }
-//            if(!animals.isHasBeenFedToday()){
-//                animals.setFriendShip(animals.getFriendShip() - 20);
-//            } if(!App.isLocationInPlace(animals.getPosition(), animals.getHome().getLocation())){
-//                animals.setFriendShip(animals.getFriendShip() - 20);
-//            }
-//            animals.setHasBeenFedToday(false);
-//            animals.setHasBeenPettedToday(false);
-//        }
-//    }
+
+    public void changesDayAnimal(){
+        for(FarmAnimals animals : App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()){
+            if(!animals.isHasBeenFedToday()){
+                animals.setFriendShip(animals.getFriendShip() - 10);
+            }
+            if(!animals.isHasBeenFedToday()){
+                animals.setFriendShip(animals.getFriendShip() - 20);
+            } if(!App.isLocationInPlace(animals.getPosition(), animals.getHome().getLocation())){
+                animals.setFriendShip(animals.getFriendShip() - 20);
+            }
+            animals.setHasBeenFedToday(false);
+            animals.setHasBeenPettedToday(false);
+        }
+    }
 
     public void changeAdvancedDay(int day) {
         this.dayOfWeek += day;
@@ -219,7 +258,18 @@ public class Date {
         ArrayList<Location> availableLocations = new ArrayList<>();
         ArrayList<Location> allLocationOfFarm = getLocationsOfRectangle(farm.getFarmLocation());
         for (Location location : allLocationOfFarm) {
-            if (location.getTypeOfTile().equals(TypeOfTile.GROUND) || location.getTypeOfTile().equals(TypeOfTile.BURNED_GROUND)) {
+            if (location.getTypeOfTile().equals(TypeOfTile.GROUND) || location.getTypeOfTile().equals(TypeOfTile.PLOUGHED_LAND)) {
+                availableLocations.add(location);
+            }
+        }
+        return availableLocations;
+    }
+
+    public ArrayList<Location> getLocationForSeeding(Farm farm) {
+        ArrayList<Location> availableLocations = new ArrayList<>();
+        ArrayList<Location> allLocationOfFarm = getLocationsOfRectangle(farm.getFarmLocation());
+        for (Location location : allLocationOfFarm) {
+            if (location.getTypeOfTile().equals(TypeOfTile.PLOUGHED_LAND)) {
                 availableLocations.add(location);
             }
         }

@@ -3,6 +3,8 @@ package models.Animal;
 import models.Fundementals.Location;
 import models.enums.Animal;
 
+import java.util.ArrayList;
+
 public class FarmAnimals implements Animals{
     //Animal enum with its information:
     private Animal animal;
@@ -15,6 +17,11 @@ public class FarmAnimals implements Animals{
     private String name;
 
     private Location position;
+
+
+    //booleans
+    private boolean hasBeenPettedToday = false;
+    private boolean hasBeenFedToday = false;
 
     public Animal getAnimal() {
         return animal;
@@ -39,4 +46,28 @@ public class FarmAnimals implements Animals{
 
 
     public String getName() {return name;}
+
+    public boolean isHasBeenPettedToday() {
+        return hasBeenPettedToday;
+    }
+
+    public void setHasBeenPettedToday(boolean hasBeenPettedToday) {
+        this.hasBeenPettedToday = hasBeenPettedToday;
+    }
+
+    public boolean isHasBeenFedToday() {
+        return hasBeenFedToday;
+    }
+
+    public void setHasBeenFedToday(boolean hasBeenFedToday) {
+        this.hasBeenFedToday = hasBeenFedToday;
+    }
+
+    public FarmAnimals(Animal animal, int friendShip, AnimalHome home, String name, Location position) {
+        this.animal = animal;
+        this.friendShip = friendShip;
+        this.home = home;
+        this.name = name;
+        this.position = position;
+    }
 }

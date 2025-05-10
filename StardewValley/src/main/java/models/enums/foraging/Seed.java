@@ -6,8 +6,11 @@ public class Seed {
     SeedTypes type;
     int x;
     int y;
-    public Seed(SeedTypes type) {
+    SeedSeason seedSeason;
+
+    public Seed(SeedTypes type, SeedSeason seedSeason) {
         this.type = type;
+        this.seedSeason = seedSeason;
     }
 
     public void setType(SeedTypes type) {
@@ -32,5 +35,13 @@ public class Seed {
 
     public void setY(int y) {
         this.y = y;
+    }
+
+    public SeedSeason getSeedSeason() {
+        return seedSeason;
+    }
+
+    public void setSeedSeason(SeedSeason seedSeason) {
+        this.seedSeason = seedSeason;
     }
 }

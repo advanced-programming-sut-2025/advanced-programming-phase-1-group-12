@@ -2,9 +2,11 @@ package models.enums.foraging;
 
 public class Tree {
     private TreeType type;
+    private foragingTrees foragingTrees;
 
-    public Tree(TreeType type) {
+    public Tree(TreeType type, foragingTrees foragingTrees) {
         this.type = type;
+        this.foragingTrees = foragingTrees;
     }
 
     public TreeType getType() {

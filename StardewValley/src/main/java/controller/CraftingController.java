@@ -13,6 +13,8 @@ import models.enums.foraging.Seed;
 import models.enums.foraging.SeedSeason;
 import models.enums.Types.TypeOfTile;
 
+import java.util.Arrays;
+
 public class CraftingController {
 
     public Result showRecipes() {
@@ -40,7 +42,7 @@ public class CraftingController {
         StringBuilder output = new StringBuilder();
         output.append("Name: ").append(craftType.name).append("\n");
         output.append("Source: ").append(craftType.source.name()).append("\n");
-        output.append("Stage: ").append(craftType.stages).append("\n");
+        output.append("Stage: ").append(Arrays.toString(craftType.stages)).append("\n");
         output.append("Total Harvest Time: ").append(craftType.totalHarvestTime).append("\n");
 
         output.append("One Time: ").append(craftType.oneTime ? "TRUE\n" : "FALSE\n");
@@ -113,7 +115,7 @@ public class CraftingController {
 
         if (newLocation.getTypeOfTile().equals(TypeOfTile.PLOUGHED_LAND)) {
             newLocation.setTypeOfTile(TypeOfTile.SEED);
-            Seed newSeed = new Seed(seedTypes);
+            Seed newSeed = new Seed(seedTypes, null);
             newLocation.setObjectInTile(newSeed);
             Plant newPlant = new Plant(newLocation, newSeed, null, false);
             App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getPlantOfFarm().add(newPlant);
@@ -128,24 +130,22 @@ public class CraftingController {
         int yAxis = Integer.parseInt(y);
         Location location = App.getCurrentGame().getMainMap().findLocation(xAxis, yAxis);
 
-        if (!location.getTypeOfTile().equals(TypeOfTile.SEED)) {
-            return new Result(false, "There is no seed here.");
+        if (!location.getTypeOfTile().equals(TypeOfTile.SEED) && !location.getTypeOfTile().equals(TypeOfTile.PLANT)) {
+            return new Result(false, "There is no seed or plant in this location.");
         }
 
         Object tileObject = location.getObjectInTile();
-        if (!(tileObject instanceof SeedSeason)) {
+        if (!(tileObject instanceof Seed) && !(tileObject instanceof Plant)) {
             return new Result(false, "Invalid object in tile.");
         }
 
-        SeedSeason seedSeason = (SeedSeason) tileObject;
+        Seed seed = (Seed) tileObject;
         StringBuilder output = new StringBuilder();
-        output.append("Name: ").append(seedSeason.name).append("\n");
+        output.append("Name: ").append(seed.getType().getName()).append("\n");
         output.append("Season: ");
-        for (Season season : seedSeason.seasons) {
-            output.append(season.name()).append(" ");
-        }
-        //TODO: oza khob nist
-
+//        for (Season season : seed) {
+//            output.append(season.name()).append(" ");
+//        }
         return new Result(true, output.toString());
     }
 

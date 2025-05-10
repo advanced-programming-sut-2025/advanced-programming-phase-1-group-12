@@ -1,17 +1,17 @@
 package models.Animal;
 
 import models.Fundementals.Location;
+import models.Fundementals.LocationOfRectangle;
 
-public class AnimalHome {
+public class AnimalHome  {
     private int CapacityRemained;
-
 
     //normal coop, Deluxe coop, big coop, normal barn, Deluxe barn, big barn:
     private String Type;
 
-    private Location location;
+    private LocationOfRectangle location;
 
-    public AnimalHome(int capacityRemained, String type, Location location) {
+    public AnimalHome(int capacityRemained, String type, LocationOfRectangle location) {
         CapacityRemained = capacityRemained;
         Type = type;
         this.location = location;
@@ -33,11 +33,11 @@ public class AnimalHome {
         Type = type;
     }
 
-    public Location getLocation() {
+    public LocationOfRectangle getLocation() {
         return location;
     }
 
-    public void setLocation(Location location) {
+    public void setLocation(LocationOfRectangle location) {
         this.location = location;
     }
 }

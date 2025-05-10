@@ -79,11 +79,9 @@ public enum CraftType {
 
     private static int[] parseStages(String str) {
         String[] parts = str.split("-");
-        if (parts.length != 4)
-            throw new IllegalArgumentException("Stages string must have exactly 4 parts, like '1-2-2-2'");
 
-        int[] result = new int[4];
-        for (int i = 0; i < 4; i++) {
+        int[] result = new int[3];
+        for (int i = 0; i < 3; i++) {
             result[i] = Integer.parseInt(parts[i]);
         }
         return result;

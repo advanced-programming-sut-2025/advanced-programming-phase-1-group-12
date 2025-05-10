@@ -2,7 +2,7 @@ package views;
 
 import controller.CraftingController;
 import controller.MenusController.GameMenuController;
-import controller.StoreController;
+//import controller.StoreController;
 import controller.movingPlayer.UserLocationController;
 import models.Fundementals.App;
 import models.Fundementals.Result;
@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 
 public class GameMenu extends AppMenu {
     private final GameMenuController controller = new GameMenuController();
-    private StoreController storeController = new StoreController();
+//    private StoreController storeController = new StoreController();
     private CraftingController craftingController = new CraftingController();
 
     @Override
@@ -85,8 +85,9 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.BUILD_BUILDING.getMather(input)) != null) {
             int x = Integer.parseInt(matcher.group("x"));
             int y = Integer.parseInt(matcher.group("y"));
-            System.out.println(storeController.buyAnimalBuilding(matcher.group("buildingName"), App.getCurrentGame().getMainMap().findLocation(x, y)));
-        } else if ((matcher = GameMenuCommands.CRAFT_INFO.getMather(input)) != null) {
+//            System.out.println(storeController.buyAnimalBuilding(matcher.group("buildingName"), App.getCurrentGame().getMainMap().findLocation(x, y)));
+        }
+        else if ((matcher = GameMenuCommands.CRAFT_INFO.getMather(input)) != null) {
             System.out.println(craftingController.showCraftInto(matcher.group("craftName")));
         } else if ((matcher = GameMenuCommands.PLANT.getMather(input)) != null) {
             System.out.println(craftingController.plant(matcher.group("seed"), matcher.group("direction")));
