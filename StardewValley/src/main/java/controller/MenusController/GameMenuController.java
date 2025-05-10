@@ -3,6 +3,7 @@ package controller.MenusController;
 import controller.MapSetUp.MapSetUp;
 import controller.NPCcontroller;
 import controller.TradeManager;
+import models.Eating.Food;
 import models.Fundementals.*;
 import models.Place.Farm;
 import models.RelatedToUser.User;
@@ -11,6 +12,7 @@ import models.RelationShips.RelationShip;
 import models.enums.*;
 import models.Fundementals.Player;
 import com.google.gson.Gson;
+import models.enums.Types.Cooking;
 import models.enums.Types.TypeOfTile;
 
 import java.io.BufferedReader;
@@ -325,7 +327,7 @@ public class GameMenuController implements MenuController {
 
             System.out.println("User: " + username);
             Player newPlayer = new Player(user, null, false, null, new ArrayList<>(),
-                    new ArrayList<>(), null, null, null, false, false);
+                     null, null, null, false, false);
             players.add(newPlayer);
 
             System.out.println("Do you want to know what each farm has?");
@@ -559,13 +561,7 @@ public class GameMenuController implements MenuController {
         }
     }
 
-    // NPC interaction methods
 
-    /**
-     * Handles the meet NPC command
-     * @param npcName The name of the NPC to meet
-     * @return Result with the NPC's dialogue
-     */
     public Result meetNPC(String npcName) {
         // Initialize NPC village if it doesn't exist
         if (App.getCurrentGame().getNPCvillage() == null) {
@@ -579,12 +575,6 @@ public class GameMenuController implements MenuController {
         return new Result(true, response);
     }
 
-    /**
-     * Handles the gift NPC command
-     * @param npcName The name of the NPC to give a gift to
-     * @param itemName The name of the item to give
-     * @return Result with the outcome of the gift
-     */
     public Result giftNPC(String npcName, String itemName) {
         // Initialize NPC village if it doesn't exist
         if (App.getCurrentGame().getNPCvillage() == null) {
@@ -598,10 +588,7 @@ public class GameMenuController implements MenuController {
         return new Result(true, response);
     }
 
-    /**
-     * Handles the friendship NPC list command
-     * @return Result with the list of NPC friendships
-     */
+
     public Result friendshipNPCList() {
         // Initialize NPC village if it doesn't exist
         if (App.getCurrentGame().getNPCvillage() == null) {
@@ -615,13 +602,71 @@ public class GameMenuController implements MenuController {
         return new Result(true, response);
     }
 
-    /**
-     * Process daily NPC activities at the start of a new day
-     */
     public void processDailyNPCActivities() {
         if (App.getCurrentGame().getNPCvillage() != null) {
             NPCcontroller controller = new NPCcontroller();
             controller.processDailyNPCActivities();
         }
     }
+
+    public Result showRecipes(){
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        return new Result(true, player.showRecipes());
+    }
+
+    public Result refrigerator(String command, String item){
+        if(command.equals("put")){
+            Item getItem = App.getCurrentGame().getCurrentPlayer().getBackPack().getItemByName(item);
+            // TODO: get map building to find the refrigerator
+        }
+        if(command.equals("pick")){
+            //TODO: add item to inventory
+        }
+        return new Result(true, "done!");
+    }
+
+    public Result prepare(String recipe) {
+        Cooking cooking = Cooking.fromName(recipe);
+        Player player = App.getCurrentGame().getCurrentPlayer();
+
+        if (cooking == null) {
+            return new Result(false, "cooking not found!");
+        }
+
+        if (App.getCurrentGame().getCurrentPlayer().getBackPack().getItemByName(recipe) == null) {
+            return  new Result(false, "recipe not found!");
+        }
+
+        if(!player.getBackPack().checkCapacity(1)){
+            return new Result(false, "inventory is full!");
+        }
+
+        if (player.getBackPack().getItemByName(recipe) != null && player.getBackPack().checkCapacity(1)) {
+            player.reduceEnergy(3);
+            Food newFood = new Food(recipe, cooking);
+            player.getBackPack().addItem(newFood, 1);
+            return  new Result(true, "processed food!");
+        }
+        else {
+            return  new Result(false, "recipe not found!");
+        }
+
+    }
+
+    public Result eat(String food){
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        Food foodToEat = (Food) player.getBackPack().getItemByName(food);
+        if(foodToEat == null){
+            return new Result(false, "food not found!");
+        }
+        else{
+            player.getBackPack().decreaseItem(foodToEat, 1);
+            player.increaseEnergy(foodToEat.getFoodType().getEnergy());
+            if(!foodToEat.getFoodType().getBuffer().isEmpty()){
+                player.setEnergy(300); // for 5 hours
+            }
+            return new Result(true, "eaten!");
+        }
+    }
+
 }

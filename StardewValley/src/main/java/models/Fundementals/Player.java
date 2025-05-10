@@ -7,6 +7,7 @@ import models.RelatedToUser.Ability;
 import models.RelatedToUser.User;
 import models.RelationShips.RelationShip;
 import models.RelationShips.Trade;
+import models.enums.Types.Cooking;
 
 import java.util.ArrayList;
 
@@ -15,7 +16,7 @@ public class Player {
     private Location userLocation;
     private boolean isMarried;
     private int energy;
-    public Refrigrator Refrigrator = new Refrigrator();
+    private ArrayList<String> recepies;
     private ArrayList<Ability> abilitis = new ArrayList<Ability>();
     private ArrayList<RelationShip> relationShips = new ArrayList<>();
     private Farm ownedFarm;
@@ -26,14 +27,13 @@ public class Player {
     private Player partner;
 
 
-    public Player(User user, Location userLocation, boolean isMarried, Refrigrator refrigrator,
+    public Player(User user, Location userLocation, boolean isMarried,
                   ArrayList<Ability> abilities, ArrayList<RelationShip> relationShips, ArrayList<Trade> trade,
                   Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited, boolean hasCollapsed ) {
         this.user = user;
         this.userLocation = userLocation;
         this.isMarried = isMarried;
         this.energy = 200;
-        this.Refrigrator = refrigrator;
         this.abilitis = abilities;
         this.relationShips = relationShips;
         this.ownedFarm = ownedFarm;
@@ -42,6 +42,7 @@ public class Player {
         this.hasCollapsed = hasCollapsed;
         this.money = 0;
         this.partner = null;
+        this.recepies = new ArrayList<>();
     }
 
     public User getUser() {
@@ -82,6 +83,15 @@ public class Player {
             energy = 200;
         }else {
             energy += amount;
+        }
+    }
+
+    public void reduceEnergy(int amount){
+        if(energy - amount < 0){
+            energy = 0;
+        }
+        else{
+            energy -= amount;
         }
     }
 
@@ -145,5 +155,17 @@ public class Player {
 
     public ArrayList<Ability> getAbilitis() {
         return abilitis;
+    }
+
+    public void addRecipes(Cooking cookingTypes){
+        recepies.add(cookingTypes.getIngredient().toString());
+    }
+
+    public String showRecipes(){
+        StringBuilder result = new StringBuilder("Recipes: \n");
+        for(String recipes : recepies){
+            result.append(recipes).append("\n");
+        }
+        return result.toString();
     }
 }

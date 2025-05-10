@@ -173,4 +173,17 @@ public class BackPack {
     public ArrayList<StoreProducts> getStoreProducts() {
         return storeProducts;
     }
+
+    public boolean checkCapacity(int amount){
+        int totalCount = 0;
+        for (int count : items.values()) {
+            totalCount += count;
+        }
+
+        if((totalCount + amount)<this.getType().getBackPackCapacity()){
+            return true;
+        }else{
+            return false;
+        }
+    }
 }

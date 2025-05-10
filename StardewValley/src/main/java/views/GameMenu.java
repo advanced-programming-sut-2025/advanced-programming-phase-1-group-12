@@ -144,8 +144,14 @@ public class GameMenu extends AppMenu {
             System.out.println(animalController.pet(matcher.group("animalName")).getMessage());
         } else if ((matcher = GameMenuCommands.FEED_HAY.getMather(input))!= null) {
             System.out.println(animalController.feedHay(matcher.group("animalName")).getMessage());
-        } else if ((ma)) {
-            
+        } else if ((matcher = GameMenuCommands.COOKING_RECIPES.getMather(input))!= null) {
+            System.out.println(controller.showRecipes());
+        } else if ((matcher = GameMenuCommands.COOKING_REFRIGERATOR.getMather(input))!= null) {
+            System.out.println(controller.refrigerator(matcher.group(0), matcher.group("item") ));
+        } else if ((matcher = GameMenuCommands.COOKING_PREPARE.getMather(input))!= null) {
+            System.out.println(controller.prepare(matcher.group("recipeName")));
+        } else if ((matcher = GameMenuCommands.EAT_FOOD.getMather(input))!= null) {
+            System.out.println(controller.eat(matcher.group("foodName")));
         }
 
     }

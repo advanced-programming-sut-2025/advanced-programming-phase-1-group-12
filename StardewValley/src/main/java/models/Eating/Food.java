@@ -1,13 +1,14 @@
 package models.Eating;
 
-import models.enums.Types.FoodType;
+import models.Item;
+import models.enums.Types.Cooking;
 
-public class Food {
+public class Food extends Item {
     private String name;
-    private FoodType foodType;
+    private Cooking foodType;
 
-    public Food(String name, FoodType foodType){
-        this.name = name;
+    public Food(String name, Cooking foodType){
+        super(name);
         this.foodType = foodType;
     }
 
@@ -19,11 +20,11 @@ public class Food {
         this.name = name;
     }
 
-    public FoodType getFoodType() {
+    public Cooking getFoodType() {
         return foodType;
     }
 
-    public void setFoodType(FoodType foodType) {
+    public void setFoodType(Cooking foodType) {
         this.foodType = foodType;
     }
 
