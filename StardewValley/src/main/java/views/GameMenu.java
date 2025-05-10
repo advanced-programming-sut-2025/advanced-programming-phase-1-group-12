@@ -144,6 +144,8 @@ public class GameMenu extends AppMenu {
             System.out.println(animalController.pet(matcher.group("animalName")).getMessage());
         } else if ((matcher = GameMenuCommands.FEED_HAY.getMather(input))!= null) {
             System.out.println(animalController.feedHay(matcher.group("animalName")).getMessage());
+        } else if ((ma)) {
+            
         }
 
     }

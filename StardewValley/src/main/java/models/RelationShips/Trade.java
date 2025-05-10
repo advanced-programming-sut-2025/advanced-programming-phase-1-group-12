@@ -110,21 +110,21 @@ public class Trade {
         sb.append("Trade ID: ").append(id).append("\n");
         sb.append("Type: ").append(type).append("\n");
         sb.append("Status: ").append(status).append("\n");
-
+        
         if (type.equals("request")) {
             sb.append(requester.getUser().getUserName()).append(" requests ");
         } else {
             sb.append(requester.getUser().getUserName()).append(" offers ");
         }
-
+        
         sb.append(amount).append(" ").append(item.getName());
-
+        
         if (isMoneyTrade()) {
             sb.append(" for ").append(price).append(" money");
         } else {
             sb.append(" for ").append(targetAmount).append(" ").append(targetItem.getName());
         }
-
+        
         return sb.toString();
     }
 }
