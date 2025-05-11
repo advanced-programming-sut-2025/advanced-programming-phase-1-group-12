@@ -259,7 +259,7 @@ public class GameMenuController implements MenuController {
                                 mapY >= loc.getTopLeftCorner().getyAxis() &&
                                 mapY <= loc.getDownRightCorner().getyAxis()) {
 
-                            contentChar = store.getOwner().charAt(0); // Store owner’s first character
+                            contentChar = store.getNameOfStore().charAt(0); // Store’s first character
                             bgColor = "\u001B[46m"; // Light cyan background for store
                             break;
                         }

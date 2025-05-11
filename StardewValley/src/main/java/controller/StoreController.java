@@ -33,34 +33,38 @@ public class StoreController {
         //i put the given location in the top left corner of the building
         //normal coop, Deluxe coop, big coop, normal barn, Deluxe barn, big barn:
 
-        buildAnimalHomeSuccess(location, buildingName);
-        if(buildingName.contains("coop")){
-            location.setTypeOfTile(TypeOfTile.COOP);
-        }else {
-            location.setTypeOfTile(TypeOfTile.BARN);
-        }
-        return new Result(true, buildingName + "built successfully");
-    }
-
-    public void buildAnimalHomeSuccess(Location givenLocation, String buildingName) {
         Location otherCorner;
         if (buildingName.contains("coop")) {
-            otherCorner = App.getCurrentGame().getMainMap().findLocation(givenLocation.getxAxis() + 3, givenLocation.getyAxis() + 6);
+            otherCorner = App.getCurrentGame().getMainMap().findLocation(location.getxAxis() + 3, location.getyAxis() + 4);
             if (otherCorner == null || !App.getCurrentPlayerLazy().getOwnedFarm().getLocation().getLocationsInRectangle().contains(otherCorner)) {
-                System.out.println("you can not build this building here.");
-                return;
+                return new Result(false, "You can not build this building here");
             }
         }//it is a barn:
         else {
-            otherCorner = App.getCurrentGame().getMainMap().findLocation(givenLocation.getxAxis() + 4, givenLocation.getyAxis() + 7);
+            otherCorner = App.getCurrentGame().getMainMap().findLocation(location.getxAxis() + 4, location.getyAxis() + 3);
             if (otherCorner == null || !App.getCurrentPlayerLazy().getOwnedFarm().getLocation().getLocationsInRectangle().contains(otherCorner)) {
-                System.out.println("you can not build this building here.");
-                return;
+                return new Result(false, "You can not build this building here");
             }
+        }
+        LocationOfRectangle buildingPlace = new LocationOfRectangle(location, otherCorner);
+        if(!isAllLocationGround(buildingPlace)) {
+            return new Result(false, "You can not build this building here");
+        }
+       return buildAnimalHomeSuccess(location, buildingName);
+    }
+
+    public Result buildAnimalHomeSuccess(Location givenLocation, String buildingName) {
+        Location otherCorner;
+        if (buildingName.contains("coop")) {
+            otherCorner = App.getCurrentGame().getMainMap().findLocation(givenLocation.getxAxis() + 3, givenLocation.getyAxis() + 4);
+
+        }//it is a barn:
+        else {
+            otherCorner = App.getCurrentGame().getMainMap().findLocation(givenLocation.getxAxis() + 2, givenLocation.getyAxis() + 3);
         }
         LocationOfRectangle buildingPlace = new LocationOfRectangle(givenLocation, otherCorner);
         if(!isAllLocationGround(buildingPlace)) {
-            System.out.println("you can not build this building here.");
+            return new Result(false, "you can not build this building here");
         }
         switch (buildingName){
             case "coop":
@@ -90,7 +94,21 @@ public class StoreController {
                         (new AnimalHome(8, "big barn", buildingPlace));
                 break;
             default:
-                System.out.println("Invalid building name entered");
+                return new Result(false, "Invalid building name entered");
+        }
+        changeTypeTileAfterBuild(buildingName, buildingPlace);
+        return new Result(true, buildingName + " " + "built successfully");
+    }
+
+    public void changeTypeTileAfterBuild(String type, LocationOfRectangle buildingPlace) {
+        if(type.contains("coop")){
+            for(Location location : buildingPlace.getLocationsInRectangle()){
+                location.setTypeOfTile(TypeOfTile.COOP);
+            }
+        } else if(type.contains("barn")){
+            for(Location location : buildingPlace.getLocationsInRectangle()){
+                location.setTypeOfTile(TypeOfTile.BARN);
+            }
         }
     }
     public boolean isAllLocationGround(LocationOfRectangle place){

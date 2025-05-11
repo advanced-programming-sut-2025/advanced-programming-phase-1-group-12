@@ -74,7 +74,7 @@ public enum GameMenuCommands implements Commands {
     EAT_FOOD("eat (?<foodName>.*)"),
 
     //tool commands
-    EQUIP_TOOL("^tools equip (?<toolName>.+)"),
+    EQUIP_TOOL("^tools equip (?<toolName>.+)$"),
     SHOW_CURRENT_TOOL("^tools show current$"),
     SHOW_AVAILABLE_TOOL("^tools show available$"),
     UPGRADE_TOOL("^tools upgrade (?<toolName>.+)$"),
