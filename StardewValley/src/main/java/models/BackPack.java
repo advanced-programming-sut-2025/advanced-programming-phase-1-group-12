@@ -81,13 +81,20 @@ public class BackPack {
             recoveryRate = trashCan.getTrashCanRecoveryRate();
         }
 
-        // TODO: Calculate and return coins based on recovery rate
+        // Calculate and return coins based on recovery rate
+        int itemValue = getItemValue(itemToTrash);
+        int recoveredCoins = (int) Math.round(itemValue * recoveryRate * amount);
+
+        // Add the recovered coins to the player's balance
+        if (recoveredCoins > 0) {
+            App.getCurrentGame().getCurrentPlayer().increaseMoney(recoveredCoins);
+        }
 
         decreaseToolQuantity(name, amount);
 
         if (recoveryRate > 0) {
             return new Result(true, "Trashed " + amount + " " + name + " and recovered " + 
-                              (recoveryRate * 100) + "% of its value.");
+                              recoveredCoins + " coins (" + (recoveryRate * 100) + "% of its value).");
         } else {
             return new Result(true, "Trashed " + amount + " " + name + ".");
         }
@@ -115,13 +122,21 @@ public class BackPack {
             recoveryRate = trashCan.getTrashCanRecoveryRate();
         }
 
-        // TODO: Calculate and return coins based on recovery rate
+        // Calculate and return coins based on recovery rate
+        int itemValue = getItemValue(toolToUpdate);
+        int amount = items.get(toolToUpdate);
+        int recoveredCoins = (int) Math.round(itemValue * recoveryRate * amount);
+
+        // Add the recovered coins to the player's balance
+        if (recoveredCoins > 0) {
+            App.getCurrentGame().getCurrentPlayer().increaseMoney(recoveredCoins);
+        }
 
         items.remove(toolToUpdate);
 
         if (recoveryRate > 0) {
-            return new Result(true, "Trashed all " + toolName + " and recovered " + 
-                              (recoveryRate * 100) + "% of its value.");
+            return new Result(true, "Trashed all " + toolName + " (" + amount + " items) and recovered " + 
+                              recoveredCoins + " coins (" + (recoveryRate * 100) + "% of its value).");
         } else {
             return new Result(true, "Trashed all " + toolName + ".");
         }
@@ -184,6 +199,30 @@ public class BackPack {
             return true;
         }else{
             return false;
+        }
+    }
+
+
+    private int getItemValue(Item item) {
+        if (item instanceof Tools) {
+            Tools tool = (Tools) item;
+            int baseValue = 500;
+
+            switch (tool.getLevel()) {
+                case 1: // Copper
+                    return baseValue + 1500;
+                case 2: // Iron
+                    return baseValue + 4500;
+                case 3: // Gold
+                    return baseValue + 9500;
+                case 4: // Iridium
+                    return baseValue + 24500;
+                default: // Normal
+                    return baseValue;
+            }
+        } else {
+            // Default value for other items
+            return 100;
         }
     }
 }

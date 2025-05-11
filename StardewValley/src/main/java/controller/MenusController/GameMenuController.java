@@ -326,8 +326,8 @@ public class GameMenuController implements MenuController {
             }
 
             System.out.println("User: " + username);
-            Player newPlayer = new Player(user, null, false, null, new ArrayList<>(),
-                     null, null, null, false, false);
+            Player newPlayer = new Player(user, null, false, new ArrayList<>(),null,
+                     null, false, false);
             players.add(newPlayer);
 
             System.out.println("Do you want to know what each farm has?");
@@ -643,6 +643,7 @@ public class GameMenuController implements MenuController {
 
         if (player.getBackPack().getItemByName(recipe) != null && player.getBackPack().checkCapacity(1)) {
             player.reduceEnergy(3);
+            checkIngredients(cooking);
             Food newFood = new Food(recipe, cooking);
             player.getBackPack().addItem(newFood, 1);
             return  new Result(true, "processed food!");
@@ -651,6 +652,19 @@ public class GameMenuController implements MenuController {
             return  new Result(false, "recipe not found!");
         }
 
+    }
+
+    public boolean checkIngredients(Cooking cooking){
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        Map<String, Integer> ingredients = cooking.getIngredient();
+        for (Map.Entry<String, Integer> entry : ingredients.entrySet()) {
+            Item item = player.getBackPack().getItemByName(entry.getKey());
+            if(player.getBackPack().getItems().get(item) >= entry.getValue()){
+                player.getBackPack().decreaseItem(item, entry.getValue());
+                return true;
+            }
+        }
+        return false;
     }
 
     public Result eat(String food){
