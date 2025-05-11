@@ -115,7 +115,7 @@ public class FarmSetUp {
 
         for(Location location : randomTree(newFarm)){
             location.setTypeOfTile(TypeOfTile.TREE);
-            location.setObjectInTile(new Tree(getRandomTreeType(), null));
+            location.setObjectInTile(new Tree(location, getRandomTreeType(), null, true));
         }
         for(Location location : randomStone(newFarm)){
             location.setTypeOfTile(TypeOfTile.STONE);

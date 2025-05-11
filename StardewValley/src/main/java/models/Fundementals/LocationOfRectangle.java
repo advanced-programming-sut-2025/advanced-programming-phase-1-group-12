@@ -50,4 +50,19 @@ public class LocationOfRectangle {
         return width;
     }
 
+    public ArrayList<Location> getLocationsInRectangle() {
+        return locationsInRectangle;
+    }
+
+    public void setLocationsInRectangle(ArrayList<Location> locationsInRectangle) {
+        this.locationsInRectangle = locationsInRectangle;
+    }
+
+    public void setLength(int length) {
+        this.length = length;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
 }

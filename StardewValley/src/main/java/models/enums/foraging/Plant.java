@@ -13,6 +13,7 @@ public class Plant {
     private int currentStage ;
     private int age;
     private boolean isForaging;
+    private boolean isGiantPlant;
 //    private Quality quality;
 
     public Plant(Location location, Seed seed, boolean isForaging, AllCrops allCrops){
@@ -27,6 +28,14 @@ public class Plant {
         this.allCrops = allCrops;
         this.hasBeenWatering = false;
 //        this.quallity = ....;
+    }
+
+    public boolean isGiantPlant() {
+        return isGiantPlant;
+    }
+
+    public void setGiantPlant(boolean giantPlant) {
+        isGiantPlant = giantPlant;
     }
 
     public boolean isHasBeenFertilized() {

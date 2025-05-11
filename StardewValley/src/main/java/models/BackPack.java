@@ -3,6 +3,7 @@ package models;
 import models.enums.ToolEnums.BackPackTypes;
 import models.enums.Types.FertilizeType;
 import models.enums.Types.SeedTypes;
+import models.enums.foraging.Plant;
 import models.enums.foraging.Seed;
 
 import java.util.ArrayList;
@@ -15,11 +16,20 @@ public class BackPack {
     private ArrayList<Seed> seeds = new ArrayList<>();
     private ArrayList<FertilizeType> fertilize = new ArrayList<>();
     private int water;
+    private ArrayList<Plant> plantOfPlayer = new ArrayList<>();
 
     public BackPack(BackPackTypes type) {
         this.tools = new HashMap<>();
         this.type = type;
         this.water = 100;
+    }
+
+    public ArrayList<Plant> getPlantOfPlayer() {
+        return plantOfPlayer;
+    }
+
+    public void setPlantOfPlayer(ArrayList<Plant> plantOfPlayer) {
+        this.plantOfPlayer = plantOfPlayer;
     }
 
     public void setTools(Map<Tools, Integer> tools) {
