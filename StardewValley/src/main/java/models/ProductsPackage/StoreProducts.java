@@ -23,6 +23,10 @@ public class StoreProducts extends Item {
         this.currentDailyLimit = type.getDailyLimit();
     }
 
+    public String getName(){
+        return type.getName();
+    }
+
     public int getCurrentDailyLimit() {
         return currentDailyLimit;
     }

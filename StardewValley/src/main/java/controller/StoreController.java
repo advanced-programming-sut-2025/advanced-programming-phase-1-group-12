@@ -158,9 +158,11 @@ public class StoreController {
             System.out.println("You are not in any store");
             return;
         }//TODO:does it print it right?
-        for(StoreProductsTypes type: StoreProductsTypes.values()){
-            if(type.getShop().equals(store)){
-                System.out.println(type.getName());
+       String storeName = store.getNameOfStore();
+        for(StoreProductsTypes storeProductsTypes : StoreProductsTypes.values()){
+            if(storeProductsTypes.getShop().equals(storeName)){
+                System.out.println(storeProductsTypes.getName());
+                //TODO:print price
             }
         }
     }
@@ -187,7 +189,7 @@ public class StoreController {
             }
         }
         if(item == null) {
-            return new Result(false, "The store doesn't have this product");
+            return new Result(false, "The store doesn't have this product ");
         }
         item.setCurrentDailyLimit(item.getCurrentDailyLimit() - Count);
         int price = 0;
@@ -204,10 +206,6 @@ public class StoreController {
         ItemBuilder.addToBackPack(item, Count, Quality.NORMAL);
 
         return new Result(true, "You bought this product");
-    }
-
-    public void addCount(){
-
     }
 
 }

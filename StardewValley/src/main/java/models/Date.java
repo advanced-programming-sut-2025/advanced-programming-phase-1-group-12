@@ -223,7 +223,7 @@ public class Date {
             for (int i = 0; i < count; i++) {
                 Location location = availableLocation.get(i);
                 foragingTrees foragingTree = allTrees.get(i);
-                Tree newTree = new Tree(location, null, foragingTree, true);
+                Tree newTree = new Tree(location, null, foragingTree, true, foragingTree.getFruitType());
 
                 location.setTypeOfTile(TypeOfTile.TREE);
                 location.setObjectInTile(newTree);

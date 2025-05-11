@@ -13,6 +13,7 @@ import models.RelationShips.RelationShip;
 import models.enums.*;
 import models.Fundementals.Player;
 import com.google.gson.Gson;
+import models.enums.ToolEnums.BackPackTypes;
 import models.enums.Types.Cooking;
 import models.enums.Types.TypeOfTile;
 
@@ -347,7 +348,7 @@ public class GameMenuController implements MenuController {
 
             System.out.println("User: " + username);
             Player newPlayer = new Player(user, null, false, null, new ArrayList<>(),
-                    null, null, false, false, new ArrayList<>());
+                    null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
             players.add(newPlayer);
 
             System.out.println("Do you want to know what each farm has?");

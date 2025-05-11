@@ -11,6 +11,8 @@ import models.enums.ToolEnums.Tool;
 import models.enums.Types.*;
 import models.enums.foraging.Seed;
 
+import java.util.Map;
+
 public class ItemBuilder {
 
     public static Item builder(String name, Quality quality) {
@@ -22,11 +24,11 @@ public class ItemBuilder {
         if (abzar != null) {
             return new Tools(abzar);
         }
-        FishDetails fishDetails = FishDetails.valueOf(name);
+        FishDetails fishDetails = FishDetails.stringToFish(name);
         if (fishDetails != null) {
             return new Fish(fishDetails, quality);
         }
-        AnimalProduct animalProduct = AnimalProduct.valueOf(name);
+        AnimalProduct animalProduct = AnimalProduct.stringToAnimalProduct(name);
         if (animalProduct != null) {
             return new AnimalProducts(animalProduct.getName(), animalProduct, quality);
         }
@@ -40,19 +42,26 @@ public class ItemBuilder {
         if (ingredientsType != null) {
             return new Item(ingredientsType.name());
         }
-        return null;
+        return new Item(name);
     }
 
-    public static void addToBackPack(Item item, int Count, Quality quality) {
-        if(App.getCurrentPlayerLazy().getBackPack().getItemNames().containsKey(item.getName())){
-            Item addToBackPack = App.getCurrentPlayerLazy().getBackPack().getItemByName(item.getName());
-            App.getCurrentPlayerLazy().getBackPack().getItems().put(addToBackPack,
-                    App.getCurrentPlayerLazy().getBackPack().getItems().get(addToBackPack) + Count);
-            return;
+    public static void addToBackPack(Item item, int count, Quality quality) {
+        BackPack backpack = App.getCurrentPlayerLazy().getBackPack();
+        Map<Item, Integer> items = backpack.getItems();
 
+        // Try to find existing item
+        Item existingItem = backpack.getItemByName(item.getName());
+
+        if (existingItem != null) {
+            // Update count safely
+            Integer currentCount = items.get(existingItem);
+            items.put(existingItem, (currentCount == null) ? count : currentCount + count);
+        } else {
+            // Add new item
+            Item newItem = ItemBuilder.builder(item.getName(), quality);
+            items.put(newItem, count);
+            backpack.getItemNames().put(newItem.getName(), newItem);
         }
-        Item item1 = ItemBuilder.builder(item.getName(), quality);
-        App.getCurrentPlayerLazy().getBackPack().getItems().put(item1, Count);
     }
 
 }

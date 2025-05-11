@@ -42,8 +42,6 @@ public class Player {
         this.relationShips = relationShips;
         this.ownedFarm = ownedFarm;
         this.backPack = backPack;
-        this.isEnergyUnlimited = isEnergyUnlimited;
-        this.hasCollapsed = hasCollapsed;
         this.money = 1_000_000;
         this.partner = null;
         this.recepies = new ArrayList<>();

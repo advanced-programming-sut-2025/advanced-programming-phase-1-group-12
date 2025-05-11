@@ -5,6 +5,8 @@ import models.Fundementals.Location;
 import models.Fundementals.LocationOfRectangle;
 import models.Place.Farm;
 import models.Place.Store;
+import models.ProductsPackage.StoreProducts;
+import models.enums.Types.StoreProductsTypes;
 import models.enums.Types.TypeOfTile;
 import models.map;
 
@@ -112,7 +114,17 @@ public class MapSetUp {
             default:
                 store = null;
         }
+        StoreProductsSetUp(store);
         return store;
+    }
+
+    public static void StoreProductsSetUp(Store store) {
+        for(StoreProductsTypes type : StoreProductsTypes.values()) {
+            if(type.getShop().equals(store.getNameOfStore())){
+                StoreProducts storeProducts = new StoreProducts(type);
+                store.getStoreProducts().add(storeProducts);
+            }
+        }
     }
 
     public static void NPCsetUp() {
