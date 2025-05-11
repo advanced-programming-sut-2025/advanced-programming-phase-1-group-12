@@ -16,7 +16,7 @@ public class Player {
     private Location userLocation;
     private boolean isMarried;
     private int energy;
-    public Refrigrator Refrigrator = new Refrigrator();
+    public Refrigrator Refrigrator;
     private ArrayList<Ability> abilitis = new ArrayList<Ability>();
     private ArrayList<RelationShip> relationShips = new ArrayList<>();
     private Farm ownedFarm;
@@ -37,7 +37,7 @@ public class Player {
         this.userLocation = userLocation;
         this.isMarried = isMarried;
         this.energy = 200;
-        Refrigrator = refrigrator;
+        this.Refrigrator = refrigrator;
         this.abilitis = abilitis;
         this.relationShips = relationShips;
         this.ownedFarm = ownedFarm;
@@ -200,5 +200,9 @@ public class Player {
 
     public void setHasCollapsed(boolean hasCollapsed) {
         this.hasCollapsed = hasCollapsed;
+    }
+
+    public Refrigrator getRefrigrator() {
+        return Refrigrator;
     }
 }
