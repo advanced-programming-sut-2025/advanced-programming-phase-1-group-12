@@ -1,11 +1,12 @@
 package models.Animal;
 
 import models.Fundementals.Location;
+import models.Item;
 import models.enums.Animal;
 
 import java.util.ArrayList;
 
-public class FarmAnimals implements Animals{
+public class FarmAnimals extends Item {
     //Animal enum with its information:
     private Animal animal;
 
@@ -18,10 +19,14 @@ public class FarmAnimals implements Animals{
 
     private Location position;
 
-
+    private int daysLeftToProduce;
     //booleans
-    private boolean hasBeenPettedToday = false;
-    private boolean hasBeenFedToday = false;
+    private boolean hasBeenPettedToday;
+    private boolean hasBeenFedToday;
+    private boolean willProduceToday;
+    //TODO:not sure we need this
+    private boolean hasCollectedProductToday;
+
 
     public Animal getAnimal() {
         return animal;
@@ -64,10 +69,41 @@ public class FarmAnimals implements Animals{
     }
 
     public FarmAnimals(Animal animal, int friendShip, AnimalHome home, String name, Location position) {
+        super(name);
         this.animal = animal;
         this.friendShip = friendShip;
         this.home = home;
         this.name = name;
         this.position = position;
+        this.hasBeenPettedToday = false;
+        this.hasBeenFedToday = false;
+        this.willProduceToday = true;
+        //produce first day
+        this.daysLeftToProduce = 0;
+        this.hasCollectedProductToday = false;
+    }
+
+    public boolean isWillProduceToday() {
+        return willProduceToday;
+    }
+
+    public void setWillProduceToday(boolean willProduceToday) {
+        this.willProduceToday = willProduceToday;
+    }
+
+    public int getDaysLeftToProduce() {
+        return daysLeftToProduce;
+    }
+
+    public void setDaysLeftToProduce(int daysLeftToProduce) {
+        this.daysLeftToProduce = daysLeftToProduce;
+    }
+
+    public boolean isHasCollectedProductToday() {
+        return hasCollectedProductToday;
+    }
+
+    public void setHasCollectedProductToday(boolean hasCollectedProductToday) {
+        this.hasCollectedProductToday = hasCollectedProductToday;
     }
 }

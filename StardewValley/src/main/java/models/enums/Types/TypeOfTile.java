@@ -12,12 +12,16 @@ public enum TypeOfTile {
     QUARRY('Q'),
     HOUSE('H'),
     GROUND('.'),
-
+    PLOUGHED_LAND('P'),
+    BURNED_GROUND('b'),
     STORE('s'),
 
     //this is used for seeing if we can buy an animal
+    //TODO:big or Deluxe stuff is not shown
     COOP('C'),
-    BARN('B');
+    BARN('B'),
+    NPC_VILLAGE('N'),
+    PLANT('p');
 
     private final char nameOfMap;
 

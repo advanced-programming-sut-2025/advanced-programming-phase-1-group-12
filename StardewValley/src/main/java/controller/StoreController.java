@@ -8,6 +8,7 @@ import models.*;
 import models.Fundementals.LocationOfRectangle;
 import models.Fundementals.Result;
 import models.Place.Store;
+import models.ProductsPackage.Quality;
 import models.ProductsPackage.StoreProducts;
 import models.enums.Animal;
 import models.enums.Season;
@@ -158,7 +159,7 @@ public class StoreController {
         }//TODO:does it print it right?
         for(StoreProductsTypes type: StoreProductsTypes.values()){
             if(type.getShop().equals(store)){
-                System.out.println(type.getName().toString());
+                System.out.println(type.getName());
             }
         }
     }
@@ -199,16 +200,9 @@ public class StoreController {
             return new Result(false, "You do not have enough money to buy this product");
         }
         App.getCurrentPlayerLazy().setMoney(App.getCurrentPlayerLazy().getMoney() - price*Count);
-        if(App.getCurrentPlayerLazy().getBackPack().getItemNames().containsKey(productName)){
-            Item addToBackPack = App.getToolByName(productName);
-            App.getCurrentPlayerLazy().getBackPack().getItems().put(addToBackPack,
-                    App.getCurrentPlayerLazy().getBackPack().getItems().get(addToBackPack) + Count);
-            return new Result(true, "You bought this product");
-        }
-        Item item1 = ItemBuilder.builder(productName);
-        App.getCurrentPlayerLazy().getBackPack().getItems().put(item1, Count);
-        return new Result(true, "You bought this product");
+        ItemBuilder.addToBackPack(item, Count);
 
+        return new Result(true, "You bought this product");
     }
 
     public void addCount(){

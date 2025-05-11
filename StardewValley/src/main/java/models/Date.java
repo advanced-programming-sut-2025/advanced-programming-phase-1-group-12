@@ -46,7 +46,11 @@ public class Date {
     public void changesDayAnimal(){
         for(FarmAnimals animals : App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()){
             if(!animals.isHasBeenFedToday()){
+                animals.setWillProduceToday(false);
                 animals.setFriendShip(animals.getFriendShip() - 10);
+            }//he was fed in the passed day
+            else {
+                animals.setWillProduceToday(true);
             }
             if(!animals.isHasBeenFedToday()){
                 animals.setFriendShip(animals.getFriendShip() - 20);

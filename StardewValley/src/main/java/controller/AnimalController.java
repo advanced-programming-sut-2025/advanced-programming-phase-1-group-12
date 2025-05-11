@@ -3,11 +3,15 @@ package controller;
 import models.Animal.FarmAnimals;
 import models.Animal.Fish;
 import models.Fundementals.*;
+import models.Item;
+import models.ItemBuilder;
 import models.ProductsPackage.Quality;
 import models.RelatedToUser.Ability;
 import models.ToolsPackage.Tools;
 import models.enums.Animal;
 import models.enums.FishDetails;
+import models.enums.Season;
+import models.enums.Types.AnimalProduct;
 import models.enums.Types.TypeOfTile;
 import models.enums.Weather;
 
@@ -81,10 +85,55 @@ public class AnimalController {
         if(!hasMilkPail){
             return new Result(false, "You do not have a milk pail!");
         }
+        Quality quality = findQulaity(animal.getFriendShip());
+
+        Random rand = new Random();
+        double randDouble = rand.nextDouble();
+        randDouble += 0.5;
+        double willProduceGood = (animal.getFriendShip() + randDouble* 150)/1500;
+        double number = rand.nextDouble();
+
+        if(animal.getDaysLeftToProduce() == 0 && !animal.isHasCollectedProductToday() && animal.isWillProduceToday()){
+        if(animal.getFriendShip() < 100 || willProduceGood < number){
+            if(animal.getAnimal().equals(Animal.COW)){
+                ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.MILK.getName(), quality), 1);
+            }if(animal.getAnimal().equals(Animal.GOAT)){
+                ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.GOAT_MILK.getName(), quality), 1);
+            }
+        }//produces the good product
+        else {
+            if(animal.getAnimal().equals(Animal.COW)){
+                ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.LARGE_MILK.getName(), quality), 1);
+            }if(animal.getAnimal().equals(Animal.GOAT)){
+                ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.LARGE_GOAT_MILK.getName(), quality), 1);
+            }
+        }
         animal.setFriendShip(animal.getFriendShip() + 5);
-        return new Result(true, "You just milked " + animalName);
+        animal.setWillProduceToday(false);
+        return new Result(true, "You just milked " + animalName);}
+        else {
+            return new Result(false, "You can not milk " + animalName + " now");
+        }
     }
 
+    public Quality findQulaity(int friendShip){
+        Random rand = new Random();
+        double randomNum = rand.nextDouble();
+        double number =  (double) friendShip /1000 * (0.5 + 0.5 * randomNum);
+
+        if(number > 0 && number < 0.5){
+            return Quality.NORMAL;
+        }
+        else if(number > 0.5 && number < 0.7){
+            return Quality.SILVER;
+        } else if (number > 0.7 && number < 0.9) {
+            return Quality.GOLDEN;
+        } else {
+            return Quality.IRIDIUM;
+        }
+
+    }
+    //TODO:add pashm and milk to back pack
     public Result shear(String animalName){
         FarmAnimals animal = findAnimalByName(animalName);
         if(animal == null){
@@ -98,6 +147,8 @@ public class AnimalController {
         if(!hasShear){
             return new Result(false, "You do not have a shear!");
         }
+        Quality quality = findQulaity(animal.getFriendShip());
+        ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.WOOL_SHEEP.getName(), quality), 1);
         animal.setFriendShip(animal.getFriendShip() + 5);
         return new Result(true, "You just sheared " + animalName);
     }
@@ -134,13 +185,8 @@ public class AnimalController {
 
     public Result fishing(String fishingPole){
 
-        boolean hasPole = false;
-        for(Tools tools : App.getCurrentPlayerLazy().getBackPack().getTools()){
-            if(tools.getName().equals(fishingPole)){
-                hasPole = true;
-                break;
-            }
-        }
+        boolean hasPole = App.getCurrentPlayerLazy().getBackPack().getItemNames().containsKey(fishingPole);
+
         if(!hasPole){
             return new Result(false, "You do not have any poles of this type");
         }
@@ -198,7 +244,14 @@ public class AnimalController {
             randomItems.add(fishTypes.get(randomIndex)); // May pick the same item multiple times
         }
         for(FishDetails fishDetails : randomItems){
-            App.getCurrentPlayerLazy().getBackPack().getFishes().add(new Fish(fishDetails, fishQuality));
+            ItemBuilder.builder(fishDetails.name(), fishQuality);
+            if(App.getCurrentPlayerLazy().getBackPack().getItemNames().containsKey(fishDetails.getName())){
+                Item addToBackPack = App.getCurrentPlayerLazy().getBackPack().getItemByName(fishDetails.getName());
+                App.getCurrentPlayerLazy().getBackPack().getItems().put(addToBackPack,
+                        App.getCurrentPlayerLazy().getBackPack().getItems().get(addToBackPack) + 1);
+            }
+            Item item1 = ItemBuilder.builder(fishDetails.getName(), fishQuality);
+            App.getCurrentPlayerLazy().getBackPack().getItems().put(item1, 1);
         }
         fishing.setAmount(fishing.getAmount() + 5);
         return new Result(true, "You just caught " + numberOfCaught + " fishes");
@@ -228,5 +281,65 @@ public class AnimalController {
         animal.setHasBeenFedToday(true);
         return new Result(true, "You feed to " + animalName);
     }
+
+    public Result collectProduce(String animalName) {
+        FarmAnimals animal = findAnimalByName(animalName);
+        if (animal == null) {
+            return new Result(false, "Animal not found");
+        }
+        if (!animal.isWillProduceToday()) {
+            return new Result(false, "This animal will not produce today");
+        }
+
+        Animal type = animal.getAnimal();
+        Quality quality = findQulaity(animal.getFriendShip());
+
+        Random rand = new Random();
+        double randDouble = rand.nextDouble();
+        randDouble += 0.5;
+        double willProduceGood = (animal.getFriendShip() + randDouble* 150)/1500;
+        double number = rand.nextDouble();
+        switch (type) {
+            case COW, GOAT -> {
+                return milking(animalName);
+            }
+            case SHEEP -> {
+                return shear(animalName);
+            }
+            case CHICKEN -> {
+                AnimalProduct product = animal.getFriendShip() >= 100 && willProduceGood >= number
+                        ? AnimalProduct.LARGE_EGG
+                        : AnimalProduct.EGG;
+                ItemBuilder.addToBackPack(ItemBuilder.builder(product.getName(), quality), 1);
+            }
+            case DUCK -> {
+                AnimalProduct product = animal.getFriendShip() >= 150 && willProduceGood >= number
+                        ? AnimalProduct.DUCK_FEATHER
+                        : AnimalProduct.DUCK_EGG;
+                ItemBuilder.addToBackPack(ItemBuilder.builder(product.getName(), quality), 1);
+            }
+            case RABBIT -> {
+                AnimalProduct product = animal.getFriendShip() >= 200 && willProduceGood >= number
+                        ? AnimalProduct.RABBITS_PIE
+                        : AnimalProduct.WOOL_RABBIT;
+                ItemBuilder.addToBackPack(ItemBuilder.builder(product.getName(), quality), 1);
+            }
+            case DINOSAUR -> {
+                ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.DINOSAUR_EGG.getName(), quality), 1);
+            }
+            case PIG -> {
+                if (App.getCurrentGame().getDate().getSeason().equals(Season.WINTER) &&
+                !App.isLocationInPlace(animal.getPosition(), animal.getHome().getLocation())) {
+                    return new Result(false, "Pigs do not produce truffles in winter");
+                }
+                ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.TRUFFLE.getName(), quality), 1);
+            }
+        }
+
+        animal.setFriendShip(animal.getFriendShip() + 5);
+        animal.setWillProduceToday(false);
+        return new Result(true, "You just collected product from " + animalName);
+    }
+
 
 }

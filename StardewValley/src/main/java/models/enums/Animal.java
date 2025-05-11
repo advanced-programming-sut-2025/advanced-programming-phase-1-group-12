@@ -1,66 +1,76 @@
 package models.enums;
 
+import models.enums.Types.AnimalProduct;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 public enum Animal {
-    //by cage, I mean coop
-    CHICKEN(800, Map.of("Egg", 50, "Large Egg", 95), true,
+    CHICKEN(800, AnimalProduct.EGG, Set.of(AnimalProduct.LARGE_EGG), true,
             "Lives in a Coop (capacity 4). Produces eggs daily if cared for. Can live in upgraded Coops.",
-            new ArrayList<>(List.of("coop", "deluxe coop", "big coop"))),
+            new ArrayList<>(List.of("coop", "deluxe coop", "big coop")), 1),
 
-    DUCK(1200, Map.of("Duck Egg", 95, "Duck Feather", 250), true,
-            "Lives in a Big Coop (capacity 8). Produces products every 2 days. Happier ducks are more likely to produce feathers. Can also live in Deluxe Coop.",
-            new ArrayList<>(List.of("big coop", "deluxe coop"))),
+    DUCK(1200, AnimalProduct.DUCK_EGG, Set.of(AnimalProduct.DUCK_FEATHER), true,
+            "Lives in a Big Coop (capacity 8). Produces products every 2 days. Happier ducks may produce feathers.",
+            new ArrayList<>(List.of("big coop", "deluxe coop")), 2),
 
-    RABBIT(8000, Map.of("Wool", 340, "Rabbit's Pie", 565), true,
-            "Lives in a Deluxe Coop (capacity 12). Produces every 4 days. Happier rabbits are more likely to produce Rabbit's Foot.",
-            new ArrayList<>(List.of(" deluxe coop"))),
+    RABBIT(8000, AnimalProduct.WOOL_RABBIT, Set.of(AnimalProduct.RABBITS_PIE), true,
+            "Lives in a Deluxe Coop (capacity 12). Produces every 4 days. May rarely produce Rabbit's Pie.",
+            new ArrayList<>(List.of("deluxe coop")), 4),
 
-    DINOSAUR(14000, Map.of("Dinosaur Egg", 350), true,
+    DINOSAUR(14000, AnimalProduct.DINOSAUR_EGG, Set.of(), true,
             "Lives in a Big Coop (capacity 8). Produces every 7 days.",
-            new ArrayList<>(List.of("big coop"))),
+            new ArrayList<>(List.of("big coop")), 7),
 
-    COW(1500, Map.of("Milk", 125, "Large Milk", 190), false,
-            "Lives in a Barn (capacity 4). Produces milk daily. Requires milk pail. Can also live in upgraded Barns.",
-            new ArrayList<>(List.of("barn", "big barn", "deluxe barn"))),
+    COW(1500, AnimalProduct.MILK, Set.of(AnimalProduct.LARGE_MILK), false,
+            "Lives in a Barn (capacity 4). Produces milk daily. Requires milk pail.",
+            new ArrayList<>(List.of("barn", "big barn", "deluxe barn")), 1),
 
-    GOAT(4000, Map.of("Goat Milk", 225, "Large Goat Milk", 345), false,
-            "Lives in a Big Barn (capacity 8). Produces milk every 2 days. Requires milk pail. Can also live in Deluxe Barn.",
-            new ArrayList<>(List.of("big barn", "deluxe barn"))),
+    GOAT(4000, AnimalProduct.GOAT_MILK, Set.of(AnimalProduct.LARGE_GOAT_MILK), false,
+            "Lives in a Big Barn (capacity 8). Produces milk every 2 days. Requires milk pail.",
+            new ArrayList<>(List.of("big barn", "deluxe barn")), 2),
 
-    SHEEP(8000, Map.of("Wool", 340), false,
-            "Lives in a Deluxe Barn (capacity 12). Produces wool every 3 days if fed and at least 70 happiness. Requires shears.",
-            new ArrayList<>(List.of("deluxe barn"))),
+    SHEEP(8000, AnimalProduct.WOOL_SHEEP, Set.of(), false,
+            "Lives in a Deluxe Barn (capacity 12). Produces wool every 3 days if well-fed.",
+            new ArrayList<>(List.of("deluxe barn")), 3),
 
-    PIG(16000, Map.of("Truffle", 625), false,
-            "Lives in a Deluxe Barn. Finds Truffles after going outside. Does not produce during Winter.",
-            new ArrayList<>(List.of("deluxe barn"))),;
+    PIG(16000, AnimalProduct.TRUFFLE, Set.of(), false,
+            "Lives in a Deluxe Barn. Finds Truffles outdoors. Doesn’t produce in Winter.",
+            new ArrayList<>(List.of("deluxe barn")), 1);
 
     private final int purchaseCost;
-    private final Map<String, Integer> products;
+    private final AnimalProduct defaultProduct;
+    private final Set<AnimalProduct> nonDefaultProducts;
     private final boolean isCoop;
     private final String description;
-    private final ArrayList<String>placesCanStay;
+    private final ArrayList<String> placesCanStay;
+    private final int producingCycle;
 
-    Animal(int purchaseCost, Map<String, Integer> products, boolean isCoop, String description, ArrayList<String> placesCanStay) {
+    Animal(int purchaseCost, AnimalProduct defaultProduct, Set<AnimalProduct> nonDefaultProducts, boolean isCoop,
+           String description, ArrayList<String> placesCanStay, int producingCycle) {
         this.purchaseCost = purchaseCost;
-        this.products = products;
+        this.defaultProduct = defaultProduct;
+        this.nonDefaultProducts = nonDefaultProducts;
         this.isCoop = isCoop;
         this.description = description;
         this.placesCanStay = placesCanStay;
+        this.producingCycle = producingCycle;
     }
 
     public int getPurchaseCost() {
         return purchaseCost;
     }
 
-    public Map<String, Integer> getProducts() {
-        return products;
+    public AnimalProduct getDefaultProduct() {
+        return defaultProduct;
     }
 
-    public boolean getCoopOrBarn() {
+    public Set<AnimalProduct> getNonDefaultProducts() {
+        return nonDefaultProducts;
+    }
+
+    public boolean isCoop() {
         return isCoop;
     }
 
@@ -68,11 +78,13 @@ public enum Animal {
         return description;
     }
 
-    public boolean isCoop() {
-        return isCoop;
-    }
-
     public ArrayList<String> getPlacesCanStay() {
         return placesCanStay;
     }
+
+    public int getProducingCycle() {
+        return producingCycle;
+    }
+
+
 }

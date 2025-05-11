@@ -1,39 +1,48 @@
 package models.enums;
 
+import models.enums.ToolEnums.Tool;
+import models.enums.Types.SeedTypes;
+
 public enum FishDetails {
-    SALMON(75, Season.AUTUMN, false),
-    SARDINE(40,Season.AUTUMN, false),
-    SHAD(60, Season.AUTUMN, false),
-    BLUE_DISCUS(120, Season.AUTUMN, false),
+    SALMON("Salmon", 75, Season.AUTUMN, false),
+    SARDINE("Sardine", 40, Season.AUTUMN, false),
+    SHAD("Shad", 60, Season.AUTUMN, false),
+    BLUE_DISCUS("Blue Discus", 120, Season.AUTUMN, false),
 
-    MIDNIGHT_CARP(150, Season.WINTER, false),
-    SQUID(80, Season.WINTER, false),
-    TUNA(100, Season.WINTER, false),
-    PERCH(55, Season.WINTER, false),
+    MIDNIGHT_CARP("Midnight Carp", 150, Season.WINTER, false),
+    SQUID("Squid", 80, Season.WINTER, false),
+    TUNA("Tuna", 100, Season.WINTER, false),
+    PERCH("Perch", 55, Season.WINTER, false),
 
-    FLOUNDER(100, Season.SPRING, false),
-    LIONFISH(100, Season.SPRING, false),
-    HERRING(30, Season.SPRING, false),
-    GHOSTFISH(45, Season.SPRING, false),
+    FLOUNDER("Flounder", 100, Season.SPRING, false),
+    LIONFISH("Lionfish", 100, Season.SPRING, false),
+    HERRING("Herring", 30, Season.SPRING, false),
+    GHOSTFISH("Ghostfish", 45, Season.SPRING, false),
 
-    TILAPIA(75, Season.SUMMER, false),
-    DORADO(100, Season.SUMMER, false),
-    SUNFISH(30,Season.SUMMER, false),
-    RAINBOW_TROUT(65, Season.SUMMER, false),
+    TILAPIA("Tilapia", 75, Season.SUMMER, false),
+    DORADO("Dorado", 100, Season.SUMMER, false),
+    SUNFISH("Sunfish", 30, Season.SUMMER, false),
+    RAINBOW_TROUT("Rainbow Trout", 65, Season.SUMMER, false),
 
-    LEGEND(5000, Season.SPRING, true),
-    GLACIERFISH(1000, Season.WINTER, true),
-    ANGLER(900, Season.AUTUMN, true),
-    CRIMSONFISH(1500, Season.SUMMER, true);
+    LEGEND("Legend", 5000, Season.SPRING, true),
+    GLACIERFISH("Glacierfish", 1000, Season.WINTER, true),
+    ANGLER("Angler", 900, Season.AUTUMN, true),
+    CRIMSONFISH("Crimsonfish", 1500, Season.SUMMER, true);
 
+    private final String name;
     private final int basePrice;
     private final Season season;
     private final boolean isLegendary;
 
-    FishDetails(int basePrice, Season season, boolean isLegendary) {
+    FishDetails(String name, int basePrice, Season season, boolean isLegendary) {
+        this.name = name;
         this.basePrice = basePrice;
         this.season = season;
         this.isLegendary = isLegendary;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public int getBasePrice() {
@@ -46,5 +55,22 @@ public enum FishDetails {
 
     public boolean isLegendary() {
         return isLegendary;
+    }
+    public static FishDetails stringToFishDetail(String seed) {
+        for (FishDetails type : FishDetails.values()) {
+            if (seed.equals(type.name)) {
+                return type;
+            }
+        }
+        return null;
+    }
+
+    public static FishDetails stringToFish(String name) {
+        for (FishDetails type : FishDetails.values()) {
+            if (name.equals(type.name)) {
+                return type;
+            }
+        }
+        return null;
     }
 }

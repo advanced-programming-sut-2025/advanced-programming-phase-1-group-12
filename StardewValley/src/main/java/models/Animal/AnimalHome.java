@@ -1,9 +1,9 @@
 package models.Animal;
 
-import models.Fundementals.Location;
 import models.Fundementals.LocationOfRectangle;
+import models.Item;
 
-public class AnimalHome  {
+public class AnimalHome extends Item {
     private int CapacityRemained;
 
     //normal coop, Deluxe coop, big coop, normal barn, Deluxe barn, big barn:
@@ -12,6 +12,7 @@ public class AnimalHome  {
     private LocationOfRectangle location;
 
     public AnimalHome(int capacityRemained, String type, LocationOfRectangle location) {
+        super(type);
         CapacityRemained = capacityRemained;
         Type = type;
         this.location = location;

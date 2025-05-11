@@ -1,14 +1,8 @@
 package models;
 
-import models.Animal.Fish;
-import models.Fundementals.App;
 import models.Fundementals.Result;
-import models.ProductsPackage.StoreProducts;
 import models.ToolsPackage.Tools;
-import models.enums.Animal;
 import models.enums.ToolEnums.BackPackTypes;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,9 +10,6 @@ public class BackPack {
     private Map<Item, Integer> items;
     private Map<String, Item> itemNames;
     private BackPackTypes type;
-    private ArrayList<Fish>fishes = new ArrayList<>();
-    private ArrayList<Tools>tools = new ArrayList<>();
-    private ArrayList<StoreProducts>storeProducts = new ArrayList<>();
     public BackPack(BackPackTypes type) {
         this.items = new HashMap<>();
         this.itemNames = new HashMap<>();
@@ -160,18 +151,6 @@ public class BackPack {
 
     public Item getItemByName(String toolName) {
         return itemNames.get(toolName);
-    }
-
-    public ArrayList<Fish> getFishes() {
-        return fishes;
-    }
-
-    public ArrayList<Tools> getTools() {
-        return tools;
-    }
-
-    public ArrayList<StoreProducts> getStoreProducts() {
-        return storeProducts;
     }
 
     public Map<String, Item> getItemNames() {
