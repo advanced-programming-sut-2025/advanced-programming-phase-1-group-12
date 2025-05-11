@@ -643,6 +643,9 @@ public class GameMenuController implements MenuController {
 
         if (player.getBackPack().getItemByName(recipe) != null && player.getBackPack().checkCapacity(1)) {
             player.reduceEnergy(3);
+            if(!checkIngredients(cooking)){
+                return new Result(false, "ingredient not enough!");
+            }
             checkIngredients(cooking);
             Food newFood = new Food(recipe, cooking);
             player.getBackPack().addItem(newFood, 1);
