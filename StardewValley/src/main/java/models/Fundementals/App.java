@@ -2,6 +2,7 @@ package models.Fundementals;
 
 import models.Date;
 import models.Fundementals.Game;
+import models.Item;
 import models.Place.Store;
 import models.RelatedToUser.User;
 import models.enums.Menu;
@@ -13,6 +14,7 @@ import java.util.Map;
 
 public class App {
     private static Map<String, User> users = new HashMap<>();
+    private static Map<String, Item> allItems = new HashMap<>();
     private static User loggedInUser = null;
     private static Menu currentMenu = Menu.LoginRegisterMenu;
     private static ArrayList<Game> game = new ArrayList<>();
@@ -130,5 +132,8 @@ public class App {
             }
         }
         return false;
+    }
+    public static Item getItemByName(String name) {
+        return allItems.get(name);
     }
 }

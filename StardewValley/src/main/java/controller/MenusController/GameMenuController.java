@@ -608,65 +608,41 @@ public class GameMenuController implements MenuController {
         }
     }
 
-    // NPC interaction methods
-
-    /**
-     * Handles the meet NPC command
-     * @param npcName The name of the NPC to meet
-     * @return Result with the NPC's dialogue
-     */
     public Result meetNPC(String npcName) {
-        // Initialize NPC village if it doesn't exist
         if (App.getCurrentGame().getNPCvillage() == null) {
             App.getCurrentGame().initializeNPCvillage();
         }
 
-        // Create controller and process the meet command
         NPCcontroller controller = new NPCcontroller();
         String response = controller.meetNPC(npcName);
 
         return new Result(true, response);
     }
 
-    /**
-     * Handles the gift NPC command
-     * @param npcName The name of the NPC to give a gift to
-     * @param itemName The name of the item to give
-     * @return Result with the outcome of the gift
-     */
     public Result giftNPC(String npcName, String itemName) {
-        // Initialize NPC village if it doesn't exist
         if (App.getCurrentGame().getNPCvillage() == null) {
             App.getCurrentGame().initializeNPCvillage();
         }
 
-        // Create controller and process the gift command
         NPCcontroller controller = new NPCcontroller();
         String response = controller.giftNPC(npcName, itemName);
 
         return new Result(true, response);
     }
 
-    /**
-     * Handles the friendship NPC list command
-     * @return Result with the list of NPC friendships
-     */
+
     public Result friendshipNPCList() {
-        // Initialize NPC village if it doesn't exist
         if (App.getCurrentGame().getNPCvillage() == null) {
             App.getCurrentGame().initializeNPCvillage();
         }
 
-        // Create controller and get the friendship list
         NPCcontroller controller = new NPCcontroller();
         String response = controller.getFriendshipList();
 
         return new Result(true, response);
     }
 
-    /**
-     * Process daily NPC activities at the start of a new day
-     */
+
     public void processDailyNPCActivities() {
         if (App.getCurrentGame().getNPCvillage() != null) {
             NPCcontroller controller = new NPCcontroller();
@@ -674,12 +650,16 @@ public class GameMenuController implements MenuController {
         }
     }
     public Result refrigerator(String command, String item){
+        Player player = App.getCurrentGame().getCurrentPlayer();
         if(command.equals("put")){
-            Item getItem = App.getCurrentGame().getCurrentPlayer().getBackPack().getItemByName(item);
-            // TODO: get map building to find the refrigerator
+            Item getItem = App.getItemByName(item);
+            player.getRefrigrator().addItem(getItem, 1);
+            player.getBackPack().decreaseItem(getItem, 1);
         }
         if(command.equals("pick")){
-            //TODO: add item to inventory
+            Item getItem = App.getItemByName(item);
+            player.getBackPack().addItem(getItem, 1);
+            player.getRefrigrator().decreaseItem(getItem, 1);
         }
         return new Result(true, "done!");
     }
