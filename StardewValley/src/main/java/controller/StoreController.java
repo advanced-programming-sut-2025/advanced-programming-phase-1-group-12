@@ -20,11 +20,11 @@ import java.util.regex.Matcher;
 public class StoreController {
 
     public Result buyAnimalBuilding(String buildingName, Location location) {
-        if (!App.isLocationInPlace(location, App.getCurrentGame().getMainMap().getStores().get(3).getLocationOfRectangle())) {
+        if (!App.isInStore("Carpenter’s Shop")) {
             //TODO:money for building is not decreased
             return new Result(false, "You are not in Carpenter's shop");
         }
-        if (App.isLocationInPlace(location, App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getLocation())) {
+        if(!App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getLocation().getLocationsInRectangle().contains(location)){
             return new Result(false, "given location is not in your farm at all");
         }
         if (!location.getTypeOfTile().equals(TypeOfTile.GROUND)) {
@@ -34,6 +34,11 @@ public class StoreController {
         //normal coop, Deluxe coop, big coop, normal barn, Deluxe barn, big barn:
 
         buildAnimalHomeSuccess(location, buildingName);
+        if(buildingName.contains("coop")){
+            location.setTypeOfTile(TypeOfTile.COOP);
+        }else {
+            location.setTypeOfTile(TypeOfTile.BARN);
+        }
         return new Result(true, buildingName + "built successfully");
     }
 
@@ -106,8 +111,7 @@ public class StoreController {
         if(type == null) {
             return new Result(false, "Animal type " + animalType + " not found");
         }
-        if (!App.isLocationInPlace(App.getCurrentPlayerLazy().getUserLocation(),
-                App.getCurrentGame().getMainMap().getStores().get(5).getLocationOfRectangle())) {
+        if (! App.isInStore("Marnie's Ranch")){
             return new Result(false, "You are not in Marnie's Ranch");
         }
         if(App.getCurrentPlayerLazy().getMoney() < type.getPurchaseCost()) {

@@ -2,6 +2,7 @@ package models.Fundementals;
 
 import models.Date;
 import models.Fundementals.Game;
+import models.Place.Store;
 import models.RelatedToUser.User;
 import models.enums.Menu;
 
@@ -120,5 +121,14 @@ public class App {
         Location ourLocation = App.getCurrentPlayerLazy().getUserLocation();
         return ((location.getyAxis() - ourLocation.getyAxis()) <= 1 && (location.getyAxis() - ourLocation.getyAxis()) >= -1)
                 && ((location.getxAxis() - ourLocation.getxAxis()) <= 1 && (location.getxAxis() - ourLocation.getxAxis()) >= -1);
+    }
+
+    public static boolean isInStore(String storeName) {
+        for(Store store : App.getCurrentGame().getMainMap().getStores()){
+            if (store.getNameOfStore().equals(storeName)){
+                return true;
+            }
+        }
+        return false;
     }
 }

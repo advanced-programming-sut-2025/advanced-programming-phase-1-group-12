@@ -37,7 +37,8 @@ public class LocationOfRectangle {
         this.width =  this.downRightCorner.getyAxis() - this.topLeftCorner.getyAxis() ;
         for(int i = 0 ; i < this.length ; i++){
             for(int j = 0 ; j < this.width ; j++){
-                this.locationsInRectangle.add(topLeftCorner);
+                Location newLocation = App.getCurrentGame().getMainMap().findLocation(topLeftCorner.getxAxis() + j, topLeftCorner.getyAxis() + i);
+                this.locationsInRectangle.add(newLocation);
             }
         }
     }

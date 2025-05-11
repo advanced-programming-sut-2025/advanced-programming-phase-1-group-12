@@ -98,7 +98,8 @@ public class UserLocationController {
             if (x < 0 || y < 0 || x >= maxX || y >= maxY || visited[x][y]) continue;
 
             Location loc = App.getCurrentGame().getMainMap().findLocation(x, y);
-            if (loc.getTypeOfTile() != TypeOfTile.GROUND) continue;
+            if (loc.getTypeOfTile() != TypeOfTile.GROUND && loc.getTypeOfTile() != TypeOfTile.PLOUGHED_LAND &&
+                    loc.getTypeOfTile() != TypeOfTile.STORE && loc.getTypeOfTile() != TypeOfTile.HOUSE) continue;
 
             visited[x][y] = true;
 
@@ -133,7 +134,8 @@ public class UserLocationController {
             if (x < 0 || y < 0 || x >= maxX || y >= maxY || visited[x][y]) continue;
 
             Location loc = App.getCurrentGame().getMainMap().findLocation(x, y);
-            if (loc.getTypeOfTile() != TypeOfTile.GROUND) continue;
+            if (loc.getTypeOfTile() != TypeOfTile.GROUND && loc.getTypeOfTile() != TypeOfTile.PLOUGHED_LAND &&
+                    loc.getTypeOfTile() != TypeOfTile.STORE && loc.getTypeOfTile() != TypeOfTile.HOUSE) continue;
 
             int energyNeeded = (dist + 10 * turns) / 20;
             if (energyNeeded > maxEnergy) continue;

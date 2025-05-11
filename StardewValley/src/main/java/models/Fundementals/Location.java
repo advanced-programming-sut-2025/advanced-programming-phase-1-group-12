@@ -7,7 +7,7 @@ public class Location {
 
     private int yAxis;
 
-    boolean isWalkable;
+    private boolean isWalkable;
 
     private TypeOfTile typeOfTile;
 

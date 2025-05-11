@@ -6,6 +6,7 @@ import controller.TradeManager;
 import models.Eating.Food;
 import models.Fundementals.*;
 import models.Place.Farm;
+import models.Place.Store;
 import models.RelatedToUser.User;
 import models.*;
 import models.RelationShips.RelationShip;
@@ -233,35 +234,55 @@ public class GameMenuController implements MenuController {
 
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                Location location = App.getCurrentGame().getMainMap().findLocation(x + i, y + j);
+                int mapX = x + i;
+                int mapY = y + j;
+                Location location = App.getCurrentGame().getMainMap().findLocation(mapX, mapY);
                 char tileType = location.getTypeOfTile().getNameOfMap();
                 String bgColor = getBackgroundColorForTile(location.getTypeOfTile());
 
                 char contentChar = tileType;
+
+                // Player on tile
                 if (location.getObjectInTile() instanceof Player) {
                     Farm farm = getFarmOfThisLocation(location);
                     if (farm != null) {
                         contentChar = farm.getOwner().getUser().getUserName().charAt(0);
-                        bgColor = "\u001B[41m";
+                        bgColor = "\u001B[41m"; // Red background for player
+                    }
+                } else {
+                    // Store on tile
+                    for (Store store : App.getCurrentGame().getMainMap().getStores()) {
+                        LocationOfRectangle loc = store.getLocation();
+                        if (mapX >= loc.getTopLeftCorner().getxAxis() &&
+                                mapX <= loc.getDownRightCorner().getxAxis() &&
+                                mapY >= loc.getTopLeftCorner().getyAxis() &&
+                                mapY <= loc.getDownRightCorner().getyAxis()) {
+
+                            contentChar = store.getOwner().charAt(0); // Store owner’s first character
+                            bgColor = "\u001B[46m"; // Light cyan background for store
+                            break;
+                        }
                     }
                 }
 
                 String block = bgColor + " " + contentChar + " " + "\u001B[0m";
-
                 tileBlock[i][j] = block;
             }
         }
 
+        // Print the tileBlock
         for (int row = 0; row < size; row++) {
             for (int col = 0; col < size; col++) {
                 System.out.print(tileBlock[row][col]);
             }
             System.out.println();
         }
+
         System.out.println("Do you want to enable map guidance?");
         String selection = scanner.nextLine();
-        if (selection.equals("yes")) helpToReadMap();
+        if (selection.equalsIgnoreCase("yes")) helpToReadMap();
     }
+
 
     public void helpToReadMap() {
         System.out.println("Map Legend:");
