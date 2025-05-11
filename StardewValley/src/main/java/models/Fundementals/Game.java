@@ -23,15 +23,6 @@ public class Game {
     private static ArrayList<Farm> farms = new ArrayList<>();
     private NPCvillage npcVillage;
 
-    public Player getPlayerByName(String playerName) {
-        for (Player player : players) {
-            if(player.getUser().getUserName().equals(playerName)) {
-                return player;
-            }
-        }
-        return null;
-    }
-
     public Player getCurrentPlayer() {
         return currentPlayer;
     }
@@ -98,12 +89,13 @@ public class Game {
         Game.farms = farms;
     }
 
-    public NPCvillage getNPCvillage() {
-        return npcVillage;
-    }
-
-    public void setNPCvillage(NPCvillage npcVillage) {
-        this.npcVillage = npcVillage;
+    public Player getPlayerByName(String playerName) {
+        for (Player player : players) {
+            if(player.getUser().getUserName().equals(playerName)) {
+                return player;
+            }
+        }
+        return null;
     }
 
     public void initializeNPCvillage() {
@@ -116,4 +108,13 @@ public class Game {
         // Create and initialize the NPC village
         this.npcVillage = new NPCvillage(villageArea);
     }
+
+    public NPCvillage getNPCvillage() {
+        return npcVillage;
+    }
+
+    public void setNPCvillage(NPCvillage npcVillage) {
+        this.npcVillage = npcVillage;
+    }
+
 }

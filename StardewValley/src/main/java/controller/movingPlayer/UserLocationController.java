@@ -1,14 +1,13 @@
 package controller.movingPlayer;
 
+import controller.MenusController.GameMenuController;
 import models.Fundementals.App;
 import models.Fundementals.Location;
 import models.Fundementals.Result;
 import models.Place.Farm;
 import models.enums.Types.TypeOfTile;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
 public class UserLocationController {
     public static Result walkPlayer(String x, String y) {
@@ -19,33 +18,64 @@ public class UserLocationController {
         Location currentLocation = App.getCurrentGame().getCurrentPlayer().getUserLocation();
         Farm currentFarm = App.getCurrentGame().getCurrentPlayer().getOwnedFarm();
 
-        int minDistance = bfsDistance(currentLocation, newLocation, currentFarm);
+        if (!isInPlayersFarm(newLocation, currentFarm)) {
+            return new Result(false, "You don't have access to this farm.");
+        }
 
-        if (minDistance != -1) {
-            if(minDistance / 20 > App.getCurrentGame().getCurrentPlayer().getEnergy()){
-                System.out.println(App.getCurrentGame().getCurrentPlayer().getUser().getUserName() + " will faint soon.");
+        int[] result = bfsDistanceWithTurns(currentLocation, newLocation);
+        int distance = result[0];
+        int turns = result[1];
 
-                return new Result(false, "you dont have enough energy to moving");
+        if (distance == -1) {
+            return new Result(false, "It is not possible to move to location " + x + " " + y + " because type of tile is " + newLocation.getTypeOfTile().name());
+        }
+
+        int energyNeeded = (distance + 10 * turns) / 20;
+        int currentEnergy = App.getCurrentGame().getCurrentPlayer().getEnergy();
+
+        if (energyNeeded > currentEnergy) {
+            // Try partial movement: BFS with tracking energy
+            Location finalReachable = bfsMaxReachable(currentLocation, targetX, targetY, currentEnergy);
+            if (finalReachable == null) {
+                return new Result(false, "You can't move at all with your current energy.");
             }
+
             App.getCurrentGame().getMainMap().findLocation(
                     currentLocation.getxAxis(), currentLocation.getyAxis()
             ).setObjectInTile(null);
 
-            App.getCurrentGame().getCurrentPlayer().setUserLocation(newLocation);
+            App.getCurrentGame().getCurrentPlayer().setUserLocation(finalReachable);
             App.getCurrentGame().getMainMap().findLocation(
-                    targetX, targetY
+                    finalReachable.getxAxis(), finalReachable.getyAxis()
             ).setObjectInTile(App.getCurrentGame().getCurrentPlayer());
 
-            return new Result(true,
-                    App.getCurrentGame().getCurrentPlayer().getUser().getUserName()
-                            + " moved to new location " + x + " " + y
-                            + " (distance = " + minDistance + ")"
-            );
+            App.getCurrentGame().getCurrentPlayer().setEnergy(0);
+            App.getCurrentGame().getCurrentPlayer().setHasCollapsed(true);
+            System.out.println(App.getCurrentGame().getCurrentPlayer().getUser().getUserName() + " fainted on the way.");
+
+            GameMenuController.nextTurn();
+            return new Result(false, "You didn't have enough energy. You moved partially and fainted at "
+                    + finalReachable.getxAxis() + ", " + finalReachable.getyAxis());
         }
-        return new Result(false, "It is not possible to move to location " + x + " " + y);
+
+        App.getCurrentGame().getMainMap().findLocation(
+                currentLocation.getxAxis(), currentLocation.getyAxis()
+        ).setObjectInTile(null);
+
+        App.getCurrentGame().getCurrentPlayer().setUserLocation(newLocation);
+        App.getCurrentGame().getMainMap().findLocation(
+                targetX, targetY
+        ).setObjectInTile(App.getCurrentGame().getCurrentPlayer());
+        App.getCurrentGame().getCurrentPlayer().setEnergy(currentEnergy - energyNeeded);
+
+        return new Result(true,
+                App.getCurrentGame().getCurrentPlayer().getUser().getUserName()
+                        + " moved to new location " + x + " " + y
+                        + " (distance = " + distance + ", turns = " + turns + ", energy cost = " + energyNeeded + ")"
+        );
     }
 
-    private static int bfsDistance(Location start, Location end, Farm currentFarm) {
+    private static int[] bfsDistanceWithTurns(Location start, Location end) {
         int maxX = 400, maxY = 400;
         boolean[][] visited = new boolean[maxX][maxY];
 
@@ -55,34 +85,84 @@ public class UserLocationController {
         };
 
         Queue<int[]> queue = new LinkedList<>();
-        queue.add(new int[]{start.getxAxis(), start.getyAxis(), 0});
+        queue.add(new int[]{start.getxAxis(), start.getyAxis(), 0, 0, 0, 0}); // x, y, dist, turns, dx, dy
 
         while (!queue.isEmpty()) {
             int[] current = queue.poll();
-            int x = current[0], y = current[1], dist = current[2];
+            int x = current[0], y = current[1], dist = current[2], turns = current[3], dx = current[4], dy = current[5];
 
-            if (x == end.getxAxis() && y == end.getyAxis()) return dist;
+            if (x == end.getxAxis() && y == end.getyAxis()) {
+                return new int[]{dist, turns};
+            }
 
             if (x < 0 || y < 0 || x >= maxX || y >= maxY || visited[x][y]) continue;
 
             Location loc = App.getCurrentGame().getMainMap().findLocation(x, y);
-            if (loc.getTypeOfTile() != TypeOfTile.GROUND || !isInPlayerFarm(loc, currentFarm)) continue;
+            if (loc.getTypeOfTile() != TypeOfTile.GROUND) continue;
 
             visited[x][y] = true;
+
             for (int[] dir : directions) {
-                queue.add(new int[]{x + dir[0], y + dir[1], dist + 1});
+                int nx = x + dir[0], ny = y + dir[1];
+                int newTurn = (dx == dir[0] && dy == dir[1]) || (dx == 0 && dy == 0) ? turns : turns + 1;
+                queue.add(new int[]{nx, ny, dist + 1, newTurn, dir[0], dir[1]});
             }
         }
-        return -1;
+
+        return new int[]{-1, -1};
     }
 
-    private static boolean isInPlayerFarm(Location loc, Farm farm) {
+    private static Location bfsMaxReachable(Location start, int targetX, int targetY, int maxEnergy) {
+        int maxX = 400, maxY = 400;
+        boolean[][] visited = new boolean[maxX][maxY];
+
+        int[][] directions = {
+                {1, 0}, {-1, 0}, {0, 1}, {0, -1},
+                {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+        };
+
+        Queue<int[]> queue = new LinkedList<>();
+        queue.add(new int[]{start.getxAxis(), start.getyAxis(), 0, 0, 0, 0}); // x, y, dist, turns, dx, dy
+
+        Location lastValid = start;
+
+        while (!queue.isEmpty()) {
+            int[] current = queue.poll();
+            int x = current[0], y = current[1], dist = current[2], turns = current[3], dx = current[4], dy = current[5];
+
+            if (x < 0 || y < 0 || x >= maxX || y >= maxY || visited[x][y]) continue;
+
+            Location loc = App.getCurrentGame().getMainMap().findLocation(x, y);
+            if (loc.getTypeOfTile() != TypeOfTile.GROUND) continue;
+
+            int energyNeeded = (dist + 10 * turns) / 20;
+            if (energyNeeded > maxEnergy) continue;
+
+            visited[x][y] = true;
+            lastValid = loc;
+
+            for (int[] dir : directions) {
+                int nx = x + dir[0], ny = y + dir[1];
+                int newTurn = (dx == dir[0] && dy == dir[1]) || (dx == 0 && dy == 0) ? turns : turns + 1;
+                queue.add(new int[]{nx, ny, dist + 1, newTurn, dir[0], dir[1]});
+            }
+        }
+
+        return lastValid.equals(start) ? null : lastValid;
+    }
+
+    private static boolean isInPlayersFarm(Location loc, Farm farm) {
         int x = loc.getxAxis();
         int y = loc.getyAxis();
-        return x >= farm.getLocation().getTopLeftCorner().getxAxis() &&
-                x <= farm.getLocation().getDownRightCorner().getxAxis() &&
-                y >= farm.getLocation().getTopLeftCorner().getyAxis() &&
-                y <= farm.getLocation().getDownRightCorner().getyAxis();
+        for (Farm f : App.getCurrentGame().getFarms()) {
+            if (f == farm) continue;
+            if (x >= f.getLocation().getTopLeftCorner().getxAxis() &&
+                    x <= f.getLocation().getDownRightCorner().getxAxis() &&
+                    y >= f.getLocation().getTopLeftCorner().getyAxis() &&
+                    y <= f.getLocation().getDownRightCorner().getyAxis()) {
+                return false;
+            }
+        }
+        return true;
     }
-
 }

@@ -15,6 +15,7 @@ public enum TypeOfTile {
     PLOUGHED_LAND('P'),
     BURNED_GROUND('b'),
     STORE('s'),
+    GIANT_PLANT('G'),
 
     //this is used for seeing if we can buy an animal
     //TODO:big or Deluxe stuff is not shown

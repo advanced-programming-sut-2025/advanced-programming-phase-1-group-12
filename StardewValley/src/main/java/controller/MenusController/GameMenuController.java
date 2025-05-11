@@ -3,6 +3,7 @@ package controller.MenusController;
 import controller.MapSetUp.MapSetUp;
 import controller.NPCcontroller;
 import controller.TradeManager;
+import models.Eating.Food;
 import models.Fundementals.*;
 import models.Place.Farm;
 import models.RelatedToUser.User;
@@ -11,6 +12,7 @@ import models.RelationShips.RelationShip;
 import models.enums.*;
 import models.Fundementals.Player;
 import com.google.gson.Gson;
+import models.enums.Types.Cooking;
 import models.enums.Types.TypeOfTile;
 
 import java.io.BufferedReader;
@@ -20,28 +22,6 @@ import java.io.IOException;
 import java.util.*;
 
 public class GameMenuController implements MenuController {
-
-    Game currentGame = App.getCurrentGame();
-
-    public map choosingMap(int MapId){ return null;}
-
-    public Result loadGame(){ return null;}
-
-    public void savingMap(Map<map, User>userAndTheirMap){}
-
-    public Result deleteGame(int MapId){ return null;}
-
-    public void nextTurn(){ }
-
-    //TODO:sper chiz ro bezanim baraye geragten babash
-
-    public void readingMap(){ }
-
-    public void energyUnlimited(){}
-
-    public Result sellProducts(String productName, int Count){
-        return null;
-    }
 
     /**
      * Starts the trade menu and shows available players
@@ -248,7 +228,7 @@ public class GameMenuController implements MenuController {
         return new Result(true, App.getCurrentGame().getDate().getWeather().name());
     }
 
-    public void printMap(int x, int y, int size) {
+    public void printMap(int x, int y, int size, Scanner scanner) {
         String[][] tileBlock = new String[size][size];
 
         for (int i = 0; i < size; i++) {
@@ -260,8 +240,10 @@ public class GameMenuController implements MenuController {
                 char contentChar = tileType;
                 if (location.getObjectInTile() instanceof Player) {
                     Farm farm = getFarmOfThisLocation(location);
-                    contentChar = farm.getOwner().getUser().getUserName().charAt(0);
-                    bgColor = "\u001B[41m";
+                    if (farm != null) {
+                        contentChar = farm.getOwner().getUser().getUserName().charAt(0);
+                        bgColor = "\u001B[41m";
+                    }
                 }
 
                 String block = bgColor + " " + contentChar + " " + "\u001B[0m";
@@ -275,6 +257,16 @@ public class GameMenuController implements MenuController {
                 System.out.print(tileBlock[row][col]);
             }
             System.out.println();
+        }
+        System.out.println("Do you want to enable map guidance?");
+        String selection = scanner.nextLine();
+        if (selection.equals("yes")) helpToReadMap();
+    }
+
+    public void helpToReadMap() {
+        System.out.println("Map Legend:");
+        for (TypeOfTile type : TypeOfTile.values()) {
+            System.out.println(type.getNameOfMap() + " -> " + type.name());
         }
     }
 
@@ -299,6 +291,13 @@ public class GameMenuController implements MenuController {
             case STONE -> "\u001B[103m";     // bright yellow background
             case TREE -> "\u001B[102m";      // bright green background
             case LAKE -> "\u001B[46m";       // cyan background
+            case STORE -> "\u001B[104m";       // Bright Blue
+            case BARN -> "\u001B[44m";         // Dark Blue (Standard ANSI)
+            case COOP -> "\u001B[48;5;155m";        // light green
+            case PLOUGHED_LAND -> "\u001B[48;5;214m"; //orange
+            case NPC_VILLAGE -> "\u001B[48;5;209m"; //Pink
+            case BURNED_GROUND -> "\u001B[40m"; //black
+            case PLANT -> "\\u001B[48;5;88m"; // Dark red
             default -> "\u001B[41m";
         };
     }
@@ -308,6 +307,8 @@ public class GameMenuController implements MenuController {
         Game newGame = new Game();
         App.setCurrentGame(newGame);
         MapSetUp.initializeFarms();
+        MapSetUp.storesSetUp();
+        MapSetUp.NPCsetUp();
 
         loadAllUsersFromFiles();
 
@@ -325,12 +326,12 @@ public class GameMenuController implements MenuController {
 
             System.out.println("User: " + username);
             Player newPlayer = new Player(user, null, false, null, new ArrayList<>(),
-                    new ArrayList<>(), null, null, null, false, false);
+                    null, null, false, false, new ArrayList<>());
             players.add(newPlayer);
 
             System.out.println("Do you want to know what each farm has?");
             String selection = scanner.nextLine();
-            if(selection.equals("yes"))guideForFarm();
+            if (selection.equals("yes")) guideForFarm();
 
             while (true) {
                 System.out.println("Choosing farm for " + username + ":");
@@ -371,14 +372,38 @@ public class GameMenuController implements MenuController {
 
         App.getCurrentGame().setUserAndMap(farmOwnership);
         App.getCurrentGame().setPlayers(players);
-        App.getCurrentGame().setCurrentPlayer(players.getFirst());
+        App.getCurrentGame().setCurrentPlayer(players.get(0));
 
         MapSetUp.showMapWithFarms(App.getCurrentGame().getMainMap());
-
+        App.getCurrentGame().setGameId(App.getGameId());
         System.out.println("All farms have been assigned!");
     }
 
-    private void guideForFarm(){
+
+    public static Result nextTurn() {
+        List<Player> players = App.getCurrentGame().getPlayers();
+        Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
+        App.getCurrentGame().getCurrentPlayer().setEnergy(200);
+
+        int currentIndex = players.indexOf(currentPlayer);
+        int nextIndex = (currentIndex + 1) % players.size();
+
+        App.getCurrentGame().setCurrentPlayer(players.get(nextIndex));
+        if (App.getCurrentGame().getCurrentPlayer().isHasCollapsed() &&
+                (App.getCurrentGame().getDate().getHour() == 8 || App.getCurrentGame().getDate().getHour() == 9)) {
+            App.getCurrentGame().getCurrentPlayer().setHasCollapsed(false);
+            App.getCurrentGame().getCurrentPlayer().setEnergy(150);
+        } else if (App.getCurrentGame().getCurrentPlayer().isHasCollapsed()) {
+            int nextIndex2 = (nextIndex + 1) % players.size();
+            App.getCurrentGame().setCurrentPlayer(players.get(nextIndex2));
+        }
+
+        App.getCurrentGame().getDate().changeAdvancedTime(1);
+
+        return new Result(true, "Turn moved to " + players.get(nextIndex).getUser().getUserName());
+    }
+
+    private void guideForFarm() {
         System.out.println("Farm selection guide:\n" +
                 "Farm with ID 0 has two lakes, a Shack, a quarry, and a greenhouse\n" +
                 "Farm with ID 1 has one lake, a Shack, two quarries, and a greenhouse\n" +
@@ -386,6 +411,8 @@ public class GameMenuController implements MenuController {
                 "Farm with ID 3 has one lake, two Shack, a quarry, and a greenhouse\n" +
                 "Be careful, you do not have the right to change your mind after choosing a farm!");
     }
+
+    
     private static Map<Farm, Player> getFarmPlayerMap(ArrayList<Player> players, ArrayList<Integer> chosenFarmNumbers) {
         Map<Farm, Player> farmOwnership = new HashMap<>();
         ArrayList<Farm> farms = App.getCurrentGame().getMainMap().getFarms();
@@ -624,4 +651,82 @@ public class GameMenuController implements MenuController {
             controller.processDailyNPCActivities();
         }
     }
+    public Result refrigerator(String command, String item){
+        if(command.equals("put")){
+            Item getItem = App.getCurrentGame().getCurrentPlayer().getBackPack().getItemByName(item);
+            // TODO: get map building to find the refrigerator
+        }
+        if(command.equals("pick")){
+            //TODO: add item to inventory
+        }
+        return new Result(true, "done!");
+    }
+
+    public Result prepare(String recipe) {
+        Cooking cooking = Cooking.fromName(recipe);
+        Player player = App.getCurrentGame().getCurrentPlayer();
+
+        if (cooking == null) {
+            return new Result(false, "cooking not found!");
+        }
+
+        if (App.getCurrentGame().getCurrentPlayer().getBackPack().getItemByName(recipe) == null) {
+            return  new Result(false, "recipe not found!");
+        }
+
+        if(!player.getBackPack().checkCapacity(1)){
+            return new Result(false, "inventory is full!");
+        }
+
+        if (player.getBackPack().getItemByName(recipe) != null && player.getBackPack().checkCapacity(1)) {
+            player.reduceEnergy(3);
+            if(!checkIngredients(cooking)){
+                return new Result(false, "ingredient not enough!");
+            }
+            checkIngredients(cooking);
+            Food newFood = new Food(recipe, cooking);
+            player.getBackPack().addItem(newFood, 1);
+            return  new Result(true, "processed food!");
+        }
+        else {
+            return  new Result(false, "recipe not found!");
+        }
+
+    }
+
+    public boolean checkIngredients(Cooking cooking){
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        Map<String, Integer> ingredients = cooking.getIngredient();
+        for (Map.Entry<String, Integer> entry : ingredients.entrySet()) {
+            Item item = player.getBackPack().getItemByName(entry.getKey());
+            if(player.getBackPack().getItems().get(item) >= entry.getValue()){
+                player.getBackPack().decreaseItem(item, entry.getValue());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Result eat(String food){
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        Food foodToEat = (Food) player.getBackPack().getItemByName(food);
+        if(foodToEat == null){
+            return new Result(false, "food not found!");
+        }
+        else{
+            player.getBackPack().decreaseItem(foodToEat, 1);
+            player.increaseEnergy(foodToEat.getFoodType().getEnergy());
+            if(!foodToEat.getFoodType().getBuffer().isEmpty()){
+                player.setEnergy(300); // for 5 hours
+            }
+            return new Result(true, "eaten!");
+        }
+    }
+
+    public Result Thor(int x, int y) {
+        Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
+        location.setTypeOfTile(TypeOfTile.BURNED_GROUND);
+        return new Result(true, "Lightning struck the map at location" + x + ", " + y);
+    }
+
 }

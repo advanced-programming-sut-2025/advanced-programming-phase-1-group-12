@@ -2,12 +2,9 @@ package models.Place;
 
 import models.Fundementals.Location;
 import models.Fundementals.LocationOfRectangle;
-import models.Item;
 import models.ProductsPackage.StoreProducts;
-import models.enums.Season;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 public class Store implements Place {
 
@@ -21,7 +18,17 @@ public class Store implements Place {
 
     private int CloseHour;
 
-    private ArrayList<StoreProducts> allProducts;
+    private ArrayList<StoreProducts> storeProducts;
+
+    public Store(LocationOfRectangle locationOfRectangle, String owner, String nameOfStore, int startHour, int closeHour, ArrayList<StoreProducts> storeProducts) {
+
+        this.locationOfRectangle = locationOfRectangle;
+        this.owner = owner;
+        this.nameOfStore = nameOfStore;
+        StartHour = startHour;
+        CloseHour = closeHour;
+        this.storeProducts = storeProducts;
+    }
 
     public LocationOfRectangle getLocationOfRectangle() {
         return locationOfRectangle;
@@ -63,18 +70,17 @@ public class Store implements Place {
         CloseHour = closeHour;
     }
 
+    public ArrayList<StoreProducts> getStoreProducts() {
+        return storeProducts;
+    }
+
+    public void setStoreProducts(ArrayList<StoreProducts> storeProducts) {
+        this.storeProducts = storeProducts;
+    }
 
 
     @Override
     public LocationOfRectangle getLocation() {
         return this.locationOfRectangle;
-    }
-
-    public ArrayList<StoreProducts> getAllProducts() {
-        return allProducts;
-    }
-
-    public void setAllProducts(ArrayList<StoreProducts> allProducts) {
-        this.allProducts = allProducts;
     }
 }

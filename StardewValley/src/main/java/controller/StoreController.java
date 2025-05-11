@@ -124,7 +124,7 @@ public class StoreController {
             return new Result(false, "You can't buy this animal because there is no home for it");
         }
         //pay for it
-        App.getCurrentPlayerLazy().setMoney(App.getCurrentPlayerLazy().getMoney() - type.getPurchaseCost());
+        App.getCurrentPlayerLazy().decreaseMoney(type.getPurchaseCost());
         FarmAnimals newAnimal = new FarmAnimals(type, 0, home, name,
                 App.getCurrentGame().getMainMap().findLocation(home.getLocation().getTopLeftCorner().getxAxis() + 1, home.getLocation().getTopLeftCorner().getyAxis() + 1));
         //vaghti too khoonan roo haman
@@ -141,9 +141,6 @@ public class StoreController {
         }
         return null;
     }
-    public Store findStore(Location location){return null;}
-
-    public boolean isStoreOpen(Store store, Date date){return false;}
 
     public void ShowProducts(){
         Store store = null;
@@ -179,7 +176,7 @@ public class StoreController {
             return new Result(false, "You are not in any store");
         }
         StoreProducts item = null;
-        for(StoreProducts item1 : store.getAllProducts()){
+        for(StoreProducts item1 : store.getStoreProducts()){
             if(item1.getName().equals(productName)){
                 item = item1;
                 break;
@@ -199,8 +196,8 @@ public class StoreController {
         if(App.getCurrentPlayerLazy().getMoney() < price*Count){
             return new Result(false, "You do not have enough money to buy this product");
         }
-        App.getCurrentPlayerLazy().setMoney(App.getCurrentPlayerLazy().getMoney() - price*Count);
-        ItemBuilder.addToBackPack(item, Count);
+        App.getCurrentPlayerLazy().decreaseMoney(price*Count);
+        ItemBuilder.addToBackPack(item, Count, Quality.NORMAL);
 
         return new Result(true, "You bought this product");
     }

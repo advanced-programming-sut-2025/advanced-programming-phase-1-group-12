@@ -5,15 +5,15 @@ import models.Eating.Food;
 import java.util.ArrayList;
 
 public class Refrigrator {
-    private ArrayList<Products> products;
+    private ArrayList<Item> products;
     private ArrayList<Food> foodMade;
     private int maxProduction;
 
-    public ArrayList<Products> getProducts() {
+    public ArrayList<Item> getProducts() {
         return products;
     }
 
-    public void setProducts(ArrayList<Products> products) {
+    public void setProducts(ArrayList<Item> products) {
         this.products = products;
     }
 
@@ -25,7 +25,7 @@ public class Refrigrator {
         this.foodMade = foodMade;
     }
 
-    public void addProducts(Products product1){
+    public void addProducts(Item product1){
         products.add(product1);
     }
 

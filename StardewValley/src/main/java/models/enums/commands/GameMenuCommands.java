@@ -7,9 +7,25 @@ public enum GameMenuCommands implements Commands {
     //Starting Game
     PLAY("^\\s*game new -u ([\\w-]+)(?: ([\\w-]+))?(?: ([\\w-]+))?\\s*$"),
     PRINT("^print map -l (?<X>.*), (?<Y>.*) -s (?<size>.*)$"),
+    HELP("^help reading map$"),
     SHOW_POSITION("^show location of current player$"),
     WALK("^walk -l (?<x>.*), (?<y>.*)$"),
     EXIT("^exit$"),
+    LoadGame("^load game with (?<gameID>.+)$"),
+    NextTurn("^next turn"),
+    //farming
+    CRAFT_INFO("^craftinfo -n (?<craftName>.+)$"),
+    PLANT("^plant -s (?<seed>.+) -d (?<direction>.+)$"),
+    SHOW_PLANT("^show plant -l (?<X>.+), (?<Y>.+)$"),
+    FERTILIZE("^fertilize -f (?<fertilize>.+) -d (?<direction>.+)$"),
+    HOW_MUCH_WATER("^how much water$"),
+    REAPING("^Reaping (?<direction>.+)$"),
+    //crafting
+    SHOW_RECIPES("^crafting show recipes$"),
+    MACK_CRAFT("^crafting craft (?<itemName>.+)"),
+    PLACE_ON_GROUND("lace item -n (?<itemName>.+) -d (?<direction>.+)$"),
+    ADD_TO_INVENTORY("^heat add item -n (?<itemName>.+) -c (?<count>.+)"),
+    WHICH_FERTILIZING("^which tile was fertilized&"),
     //weather and ....
     SEASON("^season$"),
     TIME("^time$"),
@@ -28,6 +44,34 @@ public enum GameMenuCommands implements Commands {
     ENERGY_UNLIMITED("^energy unlimited$"),
     INVENTORY_SHOW("^inventory\\s+show$"),
     INVENTORY_TRASH("inventory trash -i (?<item>.*) -n (?<number>.*)$"),
+    THOR("^cheat Thor -l (?<X>.+) , (?<Y>.+)$"),
+
+    //Damdari commands
+    //animals
+    BUILD_BUILDING("build -a (?<buildingName>.*) -l <(?<x>\\d+) , (?<y>\\d+)>"),
+    BUY_ANIMAL("buy animal -a (?<animal>.*) -n (?<name>.*)"),
+    PET("pet -n (?<name>.*)"),
+    CHEAT_SET_FRIENDSHIP("cheat set friendship -n (?<animalName>.*) -c (?<amount>.*)"),
+    ANIMALS_LIST("animals"),
+    SHEPHERD_ANIMALS("shepherd animals -n <animal name> -l <x , y>"),
+    FEED_HAY("^feed hay -n (?<animalName>.*)$"),
+    PRODUCES("^produces$"),
+    COLLECT ("collect produce -n (?<name>.*)"),
+    SELL_ANIMAL("sell animal -n (?<name>.*)"),
+
+    //fishes
+    FISHING("fishing -p (?<fishingPole>.*)"),
+
+    //Faravari commands
+    ARTISAN_USE("artisan use (?<artisanName>.*) (?<itemName>.*)"),
+    ARTISAN_GET("artisan get <artisanName>"),
+
+    //Cooking commands
+    COOKING_REFRIGERATOR("cooking refrigrator -n (?<name>.*)"),
+    COOKING_RECIPES("cooking show recipes"),
+    COOKING_PREPARE("cooking prepare (?<recipeName>.*)"),
+
+    EAT_FOOD("eat (?<foodName>.*)"),
 
     //tool commands
     EQUIP_TOOL("^tools equip (?<toolName>.+)"),
@@ -55,35 +99,9 @@ public enum GameMenuCommands implements Commands {
     TRADE_RESPONSE("^trade response --(accept|reject) -i (?<id>\\S+)$"),
     TRADE_HISTORY("^trade history$"),
 
-    //Damdari commands
-    //animals
-    BUILD_BUILDING("build -a (?<buildingName>.*) -l <(?<x>.*) , (?<y>.*)>"),
-    BUY_ANIMAL("buy animal -a (?<animal>.*) -n (?<name>.*)"),
-    PET("pet -n (?<name>.*)"),
-    CHEAT_SET_FRIENDSHIP("cheat set friendship -n (?<animalName>.*) -c (?<amount>.*)"),
-    ANIMALS_LIST("animals"),
-    SHEPHERD_ANIMALS("shepherd animals -n <animalName> -l <(?<x>.*) , (?<y>.*)>"),
-    FEED_HAY("^feed hay -n (?<animalName>.*)$"),
-    PRODUCES("^produces$"),
-    COLLECT ("collect produce -n (?<name>.*)"),
-    SELL_ANIMAL("sell animal -n (?<name>.*)"),
     //pashmesho bezane va shir bedooshe
     SHEAR("^shear -n (?<name>.*)"),
     MILK("^milk -n (?<name>.*)"),
-
-    //fishes
-    FISHING("fishing -p (?<fishingPole>.*)"),
-
-    //Faravari commands
-    ARTISAN_USE("artisan use (?<artisanName>.*) (?<itemName>.*)"),
-    ARTISAN_GET("artisan get <artisanName>"),
-
-    //Cooking commands
-    COOKING_REFRIGERATOR("cooking refrigrator -n (?<name>.*)"),
-    COOKING_RECIPES("cooking show recipes"),
-    COOKING_PREPARE("cooking prepare (?<recipeName>.*)"),
-
-    EAT_FOOD("eat (?<foodName>.*)"),
 
     // NPC commands
     MEET_NPC("^meet NPC (?<npcName>.+)$"),

@@ -7,6 +7,7 @@ import models.RelatedToUser.Ability;
 import models.RelatedToUser.User;
 import models.RelationShips.RelationShip;
 import models.RelationShips.Trade;
+import models.ToolsPackage.Tools;
 
 import java.util.ArrayList;
 
@@ -24,17 +25,20 @@ public class Player {
     private boolean hasCollapsed;
     private int money;
     private Player partner;
-
+    private ArrayList<String> recepies;
+    private ArrayList<Ability> abilities;
+    private ArrayList<Trade> trades = new ArrayList<>();
+    private Tools currentTool;
 
     public Player(User user, Location userLocation, boolean isMarried, Refrigrator refrigrator,
-                  ArrayList<Ability> abilities, ArrayList<RelationShip> relationShips, ArrayList<Trade> trade,
-                  Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited, boolean hasCollapsed ) {
+                  ArrayList<RelationShip> relationShips, Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited,
+                  boolean hasCollapsed, ArrayList<Ability> abilitis) {
         this.user = user;
         this.userLocation = userLocation;
         this.isMarried = isMarried;
         this.energy = 200;
-        this.Refrigrator = refrigrator;
-        this.abilitis = abilities;
+        Refrigrator = refrigrator;
+        this.abilitis = abilitis;
         this.relationShips = relationShips;
         this.ownedFarm = ownedFarm;
         this.backPack = backPack;
@@ -42,6 +46,11 @@ public class Player {
         this.hasCollapsed = hasCollapsed;
         this.money = 0;
         this.partner = null;
+        this.recepies = new ArrayList<>();
+        this.trades = new ArrayList<>();
+        this.currentTool = null;
+        this.isEnergyUnlimited = false;
+        this.hasCollapsed = false;
     }
 
     public User getUser() {
@@ -145,5 +154,53 @@ public class Player {
 
     public ArrayList<Ability> getAbilitis() {
         return abilitis;
+    }
+
+    private void initializeAbilities() {
+        abilitis.add(new Ability("Fishing", 0));
+        abilitis.add(new Ability("Mining", 0));
+        abilitis.add(new Ability("Farming", 0));
+        abilitis.add(new Ability("Foraging", 0));
+    }
+    public Ability getAbilityByName(String name){
+        for(Ability ability : abilitis){
+            if(ability.getName().equals(name)){
+                return ability;
+            }
+        }
+        return null;
+    }
+
+    public void reduceEnergy(int amount){
+        if(energy - amount < 0){
+            energy = 0;
+        }
+        else{
+            energy -= amount;
+        }
+    }
+
+    public String showRecipes(){
+        StringBuilder result = new StringBuilder("Recipes: \n");
+        for(String recipes : recepies){
+            result.append(recipes).append("\n");
+        }
+        return result.toString();
+    }
+
+    public boolean isEnergyUnlimited() {
+        return isEnergyUnlimited;
+    }
+
+    public void setEnergyUnlimited(boolean energyUnlimited) {
+        isEnergyUnlimited = energyUnlimited;
+    }
+
+    public boolean isHasCollapsed() {
+        return hasCollapsed;
+    }
+
+    public void setHasCollapsed(boolean hasCollapsed) {
+        this.hasCollapsed = hasCollapsed;
     }
 }

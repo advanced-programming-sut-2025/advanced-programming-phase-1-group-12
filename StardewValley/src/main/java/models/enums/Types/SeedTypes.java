@@ -59,7 +59,7 @@ public enum SeedTypes {
     MixedSeeds("Mixed Seeds", 0, Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)),
 
     // Misc
-    GrassStarter("Grass Starter", 0, Arrays.asList());
+    GrassStarter("Grass Starter", 0, Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER));
 
     private final String name;
     private final int day;

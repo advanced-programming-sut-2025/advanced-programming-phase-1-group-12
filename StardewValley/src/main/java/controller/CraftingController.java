@@ -1,16 +1,82 @@
 package controller;
 
 import models.Craft;
+import models.Fundementals.App;
+import models.Fundementals.Location;
 import models.Fundementals.Result;
+import models.enums.Season;
+import models.enums.Types.SeedTypes;
+import models.enums.foraging.AllCrops;
+import models.enums.Types.FertilizeType;
+import models.enums.foraging.Plant;
+import models.enums.foraging.Seed;
+import models.enums.Types.TypeOfTile;
+import models.enums.foraging.Tree;
+
+import java.util.*;
+import java.util.List;
 
 public class CraftingController {
-    public Result showRecipes(){
+
+    public Result addItem(String itemName, int count) {
+        //TODO: class item add
         return null;
     }
-    public Craft makingCraft(String itemName){return new Craft();}
-    public void placeItem(String itemName, String direction){}
-    public void addItem(String itemName, int count){}
-    public Result showCraftInto(Craft craftItem){
+
+    public Result putItem(String itemName, String direction) {
+        int Direction = Integer.parseInt(direction);
+        Location currentLocation = App.getCurrentGame().getCurrentPlayer().getUserLocation();
+        int x, y;
+
+        switch (Direction) {
+            case 1 -> {
+                x = currentLocation.getxAxis() - 1;
+                y = currentLocation.getyAxis() + 1;
+            }
+            case 2 -> {
+                x = currentLocation.getxAxis();
+                y = currentLocation.getyAxis() + 1;
+            }
+            case 3 -> {
+                x = currentLocation.getxAxis() + 1;
+                y = currentLocation.getyAxis() + 1;
+            }
+            case 4 -> {
+                x = currentLocation.getxAxis() - 1;
+                y = currentLocation.getyAxis();
+            }
+            case 6 -> {
+                x = currentLocation.getxAxis() + 1;
+                y = currentLocation.getyAxis();
+            }
+            case 7 -> {
+                x = currentLocation.getxAxis() - 1;
+                y = currentLocation.getyAxis() - 1;
+            }
+            case 8 -> {
+                x = currentLocation.getxAxis();
+                y = currentLocation.getyAxis() - 1;
+            }
+            case 9 -> {
+                x = currentLocation.getxAxis() + 1;
+                y = currentLocation.getyAxis() - 1;
+            }
+            default -> {
+                return new Result(false, "Invalid direction");
+            }
+        }
+        Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
+        return null;
+    }
+
+    public Result makeItem(String itemName) {
+        //TODO: class item need
+        return null;
+    }
+
+    public Result showRecipesforCrafting() {
+        //for(Recipes recipes : App.getCurrentGame().getCurrentPlayer().)
+        //TODO: class item need
         return null;
     }
 }

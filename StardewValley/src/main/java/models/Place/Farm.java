@@ -6,8 +6,13 @@ import models.Fundementals.Location;
 import models.Fundementals.LocationOfRectangle;
 import models.Fundementals.Player;
 import models.MapDetails.*;
+import models.enums.Animal;
+import models.enums.foraging.Plant;
+import models.enums.foraging.Seed;
+import models.enums.foraging.Tree;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class Farm implements Place {
 
@@ -24,6 +29,9 @@ public class Farm implements Place {
     private Quarry quarry2;
     private ArrayList<FarmAnimals> farmAnimals = new ArrayList<>();
     private ArrayList<AnimalHome> animalHomes = new ArrayList<>();
+    private ArrayList<Plant> PlantOfFarm = new ArrayList<>();
+    private ArrayList<Seed> SeedOfFarm = new ArrayList<>();
+    private ArrayList<Tree> trees = new ArrayList<>();
 
     public Farm(LocationOfRectangle farmLocation) {
         this.farmLocation = farmLocation;
@@ -117,6 +125,13 @@ public class Farm implements Place {
         this.quarry2 = new Quarry(new LocationOfRectangle(bottomLeftCornerGreenQuarry2, bottomLeftLakeDownRightQuarry2));
     }
 
+    public void setSeedOfFarm(ArrayList<Seed> seedOfFarm) {
+        SeedOfFarm = seedOfFarm;
+    }
+
+    public ArrayList<Seed> getSeedOfFarm() {
+        return SeedOfFarm;
+    }
 
     public LocationOfRectangle getLocation() {
         return farmLocation;
@@ -216,5 +231,21 @@ public class Farm implements Place {
 
     public void setAnimalHomes(ArrayList<AnimalHome> animalHomes) {
         this.animalHomes = animalHomes;
+    }
+
+    public ArrayList<Plant> getPlantOfFarm() {
+        return this.PlantOfFarm;
+    }
+
+    public void setPlantOfFarm(ArrayList<Plant> plantOfFarm) {
+        PlantOfFarm = plantOfFarm;
+    }
+
+    public ArrayList<Tree> getTrees() {
+        return trees;
+    }
+
+    public void setTrees(ArrayList<Tree> trees) {
+        this.trees = trees;
     }
 }

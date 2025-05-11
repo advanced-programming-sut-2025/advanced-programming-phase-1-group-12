@@ -1,10 +1,10 @@
 package models.enums.Types;
 
 public enum FertilizeType {
-    fertilize1("fertilize1"),
-    fertilize2("fertilize2"),
-    fertilize3("fertilize3"),
-    fertilize4("fertilize4");
+
+    DeluxeRetainingSoil("Deluxe Retaining Soil"),
+    BasicRetainingSoil("Basic Retaining Soil"),
+    QualityRetainingSoil("Quality Retaining Soil");
 
     private final String name;
 

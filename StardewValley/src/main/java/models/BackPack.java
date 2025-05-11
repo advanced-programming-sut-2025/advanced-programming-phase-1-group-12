@@ -10,10 +10,12 @@ public class BackPack {
     private Map<Item, Integer> items;
     private Map<String, Item> itemNames;
     private BackPackTypes type;
+    private int water;
     public BackPack(BackPackTypes type) {
         this.items = new HashMap<>();
         this.itemNames = new HashMap<>();
         this.type = type;
+        this.water = 100;
     }
 
     public void setItems(Map<Item, Integer> items) {
@@ -149,6 +151,14 @@ public class BackPack {
         }
     }
 
+    public int getWater() {
+        return water;
+    }
+
+    public void setWater(int water) {
+        this.water = water;
+    }
+
     public Item getItemByName(String toolName) {
         return itemNames.get(toolName);
     }
@@ -159,5 +169,18 @@ public class BackPack {
 
     public void setItemNames(Map<String, Item> itemNames) {
         this.itemNames = itemNames;
+    }
+
+    public boolean checkCapacity(int amount){
+        int totalCount = 0;
+        for (int count : items.values()) {
+            totalCount += count;
+        }
+
+        if((totalCount + amount)<this.getType().getBackPackCapacity()){
+            return true;
+        }else{
+            return false;
+        }
     }
 }

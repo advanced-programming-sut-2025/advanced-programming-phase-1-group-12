@@ -4,20 +4,11 @@ import models.Item;
 import models.enums.Types.Cooking;
 
 public class Food extends Item {
-    private String name;
     private Cooking foodType;
 
     public Food(String name, Cooking foodType){
         super(name);
         this.foodType = foodType;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Cooking getFoodType() {

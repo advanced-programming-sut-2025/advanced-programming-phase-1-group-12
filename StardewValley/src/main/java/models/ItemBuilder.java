@@ -3,11 +3,9 @@ package models;
 import models.Animal.Fish;
 import models.Eating.Food;
 import models.Fundementals.App;
-import models.Fundementals.Result;
 import models.ProductsPackage.AnimalProducts;
 import models.ProductsPackage.Quality;
 import models.ToolsPackage.Tools;
-import models.enums.Animal;
 import models.enums.FishDetails;
 import models.enums.ToolEnums.Tool;
 import models.enums.Types.*;
@@ -45,14 +43,15 @@ public class ItemBuilder {
         return null;
     }
 
-    public static void addToBackPack(Item item, int Count) {
+    public static void addToBackPack(Item item, int Count, Quality quality) {
         if(App.getCurrentPlayerLazy().getBackPack().getItemNames().containsKey(item.getName())){
             Item addToBackPack = App.getCurrentPlayerLazy().getBackPack().getItemByName(item.getName());
             App.getCurrentPlayerLazy().getBackPack().getItems().put(addToBackPack,
                     App.getCurrentPlayerLazy().getBackPack().getItems().get(addToBackPack) + Count);
+            return;
 
         }
-        Item item1 = ItemBuilder.builder(item.getName(), Quality.GOLDEN);
+        Item item1 = ItemBuilder.builder(item.getName(), quality);
         App.getCurrentPlayerLazy().getBackPack().getItems().put(item1, Count);
     }
 

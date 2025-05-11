@@ -8,14 +8,10 @@ public class Seed extends Item {
 
     private SeedTypes type;
     private Location location;
-    private int totalTimeNeeded;
-    private boolean fertilized;
 
     public Seed(SeedTypes type) {
-        super(type.name());
+        super(type.getName());
         this.type = type;
-        this.fertilized = false;
-        this.totalTimeNeeded = type.getDay();
     }
 
     public void setType(SeedTypes type) {
@@ -34,19 +30,4 @@ public class Seed extends Item {
         return type;
     }
 
-    public boolean isFertilized() {
-        return fertilized;
-    }
-
-    public int getTotalTimeNeeded() {
-        return totalTimeNeeded;
-    }
-
-    public void setFertilized(boolean fertilized) {
-        this.fertilized = fertilized;
-    }
-
-    public void setTotalTimeNeeded(int totalTimeNeeded) {
-        this.totalTimeNeeded = totalTimeNeeded;
-    }
 }

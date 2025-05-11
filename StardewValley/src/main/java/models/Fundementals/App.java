@@ -3,7 +3,6 @@ package models.Fundementals;
 import models.Date;
 import models.Fundementals.Game;
 import models.RelatedToUser.User;
-import models.ToolsPackage.Tools;
 import models.enums.Menu;
 
 import java.util.ArrayList;
@@ -14,15 +13,15 @@ import java.util.Map;
 public class App {
     private static Map<String, User> users = new HashMap<>();
     private static User loggedInUser = null;
-    private static models.enums.Menu currentMenu = Menu.LoginRegisterMenu;
+    private static Menu currentMenu = Menu.LoginRegisterMenu;
     private static ArrayList<Game> game = new ArrayList<>();
+    private static int gameId = 1;
     private static Game currentGame = new Game();
     private static Date fullTime;
     private static ArrayList<String> securityQuestions = new ArrayList<>(
             Arrays.asList("what is your favorite color?", "what is your favorite country?")
     );
     private static ArrayList<Game> allGames;
-    private static Map<String, Tools> allTools;
 
     public static User getUserByUsername(String username) {
         for(User user : users.values()){
@@ -89,11 +88,27 @@ public class App {
         return securityQuestions;
     }
 
-    public static Tools getToolByName(String toolName) {
-        return allTools.get(toolName);
+    public static int getGameId() {
+        return gameId;
     }
 
+    public static void setGame(ArrayList<Game> game) {
+        App.game = game;
+    }
 
+    public static void setSecurityQuestions(ArrayList<String> securityQuestions) {
+        App.securityQuestions = securityQuestions;
+    }
+
+    public static void setGameId(int gameId) {
+        App.gameId = gameId;
+    }
+
+    public static void setUsers(Map<String, User> users) {
+        App.users = users;
+    }
+
+    //useful functions
     public static boolean isLocationInPlace(Location location, LocationOfRectangle place){
         return location.getxAxis() >= place.getTopLeftCorner().getxAxis() &&
                 location.getxAxis() <= place.getTopLeftCorner().getxAxis() + place.getWidth() &&

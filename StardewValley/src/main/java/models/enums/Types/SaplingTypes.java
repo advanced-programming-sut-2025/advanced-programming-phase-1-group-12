@@ -16,7 +16,21 @@ public enum SaplingTypes {
 
     PomegranateSapling("Pomegranate Sapling", 5),
 
-    APPLETREE("Apple Tree", 20);
+    Appletree("Apple Tree", 20), Acorns("Acorns", 1),
+
+    MapleSeeds("MapleSeeds", 1),
+
+    PineCones("PineCones", 1),
+
+    MahoganySeeds("MahoganySeeds", 1),
+
+    MushroomTreeSeeds("MushroomTreeSeeds", 1),
+
+    BananaSapling("Banana Tree", 1),
+
+    MangoSapling("Mango Tree", 1),
+
+    MysticSapling("Mystic Tree", 1);
     //TODO:etelaat dige
 
     private final int watering;

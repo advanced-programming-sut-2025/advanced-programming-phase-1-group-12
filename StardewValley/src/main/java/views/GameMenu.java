@@ -1,12 +1,11 @@
 package views;
 
-import controller.AnimalController;
+import controller.*;
 import controller.MenusController.GameMenuController;
-import controller.StoreController;
-import controller.ToolsController;
 import controller.movingPlayer.UserLocationController;
 import models.Fundementals.App;
 import models.Fundementals.Location;
+import models.Fundementals.Player;
 import models.Fundementals.Result;
 import models.enums.commands.GameMenuCommands;
 
@@ -20,6 +19,8 @@ public class GameMenu extends AppMenu {
     private final ToolsController toolsController = new ToolsController();
     private final AnimalController animalController = new AnimalController();
     private final StoreController storeController = new StoreController();
+    private final FarmingController farmingController = new FarmingController();
+    private final CraftingController craftingController = new CraftingController();
 
     @Override
     public void check(Scanner scanner) {
@@ -35,7 +36,7 @@ public class GameMenu extends AppMenu {
 
              controller.Play(scanner, players);
         } else if ((matcher = GameMenuCommands.PRINT.getMather(input)) != null) {
-            controller.printMap(Integer.parseInt(matcher.group("X")),Integer.parseInt(matcher.group("Y")), Integer.parseInt(matcher.group("size")));
+            controller.printMap(Integer.parseInt(matcher.group("X")),Integer.parseInt(matcher.group("Y")), Integer.parseInt(matcher.group("size")), scanner);
         } else if ((matcher = GameMenuCommands.TIME.getMather(input))!= null) {
             showCurrentTime();
         } else if ((matcher = GameMenuCommands.DATE.getMather(input))!= null) {
@@ -158,6 +159,82 @@ public class GameMenu extends AppMenu {
             System.out.println(storeController.buyProduct(matcher.group("productName"), Integer.parseInt(matcher.group("count"))));
         } else if ((matcher = GameMenuCommands.COLLECT.getMather(input))!= null) {
             System.out.println(animalController.collectProduce(matcher.group("name")).getMessage());
+        }else if ((matcher = GameMenuCommands.COOKING_RECIPES.getMather(input))!= null) {
+            System.out.println(App.getCurrentPlayerLazy().showRecipes());
+        } else if ((matcher = GameMenuCommands.COOKING_REFRIGERATOR.getMather(input))!= null) {
+            System.out.println(controller.refrigerator(matcher.group(0), matcher.group("item") ));
+        } else if ((matcher = GameMenuCommands.COOKING_PREPARE.getMather(input))!= null) {
+            System.out.println(controller.prepare(matcher.group("recipeName")));
+        } else if ((matcher = GameMenuCommands.EAT_FOOD.getMather(input))!= null) {
+            System.out.println(controller.eat(matcher.group("foodName")));
+        }else if ((matcher = GameMenuCommands.TALK.getMather(input))!= null) {
+            Result result = controller.talk(matcher.group("username"), matcher.group("message"));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.TALK_HISTORY.getMather(input))!= null) {
+            Result result = controller.talkHistory(matcher.group("username"));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.GIFT.getMather(input))!= null) {
+            Result result = controller.gift(matcher.group(),matcher.group(),matcher.group());
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.HUG.getMather(input))!= null) {
+            Result result = controller.hug(matcher.group("username"));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.FLOWER.getMather(input))!= null) {
+            Result result= controller.flower(matcher.group("username"));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.ASK_MARRIAGE.getMather(input))!= null) {
+            Result result = controller.askMarriage(matcher.group("username"), matcher.group("ring"));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.RESPOND.getMather(input))!= null) {
+            Result result = controller.respond(matcher.group(0), matcher.group("username"));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.START_TRADE.getMather(input))!= null) {
+            Result result = controller.startTrade();
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.TRADE_CREATE.getMather(input))!= null) {
+            String username = matcher.group("username");
+            String type = matcher.group("type");
+            String item = matcher.group("item");
+            createTrade(username, type, item, matcher);
+
+        } else if ((matcher = GameMenuCommands.TRADE_LIST.getMather(input))!= null) {
+            Result result = controller.listTrades();
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.TRADE_RESPONSE.getMather(input))!= null) {
+            String response = matcher.group(1); // accept or reject
+            String id = matcher.group("id");
+            Result result = controller.respondToTrade(response, id);
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.TRADE_HISTORY.getMather(input))!= null) {
+            Result result = controller.tradeHistory();
+            System.out.println(result.getMessage());
+        }else if ((matcher = GameMenuCommands.CRAFT_INFO.getMather(input)) != null) {
+            System.out.println(farmingController.showCraftInto(matcher.group("craftName")));
+        } else if ((matcher = GameMenuCommands.PLANT.getMather(input)) != null) {
+            System.out.println(farmingController.plant(matcher.group("seed"), matcher.group("direction")));
+        } else if ((matcher = GameMenuCommands.SHOW_PLANT.getMather(input)) != null) {
+            System.out.println(farmingController.showPlant(matcher.group("X"), matcher.group("Y")));
+        } else if ((matcher = GameMenuCommands.FERTILIZE.getMather(input)) != null) {
+            System.out.println(farmingController.fertilize(matcher.group("fertilize"), matcher.group("direction")));
+        } else if ((matcher = GameMenuCommands.REAPING.getMather(input)) != null) {
+            System.out.println(farmingController.reaping(matcher.group("direction")));
+        } else if ((matcher = GameMenuCommands.HOW_MUCH_WATER.getMather(input)) != null) {
+            System.out.println(farmingController.howMuchWater());
+        } else if ((matcher = GameMenuCommands.ADD_TO_INVENTORY.getMather(input)) != null) {
+            System.out.println(craftingController.addItem(matcher.group("itemName"),
+                    Integer.parseInt(matcher.group("count"))));
+        } else if ((matcher = GameMenuCommands.PLACE_ON_GROUND.getMather(input)) != null) {
+            System.out.println(craftingController.putItem(matcher.group("itemName"), matcher.group("direction")));
+        } else if ((matcher = GameMenuCommands.MACK_CRAFT.getMather(input)) != null) {
+            System.out.println(craftingController.makeItem(matcher.group("itemName")));
+        } else if ((matcher = GameMenuCommands.SHOW_RECIPES.getMather(input)) != null) {
+            System.out.println(craftingController.showRecipesforCrafting());
+        } else if ((matcher = GameMenuCommands.THOR.getMather(input)) != null) {
+            System.out.println(controller.Thor(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
+        } else if ((matcher = GameMenuCommands.WHICH_FERTILIZING.getMather(input)) != null) {
+            System.out.println(farmingController.showFertilize());
+        } else {
+            System.out.println("invalid command");
         }
 
     }
@@ -245,5 +322,10 @@ public class GameMenu extends AppMenu {
 
         Result result = controller.createTrade(username, type, item, amount, price, targetItem, targetAmount);
         System.out.println(result.getMessage());
+    }
+
+    public Result showRecipes(){
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        return new Result(true, player.showRecipes());
     }
 }

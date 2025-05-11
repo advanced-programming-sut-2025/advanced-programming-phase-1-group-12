@@ -15,8 +15,6 @@ public class FarmAnimals extends Item {
     // handle it in tile type
     private AnimalHome home;
 
-    private String name;
-
     private Location position;
 
     private int daysLeftToProduce;
@@ -49,9 +47,6 @@ public class FarmAnimals extends Item {
 
     public void setPosition(Location position) {this.position = position;}
 
-
-    public String getName() {return name;}
-
     public boolean isHasBeenPettedToday() {
         return hasBeenPettedToday;
     }
@@ -73,7 +68,6 @@ public class FarmAnimals extends Item {
         this.animal = animal;
         this.friendShip = friendShip;
         this.home = home;
-        this.name = name;
         this.position = position;
         this.hasBeenPettedToday = false;
         this.hasBeenFedToday = false;
