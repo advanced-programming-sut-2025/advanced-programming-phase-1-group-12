@@ -21,6 +21,7 @@ public class GameMenu extends AppMenu {
     private final StoreController storeController = new StoreController();
     private final FarmingController farmingController = new FarmingController();
     private final CraftingController craftingController = new CraftingController();
+    private final ArtisanController artisanController = new ArtisanController();
 
     @Override
     public void check(Scanner scanner) {
@@ -61,6 +62,8 @@ public class GameMenu extends AppMenu {
             cheatWeather(matcher.group("type"));
         } else if ((matcher = GameMenuCommands.SHOW_POSITION.getMather(input)) != null) {
             System.out.println(controller.showLocation());
+        } else if (App.getCurrentPlayerLazy().getEnergy() <= 0 && !App.getCurrentPlayerLazy().isEnergyUnlimited()) {
+            System.out.println("You are not enough energy to do anything.");
         } else if ((matcher = GameMenuCommands.WALK.getMather(input)) != null) {
             System.out.println(UserLocationController.walkPlayer(matcher.group("x"), matcher.group("y")));
         } else if ((matcher = GameMenuCommands.ENERGY_SHOW.getMather(input)) != null) {
@@ -258,6 +261,10 @@ public class GameMenu extends AppMenu {
             System.out.println(controller.sellByShipping(matcher.group("product_name"), matcher.group("count")).getMessage());
         } else if ((matcher = GameMenuCommands.SELL_ONE.getMather(input))!= null) {
             System.out.println(controller.sellByShippingWithoutCount(matcher.group("product_name")).getMessage());
+        } else if ((matcher = GameMenuCommands.ARTISAN_GET.getMather(input)) != null) {
+            System.out.println(artisanController.artisanGet(matcher.group("itemName")));
+        } else if ((matcher = GameMenuCommands.ARTISAN_USE.getMather(input)) != null) {
+            System.out.println(artisanController.artisanUse(matcher.group("artisanName"), matcher.group("itemName")));
         } else {
             System.out.println("invalid command");
         }

@@ -2,7 +2,8 @@ package models.enums.Types;
 
 import java.util.Map;
 
-public enum CraftingRecipe {
+public enum
+CraftingRecipe {
     CHERRY_BOMB(
             "Cherry Bomb",
             Map.of("copper ore", 4, "coal", 1),

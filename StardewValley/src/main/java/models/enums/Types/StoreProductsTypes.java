@@ -239,4 +239,13 @@ public enum StoreProductsTypes {
     public String getShop() {
         return shop;
     }
+
+    public static StoreProductsTypes stringToStoreProduct(String name) {
+        for (StoreProductsTypes type : StoreProductsTypes.values()) {
+            if (name.equalsIgnoreCase(type.name)) {
+                return type;
+            }
+        }
+        return null;
+    }
 }

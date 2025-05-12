@@ -4,6 +4,7 @@ import models.*;
 import models.NPC.NPC;
 import models.Place.Farm;
 import models.Place.Place;
+import models.ProductsPackage.ArtisanItem;
 import models.ProductsPackage.Quality;
 import models.Refrigrator;
 import models.RelatedToUser.Ability;
@@ -36,8 +37,8 @@ public class Player {
     private ArrayList<Trade> trades = new ArrayList<>();
     private Tools currentTool;
     private Map<NPC, Date> metDates;
-    private Map<Item, Integer> artisanHoursRemained = new HashMap<>();
     private ShippingBin shippingBin;
+    private ArrayList<ArtisanItem> artisansGettingProcessed = new ArrayList<>();
 
     public Player(User user, Location userLocation, boolean isMarried, Refrigrator refrigrator,
                   ArrayList<RelationShip> relationShips, Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited,
@@ -230,4 +231,11 @@ public class Player {
         this.recepies = recepies;
     }
 
+    public ArrayList<ArtisanItem> getArtisansGettingProcessed() {
+        return artisansGettingProcessed;
+    }
+
+    public void setArtisansGettingProcessed(ArrayList<ArtisanItem> artisansGettingProcessed) {
+        this.artisansGettingProcessed = artisansGettingProcessed;
+    }
 }
