@@ -4,6 +4,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public enum GameMenuCommands implements Commands {
+
+    //hand-made cheat codes
+    SHOW_MONEY("show money"),
     //Starting Game
     PLAY("^\\s*game new -u ([\\w-]+)(?: ([\\w-]+))?(?: ([\\w-]+))?\\s*$"),
     PRINT("^print map -l (?<X>.*), (?<Y>.*) -s (?<size>.*)$"),

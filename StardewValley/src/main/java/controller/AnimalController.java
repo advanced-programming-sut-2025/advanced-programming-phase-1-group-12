@@ -159,7 +159,7 @@ public class AnimalController {
         }
         Location destination = App.getCurrentGame().getMainMap().findLocation(Integer.parseInt(matcher.group("x")), Integer.parseInt(matcher.group("y")));
 
-        if (destination == null || App.isLocationInPlace(destination, App.getCurrentPlayerLazy().getOwnedFarm().getLocation())) {
+        if (destination == null || !App.getCurrentPlayerLazy().getOwnedFarm().getLocation().getLocationsInRectangle().contains(destination)) {
             return new Result(false, "Given location is not in your farm or not valid");
         }
         //returning home
@@ -182,7 +182,6 @@ public class AnimalController {
     }
 
     public Result fishing(String fishingPole) {
-
         boolean hasPole = App.getCurrentPlayerLazy().getBackPack().getItemNames().containsKey(fishingPole);
 
         if (!hasPole) {
@@ -201,12 +200,11 @@ public class AnimalController {
             case "Training Rod" -> 0.1;
             case "Bamboo Pole" -> 0.5;
             case "Fiberglass Rod" -> 0.9;
-            //Iriⅾiuⅿ Roⅾ:
             default -> 1.2;
         };
         Ability fishing = null;
         for (Ability ability : App.getCurrentPlayerLazy().getAbilitis()) {
-            if (ability.getName().equals("fishing")) {
+            if (ability.getName().equalsIgnoreCase("fishing")) {
                 fishing = ability;
                 break;
             }
@@ -225,7 +223,10 @@ public class AnimalController {
         } else {
             fishQuality = Quality.IRIDIUM;
         }
-        List<FishDetails> fishTypes = List.of();
+
+        // Initialize as mutable ArrayList
+        List<FishDetails> fishTypes = new ArrayList<>();
+
         //possible fish types
         for (FishDetails types : FishDetails.values()) {
             if (types.getSeason().equals(App.getCurrentGame().getDate().getSeason())) {
@@ -234,22 +235,18 @@ public class AnimalController {
                 }
             }
         }
-        List<FishDetails> randomItems = new ArrayList<>();
 
+        List<FishDetails> randomItems = new ArrayList<>();
         for (int i = 0; i < numberOfCaught; i++) {
-            int randomIndex = random.nextInt(fishTypes.size()); // Random index [0, size-1]
-            randomItems.add(fishTypes.get(randomIndex)); // May pick the same item multiple times
+            int randomIndex = random.nextInt(fishTypes.size());
+            randomItems.add(fishTypes.get(randomIndex));
         }
+
         for (FishDetails fishDetails : randomItems) {
-            ItemBuilder.builder(fishDetails.name(), fishQuality);
-            if (App.getCurrentPlayerLazy().getBackPack().getItemNames().containsKey(fishDetails.getName())) {
-                Item addToBackPack = App.getCurrentPlayerLazy().getBackPack().getItemByName(fishDetails.getName());
-                App.getCurrentPlayerLazy().getBackPack().getItems().put(addToBackPack,
-                        App.getCurrentPlayerLazy().getBackPack().getItems().get(addToBackPack) + 1);
-            }
-            Item item1 = ItemBuilder.builder(fishDetails.getName(), fishQuality);
-            App.getCurrentPlayerLazy().getBackPack().getItems().put(item1, 1);
+            Item item = ItemBuilder.builder(fishDetails.getName(), fishQuality);
+            ItemBuilder.addToBackPack(item, 1, fishQuality);
         }
+
         fishing.increaseAmount(5);
         return new Result(true, "You just caught " + numberOfCaught + " fishes");
     }

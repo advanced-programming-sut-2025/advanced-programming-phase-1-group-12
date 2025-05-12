@@ -1,8 +1,6 @@
 package models.Fundementals;
 
 import models.BackPack;
-import models.Date;
-import models.NPC.NPC;
 import models.Place.Farm;
 import models.Refrigrator;
 import models.RelatedToUser.Ability;
@@ -10,11 +8,8 @@ import models.RelatedToUser.User;
 import models.RelationShips.RelationShip;
 import models.RelationShips.Trade;
 import models.ToolsPackage.Tools;
-import models.enums.Types.CraftingRecipe;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Player {
     private User user;
@@ -56,6 +51,7 @@ public class Player {
         this.isEnergyUnlimited = false;
         this.hasCollapsed = false;
         this.metDates = new HashMap<>();
+        initializeAbilities();
     }
 
     public User getUser() {

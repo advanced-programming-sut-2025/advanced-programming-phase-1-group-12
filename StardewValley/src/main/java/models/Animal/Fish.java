@@ -23,4 +23,8 @@ public class Fish extends Item {
     public void setFishtype(FishDetails fishtype) {
         this.fishtype = fishtype;
     }
+
+    public String getName(){
+        return fishtype.getName();
+    }
 }

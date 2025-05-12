@@ -56,14 +56,6 @@ public enum FishDetails {
     public boolean isLegendary() {
         return isLegendary;
     }
-    public static FishDetails stringToFishDetail(String seed) {
-        for (FishDetails type : FishDetails.values()) {
-            if (seed.equals(type.name)) {
-                return type;
-            }
-        }
-        return null;
-    }
 
     public static FishDetails stringToFish(String name) {
         for (FishDetails type : FishDetails.values()) {

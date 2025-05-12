@@ -40,6 +40,7 @@ public enum Tool {
                 if (tileType == TypeOfTile.QUARRY) {
                     models.ToolsPackage.Tools tool = (models.ToolsPackage.Tools) location.getObjectInTile();
                     if (tool != null && tool.getLevel() >= 1) {
+
                         return new Result(true, "You mined some ore");
                     } else {
                         return new Result(false, "Your pickaxe isn't strong enough to mine this");

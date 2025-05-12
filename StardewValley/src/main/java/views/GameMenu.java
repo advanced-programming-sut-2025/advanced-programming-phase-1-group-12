@@ -251,6 +251,8 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.QUESTS_FINISH.getMather(input)) != null) {
             Result result = controller.questsFinish(Integer.parseInt(matcher.group("index")));
             System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.SHOW_MONEY.getMather(input)) != null) {
+            System.out.println(App.getCurrentPlayerLazy().getMoney());
         } else {
             System.out.println("invalid command");
         }

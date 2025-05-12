@@ -462,6 +462,8 @@ public class GameMenuController implements MenuController {
         StringBuilder result = new StringBuilder("Inventory items: \n");
         for(Item items : backPack.getItems().keySet()){
             result.append(items.getName());
+            result.append(backPack.getItems().get(items));
+            result.append("\n");
         }
         return new Result(true, result.toString());
     }
