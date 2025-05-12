@@ -733,17 +733,89 @@ public class GameMenuController implements MenuController {
         }
     }
 
-    public Result sellByShipping(String product, String count){
+    private boolean isNearShippingBin(Player player) {
+        if (player.getShippingBin() == null) {
+            return false;
+        }
+
+        Location playerLocation = player.getUserLocation();
+        Location binLocation = player.getShippingBin().getShippingBinLocation();
+
+        // Calculate Manhattan distance (|x1 - x2| + |y1 - y2|)
+        int distance = Math.abs(playerLocation.getxAxis() - binLocation.getxAxis()) + 
+                       Math.abs(playerLocation.getyAxis() - binLocation.getyAxis());
+
+        // Player is near if distance is 1 or less (same tile or adjacent)
+        return distance <= 1;
+    }
+
+    private boolean canBeSold(Item item) {
+        // Check if the item is of a sellable type
+        String className = item.getClass().getSimpleName();
+        return className.equalsIgnoreCase("AnimalProducts") || 
+               className.equals("StoreProducts");
+    }
+
+    public Result sellByShipping(String product, String count) {
         Player player = App.getCurrentGame().getCurrentPlayer();
+
+        // Check if player is near a shipping bin
+        if (!isNearShippingBin(player)) {
+            return new Result(false, "You need to be near a shipping bin to sell items.");
+        }
+
+        // Check if player has the item
+        if (!player.getBackPack().hasItem(product)) {
+            return new Result(false, "You don't have this product.");
+        }
+
         Item item = player.getBackPack().getItemByName(product);
-        player.getShippingBin().addShippingItem(item, Integer.parseInt(count));
+
+        // Check if the item can be sold
+        if (!canBeSold(item)) {
+            return new Result(false, "This product cannot be sold.");
+        }
+
+        int requestedCount = Integer.parseInt(count);
+        int availableCount = player.getBackPack().getItemCount(item);
+
+        // Check if player has enough of the item
+        if (availableCount < requestedCount) {
+            return new Result(false, "You don't have enough of this product.");
+        }
+
+        // Remove item from inventory
+        player.getBackPack().decreaseItem(item, requestedCount);
+
+        // Add item to shipping bin
+        player.getShippingBin().addShippingItem(item, requestedCount);
+
         return new Result(true, "Item put in shipping bin!");
     }
 
-    public Result sellByShippingWithoutCount(String product){
+    public Result sellByShippingWithoutCount(String product) {
         Player player = App.getCurrentGame().getCurrentPlayer();
+
+        if (!isNearShippingBin(player)) {
+            return new Result(false, "You need to be near a shipping bin to sell items.");
+        }
+
+        if (!player.getBackPack().hasItem(product)) {
+            return new Result(false, "You don't have this product.");
+        }
+
         Item item = player.getBackPack().getItemByName(product);
-        player.getShippingBin().addShippingItem(item, 1);
+
+        if (!canBeSold(item)) {
+            return new Result(false, "This product cannot be sold.");
+        }
+
+        int availableCount = player.getBackPack().getItemCount(item);
+
+        player.getBackPack().decreaseItem(item, availableCount);
+
+        player.getShippingBin().addShippingItem(item, availableCount);
+
         return new Result(true, "Item put in shipping bin!");
     }
 
