@@ -53,6 +53,73 @@ public class NPC {
         this.energy = 100;
     }
 
+    public NPC(NPCdetails details, Location location, Shack shack) {
+        this.name = details.getName();
+        this.job = details.getJob();
+        this.personality = details.getPersonality();
+        this.userLocation = location;
+        this.shack = shack;
+        this.isMarried = false;
+        this.energy = 100;
+        this.details = details;
+
+        for (String dialogue : details.getGeneralDialogues()) {
+            addDialogue(dialogue);
+        }
+
+        for (String dialogue : details.getMorningDialogues()) {
+            addMorningDialogue(dialogue);
+        }
+
+        for (String dialogue : details.getEveningDialogues()) {
+            addEveningDialogue(dialogue);
+        }
+
+        for (String dialogue : details.getRainyDialogues()) {
+            addRainyDialogue(dialogue);
+        }
+
+        for (String dialogue : details.getSummerDialogues()) {
+            addSeasonDialogue(dialogue, "summer");
+        }
+
+        for (String dialogue : details.getWinterDialogues()) {
+            addSeasonDialogue(dialogue, "winter");
+        }
+
+        for (String dialogue : details.getSpringDialogues()) {
+            addSeasonDialogue(dialogue, "spring");
+        }
+
+        for (String dialogue : details.getAutumnDialogues()) {
+            addSeasonDialogue(dialogue, "autumn");
+        }
+
+        for (String dialogue : details.getLevel1Dialogues()) {
+            addFriendshipLevelDialogue(dialogue, 1);
+        }
+
+        for (String dialogue : details.getLevel2Dialogues()) {
+            addFriendshipLevelDialogue(dialogue, 2);
+        }
+
+        for (String dialogue : details.getLevel3Dialogues()) {
+            addFriendshipLevelDialogue(dialogue, 3);
+        }
+
+        for (String itemName : details.getFavoriteItems()) {
+            addFavoriteItem(new Item(itemName));
+        }
+
+        for (Item item : details.getGiftsToGive()) {
+            addGiftToGive(item);
+        }
+
+        for (NPCdetails.QuestInfo questInfo : details.getQuests()) {
+            addQuest(questInfo.getDescription(), questInfo.getReward());
+        }
+    }
+
     public String getName() {
         return name;
     }

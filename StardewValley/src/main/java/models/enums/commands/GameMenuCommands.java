@@ -107,6 +107,8 @@ public enum GameMenuCommands implements Commands {
     MEET_NPC("^meet NPC (?<npcName>.+)$"),
     GIFT_NPC("^gift NPC (?<npcName>.+) -i (?<item>.+)$"),
     FRIENDSHIP_NPC_LIST("^friendship NPC list$"),
+    QUESTS_LIST("^quests list$"),
+    QUESTS_FINISH("^quests finish -i (?<index>\\d+)$"),
 
     //store commands
     SHOW_PRODUCTS("show all products"),

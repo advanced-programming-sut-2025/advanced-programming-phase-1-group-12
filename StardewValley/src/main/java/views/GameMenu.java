@@ -235,6 +235,21 @@ public class GameMenu extends AppMenu {
             System.out.println(controller.Thor(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.WHICH_FERTILIZING.getMather(input)) != null) {
             System.out.println(farmingController.showFertilize());
+        } else if ((matcher = GameMenuCommands.MEET_NPC.getMather(input)) != null) {
+            Result result = controller.meetNPC(matcher.group("npcName"));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.GIFT_NPC.getMather(input)) != null) {
+            Result result = controller.giftNPC(matcher.group("npcName"), matcher.group("item"));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.FRIENDSHIP_NPC_LIST.getMather(input)) != null) {
+            Result result = controller.friendshipNPCList();
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.QUESTS_LIST.getMather(input)) != null) {
+            Result result = controller.questsList();
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.QUESTS_FINISH.getMather(input)) != null) {
+            Result result = controller.questsFinish(Integer.parseInt(matcher.group("index")));
+            System.out.println(result.getMessage());
         } else {
             System.out.println("invalid command");
         }
