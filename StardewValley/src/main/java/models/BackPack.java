@@ -4,6 +4,7 @@ import models.Fundementals.Result;
 import models.ToolsPackage.Tools;
 import models.enums.ToolEnums.BackPackTypes;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BackPack {
@@ -182,6 +183,10 @@ public class BackPack {
         }else{
             return false;
         }
+    }
+
+    public boolean hasItems(String itemName){
+        return itemNames.containsKey(itemName);
     }
 
 }

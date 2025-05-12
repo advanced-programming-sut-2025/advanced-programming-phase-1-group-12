@@ -26,7 +26,7 @@ public enum NPCdetails {
         Arrays.asList("You're not as annoying as most people."),
         Arrays.asList("I could show you some programming tricks sometime."),
         Arrays.asList("You're one of the few people I actually enjoy talking to."),
-        Arrays.asList(new Item("Diamond"))
+        Arrays.asList(new Item("Diamond")), 5
     ),
 
     ABIGAIL("Abigail", "Adventurer", "Curious and adventurous", 
@@ -49,7 +49,7 @@ public enum NPCdetails {
         Arrays.asList("You seem to understand my adventurous spirit."),
         Arrays.asList("Want to go exploring together sometime?"),
         Arrays.asList("You're one of my closest friends now."),
-        Arrays.asList(new Item("Quartz"))
+        Arrays.asList(new Item("Quartz")), 10
     ),
 
     HARVEY("Harvey", "Doctor", "Caring and cautious", 
@@ -72,7 +72,7 @@ public enum NPCdetails {
         Arrays.asList("I appreciate your interest in health matters."),
         Arrays.asList("I could teach you some basic medical knowledge."),
         Arrays.asList("Your friendship means a lot to me."),
-        Arrays.asList(new Item("Salad"))
+        Arrays.asList(new Item("Salad")), 15
     ),
 
     LEAH("Leah", "Artist", "Creative and nature-loving", 
@@ -95,7 +95,7 @@ public enum NPCdetails {
         Arrays.asList("You have a good eye for natural beauty."),
         Arrays.asList("I'd love to show you my artistic process sometime."),
         Arrays.asList("You've become a true inspiration for my art."),
-        Arrays.asList(new Item("Grape"))
+        Arrays.asList(new Item("Grape")), 20
     ),
 
     ROBIN("Robin", "Carpenter", "Hardworking and friendly", 
@@ -118,7 +118,7 @@ public enum NPCdetails {
         Arrays.asList("You work hard on your farm, I respect that."),
         Arrays.asList("I could give you some carpentry tips sometime."),
         Arrays.asList("You're like family to me now."),
-        Arrays.asList(new Item("Iron Bar"))
+        Arrays.asList(new Item("Iron Bar")), 25
     );
 
     private final String name;
@@ -138,6 +138,7 @@ public enum NPCdetails {
     private final List<String> level2Dialogues;
     private final List<String> level3Dialogues;
     private final List<Item> giftsToGive;
+    private final int delayDay;
 
     NPCdetails(String name, String job, String personality, 
               List<String> favoriteItems, List<QuestInfo> quests,
@@ -146,7 +147,7 @@ public enum NPCdetails {
               List<String> summerDialogues, List<String> winterDialogues,
               List<String> springDialogues, List<String> autumnDialogues,
               List<String> level1Dialogues, List<String> level2Dialogues,
-              List<String> level3Dialogues, List<Item> giftsToGive) {
+              List<String> level3Dialogues, List<Item> giftsToGive, int delayDay) {
         this.name = name;
         this.job = job;
         this.personality = personality;
@@ -164,6 +165,11 @@ public enum NPCdetails {
         this.level2Dialogues = level2Dialogues;
         this.level3Dialogues = level3Dialogues;
         this.giftsToGive = giftsToGive;
+        this.delayDay = delayDay;
+    }
+
+    public int getDelayDay() {
+        return delayDay;
     }
 
     public String getName() {
@@ -275,5 +281,6 @@ public enum NPCdetails {
         public int getActivationDelay() {
             return activationDelay;
         }
+
     }
 }
