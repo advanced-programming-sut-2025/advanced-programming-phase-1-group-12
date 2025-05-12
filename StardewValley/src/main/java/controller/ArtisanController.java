@@ -7,13 +7,13 @@ import models.enums.Types.CraftingRecipe;
 
 public class ArtisanController {
 
-    public Result artisanUse(String artisan, String item) {
-        if(App.getCurrentPlayerLazy().getBackPack().hasItem(artisan)) {
-            return new Result(false, "You do not have this artisan");
-        }
-
-    }
-    public Item makeHoney(){
-
-    }
+//    public Result artisanUse(String artisan, String item) {
+//        if(App.getCurrentPlayerLazy().getBackPack().hasItem(artisan)) {
+//            return new Result(false, "You do not have this artisan");
+//        }
+//
+//    }
+//    public Item makeHoney(){
+//
+//    }
 }

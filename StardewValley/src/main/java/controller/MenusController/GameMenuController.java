@@ -726,11 +726,11 @@ public class GameMenuController implements MenuController {
         for (Player player : players) {
             shippingBins.add(player.getShippingBin());
         }
-        for (ShippingBin shippingBin : shippingBins) {
-            for(Item item: shippingBin.getShippingItem(shippingBin.getShippingItemMap())){
-                sellItem(shippingBin.getOwner(), item);
-            }
-        }
+//        for (ShippingBin shippingBin : shippingBins) {
+//            for(Item item: shippingBin.getShippingItem(shippingBin.getShippingItemMap())){
+//                sellItem(shippingBin.getOwner(), item);
+//            }
+//        }
     }
 
     private boolean isNearShippingBin(Player player) {

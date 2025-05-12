@@ -20,10 +20,14 @@ public class UserLocationController {
         Location currentLocation = App.getCurrentGame().getCurrentPlayer().getUserLocation();
         Farm currentFarm = App.getCurrentGame().getCurrentPlayer().getOwnedFarm();
 
-        for (Farm farm : App.getCurrentGame().getFarms()) {
-            if (farm == currentFarm) continue;
-            if (App.isLocationInPlace(newLocation, farm.getLocation())) {
-                return new Result(false, "You don't have access to this location cause it is not your farm");
+        for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
+            if (farm == currentFarm) {
+                continue;
+            }
+            else{
+                if(farm.getFarmLocation().getLocationsInRectangle().contains(newLocation)){
+                    return new Result(false, "you can't move to others farm.");
+                }
             }
         }
 
