@@ -7,17 +7,36 @@ import models.Fundementals.Result;
 import models.Item;
 import models.ItemBuilder;
 import models.ProductsPackage.Quality;
+import models.enums.ToolEnums.Tool;
 import models.enums.Types.CraftingRecipe;
 import models.enums.Types.TypeOfTile;
-
-import java.util.ArrayList;
 import java.util.Map;
 
 public class CraftingController {
 
     public Result addItem(String itemName, int count) {
-        //TODO: class item add
-        return null;
+        CraftingRecipe recipe = CraftingRecipe.getByName(itemName);
+        if (recipe == null) {
+            System.out.println("Recipe not found");
+        } else {
+            if(!App.getCurrentPlayerLazy().getBackPack().checkCapacity(1)){
+                System.out.println("Back pack is full");
+            }
+            for (Map.Entry<String, Integer> entry : recipe.getIngredients().entrySet()) {
+                Item item = App.getCurrentPlayerLazy().getBackPack().getItemByName(entry.getKey());
+                if (item == null) {
+                    System.out.println("Item not found");
+                } else if (entry.getValue() * count > App.getCurrentGame().getCurrentPlayer().getBackPack().getItemCount(item)) {
+                    System.out.println("You are out of stock");
+                } else {
+                    App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, entry.getValue() * count);
+                    System.out.println("you decrease " + entry.getValue() + " ingredients");
+                }
+            }
+            App.getCurrentPlayerLazy().setEnergy(App.getCurrentGame().getCurrentPlayer().getEnergy() - 2);
+            ItemBuilder.addToBackPack(ItemBuilder.builder(itemName, Quality.NORMAL), count, Quality.NORMAL);
+        }
+        return new Result(true, "we add " + itemName + " to the back pack");
     }
 
     public Result putItem(String itemName, String direction) {
@@ -107,5 +126,56 @@ public class CraftingController {
             result.append("\n");
         }
         return new Result(true, result.toString());
+    }
+
+    public Result TakeFromGround(String itemName, int direction) {
+        Location currentLocation = App.getCurrentGame().getCurrentPlayer().getUserLocation();
+        int x, y;
+
+        switch (direction) {
+            case 1 -> {
+                x = currentLocation.getxAxis() - 1;
+                y = currentLocation.getyAxis() + 1;
+            }
+            case 2 -> {
+                x = currentLocation.getxAxis();
+                y = currentLocation.getyAxis() + 1;
+            }
+            case 3 -> {
+                x = currentLocation.getxAxis() + 1;
+                y = currentLocation.getyAxis() + 1;
+            }
+            case 4 -> {
+                x = currentLocation.getxAxis() - 1;
+                y = currentLocation.getyAxis();
+            }
+            case 6 -> {
+                x = currentLocation.getxAxis() + 1;
+                y = currentLocation.getyAxis();
+            }
+            case 7 -> {
+                x = currentLocation.getxAxis() - 1;
+                y = currentLocation.getyAxis() - 1;
+            }
+            case 8 -> {
+                x = currentLocation.getxAxis();
+                y = currentLocation.getyAxis() - 1;
+            }
+            case 9 -> {
+                x = currentLocation.getxAxis() + 1;
+                y = currentLocation.getyAxis() - 1;
+            }
+            default -> {
+                return new Result(false, "Invalid direction");
+            }
+        }
+        Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
+        ItemBuilder.addToBackPack(ItemBuilder.builder(itemName, Quality.NORMAL), 1, Quality.NORMAL);
+        Item tool = App.getCurrentPlayerLazy().getBackPack().getItemByName("Pickaxe");
+        if(tool == null){
+            return new Result(false, "you can't tack this item from ground");
+        }
+
+        return new Result(true, "you add on craft to your backpack");
     }
 }

@@ -229,11 +229,13 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.MACK_CRAFT.getMather(input)) != null) {
             System.out.println(craftingController.makeCraft(matcher.group("itemName")));
         } else if ((matcher = GameMenuCommands.SHOW_RECIPES.getMather(input)) != null) {
-            System.out.println(craftingController.showRecipesforCrafting());
+            System.out.println(craftingController.showRecipes());
         } else if ((matcher = GameMenuCommands.THOR.getMather(input)) != null) {
             System.out.println(controller.Thor(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.WHICH_FERTILIZING.getMather(input)) != null) {
             System.out.println(farmingController.showFertilize());
+        } else if ((matcher = GameMenuCommands.TakeFromGround.getMather(input)) != null) {
+            System.out.println(craftingController.TakeFromGround(matcher.group("itemName"), Integer.parseInt(matcher.group("direction"))));
         } else if ((matcher = GameMenuCommands.MEET_NPC.getMather(input)) != null) {
             Result result = controller.meetNPC(matcher.group("npcName"));
             System.out.println(result.getMessage());

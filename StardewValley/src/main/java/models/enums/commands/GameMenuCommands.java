@@ -26,6 +26,7 @@ public enum GameMenuCommands implements Commands {
     PLACE_ON_GROUND("^place item -n (?<itemName>.+) -d (?<direction>.+)$"),
     ADD_TO_INVENTORY("^heat add item -n (?<itemName>.+) -c (?<count>.+)"),
     WHICH_FERTILIZING("^which tile was fertilized&"),
+    TakeFromGround("^take -n (?<itemName>.+) -d (?<direction>.+) from ground$"),
     //weather and ....
     SEASON("^season$"),
     TIME("^time$"),
