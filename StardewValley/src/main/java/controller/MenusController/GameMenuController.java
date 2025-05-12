@@ -254,14 +254,13 @@ public class GameMenuController implements MenuController {
                         bgColor = "\u001B[46m"; // Light cyan background for store
                         break;
                     }
-
-                    // Player on tile
-                    if (location.getObjectInTile() instanceof Player) {
-                        for (Player player : App.getCurrentGame().getPlayers()) {
-                            if (player.equals(location.getObjectInTile())) {
-                                contentChar = player.getUser().getUserName().charAt(0);
-                                bgColor = "\u001B[41m"; // Red background for player
-                            }
+                }
+                // Player on tile
+                if (location.getObjectInTile() instanceof Player) {
+                    for (Player player : App.getCurrentGame().getPlayers()) {
+                        if (player.equals(location.getObjectInTile())) {
+                            contentChar = player.getUser().getUserName().charAt(0);
+                            bgColor = "\u001B[41m"; // Red background for player
                         }
                     }
                 }
