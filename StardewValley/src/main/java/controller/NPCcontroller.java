@@ -12,6 +12,7 @@ import java.util.List;
 public class NPCcontroller {
 
     public boolean canSpeak(Location playerLocation, Location npcLocation) {
+        // cant be more than 8 blocks away
         int playerX = playerLocation.getxAxis();
         int playerY = playerLocation.getyAxis();
         int npcX = npcLocation.getxAxis();
@@ -41,6 +42,7 @@ public class NPCcontroller {
         int hour = App.getCurrentGame().getDate().getHour();
         String season = App.getCurrentGame().getDate().getSeason().name().toLowerCase();
         String weather = App.getCurrentGame().getDate().getWeather().name().toLowerCase();
+        App.getCurrentPlayerLazy().addMetDates(npc);
 
         return npc.getDialogue(currentPlayer, hour, season, weather);
     }
@@ -148,17 +150,13 @@ public class NPCcontroller {
         for (NPC npc : village.getAllNPCs()) {
             int friendshipLevel = npc.getFriendshipLevel(currentPlayer);
 
-            // Get quests from the NPC
             List<NPC.Quest> npcQuests = npc.getQuests();
             if (npcQuests.isEmpty()) {
                 continue;
             }
-
-            // Check if we have at least one quest from this NPC
             boolean hasNpcQuests = false;
             StringBuilder npcQuestsText = new StringBuilder();
 
-            // First quest is always available
             if (!npcQuests.get(0).isCompleted()) {
                 npcQuestsText.append("  ").append(questIndex).append(". ")
                           .append(npcQuests.get(0).getDescription())
@@ -168,7 +166,6 @@ public class NPCcontroller {
                 hasActiveQuests = true;
             }
 
-            // Second quest requires friendship level 1
             if (npcQuests.size() > 1 && friendshipLevel >= 1 && !npcQuests.get(1).isCompleted()) {
                 npcQuestsText.append("  ").append(questIndex).append(". ")
                           .append(npcQuests.get(1).getDescription())
@@ -178,11 +175,10 @@ public class NPCcontroller {
                 hasActiveQuests = true;
             }
 
-            // Third quest requires specific activation delay (different for each NPC)
-            // In a real implementation, this would check the game time/date
-            if (npcQuests.size() > 2 && !npcQuests.get(2).isCompleted()) {
-                // For simplicity, we'll just make the third quest available
-                // In a real implementation, this would check the activation delay
+
+            if (npcQuests.size() > 2 && !npcQuests.get(2).isCompleted()
+            && (App.getCurrentGame().getDate().getDaysPassed(App.getCurrentPlayerLazy().getMetDate(npc))>npc.getDelay())) {
+
                 npcQuestsText.append("  ").append(questIndex).append(". ")
                           .append(npcQuests.get(2).getDescription())
                           .append(" (from ").append(npc.getName()).append(")\n");
@@ -211,7 +207,6 @@ public class NPCcontroller {
             return "NPC village not found!";
         }
 
-        // Find the quest by index
         int currentIndex = 1;
         NPC questNPC = null;
         NPC.Quest targetQuest = null;
@@ -219,13 +214,11 @@ public class NPCcontroller {
         for (NPC npc : village.getAllNPCs()) {
             int friendshipLevel = npc.getFriendshipLevel(currentPlayer);
 
-            // Get quests from the NPC
             List<NPC.Quest> npcQuests = npc.getQuests();
             if (npcQuests.isEmpty()) {
                 continue;
             }
 
-            // First quest is always available
             if (!npcQuests.get(0).isCompleted()) {
                 if (currentIndex == questIndex) {
                     questNPC = npc;
@@ -235,7 +228,6 @@ public class NPCcontroller {
                 currentIndex++;
             }
 
-            // Second quest requires friendship level 1
             if (npcQuests.size() > 1 && friendshipLevel >= 1 && !npcQuests.get(1).isCompleted()) {
                 if (currentIndex == questIndex) {
                     questNPC = npc;
@@ -245,7 +237,6 @@ public class NPCcontroller {
                 currentIndex++;
             }
 
-            // Third quest requires specific activation delay
             if (npcQuests.size() > 2 && !npcQuests.get(2).isCompleted()) {
                 if (currentIndex == questIndex) {
                     questNPC = npc;
@@ -260,23 +251,22 @@ public class NPCcontroller {
             return "Invalid quest index.";
         }
 
-        // Check if player is near the NPC
         if (!canSpeak(currentPlayer.getUserLocation(), questNPC.getUserLocation())) {
             return "You need to be near " + questNPC.getName() + " to complete this quest.";
         }
 
-        // Check if player has the required items
-        // In a real implementation, this would check the player's inventory
-        // For simplicity, we'll just complete the quest
+        if (!App.getCurrentPlayerLazy().getBackPack().hasItems(questNPC.getDetails().getQuests().get(questIndex).getRequiredItemName())) {
+           return "You dont have " + questNPC.getDetails().getQuests().get(questIndex).getRequiredItemName();
+        }
 
-        // Complete the quest
+        if (targetQuest.isCompleted()) {
+            return "this quest is already completed.";
+        }
+
         targetQuest.complete();
-
-        // Give the reward
         Item reward = targetQuest.getReward();
         currentPlayer.getBackPack().addItem(reward, 1);
 
-        // Double rewards for friendship level 2+
         int friendshipLevel = questNPC.getFriendshipLevel(currentPlayer);
         if (friendshipLevel >= 2) {
             currentPlayer.getBackPack().addItem(reward, 1);
@@ -286,8 +276,4 @@ public class NPCcontroller {
         return "Quest completed! " + questNPC.getName() + " gave you a " + reward.getName() + " as a reward.";
     }
 
-    public void handleMissions() {
-        // This method could be used for periodic quest updates
-        // For now, we'll leave it empty as quests are handled by the methods above
-    }
 }

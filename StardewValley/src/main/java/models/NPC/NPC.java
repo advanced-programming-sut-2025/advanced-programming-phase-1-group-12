@@ -2,6 +2,7 @@ package models.NPC;
 
 import models.Fundementals.Location;
 import models.Fundementals.Player;
+import models.Fundementals.Result;
 import models.Item;
 import models.MapDetails.Shack;
 import models.Refrigrator;
@@ -355,5 +356,13 @@ public class NPC {
 
     public List<Quest> getQuests() {
         return quests;
+    }
+
+    public int getDelay() {
+        return details.getDelayDay();
+    }
+
+    public NPCdetails getDetails() {
+        return details;
     }
 }

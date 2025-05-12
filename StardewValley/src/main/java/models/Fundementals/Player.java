@@ -1,7 +1,8 @@
 package models.Fundementals;
 
 import models.BackPack;
-import models.Item;
+import models.Date;
+import models.NPC.NPC;
 import models.Place.Farm;
 import models.Refrigrator;
 import models.RelatedToUser.Ability;
@@ -33,6 +34,7 @@ public class Player {
     private ArrayList<Ability> abilities;
     private ArrayList<Trade> trades = new ArrayList<>();
     private Tools currentTool;
+    private Map<NPC, Date> metDates;
 
     public Player(User user, Location userLocation, boolean isMarried, Refrigrator refrigrator,
                   ArrayList<RelationShip> relationShips, Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited,
@@ -53,6 +55,7 @@ public class Player {
         this.currentTool = null;
         this.isEnergyUnlimited = false;
         this.hasCollapsed = false;
+        this.metDates = new HashMap<>();
     }
 
     public User getUser() {
@@ -201,4 +204,14 @@ public class Player {
     public Refrigrator getRefrigrator() {
         return Refrigrator;
     }
+
+    public void addMetDates(NPC npc){
+        this.metDates.put(npc, App.getCurrentGame().getDate());
+    }
+
+    public Date getMetDate(NPC npc){
+        return metDates.get(npc);
+    }
+
+
 }

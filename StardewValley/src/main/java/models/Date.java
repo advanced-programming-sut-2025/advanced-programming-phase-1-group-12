@@ -415,4 +415,14 @@ public class Date {
         }
         return result;
     }
+
+    public int getDaysPassed(Date date){
+        if (date == null) {
+            return 0;
+        }
+
+        int currentTotalDays = ((int) (year - 1) * 4 * 28) + (currentSeason + 28) + dayOfMonth;
+        int dateTotalDays = ((int) (date.year - 1) * 4 * 28) + (date.currentSeason + 28) + date.dayOfMonth;
+        return currentTotalDays - dateTotalDays;
+    }
 }
