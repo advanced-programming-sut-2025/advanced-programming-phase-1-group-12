@@ -4,6 +4,7 @@ import controller.*;
 import controller.MenusController.GameMenuController;
 import controller.movingPlayer.UserLocationController;
 import models.Fundementals.App;
+import models.Fundementals.Game;
 import models.Fundementals.Location;
 import models.Fundementals.Result;
 import models.enums.commands.GameMenuCommands;
@@ -229,7 +230,7 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.MACK_CRAFT.getMather(input)) != null) {
             System.out.println(craftingController.makeCraft(matcher.group("itemName")));
         } else if ((matcher = GameMenuCommands.SHOW_RECIPES.getMather(input)) != null) {
-            System.out.println(craftingController.showRecipes());
+//            System.out.println(craftingController.showRecipes());
         } else if ((matcher = GameMenuCommands.THOR.getMather(input)) != null) {
             System.out.println(controller.Thor(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.WHICH_FERTILIZING.getMather(input)) != null) {
@@ -253,6 +254,10 @@ public class GameMenu extends AppMenu {
             System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.SHOW_MONEY.getMather(input)) != null) {
             System.out.println(App.getCurrentPlayerLazy().getMoney());
+        } else if ((matcher = GameMenuCommands.SELL.getMather(input))!= null) {
+            System.out.println(controller.sellByShipping(matcher.group("product_name"), matcher.group("count")).getMessage());
+        } else if ((matcher = GameMenuCommands.SELL_ONE.getMather(input))!= null) {
+            System.out.println(controller.sellByShippingWithoutCount(matcher.group("product_name")).getMessage());
         } else {
             System.out.println("invalid command");
         }

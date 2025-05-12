@@ -1,5 +1,6 @@
 package models;
 
+import controller.MenusController.GameMenuController;
 import models.Animal.FarmAnimals;
 import models.Fundementals.App;
 import models.Fundementals.Location;
@@ -15,6 +16,7 @@ import models.enums.foraging.*;
 import java.util.*;
 
 public class Date {
+    GameMenuController gameMenuController;
     int hour;
     int year;
     int dayOfMonth; // Max : 28 days
@@ -36,6 +38,7 @@ public class Date {
         this.weather = Weather.SUNNY;
         this.tommorowWeather = Weather.SUNNY;
         this.weatherOfSeason = initializeWeatherMap();
+        this.gameMenuController = new GameMenuController();
     }
 
     public void changeAdvancedTime(int hour) {
@@ -43,6 +46,7 @@ public class Date {
         if (this.hour > 22) {
             this.hour -= 13;
             changeAdvancedDay(1);
+            gameMenuController.sellByShippingAllPlayers();
             this.weather = this.tommorowWeather; // the day changes
 
             updateAllPlants();

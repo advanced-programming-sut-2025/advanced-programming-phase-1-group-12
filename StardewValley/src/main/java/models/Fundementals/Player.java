@@ -5,6 +5,7 @@ import models.NPC.NPC;
 import models.Place.Farm;
 import models.Place.Place;
 import models.ProductsPackage.Quality;
+import models.Refrigrator;
 import models.RelatedToUser.Ability;
 import models.RelatedToUser.User;
 import models.RelationShips.RelationShip;
@@ -36,6 +37,7 @@ public class Player {
     private Tools currentTool;
     private Map<NPC, Date> metDates;
     private Map<Item, Integer> artisanHoursRemained = new HashMap<>();
+    private ShippingBin shippingBin;
 
     public Player(User user, Location userLocation, boolean isMarried, Refrigrator refrigrator,
                   ArrayList<RelationShip> relationShips, Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited,
@@ -57,6 +59,7 @@ public class Player {
         this.isEnergyUnlimited = false;
         this.hasCollapsed = false;
         this.metDates = new HashMap<>();
+        this.shippingBin = null;
         initializeAbilities();
     }
 
@@ -215,6 +218,10 @@ public class Player {
         return metDates.get(npc);
     }
 
+    public ShippingBin getShippingBin(){
+        return shippingBin;
+    }
+
     public Map<CraftingRecipe, Boolean> getRecepies() {
         return recepies;
     }
@@ -223,11 +230,4 @@ public class Player {
         this.recepies = recepies;
     }
 
-    public Map<Item, Integer> getArtisanHoursRemained() {
-        return artisanHoursRemained;
-    }
-
-    public void setArtisanHoursRemained(Map<Item, Integer> artisanHoursRemained) {
-        this.artisanHoursRemained = artisanHoursRemained;
-    }
 }

@@ -10,6 +10,7 @@ import models.NPC.NPCvillage;
 import java.util.List;
 
 public class NPCcontroller {
+    //ncp village -> 180 * 180 (40 * 40)
 
     public boolean canSpeak(Location playerLocation, Location npcLocation) {
         // cant be more than 8 blocks away
