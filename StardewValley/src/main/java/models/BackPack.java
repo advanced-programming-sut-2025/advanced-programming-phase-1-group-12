@@ -186,4 +186,7 @@ public class BackPack {
         }
     }
 
+    public boolean hasItem(String itemName){
+        return itemNames.containsKey(itemName);
+    }
 }
