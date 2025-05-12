@@ -22,8 +22,8 @@ public enum GameMenuCommands implements Commands {
     REAPING("^Reaping (?<direction>.+)$"),
     //crafting
     SHOW_RECIPES("^crafting show recipes$"),
-    MACK_CRAFT("^crafting craft (?<itemName>.+)"),
-    PLACE_ON_GROUND("lace item -n (?<itemName>.+) -d (?<direction>.+)$"),
+    MACK_CRAFT("^crafting craft (?<itemName>.+)$"),
+    PLACE_ON_GROUND("^place item -n (?<itemName>.+) -d (?<direction>.+)$"),
     ADD_TO_INVENTORY("^heat add item -n (?<itemName>.+) -c (?<count>.+)"),
     WHICH_FERTILIZING("^which tile was fertilized&"),
     //weather and ....
@@ -53,7 +53,7 @@ public enum GameMenuCommands implements Commands {
     PET("pet -n (?<name>.*)"),
     CHEAT_SET_FRIENDSHIP("cheat set friendship -n (?<animalName>.*) -c (?<amount>.*)"),
     ANIMALS_LIST("animals"),
-    SHEPHERD_ANIMALS("shepherd animals -n <animal name> -l <x , y>"),
+    SHEPHERD_ANIMALS("shepherd animals -n (?<animalName>.*) -l <(?<x>\\d+) , (?<y>\\d+)>"),
     FEED_HAY("^feed hay -n (?<animalName>.*)$"),
     PRODUCES("^produces$"),
     COLLECT ("collect produce -n (?<name>.*)"),

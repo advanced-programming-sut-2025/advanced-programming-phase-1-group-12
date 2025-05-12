@@ -1,25 +1,21 @@
 package models;
 
-import models.enums.CraftingRecepie;
+import models.enums.Types.CraftingRecipe;
 
-public class Craft {
-    private CraftingRecepie type;
+public class Craft extends Item {
 
-    private String description;
+    private CraftingRecipe recipe;
 
-    public CraftingRecepie getType() {
-        return type;
+    public Craft(CraftingRecipe recipe) {
+        super(recipe.getName());
+        this.recipe = recipe;
     }
 
-    public void setType(CraftingRecepie type) {
-        this.type = type;
+    public CraftingRecipe getRecipe() {
+        return recipe;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+    public void setRecipe(CraftingRecipe recipe) {
+        this.recipe = recipe;
     }
 }

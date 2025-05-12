@@ -5,7 +5,6 @@ import controller.MenusController.GameMenuController;
 import controller.movingPlayer.UserLocationController;
 import models.Fundementals.App;
 import models.Fundementals.Location;
-import models.Fundementals.Player;
 import models.Fundementals.Result;
 import models.enums.commands.GameMenuCommands;
 
@@ -162,7 +161,7 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.COLLECT.getMather(input)) != null) {
             System.out.println(animalController.collectProduce(matcher.group("name")).getMessage());
         } else if ((matcher = GameMenuCommands.COOKING_RECIPES.getMather(input)) != null) {
-            System.out.println(App.getCurrentPlayerLazy().showRecipes());
+            System.out.println(craftingController.showRecipes());
         } else if ((matcher = GameMenuCommands.COOKING_REFRIGERATOR.getMather(input)) != null) {
             System.out.println(controller.refrigerator(matcher.group(0), matcher.group("item")));
         } else if ((matcher = GameMenuCommands.COOKING_PREPARE.getMather(input)) != null) {
@@ -228,7 +227,7 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.PLACE_ON_GROUND.getMather(input)) != null) {
             System.out.println(craftingController.putItem(matcher.group("itemName"), matcher.group("direction")));
         } else if ((matcher = GameMenuCommands.MACK_CRAFT.getMather(input)) != null) {
-            System.out.println(craftingController.makeItem(matcher.group("itemName")));
+            System.out.println(craftingController.makeCraft(matcher.group("itemName")));
         } else if ((matcher = GameMenuCommands.SHOW_RECIPES.getMather(input)) != null) {
             System.out.println(craftingController.showRecipesforCrafting());
         } else if ((matcher = GameMenuCommands.THOR.getMather(input)) != null) {
@@ -346,10 +345,5 @@ public class GameMenu extends AppMenu {
 
         Result result = controller.createTrade(username, type, item, amount, price, targetItem, targetAmount);
         System.out.println(result.getMessage());
-    }
-
-    public Result showRecipes() {
-        Player player = App.getCurrentGame().getCurrentPlayer();
-        return new Result(true, player.showRecipes());
     }
 }

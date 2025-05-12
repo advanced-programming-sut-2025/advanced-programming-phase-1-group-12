@@ -12,6 +12,7 @@ public class BackPack {
     private Map<String, Item> itemNames;
     private BackPackTypes type;
     private int water;
+
     public BackPack(BackPackTypes type) {
         this.items = new HashMap<>();
         this.itemNames = new HashMap<>();
@@ -183,10 +184,6 @@ public class BackPack {
         }else{
             return false;
         }
-    }
-
-    public boolean hasItems(String itemName){
-        return itemNames.containsKey(itemName);
     }
 
 }

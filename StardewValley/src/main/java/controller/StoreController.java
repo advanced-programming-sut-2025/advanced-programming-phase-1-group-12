@@ -20,7 +20,7 @@ import java.util.regex.Matcher;
 public class StoreController {
 
     public Result buyAnimalBuilding(String buildingName, Location location) {
-        if (!App.isInStore("Carpenter’s Shop")) {
+        if (!App.isInStore("Carpenter's Shop")) {
             //TODO:money for building is not decreased
             return new Result(false, "You are not in Carpenter's shop");
         }
