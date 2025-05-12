@@ -1,12 +1,10 @@
 package models.Fundementals;
 
-import models.BackPack;
-import models.Date;
-import models.ItemBuilder;
+import models.*;
 import models.NPC.NPC;
 import models.Place.Farm;
+import models.Place.Place;
 import models.ProductsPackage.Quality;
-import models.Refrigrator;
 import models.RelatedToUser.Ability;
 import models.RelatedToUser.User;
 import models.RelationShips.RelationShip;
@@ -37,6 +35,7 @@ public class Player {
     private ArrayList<Trade> trades = new ArrayList<>();
     private Tools currentTool;
     private Map<NPC, Date> metDates;
+    private Map<Item, Integer> artisanHoursRemained = new HashMap<>();
 
     public Player(User user, Location userLocation, boolean isMarried, Refrigrator refrigrator,
                   ArrayList<RelationShip> relationShips, Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited,
@@ -216,5 +215,19 @@ public class Player {
         return metDates.get(npc);
     }
 
+    public Map<CraftingRecipe, Boolean> getRecepies() {
+        return recepies;
+    }
 
+    public void setRecepies(Map<CraftingRecipe, Boolean> recepies) {
+        this.recepies = recepies;
+    }
+
+    public Map<Item, Integer> getArtisanHoursRemained() {
+        return artisanHoursRemained;
+    }
+
+    public void setArtisanHoursRemained(Map<Item, Integer> artisanHoursRemained) {
+        this.artisanHoursRemained = artisanHoursRemained;
+    }
 }

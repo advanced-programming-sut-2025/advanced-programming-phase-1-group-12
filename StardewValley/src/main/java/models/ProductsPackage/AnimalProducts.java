@@ -10,9 +10,12 @@ public class AnimalProducts extends Item {
 
     private Quality quality;
 
+    private int price;
+
     public AnimalProducts(String name, AnimalProduct animalProduct, Quality quality) {
         super(name);
         this.animalProduct = animalProduct;
         this.quality = quality;
+        this.price = animalProduct.getPrice();
     }
 }

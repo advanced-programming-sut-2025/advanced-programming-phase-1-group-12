@@ -33,6 +33,7 @@ public class Farm implements Place {
     private ArrayList<Seed> SeedOfFarm = new ArrayList<>();
     private ArrayList<Tree> trees = new ArrayList<>();
 
+
     public Farm(LocationOfRectangle farmLocation) {
         this.farmLocation = farmLocation;
         int sectionSize = 4;
