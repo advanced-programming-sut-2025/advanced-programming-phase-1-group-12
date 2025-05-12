@@ -11,6 +11,7 @@ public class BackPack {
     private Map<String, Item> itemNames;
     private BackPackTypes type;
     private int water;
+
     public BackPack(BackPackTypes type) {
         this.items = new HashMap<>();
         this.itemNames = new HashMap<>();
@@ -182,6 +183,15 @@ public class BackPack {
         }else{
             return false;
         }
+    }
+
+    public int getItemCount(Item item) {
+        for(Map.Entry<Item, Integer> entry : items.entrySet()) {
+            if(entry.getKey().getName().equals(item.getName())) {
+                return entry.getValue();
+            }
+        }
+        return 0;
     }
 
 }

@@ -42,6 +42,10 @@ public class ItemBuilder {
         if (ingredientsType != null) {
             return new Item(ingredientsType.name());
         }
+        CraftingRecipe craftingRecipe = CraftingRecipe.getByName(name);
+        if (craftingRecipe != null) {
+            return new Craft(craftingRecipe);
+        }
         return new Item(name);
     }
 

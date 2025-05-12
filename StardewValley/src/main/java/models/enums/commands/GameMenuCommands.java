@@ -22,8 +22,8 @@ public enum GameMenuCommands implements Commands {
     REAPING("^Reaping (?<direction>.+)$"),
     //crafting
     SHOW_RECIPES("^crafting show recipes$"),
-    MACK_CRAFT("^crafting craft (?<itemName>.+)"),
-    PLACE_ON_GROUND("lace item -n (?<itemName>.+) -d (?<direction>.+)$"),
+    MACK_CRAFT("^crafting craft (?<itemName>.+)$"),
+    PLACE_ON_GROUND("^place item -n (?<itemName>.+) -d (?<direction>.+)$"),
     ADD_TO_INVENTORY("^heat add item -n (?<itemName>.+) -c (?<count>.+)"),
     WHICH_FERTILIZING("^which tile was fertilized&"),
     //weather and ....

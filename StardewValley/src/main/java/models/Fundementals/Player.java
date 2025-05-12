@@ -1,6 +1,7 @@
 package models.Fundementals;
 
 import models.BackPack;
+import models.Item;
 import models.Place.Farm;
 import models.Refrigrator;
 import models.RelatedToUser.Ability;
@@ -8,8 +9,11 @@ import models.RelatedToUser.User;
 import models.RelationShips.RelationShip;
 import models.RelationShips.Trade;
 import models.ToolsPackage.Tools;
+import models.enums.Types.CraftingRecipe;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Player {
     private User user;
@@ -25,7 +29,7 @@ public class Player {
     private boolean hasCollapsed;
     private int money;
     private Player partner;
-    private ArrayList<String> recepies;
+    private Map<CraftingRecipe, Boolean> recepies;
     private ArrayList<Ability> abilities;
     private ArrayList<Trade> trades = new ArrayList<>();
     private Tools currentTool;
@@ -44,7 +48,7 @@ public class Player {
         this.backPack = backPack;
         this.money = 1_000_000;
         this.partner = null;
-        this.recepies = new ArrayList<>();
+        this.recepies = new HashMap<>();
         this.trades = new ArrayList<>();
         this.currentTool = null;
         this.isEnergyUnlimited = false;
@@ -176,14 +180,6 @@ public class Player {
         else{
             energy -= amount;
         }
-    }
-
-    public String showRecipes(){
-        StringBuilder result = new StringBuilder("Recipes: \n");
-        for(String recipes : recepies){
-            result.append(recipes).append("\n");
-        }
-        return result.toString();
     }
 
     public boolean isEnergyUnlimited() {
