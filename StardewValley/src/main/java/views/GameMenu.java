@@ -258,13 +258,14 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.SHOW_MONEY.getMather(input)) != null) {
             System.out.println(App.getCurrentPlayerLazy().getMoney());
         } else if ((matcher = GameMenuCommands.SELL.getMather(input))!= null) {
-            System.out.println(controller.sellByShipping(matcher.group("product_name"), matcher.group("count")).getMessage());
+            System.out.println(controller.sellByShipping(matcher.group("productName"), matcher.group("count")).getMessage());
         } else if ((matcher = GameMenuCommands.SELL_ONE.getMather(input))!= null) {
             System.out.println(controller.sellByShippingWithoutCount(matcher.group("product_name")).getMessage());
         } else if ((matcher = GameMenuCommands.ARTISAN_GET.getMather(input)) != null) {
             System.out.println(artisanController.artisanGet(matcher.group("itemName")));
         } else if ((matcher = GameMenuCommands.ARTISAN_USE.getMather(input)) != null) {
             System.out.println(artisanController.artisanUse(matcher.group("artisanName"), matcher.group("itemName")));
+            System.out.println(controller.sellByShippingWithoutCount(matcher.group("productName")).getMessage());
         } else {
             System.out.println("invalid command");
         }

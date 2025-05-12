@@ -78,6 +78,7 @@ public class Date {
                         location.setObjectInTile(null);
                         location.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
                         plants.remove(plant);
+                        System.out.println("crows attacked to the farm and damage plant in location: "+ location.getxAxis()+ ", " + location.getyAxis());
                     }
                 }
             }
@@ -92,7 +93,8 @@ public class Date {
                 if (random.nextInt(100) < 1) {
                     location.setObjectInTile(null);
                     location.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
-                    plants.remove(tree);
+                    trees.remove(tree);
+                    System.out.println("crows attacked to the farm and damage tree in location: "+ location.getxAxis()+ ", " + location.getyAxis());
                 }
             }
         }
@@ -159,7 +161,7 @@ public class Date {
                     if (plant.getDayPast() <= 0) {
                         System.out.println("you lost plant at location: " + plant.getLocation().getxAxis() + ", " + plant.getLocation().getyAxis());
                         Location currentLocation = plant.getLocation();
-                        currentLocation.setTypeOfTile(TypeOfTile.GROUND);
+                        currentLocation.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
                         currentLocation.setObjectInTile(null);
                     }
                 }
@@ -181,7 +183,7 @@ public class Date {
                     if (tree.getDayPast() <= 0) {
                         System.out.println("you lost plant at location: " + tree.getLocation().getxAxis() + ", " + tree.getLocation().getyAxis());
                         Location currentLocation = tree.getLocation();
-                        currentLocation.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
+                        currentLocation.setTypeOfTile(TypeOfTile.GROUND);
                         currentLocation.setObjectInTile(null);
                     }
                 }
@@ -234,6 +236,8 @@ public class Date {
                 TreeType type = foragingTrees.get(i);
                 Tree newTree = new Tree(location, type, true, type.getProduct());
                 farm.getTrees().add(newTree);
+                System.out.println("new Tree with type: " + newTree.getType().name + " add to location" +
+                        location.getxAxis() + ", " + location.getyAxis());
 
                 location.setTypeOfTile(TypeOfTile.TREE);
                 location.setObjectInTile(newTree);
@@ -250,6 +254,8 @@ public class Date {
                 AllCrops allCrops = AllCrops.sourceTypeToCraftType(seedSeason);
                 Plant newPlant = new Plant(location, newSeed, true, allCrops);
                 farm.getPlantOfFarm().add(newPlant);
+                System.out.println("new Plant with type: " + newPlant.getAllCrops().name() + " add to location" +
+                        location.getxAxis() + ", " + location.getyAxis());
 
                 location.setTypeOfTile(TypeOfTile.PLANT);
                 location.setObjectInTile(newPlant);
@@ -396,7 +402,7 @@ public class Date {
         ArrayList<Location> availableLocations = new ArrayList<>();
         ArrayList<Location> allLocationOfFarm = getLocationsOfRectangle(farm.getFarmLocation());
         for (Location location : allLocationOfFarm) {
-            if (location.getTypeOfTile().equals(TypeOfTile.GROUND) || location.getTypeOfTile().equals(TypeOfTile.PLOUGHED_LAND)) {
+            if (location.getTypeOfTile().equals(TypeOfTile.PLOUGHED_LAND) || location.getTypeOfTile().equals(TypeOfTile.GROUND)) {
                 availableLocations.add(location);
             }
         }
