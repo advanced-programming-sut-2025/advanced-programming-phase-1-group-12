@@ -72,12 +72,22 @@ public class UserLocationController {
                 targetX, targetY
         ).setObjectInTile(App.getCurrentGame().getCurrentPlayer());
         App.getCurrentGame().getCurrentPlayer().setEnergy(currentEnergy - energyNeeded);
-
+        if(App.isLocationInPlace(newLocation, App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getShack().getLocation())){
+            houseMenu();
+        }
         return new Result(true,
                 App.getCurrentGame().getCurrentPlayer().getUser().getUserName()
                         + " moved to new location " + x + " " + y
                         + " (distance = " + distance + ", turns = " + turns + ", energy cost = " + energyNeeded + ")"
         );
+    }
+
+    private static void houseMenu() {
+        System.out.println("Hey!\n" + "you are at your home location");
+        System.out.println("you can do this WORK in your house: ");
+        System.out.println("1) crafting");
+        System.out.println("2) cooking");
+        System.out.println("3) access to your refrigerator");
     }
 
     private static int[] bfsDistanceWithTurns(Location start, Location end) {

@@ -53,7 +53,7 @@ public enum GameMenuCommands implements Commands {
     PET("pet -n (?<name>.*)"),
     CHEAT_SET_FRIENDSHIP("cheat set friendship -n (?<animalName>.*) -c (?<amount>.*)"),
     ANIMALS_LIST("animals"),
-    SHEPHERD_ANIMALS("shepherd animals -n <animal name> -l <x , y>"),
+    SHEPHERD_ANIMALS("shepherd animals -n (?<animalName>.*) -l <(?<x>\\d+) , (?<y>\\d+)>"),
     FEED_HAY("^feed hay -n (?<animalName>.*)$"),
     PRODUCES("^produces$"),
     COLLECT ("collect produce -n (?<name>.*)"),

@@ -1,7 +1,5 @@
 package models;
 
-import models.enums.CraftingRecepie;
-
 public class Craft {
     private CraftingRecepie type;
 
