@@ -255,7 +255,7 @@ public class NPCcontroller {
             return "You need to be near " + questNPC.getName() + " to complete this quest.";
         }
 
-        if (!App.getCurrentPlayerLazy().getBackPack().hasItems(questNPC.getDetails().getQuests().get(questIndex).getRequiredItemName())) {
+        if (!App.getCurrentPlayerLazy().getBackPack().hasItem(questNPC.getDetails().getQuests().get(questIndex).getRequiredItemName())) {
            return "You dont have " + questNPC.getDetails().getQuests().get(questIndex).getRequiredItemName();
         }
 

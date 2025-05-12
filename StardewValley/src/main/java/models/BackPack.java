@@ -4,7 +4,6 @@ import models.Fundementals.Result;
 import models.ToolsPackage.Tools;
 import models.enums.ToolEnums.BackPackTypes;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class BackPack {
@@ -81,7 +80,7 @@ public class BackPack {
         decreaseToolQuantity(name, amount);
 
         if (recoveryRate > 0) {
-            return new Result(true, "Trashed " + amount + " " + name + " and recovered " + 
+            return new Result(true, "Trashed " + amount + " " + name + " and recovered " +
                               (recoveryRate * 100) + "% of its value.");
         } else {
             return new Result(true, "Trashed " + amount + " " + name + ".");
@@ -115,7 +114,7 @@ public class BackPack {
         items.remove(toolToUpdate);
 
         if (recoveryRate > 0) {
-            return new Result(true, "Trashed all " + toolName + " and recovered " + 
+            return new Result(true, "Trashed all " + toolName + " and recovered " +
                               (recoveryRate * 100) + "% of its value.");
         } else {
             return new Result(true, "Trashed all " + toolName + ".");
@@ -184,6 +183,15 @@ public class BackPack {
         }else{
             return false;
         }
+    }
+
+    public int getItemCount(Item item) {
+        for(Map.Entry<Item, Integer> entry : items.entrySet()) {
+            if(entry.getKey().getName().equals(item.getName())) {
+                return entry.getValue();
+            }
+        }
+        return 0;
     }
 
     public boolean hasItem(String itemName){
