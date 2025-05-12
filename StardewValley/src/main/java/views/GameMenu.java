@@ -76,14 +76,14 @@ public class GameMenu extends AppMenu {
             Result result = toolsController.showCurrentTool();
             System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.EQUIP_TOOL.getMather(input)) != null) {
-            Result result = toolsController.equipTool(matcher.group("tool_name"));
+            Result result = toolsController.equipTool(matcher.group("toolName"));
             System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.SHOW_AVAILABLE_TOOL.getMather(input)) != null) {
             Result result = toolsController.showToolsAvailable();
             System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.UPGRADE_TOOL.getMather(input)) != null) {
             boolean isInSmithing = toolsController.checkIsInSmithing();
-            Result result = toolsController.updateToolsCheck(matcher.group("tool_name"), isInSmithing);
+            Result result = toolsController.updateToolsCheck(matcher.group("toolName"), isInSmithing);
             System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.USE_TOOL.getMather(input)) != null) {
             Result result = toolsController.useTool(matcher.group("direction"));

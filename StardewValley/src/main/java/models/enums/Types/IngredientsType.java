@@ -47,7 +47,7 @@ public enum IngredientsType {
     }
     public static IngredientsType stringToIngredient(String name) {
         for (IngredientsType type : IngredientsType.values()) {
-            if (name.equals(type.name)) {
+            if (name.equalsIgnoreCase(type.name)) {
                 return type;
             }
         }

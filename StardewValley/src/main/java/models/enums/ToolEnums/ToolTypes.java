@@ -1,5 +1,7 @@
 package models.enums.ToolEnums;
 
+import models.ProductsPackage.Quality;
+
 public enum ToolTypes {
     NORMAL(5, "normal"),
     COPPER(4, "copper"),

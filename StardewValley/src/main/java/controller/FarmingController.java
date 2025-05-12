@@ -97,7 +97,7 @@ public class FarmingController {
         Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
         SeedTypes seedTypes = SeedTypes.stringToSeed(seed);
         assert seedTypes != null;
-        if (App.getCurrentGame().getCurrentPlayer().getBackPack().getItemNames().containsKey(seedTypes.getName())) {
+        if (!App.getCurrentPlayerLazy().getBackPack().hasItem(seed)) {
             return new Result(false, "Invalid seed");
         }
 
@@ -256,7 +256,7 @@ public class FarmingController {
         if (fertilizeType == null) {
             return new Result(false, "Invalid fertilize");
         }
-        if (!App.getCurrentGame().getCurrentPlayer().getBackPack().getItemNames().containsKey(fertilizeType.name())) {
+        if (!App.getCurrentPlayerLazy().getBackPack().hasItem(fertilize)) {
             return new Result(false, "we don't have fertilize here.");
         }
 

@@ -6,29 +6,25 @@ import models.enums.Types.SaplingTypes;
 
 public class Tree {
     private TreeType type;
-    private foragingTrees foragingTrees;
     private boolean hasBeenFertilized;
     private SaplingTypes saplingTypes;
     private Location location;
     private boolean hasBeenWatering;
     private int totalTimeNeeded;
     private int dayPast;
-    private int currentStage ;
+    private int currentStage;
     private int age;
     private boolean isForaging;
     private FruitType fruitType;
 
-    public Tree(Location location, TreeType type, foragingTrees foragingTrees, boolean isForaging, FruitType fruitType) {
+    public Tree(Location location, TreeType type, boolean isForaging, FruitType fruitType) {
         this.type = type;
         this.location = location;
-        this.foragingTrees = foragingTrees;
         this.hasBeenFertilized = false;
         this.age = 0;
         this.hasBeenWatering = false;
-        if(type != null) {
-            this.totalTimeNeeded = type.totalHarvestTime;
-            this.saplingTypes = type.saplingTypes;
-        }
+        this.totalTimeNeeded = type.totalHarvestTime;
+        this.saplingTypes = type.saplingTypes;
         this.dayPast = 2;
         this.currentStage = 0;
         this.isForaging = isForaging;
@@ -105,14 +101,6 @@ public class Tree {
 
     public void setType(TreeType type) {
         this.type = type;
-    }
-
-    public foragingTrees getForagingTrees() {
-        return foragingTrees;
-    }
-
-    public void setForagingTrees(foragingTrees foragingTrees) {
-        this.foragingTrees = foragingTrees;
     }
 
     public boolean isHasBeenFertilized() {

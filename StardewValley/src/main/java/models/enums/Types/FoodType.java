@@ -199,7 +199,7 @@ public enum FoodType {
 
     public static FoodType stringToFood(String name) {
         for (FoodType type : FoodType.values()) {
-            if (name.equals(type.name)) {
+            if (name.equalsIgnoreCase(type.name)) {
                 return type;
             }
         }

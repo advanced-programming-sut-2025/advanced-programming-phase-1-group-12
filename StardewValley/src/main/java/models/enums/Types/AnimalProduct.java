@@ -74,7 +74,7 @@ public enum AnimalProduct {
     }
     public static AnimalProduct stringToAnimalProduct(String seed) {
         for (AnimalProduct type : AnimalProduct.values()) {
-            if (seed.equals(type.name)) {
+            if (seed.equalsIgnoreCase(type.name)) {
                 return type;
             }
         }

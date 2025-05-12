@@ -7,6 +7,7 @@ import models.Eating.Food;
 import models.Fundementals.*;
 import models.Place.Farm;
 import models.Place.Store;
+import models.ProductsPackage.Quality;
 import models.RelatedToUser.User;
 import models.*;
 import models.RelationShips.RelationShip;
@@ -283,7 +284,7 @@ public class GameMenuController implements MenuController {
             case PLOUGHED_LAND -> "\u001B[48;5;214m"; //orange
             case NPC_VILLAGE -> "\u001B[48;5;209m"; //Pink
             case BURNED_GROUND -> "\u001B[40m"; //black
-            case PLANT -> "\\u001B[48;5;88m"; // Dark red
+            case PLANT ->"\u001B[105m"; // Bright Magenta (Pink-ish); // Dark red
             default -> "\u001B[41m";
         };
     }
@@ -314,6 +315,7 @@ public class GameMenuController implements MenuController {
             Player newPlayer = new Player(user, null, false, null, new ArrayList<>(),
                     null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
             players.add(newPlayer);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("Hoe", Quality.NORMAL), 1);
 
             System.out.println("Do you want to know what each farm has?");
             String selection = scanner.nextLine();

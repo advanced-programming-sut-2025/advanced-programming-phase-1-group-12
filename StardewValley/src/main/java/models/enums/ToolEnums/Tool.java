@@ -15,7 +15,7 @@ public enum Tool {
             return (location, skillLevel) -> {
                 TypeOfTile tileType = location.getTypeOfTile();
                 if (tileType == TypeOfTile.GROUND) {
-                    // TODO: implement functionality
+                    location.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
                     return new Result(true, "You tilled the soil!");
                 }
                 return new Result(false, "You can't use your hoe here!");
@@ -228,7 +228,7 @@ public enum Tool {
 
     public static Tool stringToTool(String name) {
         for (Tool type : Tool.values()) {
-            if (name.equals(type.name)) {
+            if (name.equalsIgnoreCase(type.name)) {
                 return type;
             }
         }

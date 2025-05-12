@@ -81,7 +81,7 @@ public enum SeedTypes {
 
     public static SeedTypes stringToSeed(String seed) {
         for (SeedTypes type : SeedTypes.values()) {
-            if (seed.equals(type.name)) {
+            if (seed.equalsIgnoreCase(type.name)) {
                 return type;
             }
         }

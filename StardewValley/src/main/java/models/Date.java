@@ -177,7 +177,7 @@ public class Date {
                     if (tree.getDayPast() <= 0) {
                         System.out.println("you lost plant at location: " + tree.getLocation().getxAxis() + ", " + tree.getLocation().getyAxis());
                         Location currentLocation = tree.getLocation();
-                        currentLocation.setTypeOfTile(TypeOfTile.GROUND);
+                        currentLocation.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
                         currentLocation.setObjectInTile(null);
                     }
                 }
@@ -203,10 +203,15 @@ public class Date {
             Collections.shuffle(availableLocation);
 
             List<MineralTypes> allMinerals = new ArrayList<>(Arrays.asList(MineralTypes.values()));
-            List<foragingTrees> allTrees = new ArrayList<>(Arrays.asList(foragingTrees.values()));
+            List<TreeType> foragingTrees = new ArrayList<>(
+                    Arrays.stream(TreeType.values())
+                            .filter(TreeType::isCanBeForaging)
+                            .toList()
+            );
+
             List<SeedTypes> allSeeds = new ArrayList<>(Arrays.asList(SeedTypes.values()));
             Collections.shuffle(allMinerals);
-            Collections.shuffle(allTrees);
+            Collections.shuffle(foragingTrees);
             Collections.shuffle(allSeeds);
 
             int count = Math.min(3, availableLocation.size());
@@ -222,8 +227,9 @@ public class Date {
 
             for (int i = 0; i < count; i++) {
                 Location location = availableLocation.get(i);
-                foragingTrees foragingTree = allTrees.get(i);
-                Tree newTree = new Tree(location, null, foragingTree, true, foragingTree.getFruitType());
+                TreeType type = foragingTrees.get(i);
+                Tree newTree = new Tree(location, type, true, type.getProduct());
+                farm.getTrees().add(newTree);
 
                 location.setTypeOfTile(TypeOfTile.TREE);
                 location.setObjectInTile(newTree);
@@ -239,6 +245,7 @@ public class Date {
                 Seed newSeed = new Seed(seedSeason);
                 AllCrops allCrops = AllCrops.sourceTypeToCraftType(seedSeason);
                 Plant newPlant = new Plant(location, newSeed, true, allCrops);
+                farm.getPlantOfFarm().add(newPlant);
 
                 location.setTypeOfTile(TypeOfTile.PLANT);
                 location.setObjectInTile(newPlant);
