@@ -25,10 +25,6 @@ import java.util.*;
 
 public class GameMenuController implements MenuController {
 
-    /**
-     * Starts the trade menu and shows available players
-     * @return Result with the list of available players
-     */
     public Result startTrade() {
         StringBuilder playerList = new StringBuilder("Available players for trading:\n");
         Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
@@ -39,7 +35,6 @@ public class GameMenuController implements MenuController {
             }
         }
 
-        // Show trade notifications if any
         String notifications = TradeManager.getTradeNotifications(currentPlayer);
         if (notifications != null) {
             playerList.append("\n").append(notifications);
@@ -48,17 +43,6 @@ public class GameMenuController implements MenuController {
         return new Result(true, playerList.toString());
     }
 
-    /**
-     * Creates a new trade request
-     * @param username The username of the target player
-     * @param type The type of trade (request or offer)
-     * @param itemName The name of the item to trade
-     * @param amount The amount of the item
-     * @param price The price (if money trade)
-     * @param targetItemName The name of the target item (if item-for-item trade)
-     * @param targetAmount The amount of the target item
-     * @return Result with the outcome of the trade creation
-     */
     public Result createTrade(String username, String type, String itemName, int amount, Integer price, String targetItemName, Integer targetAmount) {
         Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
         Player targetPlayer = App.getCurrentGame().getPlayerByName(username);
@@ -71,7 +55,6 @@ public class GameMenuController implements MenuController {
             return new Result(false, "You cannot trade with yourself");
         }
 
-        // Validate item and amount
         Item item = currentPlayer.getBackPack().getItemByName(itemName);
         if (type.equals("offer") && (item == null || amount <= 0)) {
             return new Result(false, "Invalid item or amount");
@@ -81,23 +64,18 @@ public class GameMenuController implements MenuController {
             return new Result(false, "Invalid amount");
         }
 
-        // Create a new item if it doesn't exist (for request type)
         if (type.equals("request") && item == null) {
             item = new Item(itemName);
         }
 
-        // Check if both price and target item are specified
         if (price != null && price > 0 && targetItemName != null && targetAmount != null && targetAmount > 0) {
             return new Result(false, "You cannot specify both price and target item");
         }
 
-        // Create the trade
         if (price != null && price > 0) {
-            // Money trade
             TradeManager.createTrade(currentPlayer, targetPlayer, type, item, amount, price);
             return new Result(true, "Trade request created successfully");
         } else if (targetItemName != null && targetAmount != null && targetAmount > 0) {
-            // Item-for-item trade
             Item targetItem = new Item(targetItemName);
             TradeManager.createTrade(currentPlayer, targetPlayer, type, item, amount, targetItem, targetAmount);
             return new Result(true, "Trade request created successfully");
@@ -106,22 +84,13 @@ public class GameMenuController implements MenuController {
         }
     }
 
-    /**
-     * Lists all pending trade requests for the current player
-     * @return Result with the list of pending trades
-     */
     public Result listTrades() {
         Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
         String tradeList = TradeManager.getTradeList(currentPlayer);
         return new Result(true, tradeList);
     }
 
-    /**
-     * Responds to a trade request (accept or reject)
-     * @param response The response (accept or reject)
-     * @param id The ID of the trade
-     * @return Result with the outcome of the response
-     */
+
     public Result respondToTrade(String response, String id) {
         if (response.equals("accept")) {
             String result = TradeManager.acceptTrade(id);
@@ -132,10 +101,7 @@ public class GameMenuController implements MenuController {
         }
     }
 
-    /**
-     * Shows the trade history for the current player
-     * @return Result with the trade history
-     */
+
     public Result tradeHistory() {
         Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
         String history = TradeManager.getTradeHistory(currentPlayer);
@@ -432,7 +398,7 @@ public class GameMenuController implements MenuController {
                 "Be careful, you do not have the right to change your mind after choosing a farm!");
     }
 
-    
+
     private static Map<Farm, Player> getFarmPlayerMap(ArrayList<Player> players, ArrayList<Integer> chosenFarmNumbers) {
         Map<Farm, Player> farmOwnership = new HashMap<>();
         ArrayList<Farm> farms = App.getCurrentGame().getMainMap().getFarms();
@@ -636,6 +602,28 @@ public class GameMenuController implements MenuController {
 
         NPCcontroller controller = new NPCcontroller();
         String response = controller.getFriendshipList();
+
+        return new Result(true, response);
+    }
+
+    public Result questsList() {
+        if (App.getCurrentGame().getNPCvillage() == null) {
+            App.getCurrentGame().initializeNPCvillage();
+        }
+
+        NPCcontroller controller = new NPCcontroller();
+        String response = controller.listQuests();
+
+        return new Result(true, response);
+    }
+
+    public Result questsFinish(int index) {
+        if (App.getCurrentGame().getNPCvillage() == null) {
+            App.getCurrentGame().initializeNPCvillage();
+        }
+
+        NPCcontroller controller = new NPCcontroller();
+        String response = controller.finishQuest(index);
 
         return new Result(true, response);
     }

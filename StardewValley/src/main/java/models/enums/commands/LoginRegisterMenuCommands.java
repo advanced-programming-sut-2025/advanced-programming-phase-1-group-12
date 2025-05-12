@@ -12,7 +12,6 @@ public enum LoginRegisterMenuCommands implements Commands {
 
     RegisterUser("^register -u (?<username>\\S+) -p (?<password>\\S+) (?<passwordConfirm>\\S+) -n (?<nickname>\\S+) -e (?<email>\\S+) -g (?<gender>\\S+)$"),
 
-
     LoginUser("^login -u (?<username>\\S+) -p (?<password>\\S+)( --stay-logged-in)?$"),
 
     PickQuestion("^pick question -q (?<questionNumber>.*) -a (?<answer>.*) -c (?<answerConfirm>.*)$"),
