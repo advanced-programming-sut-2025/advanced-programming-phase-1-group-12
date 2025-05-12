@@ -243,25 +243,25 @@ public class GameMenuController implements MenuController {
 
                 char contentChar = tileType;
 
-                // Player on tile
-                if (location.getObjectInTile() instanceof Player) {
-                    Farm farm = getFarmOfThisLocation(location);
-                    if (farm != null) {
-                        contentChar = farm.getOwner().getUser().getUserName().charAt(0);
-                        bgColor = "\u001B[41m"; // Red background for player
-                    }
-                } else {
-                    // Store on tile
-                    for (Store store : App.getCurrentGame().getMainMap().getStores()) {
-                        LocationOfRectangle loc = store.getLocation();
-                        if (mapX >= loc.getTopLeftCorner().getxAxis() &&
-                                mapX <= loc.getDownRightCorner().getxAxis() &&
-                                mapY >= loc.getTopLeftCorner().getyAxis() &&
-                                mapY <= loc.getDownRightCorner().getyAxis()) {
+                for (Store store : App.getCurrentGame().getMainMap().getStores()) {
+                    LocationOfRectangle loc = store.getLocation();
+                    if (mapX >= loc.getTopLeftCorner().getxAxis() &&
+                            mapX <= loc.getDownRightCorner().getxAxis() &&
+                            mapY >= loc.getTopLeftCorner().getyAxis() &&
+                            mapY <= loc.getDownRightCorner().getyAxis()) {
 
-                            contentChar = store.getNameOfStore().charAt(0); // Store’s first character
-                            bgColor = "\u001B[46m"; // Light cyan background for store
-                            break;
+                        contentChar = store.getNameOfStore().charAt(0); // Store’s first character
+                        bgColor = "\u001B[46m"; // Light cyan background for store
+                        break;
+                    }
+
+                    // Player on tile
+                    if (location.getObjectInTile() instanceof Player) {
+                        for (Player player : App.getCurrentGame().getPlayers()) {
+                            if (player.equals(location.getObjectInTile())) {
+                                contentChar = player.getUser().getUserName().charAt(0);
+                                bgColor = "\u001B[41m"; // Red background for player
+                            }
                         }
                     }
                 }
@@ -283,7 +283,6 @@ public class GameMenuController implements MenuController {
         String selection = scanner.nextLine();
         if (selection.equalsIgnoreCase("yes")) helpToReadMap();
     }
-
 
     public void helpToReadMap() {
         System.out.println("Map Legend:");

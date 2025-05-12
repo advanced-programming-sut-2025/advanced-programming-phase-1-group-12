@@ -1,3 +1,5 @@
+
+
 package controller.movingPlayer;
 
 import controller.MenusController.GameMenuController;
@@ -18,8 +20,11 @@ public class UserLocationController {
         Location currentLocation = App.getCurrentGame().getCurrentPlayer().getUserLocation();
         Farm currentFarm = App.getCurrentGame().getCurrentPlayer().getOwnedFarm();
 
-        if (!isInPlayersFarm(newLocation, currentFarm)) {
-            return new Result(false, "You don't have access to this farm.");
+        for (Farm farm : App.getCurrentGame().getFarms()) {
+            if (farm == currentFarm) continue;
+            if (App.isLocationInPlace(newLocation, farm.getLocation())) {
+                return new Result(false, "You don't have access to this location cause it is not your farm");
+            }
         }
 
         int[] result = bfsDistanceWithTurns(currentLocation, newLocation);
@@ -151,20 +156,5 @@ public class UserLocationController {
         }
 
         return lastValid.equals(start) ? null : lastValid;
-    }
-
-    private static boolean isInPlayersFarm(Location loc, Farm farm) {
-        int x = loc.getxAxis();
-        int y = loc.getyAxis();
-        for (Farm f : App.getCurrentGame().getFarms()) {
-            if (f == farm) continue;
-            if (x >= f.getLocation().getTopLeftCorner().getxAxis() &&
-                    x <= f.getLocation().getDownRightCorner().getxAxis() &&
-                    y >= f.getLocation().getTopLeftCorner().getyAxis() &&
-                    y <= f.getLocation().getDownRightCorner().getyAxis()) {
-                return false;
-            }
-        }
-        return true;
     }
 }

@@ -178,7 +178,7 @@ public class StoreController {
         }//TODO:does it print it right?
        String storeName = store.getNameOfStore();
         for(StoreProductsTypes storeProductsTypes : StoreProductsTypes.values()){
-            if(storeProductsTypes.getShop().equals(storeName)){
+            if(storeProductsTypes.getShop().equalsIgnoreCase(storeName)){
                 System.out.println(storeProductsTypes.getName());
                 //TODO:print price
             }

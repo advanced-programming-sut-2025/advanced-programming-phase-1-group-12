@@ -97,10 +97,10 @@ public class MapSetUp {
                 store = new Store(storeLocation, "Morris", "JojaMart", 9, 23, new ArrayList<>());
                 break;
             case 2:
-                store = new Store(storeLocation, "Pierre", "Pierre’s General Store", 9, 17, new ArrayList<>());
+                store = new Store(storeLocation, "Pierre", "Pierre's General Store", 9, 17, new ArrayList<>());
                 break;
             case 3:
-                store = new Store(storeLocation, "Robin", "Carpenter’s Shop", 9, 20, new ArrayList<>());
+                store = new Store(storeLocation, "Robin", "Carpenter's Shop", 9, 20, new ArrayList<>());
                 break;
             case 4:
                 store = new Store(storeLocation, "Willy", "Fish Shop", 9, 17, new ArrayList<>());
