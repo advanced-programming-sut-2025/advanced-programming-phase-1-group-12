@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.util.*;
 
 public class GameMenuController implements MenuController {
-
     public Result startTrade() {
         StringBuilder playerList = new StringBuilder("Available players for trading:\n");
         Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
@@ -719,6 +718,120 @@ public class GameMenuController implements MenuController {
         Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
         location.setTypeOfTile(TypeOfTile.BURNED_GROUND);
         return new Result(true, "Lightning struck the map at location" + x + ", " + y);
+    }
+
+    public void sellByShippingAllPlayers(){
+        List<Player> players = App.getCurrentGame().getPlayers();
+        List<ShippingBin> shippingBins = new ArrayList<>();
+        for (Player player : players) {
+            shippingBins.add(player.getShippingBin());
+        }
+        for (ShippingBin shippingBin : shippingBins) {
+            for(Item item: shippingBin.getShippingItem(shippingBin.getShippingItemMap())){
+                sellItem(shippingBin.getOwner(), item);
+            }
+        }
+    }
+
+    public Result sellByShipping(String product, String count){
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        Item item = player.getBackPack().getItemByName(product);
+        player.getShippingBin().addShippingItem(item, Integer.parseInt(count));
+        return new Result(true, "Item put in shipping bin!");
+    }
+
+    public Result sellByShippingWithoutCount(String product){
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        Item item = player.getBackPack().getItemByName(product);
+        player.getShippingBin().addShippingItem(item, 1);
+        return new Result(true, "Item put in shipping bin!");
+    }
+
+    public void sellItem(Player player, Item item){
+        int basePrice = 0;
+        Quality quality = Quality.NORMAL;
+
+        try {
+            if (item.getClass().getSimpleName().equalsIgnoreCase("AnimalProducts")) {
+                java.lang.reflect.Field qualityField = item.getClass().getDeclaredField("quality");
+                qualityField.setAccessible(true);
+                quality = (Quality) qualityField.get(item);
+
+                java.lang.reflect.Field animalProductField = item.getClass().getDeclaredField("animalProduct");
+                animalProductField.setAccessible(true);
+                Object animalProduct = animalProductField.get(item);
+
+                java.lang.reflect.Method getPriceMethod = animalProduct.getClass().getMethod("getPrice");
+                basePrice = (int) getPriceMethod.invoke(animalProduct);
+            } 
+            else if (item.getClass().getSimpleName().equals("StoreProducts")) {
+                java.lang.reflect.Method getTypeMethod = item.getClass().getMethod("getType");
+                Object storeProductType = getTypeMethod.invoke(item);
+
+                Season currentSeason = App.getCurrentGame().getDate().getSeason();
+
+                java.lang.reflect.Method getPriceMethod;
+                switch (currentSeason) {
+                    case SPRING:
+                        getPriceMethod = storeProductType.getClass().getMethod("getSpringPrice");
+                        basePrice = (int) getPriceMethod.invoke(storeProductType);
+                        break;
+                    case SUMMER:
+                        getPriceMethod = storeProductType.getClass().getMethod("getSummerPrice");
+                        basePrice = (int) getPriceMethod.invoke(storeProductType);
+                        break;
+                    case AUTUMN:
+                        getPriceMethod = storeProductType.getClass().getMethod("getFallPrice");
+                        basePrice = (int) getPriceMethod.invoke(storeProductType);
+                        break;
+                    case WINTER:
+                        getPriceMethod = storeProductType.getClass().getMethod("getWinterPrice");
+                        basePrice = (int) getPriceMethod.invoke(storeProductType);
+                        break;
+                }
+
+                if (basePrice == 0) {
+                    java.lang.reflect.Method getSpringPriceMethod = storeProductType.getClass().getMethod("getSpringPrice");
+                    java.lang.reflect.Method getSummerPriceMethod = storeProductType.getClass().getMethod("getSummerPrice");
+                    java.lang.reflect.Method getFallPriceMethod = storeProductType.getClass().getMethod("getFallPrice");
+                    java.lang.reflect.Method getWinterPriceMethod = storeProductType.getClass().getMethod("getWinterPrice");
+
+                    int springPrice = (int) getSpringPriceMethod.invoke(storeProductType);
+                    int summerPrice = (int) getSummerPriceMethod.invoke(storeProductType);
+                    int fallPrice = (int) getFallPriceMethod.invoke(storeProductType);
+                    int winterPrice = (int) getWinterPriceMethod.invoke(storeProductType);
+
+                    int cheapestPrice = Math.min(
+                        Math.min(springPrice, summerPrice),
+                        Math.min(fallPrice, winterPrice)
+                    );
+
+                    if (cheapestPrice == 0) {
+                        cheapestPrice = Integer.MAX_VALUE;
+                        if (springPrice > 0) {
+                            cheapestPrice = Math.min(cheapestPrice, springPrice);
+                        }
+                        if (summerPrice > 0) {
+                            cheapestPrice = Math.min(cheapestPrice, summerPrice);
+                        }
+                        if (fallPrice > 0) {
+                            cheapestPrice = Math.min(cheapestPrice, fallPrice);
+                        }
+                        if (winterPrice > 0) {
+                            cheapestPrice = Math.min(cheapestPrice, winterPrice);
+                        }
+                    }
+
+                    if (cheapestPrice != Integer.MAX_VALUE) {
+                        basePrice = cheapestPrice / 2;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            basePrice = 10;
+        }
+        int finalPrice = (int)(basePrice * quality.getPriceMultiPlier());
+        player.increaseMoney(finalPrice);
     }
 
 }

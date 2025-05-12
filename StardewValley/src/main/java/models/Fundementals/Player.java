@@ -1,12 +1,9 @@
 package models.Fundementals;
 
-import models.BackPack;
-import models.Date;
-import models.ItemBuilder;
+import models.*;
 import models.NPC.NPC;
 import models.Place.Farm;
 import models.ProductsPackage.Quality;
-import models.Refrigrator;
 import models.RelatedToUser.Ability;
 import models.RelatedToUser.User;
 import models.RelationShips.RelationShip;
@@ -37,6 +34,7 @@ public class Player {
     private ArrayList<Trade> trades = new ArrayList<>();
     private Tools currentTool;
     private Map<NPC, Date> metDates;
+    private ShippingBin shippingBin;
 
     public Player(User user, Location userLocation, boolean isMarried, Refrigrator refrigrator,
                   ArrayList<RelationShip> relationShips, Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited,
@@ -58,6 +56,7 @@ public class Player {
         this.isEnergyUnlimited = false;
         this.hasCollapsed = false;
         this.metDates = new HashMap<>();
+        this.shippingBin = null;
         initializeAbilities();
     }
 
@@ -214,6 +213,10 @@ public class Player {
 
     public Date getMetDate(NPC npc){
         return metDates.get(npc);
+    }
+
+    public ShippingBin getShippingBin(){
+        return shippingBin;
     }
 
 

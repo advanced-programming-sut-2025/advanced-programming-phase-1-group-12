@@ -99,13 +99,10 @@ public class Game {
     }
 
     public void initializeNPCvillage() {
-        // Create a village in a fixed location on the map
-        // Using coordinates 20,20 as the top-left corner of a 10x10 village area
+
         Location topLeft = new Location(20, 20);
         Location bottomRight = new Location(30, 30);
         LocationOfRectangle villageArea = new LocationOfRectangle(topLeft, bottomRight);
-
-        // Create and initialize the NPC village
         this.npcVillage = new NPCvillage(villageArea);
     }
 

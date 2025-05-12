@@ -102,6 +102,8 @@ public enum GameMenuCommands implements Commands {
     TRADE_LIST("^trade list$"),
     TRADE_RESPONSE("^trade response --(accept|reject) -i (?<id>\\S+)$"),
     TRADE_HISTORY("^trade history$"),
+    SELL("^sell (?<product_name>.+) -n (?<count>.+)$"),
+    SELL_ONE("^sell (?<product_name>.+)$"),
 
     //pashmesho bezane va shir bedooshe
     SHEAR("^shear -n (?<name>.*)"),
