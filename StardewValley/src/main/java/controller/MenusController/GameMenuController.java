@@ -11,6 +11,7 @@ import models.ProductsPackage.Quality;
 import models.RelatedToUser.User;
 import models.*;
 import models.RelationShips.RelationShip;
+import models.ToolsPackage.Tools;
 import models.enums.*;
 import models.Fundementals.Player;
 import com.google.gson.Gson;
@@ -264,20 +265,8 @@ public class GameMenuController implements MenuController {
     public void helpToReadMap() {
         System.out.println("Map Legend:");
         for (TypeOfTile type : TypeOfTile.values()) {
-            System.out.println(type.getNameOfMap() + " -> " + type.name());
+            System.out.println(getBackgroundColorForTile(type) + " "+ type.getNameOfMap() + " -> " + type.name());
         }
-    }
-
-    private Farm getFarmOfThisLocation(Location location) {
-        for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
-            if (location.getxAxis() >= farm.getLocation().getTopLeftCorner().getxAxis() &&
-                    location.getxAxis() <= farm.getLocation().getDownRightCorner().getxAxis() &&
-                    location.getyAxis() >= farm.getLocation().getTopLeftCorner().getyAxis() &&
-                    location.getyAxis() <= farm.getLocation().getDownRightCorner().getyAxis()) {
-                return farm;
-            }
-        }
-        return null;
     }
 
     private String getBackgroundColorForTile(TypeOfTile type) {
@@ -326,12 +315,14 @@ public class GameMenuController implements MenuController {
             Player newPlayer = new Player(user, null, false, null, new ArrayList<>(),
                     null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
             players.add(newPlayer);
+
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Hoe", Quality.NORMAL), 1);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("PickAxe", Quality.NORMAL), 1);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Axe", Quality.NORMAL), 1);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Watering can", Quality.NORMAL), 1);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Scythe", Quality.NORMAL), 1);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Trash Can", Quality.NORMAL), 1);
+            newPlayer.setCurrentTool((Tools) newPlayer.getBackPack().getItemByName("Hoe"));
 
             System.out.println("Do you want to know what each farm has?");
             String selection = scanner.nextLine();

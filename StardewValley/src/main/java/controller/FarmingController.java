@@ -6,9 +6,11 @@ import models.Fundementals.Result;
 import models.Item;
 import models.ItemBuilder;
 import models.ProductsPackage.Quality;
+import models.RelatedToUser.Ability;
 import models.enums.Season;
 import models.enums.Types.FertilizeType;
 import models.enums.Types.SeedTypes;
+import models.enums.Types.TreeType;
 import models.enums.Types.TypeOfTile;
 import models.enums.foraging.*;
 
@@ -45,6 +47,78 @@ public class FarmingController {
         output.append("\n");
 
         output.append("Can Become Giant: ").append(allCrops.canBecomeGiant ? "TRUE" : "FALSE").append("\n");
+
+        return new Result(true, output.toString());
+    }
+
+    public Result showForagingTreeInfo(String type) {
+        foragingTreeType foragingTreeType = models.enums.foraging.foragingTreeType.nameToType(type);
+        if (foragingTreeType == null) {
+            return new Result(false, "Invalid craft type");
+        }
+
+        StringBuilder output = new StringBuilder();
+        output.append("Name: ").append(foragingTreeType.name).append("\n");
+        output.append("Source: ").append(foragingTreeType.saplingTypes.name()).append("\n");
+        output.append("Stage: ").append(Arrays.toString(foragingTreeType.stages)).append("\n");
+        output.append("Total Harvest Time: ").append(foragingTreeType.totalHarvestTime).append("\n");
+
+        output.append("Base Sell Price: ").append(foragingTreeType.baseSellPrice).append("\n");
+        output.append("Edible: ").append(foragingTreeType.isEdible ? "TRUE\n" : "FALSE\n");
+        output.append("Base Energy: ").append(foragingTreeType.energy).append("\n");
+        output.append("Base Health: ").append(foragingTreeType.baseHealth).append("\n");
+
+        output.append("Season: ");
+        for (Season season : foragingTreeType.season) {
+            output.append(season.name()).append(", ");
+        }
+        output.append("\n");
+
+        return new Result(true, output.toString());
+    }
+
+    public Result showTreeInfo(String type) {
+        TreeType treeType = TreeType.nameToTreeType(type);
+        if (treeType == null) {
+            return new Result(false, "Invalid craft type");
+        }
+
+        StringBuilder output = new StringBuilder();
+        output.append("Name: ").append(treeType.name).append("\n");
+        output.append("Source: ").append(treeType.seedSource).append("\n");
+        output.append("Stage: ").append(Arrays.toString(treeType.stages)).append("\n");
+        output.append("Total Harvest Time: ").append(treeType.totalHarvestTime).append("\n");
+
+        output.append("Base Sell Price: ").append(treeType.baseSellPrice).append("\n");
+        output.append("Edible: ").append(treeType.isEdible ? "TRUE\n" : "FALSE\n");
+        output.append("Base Energy: ").append(treeType.energy).append("\n");
+        output.append("Base Health: ").append(treeType.baseHealth).append("\n");
+
+        output.append("Season: ");
+        for (Season season : treeType.season) {
+            output.append(season.name()).append(", ");
+        }
+        output.append("\n");
+
+        return new Result(true, output.toString());
+    }
+
+    public Result showForagingCropsInfo(String type) {
+        ForageItem forageItem = ForageItem.fromString(type);
+        if (forageItem == null) {
+            return new Result(false, "Invalid craft type");
+        }
+
+        StringBuilder output = new StringBuilder();
+        output.append("Name: ").append(forageItem.getName()).append("\n");
+        output.append("Base Sell Price: ").append(forageItem.getBaseSellPrice()).append("\n");
+        output.append("Base Energy: ").append(forageItem.getEnergy()).append("\n");
+
+        output.append("Season: ");
+        for (Season season : forageItem.getSeason()) {
+            output.append(season.name()).append(", ");
+        }
+        output.append("\n");
 
         return new Result(true, output.toString());
     }
@@ -97,9 +171,9 @@ public class FarmingController {
 
         Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
         SeedTypes seedTypes = SeedTypes.stringToSeed(seed);
-        assert seedTypes != null;
+        if (seedTypes == null) return new Result(false, "Invalid seed name.");
         if (!App.getCurrentPlayerLazy().getBackPack().hasItem(seed)) {
-            return new Result(false, "Invalid seed");
+            return new Result(false, "You don't have this seed.");
         }
 
         if (!newLocation.getTypeOfTile().equals(TypeOfTile.PLOUGHED_LAND)) {
@@ -112,6 +186,10 @@ public class FarmingController {
         if (newSeed.getType().equals(SeedTypes.MixedSeeds)) {
             Season season = App.getCurrentGame().getDate().getSeason();
             newSeed = switchingSeason(season);
+            AllCrops allCrops = AllCrops.sourceTypeToCraftType(newSeed.getType());
+            Plant newPlant = new Plant(newLocation, newSeed, false, allCrops);
+            App.getCurrentPlayerLazy().getOwnedFarm().getPlantOfFarm().add(newPlant);
+            return new Result(true, "You planting mixed seed in season " + season.name() + " and it appear to: " + newSeed.getName());
         }
         AllCrops allCrops = AllCrops.sourceTypeToCraftType(seedTypes);
         Plant newPlant = new Plant(newLocation, newSeed, false, allCrops);
@@ -131,6 +209,7 @@ public class FarmingController {
 
             for (int[][] squareOffsets : cornerOffsets) {
                 List<Plant> square = new ArrayList<>();
+                ArrayList<Location> locations = new ArrayList<>();
                 boolean allMatch = true;
 
                 for (int[] offset : squareOffsets) {
@@ -143,57 +222,48 @@ public class FarmingController {
                         allMatch = false;
                         break;
                     }
-                    square.add((Plant) loc.getObjectInTile());
+                    square.add(plant);
+                    locations.add(loc);
                 }
 
                 if (allMatch) {
-                    // Set all four plants as giant and tile type as GIANT_PLANT
                     System.out.println("This 4-location block became a giant plant:");
                     for (int i = 0; i < 4; i++) {
-                        int[] offset = squareOffsets[i];
-                        int gx = x + offset[0];
-                        int gy = y + offset[1];
-                        Location loc = App.getCurrentGame().getMainMap().findLocation(gx, gy);
+                        Location loc = locations.get(i);
                         loc.setTypeOfTile(TypeOfTile.GIANT_PLANT);
-                        Plant p = (Plant) loc.getObjectInTile();
+                        Plant p = square.get(i);
                         p.setGiantPlant(true);
                         System.out.println((i + 1) + ") " + p.getAllCrops().name() + " at location (" +
                                 loc.getxAxis() + ", " + loc.getyAxis() + ")");
                     }
 
-                    // Gather shared attributes from the square
                     boolean isWatered = square.stream().anyMatch(Plant::isHasBeenWatering);
                     boolean isFertilized = square.stream().anyMatch(Plant::isHasBeenFertilized);
                     int maxGrowth = square.stream().mapToInt(Plant::getAge).max().orElse(0);
 
-                    // Create the giant plant
-                    int mainX = x + squareOffsets[0][0];
-                    int mainY = y + squareOffsets[0][1];
-                    Location mainLoc = App.getCurrentGame().getMainMap().findLocation(mainX, mainY);
-
                     GiantPlants giantPlants = GiantPlants.sourceTypeToCraftType(seedTypes);
                     GiantPlant giantPlant = new GiantPlant(
                             giantPlants,
-                            mainLoc,
-                            allCrops,
+                            locations,
                             isFertilized,
                             isWatered,
-                            allCrops.totalHarvestTime, // assuming this method exists
+                            allCrops.totalHarvestTime,
                             0, // dayPast
                             0, // currentStage
                             maxGrowth
                     );
 
-                    mainLoc.setObjectInTile(giantPlant);
+                    locations.get(0).setObjectInTile(giantPlant);
+                    locations.get(1).setObjectInTile(giantPlant);
+                    locations.get(2).setObjectInTile(giantPlant);
+                    locations.get(3).setObjectInTile(giantPlant);
                     App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getGiantPlants().add(giantPlant);
 
                     for (Plant p : square) {
                         App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getPlantOfFarm().remove(p);
                     }
-
-                    break;
+                    break; // Only one giant plant per planting
                 }
-
             }
         }
         return new Result(true, seed + " planted on (" + x + ", " + y + ")");
@@ -237,7 +307,6 @@ public class FarmingController {
         SeedTypes chosenType = options.get(new Random().nextInt(options.size()));
         return new Seed(chosenType);
     }
-
 
     public Result showPlant(String x, String y) {
         int xAxis = Integer.parseInt(x);
@@ -380,30 +449,75 @@ public class FarmingController {
                 && !newLocation.getTypeOfTile().equals(TypeOfTile.GIANT_PLANT))
             return new Result(false, "there is no seed for reaping!");
         if (newLocation.getTypeOfTile().equals(TypeOfTile.PLANT)) {
-            Plant plant = (Plant) newLocation.getObjectInTile();
-            App.getCurrentGame().getMainMap().findLocation(x, y).setObjectInTile(null);
-            App.getCurrentGame().getMainMap().findLocation(x, y).setTypeOfTile(TypeOfTile.GROUND);
-            App.getCurrentPlayerLazy().getOwnedFarm().getPlantOfFarm().remove(plant);
-            ItemBuilder.addToBackPack(ItemBuilder.builder(plant.getAllCrops().name(), Quality.NORMAL), 1, Quality.NORMAL);
-            return new Result(true, plant.getAllCrops().name + " add to back pack of current player");
+            Plant plant = (Plant) newLocation.getObjectInTile();if(plant.getAge() < plant.getTotalTimeNeeded()){
+                return new Result(false, "GiantPlant can't be reached cause it stage can't be finished");
+            }
+            if(plant.getAllCrops().oneTime) {
+                App.getCurrentGame().getMainMap().findLocation(x, y).setObjectInTile(null);
+                App.getCurrentGame().getMainMap().findLocation(x, y).setTypeOfTile(TypeOfTile.GROUND);
+                App.getCurrentPlayerLazy().getOwnedFarm().getPlantOfFarm().remove(plant);
+                ItemBuilder.addToBackPack(ItemBuilder.builder(plant.getAllCrops().name(), Quality.NORMAL), 1, Quality.NORMAL);
+                for(Ability ability : App.getCurrentPlayerLazy().getAbilitis()){
+                    if(ability.getName().equalsIgnoreCase("Farming")){
+                        ability.increaseAmount(5);
+                    }
+                }
+                return new Result(true, plant.getAllCrops().name + " add to back pack of current player");
+            }else{
+                if(!plant.isOneTime()){
+                    plant.setRegrowthTime(plant.getRegrowthTime() + 1);
+                    if(plant.getRegrowthTime() == plant.getAllCrops().regrowthTime){
+                        plant.setRegrowthTime(0);
+                        plant.setOneTime(true);
+                    }
+                    return new Result(false, "We must wait until the delivery period arrives.");
+                }
+                else{
+                    ItemBuilder.addToBackPack(ItemBuilder.builder(plant.getAllCrops().name(), Quality.NORMAL), 1, Quality.NORMAL);
+                    for(Ability ability : App.getCurrentPlayerLazy().getAbilitis()){
+                        if(ability.getName().equalsIgnoreCase("Farming")){
+                            ability.increaseAmount(5);
+                        }
+                    }
+                    plant.setOneTime(false);
+                    plant.setRegrowthTime(0);
+                    return new Result(true, plant.getAllCrops().name + " add to back pack of current player");
+                }
+            }
         } else if(newLocation.getTypeOfTile().equals(TypeOfTile.TREE)) {
             Tree tree = (Tree) newLocation.getObjectInTile();
             App.getCurrentGame().getMainMap().findLocation(x, y).setObjectInTile(null);
             App.getCurrentGame().getMainMap().findLocation(x, y).setTypeOfTile(TypeOfTile.GROUND);
             App.getCurrentPlayerLazy().getOwnedFarm().getTrees().remove(tree);
-            //TODO:
-            ItemBuilder.addToBackPack(ItemBuilder.builder(tree.getType().name(), Quality.NORMAL), 1, Quality.NORMAL);
+            //TODO: fruit
+            for(Ability ability : App.getCurrentPlayerLazy().getAbilitis()){
+                if(ability.getName().equalsIgnoreCase("Farming")){
+                    ability.increaseAmount(5);
+                }
+            }
             return new Result(true, tree.getType().name + " add to back pack of current player");
         }else{
             GiantPlant giantPlant = (GiantPlant) newLocation.getObjectInTile();
-            App.getCurrentGame().getMainMap().findLocation(x, y).setObjectInTile(null);
-            App.getCurrentGame().getMainMap().findLocation(x, y).setTypeOfTile(TypeOfTile.GROUND);
-            App.getCurrentPlayerLazy().getOwnedFarm().getGiantPlants().remove(giantPlant);
-            //TODO:
-            ItemBuilder.addToBackPack(ItemBuilder.builder(giantPlant.getGiantPlants().name(), Quality.NORMAL), 1, Quality.NORMAL);
+            if(giantPlant.getAge() < giantPlant.getTotalTimeNeeded()){
+                return new Result(false, "GiantPlant can't be reached cause it stage can't be finished");
+            }
+            removeFromFarm(giantPlant);
+            ItemBuilder.addToBackPack(ItemBuilder.builder(giantPlant.getGiantPlants().getName(), Quality.NORMAL), 1, Quality.NORMAL);
+            for(Ability ability : App.getCurrentPlayerLazy().getAbilitis()){
+                if(ability.getName().equalsIgnoreCase("Farming")){
+                    ability.increaseAmount(5);
+                }
+            }
             return new Result(true, giantPlant.getGiantPlants().name + " add to back pack of current player");
         }
+    }
 
+    public void removeFromFarm(GiantPlant plant) {
+        for(Location location : plant.getLocation()){
+            System.out.println("you tack GiantPlant at " + location.getxAxis() + " " + location.getyAxis());
+            location.setObjectInTile(null);
+            location.setTypeOfTile(TypeOfTile.GROUND);
+        }
     }
 
     public Result howMuchWater() {
@@ -422,5 +536,20 @@ public class FarmingController {
             }
         }
         return new Result(true, output.toString());
+    }
+
+    public Result watering(int x, int y) {
+        Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
+        if(!App.getCurrentPlayerLazy().getCurrentTool().isWateringCan()){
+            return new Result(false, "There is no water for watering it!");
+        }
+        if(location.getTypeOfTile().equals(TypeOfTile.GROUND)){
+            location.setTypeOfTile(TypeOfTile.LAKE);
+        }
+        App.getCurrentPlayerLazy().getCurrentTool().use(location, App.getCurrentPlayerLazy().getCurrentTool().getLevel());
+        Plant plant = (Plant) location.getObjectInTile();
+        plant.setHasBeenWatering(true);
+        location.setObjectInTile(plant);
+        return new Result(true, "you watering to this plant!");
     }
 }

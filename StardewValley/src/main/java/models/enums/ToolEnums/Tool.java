@@ -2,6 +2,7 @@ package models.enums.ToolEnums;
 
 import models.Fundementals.Result;
 import models.ToolsPackage.ToolFunction;
+import models.ToolsPackage.Tools;
 import models.ToolsPackage.UpgradeFunction;
 import models.enums.Types.SeedTypes;
 import models.enums.Types.TypeOfTile;
@@ -83,27 +84,26 @@ public enum Tool {
         public ToolFunction getUseFunction() {
             return (location, skillLevel, tools) -> {
                 TypeOfTile tileType = location.getTypeOfTile();
-                models.ToolsPackage.Tools tool = (models.ToolsPackage.Tools) location.getObjectInTile();
 
                 if (tileType == TypeOfTile.LAKE) {
-                    if (tool != null && tool.isWateringCan()) {
-                        Result fillResult = tool.fillWateringCan();
-                        return new Result(true, "You filled your watering can to capacity: " + tool.getCapacity());
+                    if (tools != null && tools.isWateringCan()) {
+                        Result fillResult = tools.fillWateringCan();
+                        return new Result(true, "You filled your watering can to capacity: " + tools.getCapacity());
                     }
                     return new Result(true, "You filled your watering can");
                 }
 
-                if (tool != null && tool.isWateringCan()) {
-                    if (tool.getCurrentWater() <= 0) {
+                if (tools != null && tools.isWateringCan()) {
+                    if (tools.getCurrentWater() <= 0) {
                         return new Result(false, "Your watering can is empty! Fill it at a water source.");
                     }
 
-                    Result useResult = tool.useWater(1);
+                    Result useResult = tools.useWater(1);
                     if (!useResult.isSuccessful()) {
                         return useResult;
                     }
 
-                    return new Result(true, "You watered the soil. Water remaining: " + tool.getCurrentWater());
+                    return new Result(true, "You watered the soil. Water remaining: " + tools.getCurrentWater());
                 }
 
                 return new Result(true, "You watered the soil");

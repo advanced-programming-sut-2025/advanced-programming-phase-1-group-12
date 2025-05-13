@@ -4,10 +4,9 @@ import models.enums.Season;
 import models.enums.Types.FruitType;
 import models.enums.Types.SaplingTypes;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public enum TreeType {
+public enum foragingTreeType {
     APRICOT_TREE("Apricot Tree", SaplingTypes.ApricotSapling, 28, FruitType.Apricot, 1, 59, true, 38, 17, List.of(Season.SPRING), false),
     CHERRY_TREE("Cherry Tree", SaplingTypes.CherrySapling, 28, FruitType.Cherry, 1, 80, true, 38, 17, List.of(Season.SPRING), false),
     BANANA_TREE("Banana Tree", SaplingTypes.BananaSapling, 28, FruitType.Banana, 1, 150, true, 75, 33, List.of(Season.SUMMER), false),
@@ -37,8 +36,8 @@ public enum TreeType {
     public final List<Season> season;
     public final boolean canBeForaging;
 
-    TreeType(String name, SaplingTypes saplingTypes, int totalHarvestTime, FruitType product,
-             int productInterval, int baseSellPrice, boolean isEdible, int energy, int baseHealth, List<Season> season, boolean canBeForaging) {
+    foragingTreeType(String name, SaplingTypes saplingTypes, int totalHarvestTime, FruitType product,
+                     int productInterval, int baseSellPrice, boolean isEdible, int energy, int baseHealth, List<Season> season, boolean canBeForaging) {
         this.name = name;
         this.saplingTypes = saplingTypes;
         this.stages = List.of(7, 7, 7, 7).stream().mapToInt(Integer::intValue).toArray();
@@ -99,5 +98,14 @@ public enum TreeType {
 
     public String getName() {
         return name;
+    }
+
+    public static foragingTreeType nameToType(String name) {
+        for (foragingTreeType foragingTreeType : foragingTreeType.values()) {
+            if (foragingTreeType.name.equals(name)) {
+                return foragingTreeType;
+            }
+        }
+        return null;
     }
 }

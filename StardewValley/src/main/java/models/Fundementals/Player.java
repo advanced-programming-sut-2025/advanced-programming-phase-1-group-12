@@ -66,6 +66,7 @@ public class Player {
         this.rejectDate = null;
         initializeAbilities();
         initializerecepies();
+
     }
 
     public User getUser() {
@@ -272,6 +273,26 @@ public class Player {
 
     public void setCookingRecepies(Map<Cooking, Boolean> cookingRecepies) {
         this.cookingRecepies = cookingRecepies;
+    }
+
+    public void setAbilitis(ArrayList<Ability> abilitis) {
+        this.abilitis = abilitis;
+    }
+
+    public void setRefrigrator(Refrigrator refrigrator) {
+        Refrigrator = refrigrator;
+    }
+
+    public void setBackPack(BackPack backPack) {
+        this.backPack = backPack;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setMarried(boolean married) {
+        isMarried = married;
     }
 
     public Tools getCurrentTool() {

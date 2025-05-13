@@ -65,4 +65,8 @@ public enum GiantPlants {
         }
         return null;
     }
+
+    public String getName() {
+        return name;
+    }
 }
