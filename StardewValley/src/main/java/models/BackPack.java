@@ -186,6 +186,9 @@ public class BackPack {
     }
 
     public int getItemCount(Item item) {
+        if(item ==null){
+            return 0;
+        }
         for(Map.Entry<Item, Integer> entry : items.entrySet()) {
             if(entry.getKey().getName().equals(item.getName())) {
                 return entry.getValue();

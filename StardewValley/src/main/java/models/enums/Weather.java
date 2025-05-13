@@ -2,9 +2,9 @@ package models.enums;
 
 public enum Weather {
     SUNNY("Sunny"),
-    RAINY("Rain"),
-    STORM("Storm"),
-    SNOW("Snow");
+    RAINY("Rainy"),
+    STORM("Stormy"),
+    SNOW("Snowy");
     private final String name;
 
     Weather(String name) {
@@ -14,7 +14,7 @@ public enum Weather {
 
     public static Weather fromString(String name) {
         for (Weather type : Weather.values()) {
-            if (type.name.equals(name)) {
+            if (type.name.equalsIgnoreCase(name)) {
                 return type;
             }
         }

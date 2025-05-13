@@ -15,6 +15,7 @@ import models.enums.*;
 import models.Fundementals.Player;
 import com.google.gson.Gson;
 import models.enums.ToolEnums.BackPackTypes;
+import models.enums.ToolEnums.TrashcanTypes;
 import models.enums.Types.Cooking;
 import models.enums.Types.TypeOfTile;
 
@@ -120,7 +121,7 @@ public class GameMenuController implements MenuController {
     public Result showDate(){
         int currentDay = App.getCurrentGame().getDate().getDayOfMonth();
         int currentYear = App.getCurrentGame().getDate().getYear();
-        return new Result(true, String.format("%d/%d", currentYear, currentDay));
+        return new Result(true, String.format("Year: %d\n Day: %d\n", currentYear, currentDay));
     }
 
     public Result showDateTime(){
@@ -145,6 +146,7 @@ public class GameMenuController implements MenuController {
             return new Result( false, "Wrong Hour!");
         }
         App.getCurrentGame().getDate().changeAdvancedTime(hour);
+
         return new Result(true,"Time changed successfully!");
     }
 
@@ -156,6 +158,15 @@ public class GameMenuController implements MenuController {
             return new Result(false, "Wrong Day!");
         }
         App.getCurrentGame().getDate().changeAdvancedDay(days);
+        App.getCurrentGame().getDate().setHour(9);
+        if(App.getCurrentGame().getDate().getWeather().equals(Weather.STORM)){
+            Random random = new Random();
+            int x = random.nextInt(200) + 1;
+            int y = random.nextInt(200) + 1;
+            Result thorResult = Thor(x, y);
+            String result = "Day changed successfully! " + thorResult.getMessage();
+            return new Result(true,result);
+        }
         return new Result(true, "Day changed successfully!");
     }
 
@@ -181,15 +192,15 @@ public class GameMenuController implements MenuController {
     }
 
     public Result weatherForecast(Season season){
-        Weather weather = App.getCurrentGame().getDate().getWeather();
-        return new Result(true, Weather.getName(weather));
+        Weather possibleWeather = App.getCurrentGame().getDate().weatherForecast(season);
+        return new Result(true, Weather.getName(possibleWeather));
     }
 
 
     public Result cheatWeather(String type){
         Weather weather = Weather.fromString(type);
         App.getCurrentGame().getDate().setTommorowWeather(weather);
-        String result = "Weather cheated successfully!";
+        String result = "Weather cheated successfully! " + "Tomorrow's weather is: " + weather.name();
         return new Result(true, result);
     }
 
@@ -304,6 +315,11 @@ public class GameMenuController implements MenuController {
                     null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
             players.add(newPlayer);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Hoe", Quality.NORMAL), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("PickAxe", Quality.NORMAL), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("Axe", Quality.NORMAL), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("Watering can", Quality.NORMAL), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("Scythe", Quality.NORMAL), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("Trash Can", Quality.NORMAL), 1);
 
             System.out.println("Do you want to know what each farm has?");
             String selection = scanner.nextLine();
@@ -643,8 +659,8 @@ public class GameMenuController implements MenuController {
             return new Result(false, "cooking not found!");
         }
 
-        if (App.getCurrentGame().getCurrentPlayer().getBackPack().getItemByName(recipe) == null) {
-            return  new Result(false, "recipe not found!");
+        if (!App.getCurrentGame().getCurrentPlayer().getCookingRecepies().get(recipe)) {
+            return  new Result(false, "you do not know this recepie");
         }
 
         if(!player.getBackPack().checkCapacity(1)){
@@ -698,6 +714,9 @@ public class GameMenuController implements MenuController {
 
     public Result Thor(int x, int y) {
         Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
+        if(location.getTypeOfTile().equals(TypeOfTile.GREENHOUSE)){
+            return  new Result(false, "Lightning doesn't have effect on GreenHouse!");
+        }
         location.setTypeOfTile(TypeOfTile.BURNED_GROUND);
         return new Result(true, "Lightning struck the map at location" + x + ", " + y);
     }
@@ -706,7 +725,9 @@ public class GameMenuController implements MenuController {
         List<Player> players = App.getCurrentGame().getPlayers();
         List<ShippingBin> shippingBins = new ArrayList<>();
         for (Player player : players) {
-            shippingBins.add(player.getShippingBin());
+            if(player.getShippingBin() != null){
+                shippingBins.add(player.getShippingBin());
+            }
         }
         for (ShippingBin shippingBin : shippingBins) {
             for(Item item: shippingBin.getShippingItem(shippingBin.getShippingItemMap())){
@@ -792,15 +813,32 @@ public class GameMenuController implements MenuController {
     }
 
     public void sellItem(Player player, Item item) {
-        Quality quality = item.getQuality();
-        if(quality == null){
-            quality = Quality.NORMAL;
+//        Quality quality = item.getQuality();
+//        if(quality == null){
+//            quality = Quality.NORMAL;
+//        }
+//        int price = item.getPrice();
+//        int returnPrice =(int) (price * quality.getPriceMultiPlier());
+//        int count = player.getBackPack().getItemCount(item);
+//        player.getBackPack().decreaseItem(item, count);
+//        player.increaseMoney(returnPrice * count);
+    }
+
+    public Result buildGreenHouse(){
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        if(player.getMoney() < 1000 ){
+            return new Result(false, "You don't have enough money to build green house.");
         }
-        int price = item.getPrice();
-        int returnPrice =(int) (price * quality.getPriceMultiPlier());
-        int count = player.getBackPack().getItemCount(item);
-        player.getBackPack().decreaseItem(item, count);
-        player.increaseMoney(returnPrice * count);
+        if(player.getBackPack().getItemCount(player.getBackPack().getItemByName("Wood")) < 500){
+            return new Result(false, "You don't have enough woods to build green house.");
+        }
+
+        //build greenhouse
+        player.decreaseMoney(1000);
+        player.getBackPack().decreaseItem(player.getBackPack().getItemByName("Wood"), 500);
+        String message = "You built a green house!, Money (-1000) / Wood (-500)\n" + "Money: " +player.getMoney() +
+                "\nWood: " + player.getBackPack().getItemCount(player.getBackPack().getItemByName("Wood")) + "\n";
+        return new Result(true, message);
     }
 
 }

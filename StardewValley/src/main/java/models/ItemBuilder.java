@@ -10,6 +10,7 @@ import models.ToolsPackage.Tools;
 import models.enums.FishDetails;
 import models.enums.ToolEnums.Tool;
 import models.enums.Types.*;
+import models.enums.foraging.Seed;
 import models.enums.foraging.*;
 
 import java.util.Map;

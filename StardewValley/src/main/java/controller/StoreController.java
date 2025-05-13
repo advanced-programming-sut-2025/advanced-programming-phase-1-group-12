@@ -12,6 +12,8 @@ import models.ProductsPackage.Quality;
 import models.ProductsPackage.StoreProducts;
 import models.enums.Animal;
 import models.enums.Season;
+import models.enums.Types.Cooking;
+import models.enums.Types.CraftingRecipe;
 import models.enums.Types.StoreProductsTypes;
 import models.enums.Types.TypeOfTile;
 import java.util.List;
@@ -83,7 +85,7 @@ public class StoreController {
                 break;
             case "barn":
                 App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getAnimalHomes().add
-                        (new AnimalHome(4, "normal barn", buildingPlace));
+                        (new AnimalHome(4, "barn", buildingPlace));
                 break;
             case "deluxe barn":
                 App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getAnimalHomes().add
@@ -222,6 +224,17 @@ public class StoreController {
             return new Result(false, "You do not have enough money to buy this product");
         }
         App.getCurrentPlayerLazy().decreaseMoney(price*Count);
+        for(CraftingRecipe craftingRecipe : CraftingRecipe.values()){
+            if(productName.equalsIgnoreCase(craftingRecipe.getName())){
+                App.getCurrentPlayerLazy().getRecepies().put(craftingRecipe, true);
+                return new Result(true, "You bought this recepie");
+            }
+        }for(Cooking craftingRecipe : Cooking.values()){
+            if(productName.equalsIgnoreCase(craftingRecipe.getName())){
+                App.getCurrentPlayerLazy().getCookingRecepies().put(craftingRecipe, true);
+                return new Result(true, "You bought this recepie");
+            }
+        }
         ItemBuilder.addToBackPack(item, Count, Quality.NORMAL);
 
         return new Result(true, "You bought this product");

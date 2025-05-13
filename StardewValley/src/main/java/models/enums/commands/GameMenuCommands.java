@@ -7,6 +7,7 @@ public enum GameMenuCommands implements Commands {
 
     //hand-made cheat codes
     SHOW_MONEY("show money"),
+    ABILITIES_SHOW("abilities show"),
     //Starting Game
     PLAY("^\\s*game new -u ([\\w-]+)(?: ([\\w-]+))?(?: ([\\w-]+))?\\s*$"),
     PRINT("^print map -l (?<X>.*), (?<Y>.*) -s (?<size>.*)$"),
@@ -38,8 +39,8 @@ public enum GameMenuCommands implements Commands {
     DAY_OF_WEEK("^day\\s+of\\s+the\\s+week$"),
     WEATHER("^weather$"),
     WEATHER_FORECAST("^weather\\s+forecast$"),
-    CHEAT_ADVANCED_TIME("^cheat advance time (?<time>.*)h$"),
-    CHEAT_ADVANCED_DATE("^cheat advance date (?<date>.*)d$"),
+    CHEAT_ADVANCED_TIME("^cheat advance time (?<time>.*) h$"),
+    CHEAT_ADVANCED_DATE("^cheat advance date (?<date>.*) d$"),
     CHEAT_WEATHER_SET("^cheat\\s+weather\\s+set\\s+(?<type>.*)$"),
     CHEAT_THOR("^cheat\\s+Thor\\s+-l\\s+<(\\S+),(\\S+)>"),
     ENERGY_SHOW("^energy\\s+show$"),
@@ -67,8 +68,8 @@ public enum GameMenuCommands implements Commands {
     FISHING("fishing -p (?<fishingPole>.*)"),
 
     //Faravari commands
-    ARTISAN_USE("artisan use (?<artisanName>.*) (?<itemName>.*)"),
-    ARTISAN_GET("artisan get (?<itemName>.*)"),
+    ARTISAN_USE("artisan use -a (?<artisanName>.*) -i (?<itemName>.*)"),
+    ARTISAN_GET("artisan get -i (?<itemName>.*)"),
 
     //Cooking commands
     COOKING_REFRIGERATOR("cooking refrigrator -n (?<name>.*)"),

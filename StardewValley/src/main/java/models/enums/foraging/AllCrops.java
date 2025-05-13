@@ -127,4 +127,8 @@ public enum AllCrops {
                 ", canBecomeGiant=" + canBecomeGiant +
                 '}';
     }
+
+    public String getName() {
+        return name;
+    }
 }

@@ -12,6 +12,7 @@ import models.RelatedToUser.User;
 import models.RelationShips.RelationShip;
 import models.RelationShips.Trade;
 import models.ToolsPackage.Tools;
+import models.enums.Types.Cooking;
 import models.enums.Types.CraftingRecipe;
 
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ public class Player {
     private int money;
     private Player partner;
     private Map<CraftingRecipe, Boolean> recepies;
-    private ArrayList<Ability> abilities;
+    private Map<Cooking, Boolean> cookingRecepies = new HashMap<>();
     private ArrayList<Trade> trades = new ArrayList<>();
     private Tools currentTool;
     private Map<NPC, Date> metDates;
@@ -64,6 +65,7 @@ public class Player {
         this.shippingBin = null;
         this.rejectDate = null;
         initializeAbilities();
+        initializerecepies();
     }
 
     public User getUser() {
@@ -179,9 +181,20 @@ public class Player {
         abilitis.add(new Ability("Farming", 0));
         abilitis.add(new Ability("Foraging", 0));
     }
+
+    private void initializerecepies() {
+        Map<CraftingRecipe, Boolean> recepies = new HashMap();
+        for(CraftingRecipe craftingRecipe : CraftingRecipe.values()){
+            recepies.put(craftingRecipe, false);
+        }
+        Map<Cooking, Boolean> cookings = new HashMap();
+        for(Cooking cooking : Cooking.values()){
+            cookings.put(cooking, false);
+        }
+    }
     public Ability getAbilityByName(String name){
         for(Ability ability : abilitis){
-            if(ability.getName().equals(name)){
+            if(ability.getName().equalsIgnoreCase(name)){
                 return ability;
             }
         }
@@ -251,6 +264,14 @@ public class Player {
 
     public void setRejectDate(Date rejectDate) {
         this.rejectDate = rejectDate;
+    }
+
+    public Map<Cooking, Boolean> getCookingRecepies() {
+        return cookingRecepies;
+    }
+
+    public void setCookingRecepies(Map<Cooking, Boolean> cookingRecepies) {
+        this.cookingRecepies = cookingRecepies;
     }
 }
 

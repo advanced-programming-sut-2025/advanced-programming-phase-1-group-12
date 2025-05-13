@@ -7,6 +7,7 @@ import models.Fundementals.App;
 import models.Fundementals.Game;
 import models.Fundementals.Location;
 import models.Fundementals.Result;
+import models.RelatedToUser.Ability;
 import models.enums.commands.GameMenuCommands;
 
 import java.util.ArrayList;
@@ -55,7 +56,7 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.SEASON.getMather(input)) != null) {
             showCurrentSeason();
         } else if ((matcher = GameMenuCommands.WEATHER.getMather(input)) != null) {
-            season();
+            System.out.println(controller.showWeather().getMessage());
         } else if ((matcher = GameMenuCommands.WEATHER_FORECAST.getMather(input)) != null) {
             weatherForecast();
         } else if ((matcher = GameMenuCommands.CHEAT_WEATHER_SET.getMather(input)) != null) {
@@ -233,7 +234,7 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.MACK_CRAFT.getMather(input)) != null) {
             System.out.println(craftingController.makeCraft(matcher.group("itemName")));
         } else if ((matcher = GameMenuCommands.SHOW_RECIPES.getMather(input)) != null) {
-//            System.out.println(craftingController.showRecipes());
+            System.out.println(craftingController.showRecipes());
         } else if ((matcher = GameMenuCommands.THOR.getMather(input)) != null) {
             System.out.println(controller.Thor(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.WHICH_FERTILIZING.getMather(input)) != null) {
@@ -260,12 +261,17 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.SELL.getMather(input))!= null) {
             System.out.println(controller.sellByShipping(matcher.group("productName"), matcher.group("count")).getMessage());
         } else if ((matcher = GameMenuCommands.SELL_ONE.getMather(input))!= null) {
-            System.out.println(controller.sellByShippingWithoutCount(matcher.group("product_name")).getMessage());
+            System.out.println(controller.sellByShippingWithoutCount(matcher.group("productName")).getMessage());
         } else if ((matcher = GameMenuCommands.ARTISAN_GET.getMather(input)) != null) {
             System.out.println(artisanController.artisanGet(matcher.group("itemName")));
         } else if ((matcher = GameMenuCommands.ARTISAN_USE.getMather(input)) != null) {
             System.out.println(artisanController.artisanUse(matcher.group("artisanName"), matcher.group("itemName")));
-            System.out.println(controller.sellByShippingWithoutCount(matcher.group("productName")).getMessage());
+        } else if ((matcher = GameMenuCommands.GREENHOUSE_BUILD.getMather(input))!=null) {
+            System.out.println(controller.buildGreenHouse());
+        } else if ((matcher = GameMenuCommands.ABILITIES_SHOW.getMather(input)) != null) {
+            for(Ability ability: App.getCurrentPlayerLazy().getAbilitis()){
+                System.out.println(ability.getName() +" "+ ability.getLevel()+" "+ability.getAmount());
+            }
         } else {
             System.out.println("invalid command");
         }

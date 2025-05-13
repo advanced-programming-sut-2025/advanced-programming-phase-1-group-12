@@ -1,5 +1,6 @@
 package models.enums.Types;
 
+import models.enums.FishDetails;
 import models.enums.Season;
 import java.util.List;
 
@@ -44,5 +45,13 @@ public enum TreeType {
         this.energy = energy;
         this.baseHealth = baseHealth;
         this.season = season;
+    }
+
+    public String getProduct() {
+        return product;
+    }
+
+    public int getEnergy() {
+        return energy;
     }
 }
