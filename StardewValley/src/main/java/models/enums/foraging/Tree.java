@@ -5,7 +5,7 @@ import models.enums.Types.FruitType;
 import models.enums.Types.SaplingTypes;
 
 public class Tree {
-    private TreeType type;
+    private foragingTreeType type;
     private boolean hasBeenFertilized;
     private SaplingTypes saplingTypes;
     private Location location;
@@ -17,7 +17,7 @@ public class Tree {
     private boolean isForaging;
     private FruitType fruitType;
 
-    public Tree(Location location, TreeType type, boolean isForaging, FruitType fruitType) {
+    public Tree(Location location, foragingTreeType type, boolean isForaging, FruitType fruitType) {
         this.type = type;
         this.location = location;
         this.hasBeenFertilized = false;
@@ -31,7 +31,7 @@ public class Tree {
         this.fruitType = fruitType;
     }
 
-    public TreeType getType() {
+    public foragingTreeType getType() {
         return type;
     }
 
@@ -99,7 +99,7 @@ public class Tree {
         this.saplingTypes = saplingTypes;
     }
 
-    public void setType(TreeType type) {
+    public void setType(foragingTreeType type) {
         this.type = type;
     }
 

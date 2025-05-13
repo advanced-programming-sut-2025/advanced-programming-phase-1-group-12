@@ -4,7 +4,6 @@ import controller.*;
 import controller.MenusController.GameMenuController;
 import controller.movingPlayer.UserLocationController;
 import models.Fundementals.App;
-import models.Fundementals.Game;
 import models.Fundementals.Location;
 import models.Fundementals.Result;
 import models.RelatedToUser.Ability;
@@ -216,6 +215,12 @@ public class GameMenu extends AppMenu {
             System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.CRAFT_INFO.getMather(input)) != null) {
             System.out.println(farmingController.showCraftInto(matcher.group("craftName")));
+        } else if ((matcher = GameMenuCommands.FORAGING_TREE_TYPE.getMather(input)) != null) {
+            System.out.println(farmingController.showForagingTreeInfo(matcher.group("type")));
+        } else if ((matcher = GameMenuCommands.TREE_TYPE.getMather(input)) != null) {
+            System.out.println(farmingController.showTreeInfo(matcher.group("type")));
+        } else if ((matcher = GameMenuCommands.FORAGING_CROPS.getMather(input)) != null) {
+            System.out.println(farmingController.showForagingCropsInfo(matcher.group("type")));
         } else if ((matcher = GameMenuCommands.PLANT.getMather(input)) != null) {
             System.out.println(farmingController.plant(matcher.group("seed"), matcher.group("direction")));
         } else if ((matcher = GameMenuCommands.SHOW_PLANT.getMather(input)) != null) {
@@ -224,6 +229,9 @@ public class GameMenu extends AppMenu {
             System.out.println(farmingController.fertilize(matcher.group("fertilize"), matcher.group("direction")));
         } else if ((matcher = GameMenuCommands.REAPING.getMather(input)) != null) {
             System.out.println(farmingController.reaping(matcher.group("direction")));
+        } else if ((matcher = GameMenuCommands.WATERING.getMather(input)) != null) {
+            System.out.println(farmingController.watering(Integer.parseInt(matcher.group("X")),
+                    Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.HOW_MUCH_WATER.getMather(input)) != null) {
             System.out.println(farmingController.howMuchWater());
         } else if ((matcher = GameMenuCommands.ADD_TO_INVENTORY.getMather(input)) != null) {

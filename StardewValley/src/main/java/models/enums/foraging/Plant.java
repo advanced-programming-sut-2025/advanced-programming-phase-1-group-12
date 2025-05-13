@@ -14,22 +14,42 @@ public class Plant extends Item {
     private int currentStage ;
     private int age;
     private boolean isForaging;
+    private boolean isOneTime;
+    private int regrowthTime;
     private boolean isGiantPlant;
 //    private Quality quality;
 
     public Plant(Location location, Seed seed, boolean isForaging, AllCrops allCrops){
-        super(allCrops.name());
+        super(seed.getName());
         this.location = location;
         this.seed = seed;
-        hasBeenFertilized = false;
-        dayPast = 2;
+        this.hasBeenFertilized = false;
+        this.dayPast = 2;
         this.currentStage = 0;
         this.age = 0;
+        this.isOneTime = true;
         this.isForaging = isForaging;
         this.totalTimeNeeded = seed.getType().getDay();
         this.allCrops = allCrops;
         this.hasBeenWatering = false;
+        this.regrowthTime = 0;
 //        this.quallity = ....;
+    }
+
+    public boolean isOneTime() {
+        return isOneTime;
+    }
+
+    public void setOneTime(boolean oneTime) {
+        isOneTime = oneTime;
+    }
+
+    public int getRegrowthTime() {
+        return regrowthTime;
+    }
+
+    public void setRegrowthTime(int regrowthTime) {
+        this.regrowthTime = regrowthTime;
     }
 
     public boolean isGiantPlant() {
@@ -118,6 +138,10 @@ public class Plant extends Item {
 
     public void setHasBeenFertilized(boolean hasBeenFertilized) {
         this.hasBeenFertilized = hasBeenFertilized;
+    }
+
+    public void decreaseDayPast() {
+        dayPast--;
     }
 
 }

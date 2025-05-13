@@ -125,6 +125,7 @@ public enum StoreProductsTypes {
     GENERAL_STORE_CRANBERRY_SEEDS("Cranberry Seeds", 0, 0, 300, 0, 5, "JojaMart"),
     GENERAL_STORE_FAIRY_SEEDS("Fairy Seeds", 0, 0, 250, 0, 5, "JojaMart"),
     GENERAL_STORE_RARE_SEED("Rare Seed", 0, 0, 1000, 0, 1, "JojaMart"),
+    GENERAL_STORE_MIXED_SEEDS("Mixed Seeds", 0, 0, 0, 0, 10, "JojaMart"),
 
     // Winter Seeds
     GENERAL_STORE_POWDERMELON_SEEDS("Powdermelon Seeds", 0, 0, 0, 20, 10, "JojaMart"),

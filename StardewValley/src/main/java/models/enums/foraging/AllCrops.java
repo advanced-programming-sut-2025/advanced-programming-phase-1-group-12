@@ -42,13 +42,13 @@ public enum AllCrops {
     CRANBERRIES("Cranberries", SeedTypes.CRANBERRYSeeds, "1-2-1-1-2", 7, false, 5, 75, true, 38, 17, List.of(Season.AUTUMN), false),
     EGGPLANT("Eggplant", SeedTypes.EggplantSeeds, "1-1-1-1", 5, false, 5, 60, true, 20, 9, List.of(Season.AUTUMN), false),
     FAIRY_ROSE("Fairy Rose", SeedTypes.FairySeeds, "1-4-4-3", 12, true, -1, 290, true, 45, 20, List.of(Season.AUTUMN), false),
-    GRAPE("Grape", SeedTypes.GarlicSeeds, "1-1-2-3-3", 10, false, 3, 80, true, 38, 17, List.of(Season.AUTUMN), false),
+    GRAPE("Grape", SeedTypes.GrapeStarter, "1-1-2-3-3", 10, false, 3, 80, true, 38, 17, List.of(Season.AUTUMN), false),
     PUMPKIN("Pumpkin", SeedTypes.PumpkinSeeds, "1-2-3-4-3", 13, true, -1, 320, false, -1, -1, List.of(Season.AUTUMN), true),
     YAM("Yam", SeedTypes.YamSeeds, "1-3-3-3", 10, true, -1, 160, true, 45, 20, List.of(Season.AUTUMN), false),
     SWEET_GEM_BERRY("Sweet Gem Berry", SeedTypes.RARE_SEEDS, "2-4-6-6-6", 24, true, -1, 3000, false, -1, -1, List.of(Season.AUTUMN), false),
     POWDERMELON("Powdermelon", SeedTypes.POWDER_MELON_SEEDS, "1-2-1-2-1", 7, true, -1, 60, true, 63, 28, List.of(Season.WINTER), true),
-    ANCIENT_FRUIT("Ancient Fruit", SeedTypes.AncientSeeds, "2-7-7-7-5", 28, false, 7, 550, false, -1, -1, List.of(Season.SPRING, Season.SUMMER, Season.AUTUMN), false);
-
+    ANCIENT_FRUIT("Ancient Fruit", SeedTypes.AncientSeeds, "2-7-7-7-5", 28, false, 7, 550, false, -1, -1, List.of(Season.SPRING, Season.SUMMER, Season.AUTUMN), false),
+    GRASS_STARTER("Grass Starter", SeedTypes.GrassStarter, "1-1-1", 3, true, -1, 60, false, 0, 28, List.of(Season.WINTER, Season.AUTUMN, Season.SUMMER, Season.SPRING), false );
     public final String name;
     public final SeedTypes source;
     public final int[] stages;
@@ -86,10 +86,6 @@ public enum AllCrops {
             result[i] = Integer.parseInt(parts[i]);
         }
         return result;
-    }
-
-    public String getName(){
-        return name;
     }
 
     public static AllCrops nameToCraftType(String name){
