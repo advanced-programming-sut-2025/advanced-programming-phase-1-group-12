@@ -710,6 +710,9 @@ public class GameMenuController implements MenuController {
 
     public Result Thor(int x, int y) {
         Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
+        if(location.getTypeOfTile().equals(TypeOfTile.GREENHOUSE)){
+            return  new Result(false, "Lightning doesn't have effect on GreenHouse!");
+        }
         location.setTypeOfTile(TypeOfTile.BURNED_GROUND);
         return new Result(true, "Lightning struck the map at location" + x + ", " + y);
     }
@@ -815,6 +818,21 @@ public class GameMenuController implements MenuController {
         int count = player.getBackPack().getItemCount(item);
         player.getBackPack().decreaseItem(item, count);
         player.increaseMoney(returnPrice * count);
+    }
+
+    public Result buildGreenHouse(){
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        if(player.getMoney() < 1000 ||
+                player.getBackPack().getItemCount(player.getBackPack().getItemByName("Wood")) < 500){
+            return new Result(false, "You don't have enough money to build green house.");
+        }
+
+        //build greenhouse
+        player.decreaseMoney(1000);
+        player.getBackPack().decreaseItem(player.getBackPack().getItemByName("Wood"), 500);
+        String message = "You built a green house!, Money (-1000) / Wood (-500)\n" + "Money: " +player.getMoney() +
+                "\nWood: " + player.getBackPack().getItemCount(player.getBackPack().getItemByName("Wood")) + "\n";
+        return new Result(true, message);
     }
 
 }

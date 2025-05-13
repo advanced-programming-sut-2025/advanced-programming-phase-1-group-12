@@ -265,11 +265,10 @@ public class GameMenu extends AppMenu {
             System.out.println(artisanController.artisanGet(matcher.group("itemName")));
         } else if ((matcher = GameMenuCommands.ARTISAN_USE.getMather(input)) != null) {
             System.out.println(artisanController.artisanUse(matcher.group("artisanName"), matcher.group("itemName")));
-        } else if ((matcher = GameMenuCommands.SELL.getMather(input)) != null) {
             System.out.println(controller.sellByShippingWithoutCount(matcher.group("productName")).getMessage());
-        }
-
-         else {
+        } else if ((matcher = GameMenuCommands.GREENHOUSE_BUILD.getMather(input))!=null) {
+            System.out.println(controller.buildGreenHouse());
+        } else {
             System.out.println("invalid command");
         }
 
