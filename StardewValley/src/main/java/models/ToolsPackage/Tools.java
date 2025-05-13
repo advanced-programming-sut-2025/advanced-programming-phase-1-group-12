@@ -4,6 +4,7 @@ import models.Fundementals.App;
 import models.Fundementals.Location;
 import models.Fundementals.Result;
 import models.Item;
+import models.ProductsPackage.Quality;
 import models.enums.ToolEnums.Tool;
 import models.enums.ToolEnums.ToolTypes;
 
@@ -14,6 +15,7 @@ public class Tools extends Item {
     private UpgradeFunction upgradeFunction;
     private Tool toolType;
     private ToolTypes type;
+
 
     // watering can
     private int capacity;

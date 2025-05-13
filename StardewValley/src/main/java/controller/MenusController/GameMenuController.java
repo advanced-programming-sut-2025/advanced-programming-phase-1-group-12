@@ -726,11 +726,11 @@ public class GameMenuController implements MenuController {
         for (Player player : players) {
             shippingBins.add(player.getShippingBin());
         }
-//        for (ShippingBin shippingBin : shippingBins) {
-//            for(Item item: shippingBin.getShippingItem(shippingBin.getShippingItemMap())){
-//                sellItem(shippingBin.getOwner(), item);
-//            }
-//        }
+        for (ShippingBin shippingBin : shippingBins) {
+            for(Item item: shippingBin.getShippingItem(shippingBin.getShippingItemMap())){
+                sellItem(shippingBin.getOwner(), item);
+            }
+        }
     }
 
     private boolean isNearShippingBin(Player player) {
@@ -741,16 +741,12 @@ public class GameMenuController implements MenuController {
         Location playerLocation = player.getUserLocation();
         Location binLocation = player.getShippingBin().getShippingBinLocation();
 
-        // Calculate Manhattan distance (|x1 - x2| + |y1 - y2|)
-        int distance = Math.abs(playerLocation.getxAxis() - binLocation.getxAxis()) + 
+        int distance = Math.abs(playerLocation.getxAxis() - binLocation.getxAxis()) +
                        Math.abs(playerLocation.getyAxis() - binLocation.getyAxis());
-
-        // Player is near if distance is 1 or less (same tile or adjacent)
         return distance <= 1;
     }
 
     private boolean canBeSold(Item item) {
-        // Check if the item is of a sellable type
         String className = item.getClass().getSimpleName();
         return className.equalsIgnoreCase("AnimalProducts") || 
                className.equals("StoreProducts");
@@ -759,19 +755,16 @@ public class GameMenuController implements MenuController {
     public Result sellByShipping(String product, String count) {
         Player player = App.getCurrentGame().getCurrentPlayer();
 
-        // Check if player is near a shipping bin
         if (!isNearShippingBin(player)) {
             return new Result(false, "You need to be near a shipping bin to sell items.");
         }
 
-        // Check if player has the item
         if (!player.getBackPack().hasItem(product)) {
             return new Result(false, "You don't have this product.");
         }
 
         Item item = player.getBackPack().getItemByName(product);
 
-        // Check if the item can be sold
         if (!canBeSold(item)) {
             return new Result(false, "This product cannot be sold.");
         }
@@ -779,15 +772,12 @@ public class GameMenuController implements MenuController {
         int requestedCount = Integer.parseInt(count);
         int availableCount = player.getBackPack().getItemCount(item);
 
-        // Check if player has enough of the item
         if (availableCount < requestedCount) {
             return new Result(false, "You don't have enough of this product.");
         }
 
-        // Remove item from inventory
         player.getBackPack().decreaseItem(item, requestedCount);
 
-        // Add item to shipping bin
         player.getShippingBin().addShippingItem(item, requestedCount);
 
         return new Result(true, "Item put in shipping bin!");
@@ -819,91 +809,16 @@ public class GameMenuController implements MenuController {
         return new Result(true, "Item put in shipping bin!");
     }
 
-    public void sellItem(Player player, Item item){
-        int basePrice = 0;
-        Quality quality = Quality.NORMAL;
-
-        try {
-            if (item.getClass().getSimpleName().equalsIgnoreCase("AnimalProducts")) {
-                java.lang.reflect.Field qualityField = item.getClass().getDeclaredField("quality");
-                qualityField.setAccessible(true);
-                quality = (Quality) qualityField.get(item);
-
-                java.lang.reflect.Field animalProductField = item.getClass().getDeclaredField("animalProduct");
-                animalProductField.setAccessible(true);
-                Object animalProduct = animalProductField.get(item);
-
-                java.lang.reflect.Method getPriceMethod = animalProduct.getClass().getMethod("getPrice");
-                basePrice = (int) getPriceMethod.invoke(animalProduct);
-            } 
-            else if (item.getClass().getSimpleName().equals("StoreProducts")) {
-                java.lang.reflect.Method getTypeMethod = item.getClass().getMethod("getType");
-                Object storeProductType = getTypeMethod.invoke(item);
-
-                Season currentSeason = App.getCurrentGame().getDate().getSeason();
-
-                java.lang.reflect.Method getPriceMethod;
-                switch (currentSeason) {
-                    case SPRING:
-                        getPriceMethod = storeProductType.getClass().getMethod("getSpringPrice");
-                        basePrice = (int) getPriceMethod.invoke(storeProductType);
-                        break;
-                    case SUMMER:
-                        getPriceMethod = storeProductType.getClass().getMethod("getSummerPrice");
-                        basePrice = (int) getPriceMethod.invoke(storeProductType);
-                        break;
-                    case AUTUMN:
-                        getPriceMethod = storeProductType.getClass().getMethod("getFallPrice");
-                        basePrice = (int) getPriceMethod.invoke(storeProductType);
-                        break;
-                    case WINTER:
-                        getPriceMethod = storeProductType.getClass().getMethod("getWinterPrice");
-                        basePrice = (int) getPriceMethod.invoke(storeProductType);
-                        break;
-                }
-
-                if (basePrice == 0) {
-                    java.lang.reflect.Method getSpringPriceMethod = storeProductType.getClass().getMethod("getSpringPrice");
-                    java.lang.reflect.Method getSummerPriceMethod = storeProductType.getClass().getMethod("getSummerPrice");
-                    java.lang.reflect.Method getFallPriceMethod = storeProductType.getClass().getMethod("getFallPrice");
-                    java.lang.reflect.Method getWinterPriceMethod = storeProductType.getClass().getMethod("getWinterPrice");
-
-                    int springPrice = (int) getSpringPriceMethod.invoke(storeProductType);
-                    int summerPrice = (int) getSummerPriceMethod.invoke(storeProductType);
-                    int fallPrice = (int) getFallPriceMethod.invoke(storeProductType);
-                    int winterPrice = (int) getWinterPriceMethod.invoke(storeProductType);
-
-                    int cheapestPrice = Math.min(
-                        Math.min(springPrice, summerPrice),
-                        Math.min(fallPrice, winterPrice)
-                    );
-
-                    if (cheapestPrice == 0) {
-                        cheapestPrice = Integer.MAX_VALUE;
-                        if (springPrice > 0) {
-                            cheapestPrice = Math.min(cheapestPrice, springPrice);
-                        }
-                        if (summerPrice > 0) {
-                            cheapestPrice = Math.min(cheapestPrice, summerPrice);
-                        }
-                        if (fallPrice > 0) {
-                            cheapestPrice = Math.min(cheapestPrice, fallPrice);
-                        }
-                        if (winterPrice > 0) {
-                            cheapestPrice = Math.min(cheapestPrice, winterPrice);
-                        }
-                    }
-
-                    if (cheapestPrice != Integer.MAX_VALUE) {
-                        basePrice = cheapestPrice / 2;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            basePrice = 10;
+    public void sellItem(Player player, Item item) {
+        Quality quality = item.getQuality();
+        if(quality == null){
+            quality = Quality.NORMAL;
         }
-        int finalPrice = (int)(basePrice * quality.getPriceMultiPlier());
-        player.increaseMoney(finalPrice);
+        int price = item.getPrice();
+        int returnPrice =(int) (price * quality.getPriceMultiPlier());
+        int count = player.getBackPack().getItemCount(item);
+        player.getBackPack().decreaseItem(item, count);
+        player.increaseMoney(returnPrice * count);
     }
 
 }
