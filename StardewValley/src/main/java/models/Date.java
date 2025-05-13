@@ -179,6 +179,9 @@ public class Date {
     public void updateAllPlants() {
         for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
             for (Plant plant : farm.getPlantOfFarm()) {
+                if(plant.isHasBeenWatering()){
+                    continue;
+                }
                 if (!plant.isHasBeenFertilized()) {
                     plant.setDayPast(plant.getDayPast() - 1);
                     if (plant.getDayPast() <= 0) {

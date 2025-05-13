@@ -83,7 +83,8 @@ public class GameMenu extends AppMenu {
             Result result = toolsController.equipTool(matcher.group("toolName"));
             System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.Picking_FRUIT.getMather(input)) != null) {
-            System.out.println();
+            System.out.println(farmingController.PickingFruit(Integer.parseInt(matcher.group("X")),
+                    Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.SHOW_AVAILABLE_TOOL.getMather(input)) != null) {
             Result result = toolsController.showToolsAvailable();
             System.out.println(result.getMessage());
