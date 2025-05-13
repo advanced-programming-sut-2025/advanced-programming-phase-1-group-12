@@ -7,6 +7,7 @@ import models.Fundementals.Location;
 import models.Fundementals.LocationOfRectangle;
 import models.Fundementals.Player;
 import models.Place.Farm;
+import models.ProductsPackage.ArtisanItem;
 import models.enums.Season;
 import models.enums.Types.SeedTypes;
 import models.enums.Types.TypeOfTile;
@@ -44,6 +45,7 @@ public class Date {
 
     public void changeAdvancedTime(int hour) {
         this.hour += hour;
+        artisansUpdate(hour);
         if (this.hour > 22) {
             this.hour -= 13;
             changeAdvancedDay(1);
@@ -56,6 +58,15 @@ public class Date {
             changesDayAnimal();
             attackingCrow();
         }
+    }
+
+    public void artisansUpdate(int hour) {
+        for (Player player : App.getCurrentGame().getPlayers()) {
+            for (ArtisanItem item : player.getArtisansGettingProcessed()) {
+                item.setHoursRemained(item.getHoursRemained() - hour);
+            }
+        }
+
     }
 
     public void attackingCrow() {
@@ -315,6 +326,7 @@ public class Date {
             this.currentSeason = (this.currentSeason + 1) % 4;
             this.season = Season.values()[this.currentSeason];
         }
+        artisansUpdate(day * 13);
     }
 
     public String dayName(int dayOfWeek) {
