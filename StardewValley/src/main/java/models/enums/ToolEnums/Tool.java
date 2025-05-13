@@ -2,8 +2,8 @@ package models.enums.ToolEnums;
 
 import models.Fundementals.Result;
 import models.ToolsPackage.ToolFunction;
+import models.ToolsPackage.Tools;
 import models.ToolsPackage.UpgradeFunction;
-import models.enums.Types.SeedTypes;
 import models.enums.Types.TypeOfTile;
 import models.Animal.FarmAnimals;
 import models.enums.Animal;
@@ -38,7 +38,7 @@ public enum Tool {
                     return new Result(true, "You broke the stone");
                 }
                 if (tileType == TypeOfTile.QUARRY) {
-                    models.ToolsPackage.Tools tool = (models.ToolsPackage.Tools) location.getObjectInTile();
+                    Tools tool = (Tools) location.getObjectInTile();
                     if (tool != null && tool.getLevel() >= 1) {
 
                         return new Result(true, "You mined some ore");
@@ -84,7 +84,7 @@ public enum Tool {
         public ToolFunction getUseFunction() {
             return (location, skillLevel) -> {
                 TypeOfTile tileType = location.getTypeOfTile();
-                models.ToolsPackage.Tools tool = (models.ToolsPackage.Tools) location.getObjectInTile();
+                Tools tool = (Tools) location.getObjectInTile();
 
                 if (tileType == TypeOfTile.LAKE) {
                     if (tool != null && tool.isWateringCan()) {

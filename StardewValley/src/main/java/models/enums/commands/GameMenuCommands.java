@@ -27,7 +27,8 @@ public enum GameMenuCommands implements Commands {
     FERTILIZE("^fertilize -f (?<fertilize>.+) -d (?<direction>.+)$"),
     HOW_MUCH_WATER("^how much water$"),
     REAPING("^Reaping (?<direction>.+)$"),
-    WATERING("watering -l (?<X>.+)\\s*,\\s*(?<Y>.+)$"),
+    WATERING("^watering -l (?<X>.+)\\s*,\\s*(?<Y>.+)$"),
+    Picking_FRUIT("^Picking fruit -l (?<X>.+)\\s*,\\s*(?<Y>.+)$"),
     //crafting
     SHOW_RECIPES("^crafting show recipes$"),
     MACK_CRAFT("^crafting craft (?<itemName>.+)$"),

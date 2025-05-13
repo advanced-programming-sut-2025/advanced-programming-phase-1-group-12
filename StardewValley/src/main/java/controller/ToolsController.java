@@ -6,9 +6,6 @@ import models.Fundementals.Result;
 import models.BackPack;
 import models.Item;
 import models.ToolsPackage.Tools;
-import models.enums.Types.TypeOfTile;
-import models.Animal.FarmAnimals;
-import models.enums.Animal;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -29,19 +26,16 @@ public class ToolsController {
         DIRECTION_MAP.put("southwest", "downleft");
     }
 
-    public void checkBackPack() {
-    }
-
     public Result equipTool(String toolName) {
         BackPack backPack = App.getCurrentPlayerLazy().getBackPack();
 
         for (Item item : backPack.getItems().keySet()) {
             if (item.getName().equalsIgnoreCase(toolName)) {
                 currentTool = (Tools) item;
+                App.getCurrentPlayerLazy().setCurrentTool(currentTool);
                 return new Result(true, "You equipped the " + toolName);
             }
         }
-
         return new Result(false, "You don't have a " + toolName + " in your backpack!");
     }
 

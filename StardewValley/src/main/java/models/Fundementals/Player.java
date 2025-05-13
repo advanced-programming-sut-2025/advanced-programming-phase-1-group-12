@@ -65,6 +65,8 @@ public class Player {
         this.shippingBin = null;
         this.rejectDate = null;
         initializeAbilities();
+        initializerecepies();
+
     }
 
     public User getUser() {

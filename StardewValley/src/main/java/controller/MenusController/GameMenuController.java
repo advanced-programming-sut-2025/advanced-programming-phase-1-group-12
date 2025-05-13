@@ -11,6 +11,7 @@ import models.ProductsPackage.Quality;
 import models.RelatedToUser.User;
 import models.*;
 import models.RelationShips.RelationShip;
+import models.ToolsPackage.Tools;
 import models.enums.*;
 import models.Fundementals.Player;
 import com.google.gson.Gson;
@@ -314,12 +315,14 @@ public class GameMenuController implements MenuController {
             Player newPlayer = new Player(user, null, false, null, new ArrayList<>(),
                     null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
             players.add(newPlayer);
+
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Hoe", Quality.NORMAL), 1);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("PickAxe", Quality.NORMAL), 1);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Axe", Quality.NORMAL), 1);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Watering can", Quality.NORMAL), 1);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Scythe", Quality.NORMAL), 1);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Trash Can", Quality.NORMAL), 1);
+            newPlayer.setCurrentTool((Tools) newPlayer.getBackPack().getItemByName("Hoe"));
 
             System.out.println("Do you want to know what each farm has?");
             String selection = scanner.nextLine();
