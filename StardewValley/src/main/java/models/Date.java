@@ -16,16 +16,17 @@ import models.enums.foraging.*;
 import java.util.*;
 
 public class Date {
-    GameMenuController gameMenuController;
-    int hour;
-    int year;
-    int dayOfMonth; // Max : 28 days
-    int dayOfWeek; //Max : 7 days
-    Season season; // season changes after 28 days
-    Weather weather;
-    Weather tommorowWeather;
-    Map<Season, List<Weather>> weatherOfSeason;
-    int currentSeason; // value of each season
+    private GameMenuController gameMenuController;
+    private int hour;
+    private int year;
+    private int dayOfMonth; // Max : 28 days
+    private int dayOfWeek; //Max : 7 days
+    private Season season; // season changes after 28 days
+    private Weather weather;
+    private Weather tommorowWeather;
+    private Map<Season, List<Weather>> weatherOfSeason;
+    private int currentSeason; // value of each season
+
 
     //Date setUp
     public Date() {

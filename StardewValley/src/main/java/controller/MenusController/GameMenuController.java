@@ -94,6 +94,7 @@ public class GameMenuController implements MenuController {
     public Result respondToTrade(String response, String id) {
         if (response.equals("accept")) {
             String result = TradeManager.acceptTrade(id);
+
             return new Result(result.contains("successfully"), result);
         } else {
             String result = TradeManager.rejectTrade(id);
@@ -631,13 +632,6 @@ public class GameMenuController implements MenuController {
         return new Result(true, response);
     }
 
-
-    public void processDailyNPCActivities() {
-        if (App.getCurrentGame().getNPCvillage() != null) {
-            NPCcontroller controller = new NPCcontroller();
-            controller.processDailyNPCActivities();
-        }
-    }
     public Result refrigerator(String command, String item){
         Player player = App.getCurrentGame().getCurrentPlayer();
         if(command.equals("put")){
