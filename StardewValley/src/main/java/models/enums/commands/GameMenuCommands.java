@@ -67,8 +67,8 @@ public enum GameMenuCommands implements Commands {
     FISHING("fishing -p (?<fishingPole>.*)"),
 
     //Faravari commands
-    ARTISAN_USE("artisan use (?<artisanName>.*) (?<itemName>.*)"),
-    ARTISAN_GET("artisan get (?<itemName>.*)"),
+    ARTISAN_USE("artisan use -a (?<artisanName>.*) -i (?<itemName>.*)"),
+    ARTISAN_GET("artisan get -i (?<itemName>.*)"),
 
     //Cooking commands
     COOKING_REFRIGERATOR("cooking refrigrator -n (?<name>.*)"),
