@@ -15,6 +15,7 @@ import models.enums.*;
 import models.Fundementals.Player;
 import com.google.gson.Gson;
 import models.enums.ToolEnums.BackPackTypes;
+import models.enums.ToolEnums.TrashcanTypes;
 import models.enums.Types.Cooking;
 import models.enums.Types.TypeOfTile;
 
@@ -326,6 +327,11 @@ public class GameMenuController implements MenuController {
                     null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
             players.add(newPlayer);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Hoe", Quality.NORMAL), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("PickAxe", Quality.NORMAL), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("Axe", Quality.NORMAL), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("Watering can", Quality.NORMAL), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("Scythe", Quality.NORMAL), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("Trash Can", Quality.NORMAL), 1);
 
             System.out.println("Do you want to know what each farm has?");
             String selection = scanner.nextLine();

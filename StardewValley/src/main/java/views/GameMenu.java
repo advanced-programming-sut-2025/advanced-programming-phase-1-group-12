@@ -7,6 +7,7 @@ import models.Fundementals.App;
 import models.Fundementals.Game;
 import models.Fundementals.Location;
 import models.Fundementals.Result;
+import models.RelatedToUser.Ability;
 import models.enums.commands.GameMenuCommands;
 
 import java.util.ArrayList;
@@ -265,9 +266,12 @@ public class GameMenu extends AppMenu {
             System.out.println(artisanController.artisanGet(matcher.group("itemName")));
         } else if ((matcher = GameMenuCommands.ARTISAN_USE.getMather(input)) != null) {
             System.out.println(artisanController.artisanUse(matcher.group("artisanName"), matcher.group("itemName")));
-            System.out.println(controller.sellByShippingWithoutCount(matcher.group("productName")).getMessage());
         } else if ((matcher = GameMenuCommands.GREENHOUSE_BUILD.getMather(input))!=null) {
             System.out.println(controller.buildGreenHouse());
+        } else if ((matcher = GameMenuCommands.ABILITIES_SHOW.getMather(input)) != null) {
+            for(Ability ability: App.getCurrentPlayerLazy().getAbilitis()){
+                System.out.println(ability.getName() +" "+ ability.getLevel()+" "+ability.getAmount());
+            }
         } else {
             System.out.println("invalid command");
         }
