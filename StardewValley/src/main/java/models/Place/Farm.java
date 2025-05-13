@@ -7,6 +7,7 @@ import models.Fundementals.LocationOfRectangle;
 import models.Fundementals.Player;
 import models.MapDetails.*;
 import models.enums.Animal;
+import models.enums.foraging.GiantPlant;
 import models.enums.foraging.Plant;
 import models.enums.foraging.Seed;
 import models.enums.foraging.Tree;
@@ -32,6 +33,7 @@ public class Farm implements Place {
     private ArrayList<Plant> PlantOfFarm = new ArrayList<>();
     private ArrayList<Seed> SeedOfFarm = new ArrayList<>();
     private ArrayList<Tree> trees = new ArrayList<>();
+    private ArrayList<GiantPlant> giantPlants = new ArrayList<>();
 
 
     public Farm(LocationOfRectangle farmLocation) {
@@ -244,6 +246,14 @@ public class Farm implements Place {
 
     public ArrayList<Tree> getTrees() {
         return trees;
+    }
+
+    public void setGiantPlants(ArrayList<GiantPlant> giantPlants) {
+        this.giantPlants = giantPlants;
+    }
+
+    public ArrayList<GiantPlant> getGiantPlants() {
+        return giantPlants;
     }
 
     public void setTrees(ArrayList<Tree> trees) {

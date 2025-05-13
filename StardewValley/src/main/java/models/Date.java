@@ -58,47 +58,58 @@ public class Date {
     }
 
     public void attackingCrow() {
-        List<Plant> plants = App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getPlantOfFarm();
-        List<Tree> trees = App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getTrees();
-
-        if (plants.size() + trees.size() < 16) return;
+        if (App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getPlantOfFarm().size() +
+                App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getTrees().size() < 16) return;
 
         Random random = new Random();
+        int randomInt = random.nextInt(100);
 
-        for (Plant plant : new ArrayList<>(plants)) {
-            Location location = plant.getLocation();
-            if(App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getGreenHouse().getLocation().getLocationsInRectangle().contains(location)) {
-                if (location == null) continue;
-//                if (location.isProtectedByScarecrow()) continue;
+        List<Plant> plants = App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getPlantOfFarm();
+        List<Plant> destroyablePlants = new ArrayList<>();
+        List<Tree> trees = App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getTrees();
 
-                if (random.nextInt(100) < 1) {
-                    if (plant.isGiantPlant()) {
-                        removeGiantPlant(plant);
-                    } else {
-                        location.setObjectInTile(null);
-                        location.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
-                        plants.remove(plant);
-                        System.out.println("crows attacked to the farm and damage plant in location: "+ location.getxAxis()+ ", " + location.getyAxis());
-                    }
+        if (randomInt < 26 && !plants.isEmpty()) {
+            for (Plant plant : new ArrayList<>(plants)) {
+                if (plant.isGiantPlant()) {
+                    removeGiantPlant(plant);
+                    System.out.println("crows attacked and damaged a GiantPlant at: " +
+                            plant.getLocation().getxAxis() + ", " + plant.getLocation().getyAxis());
+                    return;
+                } else {
+                    destroyablePlants.add(plant);
                 }
+            }
+
+            int plantsToDamage = Math.min(3, destroyablePlants.size());
+            Collections.shuffle(destroyablePlants);
+
+            for (int i = 0; i < plantsToDamage; i++) {
+                Plant plant = destroyablePlants.get(i);
+                Location location = plant.getLocation();
+                location.setObjectInTile(null);
+                location.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
+                plants.remove(plant);
+                System.out.println("crows attacked and damaged a plant at: " +
+                        location.getxAxis() + ", " + location.getyAxis());
             }
         }
-        for (Tree tree : trees) {
-            Location location = tree.getLocation();
-            if(App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getGreenHouse().
-                    getLocation().getLocationsInRectangle().contains(location)) {
-                if (location == null) continue;
-//                if (location.isProtectedByScarecrow()) continue;
 
-                if (random.nextInt(100) < 1) {
-                    location.setObjectInTile(null);
-                    location.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
-                    trees.remove(tree);
-                    System.out.println("crows attacked to the farm and damage tree in location: "+ location.getxAxis()+ ", " + location.getyAxis());
-                }
+        if (randomInt > 74 && !trees.isEmpty()) {
+            int treesToDamage = Math.min(3, trees.size());
+            Collections.shuffle(trees);
+
+            for (int i = 0; i < treesToDamage; i++) {
+                Tree tree = trees.get(i);
+                Location location = tree.getLocation();
+                location.setObjectInTile(null);
+                location.setTypeOfTile(TypeOfTile.GROUND);
+                System.out.println("crows attacked and damaged tree at " + location.getxAxis() + ", " + location.getyAxis());
             }
+
+            trees.subList(0, treesToDamage).clear();
         }
     }
+
 
     public void removeGiantPlant(Plant plant) {
         Location baseLocation = plant.getLocation();
@@ -141,7 +152,7 @@ public class Date {
         }
     }
 
-    public void ThunderAndLightning () {
+    public void ThunderAndLightning() {
         ArrayList<Location> availableLocation = getLocations();
 
         List<Location> shuffled = new ArrayList<>(availableLocation);
@@ -153,7 +164,7 @@ public class Date {
         }
     }
 
-    public void updateAllPlants () {
+    public void updateAllPlants() {
         for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
             for (Plant plant : farm.getPlantOfFarm()) {
                 if (!plant.isHasBeenFertilized()) {
@@ -201,7 +212,7 @@ public class Date {
         }
     }
 
-    public void foragingAdd () {
+    public void foragingAdd() {
         for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
             ArrayList<Location> availableLocation = getGroundLocation(farm);
             if (availableLocation.size() < 3) continue;
@@ -254,42 +265,45 @@ public class Date {
                 AllCrops allCrops = AllCrops.sourceTypeToCraftType(seedSeason);
                 Plant newPlant = new Plant(location, newSeed, true, allCrops);
                 farm.getPlantOfFarm().add(newPlant);
-                System.out.println("new Plant with type: " + newPlant.getAllCrops().name() + " add to location" +
-                        location.getxAxis() + ", " + location.getyAxis());
-
+                if (newPlant.getAllCrops() != null)
+                    System.out.println("new Plant with type: " + newPlant.getAllCrops().name() + " add to location" +
+                            location.getxAxis() + ", " + location.getyAxis());
+                else
+                    System.out.println("new Plant with type: " + newPlant.getSeed().getName().toLowerCase() + " add to location" +
+                            location.getxAxis() + ", " + location.getyAxis());
                 location.setTypeOfTile(TypeOfTile.PLANT);
                 location.setObjectInTile(newPlant);
             }
         }
     }
 
-
-    public void changesDayAnimal(){
-        for(Player player : App.getCurrentGame().getPlayers()){
-            for(FarmAnimals animals : player.getOwnedFarm().getFarmAnimals()){
-                if(!animals.isHasBeenFedToday()){
+    public void changesDayAnimal() {
+        for (Player player : App.getCurrentGame().getPlayers()) {
+            for (FarmAnimals animals : player.getOwnedFarm().getFarmAnimals()) {
+                if (!animals.isHasBeenFedToday()) {
                     animals.setWillProduceToday(false);
                     animals.setFriendShip(animals.getFriendShip() - 10);
                 }//he was fed in the passed day
                 else {
                     animals.setWillProduceToday(true);
                 }
-                if(!animals.isHasBeenFedToday()){
+                if (!animals.isHasBeenFedToday()) {
                     animals.setFriendShip(animals.getFriendShip() - 20);
-                } if(!App.isLocationInPlace(animals.getPosition(), animals.getHome().getLocation())){
+                }
+                if (!App.isLocationInPlace(animals.getPosition(), animals.getHome().getLocation())) {
                     animals.setFriendShip(animals.getFriendShip() - 20);
                 }
                 animals.setHasBeenFedToday(false);
                 animals.setHasBeenPettedToday(false);
                 animals.setDaysLeftToProduce(animals.getDaysLeftToProduce() + 1);
-                if(animals.getDaysLeftToProduce() == animals.getAnimal().getProducingCycle()){
+                if (animals.getDaysLeftToProduce() == animals.getAnimal().getProducingCycle()) {
                     animals.setDaysLeftToProduce(0);
                 }
             }
         }
     }
 
-    public void changeAdvancedDay ( int day){
+    public void changeAdvancedDay(int day) {
         this.dayOfWeek += day;
         if (this.dayOfWeek > 7) {
             this.dayOfWeek -= 7;
@@ -302,7 +316,7 @@ public class Date {
         }
     }
 
-    public String dayName ( int dayOfWeek){
+    public String dayName(int dayOfWeek) {
         return switch (dayOfWeek) {
             case 1 -> "Sunday";
             case 2 -> "Monday";
@@ -315,48 +329,48 @@ public class Date {
         };
     }
 
-    public int getHour () {
+    public int getHour() {
         return hour;
     }
 
-    public int getYear () {
+    public int getYear() {
         return year;
     }
 
-    public int getDayOfMonth () {
+    public int getDayOfMonth() {
         return dayOfMonth;
     }
 
-    public int getDayOfWeek () {
+    public int getDayOfWeek() {
         return dayOfWeek;
     }
 
-    public Season getSeason () {
+    public Season getSeason() {
         return season;
     }
 
-    public int getCurrentSeason () {
+    public int getCurrentSeason() {
         return currentSeason;
     }
 
-    public String getDayName ( int dayOfWeek){
+    public String getDayName(int dayOfWeek) {
         return dayName(dayOfWeek);
     }
 
-    public Weather getWeather () {
+    public Weather getWeather() {
         return weather;
     }
 
-    public void setWeather (Weather weather){
+    public void setWeather(Weather weather) {
         this.weather = weather;
     }
 
-    public Map<Season, List<Weather>> initializeWeatherMap () {
+    public Map<Season, List<Weather>> initializeWeatherMap() {
         weatherOfSeason = Map.of(Season.SPRING, List.of(Weather.SUNNY, Weather.RAINY, Weather.STORM), Season.SUMMER, List.of(Weather.SUNNY, Weather.RAINY, Weather.STORM), Season.AUTUMN, List.of(Weather.SUNNY, Weather.RAINY, Weather.STORM), Season.WINTER, List.of(Weather.SUNNY, Weather.SNOW));
         return weatherOfSeason;
     }
 
-    public Weather weatherForecast (Season season){
+    public Weather weatherForecast(Season season) {
         if (weatherOfSeason == null) {
             initializeWeatherMap();
         }
@@ -366,27 +380,27 @@ public class Date {
         return possibleWeathers.get(randomIndex);
     }
 
-    public void setTommorowWeather (Weather weather){
+    public void setTommorowWeather(Weather weather) {
         this.tommorowWeather = weather;
     }
 
-    public void setDayOfMonth ( int dayOfMonth){
+    public void setDayOfMonth(int dayOfMonth) {
         this.dayOfMonth = dayOfMonth;
     }
 
-    public void setDayOfWeek ( int dayOfWeek){
+    public void setDayOfWeek(int dayOfWeek) {
         this.dayOfWeek = dayOfWeek;
     }
 
-    public void setSeason (Season season){
+    public void setSeason(Season season) {
         this.season = season;
     }
 
-    public void setHour ( int newHour){
+    public void setHour(int newHour) {
         this.hour = newHour;
     }
 
-    public ArrayList<Location> getLocations () {
+    public ArrayList<Location> getLocations() {
         ArrayList<Location> availableLocations = new ArrayList<>();
         for (Location location : App.getCurrentGame().getMainMap().getTilesOfMap()) {
             if (location.getTypeOfTile() != TypeOfTile.BARN || location.getTypeOfTile() != TypeOfTile.LAKE ||
@@ -398,7 +412,7 @@ public class Date {
         return availableLocations;
     }
 
-    public ArrayList<Location> getGroundLocation (Farm farm){
+    public ArrayList<Location> getGroundLocation(Farm farm) {
         ArrayList<Location> availableLocations = new ArrayList<>();
         ArrayList<Location> allLocationOfFarm = getLocationsOfRectangle(farm.getFarmLocation());
         for (Location location : allLocationOfFarm) {
@@ -409,7 +423,7 @@ public class Date {
         return availableLocations;
     }
 
-    public ArrayList<Location> getLocationForSeeding (Farm farm){
+    public ArrayList<Location> getLocationForSeeding(Farm farm) {
         ArrayList<Location> availableLocations = new ArrayList<>();
         ArrayList<Location> allLocationOfFarm = getLocationsOfRectangle(farm.getFarmLocation());
         for (Location location : allLocationOfFarm) {
@@ -420,7 +434,7 @@ public class Date {
         return availableLocations;
     }
 
-    private ArrayList<Location> getLocationsOfRectangle (LocationOfRectangle rect){
+    private ArrayList<Location> getLocationsOfRectangle(LocationOfRectangle rect) {
         ArrayList<Location> result = new ArrayList<>();
         for (Location loc : App.getCurrentGame().getMainMap().getTilesOfMap()) {
             if (loc.getxAxis() >= rect.getTopLeftCorner().getxAxis() &&
@@ -433,7 +447,7 @@ public class Date {
         return result;
     }
 
-    public int getDaysPassed(Date date){
+    public int getDaysPassed(Date date) {
         if (date == null) {
             return 0;
         }
