@@ -671,8 +671,8 @@ public class GameMenuController implements MenuController {
             return new Result(false, "cooking not found!");
         }
 
-        if (!App.getCurrentGame().getCurrentPlayer().getCookingRecepies().get(recipe)) {
-            return  new Result(false, "you do not know this recepie");
+        if (!player.getCookingRecepies().get(cooking)) {  // Use the enum as key
+            return new Result(false, "you do not know this recepie");
         }
 
         if(!player.getBackPack().checkCapacity(1)){

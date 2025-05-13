@@ -183,13 +183,13 @@ public class Player {
     }
 
     private void initializerecepies() {
-        Map<CraftingRecipe, Boolean> recepies = new HashMap();
+        recepies = new HashMap<>();  // Initialize the class field, not a local variable
         for(CraftingRecipe craftingRecipe : CraftingRecipe.values()){
             recepies.put(craftingRecipe, false);
         }
-        Map<Cooking, Boolean> cookings = new HashMap();
+        cookingRecepies = new HashMap<>();  // Initialize the class field
         for(Cooking cooking : Cooking.values()){
-            cookings.put(cooking, false);
+            cookingRecepies.put(cooking, false);
         }
     }
     public Ability getAbilityByName(String name){
@@ -272,6 +272,14 @@ public class Player {
 
     public void setCookingRecepies(Map<Cooking, Boolean> cookingRecepies) {
         this.cookingRecepies = cookingRecepies;
+    }
+
+    public Tools getCurrentTool() {
+        return currentTool;
+    }
+
+    public void setCurrentTool(Tools currentTool) {
+        this.currentTool = currentTool;
     }
 }
 

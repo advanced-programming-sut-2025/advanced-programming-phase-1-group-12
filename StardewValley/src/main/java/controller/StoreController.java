@@ -229,9 +229,9 @@ public class StoreController {
                 App.getCurrentPlayerLazy().getRecepies().put(craftingRecipe, true);
                 return new Result(true, "You bought this recepie");
             }
-        }for(Cooking craftingRecipe : Cooking.values()){
-            if(productName.equalsIgnoreCase(craftingRecipe.getName())){
-                App.getCurrentPlayerLazy().getCookingRecepies().put(craftingRecipe, true);
+        }for(Cooking cooking : Cooking.values()){
+            if(productName.equalsIgnoreCase(cooking.getName())){
+                App.getCurrentPlayerLazy().getCookingRecepies().put(cooking, true);  // Use enum as key
                 return new Result(true, "You bought this recepie");
             }
         }
