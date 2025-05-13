@@ -4,14 +4,11 @@ import models.Animal.Fish;
 import models.Eating.Food;
 import models.Fundementals.App;
 import models.ProductsPackage.AnimalProducts;
-import models.ProductsPackage.ArtisanItem;
 import models.ProductsPackage.Quality;
 import models.ToolsPackage.Tools;
 import models.enums.FishDetails;
 import models.enums.ToolEnums.Tool;
 import models.enums.Types.*;
-import models.enums.foraging.GiantPlant;
-import models.enums.foraging.GiantPlants;
 import models.enums.foraging.Seed;
 
 import java.util.Map;

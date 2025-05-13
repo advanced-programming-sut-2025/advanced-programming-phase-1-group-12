@@ -71,7 +71,7 @@ public enum StoreProductsTypes {
     CARPENTER_DELUXE_COOP("Deluxe Coop", 0, 0, 0, 0, 10000, "Carpenter's Shop"),
 
     // Fishing Items (from Willy's Fish Shop)
-    FISH_SHOP_FISH_SMOKER_RECIPE("Fish Smoker Recipe", 10000, 10000, 10000, 10000, 1, "Fish Shop"),
+    FISH_SHOP_FISH_SMOKER_RECIPE("Fish Smoker", 10000, 10000, 10000, 10000, 1, "Fish Shop"),
     FISH_SHOP_TROUT_SOUP("Trout Soup", 250, 250, 250, 250, 1, "Fish Shop"),
     FISH_SHOP_BAMBOO_POLE("Bamboo Pole", 500, 500, 500, 500, 1, "Fish Shop"),
     FISH_SHOP_TRAINING_ROD("Training Rod", 25, 25, 25, 25, 1, "Fish Shop"),
@@ -134,8 +134,8 @@ public enum StoreProductsTypes {
     PIER_GENERAL_STORE_WHEAT_FLOUR("Wheat Flour", 100, 100, 100, 100, 10000, "Pierre's General Store"),
     GENERAL_STORE_BOUQUET("Bouquet", 1000, 1000, 1000, 1000, 2, "Pierre's General Store"),
     GENERAL_STORE_WEDDING_RING("Wedding Ring", 10000, 10000, 10000, 10000, 2, "Pierre's General Store"),
-    GENERAL_STORE_DEHYDRATOR_RECIPE("Dehydrator Recipe", 10000, 10000, 10000, 10000, 1, "Pierre's General Store"),
-    GENERAL_STORE_GRASS_STARTER_RECIPE("Grass Starter Recipe", 1000, 1000, 1000, 1000, 1, "Pierre's General Store"),
+    GENERAL_STORE_DEHYDRATOR_RECIPE("Dehydrator", 10000, 10000, 10000, 10000, 1, "Pierre's General Store"),
+    GENERAL_STORE_GRASS_STARTER_RECIPE("Grass Starter", 1000, 1000, 1000, 1000, 1, "Pierre's General Store"),
     PIER_GENERAL_STORE_SUGAR("Sugar", 100, 100, 100, 100, 10000, "Pierre's General Store"),
     GENERAL_STORE_OIL("Oil", 200, 200, 200, 200, 10000, "Pierre's General Store"),
     GENERAL_STORE_VINEGAR("Vinegar", 200, 200, 200, 200, 10000, "Pierre's General Store"),

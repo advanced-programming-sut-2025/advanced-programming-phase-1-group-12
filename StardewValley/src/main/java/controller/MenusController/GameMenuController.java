@@ -665,8 +665,8 @@ public class GameMenuController implements MenuController {
             return new Result(false, "cooking not found!");
         }
 
-        if (App.getCurrentGame().getCurrentPlayer().getBackPack().getItemByName(recipe) == null) {
-            return  new Result(false, "recipe not found!");
+        if (!App.getCurrentGame().getCurrentPlayer().getCookingRecepies().get(recipe)) {
+            return  new Result(false, "you do not know this recepie");
         }
 
         if(!player.getBackPack().checkCapacity(1)){
@@ -731,7 +731,9 @@ public class GameMenuController implements MenuController {
         List<Player> players = App.getCurrentGame().getPlayers();
         List<ShippingBin> shippingBins = new ArrayList<>();
         for (Player player : players) {
-            shippingBins.add(player.getShippingBin());
+            if(player.getShippingBin() != null){
+                shippingBins.add(player.getShippingBin());
+            }
         }
         for (ShippingBin shippingBin : shippingBins) {
             for(Item item: shippingBin.getShippingItem(shippingBin.getShippingItemMap())){
