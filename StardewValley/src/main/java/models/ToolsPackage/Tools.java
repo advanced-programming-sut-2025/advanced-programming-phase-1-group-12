@@ -7,6 +7,7 @@ import models.Item;
 import models.ProductsPackage.Quality;
 import models.enums.ToolEnums.Tool;
 import models.enums.ToolEnums.ToolTypes;
+import models.enums.Weather;
 
 public class Tools extends Item {
     private int level;
@@ -131,7 +132,12 @@ public class Tools extends Item {
         if (App.getCurrentPlayerLazy().getEnergy() < energyCost) {
             return new Result(false, "Not enough energy to use this tool!");
         }
-
+        if(App.getCurrentGame().getDate().getWeather().equals(Weather.RAINY)){
+            energyCost *= 1.5;
+        }
+        if(App.getCurrentGame().getDate().getWeather().equals(Weather.SNOW)){
+            energyCost *= 2;
+        }
         App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - energyCost);
         return useFunction.execute(targetLocation, skillLevel);
     }

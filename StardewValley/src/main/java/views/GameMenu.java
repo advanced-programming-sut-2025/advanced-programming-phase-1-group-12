@@ -55,7 +55,7 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.SEASON.getMather(input)) != null) {
             showCurrentSeason();
         } else if ((matcher = GameMenuCommands.WEATHER.getMather(input)) != null) {
-            season();
+            System.out.println(controller.showWeather().getMessage());
         } else if ((matcher = GameMenuCommands.WEATHER_FORECAST.getMather(input)) != null) {
             weatherForecast();
         } else if ((matcher = GameMenuCommands.CHEAT_WEATHER_SET.getMather(input)) != null) {
@@ -233,7 +233,7 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.MACK_CRAFT.getMather(input)) != null) {
             System.out.println(craftingController.makeCraft(matcher.group("itemName")));
         } else if ((matcher = GameMenuCommands.SHOW_RECIPES.getMather(input)) != null) {
-//            System.out.println(craftingController.showRecipes());
+            System.out.println(craftingController.showRecipes());
         } else if ((matcher = GameMenuCommands.THOR.getMather(input)) != null) {
             System.out.println(controller.Thor(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.WHICH_FERTILIZING.getMather(input)) != null) {

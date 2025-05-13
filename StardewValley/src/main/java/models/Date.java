@@ -13,6 +13,7 @@ import models.enums.Types.SeedTypes;
 import models.enums.Types.TypeOfTile;
 import models.enums.Weather;
 import models.enums.foraging.*;
+import views.GameMenu;
 
 import java.util.*;
 
@@ -36,10 +37,10 @@ public class Date {
         this.dayOfWeek = 1;
         this.season = Season.SPRING;
         this.currentSeason = season.getValue();
-        this.year = 1900;
+        this.year = 2025;
         this.weather = Weather.SUNNY;
-        this.tommorowWeather = Weather.SUNNY;
         this.weatherOfSeason = initializeWeatherMap();
+        this.tommorowWeather = weatherForecast(season);
         this.gameMenuController = new GameMenuController();
     }
 
@@ -49,8 +50,7 @@ public class Date {
         if (this.hour > 22) {
             this.hour -= 13;
             changeAdvancedDay(1);
-            gameMenuController.sellByShippingAllPlayers();
-            this.weather = this.tommorowWeather; // the day changes
+//            gameMenuController.sellByShippingAllPlayers();
 
             updateAllPlants();
             ThunderAndLightning();
@@ -316,6 +316,10 @@ public class Date {
     }
 
     public void changeAdvancedDay(int day) {
+        if (day == 1 ){
+            this.weather = this.tommorowWeather;// the day changes
+
+        }
         this.dayOfWeek += day;
         if (this.dayOfWeek > 7) {
             this.dayOfWeek -= 7;
@@ -325,6 +329,9 @@ public class Date {
             this.dayOfMonth -= 28;
             this.currentSeason = (this.currentSeason + 1) % 4;
             this.season = Season.values()[this.currentSeason];
+            if(this.season.equals(Season.SUMMER)){
+                changeYear();
+            }
         }
         artisansUpdate(day * 13);
     }
@@ -468,5 +475,9 @@ public class Date {
         int currentTotalDays = ((int) (year - 1) * 4 * 28) + (currentSeason + 28) + dayOfMonth;
         int dateTotalDays = ((int) (date.year - 1) * 4 * 28) + (date.currentSeason + 28) + date.dayOfMonth;
         return currentTotalDays - dateTotalDays;
+    }
+
+    public void changeYear(){
+        this.year = year + 1;
     }
 }
