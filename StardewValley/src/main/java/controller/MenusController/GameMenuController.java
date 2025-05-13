@@ -820,14 +820,17 @@ public class GameMenuController implements MenuController {
 
     public Result buildGreenHouse(){
         Player player = App.getCurrentGame().getCurrentPlayer();
-        if(player.getMoney() < 1000 || player.getBackPack().getItemCount(player.getBackPack().getItemByName("Wood")) < 500){
+        if(player.getMoney() < 1000 ||
+                player.getBackPack().getItemCount(player.getBackPack().getItemByName("Wood")) < 500){
             return new Result(false, "You don't have enough money to build green house.");
         }
 
         //build greenhouse
         player.decreaseMoney(1000);
         player.getBackPack().decreaseItem(player.getBackPack().getItemByName("Wood"), 500);
-        return new Result(true, "You built a green house!");
+        String message = "You built a green house!, Money (-1000) / Wood (-500)\n" + "Money: " +player.getMoney() +
+                "\nWood: " + player.getBackPack().getItemCount(player.getBackPack().getItemByName("Wood")) + "\n";
+        return new Result(true, message);
     }
 
 }
