@@ -85,8 +85,8 @@ public class FarmingController {
 
         StringBuilder output = new StringBuilder();
         output.append("Name: ").append(treeType.name).append("\n");
-        output.append("Source: ").append(treeType.seedSource.getName()).append("\n");
-        output.append("Stage: ").append(Arrays.toString(treeType.stages.toCharArray())).append("\n");
+        output.append("Source: ").append(treeType.seedSource).append("\n");
+        output.append("Stage: ").append(Arrays.toString(treeType.stages)).append("\n");
         output.append("Total Harvest Time: ").append(treeType.totalHarvestTime).append("\n");
 
         output.append("Base Sell Price: ").append(treeType.baseSellPrice).append("\n");
@@ -546,7 +546,7 @@ public class FarmingController {
         if(location.getTypeOfTile().equals(TypeOfTile.GROUND)){
             location.setTypeOfTile(TypeOfTile.LAKE);
         }
-        App.getCurrentPlayerLazy().getCurrentTool().use(location, 1);
+        App.getCurrentPlayerLazy().getCurrentTool().use(location, App.getCurrentPlayerLazy().getCurrentTool().getLevel());
         Plant plant = (Plant) location.getObjectInTile();
         plant.setHasBeenWatering(true);
         location.setObjectInTile(plant);

@@ -3,9 +3,10 @@ package models.enums.foraging;
 import models.Fundementals.Location;
 import models.enums.Types.FruitType;
 import models.enums.Types.SaplingTypes;
+import models.enums.Types.TreeType;
 
 public class Tree {
-    private foragingTreeType type;
+    private TreeType type;
     private boolean hasBeenFertilized;
     private SaplingTypes saplingTypes;
     private Location location;
@@ -17,21 +18,21 @@ public class Tree {
     private boolean isForaging;
     private FruitType fruitType;
 
-    public Tree(Location location, foragingTreeType type, boolean isForaging, FruitType fruitType) {
+    public Tree(Location location, TreeType type, boolean isForaging, FruitType fruitType) {
         this.type = type;
         this.location = location;
         this.hasBeenFertilized = false;
         this.age = 0;
         this.hasBeenWatering = false;
         this.totalTimeNeeded = type.totalHarvestTime;
-        this.saplingTypes = type.saplingTypes;
+        this.saplingTypes = type.seedSource;
         this.dayPast = 2;
         this.currentStage = 0;
         this.isForaging = isForaging;
         this.fruitType = fruitType;
     }
 
-    public foragingTreeType getType() {
+    public TreeType getType() {
         return type;
     }
 
@@ -99,7 +100,7 @@ public class Tree {
         this.saplingTypes = saplingTypes;
     }
 
-    public void setType(foragingTreeType type) {
+    public void setType(TreeType type) {
         this.type = type;
     }
 
