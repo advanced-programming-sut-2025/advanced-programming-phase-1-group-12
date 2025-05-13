@@ -471,8 +471,7 @@ public class ArtisanController {
         for (ArtisanItem ai : App.getCurrentPlayerLazy().getArtisansGettingProcessed()) {
             if (ai.getName().equalsIgnoreCase(itemName) && ai.getHoursRemained() <= 0) {
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().remove(ai);
-                Item item = new Item(itemName);
-                ItemBuilder.addToBackPack(item, 1, Quality.NORMAL);
+                ItemBuilder.addToBackPack(ai, 1, Quality.NORMAL);
                 // Remove this line: App.getCurrentPlayerLazy().getBackPack().getItems().remove(ai);
                 return new Result(true, itemName + " has been added to your inventory");
             }
