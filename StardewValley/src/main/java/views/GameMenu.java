@@ -266,6 +266,8 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.ARTISAN_USE.getMather(input)) != null) {
             System.out.println(artisanController.artisanUse(matcher.group("artisanName"), matcher.group("itemName")));
             System.out.println(controller.sellByShippingWithoutCount(matcher.group("productName")).getMessage());
+        } else if ((matcher = GameMenuCommands.GREENHOUSE_BUILD.getMather(input))!=null) {
+            System.out.println(controller.buildGreenHouse());
         } else {
             System.out.println("invalid command");
         }
