@@ -1,5 +1,6 @@
 package models.RelationShips;
 
+import models.Fundementals.App;
 import models.Fundementals.Player;
 import models.Item;
 
@@ -12,13 +13,12 @@ public class RelationShip {
     private int friendshipLevel;
     private int XP;
     private List<String> talks;
-    private Boolean hasBouquet;
-    private Boolean areMarried;
-    private Boolean hasTalked;
-    private Boolean hasDealed;
-    private Boolean hasGifted;
-    private Boolean hasHugged;
-    private Boolean isDealSuccessful;
+    private boolean hasBouquet;
+    private boolean areMarried;
+    private boolean hasTalked;
+    private boolean hasDealed;
+    private boolean hasGifted;
+    private boolean hasHugged;
     private String askedRing;
 
     public RelationShip(Player player1, Player player2) {
@@ -33,7 +33,6 @@ public class RelationShip {
         this.hasDealed = false;
         this.hasGifted = false;
         this.hasHugged = false;
-        this.isDealSuccessful = null;
         this.askedRing = null;
     }
 
@@ -97,8 +96,12 @@ public class RelationShip {
     }
 
     public void talk(String message){
-        hasTalked = true;
+        this.hasTalked = true;
         talks.add(message);
+        if(areMarried){
+            player1.increaseEnergy(50);
+            player2.increaseEnergy(50);
+        }
         this.XP +=20;
     }
 
@@ -110,23 +113,13 @@ public class RelationShip {
         return result.toString();
     }
 
-    public void deal(){
-        // not fully implemented
-        if(isDealSuccessful){
-            increaseXP(50);
-        }
-        else{
-            decreaseXP(30);
-        }
-    }
-
     public void gift(Item gift){
 
     }
 
     public void hug(){
         if(arePlayersAdjacent() && !hasHugged){
-            hasHugged = true;
+            this.hasHugged = true;
             increaseXP(60);
         }
     }
@@ -188,6 +181,7 @@ public class RelationShip {
     public void reject(){
         friendshipLevel = 0;
         player1.setEnergy(player1.getEnergy() /2);
+        player1.setRejectDate(App.getCurrentGame().getDate());
     }
 
 }

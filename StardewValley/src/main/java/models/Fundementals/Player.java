@@ -4,6 +4,7 @@ import models.*;
 import models.NPC.NPC;
 import models.Place.Farm;
 import models.Place.Place;
+import models.ProductsPackage.ArtisanItem;
 import models.ProductsPackage.Quality;
 import models.Refrigrator;
 import models.RelatedToUser.Ability;
@@ -36,8 +37,9 @@ public class Player {
     private ArrayList<Trade> trades = new ArrayList<>();
     private Tools currentTool;
     private Map<NPC, Date> metDates;
-    private Map<Item, Integer> artisanHoursRemained = new HashMap<>();
     private ShippingBin shippingBin;
+    private ArrayList<ArtisanItem> artisansGettingProcessed = new ArrayList<>();
+    private Date rejectDate;
 
     public Player(User user, Location userLocation, boolean isMarried, Refrigrator refrigrator,
                   ArrayList<RelationShip> relationShips, Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited,
@@ -60,6 +62,7 @@ public class Player {
         this.hasCollapsed = false;
         this.metDates = new HashMap<>();
         this.shippingBin = null;
+        this.rejectDate = null;
         initializeAbilities();
     }
 
@@ -97,10 +100,19 @@ public class Player {
     }
 
     public void increaseEnergy(int amount){
-        if(energy + amount > 200 && !isEnergyUnlimited){
-            energy = 200;
-        }else {
-            energy += amount;
+        if(App.getCurrentGame().getDate().getDaysPassed(getRejectDate()) <= 7){
+            if(energy + amount > 200 && !isEnergyUnlimited){
+                energy = 200;
+            }else {
+                energy += amount / 2;
+            }
+        }
+        else{
+            if(energy + amount > 200 && !isEnergyUnlimited){
+                energy = 200;
+            }else {
+                energy += amount;
+            }
         }
     }
 
@@ -112,11 +124,6 @@ public class Player {
         this.isEnergyUnlimited = true;
     }
 
-    public void collapse(){
-        if(energy == 0){
-            this.hasCollapsed = true;
-        }
-    }
 
     public RelationShip findRelationShip(Player player2){
         for(RelationShip relationShip : relationShips){
@@ -230,4 +237,20 @@ public class Player {
         this.recepies = recepies;
     }
 
+    public ArrayList<ArtisanItem> getArtisansGettingProcessed() {
+        return artisansGettingProcessed;
+    }
+
+    public void setArtisansGettingProcessed(ArrayList<ArtisanItem> artisansGettingProcessed) {
+        this.artisansGettingProcessed = artisansGettingProcessed;
+    }
+
+    public Date getRejectDate() {
+        return rejectDate;
+    }
+
+    public void setRejectDate(Date rejectDate) {
+        this.rejectDate = rejectDate;
+    }
 }
+

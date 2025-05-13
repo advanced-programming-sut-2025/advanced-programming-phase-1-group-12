@@ -121,6 +121,7 @@ public class StoreController {
         return true;
     }
 
+    //TODO:daily limits are not conducted with this yet:
     public Result buyAnimal(Matcher matcher) {
         String name = matcher.group("name");
         String animalType = matcher.group("animal");

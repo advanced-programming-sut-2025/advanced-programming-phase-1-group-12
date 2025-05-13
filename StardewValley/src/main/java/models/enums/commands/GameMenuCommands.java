@@ -68,7 +68,7 @@ public enum GameMenuCommands implements Commands {
 
     //Faravari commands
     ARTISAN_USE("artisan use (?<artisanName>.*) (?<itemName>.*)"),
-    ARTISAN_GET("artisan get (?<artisanName>.*)"),
+    ARTISAN_GET("artisan get (?<itemName>.*)"),
 
     //Cooking commands
     COOKING_REFRIGERATOR("cooking refrigrator -n (?<name>.*)"),
