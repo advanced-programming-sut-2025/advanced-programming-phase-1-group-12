@@ -253,20 +253,8 @@ public class GameMenuController implements MenuController {
     public void helpToReadMap() {
         System.out.println("Map Legend:");
         for (TypeOfTile type : TypeOfTile.values()) {
-            System.out.println(type.getNameOfMap() + " -> " + type.name());
+            System.out.println(getBackgroundColorForTile(type) + " "+ type.getNameOfMap() + " -> " + type.name());
         }
-    }
-
-    private Farm getFarmOfThisLocation(Location location) {
-        for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
-            if (location.getxAxis() >= farm.getLocation().getTopLeftCorner().getxAxis() &&
-                    location.getxAxis() <= farm.getLocation().getDownRightCorner().getxAxis() &&
-                    location.getyAxis() >= farm.getLocation().getTopLeftCorner().getyAxis() &&
-                    location.getyAxis() <= farm.getLocation().getDownRightCorner().getyAxis()) {
-                return farm;
-            }
-        }
-        return null;
     }
 
     private String getBackgroundColorForTile(TypeOfTile type) {

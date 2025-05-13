@@ -88,6 +88,9 @@ public enum AllCrops {
         return result;
     }
 
+    public String getName(){
+        return name;
+    }
 
     public static AllCrops nameToCraftType(String name){
         for(AllCrops ct : AllCrops.values()){

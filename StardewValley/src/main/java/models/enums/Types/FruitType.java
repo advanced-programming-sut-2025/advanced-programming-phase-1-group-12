@@ -14,6 +14,9 @@ public enum FruitType {
     Pine_Tar,
     Sap,
     Common_Mushroom,
-    Mystic_Syrup, Acrons, MahoganySeeds, MushroomTreeSeeds;
+    Mystic_Syrup,
+    Acrons,
+    MahoganySeeds,
+    MushroomTreeSeeds;
 
 }

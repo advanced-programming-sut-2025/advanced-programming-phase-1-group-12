@@ -10,9 +10,7 @@ import models.ToolsPackage.Tools;
 import models.enums.FishDetails;
 import models.enums.ToolEnums.Tool;
 import models.enums.Types.*;
-import models.enums.foraging.GiantPlant;
-import models.enums.foraging.GiantPlants;
-import models.enums.foraging.Seed;
+import models.enums.foraging.*;
 
 import java.util.Map;
 
@@ -48,6 +46,15 @@ public class ItemBuilder {
         CraftingRecipe craftingRecipe = CraftingRecipe.getByName(name);
         if (craftingRecipe != null) {
             return new Craft(craftingRecipe);
+        }
+        AllCrops allCrops = AllCrops.nameToCraftType(name);
+        if(allCrops != null) {
+            return new Plant(null, null, false, allCrops);
+        }
+        GiantPlants giantPlants = GiantPlants.nameToCraftType(name);
+        if(giantPlants != null) {
+            return new GiantPlant(giantPlants, null, false, false,
+                    0, 0, 0, 0);
         }
         return new Item(name);
     }

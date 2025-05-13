@@ -1,8 +1,9 @@
 package models.enums.foraging;
 
 import models.Fundementals.Location;
+import models.Item;
 
-public class Plant {
+public class Plant extends Item {
     private Location location;
     private Seed seed;
     private AllCrops allCrops;
@@ -17,6 +18,7 @@ public class Plant {
 //    private Quality quality;
 
     public Plant(Location location, Seed seed, boolean isForaging, AllCrops allCrops){
+        super(allCrops.name());
         this.location = location;
         this.seed = seed;
         hasBeenFertilized = false;

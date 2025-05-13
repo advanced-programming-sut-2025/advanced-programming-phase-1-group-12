@@ -8,15 +8,12 @@ public class ArtisanItem extends Item {
 
     private int hoursRemained;
 
-    private int price;
-
     private int energy;
 
     public ArtisanItem(String name, ArtisanTypes type, int hoursRemained, int price, int energy) {
         super(name);
         this.type = type;
         this.hoursRemained = type.getProcessingTime();
-        this.price = price;
         this.energy = energy;
     }
 
@@ -36,13 +33,6 @@ public class ArtisanItem extends Item {
         this.hoursRemained = hoursRemained;
     }
 
-    public int getPrice() {
-        return price;
-    }
-
-    public void setPrice(int price) {
-        this.price = price;
-    }
 
     public int getEnergy() {
         return energy;

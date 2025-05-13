@@ -1,5 +1,6 @@
 package controller;
 
+import models.Date;
 import models.Fundementals.App;
 import models.Fundementals.Location;
 import models.Fundementals.Result;
@@ -94,9 +95,9 @@ public class FarmingController {
 
         Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
         SeedTypes seedTypes = SeedTypes.stringToSeed(seed);
-        assert seedTypes != null;
+        if (seedTypes == null) return new Result(false, "Invalid seed name.");
         if (!App.getCurrentPlayerLazy().getBackPack().hasItem(seed)) {
-            return new Result(false, "Invalid seed");
+            return new Result(false, "You don't have this seed.");
         }
 
         if (!newLocation.getTypeOfTile().equals(TypeOfTile.PLOUGHED_LAND)) {
@@ -128,6 +129,7 @@ public class FarmingController {
 
             for (int[][] squareOffsets : cornerOffsets) {
                 List<Plant> square = new ArrayList<>();
+                ArrayList<Location> locations = new ArrayList<>();
                 boolean allMatch = true;
 
                 for (int[] offset : squareOffsets) {
@@ -140,61 +142,53 @@ public class FarmingController {
                         allMatch = false;
                         break;
                     }
-                    square.add((Plant) loc.getObjectInTile());
+                    square.add(plant);
+                    locations.add(loc);
                 }
 
                 if (allMatch) {
-                    // Set all four plants as giant and tile type as GIANT_PLANT
                     System.out.println("This 4-location block became a giant plant:");
                     for (int i = 0; i < 4; i++) {
-                        int[] offset = squareOffsets[i];
-                        int gx = x + offset[0];
-                        int gy = y + offset[1];
-                        Location loc = App.getCurrentGame().getMainMap().findLocation(gx, gy);
+                        Location loc = locations.get(i);
                         loc.setTypeOfTile(TypeOfTile.GIANT_PLANT);
-                        Plant p = (Plant) loc.getObjectInTile();
+                        Plant p = square.get(i);
                         p.setGiantPlant(true);
                         System.out.println((i + 1) + ") " + p.getAllCrops().name() + " at location (" +
                                 loc.getxAxis() + ", " + loc.getyAxis() + ")");
                     }
 
-                    // Gather shared attributes from the square
                     boolean isWatered = square.stream().anyMatch(Plant::isHasBeenWatering);
                     boolean isFertilized = square.stream().anyMatch(Plant::isHasBeenFertilized);
                     int maxGrowth = square.stream().mapToInt(Plant::getAge).max().orElse(0);
 
-                    // Create the giant plant
-                    int mainX = x + squareOffsets[0][0];
-                    int mainY = y + squareOffsets[0][1];
-                    Location mainLoc = App.getCurrentGame().getMainMap().findLocation(mainX, mainY);
-
                     GiantPlants giantPlants = GiantPlants.sourceTypeToCraftType(seedTypes);
                     GiantPlant giantPlant = new GiantPlant(
                             giantPlants,
-                            mainLoc,
-                            allCrops,
+                            locations,
                             isFertilized,
                             isWatered,
-                            allCrops.totalHarvestTime, // assuming this method exists
+                            allCrops.totalHarvestTime,
                             0, // dayPast
                             0, // currentStage
                             maxGrowth
                     );
 
-                    mainLoc.setObjectInTile(giantPlant);
+                    locations.get(0).setObjectInTile(giantPlant);
+                    locations.get(1).setObjectInTile(giantPlant);
+                    locations.get(2).setObjectInTile(giantPlant);
+                    locations.get(3).setObjectInTile(giantPlant);
                     App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getGiantPlants().add(giantPlant);
 
                     for (Plant p : square) {
                         App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getPlantOfFarm().remove(p);
                     }
-
-                    break;
+                    break; // Only one giant plant per planting
                 }
-
             }
         }
         return new Result(true, seed + " planted on (" + x + ", " + y + ")");
     }
+
 
     public Seed switchingSeason(Season season) {
         List<SeedTypes> options;
@@ -388,19 +382,22 @@ public class FarmingController {
             App.getCurrentGame().getMainMap().findLocation(x, y).setObjectInTile(null);
             App.getCurrentGame().getMainMap().findLocation(x, y).setTypeOfTile(TypeOfTile.GROUND);
             App.getCurrentPlayerLazy().getOwnedFarm().getTrees().remove(tree);
-            //TODO:
-            ItemBuilder.addToBackPack(ItemBuilder.builder(tree.getType().name(), Quality.NORMAL), 1, Quality.NORMAL);
+            //TODO: fruit
             return new Result(true, tree.getType().name + " add to back pack of current player");
         }else{
             GiantPlant giantPlant = (GiantPlant) newLocation.getObjectInTile();
-            App.getCurrentGame().getMainMap().findLocation(x, y).setObjectInTile(null);
-            App.getCurrentGame().getMainMap().findLocation(x, y).setTypeOfTile(TypeOfTile.GROUND);
-            App.getCurrentPlayerLazy().getOwnedFarm().getGiantPlants().remove(giantPlant);
-            //TODO:
-            ItemBuilder.addToBackPack(ItemBuilder.builder(giantPlant.getGiantPlants().name(), Quality.NORMAL), 1, Quality.NORMAL);
+            removeFromFarm(giantPlant);
+            ItemBuilder.addToBackPack(ItemBuilder.builder(giantPlant.getGiantPlants().getName(), Quality.NORMAL), 1, Quality.NORMAL);
             return new Result(true, giantPlant.getGiantPlants().name + " add to back pack of current player");
         }
+    }
 
+    public void removeFromFarm(GiantPlant plant) {
+        for(Location location : plant.getLocation()){
+            System.out.println("you tack GiantPlant at " + location.getxAxis() + " " + location.getyAxis());
+            location.setObjectInTile(null);
+            location.setTypeOfTile(TypeOfTile.GROUND);
+        }
     }
 
     public Result howMuchWater() {

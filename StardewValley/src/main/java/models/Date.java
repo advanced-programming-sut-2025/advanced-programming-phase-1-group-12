@@ -47,10 +47,10 @@ public class Date {
         if (this.hour > 22) {
             this.hour -= 13;
             changeAdvancedDay(1);
-            gameMenuController.sellByShippingAllPlayers();
+//            gameMenuController.sellByShippingAllPlayers();
             this.weather = this.tommorowWeather; // the day changes
 
-            updateAllPlants();
+//            updateAllPlants();
             ThunderAndLightning();
             foragingAdd();
             changesDayAnimal();
@@ -110,7 +110,6 @@ public class Date {
             trees.subList(0, treesToDamage).clear();
         }
     }
-
 
     public void removeGiantPlant(Plant plant) {
         Location baseLocation = plant.getLocation();
