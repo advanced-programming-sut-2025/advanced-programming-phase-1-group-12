@@ -52,6 +52,9 @@ public class FarmingController {
     public Result plant(String seed, String direction) {
         int Direction = Integer.parseInt(direction);
         Location currentLocation = App.getCurrentGame().getCurrentPlayer().getUserLocation();
+        if(currentLocation.getTypeOfTile().equals(TypeOfTile.GREENHOUSE)){
+            return new Result(false, "You can't grow giant plants in a green house");
+        }
         int x, y;
 
         switch (Direction) {
