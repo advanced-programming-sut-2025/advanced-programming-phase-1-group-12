@@ -9,6 +9,7 @@ import models.Fundementals.Player;
 import models.NPC.NPC;
 import models.Place.Farm;
 import models.ProductsPackage.ArtisanItem;
+import models.ProductsPackage.Quality;
 import models.enums.Season;
 import models.enums.Types.SeedTypes;
 import models.enums.Types.TypeOfTile;
@@ -271,7 +272,7 @@ public class Date {
             for (int i = 0; i < seedCount; i++) {
                 Location location = seedPlacing.get(i);
                 SeedTypes seedSeason = allSeeds.get(i);
-                Seed newSeed = new Seed(seedSeason);
+                Seed newSeed = new Seed(seedSeason.getName(), Quality.NORMAL, 0, seedSeason);
                 AllCrops allCrops = AllCrops.sourceTypeToCraftType(seedSeason);
                 Plant newPlant = new Plant(location, newSeed, true, allCrops);
                 farm.getPlantOfFarm().add(newPlant);
@@ -317,14 +318,6 @@ public class Date {
         if (day == 1 ){
             this.weather = this.tommorowWeather;// the day changes
 
-            sellByShippingAllPlayers();
-            updateAllPlants();
-            ThunderAndLightning();
-            foragingAdd();
-            changesDayAnimal();
-            attackingCrow();
-            resetNPCStatus();
-
         }
         this.dayOfWeek += day;
         if (this.dayOfWeek > 7) {
@@ -339,6 +332,13 @@ public class Date {
                 changeYear();
             }
         }
+        sellByShippingAllPlayers();
+
+        updateAllPlants();
+        ThunderAndLightning();
+        foragingAdd();
+        changesDayAnimal();
+        attackingCrow();
         resetNPCStatus();
         artisansUpdate(day * 13);
     }
@@ -500,7 +500,6 @@ public class Date {
 
     public void sellByShippingAllPlayers(){
         for (Player player : App.getCurrentGame().getPlayers()) {
-            System.out.println(player.getShippingMoney());
             player.increaseMoney(player.getShippingMoney());
             player.setShippingMoney(0);
         }

@@ -13,7 +13,7 @@ public class AnimalProducts extends Item {
     private int price;
 
     public AnimalProducts(String name, AnimalProduct animalProduct, Quality quality) {
-        super(name);
+        super(name, quality, animalProduct.getPrice());
         this.animalProduct = animalProduct;
         this.quality = quality;
         this.price = animalProduct.getPrice();

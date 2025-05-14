@@ -2,6 +2,7 @@ package models.Animal;
 
 import models.Fundementals.Location;
 import models.Item;
+import models.ProductsPackage.Quality;
 import models.enums.Animal;
 
 import java.util.ArrayList;
@@ -64,7 +65,7 @@ public class FarmAnimals extends Item {
     }
 
     public FarmAnimals(Animal animal, int friendShip, AnimalHome home, String name, Location position) {
-        super(name);
+        super(name, Quality.NORMAL, animal.getPurchaseCost());
         this.animal = animal;
         this.friendShip = friendShip;
         this.home = home;

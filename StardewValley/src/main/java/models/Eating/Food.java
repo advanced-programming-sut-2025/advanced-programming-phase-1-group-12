@@ -1,13 +1,14 @@
 package models.Eating;
 
 import models.Item;
+import models.ProductsPackage.Quality;
 import models.enums.Types.Cooking;
 
 public class Food extends Item {
     private Cooking foodType;
 
     public Food(String name, Cooking foodType){
-        super(name);
+        super(name, Quality.NORMAL, foodType.getBaseSellPrice());
         this.foodType = foodType;
     }
 

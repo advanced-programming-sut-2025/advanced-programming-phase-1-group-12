@@ -7,6 +7,7 @@ import models.Fundementals.Location;
 import models.*;
 import models.Fundementals.LocationOfRectangle;
 import models.Fundementals.Result;
+import models.MapDetails.Shack;
 import models.Place.Store;
 import models.ProductsPackage.Quality;
 import models.ProductsPackage.StoreProducts;
@@ -16,6 +17,9 @@ import models.enums.Types.Cooking;
 import models.enums.Types.CraftingRecipe;
 import models.enums.Types.StoreProductsTypes;
 import models.enums.Types.TypeOfTile;
+import models.enums.foraging.Stone;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 
@@ -26,7 +30,7 @@ public class StoreController {
             //TODO:money for building is not decreased
             return new Result(false, "You are not in Carpenter's shop");
         }
-        if(!App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getLocation().getLocationsInRectangle().contains(location)){
+        if (!App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getLocation().getLocationsInRectangle().contains(location)) {
             return new Result(false, "given location is not in your farm at all");
         }
         if (!location.getTypeOfTile().equals(TypeOfTile.GROUND)) {
@@ -49,10 +53,10 @@ public class StoreController {
             }
         }
         LocationOfRectangle buildingPlace = new LocationOfRectangle(location, otherCorner);
-        if(!isAllLocationGround(buildingPlace)) {
+        if (!isAllLocationGround(buildingPlace)) {
             return new Result(false, "You can not build this building here");
         }
-       return buildAnimalHomeSuccess(location, buildingName);
+        return buildAnimalHomeSuccess(location, buildingName);
     }
 
     public Result buildAnimalHomeSuccess(Location givenLocation, String buildingName) {
@@ -65,58 +69,74 @@ public class StoreController {
             otherCorner = App.getCurrentGame().getMainMap().findLocation(givenLocation.getxAxis() + 2, givenLocation.getyAxis() + 3);
         }
         LocationOfRectangle buildingPlace = new LocationOfRectangle(givenLocation, otherCorner);
-        if(!isAllLocationGround(buildingPlace)) {
+        if (!isAllLocationGround(buildingPlace)) {
             return new Result(false, "you can not build this building here");
         }
-        switch (buildingName){
+        switch (buildingName) {
             case "coop":
                 App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes().add(
-                        new AnimalHome(4, "coop", buildingPlace)
+                        new AnimalHome("coop", Quality.NORMAL, 0, 4, "coop", buildingPlace)
                 );
                 break;
             case "deluxe coop":
                 App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes().add(
-                        new AnimalHome(12, "Deluxe coop", buildingPlace)
+                        new AnimalHome("deluxe coop", Quality.NORMAL, 0, 12, "deluxe coop", buildingPlace)
                 );
                 break;
             case "big coop":
-                App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getAnimalHomes().add
-                        (new AnimalHome(8, "big coop", buildingPlace));
+                App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes().add(
+                        new AnimalHome("big coop", Quality.NORMAL, 0, 8, "big coop", buildingPlace)
+                );
                 break;
             case "barn":
-                App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getAnimalHomes().add
-                        (new AnimalHome(4, "barn", buildingPlace));
+                App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes().add(
+                        new AnimalHome("barn", Quality.NORMAL, 0, 4, "barn", buildingPlace)
+                );
                 break;
             case "deluxe barn":
-                App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getAnimalHomes().add
-                        (new AnimalHome(12, "Deluxe barn", buildingPlace));
+                App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes().add(
+                        new AnimalHome("deluxe barn", Quality.NORMAL, 0, 12, "deluxe barn", buildingPlace)
+                );
                 break;
             case "big barn":
-                App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getAnimalHomes().add
-                        (new AnimalHome(8, "big barn", buildingPlace));
+                App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes().add(
+                        new AnimalHome("big barn", Quality.NORMAL, 0, 8, "big barn", buildingPlace)
+                );
                 break;
             default:
                 return new Result(false, "Invalid building name entered");
         }
+
         changeTypeTileAfterBuild(buildingName, buildingPlace);
+
+        Item wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Wood");
+        Item stone = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Stone");
+
+        if (wood == null || stone == null ||
+                App.getCurrentPlayerLazy().getBackPack().getItems().get(wood) < 100 || App.getCurrentPlayerLazy().getBackPack().getItems().get(stone) < 100) {
+            return new Result(false, "You do not have enough wood or stone to build this building");
+        }
+        App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Wood"), 100);
+        App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getItemByName("Stone"), 100);
         return new Result(true, buildingName + " " + "built successfully");
     }
 
     public void changeTypeTileAfterBuild(String type, LocationOfRectangle buildingPlace) {
-        if(type.contains("coop")){
-            for(Location location : buildingPlace.getLocationsInRectangle()){
+        if (type.contains("coop")) {
+            for (Location location : buildingPlace.getLocationsInRectangle()) {
                 location.setTypeOfTile(TypeOfTile.COOP);
             }
-        } else if(type.contains("barn")){
-            for(Location location : buildingPlace.getLocationsInRectangle()){
+        } else if (type.contains("barn")) {
+            for (Location location : buildingPlace.getLocationsInRectangle()) {
                 location.setTypeOfTile(TypeOfTile.BARN);
             }
         }
     }
-    public boolean isAllLocationGround(LocationOfRectangle place){
-        for(Location location : place.getLocationsInRectangle()){
-            if( !location.getTypeOfTile().equals(TypeOfTile.GROUND) &&
-                    !App.getCurrentGame().getMainMap().findLocation(location.getxAxis(), location.getyAxis()).getTypeOfTile().equals(TypeOfTile.GROUND)){
+
+    public boolean isAllLocationGround(LocationOfRectangle place) {
+        for (Location location : place.getLocationsInRectangle()) {
+            if (!location.getTypeOfTile().equals(TypeOfTile.GROUND) &&
+                    !App.getCurrentGame().getMainMap().findLocation(location.getxAxis(), location.getyAxis()).getTypeOfTile().equals(TypeOfTile.GROUND)) {
                 return false;
             }
         }
@@ -129,23 +149,23 @@ public class StoreController {
         String animalType = matcher.group("animal");
 
         Animal type = findAnimalType(animalType);
-        if(type == null) {
+        if (type == null) {
             return new Result(false, "Animal type " + animalType + " not found");
         }
-        if (! App.isInStore("Marnie's Ranch")){
+        if (!App.isInStore("Marnie's Ranch")) {
             return new Result(false, "You are not in Marnie's Ranch");
         }
-        if(App.getCurrentPlayerLazy().getMoney() < type.getPurchaseCost()) {
+        if (App.getCurrentPlayerLazy().getMoney() < type.getPurchaseCost()) {
             return new Result(false, "You do not have enough money to buy this animal");
         }
         AnimalHome home = null;
-        for(AnimalHome animalHome : App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes()){
-            if(animalHome.getCapacityRemained() > 0 && type.getPlacesCanStay().contains(animalHome.getType())){
+        for (AnimalHome animalHome : App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes()) {
+            if (animalHome.getCapacityRemained() > 0 && type.getPlacesCanStay().contains(animalHome.getType())) {
                 home = animalHome;
                 break;
             }
         }
-        if(home == null) {
+        if (home == null) {
             return new Result(false, "You can't buy this animal because there is no home for it");
         }
         //pay for it
@@ -158,37 +178,39 @@ public class StoreController {
 
         return new Result(true, "You bought this animal");
     }
-    public Animal findAnimalType(String animalType){
-        for(Animal type : Animal.values()){
-            if(animalType.equalsIgnoreCase(type.name())){
+
+    public Animal findAnimalType(String animalType) {
+        for (Animal type : Animal.values()) {
+            if (animalType.equalsIgnoreCase(type.name())) {
                 return type;
             }
         }
         return null;
     }
 
-    public void ShowProducts(){
+    public void ShowProducts() {
         Store store = null;
 
-        for(Store store1: App.getCurrentGame().getMainMap().getStores()){
-            if(App.isLocationInPlace(App.getCurrentPlayerLazy().getUserLocation(), store1.getLocationOfRectangle())){
+        for (Store store1 : App.getCurrentGame().getMainMap().getStores()) {
+            if (App.isLocationInPlace(App.getCurrentPlayerLazy().getUserLocation(), store1.getLocationOfRectangle())) {
                 store = store1;
             }
         }
-        if(store == null) {
+        if (store == null) {
             System.out.println("You are not in any store");
             return;
         }//TODO:does it print it right?
-       String storeName = store.getNameOfStore();
-        for(StoreProductsTypes storeProductsTypes : StoreProductsTypes.values()){
-            if(storeProductsTypes.getShop().equalsIgnoreCase(storeName)){
+        String storeName = store.getNameOfStore();
+        for (StoreProductsTypes storeProductsTypes : StoreProductsTypes.values()) {
+            if (storeProductsTypes.getShop().equalsIgnoreCase(storeName)) {
                 System.out.println(storeProductsTypes.getName());
                 //TODO:print price
             }
         }
     }
 
-    public void showTotalProducts(List<Store> stores){}
+    public void showTotalProducts(List<Store> stores) {
+    }
 
     public Result buyProduct(String productName, int count) {
         Store store = null;
@@ -229,11 +251,36 @@ public class StoreController {
             return new Result(false, "You do not have enough money to buy this product");
         }
 
-        if(item.getName().equalsIgnoreCase(StoreProductsTypes.CARPENTER_SHIPPING_BIN.getName())){
+        if (item.getName().equalsIgnoreCase(StoreProductsTypes.CARPENTER_WELL.getName())) {
+            Item wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Stone");
+
+            if (wood == null || App.getCurrentPlayerLazy().getBackPack().getItems().get(wood) < 75) {
+                return new Result(false, "You do not have enough wood or stone to build this building");
+            }
+            App.getCurrentPlayerLazy().getBackPack().decreaseItem(wood, 75);
+
+            ArrayList<Location> wellLocation = new ArrayList<>();
+
+            for (int i = 0; i < 6; i++) {
+                Shack shack = App.getCurrentPlayerLazy().getOwnedFarm().getShack();
+                wellLocation.add(App.getCurrentGame().getMainMap().findLocation(shack.getLocation().getTopLeftCorner().getxAxis() + i, shack.getLocation().getTopLeftCorner().getyAxis()));
+                wellLocation.get(i).setTypeOfTile(TypeOfTile.LAKE);
+            }
+            return new Result(true, "you bought this Well");
+
+        }
+        if (item.getName().equalsIgnoreCase(StoreProductsTypes.CARPENTER_SHIPPING_BIN.getName())) {
+            Item wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Wood");
+
+            if (wood == null || App.getCurrentPlayerLazy().getBackPack().getItems().get(wood) < 150) {
+                return new Result(false, "You do not have enough wood or stone to build this building");
+            }
+            App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Wood"), 100);
             ShippingBin shippingBin = new ShippingBin(App.getCurrentPlayerLazy().getOwnedFarm().getShack().getLocation().getTopLeftCorner(), App.getCurrentPlayerLazy());
             shippingBin.getShippingBinLocation().setObjectInTile(shippingBin);
 
             App.getCurrentPlayerLazy().setShippingBin(shippingBin);
+
             return new Result(true, "You bought this shipping bin");
         }
 
@@ -263,5 +310,61 @@ public class StoreController {
         return new Result(true, "You bought this product");
     }
 
+    public Result cheatAddItem(String productName, int count) {
 
+        StoreProducts item = null;
+        for (Store store1 : App.getCurrentGame().getMainMap().getStores()) {
+            for (StoreProducts item1 : store1.getStoreProducts()) {
+                if (item1.getName().equalsIgnoreCase(productName)) {
+                    item = item1;
+                    break;
+                }
+            }
+        }
+
+
+        if (item == null) {
+            return new Result(false, "The store doesn't have this product");
+        }
+
+        if (item.getCurrentDailyLimit() < count) {
+            return new Result(false, "Not enough stock in the store today.");
+        }
+
+        int price = switch (App.getCurrentGame().getDate().getSeason()) {
+            case AUTUMN -> item.getType().getFallPrice();
+            case WINTER -> item.getType().getWinterPrice();
+            case SUMMER -> item.getType().getSummerPrice();
+            case SPRING -> item.getType().getSpringPrice();
+        };
+
+        int totalCost = price * count;
+        if (App.getCurrentPlayerLazy().getMoney() < totalCost) {
+            return new Result(false, "You do not have enough money to buy this product");
+        }
+
+        if (item.getName().equalsIgnoreCase(StoreProductsTypes.CARPENTER_WELL.getName())) {
+
+            ArrayList<Location> wellLocation = new ArrayList<>();
+
+            for (int i = 0; i < 6; i++) {
+                Shack shack = App.getCurrentPlayerLazy().getOwnedFarm().getShack();
+                wellLocation.add(App.getCurrentGame().getMainMap().findLocation(shack.getLocation().getTopLeftCorner().getxAxis() + i, shack.getLocation().getTopLeftCorner().getyAxis()));
+                wellLocation.get(i).setTypeOfTile(TypeOfTile.LAKE);
+            }
+            return new Result(true, "you bought this Well");
+
+        }
+        if (item.getName().equalsIgnoreCase(StoreProductsTypes.CARPENTER_SHIPPING_BIN.getName())) {
+
+            ShippingBin shippingBin = new ShippingBin(App.getCurrentPlayerLazy().getOwnedFarm().getShack().getLocation().getTopLeftCorner(), App.getCurrentPlayerLazy());
+            shippingBin.getShippingBinLocation().setObjectInTile(shippingBin);
+
+            App.getCurrentPlayerLazy().setShippingBin(shippingBin);
+
+            return new Result(true, "You bought this shipping bin");
+        }
+        ItemBuilder.addToBackPack(item, count, Quality.NORMAL); // assuming getType() returns Item
+        return new Result(true, "You bought this product");
+    }
 }

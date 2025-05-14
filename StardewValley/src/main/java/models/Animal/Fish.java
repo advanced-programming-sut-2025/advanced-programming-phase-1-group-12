@@ -11,7 +11,7 @@ public class Fish extends Item {
     private Quality quality;
 
     public Fish(FishDetails fishtype, Quality quality) {
-        super(fishtype.name());
+        super(fishtype.getName(), Quality.NORMAL, fishtype.getBasePrice());
         this.fishtype = fishtype;
         this.quality = quality;
     }

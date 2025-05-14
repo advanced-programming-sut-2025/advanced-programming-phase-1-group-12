@@ -318,6 +318,8 @@ public class GameMenu extends AppMenu {
             System.out.println(App.getCurrentPlayerLazy().getMoney());
         } else if ((matcher = GameMenuCommands.SHOW_SHIPPING_BIN_LOCATION.getMather(input))!= null) {
             System.out.println(controller.showShippingBinLocation().getMessage());
+        } else if ((matcher = GameMenuCommands.CHEAT_ADD_ITEM.getMather(input)) != null) {
+            System.out.println(storeController.cheatAddItem(matcher.group("productName"), Integer.parseInt(matcher.group("count"))));
         } else {
             System.out.println("invalid command");
         }

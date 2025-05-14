@@ -2,6 +2,7 @@ package models.enums.foraging;
 
 import models.Fundementals.Location;
 import models.Item;
+import models.ProductsPackage.Quality;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ public class GiantPlant extends Item {
 
     public GiantPlant(GiantPlants giantPlants, ArrayList<Location> location, boolean hasBeenFertilized,
                       boolean hasBeenWatering, int totalTimeNeeded, int dayPast, int currentStage, int age){
-        super(giantPlants.name());
+        super(giantPlants.name(), Quality.NORMAL, giantPlants.baseSellPrice);
         this.giantPlants = giantPlants;
         this.location = location;
         this.hasBeenFertilized = hasBeenFertilized;

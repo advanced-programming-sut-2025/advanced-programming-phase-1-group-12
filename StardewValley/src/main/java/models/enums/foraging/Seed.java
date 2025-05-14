@@ -2,28 +2,20 @@ package models.enums.foraging;
 
 import models.Fundementals.Location;
 import models.Item;
+import models.ProductsPackage.Quality;
 import models.enums.Types.SeedTypes;
 
 public class Seed extends Item {
 
     private SeedTypes type;
-    private Location location;
 
-    public Seed(SeedTypes type) {
-        super(type.getName());
+    public Seed(String name, Quality quality, int price, SeedTypes type) {
+        super(name, quality, price);
         this.type = type;
     }
 
     public void setType(SeedTypes type) {
         this.type = type;
-    }
-
-    public void setLocation(Location location) {
-        this.location = location;
-    }
-
-    public Location getLocation() {
-        return location;
     }
 
     public SeedTypes getType() {

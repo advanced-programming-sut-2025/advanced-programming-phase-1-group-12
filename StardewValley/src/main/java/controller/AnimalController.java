@@ -94,18 +94,18 @@ public class AnimalController {
         if (animal.getDaysLeftToProduce() == 0 && !animal.isHasCollectedProductToday() && animal.isWillProduceToday()) {
             if (animal.getFriendShip() < 100 || willProduceGood < number) {
                 if (animal.getAnimal().equals(Animal.COW)) {
-                    ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.MILK.getName(), quality), 1, quality);
+                    ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.MILK.getName(), quality, AnimalProduct.MILK.getPrice()), 1, quality);
                 }
                 if (animal.getAnimal().equals(Animal.GOAT)) {
-                    ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.GOAT_MILK.getName(), quality), 1, quality);
+                    ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.GOAT_MILK.getName(), quality, AnimalProduct.GOAT_MILK.getPrice()), 1, quality);
                 }
             }//produces the good product
             else {
                 if (animal.getAnimal().equals(Animal.COW)) {
-                    ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.LARGE_MILK.getName(), quality), 1, quality);
+                    ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.LARGE_MILK.getName(), quality, AnimalProduct.LARGE_MILK.getPrice()), 1, quality);
                 }
                 if (animal.getAnimal().equals(Animal.GOAT)) {
-                    ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.LARGE_GOAT_MILK.getName(), quality), 1, quality);
+                    ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.LARGE_GOAT_MILK.getName(), quality, AnimalProduct.LARGE_GOAT_MILK.getPrice()), 1, quality);
                 }
             }
             animal.setWillProduceToday(false);
@@ -147,7 +147,7 @@ public class AnimalController {
             return new Result(false, "You do not have a shear!");
         }
         Quality quality = findQulaity(animal.getFriendShip());
-        ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.WOOL_SHEEP.getName(), quality), 1, quality);
+        ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.WOOL_SHEEP.getName(), quality, AnimalProduct.WOOL_SHEEP.getPrice()), 1, quality);
         return new Result(true, "You just sheared " + animalName);
     }
 
@@ -243,7 +243,7 @@ public class AnimalController {
         }
 
         for (FishDetails fishDetails : randomItems) {
-            Item item = ItemBuilder.builder(fishDetails.getName(), fishQuality);
+            Item item = ItemBuilder.builder(fishDetails.getName(),fishQuality, fishDetails.getBasePrice());
             ItemBuilder.addToBackPack(item, 1, fishQuality);
         }
 
@@ -302,29 +302,29 @@ public class AnimalController {
                     AnimalProduct product = animal.getFriendShip() >= 100 && willProduceGood >= number
                             ? AnimalProduct.LARGE_EGG
                             : AnimalProduct.EGG;
-                    ItemBuilder.addToBackPack(ItemBuilder.builder(product.getName(), quality), 1, quality);
+                    ItemBuilder.addToBackPack(ItemBuilder.builder(product.getName(), quality, product.getPrice()), 1, quality);
                 }
                 case DUCK -> {
                     AnimalProduct product = animal.getFriendShip() >= 150 && willProduceGood >= number
                             ? AnimalProduct.DUCK_FEATHER
                             : AnimalProduct.DUCK_EGG;
-                    ItemBuilder.addToBackPack(ItemBuilder.builder(product.getName(), quality), 1, quality);
+                    ItemBuilder.addToBackPack(ItemBuilder.builder(product.getName(), quality, product.getPrice()), 1, quality);
                 }
                 case RABBIT -> {
                     AnimalProduct product = animal.getFriendShip() >= 200 && willProduceGood >= number
                             ? AnimalProduct.RABBITS_PIE
                             : AnimalProduct.WOOL_RABBIT;
-                    ItemBuilder.addToBackPack(ItemBuilder.builder(product.getName(), quality), 1, quality);
+                    ItemBuilder.addToBackPack(ItemBuilder.builder(product.getName(), quality, product.getPrice()), 1, quality);
                 }
                 case DINOSAUR -> {
-                    ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.DINOSAUR_EGG.getName(), quality), 1, quality);
+                    ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.DINOSAUR_EGG.getName(), quality, AnimalProduct.DINOSAUR_EGG.getPrice()), 1, quality);
                 }
                 case PIG -> {
                     if (App.getCurrentGame().getDate().getSeason().equals(Season.WINTER) &&
                             !App.isLocationInPlace(animal.getPosition(), animal.getHome().getLocation())) {
                         return new Result(false, "Pigs do not produce truffles in winter");
                     }
-                    ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.TRUFFLE.getName(), quality), 1, quality);
+                    ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.TRUFFLE.getName(), quality, AnimalProduct.TRUFFLE.getPrice()), 1, quality);
                 }
             }
 

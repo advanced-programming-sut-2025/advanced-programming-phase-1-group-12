@@ -5,6 +5,7 @@ import models.Fundementals.Player;
 import models.Fundementals.Result;
 import models.Item;
 import models.MapDetails.Shack;
+import models.ProductsPackage.Quality;
 import models.Refrigrator;
 import models.enums.NPCdetails;
 
@@ -109,7 +110,7 @@ public class NPC {
         }
 
         for (String itemName : details.getFavoriteItems()) {
-            addFavoriteItem(new Item(itemName));
+            addFavoriteItem(new Item(itemName, Quality.NORMAL, 50));
         }
 
         for (Item item : details.getGiftsToGive()) {
