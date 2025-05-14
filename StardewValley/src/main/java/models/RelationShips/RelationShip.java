@@ -327,4 +327,8 @@ public class RelationShip {
     public List<Gift> getSentGifts() {
         return sentGifts;
     }
+
+    public void setHasBouquet() {
+        this.hasBouquet = true;
+    }
 }

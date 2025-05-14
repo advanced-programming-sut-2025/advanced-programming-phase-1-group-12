@@ -2,7 +2,7 @@ package controller.MenusController;
 
 import controller.MapSetUp.MapSetUp;
 import controller.NPCcontroller;
-import controller.TradeManager;
+import controller.TradeController;
 import models.Eating.Food;
 import models.Fundementals.*;
 import models.Place.Farm;
@@ -21,7 +21,6 @@ import models.enums.Types.Cooking;
 import models.enums.Types.TypeOfTile;
 import models.NPC.NPC;
 
-import javax.management.relation.Relation;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -39,7 +38,7 @@ public class GameMenuController implements MenuController {
             }
         }
 
-        String notifications = TradeManager.getTradeNotifications(currentPlayer);
+        String notifications = TradeController.getTradeNotifications(currentPlayer);
         if (notifications != null) {
             playerList.append("\n").append(notifications);
         }
@@ -81,11 +80,11 @@ public class GameMenuController implements MenuController {
         }
 
         if (price != null && price > 0) {
-            TradeManager.createTrade(currentPlayer, targetPlayer, type, item, amount, price);
+            TradeController.createTrade(currentPlayer, targetPlayer, type, item, amount, price);
             return new Result(true, "Trade request created successfully");
         } else if (targetItemName != null && targetAmount != null && targetAmount > 0) {
             Item targetItem = new Item(itemName, item.getQuality(), item.getPrice());
-            TradeManager.createTrade(currentPlayer, targetPlayer, type, item, amount, targetItem, targetAmount);
+            TradeController.createTrade(currentPlayer, targetPlayer, type, item, amount, targetItem, targetAmount);
             return new Result(true, "Trade request created successfully");
         } else {
             return new Result(false, "You must specify either price or target item");
@@ -94,18 +93,18 @@ public class GameMenuController implements MenuController {
 
     public Result listTrades() {
         Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
-        String tradeList = TradeManager.getTradeList(currentPlayer);
+        String tradeList = TradeController.getTradeList(currentPlayer);
         return new Result(true, tradeList);
     }
 
 
     public Result respondToTrade(String response, String id) {
         if (response.equals("accept")) {
-            String result = TradeManager.acceptTrade(id);
+            String result = TradeController.acceptTrade(id);
 
             return new Result(result.contains("successfully"), result);
         } else {
-            String result = TradeManager.rejectTrade(id);
+            String result = TradeController.rejectTrade(id);
             return new Result(true, result);
         }
     }
@@ -113,7 +112,7 @@ public class GameMenuController implements MenuController {
 
     public Result tradeHistory() {
         Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
-        String history = TradeManager.getTradeHistory(currentPlayer);
+        String history = TradeController.getTradeHistory(currentPlayer);
         return new Result(true, history);
     }
 
@@ -1205,5 +1204,12 @@ public class GameMenuController implements MenuController {
 
         relationShip.increaseXP(201);
         return new Result(true, "XP added by " + App.getCurrentPlayerLazy() + " to " + username + "!");
+    }
+
+    public Result cheatAddBouquet(String username) {
+        Player player = App.getCurrentGame().getPlayerByName(username);
+        RelationShip relationShip = player.findRelationShip(App.getCurrentGame().getCurrentPlayer());
+        relationShip.setHasBouquet();
+        return new Result(true, "Bouquet added to " + username + "!");
     }
 }

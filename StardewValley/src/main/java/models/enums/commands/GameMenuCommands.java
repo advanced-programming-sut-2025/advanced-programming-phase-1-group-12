@@ -133,6 +133,8 @@ public enum GameMenuCommands implements Commands {
     CHEAT_PLAYER_MONEY("^cheat player money$"),
     SHOW_SHIPPING_BIN_LOCATION("^show shipping bin location$"),
     CHEAT_FRIENDSHIP_LEVEL("^cheat friendship level -n (?<name>.*) -c (?<amount>.*)$"),
+    CHEAT_SET_BOUQUET("^set bouquet -n (?<username>.*)$"),
+    CHEAT_DECREASE_MONEY("^decrease money -a (?<username>.*)$"),
 
     //store commands
     SHOW_PRODUCTS("show all products"),

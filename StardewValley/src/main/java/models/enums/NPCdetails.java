@@ -5,7 +5,6 @@ import models.ProductsPackage.Quality;
 import models.enums.Types.ArtisanTypes;
 import models.enums.Types.Cooking;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -106,7 +105,7 @@ public enum NPCdetails {
         Arrays.asList("Spaghetti", "Wood", "Iron Bar"),
         Arrays.asList(
             new QuestInfo("Deliver 200 Wood", "Wood", 200, new Item("Scarecrow", Quality.NORMAL, 0), 3, 0),
-            new QuestInfo("Deliver 100 Wood", "Wood", 100, new Item("Gold", Quality.NORMAL, 0), 25000, 1),
+            new QuestInfo("Deliver 100 Iron", "Iron", 100, new Item("Gold", Quality.NORMAL, 0), 25000, 1),
             new QuestInfo("Deliver 1000 Wood", "Wood", 1000, new Item("Gold", Quality.NORMAL, 0), 1000, 2)
         ),
         Arrays.asList("I can build anything you need for your farm.",

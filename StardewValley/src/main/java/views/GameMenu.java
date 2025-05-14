@@ -326,8 +326,11 @@ public class GameMenu extends AppMenu {
             System.out.println(controller.cheatFriendShipLevel(matcher.group("name"), matcher.group("amount")));
         } else if ((matcher = GameMenuCommands.CHEAT_FRIENDSHIP_XP.getMather(input))!= null) {
             System.out.println(controller.cheatAddXP(matcher.group("username")));
-        }
-        else {
+        } else if ((matcher = GameMenuCommands.CHEAT_SET_BOUQUET.getMather(input))!= null) {
+            System.out.println(controller.cheatAddBouquet("username"));
+        } else if ((matcher = GameMenuCommands.CHEAT_DECREASE_MONEY.getMather(input))!= null) {
+            App.getCurrentPlayerLazy().decreaseMoney(Integer.parseInt(matcher.group("amount")));
+        } else {
             System.out.println("invalid command");
         }
 

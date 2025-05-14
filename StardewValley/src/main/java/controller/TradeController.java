@@ -1,6 +1,5 @@
 package controller;
 
-import models.Fundementals.App;
 import models.Fundementals.Player;
 import models.Item;
 import models.RelationShips.RelationShip;
@@ -10,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TradeManager {
+public class TradeController {
     private static List<Trade> trades = new ArrayList<>();
 
     public static Trade createTrade(Player requester, Player target, String type, Item item, int amount, int price) {

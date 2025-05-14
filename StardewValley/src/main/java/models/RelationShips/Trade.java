@@ -21,7 +21,7 @@ public class Trade {
     private boolean isNew;
 
     public Trade(Player requester, Player target, String type, Item item, int amount, int price) {
-        this.id = UUID.randomUUID().toString().substring(0, 8); // Generate a short unique ID
+        this.id = UUID.randomUUID().toString().substring(0, 8);
         this.requester = requester;
         this.target = target;
         this.type = type;
@@ -35,7 +35,7 @@ public class Trade {
     }
 
     public Trade(Player requester, Player target, String type, Item item, int amount, Item targetItem, int targetAmount) {
-        this.id = UUID.randomUUID().toString().substring(0, 8); // Generate a short unique ID
+        this.id = UUID.randomUUID().toString().substring(0, 8);
         this.requester = requester;
         this.target = target;
         this.type = type;
