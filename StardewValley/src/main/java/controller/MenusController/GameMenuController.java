@@ -545,10 +545,12 @@ public class GameMenuController implements MenuController {
             player1.addRelationShip(newRelationShip);
             player2.addRelationShip(newRelationShip);
             newRelationShip.talk(message);
-            return new Result(true, "message sent!");
+            return new Result(true, "message sent!" + "\nRelationShip XP: " + relationShip.getXP()+
+                    "\nFriendship Level: " + relationShip.getFriendshipLevel());
         }
         relationShip.talk(message);
-        return new Result(true, "message sent!");
+        return new Result(true, "message sent!" + "\nRelationShip XP: " + relationShip.getXP()+
+                "\nFriendship Level: " + relationShip.getFriendshipLevel());
     }
 
     public Result talkHistory(String username) {
@@ -592,7 +594,9 @@ public class GameMenuController implements MenuController {
             }
 
             if (relationShip.gift(gift, inAmount)) {
-                return new Result(true, "Gift sent successfully! " + player2.getUser().getUserName() + " can rate it now.");
+                return new Result(true, "Gift sent successfully! " + player2.getUser().getUserName() + " can rate it now."
+                        + "\nRelationShip XP: " + relationShip.getXP()+
+                        "\nFriendship Level: " + relationShip.getFriendshipLevel());
             } else {
                 return new Result(false, "Error sending gift!");
             }
