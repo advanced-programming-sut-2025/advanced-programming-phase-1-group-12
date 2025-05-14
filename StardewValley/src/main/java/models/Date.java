@@ -51,14 +51,7 @@ public class Date {
         if (this.hour > 22) {
             this.hour -= 13;
             changeAdvancedDay(1);
-//            gameMenuController.sellByShippingAllPlayers();
 
-            updateAllPlants();
-            ThunderAndLightning();
-            foragingAdd();
-            changesDayAnimal();
-            attackingCrow();
-            resetNPCStatus();
         }
     }
 
@@ -324,6 +317,14 @@ public class Date {
         if (day == 1 ){
             this.weather = this.tommorowWeather;// the day changes
 
+            sellByShippingAllPlayers();
+            updateAllPlants();
+            ThunderAndLightning();
+            foragingAdd();
+            changesDayAnimal();
+            attackingCrow();
+            resetNPCStatus();
+
         }
         this.dayOfWeek += day;
         if (this.dayOfWeek > 7) {
@@ -488,9 +489,20 @@ public class Date {
     }
 
     public void resetNPCStatus(){
+        if(App.getCurrentGame().getNPCvillage() == null){
+            return;
+        }
         for(NPC npc : App.getCurrentGame().getNPCvillage().getAllNPCs()){
             npc.resetAllTalkedStatuses();
             npc.resetAllGiftedStatuses();
+        }
+    }
+
+    public void sellByShippingAllPlayers(){
+        for (Player player : App.getCurrentGame().getPlayers()) {
+            System.out.println(player.getShippingMoney());
+            player.increaseMoney(player.getShippingMoney());
+            player.setShippingMoney(0);
         }
     }
 }

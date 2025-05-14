@@ -303,7 +303,7 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.SELL.getMather(input))!= null) {
             System.out.println(controller.sellByShipping(matcher.group("productName"), matcher.group("count")).getMessage());
         } else if ((matcher = GameMenuCommands.SELL_ONE.getMather(input))!= null) {
-            System.out.println(controller.sellByShippingWithoutCount(matcher.group("productName")).getMessage());
+            System.out.println(controller.sellByShippingWithoutCount(matcher.group("productName")).getMessage() + "sold without count");
         } else if ((matcher = GameMenuCommands.ARTISAN_GET.getMather(input)) != null) {
             System.out.println(artisanController.artisanGet(matcher.group("itemName")));
         } else if ((matcher = GameMenuCommands.ARTISAN_USE.getMather(input)) != null) {
@@ -316,6 +316,8 @@ public class GameMenu extends AppMenu {
             }
         } else if ((matcher = GameMenuCommands.CHEAT_PLAYER_MONEY.getMather(input))!= null) {
             System.out.println(App.getCurrentPlayerLazy().getMoney());
+        } else if ((matcher = GameMenuCommands.SHOW_SHIPPING_BIN_LOCATION.getMather(input))!= null) {
+            System.out.println(controller.showShippingBinLocation().getMessage());
         } else {
             System.out.println("invalid command");
         }

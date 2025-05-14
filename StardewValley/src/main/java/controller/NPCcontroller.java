@@ -19,7 +19,7 @@ public class NPCcontroller {
         int npcX = npcLocation.getxAxis();
         int npcY = npcLocation.getyAxis();
 
-        return !(Math.abs(playerX - npcX) <= 1 && Math.abs(playerY - npcY) <= 1);
+        return (Math.abs(playerX - npcX) <= 1 && Math.abs(playerY - npcY) <= 1);
     }
 
 
