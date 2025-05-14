@@ -2,6 +2,7 @@ package models.enums.ToolEnums;
 
 import models.Fundementals.Result;
 import models.ToolsPackage.ToolFunction;
+import models.ToolsPackage.Tools;
 import models.ToolsPackage.UpgradeFunction;
 import models.enums.Types.SeedTypes;
 import models.enums.Types.TypeOfTile;
@@ -12,7 +13,7 @@ public enum Tool {
     HOE("Hoe", 5) {
         @Override
         public ToolFunction getUseFunction() {
-            return (location, skillLevel) -> {
+            return (location, skillLevel, tool) -> {
                 TypeOfTile tileType = location.getTypeOfTile();
                 if (tileType == TypeOfTile.GROUND) {
                     location.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
@@ -31,14 +32,13 @@ public enum Tool {
     PICKAXE("Pickaxe", 5) {
         @Override
         public ToolFunction getUseFunction() {
-            return (location, skillLevel) -> {
+            return (location, skillLevel, tool) -> {
                 TypeOfTile tileType = location.getTypeOfTile();
                 if (tileType == TypeOfTile.STONE) {
                     location.setTypeOfTile(TypeOfTile.GROUND);
                     return new Result(true, "You broke the stone");
                 }
                 if (tileType == TypeOfTile.QUARRY) {
-                    models.ToolsPackage.Tools tool = (models.ToolsPackage.Tools) location.getObjectInTile();
                     if (tool != null && tool.getLevel() >= 1) {
 
                         return new Result(true, "You mined some ore");
@@ -63,7 +63,7 @@ public enum Tool {
     AXE("Axe", 5) {
         @Override
         public ToolFunction getUseFunction() {
-            return (location, skillLevel) -> {
+            return (location, skillLevel, tools) -> {
                 TypeOfTile tileType = location.getTypeOfTile();
                 if (tileType == TypeOfTile.TREE) {
                     location.setTypeOfTile(TypeOfTile.GROUND);
@@ -82,29 +82,28 @@ public enum Tool {
     WATERING_CAN("Watering Can", 5) {
         @Override
         public ToolFunction getUseFunction() {
-            return (location, skillLevel) -> {
+            return (location, skillLevel, tools) -> {
                 TypeOfTile tileType = location.getTypeOfTile();
-                models.ToolsPackage.Tools tool = (models.ToolsPackage.Tools) location.getObjectInTile();
 
                 if (tileType == TypeOfTile.LAKE) {
-                    if (tool != null && tool.isWateringCan()) {
-                        Result fillResult = tool.fillWateringCan();
-                        return new Result(true, "You filled your watering can to capacity: " + tool.getCapacity());
+                    if (tools != null && tools.isWateringCan()) {
+                        Result fillResult = tools.fillWateringCan();
+                        return new Result(true, "You filled your watering can to capacity: " + tools.getCapacity());
                     }
                     return new Result(true, "You filled your watering can");
                 }
 
-                if (tool != null && tool.isWateringCan()) {
-                    if (tool.getCurrentWater() <= 0) {
+                if (tools != null && tools.isWateringCan()) {
+                    if (tools.getCurrentWater() <= 0) {
                         return new Result(false, "Your watering can is empty! Fill it at a water source.");
                     }
 
-                    Result useResult = tool.useWater(1);
+                    Result useResult = tools.useWater(1);
                     if (!useResult.isSuccessful()) {
                         return useResult;
                     }
 
-                    return new Result(true, "You watered the soil. Water remaining: " + tool.getCurrentWater());
+                    return new Result(true, "You watered the soil. Water remaining: " + tools.getCurrentWater());
                 }
 
                 return new Result(true, "You watered the soil");
@@ -120,7 +119,7 @@ public enum Tool {
     FISHING_POLE("Fishing Pole", 8) {
         @Override
         public ToolFunction getUseFunction() {
-            return (location, skillLevel) -> {
+            return (location, skillLevel, tools) -> {
                 TypeOfTile tileType = location.getTypeOfTile();
                 if (tileType != TypeOfTile.LAKE) {
                     return new Result(false, "You can only fish in water");
@@ -138,7 +137,7 @@ public enum Tool {
     SCYTHE("Seythe", 2) {
         @Override
         public ToolFunction getUseFunction() {
-            return (location, skillLevel) -> new Result(true, "You swung your scythe");
+            return (location, skillLevel, tools) -> new Result(true, "You swung your scythe");
         }
 
         @Override
@@ -150,7 +149,7 @@ public enum Tool {
     MILKPALE("Milk Pale", 4) {
         @Override
         public ToolFunction getUseFunction() {
-            return (location, skillLevel) -> {
+            return (location, skillLevel, tools) -> {
                 if (location.getObjectInTile() instanceof FarmAnimals) {
                     FarmAnimals animal = (FarmAnimals) location.getObjectInTile();
                     if (animal.getAnimal() == Animal.COW || animal.getAnimal() == Animal.GOAT) {
@@ -173,7 +172,7 @@ public enum Tool {
     SHEAR("Shear", 4) {
         @Override
         public ToolFunction getUseFunction() {
-            return (location, skillLevel) -> {
+            return (location, skillLevel, tools) -> {
                 if (location.getObjectInTile() instanceof FarmAnimals) {
                     FarmAnimals animal = (FarmAnimals) location.getObjectInTile();
                     if (animal.getAnimal() == Animal.SHEEP) {
@@ -196,7 +195,7 @@ public enum Tool {
     TRASH_CAN("Trash Can", 0) {
         @Override
         public ToolFunction getUseFunction() {
-            return (location, skillLevel) -> {
+            return (location, skillLevel, tools) -> {
                 return new Result(false, "Use the inventory commands to trash items");
             };
         }

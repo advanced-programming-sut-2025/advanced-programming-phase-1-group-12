@@ -3,6 +3,7 @@ package models.enums.foraging;
 import models.Fundementals.Location;
 import models.enums.Types.FruitType;
 import models.enums.Types.SaplingTypes;
+import models.enums.Types.TreeType;
 
 public class Tree {
     private TreeType type;
@@ -24,7 +25,7 @@ public class Tree {
         this.age = 0;
         this.hasBeenWatering = false;
         this.totalTimeNeeded = type.totalHarvestTime;
-        this.saplingTypes = type.saplingTypes;
+        this.saplingTypes = type.seedSource;
         this.dayPast = 2;
         this.currentStage = 0;
         this.isForaging = isForaging;

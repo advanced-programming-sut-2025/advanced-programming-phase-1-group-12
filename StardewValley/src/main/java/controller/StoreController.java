@@ -190,54 +190,70 @@ public class StoreController {
 
     public void showTotalProducts(List<Store> stores){}
 
-    public Result buyProduct(String productName, int Count){
-
+    public Result buyProduct(String productName, int count) {
         Store store = null;
-        for(Store store1 : App.getCurrentGame().getMainMap().getStores()){
-            if(App.isLocationInPlace(App.getCurrentPlayerLazy().getUserLocation(), store1.getLocationOfRectangle())){
+        for (Store store1 : App.getCurrentGame().getMainMap().getStores()) {
+            if (App.isLocationInPlace(App.getCurrentPlayerLazy().getUserLocation(), store1.getLocationOfRectangle())) {
                 store = store1;
                 break;
             }
         }
-        if(store == null) {
+        if (store == null) {
             return new Result(false, "You are not in any store");
         }
+
         StoreProducts item = null;
-        for(StoreProducts item1 : store.getStoreProducts()){
-            if(item1.getName().equals(productName)){
+        for (StoreProducts item1 : store.getStoreProducts()) {
+            if (item1.getName().equalsIgnoreCase(productName)) {
                 item = item1;
                 break;
             }
         }
-        if(item == null) {
-            return new Result(false, "The store doesn't have this product ");
+        if (item == null) {
+            return new Result(false, "The store doesn't have this product");
         }
-        item.setCurrentDailyLimit(item.getCurrentDailyLimit() - Count);
-        int price = 0;
-        switch(App.getCurrentGame().getDate().getSeason()){
-            case Season.AUTUMN -> price = item.getType().getFallPrice();
-            case Season.WINTER -> price = item.getType().getWinterPrice();
-            case Season.SUMMER -> price = item.getType().getSummerPrice();
-            case Season.SPRING -> price = item.getType().getSpringPrice();
-        }//TODO:handle the ones that are paid differently
-        if(App.getCurrentPlayerLazy().getMoney() < price*Count){
+
+        if (item.getCurrentDailyLimit() < count) {
+            return new Result(false, "Not enough stock in the store today.");
+        }
+
+        int price = switch (App.getCurrentGame().getDate().getSeason()) {
+            case AUTUMN -> item.getType().getFallPrice();
+            case WINTER -> item.getType().getWinterPrice();
+            case SUMMER -> item.getType().getSummerPrice();
+            case SPRING -> item.getType().getSpringPrice();
+        };
+
+        int totalCost = price * count;
+        if (App.getCurrentPlayerLazy().getMoney() < totalCost) {
             return new Result(false, "You do not have enough money to buy this product");
         }
-        App.getCurrentPlayerLazy().decreaseMoney(price*Count);
-        for(CraftingRecipe craftingRecipe : CraftingRecipe.values()){
-            if(productName.equalsIgnoreCase(craftingRecipe.getName())){
-                App.getCurrentPlayerLazy().getRecepies().put(craftingRecipe, true);
-                return new Result(true, "You bought this recepie");
-            }
-        }for(Cooking craftingRecipe : Cooking.values()){
-            if(productName.equalsIgnoreCase(craftingRecipe.getName())){
-                App.getCurrentPlayerLazy().getCookingRecepies().put(craftingRecipe, true);
-                return new Result(true, "You bought this recepie");
+
+        // Handle Crafting Recipe
+        for (CraftingRecipe recipe : CraftingRecipe.values()) {
+            if (productName.equalsIgnoreCase(recipe.getName())) {
+                App.getCurrentPlayerLazy().getRecepies().put(recipe, true);
+                App.getCurrentPlayerLazy().decreaseMoney(totalCost);
+                return new Result(true, "You bought this recipe");
             }
         }
-        ItemBuilder.addToBackPack(item, Count, Quality.NORMAL);
+
+        // Handle Cooking Recipe
+        for (Cooking cooking : Cooking.values()) {
+            if (productName.equalsIgnoreCase(cooking.getName())) {
+                App.getCurrentPlayerLazy().getCookingRecepies().put(cooking, true);
+                App.getCurrentPlayerLazy().decreaseMoney(totalCost);
+                return new Result(true, "You bought this recipe");
+            }
+        }
+
+        // Regular item
+        App.getCurrentPlayerLazy().decreaseMoney(totalCost);
+        item.setCurrentDailyLimit(item.getCurrentDailyLimit() - count);
+        ItemBuilder.addToBackPack(item, count, Quality.NORMAL); // assuming getType() returns Item
 
         return new Result(true, "You bought this product");
     }
+
 
 }

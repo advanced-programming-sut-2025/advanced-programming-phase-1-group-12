@@ -14,7 +14,7 @@ import models.enums.Types.SeedTypes;
 import models.enums.Types.TypeOfTile;
 import models.enums.Weather;
 import models.enums.foraging.*;
-import views.GameMenu;
+import models.enums.Types.TreeType;
 
 import java.util.*;
 
@@ -181,6 +181,9 @@ public class Date {
     public void updateAllPlants() {
         for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
             for (Plant plant : farm.getPlantOfFarm()) {
+                if(plant.isHasBeenWatering()){
+                    continue;
+                }
                 if (!plant.isHasBeenFertilized()) {
                     plant.setDayPast(plant.getDayPast() - 1);
                     if (plant.getDayPast() <= 0) {
@@ -259,7 +262,7 @@ public class Date {
             for (int i = 0; i < count; i++) {
                 Location location = availableLocation.get(i);
                 TreeType type = foragingTrees.get(i);
-                Tree newTree = new Tree(location, type, true, type.getProduct());
+                Tree newTree = new Tree(location, type, true, type.fruitType);
                 farm.getTrees().add(newTree);
                 System.out.println("new Tree with type: " + newTree.getType().name + " add to location" +
                         location.getxAxis() + ", " + location.getyAxis());

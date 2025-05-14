@@ -8,6 +8,7 @@ import models.Item;
 import models.ItemBuilder;
 import models.ProductsPackage.Quality;
 import models.enums.ToolEnums.Tool;
+import models.enums.Types.Cooking;
 import models.enums.Types.CraftingRecipe;
 import models.enums.Types.TypeOfTile;
 import java.util.Map;
@@ -118,10 +119,13 @@ public class CraftingController {
 
     public Result showRecipes() {
         StringBuilder result = new StringBuilder("Recipes:\n");
-        for (CraftingRecipe recipe : CraftingRecipe.values()) {
-            result.append(recipe.name()).append(":\n");
-            for (Map.Entry<String, Integer> entry : recipe.getIngredients().entrySet()) {
-                result.append(entry.getValue()).append(" × ").append(entry.getKey()).append("\n");
+        for (Cooking recipe : Cooking.values()) {
+            //if he has learned this recepie
+            if(App.getCurrentPlayerLazy().getCookingRecepies().get(recipe)) {
+                result.append(recipe.name()).append(":\n");
+                for (Map.Entry<String, Integer> entry : recipe.getIngredient().entrySet()) {
+                    result.append(entry.getValue()).append(" × ").append(entry.getKey()).append("\n");
+                }
             }
             result.append("\n");
         }

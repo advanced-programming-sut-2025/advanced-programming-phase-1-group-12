@@ -1,12 +1,15 @@
 package models.enums.foraging;
 
 import models.Fundementals.Location;
+import models.Item;
 
-public class GiantPlant {
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
-    GiantPlants giantPlants;
-    private Location location;
-    private AllCrops allCrops;
+public class GiantPlant extends Item {
+
+    private GiantPlants giantPlants;
+    private ArrayList<Location> location;
     private boolean hasBeenFertilized;
     private boolean hasBeenWatering;
     private int totalTimeNeeded;
@@ -14,11 +17,11 @@ public class GiantPlant {
     private int currentStage ;
     private int age;
 
-    public GiantPlant(GiantPlants giantPlants, Location location, AllCrops allCrops, boolean hasBeenFertilized,
+    public GiantPlant(GiantPlants giantPlants, ArrayList<Location> location, boolean hasBeenFertilized,
                       boolean hasBeenWatering, int totalTimeNeeded, int dayPast, int currentStage, int age){
+        super(giantPlants.name());
         this.giantPlants = giantPlants;
         this.location = location;
-        this.allCrops = allCrops;
         this.hasBeenFertilized = hasBeenFertilized;
         this.hasBeenWatering = hasBeenWatering;
         this.totalTimeNeeded = totalTimeNeeded;
@@ -27,11 +30,11 @@ public class GiantPlant {
         this.age = age;
     }
 
-    public void setLocation(Location location) {
+    public void setLocation(ArrayList<Location> location) {
         this.location = location;
     }
 
-    public Location getLocation() {
+    public ArrayList<Location> getLocation() {
         return location;
     }
 
@@ -85,14 +88,6 @@ public class GiantPlant {
 
     public boolean isHasBeenFertilized() {
         return hasBeenFertilized;
-    }
-
-    public AllCrops getAllCrops() {
-        return allCrops;
-    }
-
-    public void setAllCrops(AllCrops allCrops) {
-        this.allCrops = allCrops;
     }
 
     public void setGiantPlants(GiantPlants giantPlants) {

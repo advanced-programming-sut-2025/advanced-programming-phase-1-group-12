@@ -7,6 +7,7 @@ public enum GameMenuCommands implements Commands {
 
     //hand-made cheat codes
     SHOW_MONEY("show money"),
+    ABILITIES_SHOW("abilities show"),
     //Starting Game
     PLAY("^\\s*game new -u ([\\w-]+)(?: ([\\w-]+))?(?: ([\\w-]+))?\\s*$"),
     PRINT("^print map -l (?<X>.*), (?<Y>.*) -s (?<size>.*)$"),
@@ -18,11 +19,16 @@ public enum GameMenuCommands implements Commands {
     NextTurn("^next turn"),
     //farming
     CRAFT_INFO("^craftinfo -n (?<craftName>.+)$"),
+    FORAGING_TREE_TYPE("^foragingTree (?<type>.+)$"),
+    FORAGING_CROPS("^foraging crops (?<type>.+)$"),
+    TREE_TYPE("^treetype (?<type>.+)$"),
     PLANT("^plant -s (?<seed>.+) -d (?<direction>.+)$"),
     SHOW_PLANT("^show plant -l (?<X>.+), (?<Y>.+)$"),
     FERTILIZE("^fertilize -f (?<fertilize>.+) -d (?<direction>.+)$"),
     HOW_MUCH_WATER("^how much water$"),
     REAPING("^Reaping (?<direction>.+)$"),
+    WATERING("^watering -l (?<X>.+)\\s*,\\s*(?<Y>.+)$"),
+    Picking_FRUIT("^Picking fruit -l (?<X>.+)\\s*,\\s*(?<Y>.+)$"),
     //crafting
     SHOW_RECIPES("^crafting show recipes$"),
     MACK_CRAFT("^crafting craft (?<itemName>.+)$"),
@@ -48,7 +54,7 @@ public enum GameMenuCommands implements Commands {
     ENERGY_UNLIMITED("^energy unlimited$"),
     INVENTORY_SHOW("^inventory\\s+show$"),
     INVENTORY_TRASH("inventory trash -i (?<item>.*) -n (?<number>.*)$"),
-    THOR("^cheat Thor -l (?<X>.+) , (?<Y>.+)$"),
+    THOR("^cheat Thor -l (?<X>.+)\\s*,\\s*(?<Y>.+)$"),
 
     //Damdari commands
     //animals

@@ -4,16 +4,17 @@ import models.Item;
 import java.util.Map;
 
 public enum Cooking {
-    FriedEgg("Fried Egg", Map.of("egg", 1), "", "Starter", 35 , 50),
-    BakedFish("Baked Fish",Map.of("Sardine", 1, "Salmon", 1, "Wheat Flour", 1),  "", "Starter", 100 , 75),
-    Salad("Salad", Map.of("leek", 1 , "Dandelion", 1), "", "Starter", 110, 113),
-    Omelet("Omelet",Map.of("egg", 1, "milk", 1) ,  "", "Stardrop Saloon", 125100,100),
-    PumpkinPie("Pumpkin Pie",Map.of("pumkin", 1 , "Wheat Flour", 1, "milk", 1, "Sugar", 1) , "", "Stardrop Saloon", 385, 225),
-    Spaghetti("Spaghetti", Map.of("Wheat Flour", 1 , "Tomato", 1), "", "Stardrop Saloon", 120, 75),
-    Pizza("Pizza", Map.of("Wheat Flour", 1 , "Tomato", 1, "cheese", 1) , "", "Stardrop Saloon", 300 ,150),
-    Tortilla("Tortilla", Map.of("corn", 1), "", "Stardrop Saloon", 50, 50),
-    MakiRoll("Maki Roll", Map.of("fish", 1, "rice", 1, "fiber", 1), "", "Stardrop Saloon", 220, 100),
-    TripleShotEspresso("Triple Shot Espresso", Map.of("coffee" , 3), "Max Energy + 100 (5 hours)", "Stardrop Saloon", 450, 200);
+    //TODO:what the f***ing fish?
+    FriedEgg("Fried Egg Recipe", Map.of("Egg", 1), "", "Starter", 35 , 50),
+    BakedFish("Baked Fish Recipe",Map.of("Sardine", 1, "Salmon", 1, "Wheat Flour", 1),  "", "Starter", 100 , 75),
+    Salad("Salad Recipe", Map.of("Leek", 1 , "Dandelion", 1), "", "Starter", 110, 113),
+    Omelet("Omelet Recipe",Map.of("Egg", 1, "Milk", 1) ,  "", "Stardrop Saloon", 125100,100),
+    PumpkinPie("Pumpkin Pie Recipe",Map.of("Pumpkin", 1 , "Wheat Flour", 1, "Milk", 1, "Sugar", 1) , "", "Stardrop Saloon", 385, 225),
+    Spaghetti("Spaghetti Recipe", Map.of("Wheat Flour", 1 , "Tomato", 1), "", "Stardrop Saloon", 120, 75),
+    Pizza("Pizza Recipe", Map.of("Wheat Flour", 1 , "Tomato", 1, "Cheese", 1) , "", "Stardrop Saloon", 300 ,150),
+    Tortilla("Tortilla Recipe", Map.of("Corn", 1), "", "Stardrop Saloon", 50, 50),
+    MakiRoll("Maki Roll Recipe", Map.of("Fish", 1, "Rice", 1, "Fiber", 1), "", "Stardrop Saloon", 220, 100),
+    TripleShotEspresso("Triple Shot Espresso Recipe", Map.of("Coffee" , 3), "Max Energy + 100 (5 hours)", "Stardrop Saloon", 450, 200);
 
     private final String name;
     private final Map<String , Integer> ingredient;
@@ -33,7 +34,7 @@ public enum Cooking {
 
     public static Cooking fromName(String name) {
         for (Cooking type :Cooking.values()) {
-            if (type.getName().equals(name)) {
+            if (type.getName().equalsIgnoreCase(name)) {
                 return type;
             }
         }
@@ -63,4 +64,6 @@ public enum Cooking {
     public int getBaseSellPrice() {
         return baseSellPrice;
     }
+
+
 }

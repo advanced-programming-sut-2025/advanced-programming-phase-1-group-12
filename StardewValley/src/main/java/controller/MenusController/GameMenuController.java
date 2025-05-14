@@ -11,10 +11,12 @@ import models.ProductsPackage.Quality;
 import models.RelatedToUser.User;
 import models.*;
 import models.RelationShips.RelationShip;
+import models.ToolsPackage.Tools;
 import models.enums.*;
 import models.Fundementals.Player;
 import com.google.gson.Gson;
 import models.enums.ToolEnums.BackPackTypes;
+import models.enums.ToolEnums.TrashcanTypes;
 import models.enums.Types.Cooking;
 import models.enums.Types.TypeOfTile;
 import models.NPC.NPC;
@@ -269,20 +271,8 @@ public class GameMenuController implements MenuController {
     public void helpToReadMap() {
         System.out.println("Map Legend:");
         for (TypeOfTile type : TypeOfTile.values()) {
-            System.out.println(type.getNameOfMap() + " -> " + type.name());
+            System.out.println(getBackgroundColorForTile(type) + " "+ type.getNameOfMap() + " -> " + type.name());
         }
-    }
-
-    private Farm getFarmOfThisLocation(Location location) {
-        for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
-            if (location.getxAxis() >= farm.getLocation().getTopLeftCorner().getxAxis() &&
-                    location.getxAxis() <= farm.getLocation().getDownRightCorner().getxAxis() &&
-                    location.getyAxis() >= farm.getLocation().getTopLeftCorner().getyAxis() &&
-                    location.getyAxis() <= farm.getLocation().getDownRightCorner().getyAxis()) {
-                return farm;
-            }
-        }
-        return null;
     }
 
     private String getBackgroundColorForTile(TypeOfTile type) {
@@ -331,7 +321,14 @@ public class GameMenuController implements MenuController {
             Player newPlayer = new Player(user, null, false, null, new ArrayList<>(),
                     null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
             players.add(newPlayer);
+
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Hoe", Quality.NORMAL), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("PickAxe", Quality.NORMAL), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("Axe", Quality.NORMAL), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("Watering can", Quality.NORMAL), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("Scythe", Quality.NORMAL), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("Trash Can", Quality.NORMAL), 1);
+            newPlayer.setCurrentTool((Tools) newPlayer.getBackPack().getItemByName("Hoe"));
 
             System.out.println("Do you want to know what each farm has?");
             String selection = scanner.nextLine();
@@ -890,41 +887,45 @@ public class GameMenuController implements MenuController {
             return new Result(false, "cooking not found!");
         }
 
-        if (!App.getCurrentGame().getCurrentPlayer().getCookingRecepies().get(recipe)) {
-            return  new Result(false, "you do not know this recepie");
+        if (!player.getCookingRecepies().get(cooking)) {  // Use the enum as key
+            return new Result(false, "you do not know this recepie");
         }
 
         if(!player.getBackPack().checkCapacity(1)){
             return new Result(false, "inventory is full!");
         }
 
-        if (player.getBackPack().getItemByName(recipe) != null && player.getBackPack().checkCapacity(1)) {
             player.reduceEnergy(3);
             if(!checkIngredients(cooking)){
                 return new Result(false, "ingredient not enough!");
             }
-            checkIngredients(cooking);
             Food newFood = new Food(recipe, cooking);
             player.getBackPack().addItem(newFood, 1);
             return  new Result(true, "processed food!");
-        }
-        else {
-            return  new Result(false, "recipe not found!");
-        }
+
 
     }
 
-    public boolean checkIngredients(Cooking cooking){
+    public boolean checkIngredients(Cooking cooking) {
         Player player = App.getCurrentGame().getCurrentPlayer();
         Map<String, Integer> ingredients = cooking.getIngredient();
+
+        // First check if all required ingredients are present in sufficient quantities
         for (Map.Entry<String, Integer> entry : ingredients.entrySet()) {
             Item item = player.getBackPack().getItemByName(entry.getKey());
-            if(player.getBackPack().getItems().get(item) >= entry.getValue()){
-                player.getBackPack().decreaseItem(item, entry.getValue());
-                return true;
+           // System.out.println(entry.getKey() +"alo pepe too sandogh" + player.getBackPack().getItems().get(item)+"naaa"+item.getName());
+            if (item == null || player.getBackPack().getItemCount(item) < entry.getValue()) {
+                return false;
             }
         }
-        return false;
+
+        // If we get here, all ingredients are available - now consume them
+        for (Map.Entry<String, Integer> entry : ingredients.entrySet()) {
+            Item item = player.getBackPack().getItemByName(entry.getKey());
+            player.getBackPack().decreaseItem(item, entry.getValue());
+        }
+
+        return true;
     }
 
     public Result eat(String food){

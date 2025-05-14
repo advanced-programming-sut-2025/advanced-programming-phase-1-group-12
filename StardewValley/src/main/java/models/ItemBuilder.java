@@ -4,12 +4,14 @@ import models.Animal.Fish;
 import models.Eating.Food;
 import models.Fundementals.App;
 import models.ProductsPackage.AnimalProducts;
+import models.ProductsPackage.ArtisanItem;
 import models.ProductsPackage.Quality;
 import models.ToolsPackage.Tools;
 import models.enums.FishDetails;
 import models.enums.ToolEnums.Tool;
 import models.enums.Types.*;
 import models.enums.foraging.Seed;
+import models.enums.foraging.*;
 
 import java.util.Map;
 
@@ -46,6 +48,19 @@ public class ItemBuilder {
         if (craftingRecipe != null) {
             return new Craft(craftingRecipe);
         }
+        AllCrops allCrops = AllCrops.nameToCraftType(name);
+        if(allCrops != null) {
+            return new Plant(null, null, false, allCrops);
+        }
+        GiantPlants giantPlants = GiantPlants.nameToCraftType(name);
+        if(giantPlants != null) {
+            return new GiantPlant(giantPlants, null, false, false,
+                    0, 0, 0, 0);
+        }
+        FruitType fruitType = FruitType.getFruitType(name);
+        if (fruitType != null) {
+            return new Fruit(fruitType);
+        }
         return new Item(name);
     }
 
@@ -62,9 +77,10 @@ public class ItemBuilder {
             items.put(existingItem, (currentCount == null) ? count : currentCount + count);
         } else {
             // Add new item
-            Item newItem = ItemBuilder.builder(item.getName(), quality);
-            items.put(newItem, count);
-            backpack.getItemNames().put(newItem.getName(), newItem);
+
+            backpack.getItems().put(item, count);
+            backpack.getItemNames().put(item.getName(), item);
+
         }
     }
 

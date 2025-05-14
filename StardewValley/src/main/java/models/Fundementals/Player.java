@@ -66,6 +66,7 @@ public class Player {
         this.rejectDate = null;
         initializeAbilities();
         initializerecepies();
+
     }
 
     public User getUser() {
@@ -183,13 +184,13 @@ public class Player {
     }
 
     private void initializerecepies() {
-        Map<CraftingRecipe, Boolean> recepies = new HashMap();
+        recepies = new HashMap<>();  // Initialize the class field, not a local variable
         for(CraftingRecipe craftingRecipe : CraftingRecipe.values()){
             recepies.put(craftingRecipe, false);
         }
-        Map<Cooking, Boolean> cookings = new HashMap();
+        cookingRecepies = new HashMap<>();  // Initialize the class field
         for(Cooking cooking : Cooking.values()){
-            cookings.put(cooking, false);
+            cookingRecepies.put(cooking, false);
         }
     }
     public Ability getAbilityByName(String name){
@@ -202,9 +203,6 @@ public class Player {
     }
 
     public void reduceEnergy(int amount){
-        if(isEnergyUnlimited){
-            return;
-        }
         if(energy - amount < 0){
             energy = 0;
         }
@@ -277,11 +275,32 @@ public class Player {
         this.cookingRecepies = cookingRecepies;
     }
 
-    public void addRelationShip(RelationShip relationShip) {
-        this.relationShips.add(relationShip);
+    public void setAbilitis(ArrayList<Ability> abilitis) {
+        this.abilitis = abilitis;
     }
 
-    public ArrayList<RelationShip> getRelationShips() {
-        return relationShips;
+    public void setRefrigrator(Refrigrator refrigrator) {
+        Refrigrator = refrigrator;
+    }
+
+    public void setBackPack(BackPack backPack) {
+        this.backPack = backPack;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setMarried(boolean married) {
+        isMarried = married;
+    }
+
+    public Tools getCurrentTool() {
+        return currentTool;
+    }
+
+    public void setCurrentTool(Tools currentTool) {
+        this.currentTool = currentTool;
     }
 }
+

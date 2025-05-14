@@ -4,9 +4,9 @@ import controller.*;
 import controller.MenusController.GameMenuController;
 import controller.movingPlayer.UserLocationController;
 import models.Fundementals.App;
-import models.Fundementals.Game;
 import models.Fundementals.Location;
 import models.Fundementals.Result;
+import models.RelatedToUser.Ability;
 import models.enums.commands.GameMenuCommands;
 
 import java.util.ArrayList;
@@ -82,6 +82,9 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.EQUIP_TOOL.getMather(input)) != null) {
             Result result = toolsController.equipTool(matcher.group("toolName"));
             System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.Picking_FRUIT.getMather(input)) != null) {
+            System.out.println(farmingController.PickingFruit(Integer.parseInt(matcher.group("X")),
+                    Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.SHOW_AVAILABLE_TOOL.getMather(input)) != null) {
             Result result = toolsController.showToolsAvailable();
             System.out.println(result.getMessage());
@@ -233,6 +236,12 @@ public class GameMenu extends AppMenu {
             System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.CRAFT_INFO.getMather(input)) != null) {
             System.out.println(farmingController.showCraftInto(matcher.group("craftName")));
+        } else if ((matcher = GameMenuCommands.FORAGING_TREE_TYPE.getMather(input)) != null) {
+            System.out.println(farmingController.showForagingTreeInfo(matcher.group("type")));
+        } else if ((matcher = GameMenuCommands.TREE_TYPE.getMather(input)) != null) {
+            System.out.println(farmingController.showTreeInfo(matcher.group("type")));
+        } else if ((matcher = GameMenuCommands.FORAGING_CROPS.getMather(input)) != null) {
+            System.out.println(farmingController.showForagingCropsInfo(matcher.group("type")));
         } else if ((matcher = GameMenuCommands.PLANT.getMather(input)) != null) {
             System.out.println(farmingController.plant(matcher.group("seed"), matcher.group("direction")));
         } else if ((matcher = GameMenuCommands.SHOW_PLANT.getMather(input)) != null) {
@@ -241,6 +250,9 @@ public class GameMenu extends AppMenu {
             System.out.println(farmingController.fertilize(matcher.group("fertilize"), matcher.group("direction")));
         } else if ((matcher = GameMenuCommands.REAPING.getMather(input)) != null) {
             System.out.println(farmingController.reaping(matcher.group("direction")));
+        } else if ((matcher = GameMenuCommands.WATERING.getMather(input)) != null) {
+            System.out.println(farmingController.watering(Integer.parseInt(matcher.group("X")),
+                    Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.HOW_MUCH_WATER.getMather(input)) != null) {
             System.out.println(farmingController.howMuchWater());
         } else if ((matcher = GameMenuCommands.ADD_TO_INVENTORY.getMather(input)) != null) {
@@ -292,9 +304,12 @@ public class GameMenu extends AppMenu {
             System.out.println(artisanController.artisanGet(matcher.group("itemName")));
         } else if ((matcher = GameMenuCommands.ARTISAN_USE.getMather(input)) != null) {
             System.out.println(artisanController.artisanUse(matcher.group("artisanName"), matcher.group("itemName")));
-            System.out.println(controller.sellByShippingWithoutCount(matcher.group("productName")).getMessage());
         } else if ((matcher = GameMenuCommands.GREENHOUSE_BUILD.getMather(input))!=null) {
             System.out.println(controller.buildGreenHouse());
+        } else if ((matcher = GameMenuCommands.ABILITIES_SHOW.getMather(input)) != null) {
+            for(Ability ability: App.getCurrentPlayerLazy().getAbilitis()){
+                System.out.println(ability.getName() +" "+ ability.getLevel()+" "+ability.getAmount());
+            }
         } else {
             System.out.println("invalid command");
         }

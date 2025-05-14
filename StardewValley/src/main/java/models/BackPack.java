@@ -136,8 +136,8 @@ public class BackPack {
     }
 
     public void addItem(Item item, int amount) {
-        items.put(item, amount);
-        itemNames.put(item.getName(), item);
+        this.items.put(item, amount);
+        this.itemNames.put(item.getName(), item);
     }
 
     public void decreaseItem(Item item, int amount) {

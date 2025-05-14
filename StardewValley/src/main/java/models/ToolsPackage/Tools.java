@@ -139,7 +139,7 @@ public class Tools extends Item {
             energyCost *= 2;
         }
         App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - energyCost);
-        return useFunction.execute(targetLocation, skillLevel);
+        return useFunction.execute(targetLocation, skillLevel, App.getCurrentPlayerLazy().getCurrentTool());
     }
 
 
