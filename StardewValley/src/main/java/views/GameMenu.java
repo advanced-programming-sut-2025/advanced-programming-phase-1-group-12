@@ -322,7 +322,12 @@ public class GameMenu extends AppMenu {
             System.out.println(storeController.cheatBuyItem(matcher.group("productName"), Integer.parseInt(matcher.group("count"))));
         }  else if ((matcher = GameMenuCommands.CHEAT_ADD_ITEM.getMather(input)) != null) {
             System.out.println(storeController.cheatAddItem(matcher.group("productName"), Integer.parseInt(matcher.group("count"))));
-        }else {
+        } else if ((matcher = GameMenuCommands.CHEAT_FRIENDSHIP_LEVEL.getMather(input))!= null) {
+            System.out.println(controller.cheatFriendShipLevel(matcher.group("name"), matcher.group("amount")));
+        } else if ((matcher = GameMenuCommands.CHEAT_FRIENDSHIP_XP.getMather(input))!= null) {
+            System.out.println(controller.cheatAddXP(matcher.group("username")));
+        }
+        else {
             System.out.println("invalid command");
         }
 

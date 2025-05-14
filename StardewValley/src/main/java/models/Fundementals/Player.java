@@ -26,7 +26,7 @@ public class Player {
     private int energy;
     public Refrigrator Refrigrator;
     private ArrayList<Ability> abilitis = new ArrayList<Ability>();
-    private ArrayList<RelationShip> relationShips = new ArrayList<>();
+    private ArrayList<RelationShip> relationShips;
     private Farm ownedFarm;
     private BackPack backPack;
     private boolean isEnergyUnlimited;
@@ -68,9 +68,9 @@ public class Player {
         this.shippingBin = null;
         this.rejectDate = null;
         this.shippingMoney = 0;
+        this.relationShips = new ArrayList<>();
         initializeAbilities();
         initializerecepies();
-
     }
 
     public User getUser() {
