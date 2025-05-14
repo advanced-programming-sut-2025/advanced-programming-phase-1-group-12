@@ -79,7 +79,7 @@ public enum GameMenuCommands implements Commands {
     ARTISAN_GET("artisan get -i (?<itemName>.*)"),
 
     //Cooking commands
-    COOKING_REFRIGERATOR("cooking refrigrator -n (?<name>.*)"),
+    COOKING_REFRIGERATOR("cooking refrigrator -(put|pick) (?<name>.*)"),
     COOKING_RECIPES("cooking show recipes"),
     COOKING_PREPARE("cooking prepare (?<recipeName>.*)"),
 
