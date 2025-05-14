@@ -75,7 +75,11 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.INVENTORY_SHOW.getMather(input)) != null) {
             showInventory();
         } else if ((matcher = GameMenuCommands.INVENTORY_TRASH.getMather(input)) != null) {
-            trashItem(matcher.group("item"), matcher.group("number"));
+            try {
+                trashItem(matcher.group("item"), matcher.group("number"));
+            } catch (IllegalArgumentException e) {
+                trashItem(matcher.group("item"), null);
+            }
         } else if ((matcher = GameMenuCommands.SHOW_CURRENT_TOOL.getMather(input)) != null) {
             Result result = toolsController.showCurrentTool();
             System.out.println(result.getMessage());
@@ -310,6 +314,8 @@ public class GameMenu extends AppMenu {
             for(Ability ability: App.getCurrentPlayerLazy().getAbilitis()){
                 System.out.println(ability.getName() +" "+ ability.getLevel()+" "+ability.getAmount());
             }
+        } else if ((matcher = GameMenuCommands.CHEAT_PLAYER_MONEY.getMather(input))!= null) {
+            System.out.println(App.getCurrentPlayerLazy().getMoney());
         } else {
             System.out.println("invalid command");
         }
