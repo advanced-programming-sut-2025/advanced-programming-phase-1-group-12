@@ -41,6 +41,7 @@ public class Player {
     private ShippingBin shippingBin;
     private ArrayList<ArtisanItem> artisansGettingProcessed = new ArrayList<>();
     private Date rejectDate;
+    private int shippingMoney;
 
     public Player(User user, Location userLocation, boolean isMarried, Refrigrator refrigrator,
                   ArrayList<RelationShip> relationShips, Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited,
@@ -64,6 +65,7 @@ public class Player {
         this.metDates = new HashMap<>();
         this.shippingBin = null;
         this.rejectDate = null;
+        this.shippingMoney = 0;
         initializeAbilities();
         initializerecepies();
 
@@ -316,6 +318,17 @@ public class Player {
 
     public void setShippingBin(ShippingBin shippingBin) {
         this.shippingBin = shippingBin;
+    }
+
+    public void increaseShippingMoney(int amount){
+        this.shippingMoney += amount;
+    }
+    public int getShippingMoney(){
+        return shippingMoney;
+    }
+
+    public void setShippingMoney(int shippingMoney) {
+        this.shippingMoney = shippingMoney;
     }
 }
 

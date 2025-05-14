@@ -7,6 +7,7 @@ import models.Eating.Food;
 import models.Fundementals.*;
 import models.Place.Farm;
 import models.Place.Store;
+import models.ProductsPackage.ArtisanItem;
 import models.ProductsPackage.Quality;
 import models.RelatedToUser.User;
 import models.*;
@@ -16,7 +17,9 @@ import models.enums.*;
 import models.Fundementals.Player;
 import com.google.gson.Gson;
 import models.enums.ToolEnums.BackPackTypes;
+import models.enums.ToolEnums.Tool;
 import models.enums.ToolEnums.TrashcanTypes;
+import models.enums.Types.ArtisanTypes;
 import models.enums.Types.Cooking;
 import models.enums.Types.TypeOfTile;
 import models.NPC.NPC;
@@ -851,7 +854,7 @@ public class GameMenuController implements MenuController {
 
         // Add all items to player's inventory
         for (String itemName : favoriteItems) {
-            Item item = new Item(itemName, Quality.NORMAL, 0);
+            Item item = new Item(itemName, Quality.NORMAL, 10);
             backpack.addItem(item, 5);
             response.append("- ").append(itemName).append(" (5)\n");
         }
@@ -943,16 +946,36 @@ public class GameMenuController implements MenuController {
     public Result eat(String food){
         Player player = App.getCurrentGame().getCurrentPlayer();
         Food foodToEat = (Food) player.getBackPack().getItemByName(food);
-        if(foodToEat == null){
-            return new Result(false, "food not found!");
-        }
-        else{
+        ArtisanItem artisanItem = getArtisanItem(food);
+
+         if (foodToEat != null && artisanItem ==null){
             player.getBackPack().decreaseItem(foodToEat, 1);
             player.increaseEnergy(foodToEat.getFoodType().getEnergy());
             if(!foodToEat.getFoodType().getBuffer().isEmpty()){
                 player.setEnergy(300); // for 5 hours
             }
-            return new Result(true, "eaten!");
+            return new Result(true, "eaten food!");
+        } else if (artisanItem != null && foodToEat == null) {
+            player.getBackPack().decreaseItem(artisanItem, 1);
+            player.increaseEnergy(artisanItem.getEnergy());
+            return new Result(true, "eaten artisan food!");
+        }
+        return new Result(false, "food not found!");
+    }
+
+    public ArtisanItem getArtisanItem(String itemName){
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        if(player.getBackPack().getItemByName(itemName) == null){
+            return null;
+        }
+        else{
+            Item item = player.getBackPack().getItemByName(itemName);
+            if(item instanceof ArtisanItem){
+                return (ArtisanItem) item;
+            }
+            else{
+                return null;
+            }
         }
     }
 
@@ -965,20 +988,7 @@ public class GameMenuController implements MenuController {
         return new Result(true, "Lightning struck the map at location" + x + ", " + y);
     }
 
-    public void sellByShippingAllPlayers(){
-        List<Player> players = App.getCurrentGame().getPlayers();
-        List<ShippingBin> shippingBins = new ArrayList<>();
-        for (Player player : players) {
-            if(player.getShippingBin() != null){
-                shippingBins.add(player.getShippingBin());
-            }
-        }
-        for (ShippingBin shippingBin : shippingBins) {
-            for(Item item: shippingBin.getShippingItem(shippingBin.getShippingItemMap())){
-                sellItem(shippingBin.getOwner(), item);
-            }
-        }
-    }
+
 
     private boolean isNearShippingBin(Player player) {
         if (player.getShippingBin() == null) {
@@ -994,9 +1004,10 @@ public class GameMenuController implements MenuController {
     }
 
     private boolean canBeSold(Item item) {
-        String className = item.getClass().getSimpleName();
-        return className.equalsIgnoreCase("AnimalProducts") || 
-               className.equals("StoreProducts");
+        if (item instanceof Tools) {
+            return false;
+        }
+        return true;
     }
 
     public Result sellByShipping(String product, String count) {
@@ -1013,18 +1024,29 @@ public class GameMenuController implements MenuController {
         Item item = player.getBackPack().getItemByName(product);
 
         if (!canBeSold(item)) {
-            return new Result(false, "This product cannot be sold.");
+            return new Result(false, "Tools cannot be sold!");
         }
 
-        int requestedCount = Integer.parseInt(count);
+        int requestedCount;
+        try{
+            requestedCount = Integer.parseInt(count);
+        } catch (NumberFormatException e) {
+            return new Result(false, "Count must be a number!");
+        }
         int availableCount = player.getBackPack().getItemCount(item);
 
         if (availableCount < requestedCount) {
             return new Result(false, "You don't have enough of this product.");
         }
+        Quality quality = item.getQuality();
+        if(quality == null){
+            quality = Quality.NORMAL;
+        }
+        int price = item.getPrice();
+        int returnPrice =(int) (price * quality.getPriceMultiPlier());
+        player.increaseShippingMoney(returnPrice * requestedCount);
 
         player.getBackPack().decreaseItem(item, requestedCount);
-
         player.getShippingBin().addShippingItem(item, requestedCount);
 
         return new Result(true, "Item put in shipping bin!");
@@ -1048,25 +1070,21 @@ public class GameMenuController implements MenuController {
         }
 
         int availableCount = player.getBackPack().getItemCount(item);
+        Quality quality = item.getQuality();
+        if(quality == null){
+            quality = Quality.NORMAL;
+        }
+        int price = item.getPrice();
 
+        int returnPrice =(int) (price * quality.getPriceMultiPlier());
+
+        player.increaseShippingMoney(returnPrice * availableCount);
         player.getBackPack().decreaseItem(item, availableCount);
-
         player.getShippingBin().addShippingItem(item, availableCount);
 
         return new Result(true, "Item put in shipping bin!");
     }
 
-    public void sellItem(Player player, Item item) {
-//        Quality quality = item.getQuality();
-//        if(quality == null){
-//            quality = Quality.NORMAL;
-//        }
-//        int price = item.getPrice();
-//        int returnPrice =(int) (price * quality.getPriceMultiPlier());
-//        int count = player.getBackPack().getItemCount(item);
-//        player.getBackPack().decreaseItem(item, count);
-//        player.increaseMoney(returnPrice * count);
-    }
 
     public Result buildGreenHouse(){
         Player player = App.getCurrentGame().getCurrentPlayer();
@@ -1083,6 +1101,16 @@ public class GameMenuController implements MenuController {
         String message = "You built a green house!, Money (-1000) / Wood (-500)\n" + "Money: " +player.getMoney() +
                 "\nWood: " + player.getBackPack().getItemCount(player.getBackPack().getItemByName("Wood")) + "\n";
         return new Result(true, message);
+    }
+
+    public Result showShippingBinLocation(){
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        if(player.getShippingBin() == null){
+            return new Result(false, "no shipping bin found!");
+        }
+        return new Result(true,
+                player.getShippingBin().getShippingBinLocation().getxAxis()
+                        + ", " + player.getShippingBin().getShippingBinLocation().getyAxis());
     }
 
 }

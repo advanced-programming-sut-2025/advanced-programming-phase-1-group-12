@@ -8,6 +8,7 @@ public enum GameMenuCommands implements Commands {
     //hand-made cheat codes
     SHOW_MONEY("show money"),
     ABILITIES_SHOW("abilities show"),
+    CHEAT_ADD_ITEM("cheat add item (?<productName>.*) -n (?<count>.*)"),
     //Starting Game
     PLAY("^\\s*game new -u ([\\w-]+)(?: ([\\w-]+))?(?: ([\\w-]+))?\\s*$"),
     PRINT("^print map -l (?<X>.*), (?<Y>.*) -s (?<size>.*)$"),
@@ -127,6 +128,7 @@ public enum GameMenuCommands implements Commands {
     CHEAT_NPC_LOCATIONS("^cheat npc locations$"),
     CHEAT_NPC_TEST_ITEMS("^cheat npc test items$"),
     CHEAT_PLAYER_MONEY("^cheat player money$"),
+    SHOW_SHIPPING_BIN_LOCATION("^show shipping bin location$"),
 
     //store commands
     SHOW_PRODUCTS("show all products"),

@@ -4,6 +4,7 @@ import models.Fundementals.Location;
 import models.Fundementals.Player;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ public class ShippingBin{
     public ShippingBin(Location shippingBinLocation, Player owner) {
         this.shippingBinLocation = shippingBinLocation;
         this.owner = owner;
+        this.shippingItem = new HashMap<>();
     }
 
     public void addShippingItem(Item item, int quantity){
@@ -48,4 +50,8 @@ public class ShippingBin{
         }
         return items;
     }
+    public Location getLocation(){
+        return this.shippingBinLocation;
+    }
+
 }
