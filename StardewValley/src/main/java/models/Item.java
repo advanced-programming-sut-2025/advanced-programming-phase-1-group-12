@@ -9,9 +9,12 @@ public class Item {
     private Quality quality;
     private int price;
 
-    public Item(String name) {
+    public Item(String name, Quality quality, int price) {
         this.name = name;
+        this.quality = quality;
+        this.price = price;
     }
+
 
     public String getName() {
         return name;

@@ -9,6 +9,7 @@ import models.Fundementals.Player;
 import models.NPC.NPC;
 import models.Place.Farm;
 import models.ProductsPackage.ArtisanItem;
+import models.ProductsPackage.Quality;
 import models.enums.Season;
 import models.enums.Types.SeedTypes;
 import models.enums.Types.TypeOfTile;
@@ -278,7 +279,7 @@ public class Date {
             for (int i = 0; i < seedCount; i++) {
                 Location location = seedPlacing.get(i);
                 SeedTypes seedSeason = allSeeds.get(i);
-                Seed newSeed = new Seed(seedSeason);
+                Seed newSeed = new Seed(seedSeason.getName(), Quality.NORMAL, 0, seedSeason);
                 AllCrops allCrops = AllCrops.sourceTypeToCraftType(seedSeason);
                 Plant newPlant = new Plant(location, newSeed, true, allCrops);
                 farm.getPlantOfFarm().add(newPlant);
@@ -488,9 +489,9 @@ public class Date {
     }
 
     public void resetNPCStatus(){
-        for(NPC npc : App.getCurrentGame().getNPCvillage().getAllNPCs()){
-            npc.resetAllTalkedStatuses();
-            npc.resetAllGiftedStatuses();
-        }
+//        for(NPC npc : App.getCurrentGame().getNPCvillage().getAllNPCs()){
+//            npc.resetAllTalkedStatuses();
+//            npc.resetAllGiftedStatuses();
+//        }
     }
 }

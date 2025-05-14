@@ -35,7 +35,7 @@ public class CraftingController {
                 }
             }
             App.getCurrentPlayerLazy().setEnergy(App.getCurrentGame().getCurrentPlayer().getEnergy() - 2);
-            ItemBuilder.addToBackPack(ItemBuilder.builder(itemName, Quality.NORMAL), count, Quality.NORMAL);
+            ItemBuilder.addToBackPack(ItemBuilder.builder(itemName, Quality.NORMAL, recipe.getSellPrice()), count, Quality.NORMAL);
         }
         return new Result(true, "we add " + itemName + " to the back pack");
     }
@@ -112,7 +112,7 @@ public class CraftingController {
                 }
             }
             App.getCurrentPlayerLazy().setEnergy(App.getCurrentGame().getCurrentPlayer().getEnergy() - 2);
-            ItemBuilder.addToBackPack(ItemBuilder.builder(itemName, Quality.NORMAL), 1, Quality.NORMAL);
+            ItemBuilder.addToBackPack(ItemBuilder.builder(itemName, Quality.NORMAL, recipe.getSellPrice()), 1, Quality.NORMAL);
         }
         return null;
     }
@@ -174,7 +174,8 @@ public class CraftingController {
             }
         }
         Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
-        ItemBuilder.addToBackPack(ItemBuilder.builder(itemName, Quality.NORMAL), 1, Quality.NORMAL);
+        //TODO:chert neveshtam
+        ItemBuilder.addToBackPack(ItemBuilder.builder(itemName, Quality.NORMAL, 0), 1, Quality.NORMAL);
         Item tool = App.getCurrentPlayerLazy().getBackPack().getItemByName("Pickaxe");
         if(tool == null){
             return new Result(false, "you can't tack this item from ground");

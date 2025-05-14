@@ -18,7 +18,8 @@ public class StoreProducts extends Item {
     }
 
     public StoreProducts(StoreProductsTypes type) {
-        super(type.name());
+        //TODO:change price
+        super(type.name(), Quality.NORMAL, type.getWinterPrice());
         this.type = type;
         this.currentDailyLimit = type.getDailyLimit();
     }

@@ -179,7 +179,8 @@ public class FarmingController {
 
         // Planting
         newLocation.setTypeOfTile(TypeOfTile.PLANT);
-        Seed newSeed = new Seed(seedTypes);
+        SeedTypes type = SeedTypes.stringToSeed(seed);
+        Seed newSeed = new Seed(seedTypes.getName(), Quality.NORMAL, 0, type);
         if (newSeed.getType().equals(SeedTypes.MixedSeeds)) {
             Season season = App.getCurrentGame().getDate().getSeason();
             newSeed = switchingSeason(season);
@@ -302,7 +303,7 @@ public class FarmingController {
 
         // Return a random seed from the list
         SeedTypes chosenType = options.get(new Random().nextInt(options.size()));
-        return new Seed(chosenType);
+        return new Seed(chosenType.getName(), Quality.NORMAL, 0, chosenType);
     }
 
     public Result showPlant(String x, String y) {
@@ -453,7 +454,7 @@ public class FarmingController {
                 App.getCurrentGame().getMainMap().findLocation(x, y).setObjectInTile(null);
                 App.getCurrentGame().getMainMap().findLocation(x, y).setTypeOfTile(TypeOfTile.GROUND);
                 App.getCurrentPlayerLazy().getOwnedFarm().getPlantOfFarm().remove(plant);
-                ItemBuilder.addToBackPack(ItemBuilder.builder(plant.getAllCrops().name(), Quality.NORMAL), 1, Quality.NORMAL);
+                ItemBuilder.addToBackPack(ItemBuilder.builder(plant.getAllCrops().name(), Quality.NORMAL, plant.getPrice()), 1, Quality.NORMAL);
                 for(Ability ability : App.getCurrentPlayerLazy().getAbilitis()){
                     if(ability.getName().equalsIgnoreCase("Farming")){
                         ability.increaseAmount(5);
@@ -470,7 +471,7 @@ public class FarmingController {
                     return new Result(false, "We must wait until the delivery period arrives.");
                 }
                 else{
-                    ItemBuilder.addToBackPack(ItemBuilder.builder(plant.getAllCrops().name(), Quality.NORMAL), 1, Quality.NORMAL);
+                    ItemBuilder.addToBackPack(ItemBuilder.builder(plant.getAllCrops().getName(), Quality.NORMAL, plant.getPrice()), 1, Quality.NORMAL);
                     for(Ability ability : App.getCurrentPlayerLazy().getAbilitis()){
                         if(ability.getName().equalsIgnoreCase("Farming")){
                             ability.increaseAmount(5);
@@ -499,7 +500,7 @@ public class FarmingController {
                 return new Result(false, "GiantPlant can't be reached cause it stage can't be finished");
             }
             removeFromFarm(giantPlant);
-            ItemBuilder.addToBackPack(ItemBuilder.builder(giantPlant.getGiantPlants().getName(), Quality.NORMAL), 1, Quality.NORMAL);
+            ItemBuilder.addToBackPack(ItemBuilder.builder(giantPlant.getGiantPlants().getName(), Quality.NORMAL, giantPlant.getPrice()), 1, Quality.NORMAL);
             for(Ability ability : App.getCurrentPlayerLazy().getAbilitis()){
                 if(ability.getName().equalsIgnoreCase("Farming")){
                     ability.increaseAmount(5);

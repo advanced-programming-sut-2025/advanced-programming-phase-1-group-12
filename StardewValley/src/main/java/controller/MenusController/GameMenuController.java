@@ -73,7 +73,7 @@ public class GameMenuController implements MenuController {
         }
 
         if (type.equals("request") && item == null) {
-            item = new Item(itemName);
+            item = new Item(itemName, item.getQuality(), item.getPrice());
         }
 
         if (price != null && price > 0 && targetItemName != null && targetAmount != null && targetAmount > 0) {
@@ -84,7 +84,7 @@ public class GameMenuController implements MenuController {
             TradeManager.createTrade(currentPlayer, targetPlayer, type, item, amount, price);
             return new Result(true, "Trade request created successfully");
         } else if (targetItemName != null && targetAmount != null && targetAmount > 0) {
-            Item targetItem = new Item(targetItemName);
+            Item targetItem = new Item(itemName, item.getQuality(), item.getPrice());
             TradeManager.createTrade(currentPlayer, targetPlayer, type, item, amount, targetItem, targetAmount);
             return new Result(true, "Trade request created successfully");
         } else {
@@ -322,12 +322,12 @@ public class GameMenuController implements MenuController {
                     null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
             players.add(newPlayer);
 
-            newPlayer.getBackPack().addItem(ItemBuilder.builder("Hoe", Quality.NORMAL), 1);
-            newPlayer.getBackPack().addItem(ItemBuilder.builder("PickAxe", Quality.NORMAL), 1);
-            newPlayer.getBackPack().addItem(ItemBuilder.builder("Axe", Quality.NORMAL), 1);
-            newPlayer.getBackPack().addItem(ItemBuilder.builder("Watering can", Quality.NORMAL), 1);
-            newPlayer.getBackPack().addItem(ItemBuilder.builder("Scythe", Quality.NORMAL), 1);
-            newPlayer.getBackPack().addItem(ItemBuilder.builder("Trash Can", Quality.NORMAL), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("Hoe", Quality.NORMAL, 0), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("PickAxe", Quality.NORMAL, 0), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("Axe", Quality.NORMAL, 0), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("Watering can", Quality.NORMAL, 0), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("Scythe", Quality.NORMAL, 0), 1);
+            newPlayer.getBackPack().addItem(ItemBuilder.builder("Trash Can", Quality.NORMAL, 0), 1);
             newPlayer.setCurrentTool((Tools) newPlayer.getBackPack().getItemByName("Hoe"));
 
             System.out.println("Do you want to know what each farm has?");
@@ -812,19 +812,20 @@ public class GameMenuController implements MenuController {
         }
 
         StringBuilder response = new StringBuilder("NPC Locations:\n");
-        for (NPC npc : App.getCurrentGame().getNPCvillage().getAllNPCs()) {
-            Location location = npc.getUserLocation();
-            response.append(npc.getName())
-                   .append(": (")
-                   .append(location.getxAxis())
-                   .append(", ")
-                   .append(location.getyAxis())
-                   .append(")\n");
-        }
+//        for (NPC npc : App.getCurrentGame().getNPCvillage().getAllNPCs()) {
+//            Location location = npc.getUserLocation();
+//            response.append(npc.getName())
+//                   .append(": (")
+//                   .append(location.getxAxis())
+//                   .append(", ")
+//                   .append(location.getyAxis())
+//                   .append(")\n");
+//        }
 
         return new Result(true, response.toString());
     }
 
+    //TODO:pak kon ino.cheat jadid
     public Result cheatNPCTestItems() {
         Player player = App.getCurrentGame().getCurrentPlayer();
         BackPack backpack = player.getBackPack();
@@ -850,7 +851,7 @@ public class GameMenuController implements MenuController {
 
         // Add all items to player's inventory
         for (String itemName : favoriteItems) {
-            Item item = new Item(itemName);
+            Item item = new Item(itemName, Quality.NORMAL, 0);
             backpack.addItem(item, 5);
             response.append("- ").append(itemName).append(" (5)\n");
         }
@@ -866,7 +867,7 @@ public class GameMenuController implements MenuController {
             }
 
             if (!alreadyAdded) {
-                Item item = new Item(itemName);
+                Item item = new Item(itemName, Quality.NORMAL, 0);
                 backpack.addItem(item, 50);
                 response.append("- ").append(itemName).append(" (50)\n");
             }

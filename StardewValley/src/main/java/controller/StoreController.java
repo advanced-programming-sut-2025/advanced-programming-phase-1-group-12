@@ -7,6 +7,7 @@ import models.Fundementals.Location;
 import models.*;
 import models.Fundementals.LocationOfRectangle;
 import models.Fundementals.Result;
+import models.MapDetails.Shack;
 import models.Place.Store;
 import models.ProductsPackage.Quality;
 import models.ProductsPackage.StoreProducts;
@@ -16,6 +17,9 @@ import models.enums.Types.Cooking;
 import models.enums.Types.CraftingRecipe;
 import models.enums.Types.StoreProductsTypes;
 import models.enums.Types.TypeOfTile;
+import models.enums.foraging.Stone;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 
@@ -68,37 +72,52 @@ public class StoreController {
         if(!isAllLocationGround(buildingPlace)) {
             return new Result(false, "you can not build this building here");
         }
-        switch (buildingName){
+        switch (buildingName) {
             case "coop":
                 App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes().add(
-                        new AnimalHome(4, "coop", buildingPlace)
+                        new AnimalHome("coop", Quality.NORMAL, 0, 4, "coop", buildingPlace)
                 );
                 break;
             case "deluxe coop":
                 App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes().add(
-                        new AnimalHome(12, "Deluxe coop", buildingPlace)
+                        new AnimalHome("deluxe coop", Quality.NORMAL, 0, 12, "deluxe coop", buildingPlace)
                 );
                 break;
             case "big coop":
-                App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getAnimalHomes().add
-                        (new AnimalHome(8, "big coop", buildingPlace));
+                App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes().add(
+                        new AnimalHome("big coop", Quality.NORMAL, 0, 8, "big coop", buildingPlace)
+                );
                 break;
             case "barn":
-                App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getAnimalHomes().add
-                        (new AnimalHome(4, "barn", buildingPlace));
+                App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes().add(
+                        new AnimalHome("barn", Quality.NORMAL, 0, 4, "barn", buildingPlace)
+                );
                 break;
             case "deluxe barn":
-                App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getAnimalHomes().add
-                        (new AnimalHome(12, "Deluxe barn", buildingPlace));
+                App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes().add(
+                        new AnimalHome("deluxe barn", Quality.NORMAL, 0, 12, "deluxe barn", buildingPlace)
+                );
                 break;
             case "big barn":
-                App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getAnimalHomes().add
-                        (new AnimalHome(8, "big barn", buildingPlace));
+                App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes().add(
+                        new AnimalHome("big barn", Quality.NORMAL, 0, 8, "big barn", buildingPlace)
+                );
                 break;
             default:
                 return new Result(false, "Invalid building name entered");
         }
+
         changeTypeTileAfterBuild(buildingName, buildingPlace);
+
+        Item wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Wood");
+        Item stone = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Stone");
+
+        if(wood == null || stone == null ||
+                App.getCurrentPlayerLazy().getBackPack().getItems().get(wood) < 100 || App.getCurrentPlayerLazy().getBackPack().getItems().get(stone) < 100) {
+            return new Result(false, "You do not have enough wood or stone to build this building");
+        }
+        App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Wood"), 100);
+        App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getItemByName("Stone"), 100);
         return new Result(true, buildingName + " " + "built successfully");
     }
 
@@ -229,11 +248,35 @@ public class StoreController {
             return new Result(false, "You do not have enough money to buy this product");
         }
 
-        if(item.getName().equalsIgnoreCase(StoreProductsTypes.CARPENTER_SHIPPING_BIN.getName())){
+        if(item.getName().equalsIgnoreCase(StoreProductsTypes.CARPENTER_WELL.getName())){
+            Item wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Stone");
+
+            if(wood == null || App.getCurrentPlayerLazy().getBackPack().getItems().get(wood) < 75 ) {
+                return new Result(false, "You do not have enough wood or stone to build this building");
+            }
+            App.getCurrentPlayerLazy().getBackPack().decreaseItem(wood, 75);
+
+            ArrayList<Location>wellLocation = new ArrayList<>();
+
+            for(int i = 0; i < 6; i++){
+                Shack shack = App.getCurrentPlayerLazy().getOwnedFarm().getShack();
+                wellLocation.add(App.getCurrentGame().getMainMap().findLocation(shack.getLocation().getTopLeftCorner().getxAxis() + i, shack.getLocation().getTopLeftCorner().getyAxis()));
+                wellLocation.get(i).setTypeOfTile(TypeOfTile.LAKE);
+            }
+            return new Result(true, "you bought this Well");
+
+        } if(item.getName().equalsIgnoreCase(StoreProductsTypes.CARPENTER_SHIPPING_BIN.getName())){
+            Item wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Wood");
+
+            if(wood == null || App.getCurrentPlayerLazy().getBackPack().getItems().get(wood) < 150 ) {
+                return new Result(false, "You do not have enough wood or stone to build this building");
+            }
+            App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Wood"), 100);
             ShippingBin shippingBin = new ShippingBin(App.getCurrentPlayerLazy().getOwnedFarm().getShack().getLocation().getTopLeftCorner(), App.getCurrentPlayerLazy());
             shippingBin.getShippingBinLocation().setObjectInTile(shippingBin);
 
             App.getCurrentPlayerLazy().setShippingBin(shippingBin);
+
             return new Result(true, "You bought this shipping bin");
         }
 

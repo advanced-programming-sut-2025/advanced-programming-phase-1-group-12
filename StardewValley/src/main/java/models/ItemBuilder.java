@@ -17,10 +17,10 @@ import java.util.Map;
 
 public class ItemBuilder {
 
-    public static Item builder(String name, Quality quality) {
+    public static Item builder(String name, Quality quality, int price) {
         SeedTypes seedType = SeedTypes.stringToSeed(name);
         if (seedType != null) {
-            return new Seed(seedType);
+            return new Seed(seedType.getName(), Quality.NORMAL, 0, seedType);
         }
         Tool abzar = Tool.stringToTool(name);
         if (abzar != null) {
@@ -42,7 +42,7 @@ public class ItemBuilder {
         }
         IngredientsType ingredientsType = IngredientsType.stringToIngredient(name);
         if (ingredientsType != null) {
-            return new Item(ingredientsType.name());
+            return new Item(ingredientsType.name(), quality, price);
         }
         CraftingRecipe craftingRecipe = CraftingRecipe.getByName(name);
         if (craftingRecipe != null) {
@@ -61,7 +61,7 @@ public class ItemBuilder {
         if (fruitType != null) {
             return new Fruit(fruitType);
         }
-        return new Item(name);
+        return new Item(name, quality, price);
     }
 
     public static void addToBackPack(Item item, int count, Quality quality) {

@@ -29,10 +29,10 @@ public enum ArtisanTypes {
     TRUFFLE_OIL("Truffle Oil", "Gourmet cooking ingredient.", 38, 6, "Truffle", 1065, false),
     OIL("Oil", "All-purpose cooking oil.", 13, 6, "Corn or Sunflower Seeds or Sunflower", 100, false),
     COAL("Coal", "Turns 10 wood into coal.", 0, 1, "Wood (10)", 50, false),
-    COPPER_BAR("Copper Bar", "Turns ore and coal into bars.", 0, 4, "Any Ore (5) + Coal", 20, false),
-    Gold_BAR("Gold Bar", "Turns ore and coal into bars.", 0, 4, "Any Ore (5) + Coal", 20, false),
-    Iron_BAR("Iron Bar", "Turns ore and coal into bars.", 0, 4, "Any Ore (5) + Coal", 20, false),
-    IRIDIUM_BAR("Iridium Bar", "Turns ore and coal into bars.", 0, 4, "Any Ore (5) + Coal", 20, false);
+    COPPER_BAR("Copper bar", "Turns ore and coal into bars.", 0, 4, "Any Ore (5) + Coal", 20, false),
+    Gold_BAR("Gold bar", "Turns ore and coal into bars.", 0, 4, "Any Ore (5) + Coal", 20, false),
+    Iron_BAR("Iron bar", "Turns ore and coal into bars.", 0, 4, "Any Ore (5) + Coal", 20, false),
+    IRIDIUM_BAR("Iridium bar", "Turns ore and coal into bars.", 0, 4, "Any Ore (5) + Coal", 20, false);
 
     private final String name;
     private final String description;

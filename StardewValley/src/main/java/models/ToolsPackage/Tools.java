@@ -23,7 +23,7 @@ public class Tools extends Item {
     private int currentWater;
 
     public Tools(Tool toolType) {
-        super(toolType.getName());
+        super(toolType.getName(), Quality.NORMAL, 100);
         this.toolType = toolType;
         this.level = 0;
         this.baseEnergyCost = toolType.getEnergyCost();
