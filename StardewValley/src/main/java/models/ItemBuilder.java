@@ -73,9 +73,10 @@ public class ItemBuilder {
             items.put(existingItem, (currentCount == null) ? count : currentCount + count);
         } else {
             // Add new item
-            Item newItem = ItemBuilder.builder(item.getName(), quality);
-            items.put(newItem, count);
-            backpack.getItemNames().put(newItem.getName(), newItem);
+
+            backpack.getItems().put(item, count);
+            backpack.getItemNames().put(item.getName(), item);
+
         }
     }
 

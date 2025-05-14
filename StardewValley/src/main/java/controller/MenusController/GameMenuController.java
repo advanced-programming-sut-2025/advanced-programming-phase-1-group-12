@@ -670,33 +670,37 @@ public class GameMenuController implements MenuController {
             return new Result(false, "inventory is full!");
         }
 
-        if (player.getBackPack().getItemByName(recipe) != null && player.getBackPack().checkCapacity(1)) {
             player.reduceEnergy(3);
             if(!checkIngredients(cooking)){
                 return new Result(false, "ingredient not enough!");
             }
-            checkIngredients(cooking);
             Food newFood = new Food(recipe, cooking);
             player.getBackPack().addItem(newFood, 1);
             return  new Result(true, "processed food!");
-        }
-        else {
-            return  new Result(false, "recipe not found!");
-        }
+
 
     }
 
-    public boolean checkIngredients(Cooking cooking){
+    public boolean checkIngredients(Cooking cooking) {
         Player player = App.getCurrentGame().getCurrentPlayer();
         Map<String, Integer> ingredients = cooking.getIngredient();
+
+        // First check if all required ingredients are present in sufficient quantities
         for (Map.Entry<String, Integer> entry : ingredients.entrySet()) {
             Item item = player.getBackPack().getItemByName(entry.getKey());
-            if(player.getBackPack().getItems().get(item) >= entry.getValue()){
-                player.getBackPack().decreaseItem(item, entry.getValue());
-                return true;
+           // System.out.println(entry.getKey() +"alo pepe too sandogh" + player.getBackPack().getItems().get(item)+"naaa"+item.getName());
+            if (item == null || player.getBackPack().getItemCount(item) < entry.getValue()) {
+                return false;
             }
         }
-        return false;
+
+        // If we get here, all ingredients are available - now consume them
+        for (Map.Entry<String, Integer> entry : ingredients.entrySet()) {
+            Item item = player.getBackPack().getItemByName(entry.getKey());
+            player.getBackPack().decreaseItem(item, entry.getValue());
+        }
+
+        return true;
     }
 
     public Result eat(String food){
