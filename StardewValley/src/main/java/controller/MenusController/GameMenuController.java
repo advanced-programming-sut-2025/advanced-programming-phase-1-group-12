@@ -545,8 +545,8 @@ public class GameMenuController implements MenuController {
             player1.addRelationShip(newRelationShip);
             player2.addRelationShip(newRelationShip);
             newRelationShip.talk(message);
-            return new Result(true, "message sent!" + "\nRelationShip XP: " + relationShip.getXP()+
-                    "\nFriendship Level: " + relationShip.getFriendshipLevel());
+            return new Result(true, "message sent!" + "\nRelationShip XP: " + newRelationShip.getXP()+
+                    "\nFriendship Level: " + newRelationShip.getFriendshipLevel());
         }
         relationShip.talk(message);
         return new Result(true, "message sent!" + "\nRelationShip XP: " + relationShip.getXP()+
@@ -679,7 +679,8 @@ public class GameMenuController implements MenuController {
             return new Result(false, "No relationship found with " + username + ". You need to establish a relationship first.");
         }
         relationShip.hug();
-        return new Result(true, "hugged successfully!");
+        return new Result(true, "hugged successfully!" + "\nFriendShip XP: " +
+                relationShip.getXP() + " Friendship level: " + relationShip.getFriendshipLevel());
     }
 
     public Result flower(String username){
@@ -689,11 +690,17 @@ public class GameMenuController implements MenuController {
             return new Result(false, "Player with username " + username + " not found!");
         }
         RelationShip relationShip = player1.findRelationShip(player2);
-        if (relationShip == null) {
+        RelationShip relationShip2 = player2.findRelationShip(player1);
+        if (relationShip == null && relationShip2 == null) {
             return new Result(false, "No relationship found with " + username + ". You need to establish a relationship first.");
         }
-        relationShip.flower();
-        return new Result(true, "flowered successfully!");
+        if(relationShip!= null){
+            relationShip.flower();
+            return  new Result(true, "flowered successfully!" + "\nFriendShip XP: " +
+                    relationShip.getXP() + " Friendship level: " + relationShip.getFriendshipLevel());
+        }
+        return new Result(true, "flowered successfully!" + "\nFriendShip XP: " +
+                relationShip2.getXP() + " Friendship level: " + relationShip2.getFriendshipLevel());
     }
 
     public Result askMarriage(String username, String ring){
@@ -703,14 +710,21 @@ public class GameMenuController implements MenuController {
             return new Result(false, "Player with username " + username + " not found!");
         }
         RelationShip relationShip = player1.findRelationShip(player2);
-        if (relationShip == null) {
+        RelationShip relationShip2 = player2.findRelationShip(player1);
+        if (relationShip == null && relationShip2 == null) {
             return new Result(false, "No relationship found with " + username + ". You need to establish a relationship first.");
         }
-        if(relationShip.askMarriage(ring)){
-            return new Result(true, "marriage asked successfully!");
+        if(relationShip!= null){
+            relationShip.askMarriage(ring);
+            return new Result(true, "marriage asked successfully by "
+                    + relationShip.getPlayer1().getUser().getUserName() + "\nFriendShip XP: " + relationShip.getXP()
+            + "\nFriendShip Level: " + relationShip.getFriendshipLevel());
         }
         else{
-            return new Result(false, "cant ask marriage!");
+            relationShip2.askMarriage(ring);
+            return new Result(true, "marriage asked successfully by " + relationShip2.getPlayer1().getUser().getUserName()
+                    + "\nFriendShip XP: " + relationShip2.getXP()
+                    + "\nFriendShip Level: " + relationShip2.getFriendshipLevel());
         }
     }
 
@@ -721,15 +735,35 @@ public class GameMenuController implements MenuController {
             return new Result(false, "Player with username " + username + " not found!");
         }
         RelationShip relationShip = player1.findRelationShip(player2);
-        if (relationShip == null) {
+        RelationShip relationShip2 = player2.findRelationShip(player1);
+        if (relationShip == null && relationShip2 == null) {
             return new Result(false, "No relationship found with " + username + ". You need to establish a relationship first.");
         }
-        if(answer.equals("accept")){
-            relationShip.marriage(relationShip.getAskedRing());
-            return new Result(true, "marriage accepted!");
-        }else {
-            relationShip.reject();
-            return new Result(false, "booo!");
+        if(relationShip!= null){
+            if(answer.equals("accept")){
+                relationShip.marriage(relationShip.getAskedRing());
+                return new Result(true, "marriage accepted by "
+                        + relationShip.getPlayer1().getUser().getUserName()
+                        + "\nFriendShip XP: " + relationShip.getXP() + "\nFriendShip Level: "+ relationShip.getFriendshipLevel());
+            }else {
+                relationShip.reject();
+                return new Result(false, "marriage accepted by "
+                        + relationShip.getPlayer1().getUser().getUserName()
+                        + "\nFriendShip XP: " + relationShip.getXP() + "\nFriendShip Level: "+ relationShip.getFriendshipLevel());
+            }
+        }
+        else{
+            if(answer.equals("accept")){
+                relationShip2.marriage(relationShip2.getAskedRing());
+                return new Result(true, "marriage accepted by "
+                        + relationShip2.getPlayer1().getUser().getUserName()
+                        + "\nFriendShip XP: " + relationShip2.getXP() + "\nFriendShip Level: " + relationShip2.getFriendshipLevel());
+            }else {
+                relationShip2.reject();
+                return new Result(false, "marriage accepted by "
+                        + relationShip2.getPlayer1().getUser().getUserName()
+                        + "\nFriendShip XP: " + relationShip2.getXP() + "\nFriendShip Level: " + relationShip2.getFriendshipLevel());
+            }
         }
     }
 
@@ -819,20 +853,19 @@ public class GameMenuController implements MenuController {
         }
 
         StringBuilder response = new StringBuilder("NPC Locations:\n");
-//        for (NPC npc : App.getCurrentGame().getNPCvillage().getAllNPCs()) {
-//            Location location = npc.getUserLocation();
-//            response.append(npc.getName())
-//                   .append(": (")
-//                   .append(location.getxAxis())
-//                   .append(", ")
-//                   .append(location.getyAxis())
-//                   .append(")\n");
-//        }
+        for (NPC npc : App.getCurrentGame().getNPCvillage().getAllNPCs()) {
+            Location location = npc.getUserLocation();
+            response.append(npc.getName())
+                   .append(": (")
+                   .append(location.getxAxis())
+                   .append(", ")
+                   .append(location.getyAxis())
+                   .append(")\n");
+        }
 
         return new Result(true, response.toString());
     }
 
-    //TODO:pak kon ino.cheat jadid
     public Result cheatNPCTestItems() {
         Player player = App.getCurrentGame().getCurrentPlayer();
         BackPack backpack = player.getBackPack();

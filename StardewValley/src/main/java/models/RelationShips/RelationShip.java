@@ -100,13 +100,13 @@ public class RelationShip {
     }
 
     public void talk(String message){
-        this.hasTalked = true;
         talks.add(message);
         if(areMarried){
             player1.increaseEnergy(50);
             player2.increaseEnergy(50);
         }
         this.XP +=20;
+        this.hasTalked = true;
     }
 
     public String talkHistory(){
