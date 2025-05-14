@@ -6,5 +6,5 @@ import models.Fundementals.Result;
 @FunctionalInterface
 public interface UpgradeFunction {
 
-    Result execute(int currentLevel);
+    Result execute(int currentLevel, Tools tools);
 }

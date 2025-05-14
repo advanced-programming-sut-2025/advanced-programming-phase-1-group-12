@@ -18,7 +18,7 @@ import java.util.Map;
 public class ItemBuilder {
 
     public static Item builder(String name, Quality quality, int price) {
-        SeedTypes seedType = SeedTypes.stringToSeed(name);
+            SeedTypes seedType = SeedTypes.stringToSeed(name);
         if (seedType != null) {
             return new Seed(seedType.getName(), Quality.NORMAL, 0, seedType);
         }
@@ -36,7 +36,7 @@ public class ItemBuilder {
         }
         FoodType foodType = FoodType.stringToFood(name);
         Cooking cooking = Cooking.fromName(name);
-        if (foodType != null) {
+        if (foodType != null || cooking != null) {
             //TODO:cooking?
             return new Food(name, cooking);
         }

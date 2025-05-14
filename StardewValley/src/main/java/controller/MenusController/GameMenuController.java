@@ -1009,6 +1009,14 @@ public class GameMenuController implements MenuController {
             if (!foodToEat.getFoodType().getBuffer().isEmpty()) {
                 player.setEnergy(300); // for 5 hours
             }
+            if(foodToEat.getFoodType().isEnergyBuff()){
+                App.getCurrentPlayerLazy().setMaxEnergyBuffEaten(true);
+                App.getCurrentGame().getCurrentPlayer().increaseEnergy(10000);
+            } else {
+                App.getCurrentPlayerLazy().setSkillBuffEaten(true);
+                App.getCurrentGame().getCurrentPlayer().getAbilityByName("Farming").setLevel(App.getCurrentGame().getCurrentPlayer().getAbilityByName("Farming").getLevel() + 1);
+            }
+
             return new Result(true, "eaten food!");
         } else if (artisanItem != null && foodToEat == null) {
             player.getBackPack().decreaseItem(artisanItem, 1);
