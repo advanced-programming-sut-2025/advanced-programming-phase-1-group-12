@@ -31,7 +31,8 @@ public class MainMenu extends AppMenu {
             }
         } else if ((matcher = MainMenuCommands.Logout.getMather(input)) != null) {
             //TODO:is this right?
-            App.setLoggedInUser(null);
+          //  App.setLoggedInUser(null);
+            System.out.println("now you are logged out");
 //                App.getCurrentGame().setCurrentPlayer(null);
 //                App.setCurrentMenu(Menu.LoginRegisterMenu);
             App.setCurrentMenu(Menu.LoginRegisterMenu);

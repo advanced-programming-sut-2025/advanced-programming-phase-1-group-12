@@ -11,6 +11,7 @@ import models.Place.Farm;
 import models.ProductsPackage.ArtisanItem;
 import models.ProductsPackage.Quality;
 import models.enums.Season;
+import models.enums.Types.CraftingRecipe;
 import models.enums.Types.SeedTypes;
 import models.enums.Types.TypeOfTile;
 import models.enums.Weather;
@@ -342,13 +343,14 @@ public class Date {
         resetNPCStatus();
         artisansUpdate(day * 13);
         buffUpdates();
+        updateRecepies();
     }
 
     public void buffUpdates(){
         if(App.getCurrentPlayerLazy().isMaxEnergyBuffEaten()){
             App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - 10000);
             App.getCurrentPlayerLazy().setMaxEnergyBuffEaten(false);
-        }         if(!App.getCurrentPlayerLazy().isMaxEnergyBuffEaten()){
+        }         if(App.getCurrentPlayerLazy().isSkillBuffEaten()){
             App.getCurrentPlayerLazy().getAbilityByName("Farming").setLevel(App.getCurrentGame().getCurrentPlayer().getAbilityByName("Farming").getLevel() - 1);
             App.getCurrentPlayerLazy().setSkillBuffEaten(false);
         }
@@ -513,6 +515,16 @@ public class Date {
         for (Player player : App.getCurrentGame().getPlayers()) {
             player.increaseMoney(player.getShippingMoney());
             player.setShippingMoney(0);
+        }
+    }
+
+    public void updateRecepies(){
+        if(App.getCurrentPlayerLazy().getAbilityByName("Mining").getLevel() >= 2 && App.getCurrentPlayerLazy().getAbilityByName("Farming").getLevel() >= 2){
+            for(CraftingRecipe recipe : CraftingRecipe.values()){
+                if(!recipe.getName().equalsIgnoreCase("Fish Smoker") && !recipe.getName().equalsIgnoreCase("Dehydrator")){
+                    App.getCurrentPlayerLazy().getRecepies().put(recipe, true);
+                }
+            }
         }
     }
 }

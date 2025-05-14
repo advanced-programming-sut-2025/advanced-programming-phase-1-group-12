@@ -86,6 +86,7 @@ public class LoginRegisterMenuController implements MenuController {
             return new Result(false, "Error saving user data: " + e.getMessage());
         }
 
+        App.setLoggedInUser(newUser);
         return new Result(true, "User registered successfully");
     }
 
@@ -204,7 +205,7 @@ public class LoginRegisterMenuController implements MenuController {
 
     public Result answerQuestion(Matcher matcher) {
         String answer = matcher.group("answer");
-        if(answer.equals(App.getCurrentPlayerLazy().getUser().getAnswerOfQuestionForSecurity())){
+        if(answer.equals(App.getLoggedInUser().getAnswerOfQuestionForSecurity())){
             return new Result(true, "correct answer. now enter your new password like this : i answered so my new password:"
             );
         }
@@ -216,12 +217,12 @@ public class LoginRegisterMenuController implements MenuController {
             newPass = RandomPassword();
             System.out.println("this will be your password : " + newPass);
             App.getLoggedInUser().setPassword(hashPassword(newPass));
-            saveUser(App.getCurrentPlayerLazy().getUser(), App.getLoggedInUser().getUserName() + ".json");
+            saveUser(App.getLoggedInUser(), App.getLoggedInUser().getUserName() + ".json");
             System.out.println("password updated successfully");
             return;
         }
         App.getLoggedInUser().setPassword(hashPassword(newPass));
-        saveUser(App.getCurrentPlayerLazy().getUser(), App.getLoggedInUser().getUserName() + ".json");
+        saveUser(App.getLoggedInUser(), App.getLoggedInUser().getUserName() + ".json");
         System.out.println("password updated successfully");
     }
 

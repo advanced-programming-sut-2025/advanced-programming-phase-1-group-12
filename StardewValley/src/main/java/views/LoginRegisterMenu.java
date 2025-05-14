@@ -52,7 +52,9 @@ public class LoginRegisterMenu extends AppMenu{
         } //ghablesh balayee ro zade bashe
         else if ((matcher = LoginRegisterMenuCommands.CHOOSE_PASSWORD_AFTER_FORGET.getMather(input)) != null) {
             controller.newPassAfterForget(matcher.group("newPass"));
-        }else{
+        } else if ((matcher = LoginRegisterMenuCommands.SHOW_CURRENT_MENU.getMather(input)) != null) {
+            System.out.println("login menu");
+        } else{
             System.out.println("invalid command");
         }
     }

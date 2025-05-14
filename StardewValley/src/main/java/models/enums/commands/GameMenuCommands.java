@@ -9,6 +9,7 @@ public enum GameMenuCommands implements Commands {
     SHOW_MONEY("show money"),
     ABILITIES_SHOW("abilities show"),
     CHEAT_BUY_ITEM("cheat buy item (?<productName>.*) -n (?<count>.*)"),
+    CHEAT_MAXIMIZE_ABILITY_LEVEL("cheat maximize ability level (?<ability>.*)"),
     //chizi ke bahash misazim be price esh kari nadashte bashimmm!!!
     CHEAT_ADD_ITEM("cheat add item (?<productName>.*) -n (?<count>.*)"),
     //Starting Game

@@ -213,6 +213,7 @@ public class StoreController {
     }
 
     public Result buyProduct(String productName, int count) {
+
         Store store = null;
         for (Store store1 : App.getCurrentGame().getMainMap().getStores()) {
             if (App.isLocationInPlace(App.getCurrentPlayerLazy().getUserLocation(), store1.getLocationOfRectangle())) {
@@ -222,6 +223,10 @@ public class StoreController {
         }
         if (store == null) {
             return new Result(false, "You are not in any store");
+        }
+
+        if(App.getCurrentGame().getDate().getHour() < store.getStartHour() || App.getCurrentGame().getDate().getHour() > store.getCloseHour()){
+            return new Result(false, "Store is currently closed");
         }
 
         StoreProducts item = null;
@@ -245,6 +250,10 @@ public class StoreController {
             case SUMMER -> item.getType().getSummerPrice();
             case SPRING -> item.getType().getSpringPrice();
         };
+
+        if(price == 0){
+            return new Result(false, "You can not buy this product in this season");
+        }
 
         int totalCost = price * count;
         if (App.getCurrentPlayerLazy().getMoney() < totalCost) {
@@ -338,6 +347,9 @@ public class StoreController {
             case SUMMER -> item.getType().getSummerPrice();
             case SPRING -> item.getType().getSpringPrice();
         };
+        if(price == 0){
+            return new Result(false, "You can not buy this product in this season");
+        }
 
         int totalCost = price * count;
         if (App.getCurrentPlayerLazy().getMoney() < totalCost) {
