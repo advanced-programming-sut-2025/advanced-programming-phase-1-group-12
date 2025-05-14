@@ -69,7 +69,6 @@ public class Player {
         this.relationShips = new ArrayList<>();
         initializeAbilities();
         initializerecepies();
-
     }
 
     public User getUser() {

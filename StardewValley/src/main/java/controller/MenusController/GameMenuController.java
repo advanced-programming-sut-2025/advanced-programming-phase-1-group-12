@@ -67,7 +67,7 @@ public class GameMenuController implements MenuController {
             return new Result(false, "Invalid item or amount");
         }
 
-        if(type.equals("offer") && (amount >currentPlayer.getBackPack().getItemCount(item))){
+        if (type.equals("offer") && (amount > currentPlayer.getBackPack().getItemCount(item))) {
             return new Result(false, "You don't have enough of " + itemName);
         }
 
@@ -123,68 +123,68 @@ public class GameMenuController implements MenuController {
 
     // Samin: date comands are here
 
-    public Result showHour(){
+    public Result showHour() {
         int currentHour = App.getCurrentGame().getDate().getHour();
         return new Result(true, String.format("%s", currentHour));
     }
 
-    public Result showDate(){
+    public Result showDate() {
         int currentDay = App.getCurrentGame().getDate().getDayOfMonth();
         int currentYear = App.getCurrentGame().getDate().getYear();
         return new Result(true, String.format("Year: %d\n Day: %d\n", currentYear, currentDay));
     }
 
-    public Result showDateTime(){
+    public Result showDateTime() {
         int currentDay = App.getCurrentGame().getDate().getDayOfMonth();
         int currentYear = App.getCurrentGame().getDate().getYear();
         int currentHour = App.getCurrentGame().getDate().getHour();
-        return new Result( true, String.format("%d/%d - Time: %d", currentYear,
+        return new Result(true, String.format("%d/%d - Time: %d", currentYear,
                 currentDay, currentHour));
     }
 
-    public Result showDayOfTheWeek(){
+    public Result showDayOfTheWeek() {
         int currentDay = App.getCurrentGame().getDate().getDayOfWeek();
         String StringDay = App.getCurrentGame().getDate().getDayName(currentDay);
-        return new Result( true, StringDay);
+        return new Result(true, StringDay);
     }
 
-    public Result cheatAdvancedTime(String time){
+    public Result cheatAdvancedTime(String time) {
         int hour;
-        try{
+        try {
             hour = Integer.parseInt(time);
-        }catch(NumberFormatException e){
-            return new Result( false, "Wrong Hour!");
+        } catch (NumberFormatException e) {
+            return new Result(false, "Wrong Hour!");
         }
         App.getCurrentGame().getDate().changeAdvancedTime(hour);
 
-        return new Result(true,"Time changed successfully!");
+        return new Result(true, "Time changed successfully!");
     }
 
-    public Result cheatAdvancedDay(String day){
+    public Result cheatAdvancedDay(String day) {
         int days;
-        try{
+        try {
             days = Integer.parseInt(day);
-        }catch(NumberFormatException e){
+        } catch (NumberFormatException e) {
             return new Result(false, "Wrong Day!");
         }
         App.getCurrentGame().getDate().changeAdvancedDay(days);
         App.getCurrentGame().getDate().setHour(9);
-        if(App.getCurrentGame().getDate().getWeather().equals(Weather.STORM)){
+        if (App.getCurrentGame().getDate().getWeather().equals(Weather.STORM)) {
             Random random = new Random();
             int x = random.nextInt(200) + 1;
             int y = random.nextInt(200) + 1;
             Result thorResult = Thor(x, y);
             String result = "Day changed successfully! " + thorResult.getMessage();
-            return new Result(true,result);
+            return new Result(true, result);
         }
         return new Result(true, "Day changed successfully!");
     }
 
-    public Result showSeason(){
+    public Result showSeason() {
         Season season = App.getCurrentGame().getDate().getSeason();
-        switch(season){
+        switch (season) {
             case SPRING -> {
-                return new Result( true, "Spring");
+                return new Result(true, "Spring");
             }
             case SUMMER -> {
                 return new Result(true, "Summer");
@@ -201,20 +201,20 @@ public class GameMenuController implements MenuController {
         }
     }
 
-    public Result weatherForecast(Season season){
+    public Result weatherForecast(Season season) {
         Weather possibleWeather = App.getCurrentGame().getDate().weatherForecast(season);
         return new Result(true, Weather.getName(possibleWeather));
     }
 
 
-    public Result cheatWeather(String type){
+    public Result cheatWeather(String type) {
         Weather weather = Weather.fromString(type);
         App.getCurrentGame().getDate().setTommorowWeather(weather);
         String result = "Weather cheated successfully! " + "Tomorrow's weather is: " + weather.name();
         return new Result(true, result);
     }
 
-    public Result showWeather(){
+    public Result showWeather() {
         return new Result(true, App.getCurrentGame().getDate().getWeather().name());
     }
 
@@ -274,7 +274,7 @@ public class GameMenuController implements MenuController {
     public void helpToReadMap() {
         System.out.println("Map Legend:");
         for (TypeOfTile type : TypeOfTile.values()) {
-            System.out.println(getBackgroundColorForTile(type) + " "+ type.getNameOfMap() + " -> " + type.name());
+            System.out.println(getBackgroundColorForTile(type) + " " + type.getNameOfMap() + " -> " + type.name());
         }
     }
 
@@ -293,7 +293,7 @@ public class GameMenuController implements MenuController {
             case PLOUGHED_LAND -> "\u001B[48;5;214m"; //orange
             case NPC_VILLAGE -> "\u001B[48;5;209m"; //Pink
             case BURNED_GROUND -> "\u001B[40m"; //black
-            case PLANT ->"\u001B[105m"; // Bright Magenta (Pink-ish); // Dark red
+            case PLANT -> "\u001B[105m"; // Bright Magenta (Pink-ish); // Dark red
             default -> "\u001B[41m";
         };
     }
@@ -458,33 +458,32 @@ public class GameMenuController implements MenuController {
     }
 
 
-    public Result showEnergy(){
+    public Result showEnergy() {
         Player player = App.getCurrentGame().getCurrentPlayer();
-        if(player.isEnergyUnlimited()){
+        if (player.isEnergyUnlimited()) {
             return new Result(true, "Energy is unlimited!");
-        }
-        else{
+        } else {
             return new Result(true, String.format("%d", player.getEnergy()));
 
         }
     }
 
-    public Result setEnergy(String energy){
+    public Result setEnergy(String energy) {
         int amount = Integer.parseInt(energy);
         App.getCurrentGame().getCurrentPlayer().setEnergy(amount);
         return new Result(true, "Energy set successfully!");
     }
 
-    public Result setUnlimited(){
+    public Result setUnlimited() {
         App.getCurrentGame().getCurrentPlayer().setUnlimited();
         return new Result(true, "Energy unlimited!");
     }
 
-    public Result showInventory(){
+    public Result showInventory() {
         Player player = App.getCurrentGame().getCurrentPlayer();
         BackPack backPack = player.getBackPack();
         StringBuilder result = new StringBuilder("Inventory items: \n");
-        for(Item items : backPack.getItems().keySet()){
+        for (Item items : backPack.getItems().keySet()) {
             result.append(items.getName());
             result.append(" -> ");
             result.append(backPack.getItems().get(items));
@@ -518,7 +517,7 @@ public class GameMenuController implements MenuController {
         } else {
             int intAmount;
             try {
-                intAmount=Integer.parseInt(amount);
+                intAmount = Integer.parseInt(amount);
             } catch (NumberFormatException e) {
                 return new Result(false, "Amount must be a number!");
             }
@@ -543,13 +542,12 @@ public class GameMenuController implements MenuController {
         if (relationShip == null) {
             RelationShip newRelationShip = new RelationShip(player1, player2);
             player1.addRelationShip(newRelationShip);
-            player2.addRelationShip(newRelationShip);
             newRelationShip.talk(message);
-            return new Result(true, "message sent!" + "\nRelationShip XP: " + newRelationShip.getXP()+
+            return new Result(true, "message sent!" + "\nRelationShip XP: " + newRelationShip.getXP() +
                     "\nFriendship Level: " + newRelationShip.getFriendshipLevel());
         }
         relationShip.talk(message);
-        return new Result(true, "message sent!" + "\nRelationShip XP: " + relationShip.getXP()+
+        return new Result(true, "message sent!" + "\nRelationShip XP: " + relationShip.getXP() +
                 "\nFriendship Level: " + relationShip.getFriendshipLevel());
     }
 
@@ -564,7 +562,7 @@ public class GameMenuController implements MenuController {
         if (relationShip == null && relationShip2 == null) {
             return new Result(false, "No relationship found with " + username + ". You need to establish a relationship first.");
         }
-        if(relationShip == null){
+        if (relationShip == null) {
             relationShip = relationShip2;
         }
         return new Result(true, relationShip.talkHistory());
@@ -595,7 +593,7 @@ public class GameMenuController implements MenuController {
 
             if (relationShip.gift(gift, inAmount)) {
                 return new Result(true, "Gift sent successfully! " + player2.getUser().getUserName() + " can rate it now."
-                        + "\nRelationShip XP: " + relationShip.getXP()+
+                        + "\nRelationShip XP: " + relationShip.getXP() +
                         "\nFriendship Level: " + relationShip.getFriendshipLevel());
             } else {
                 return new Result(false, "Error sending gift!");
@@ -668,7 +666,7 @@ public class GameMenuController implements MenuController {
         }
     }
 
-    public Result hug(String username){
+    public Result hug(String username) {
         Player player1 = App.getCurrentGame().getCurrentPlayer();
         Player player2 = App.getCurrentGame().getPlayerByName(username);
         if (player2 == null) {
@@ -679,16 +677,15 @@ public class GameMenuController implements MenuController {
         if (relationShip == null && relationShip2 == null) {
             return new Result(false, "No relationship found with " + username + ". You need to establish a relationship first.");
         }
-        if(relationShip!= null){
-            if(!relationShip.arePlayersAdjacent()){
+        if (relationShip != null) {
+            if (!relationShip.arePlayersAdjacent()) {
                 return new Result(false, "Players are not adjacent!");
             }
             relationShip.hug();
             return new Result(true, "hugged successfully!" + "\nFriendShip XP: " +
                     relationShip.getXP() + " Friendship level: " + relationShip.getFriendshipLevel());
-        }
-        else{
-            if(!relationShip2.arePlayersAdjacent()){
+        } else {
+            if (!relationShip2.arePlayersAdjacent()) {
                 return new Result(false, "Players are not adjacent!");
             }
             relationShip2.hug();
@@ -697,7 +694,7 @@ public class GameMenuController implements MenuController {
         }
     }
 
-    public Result flower(String username){
+    public Result flower(String username) {
         Player player1 = App.getCurrentGame().getCurrentPlayer();
         Player player2 = App.getCurrentGame().getPlayerByName(username);
         if (player2 == null) {
@@ -708,46 +705,47 @@ public class GameMenuController implements MenuController {
         if (relationShip == null && relationShip2 == null) {
             return new Result(false, "No relationship found with " + username + ". You need to establish a relationship first.");
         }
-        if(relationShip!= null){
+        if (relationShip != null) {
             relationShip.flower();
-            return  new Result(true, "flowered successfully!" + "\nFriendShip XP: " +
+            return new Result(true, "flowered successfully!" + "\nFriendShip XP: " +
                     relationShip.getXP() + " Friendship level: " + relationShip.getFriendshipLevel());
-        }
-        else{
+        } else {
             relationShip2.flower();
             return new Result(true, "flowered successfully!" + "\nFriendShip XP: " +
                     relationShip2.getXP() + " Friendship level: " + relationShip2.getFriendshipLevel());
         }
     }
 
-    public Result askMarriage(String username, String ring){
+    public Result askMarriage(String username, String ring) {
         Player player1 = App.getCurrentGame().getCurrentPlayer();
         Player player2 = App.getCurrentGame().getPlayerByName(username);
         if (player2 == null) {
             return new Result(false, "Player with username " + username + " not found!");
         }
+
         RelationShip relationShip = player1.findRelationShip(player2);
         RelationShip relationShip2 = player2.findRelationShip(player1);
+
         if (relationShip == null && relationShip2 == null) {
             return new Result(false, "No relationship found with " + username + ". You need to establish a relationship first.");
         }
-        if(relationShip!= null){
-            if(!(relationShip.getFriendshipLevel() == 3)){
+
+        if (relationShip != null) {
+            if (!(relationShip.getFriendshipLevel() == 3)) {
                 return new Result(false, "You need to be at level 3 to ask for a marriage!");
             }
-            if(player1.getUser().isFemale()){
+            if (player1.getUser().isFemale()) {
                 return new Result(false, "You can only ask for a marriage with a male player!");
             }
             relationShip.askMarriage(ring);
             return new Result(true, "marriage asked successfully by "
                     + relationShip.getPlayer1().getUser().getUserName() + "\nFriendShip XP: " + relationShip.getXP()
-            + "\nFriendShip Level: " + relationShip.getFriendshipLevel());
-        }
-        else{
-            if(!(relationShip2.getFriendshipLevel() == 3)){
+                    + "\nFriendShip Level: " + relationShip.getFriendshipLevel());
+        } else {
+            if (!(relationShip2.getFriendshipLevel() == 3)) {
                 return new Result(false, "You need to be at level 3 to ask for a marriage!");
             }
-            if(player1.getUser().isFemale()){
+            if (player1.getUser().isFemale()) {
                 return new Result(false, "You can only ask for a marriage with a male player!");
             }
             relationShip2.askMarriage(ring);
@@ -757,7 +755,7 @@ public class GameMenuController implements MenuController {
         }
     }
 
-    public Result respond(String answer, String username){
+    public Result respond(String answer, String username) {
         Player player1 = App.getCurrentGame().getCurrentPlayer();
         Player player2 = App.getCurrentGame().getPlayerByName(username);
         if (player2 == null) {
@@ -765,34 +763,25 @@ public class GameMenuController implements MenuController {
         }
         RelationShip relationShip = player1.findRelationShip(player2);
         RelationShip relationShip2 = player2.findRelationShip(player1);
-        if (relationShip == null && relationShip2 == null) {
+
+        if (relationShip == null || relationShip2 == null) {
             return new Result(false, "No relationship found with " + username + ". You need to establish a relationship first.");
         }
-        if(relationShip!= null){
-            if(answer.equals("accept")){
-                relationShip.marriage(relationShip.getAskedRing());
-                return new Result(true, "marriage accepted by "
-                        + relationShip.getPlayer1().getUser().getUserName()
-                        + "\nFriendShip XP: " + relationShip.getXP() + "\nFriendShip Level: "+ relationShip.getFriendshipLevel());
-            }else {
-                relationShip.reject();
-                return new Result(false, "marriage accepted by "
-                        + relationShip.getPlayer1().getUser().getUserName()
-                        + "\nFriendShip XP: " + relationShip.getXP() + "\nFriendShip Level: "+ relationShip.getFriendshipLevel());
-            }
+
+        if (!relationShip.hasAskedToMarry() || !relationShip2.hasAskedToMarry()) {
+            return new Result(false, "There is no proposal to respond to!");
         }
-        else{
-            if(answer.equals("accept")){
-                relationShip2.marriage(relationShip2.getAskedRing());
-                return new Result(true, "marriage accepted by "
-                        + relationShip2.getPlayer1().getUser().getUserName()
-                        + "\nFriendShip XP: " + relationShip2.getXP() + "\nFriendShip Level: " + relationShip2.getFriendshipLevel());
-            }else {
-                relationShip2.reject();
-                return new Result(false, "marriage accepted by "
-                        + relationShip2.getPlayer1().getUser().getUserName()
-                        + "\nFriendShip XP: " + relationShip2.getXP() + "\nFriendShip Level: " + relationShip2.getFriendshipLevel());
-            }
+
+        if (answer.equals("accept")) {
+            relationShip.marriage(relationShip.getAskedRing());
+            return new Result(true, "marriage accepted by "
+                    + relationShip.getPlayer1().getUser().getUserName()
+                    + "\nFriendShip XP: " + relationShip.getXP() + "\nFriendShip Level: " + relationShip.getFriendshipLevel());
+        } else {
+            relationShip.reject();
+            return new Result(false, "marriage accepted by "
+                    + relationShip.getPlayer1().getUser().getUserName()
+                    + "\nFriendShip XP: " + relationShip.getXP() + "\nFriendShip Level: " + relationShip.getFriendshipLevel());
         }
     }
 
@@ -841,14 +830,14 @@ public class GameMenuController implements MenuController {
         for (RelationShip relationship : currentPlayer.getRelationShips()) {
             Player otherPlayer;
             if (relationship.getPlayer1().equals(currentPlayer)) {
-                otherPlayer = relationship.getPlayer2();
-            } else {
                 otherPlayer = relationship.getPlayer1();
+            } else {
+                otherPlayer = relationship.getPlayer2();
             }
 
             result.append("- ").append(otherPlayer.getUser().getUserName())
-                  .append(": Level ").append(relationship.getFriendshipLevel())
-                  .append(" (XP: ").append(relationship.getXP()).append("/").append(relationship.calculateLevelXP()).append(")\n");
+                    .append(": Level ").append(relationship.getFriendshipLevel())
+                    .append(" (XP: ").append(relationship.getXP()).append("/").append(relationship.calculateLevelXP()).append(")\n");
         }
 
         return new Result(true, result.toString());
@@ -885,11 +874,11 @@ public class GameMenuController implements MenuController {
         for (NPC npc : App.getCurrentGame().getNPCvillage().getAllNPCs()) {
             Location location = npc.getUserLocation();
             response.append(npc.getName())
-                   .append(": (")
-                   .append(location.getxAxis())
-                   .append(", ")
-                   .append(location.getyAxis())
-                   .append(")\n");
+                    .append(": (")
+                    .append(location.getxAxis())
+                    .append(", ")
+                    .append(location.getyAxis())
+                    .append(")\n");
         }
 
         return new Result(true, response.toString());
@@ -902,20 +891,20 @@ public class GameMenuController implements MenuController {
 
         // Add favorite items for each NPC
         String[] favoriteItems = {
-            "Wool", "Pumpkin Pie", "Pizza",      // Sebastian
-            "Stone", "Iron Ore", "Coffee",       // Abigail
-            "Coffee", "Pickles", "Wine",         // Harvey
-            "Salad", "Grape", "Wine",            // Leah
-            "Spaghetti", "Wood", "Iron Bar"      // Robin
+                "Wool", "Pumpkin Pie", "Pizza",      // Sebastian
+                "Stone", "Iron Ore", "Coffee",       // Abigail
+                "Coffee", "Pickles", "Wine",         // Harvey
+                "Salad", "Grape", "Wine",            // Leah
+                "Spaghetti", "Wood", "Iron Bar"      // Robin
         };
 
         // Add quest items
         String[] questItems = {
-            "Iron", "Pumpkin Pie", "Stone",      // Sebastian quests
-            "Gold Bar", "Pumpkin", "Wheat",      // Abigail quests
-            "Crop", "Wine", "Hardwood",          // Harvey quests
-            "Salmon", "Wood", "Iron Bar",        // Leah quests
-            "Wood"                               // Robin quests
+                "Iron", "Pumpkin Pie", "Stone",      // Sebastian quests
+                "Gold Bar", "Pumpkin", "Wheat",      // Abigail quests
+                "Crop", "Wine", "Hardwood",          // Harvey quests
+                "Salmon", "Wood", "Iron Bar",        // Leah quests
+                "Wood"                               // Robin quests
         };
 
         // Add all items to player's inventory
@@ -945,14 +934,14 @@ public class GameMenuController implements MenuController {
         return new Result(true, response.toString());
     }
 
-    public Result refrigerator(String command, String item){
+    public Result refrigerator(String command, String item) {
         Player player = App.getCurrentGame().getCurrentPlayer();
-        if(command.equals("put")){
+        if (command.equals("put")) {
             Item getItem = App.getItemByName(item);
             player.getRefrigrator().addItem(getItem, 1);
             player.getBackPack().decreaseItem(getItem, 1);
         }
-        if(command.equals("pick")){
+        if (command.equals("pick")) {
             Item getItem = App.getItemByName(item);
             player.getBackPack().addItem(getItem, 1);
             player.getRefrigrator().decreaseItem(getItem, 1);
@@ -972,17 +961,17 @@ public class GameMenuController implements MenuController {
             return new Result(false, "you do not know this recepie");
         }
 
-        if(!player.getBackPack().checkCapacity(1)){
+        if (!player.getBackPack().checkCapacity(1)) {
             return new Result(false, "inventory is full!");
         }
 
-            player.reduceEnergy(3);
-            if(!checkIngredients(cooking)){
-                return new Result(false, "ingredient not enough!");
-            }
-            Food newFood = new Food(recipe, cooking);
-            player.getBackPack().addItem(newFood, 1);
-            return  new Result(true, "processed food!");
+        player.reduceEnergy(3);
+        if (!checkIngredients(cooking)) {
+            return new Result(false, "ingredient not enough!");
+        }
+        Food newFood = new Food(recipe, cooking);
+        player.getBackPack().addItem(newFood, 1);
+        return new Result(true, "processed food!");
 
 
     }
@@ -994,7 +983,7 @@ public class GameMenuController implements MenuController {
         // First check if all required ingredients are present in sufficient quantities
         for (Map.Entry<String, Integer> entry : ingredients.entrySet()) {
             Item item = player.getBackPack().getItemByName(entry.getKey());
-           // System.out.println(entry.getKey() +"alo pepe too sandogh" + player.getBackPack().getItems().get(item)+"naaa"+item.getName());
+            // System.out.println(entry.getKey() +"alo pepe too sandogh" + player.getBackPack().getItems().get(item)+"naaa"+item.getName());
             if (item == null || player.getBackPack().getItemCount(item) < entry.getValue()) {
                 return false;
             }
@@ -1009,15 +998,15 @@ public class GameMenuController implements MenuController {
         return true;
     }
 
-    public Result eat(String food){
+    public Result eat(String food) {
         Player player = App.getCurrentGame().getCurrentPlayer();
         Food foodToEat = (Food) player.getBackPack().getItemByName(food);
         ArtisanItem artisanItem = getArtisanItem(food);
 
-         if (foodToEat != null && artisanItem ==null){
+        if (foodToEat != null && artisanItem == null) {
             player.getBackPack().decreaseItem(foodToEat, 1);
             player.increaseEnergy(foodToEat.getFoodType().getEnergy());
-            if(!foodToEat.getFoodType().getBuffer().isEmpty()){
+            if (!foodToEat.getFoodType().getBuffer().isEmpty()) {
                 player.setEnergy(300); // for 5 hours
             }
             return new Result(true, "eaten food!");
@@ -1029,17 +1018,15 @@ public class GameMenuController implements MenuController {
         return new Result(false, "food not found!");
     }
 
-    public ArtisanItem getArtisanItem(String itemName){
+    public ArtisanItem getArtisanItem(String itemName) {
         Player player = App.getCurrentGame().getCurrentPlayer();
-        if(player.getBackPack().getItemByName(itemName) == null){
+        if (player.getBackPack().getItemByName(itemName) == null) {
             return null;
-        }
-        else{
+        } else {
             Item item = player.getBackPack().getItemByName(itemName);
-            if(item instanceof ArtisanItem){
+            if (item instanceof ArtisanItem) {
                 return (ArtisanItem) item;
-            }
-            else{
+            } else {
                 return null;
             }
         }
@@ -1047,13 +1034,12 @@ public class GameMenuController implements MenuController {
 
     public Result Thor(int x, int y) {
         Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
-        if(location.getTypeOfTile().equals(TypeOfTile.GREENHOUSE)){
-            return  new Result(false, "Lightning doesn't have effect on GreenHouse!");
+        if (location.getTypeOfTile().equals(TypeOfTile.GREENHOUSE)) {
+            return new Result(false, "Lightning doesn't have effect on GreenHouse!");
         }
         location.setTypeOfTile(TypeOfTile.BURNED_GROUND);
         return new Result(true, "Lightning struck the map at location" + x + ", " + y);
     }
-
 
 
     private boolean isNearShippingBin(Player player) {
@@ -1065,7 +1051,7 @@ public class GameMenuController implements MenuController {
         Location binLocation = player.getShippingBin().getShippingBinLocation();
 
         int distance = Math.abs(playerLocation.getxAxis() - binLocation.getxAxis()) +
-                       Math.abs(playerLocation.getyAxis() - binLocation.getyAxis());
+                Math.abs(playerLocation.getyAxis() - binLocation.getyAxis());
         return distance <= 1;
     }
 
@@ -1094,7 +1080,7 @@ public class GameMenuController implements MenuController {
         }
 
         int requestedCount;
-        try{
+        try {
             requestedCount = Integer.parseInt(count);
         } catch (NumberFormatException e) {
             return new Result(false, "Count must be a number!");
@@ -1105,11 +1091,11 @@ public class GameMenuController implements MenuController {
             return new Result(false, "You don't have enough of this product.");
         }
         Quality quality = item.getQuality();
-        if(quality == null){
+        if (quality == null) {
             quality = Quality.NORMAL;
         }
         int price = item.getPrice();
-        int returnPrice =(int) (price * quality.getPriceMultiPlier());
+        int returnPrice = (int) (price * quality.getPriceMultiPlier());
         player.increaseShippingMoney(returnPrice * requestedCount);
 
         player.getBackPack().decreaseItem(item, requestedCount);
@@ -1137,12 +1123,12 @@ public class GameMenuController implements MenuController {
 
         int availableCount = player.getBackPack().getItemCount(item);
         Quality quality = item.getQuality();
-        if(quality == null){
+        if (quality == null) {
             quality = Quality.NORMAL;
         }
         int price = item.getPrice();
 
-        int returnPrice =(int) (price * quality.getPriceMultiPlier());
+        int returnPrice = (int) (price * quality.getPriceMultiPlier());
 
         player.increaseShippingMoney(returnPrice * availableCount);
         player.getBackPack().decreaseItem(item, availableCount);
@@ -1152,26 +1138,26 @@ public class GameMenuController implements MenuController {
     }
 
 
-    public Result buildGreenHouse(){
+    public Result buildGreenHouse() {
         Player player = App.getCurrentGame().getCurrentPlayer();
-        if(player.getMoney() < 1000 ){
+        if (player.getMoney() < 1000) {
             return new Result(false, "You don't have enough money to build green house.");
         }
-        if(player.getBackPack().getItemCount(player.getBackPack().getItemByName("Wood")) < 500){
+        if (player.getBackPack().getItemCount(player.getBackPack().getItemByName("Wood")) < 500) {
             return new Result(false, "You don't have enough woods to build green house.");
         }
 
         //build greenhouse
         player.decreaseMoney(1000);
         player.getBackPack().decreaseItem(player.getBackPack().getItemByName("Wood"), 500);
-        String message = "You built a green house!, Money (-1000) / Wood (-500)\n" + "Money: " +player.getMoney() +
+        String message = "You built a green house!, Money (-1000) / Wood (-500)\n" + "Money: " + player.getMoney() +
                 "\nWood: " + player.getBackPack().getItemCount(player.getBackPack().getItemByName("Wood")) + "\n";
         return new Result(true, message);
     }
 
-    public Result showShippingBinLocation(){
+    public Result showShippingBinLocation() {
         Player player = App.getCurrentGame().getCurrentPlayer();
-        if(player.getShippingBin() == null){
+        if (player.getShippingBin() == null) {
             return new Result(false, "no shipping bin found!");
         }
         return new Result(true,
@@ -1179,36 +1165,43 @@ public class GameMenuController implements MenuController {
                         + ", " + player.getShippingBin().getShippingBinLocation().getyAxis());
     }
 
-    public Result cheatFriendShipLevel(String name, String amount){
+    public Result cheatFriendShipLevel(String name, String amount) {
         int intAmount;
-        try{
+        try {
             intAmount = Integer.parseInt(amount);
         } catch (NumberFormatException e) {
             return new Result(false, "Amount must be a number!");
         }
         Player player1 = App.getCurrentGame().getCurrentPlayer();
         Player player2 = App.getCurrentGame().getPlayerByName(name);
-        if(player2 == null){
+        if (player2 == null) {
             return new Result(false, "Player with username " + name + " not found!");
         }
         RelationShip relationShip = player1.findRelationShip(player2);
         RelationShip relationShip2 = player2.findRelationShip(player1);
-        if(relationShip2 ==null && relationShip ==null){
+        if (relationShip2 == null && relationShip == null) {
             return new Result(false, "No relationship found with " + name + ". You need to establish a relationship first.");
         }
-        if(relationShip!= null){
+        if (relationShip != null) {
             relationShip.setFriendshipLevel(intAmount);
             return new Result(true, "Friendship level set to " + intAmount + " by "
                     + relationShip.getPlayer1().getUser().getUserName()
-                    + "\nFriendShip XP: " + relationShip.getXP() + "\nFriendShip Level: "+ relationShip.getFriendshipLevel());
-        }
-        else{
+                    + "\nFriendShip XP: " + relationShip.getXP() + "\nFriendShip Level: " + relationShip.getFriendshipLevel());
+        } else {
             relationShip2.setFriendshipLevel(intAmount);
             return new Result(true, "Friendship level set to " + intAmount + " by "
                     + relationShip2.getPlayer1().getUser().getUserName()
-                    + "\nFriendShip XP: " + relationShip2.getXP() + "\nFriendShip Level: "+ relationShip2.getFriendshipLevel());
+                    + "\nFriendShip XP: " + relationShip2.getXP() + "\nFriendShip Level: " + relationShip2.getFriendshipLevel());
         }
 
     }
 
+
+    public Result cheatAddXP(String username) {
+        Player player = App.getCurrentGame().getPlayerByName(username);
+        RelationShip relationShip = player.findRelationShip(App.getCurrentGame().getCurrentPlayer());
+
+        relationShip.increaseXP(201);
+        return new Result(true, "XP added by " + App.getCurrentPlayerLazy() + " to " + username + "!");
+    }
 }

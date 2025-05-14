@@ -22,6 +22,7 @@ public class RelationShip {
     private String askedRing;
     private List<Gift> receivedGifts;
     private List<Gift> sentGifts;
+    private boolean hasAskedToMarry;
 
     public RelationShip(Player player1, Player player2) {
         this.player1 = player1;
@@ -38,42 +39,60 @@ public class RelationShip {
         this.askedRing = null;
         this.receivedGifts = new ArrayList<>();
         this.sentGifts = new ArrayList<>();
+
+        this.hasAskedToMarry = false;
+
+        player1.addRelationShip(this);
+        player2.addRelationShip(this);
     }
 
-    public int calculateLevelXP(){
+    public void askToMarry() {
+        this.hasAskedToMarry = true;
+    }
+
+    public boolean hasAskedToMarry() {
+        return this.hasAskedToMarry;
+    }
+
+    public int calculateLevelXP() {
         return (this.friendshipLevel + 1) * 100;
     }
 
-    public boolean checkNeededXP(){
+    public boolean checkNeededXP() {
         return this.XP >= this.calculateLevelXP();
     }
-    public boolean isXPFilled(){
-        return this.XP ==calculateLevelXP();
+
+    public boolean isXPFilled() {
+        return this.XP == calculateLevelXP();
     }
 
-    public void increaseXP(int amount){
+    public void increaseXP(int amount) {
         this.XP += amount;
+        increaseFriendshipLevel();
     }
 
-    public void decreaseXP(int amount){
-        this.XP-=amount;
+    public void decreaseXP(int amount) {
+        this.XP -= amount;
     }
 
 
-    public void increaseFriendshipLevel(){
-        switch (this.friendshipLevel){
+    public void increaseFriendshipLevel() {
+        switch (this.friendshipLevel) {
             case 0, 1:
-                if(checkNeededXP()){
+                if (checkNeededXP()) {
+                    this.XP -= calculateLevelXP();
                     this.friendshipLevel++;
                 }
                 break;
             case 2:
-                if(checkNeededXP() && hasBouquet){
+                if (checkNeededXP() && hasBouquet) {
+                    this.XP -= calculateLevelXP();
                     this.friendshipLevel++;
                 }
                 break;
             case 3:
-                if(checkNeededXP() && areMarried){
+                if (checkNeededXP() && areMarried) {
+                    this.XP -= calculateLevelXP();
                     this.friendshipLevel++;
                 }
                 break;
@@ -99,27 +118,27 @@ public class RelationShip {
         return XP;
     }
 
-    public void talk(String message){
+    public void talk(String message) {
         talks.add(message);
-        if(areMarried){
+        if (areMarried) {
             player1.increaseEnergy(50);
             player2.increaseEnergy(50);
         }
-        this.XP +=20;
+        this.XP += 20;
         this.hasTalked = true;
     }
 
-    public String talkHistory(){
+    public String talkHistory() {
         StringBuilder result = new StringBuilder("Talk History: \n");
-        for(String message: talks){
+        for (String message : talks) {
             result.append(message).append("\n");
         }
         return result.toString();
     }
 
-    public boolean gift(Item gift, int amount){
-        if (player1.getBackPack().getItemByName(gift.getName()) == null || 
-            player1.getBackPack().getItemCount(gift) < amount) {
+    public boolean gift(Item gift, int amount) {
+        if (player1.getBackPack().getItemByName(gift.getName()) == null ||
+                player1.getBackPack().getItemCount(gift) < amount) {
             return false;
         }
 
@@ -143,11 +162,11 @@ public class RelationShip {
         for (int i = 0; i < receivedGifts.size(); i++) {
             Gift gift = receivedGifts.get(i);
             result.append(i + 1).append(". ")
-                  .append(gift.getAmount()).append(" ")
-                  .append(gift.getItem().getName())
-                  .append(" from ").append(gift.getSender().getUser().getUserName())
-                  .append(gift.isRated() ? " (Rated: " + gift.getRating() + ")" : " (Not rated yet)")
-                  .append("\n");
+                    .append(gift.getAmount()).append(" ")
+                    .append(gift.getItem().getName())
+                    .append(" from ").append(gift.getSender().getUser().getUserName())
+                    .append(gift.isRated() ? " (Rated: " + gift.getRating() + ")" : " (Not rated yet)")
+                    .append("\n");
         }
         return result.toString();
     }
@@ -202,30 +221,31 @@ public class RelationShip {
         return result.toString();
     }
 
-    public void hug(){
+    public void hug() {
         this.hasHugged = true;
         increaseXP(60);
 
     }
 
-    public boolean arePlayersAdjacent(){
+    public boolean arePlayersAdjacent() {
         return Math.abs(player1.getUserLocation().getxAxis() - player2.getUserLocation().getxAxis())
                 + Math.abs(player1.getUserLocation().getyAxis() - player2.getUserLocation().getyAxis()) <= 2;
     }
 
-    public void flower(){
+    public void flower() {
         Item flower = player1.getBackPack().getItemByName("Flower");
-        if(flower != null){
+        if (flower != null) {
             hasBouquet = true;
             player2.getBackPack().addItem(flower, 1);
             player1.getBackPack().decreaseItem(flower, 1);
         }
     }
 
-    public Boolean askMarriage(String ring){
-        if(player1.getBackPack().getItemByName(ring) != null){
+    public Boolean askMarriage(String ring) {
+        askToMarry();
+        if (player1.getBackPack().getItemByName(ring) != null) {
             this.askedRing = ring;
-            if(player2.getUser().isFemale()){
+            if (player2.getUser().isFemale()) {
                 return true;
             }
         }
@@ -233,25 +253,26 @@ public class RelationShip {
         return false;
     }
 
-    public void marriage(String ring){
+    public void marriage(String ring) {
         Item ringItem = player1.getBackPack().getItemByName(ring);
         player1.getBackPack().decreaseItem(ringItem, 1);
         player2.getBackPack().addItem(ringItem, 1);
         areMarried = true;
         player1.setMarried();
         player2.setMarried();
-        player1.setPartner(player2); player2.setPartner(player1);
+        player1.setPartner(player2);
+        player2.setPartner(player1);
         increaseFriendshipLevel();
         mergeMoney();
     }
 
-    public void mergeMoney(){
+    public void mergeMoney() {
         int allMoney = player1.getMoney() + player2.getMoney();
         player1.setMoney(allMoney);
         player2.setMoney(allMoney);
     }
 
-    public void setFriendshipLevel(int level){
+    public void setFriendshipLevel(int level) {
         this.friendshipLevel = level;
     }
 
@@ -259,14 +280,15 @@ public class RelationShip {
         return askedRing;
     }
 
-    public void reject(){
+    public void reject() {
         friendshipLevel = 0;
-        player1.setEnergy(player1.getEnergy() /2);
+        player1.setEnergy(player1.getEnergy() / 2);
         player1.setRejectDate(App.getCurrentGame().getDate());
     }
-    public int calculateGiftXp(int rate){
+
+    public int calculateGiftXp(int rate) {
         int calculatedXp = 0;
-        calculatedXp = (rate - 3) *30 +15;
+        calculatedXp = (rate - 3) * 30 + 15;
         return calculatedXp;
     }
 
