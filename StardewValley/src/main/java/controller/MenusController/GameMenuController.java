@@ -7,6 +7,7 @@ import models.Eating.Food;
 import models.Fundementals.*;
 import models.Place.Farm;
 import models.Place.Store;
+import models.ProductsPackage.ArtisanItem;
 import models.ProductsPackage.Quality;
 import models.RelatedToUser.User;
 import models.*;
@@ -16,10 +17,14 @@ import models.enums.*;
 import models.Fundementals.Player;
 import com.google.gson.Gson;
 import models.enums.ToolEnums.BackPackTypes;
+import models.enums.ToolEnums.Tool;
 import models.enums.ToolEnums.TrashcanTypes;
+import models.enums.Types.ArtisanTypes;
 import models.enums.Types.Cooking;
 import models.enums.Types.TypeOfTile;
+import models.NPC.NPC;
 
+import javax.management.relation.Relation;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -60,6 +65,10 @@ public class GameMenuController implements MenuController {
         Item item = currentPlayer.getBackPack().getItemByName(itemName);
         if (type.equals("offer") && (item == null || amount <= 0)) {
             return new Result(false, "Invalid item or amount");
+        }
+
+        if(type.equals("offer") && (amount >currentPlayer.getBackPack().getItemCount(item))){
+            return new Result(false, "You don't have enough of " + itemName);
         }
 
         if (type.equals("request") && amount <= 0) {
@@ -451,7 +460,13 @@ public class GameMenuController implements MenuController {
 
     public Result showEnergy(){
         Player player = App.getCurrentGame().getCurrentPlayer();
-        return new Result(true, String.format("%d", player.getEnergy()));
+        if(player.isEnergyUnlimited()){
+            return new Result(true, "Energy is unlimited!");
+        }
+        else{
+            return new Result(true, String.format("%d", player.getEnergy()));
+
+        }
     }
 
     public Result setEnergy(String energy){
@@ -471,6 +486,7 @@ public class GameMenuController implements MenuController {
         StringBuilder result = new StringBuilder("Inventory items: \n");
         for(Item items : backPack.getItems().keySet()){
             result.append(items.getName());
+            result.append(" -> ");
             result.append(backPack.getItems().get(items));
             result.append("\n");
         }
@@ -478,9 +494,8 @@ public class GameMenuController implements MenuController {
     }
 
     public Result trashItem(String name, String amount) {
-        BackPack backPack = App.getCurrentGame().getCurrentPlayer().getBackPack();
-
-        // Find trash can in player's inventory
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        BackPack backPack = player.getBackPack();
         models.ToolsPackage.Tools trashCan = null;
         for (Item item : backPack.getItems().keySet()) {
             if (item instanceof models.ToolsPackage.Tools) {
@@ -498,10 +513,15 @@ public class GameMenuController implements MenuController {
                 result = backPack.trashAll(name, trashCan);
             } else {
                 backPack.trashAll(name);
-                result = new Result(true, "Trashed all " + name + " successfully!");
+                result = new Result(true, "Trashed all " + name + " successfully!" + "\nMoney: " + player.getMoney());
             }
         } else {
-            int intAmount = Integer.parseInt(amount);
+            int intAmount;
+            try {
+                intAmount=Integer.parseInt(amount);
+            } catch (NumberFormatException e) {
+                return new Result(false, "Amount must be a number!");
+            }
             if (trashCan != null) {
                 result = backPack.trash(name, intAmount, trashCan);
             } else {
@@ -516,7 +536,17 @@ public class GameMenuController implements MenuController {
     public Result talk(String username, String message) {
         Player player1 = App.getCurrentGame().getCurrentPlayer();
         Player player2 = App.getCurrentGame().getPlayerByName(username);
+        if (player2 == null) {
+            return new Result(false, "Player with username " + username + " not found!");
+        }
         RelationShip relationShip = player1.findRelationShip(player2);
+        if (relationShip == null) {
+            RelationShip newRelationShip = new RelationShip(player1, player2);
+            player1.addRelationShip(newRelationShip);
+            player2.addRelationShip(newRelationShip);
+            newRelationShip.talk(message);
+            return new Result(true, "message sent!");
+        }
         relationShip.talk(message);
         return new Result(true, "message sent!");
     }
@@ -524,28 +554,126 @@ public class GameMenuController implements MenuController {
     public Result talkHistory(String username) {
         Player player1 = App.getCurrentGame().getCurrentPlayer();
         Player player2 = App.getCurrentGame().getPlayerByName(username);
+        if (player2 == null) {
+            return new Result(false, "Player with username " + username + " not found!");
+        }
         RelationShip relationShip = player1.findRelationShip(player2);
-        return new Result(true,relationShip.talkHistory());
+        RelationShip relationShip2 = player2.findRelationShip(player1);
+        if (relationShip == null && relationShip2 == null) {
+            return new Result(false, "No relationship found with " + username + ". You need to establish a relationship first.");
+        }
+        if(relationShip == null){
+            relationShip = relationShip2;
+        }
+        return new Result(true, relationShip.talkHistory());
     }
 
-    public Result gift(String username, String item, String amount) {
-        int inAmount = Integer.parseInt(amount);
+    public Result gift(String username, String itemName, String amount) {
+        try {
+            int inAmount = Integer.parseInt(amount);
+            Player player1 = App.getCurrentGame().getCurrentPlayer();
+            Player player2 = App.getCurrentGame().getPlayerByName(username);
+
+            if (player2 == null) {
+                return new Result(false, "Player with username " + username + " not found!");
+            }
+
+            Item gift = player1.getBackPack().getItemByName(itemName);
+            if (gift == null) {
+                return new Result(false, "Item not found in your inventory!");
+            }
+
+            RelationShip relationShip = player1.findRelationShip(player2);
+            if (relationShip == null) {
+                RelationShip newRelationShip = new RelationShip(player1, player2);
+                player1.addRelationShip(newRelationShip);
+                player2.addRelationShip(newRelationShip);
+                relationShip = newRelationShip;
+            }
+
+            if (relationShip.gift(gift, inAmount)) {
+                return new Result(true, "Gift sent successfully! " + player2.getUser().getUserName() + " can rate it now.");
+            } else {
+                return new Result(false, "Error sending gift!");
+            }
+        } catch (NumberFormatException e) {
+            return new Result(false, "Invalid amount. Please enter a valid number.");
+        }
+    }
+
+    public Result giftList() {
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        String giftList = "";
+
+        for (RelationShip relationShip : player.getRelationShips()) {
+            if (relationShip.getPlayer2() == player) {
+                giftList += relationShip.listGifts();
+            }
+        }
+
+        if (giftList.isEmpty()) {
+            return new Result(true, "You haven't received any gifts yet.");
+        }
+
+        return new Result(true, giftList);
+    }
+
+    public Result giftRate(String giftNumber, String rating) {
+        try {
+            int giftNum = Integer.parseInt(giftNumber);
+            int ratingValue = Integer.parseInt(rating);
+
+            Player player = App.getCurrentGame().getCurrentPlayer();
+
+            for (RelationShip relationShip : player.getRelationShips()) {
+                if (relationShip.getPlayer2() == player) {
+                    if (relationShip.rateGift(giftNum, ratingValue)) {
+                        return new Result(true, "Gift rated successfully!");
+                    }
+                }
+            }
+
+            return new Result(false, "Invalid gift number or rating. Gift numbers start at 1, and ratings must be between 1 and 5.");
+        } catch (NumberFormatException e) {
+            return new Result(false, "Invalid input. Please enter valid numbers for gift number and rating.");
+        }
+    }
+
+    public Result giftHistory(String username) {
         Player player1 = App.getCurrentGame().getCurrentPlayer();
-        Player player2 = App.getCurrentGame().getPlayerByName(username);
-        RelationShip relationShip = player1.findRelationShip(player2);
-        Item gift  = player1.getBackPack().getItemByName(item);
-        if(gift != null) {
-            relationShip.gift(gift);
-            return new Result(true, "gifted successfully! you can rate now!");
+
+        if (username == null || username.isEmpty()) {
+            StringBuilder history = new StringBuilder("Gift History for all relationships:\n\n");
+            for (RelationShip relationShip : player1.getRelationShips()) {
+                history.append("With ").append(relationShip.getPlayer2().getUser().getUserName()).append(":\n");
+                history.append(relationShip.giftHistory()).append("\n");
+            }
+            return new Result(true, history.toString());
         } else {
-            return new Result(false, "Item not found in your inventory!");
+            Player player2 = App.getCurrentGame().getPlayerByName(username);
+            if (player2 == null) {
+                return new Result(false, "Player with username " + username + " not found!");
+            }
+
+            RelationShip relationShip = player1.findRelationShip(player2);
+            if (relationShip == null) {
+                return new Result(false, "No relationship found with " + username);
+            }
+
+            return new Result(true, relationShip.giftHistory());
         }
     }
 
     public Result hug(String username){
         Player player1 = App.getCurrentGame().getCurrentPlayer();
         Player player2 = App.getCurrentGame().getPlayerByName(username);
+        if (player2 == null) {
+            return new Result(false, "Player with username " + username + " not found!");
+        }
         RelationShip relationShip = player1.findRelationShip(player2);
+        if (relationShip == null) {
+            return new Result(false, "No relationship found with " + username + ". You need to establish a relationship first.");
+        }
         relationShip.hug();
         return new Result(true, "hugged successfully!");
     }
@@ -553,7 +681,13 @@ public class GameMenuController implements MenuController {
     public Result flower(String username){
         Player player1 = App.getCurrentGame().getCurrentPlayer();
         Player player2 = App.getCurrentGame().getPlayerByName(username);
+        if (player2 == null) {
+            return new Result(false, "Player with username " + username + " not found!");
+        }
         RelationShip relationShip = player1.findRelationShip(player2);
+        if (relationShip == null) {
+            return new Result(false, "No relationship found with " + username + ". You need to establish a relationship first.");
+        }
         relationShip.flower();
         return new Result(true, "flowered successfully!");
     }
@@ -561,7 +695,13 @@ public class GameMenuController implements MenuController {
     public Result askMarriage(String username, String ring){
         Player player1 = App.getCurrentGame().getCurrentPlayer();
         Player player2 = App.getCurrentGame().getPlayerByName(username);
+        if (player2 == null) {
+            return new Result(false, "Player with username " + username + " not found!");
+        }
         RelationShip relationShip = player1.findRelationShip(player2);
+        if (relationShip == null) {
+            return new Result(false, "No relationship found with " + username + ". You need to establish a relationship first.");
+        }
         if(relationShip.askMarriage(ring)){
             return new Result(true, "marriage asked successfully!");
         }
@@ -573,7 +713,13 @@ public class GameMenuController implements MenuController {
     public Result respond(String answer, String username){
         Player player1 = App.getCurrentGame().getCurrentPlayer();
         Player player2 = App.getCurrentGame().getPlayerByName(username);
+        if (player2 == null) {
+            return new Result(false, "Player with username " + username + " not found!");
+        }
         RelationShip relationShip = player1.findRelationShip(player2);
+        if (relationShip == null) {
+            return new Result(false, "No relationship found with " + username + ". You need to establish a relationship first.");
+        }
         if(answer.equals("accept")){
             relationShip.marriage(relationShip.getAskedRing());
             return new Result(true, "marriage accepted!");
@@ -617,6 +763,30 @@ public class GameMenuController implements MenuController {
         return new Result(true, response);
     }
 
+    public Result friendshipList() {
+        Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
+        StringBuilder result = new StringBuilder("Friendship levels with other players:\n");
+
+        if (currentPlayer.getRelationShips().isEmpty()) {
+            return new Result(true, "You don't have any relationships with other players yet.");
+        }
+
+        for (RelationShip relationship : currentPlayer.getRelationShips()) {
+            Player otherPlayer;
+            if (relationship.getPlayer1().equals(currentPlayer)) {
+                otherPlayer = relationship.getPlayer2();
+            } else {
+                otherPlayer = relationship.getPlayer1();
+            }
+
+            result.append("- ").append(otherPlayer.getUser().getUserName())
+                  .append(": Level ").append(relationship.getFriendshipLevel())
+                  .append(" (XP: ").append(relationship.getXP()).append("/").append(relationship.calculateLevelXP()).append(")\n");
+        }
+
+        return new Result(true, result.toString());
+    }
+
     public Result questsList() {
         if (App.getCurrentGame().getNPCvillage() == null) {
             App.getCurrentGame().initializeNPCvillage();
@@ -637,6 +807,75 @@ public class GameMenuController implements MenuController {
         String response = controller.finishQuest(index);
 
         return new Result(true, response);
+    }
+
+    public Result cheatNPCLocations() {
+        if (App.getCurrentGame().getNPCvillage() == null) {
+            App.getCurrentGame().initializeNPCvillage();
+        }
+
+        StringBuilder response = new StringBuilder("NPC Locations:\n");
+        for (NPC npc : App.getCurrentGame().getNPCvillage().getAllNPCs()) {
+            Location location = npc.getUserLocation();
+            response.append(npc.getName())
+                   .append(": (")
+                   .append(location.getxAxis())
+                   .append(", ")
+                   .append(location.getyAxis())
+                   .append(")\n");
+        }
+
+        return new Result(true, response.toString());
+    }
+
+    public Result cheatNPCTestItems() {
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        BackPack backpack = player.getBackPack();
+        StringBuilder response = new StringBuilder("Added the following items for NPC testing:\n");
+
+        // Add favorite items for each NPC
+        String[] favoriteItems = {
+            "Wool", "Pumpkin Pie", "Pizza",      // Sebastian
+            "Stone", "Iron Ore", "Coffee",       // Abigail
+            "Coffee", "Pickles", "Wine",         // Harvey
+            "Salad", "Grape", "Wine",            // Leah
+            "Spaghetti", "Wood", "Iron Bar"      // Robin
+        };
+
+        // Add quest items
+        String[] questItems = {
+            "Iron", "Pumpkin Pie", "Stone",      // Sebastian quests
+            "Gold Bar", "Pumpkin", "Wheat",      // Abigail quests
+            "Crop", "Wine", "Hardwood",          // Harvey quests
+            "Salmon", "Wood", "Iron Bar",        // Leah quests
+            "Wood"                               // Robin quests
+        };
+
+        // Add all items to player's inventory
+        for (String itemName : favoriteItems) {
+            Item item = new Item(itemName);
+            backpack.addItem(item, 5);
+            response.append("- ").append(itemName).append(" (5)\n");
+        }
+
+        for (String itemName : questItems) {
+            // Skip items already added as favorite items
+            boolean alreadyAdded = false;
+            for (String favItem : favoriteItems) {
+                if (favItem.equals(itemName)) {
+                    alreadyAdded = true;
+                    break;
+                }
+            }
+
+            if (!alreadyAdded) {
+                Item item = new Item(itemName);
+                backpack.addItem(item, 50);
+                response.append("- ").append(itemName).append(" (50)\n");
+            }
+        }
+
+        return new Result(true, response.toString());
     }
 
     public Result refrigerator(String command, String item){
@@ -670,48 +909,72 @@ public class GameMenuController implements MenuController {
             return new Result(false, "inventory is full!");
         }
 
-        if (player.getBackPack().getItemByName(recipe) != null && player.getBackPack().checkCapacity(1)) {
             player.reduceEnergy(3);
             if(!checkIngredients(cooking)){
                 return new Result(false, "ingredient not enough!");
             }
-            checkIngredients(cooking);
             Food newFood = new Food(recipe, cooking);
             player.getBackPack().addItem(newFood, 1);
             return  new Result(true, "processed food!");
-        }
-        else {
-            return  new Result(false, "recipe not found!");
-        }
+
 
     }
 
-    public boolean checkIngredients(Cooking cooking){
+    public boolean checkIngredients(Cooking cooking) {
         Player player = App.getCurrentGame().getCurrentPlayer();
         Map<String, Integer> ingredients = cooking.getIngredient();
+
+        // First check if all required ingredients are present in sufficient quantities
         for (Map.Entry<String, Integer> entry : ingredients.entrySet()) {
             Item item = player.getBackPack().getItemByName(entry.getKey());
-            if(player.getBackPack().getItems().get(item) >= entry.getValue()){
-                player.getBackPack().decreaseItem(item, entry.getValue());
-                return true;
+           // System.out.println(entry.getKey() +"alo pepe too sandogh" + player.getBackPack().getItems().get(item)+"naaa"+item.getName());
+            if (item == null || player.getBackPack().getItemCount(item) < entry.getValue()) {
+                return false;
             }
         }
-        return false;
+
+        // If we get here, all ingredients are available - now consume them
+        for (Map.Entry<String, Integer> entry : ingredients.entrySet()) {
+            Item item = player.getBackPack().getItemByName(entry.getKey());
+            player.getBackPack().decreaseItem(item, entry.getValue());
+        }
+
+        return true;
     }
 
     public Result eat(String food){
         Player player = App.getCurrentGame().getCurrentPlayer();
         Food foodToEat = (Food) player.getBackPack().getItemByName(food);
-        if(foodToEat == null){
-            return new Result(false, "food not found!");
-        }
-        else{
+        ArtisanItem artisanItem = getArtisanItem(food);
+
+         if (foodToEat != null && artisanItem ==null){
             player.getBackPack().decreaseItem(foodToEat, 1);
             player.increaseEnergy(foodToEat.getFoodType().getEnergy());
             if(!foodToEat.getFoodType().getBuffer().isEmpty()){
                 player.setEnergy(300); // for 5 hours
             }
-            return new Result(true, "eaten!");
+            return new Result(true, "eaten food!");
+        } else if (artisanItem != null && foodToEat == null) {
+            player.getBackPack().decreaseItem(artisanItem, 1);
+            player.increaseEnergy(artisanItem.getEnergy());
+            return new Result(true, "eaten artisan food!");
+        }
+        return new Result(false, "food not found!");
+    }
+
+    public ArtisanItem getArtisanItem(String itemName){
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        if(player.getBackPack().getItemByName(itemName) == null){
+            return null;
+        }
+        else{
+            Item item = player.getBackPack().getItemByName(itemName);
+            if(item instanceof ArtisanItem){
+                return (ArtisanItem) item;
+            }
+            else{
+                return null;
+            }
         }
     }
 
@@ -724,20 +987,7 @@ public class GameMenuController implements MenuController {
         return new Result(true, "Lightning struck the map at location" + x + ", " + y);
     }
 
-    public void sellByShippingAllPlayers(){
-        List<Player> players = App.getCurrentGame().getPlayers();
-        List<ShippingBin> shippingBins = new ArrayList<>();
-        for (Player player : players) {
-            if(player.getShippingBin() != null){
-                shippingBins.add(player.getShippingBin());
-            }
-        }
-        for (ShippingBin shippingBin : shippingBins) {
-            for(Item item: shippingBin.getShippingItem(shippingBin.getShippingItemMap())){
-                sellItem(shippingBin.getOwner(), item);
-            }
-        }
-    }
+
 
     private boolean isNearShippingBin(Player player) {
         if (player.getShippingBin() == null) {
@@ -753,9 +1003,10 @@ public class GameMenuController implements MenuController {
     }
 
     private boolean canBeSold(Item item) {
-        String className = item.getClass().getSimpleName();
-        return className.equalsIgnoreCase("AnimalProducts") || 
-               className.equals("StoreProducts");
+        if (item instanceof Tools) {
+            return false;
+        }
+        return true;
     }
 
     public Result sellByShipping(String product, String count) {
@@ -772,18 +1023,29 @@ public class GameMenuController implements MenuController {
         Item item = player.getBackPack().getItemByName(product);
 
         if (!canBeSold(item)) {
-            return new Result(false, "This product cannot be sold.");
+            return new Result(false, "Tools cannot be sold!");
         }
 
-        int requestedCount = Integer.parseInt(count);
+        int requestedCount;
+        try{
+            requestedCount = Integer.parseInt(count);
+        } catch (NumberFormatException e) {
+            return new Result(false, "Count must be a number!");
+        }
         int availableCount = player.getBackPack().getItemCount(item);
 
         if (availableCount < requestedCount) {
             return new Result(false, "You don't have enough of this product.");
         }
-
+        Quality quality = item.getQuality();
+        if(quality == null){
+            quality = Quality.NORMAL;
+        }
+        int price = item.getPrice();
+        int returnPrice =(int) (price * quality.getPriceMultiPlier());
+        player.increaseShippingMoney(returnPrice * requestedCount);
+        System.out.println("price " + returnPrice * requestedCount);
         player.getBackPack().decreaseItem(item, requestedCount);
-
         player.getShippingBin().addShippingItem(item, requestedCount);
 
         return new Result(true, "Item put in shipping bin!");
@@ -807,25 +1069,21 @@ public class GameMenuController implements MenuController {
         }
 
         int availableCount = player.getBackPack().getItemCount(item);
-
+        Quality quality = item.getQuality();
+        if(quality == null){
+            quality = Quality.NORMAL;
+        }
+        int price = item.getPrice();
+        System.out.println("price " + price);
+        int returnPrice =(int) (price * quality.getPriceMultiPlier());
+        System.out.println("price " + returnPrice * availableCount);
+        player.increaseShippingMoney(returnPrice * availableCount);
         player.getBackPack().decreaseItem(item, availableCount);
-
         player.getShippingBin().addShippingItem(item, availableCount);
 
         return new Result(true, "Item put in shipping bin!");
     }
 
-    public void sellItem(Player player, Item item) {
-//        Quality quality = item.getQuality();
-//        if(quality == null){
-//            quality = Quality.NORMAL;
-//        }
-//        int price = item.getPrice();
-//        int returnPrice =(int) (price * quality.getPriceMultiPlier());
-//        int count = player.getBackPack().getItemCount(item);
-//        player.getBackPack().decreaseItem(item, count);
-//        player.increaseMoney(returnPrice * count);
-    }
 
     public Result buildGreenHouse(){
         Player player = App.getCurrentGame().getCurrentPlayer();
@@ -842,6 +1100,16 @@ public class GameMenuController implements MenuController {
         String message = "You built a green house!, Money (-1000) / Wood (-500)\n" + "Money: " +player.getMoney() +
                 "\nWood: " + player.getBackPack().getItemCount(player.getBackPack().getItemByName("Wood")) + "\n";
         return new Result(true, message);
+    }
+
+    public Result showShippingBinLocation(){
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        if(player.getShippingBin() == null){
+            return new Result(false, "no shipping bin found!");
+        }
+        return new Result(true,
+                player.getShippingBin().getShippingBinLocation().getxAxis()
+                        + ", " + player.getShippingBin().getShippingBinLocation().getyAxis());
     }
 
 }

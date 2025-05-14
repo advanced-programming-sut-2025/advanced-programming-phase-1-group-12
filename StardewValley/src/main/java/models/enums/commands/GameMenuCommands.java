@@ -53,7 +53,7 @@ public enum GameMenuCommands implements Commands {
     ENERGY_SET("^energy set -v (?<value>.*)$"),
     ENERGY_UNLIMITED("^energy unlimited$"),
     INVENTORY_SHOW("^inventory\\s+show$"),
-    INVENTORY_TRASH("inventory trash -i (?<item>.*) -n (?<number>.*)$"),
+    INVENTORY_TRASH("inventory trash -i (?<item>\\S+)(?: -n (?<number>.*))?$"),
     THOR("^cheat Thor -l (?<X>.+)\\s*,\\s*(?<Y>.+)$"),
 
     //Damdari commands
@@ -95,7 +95,7 @@ public enum GameMenuCommands implements Commands {
     TALK_HISTORY("^talk history -u (?<username>.+)$"),
     GIFT("^gift -u (?<username>.+) -i (?<item>.+) -a (?<amount>.+)$"),
     GIFT_LIST("^gift list$"),
-    GIFT_RATE("^gift rate -i (?<gift-number>.+) -r (?<rate>.+)$"),
+    GIFT_RATE("^gift rate -i (?<giftNumber>.+) -r (?<rate>.+)$"),
     GIFT_HISTORY("^gift history -u (?<username>.+)$"),
     HUG("^hug -u (?<username>.+)$"),
     FLOWER("^flower -u (?<username>.+)$"),
@@ -104,9 +104,9 @@ public enum GameMenuCommands implements Commands {
 
     // Trade commands
     START_TRADE("^start trade$"),
-    TRADE_CREATE("^trade -u (?<username>\\S+) -t (?<type>request|offer) -i (?<item>\\S+) -a (?<amount>\\d+)( -p (?<price>\\d+))?( -ti (?<targetItem>\\S+) -ta (?<targetAmount>\\d+))?$"),
+    TRADE_CREATE("^trade -u (?<username>\\S+) -t (?<type>request|offer) -i (?<item>\\S+) -a (?<amount>\\S+)( -p (?<price>\\d+))?( -ti (?<targetItem>\\S+) -ta (?<targetAmount>\\d+))?$"),
     TRADE_LIST("^trade list$"),
-    TRADE_RESPONSE("^trade response --(accept|reject) -i (?<id>\\S+)$"),
+    TRADE_RESPONSE("^trade response -(accept|reject) -i (?<id>\\S+)$"),
     TRADE_HISTORY("^trade history$"),
     SELL("^sell (?<productName>.+) -n (?<count>.+)$"),
     SELL_ONE("^sell (?<productName>.+)$"),
@@ -119,8 +119,15 @@ public enum GameMenuCommands implements Commands {
     MEET_NPC("^meet NPC (?<npcName>.+)$"),
     GIFT_NPC("^gift NPC (?<npcName>.+) -i (?<item>.+)$"),
     FRIENDSHIP_NPC_LIST("^friendship NPC list$"),
+    FRIENDSHIP_LIST("^friendships$"),
     QUESTS_LIST("^quests list$"),
-    QUESTS_FINISH("^quests finish -i (?<index>\\d+)$"),
+    QUESTS_FINISH("^quests finish -i (?<index>\\S+)$"),
+
+    // cheat codes
+    CHEAT_NPC_LOCATIONS("^cheat npc locations$"),
+    CHEAT_NPC_TEST_ITEMS("^cheat npc test items$"),
+    CHEAT_PLAYER_MONEY("^cheat player money$"),
+    SHOW_SHIPPING_BIN_LOCATION("^show shipping bin location$"),
 
     //store commands
     SHOW_PRODUCTS("show all products"),

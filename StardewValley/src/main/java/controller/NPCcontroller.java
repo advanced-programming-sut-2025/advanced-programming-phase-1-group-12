@@ -19,7 +19,7 @@ public class NPCcontroller {
         int npcX = npcLocation.getxAxis();
         int npcY = npcLocation.getyAxis();
 
-        return Math.abs(playerX - npcX) <= 1 && Math.abs(playerY - npcY) <= 1;
+        return (Math.abs(playerX - npcX) <= 1 && Math.abs(playerY - npcY) <= 1);
     }
 
 
@@ -79,9 +79,9 @@ public class NPCcontroller {
 
         String response;
         if (npc.isFavoriteItem(item)) {
-            response = npcName + " loves this gift! Your friendship has increased significantly.";
+            response = npcName + " loves this gift! Your friendship has increased significantly.  FriendShip XP: " + npc.getFriendshipPoints(currentPlayer) + " (level" + npc.getFriendshipLevel(currentPlayer) + ")" ;
         } else {
-            response = npcName + " accepts your gift. Your friendship has increased.";
+            response = npcName + " accepts your gift. Your friendship has increased. FriendShip XP: "+ npc.getFriendshipPoints(currentPlayer) + " (level " + npc.getFriendshipLevel(currentPlayer) + ")" ;
         }
 
         return response;
@@ -256,8 +256,24 @@ public class NPCcontroller {
             return "You need to be near " + questNPC.getName() + " to complete this quest.";
         }
 
-        if (!App.getCurrentPlayerLazy().getBackPack().hasItem(questNPC.getDetails().getQuests().get(questIndex).getRequiredItemName())) {
-           return "You dont have " + questNPC.getDetails().getQuests().get(questIndex).getRequiredItemName();
+        // Find the corresponding quest in the NPC's details
+        String requiredItemName = null;
+        for (int i = 0; i < questNPC.getQuests().size(); i++) {
+            if (questNPC.getQuests().get(i) == targetQuest) {
+                // Found the matching quest, get the required item name from details
+                if (i < questNPC.getDetails().getQuests().size()) {
+                    requiredItemName = questNPC.getDetails().getQuests().get(i).getRequiredItemName();
+                    break;
+                }
+            }
+        }
+
+        if (requiredItemName == null) {
+            return "Error: Could not find required item for this quest.";
+        }
+
+        if (!App.getCurrentPlayerLazy().getBackPack().hasItem(requiredItemName)) {
+           return "You dont have " + requiredItemName;
         }
 
         if (targetQuest.isCompleted()) {
