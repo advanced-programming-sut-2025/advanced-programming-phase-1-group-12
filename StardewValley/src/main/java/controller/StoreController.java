@@ -251,6 +251,7 @@ public class StoreController {
             return new Result(false, "You do not have enough money to buy this product");
         }
 
+
         if (item.getName().equalsIgnoreCase(StoreProductsTypes.CARPENTER_WELL.getName())) {
             Item wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Stone");
 
@@ -261,7 +262,7 @@ public class StoreController {
 
             ArrayList<Location> wellLocation = new ArrayList<>();
 
-            for (int i = 0; i < 6; i++) {
+            for (int i = 0; i < 3; i++) {
                 Shack shack = App.getCurrentPlayerLazy().getOwnedFarm().getShack();
                 wellLocation.add(App.getCurrentGame().getMainMap().findLocation(shack.getLocation().getTopLeftCorner().getxAxis() + i, shack.getLocation().getTopLeftCorner().getyAxis()));
                 wellLocation.get(i).setTypeOfTile(TypeOfTile.LAKE);
@@ -310,7 +311,7 @@ public class StoreController {
         return new Result(true, "You bought this product");
     }
 
-    public Result cheatAddItem(String productName, int count) {
+    public Result cheatBuyItem(String productName, int count) {
 
         StoreProducts item = null;
         for (Store store1 : App.getCurrentGame().getMainMap().getStores()) {
@@ -347,7 +348,7 @@ public class StoreController {
 
             ArrayList<Location> wellLocation = new ArrayList<>();
 
-            for (int i = 0; i < 6; i++) {
+            for (int i = 0; i < 3; i++) {
                 Shack shack = App.getCurrentPlayerLazy().getOwnedFarm().getShack();
                 wellLocation.add(App.getCurrentGame().getMainMap().findLocation(shack.getLocation().getTopLeftCorner().getxAxis() + i, shack.getLocation().getTopLeftCorner().getyAxis()));
                 wellLocation.get(i).setTypeOfTile(TypeOfTile.LAKE);
@@ -365,6 +366,12 @@ public class StoreController {
             return new Result(true, "You bought this shipping bin");
         }
         ItemBuilder.addToBackPack(item, count, Quality.NORMAL); // assuming getType() returns Item
+        return new Result(true, "You bought this product");
+    } public Result cheatAddItem(String productName, int count) {
+
+        //TODO:bullshit price
+
+        ItemBuilder.addToBackPack(ItemBuilder.builder(productName, Quality.NORMAL, 10), count, Quality.NORMAL); // assuming getType() returns Item
         return new Result(true, "You bought this product");
     }
 }

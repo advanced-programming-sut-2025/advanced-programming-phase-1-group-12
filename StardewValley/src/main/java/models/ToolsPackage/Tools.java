@@ -96,7 +96,7 @@ public class Tools extends Item {
             return new Result(false, "This tool is already at its maximum level");
         }
 
-        Result result = upgradeFunction.execute(level);
+        Result result = upgradeFunction.execute(level, App.getCurrentPlayerLazy().getCurrentTool());
         if (result.isSuccessful()) {
             this.level = newLevel;
 

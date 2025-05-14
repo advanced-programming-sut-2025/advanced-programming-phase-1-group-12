@@ -1,5 +1,6 @@
 package models.enums.ToolEnums;
 
+import models.Fundementals.App;
 import models.Fundementals.Result;
 import models.ToolsPackage.ToolFunction;
 import models.ToolsPackage.Tools;
@@ -17,6 +18,7 @@ public enum Tool {
                 TypeOfTile tileType = location.getTypeOfTile();
                 if (tileType == TypeOfTile.GROUND) {
                     location.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
+                    App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - tool.getType().getEnergyDamage());
                     return new Result(true, "You tilled the soil!");
                 }
                 return new Result(false, "You can't use your hoe here!");
@@ -25,7 +27,7 @@ public enum Tool {
 
         @Override
         public UpgradeFunction getUpgradeFunction() {
-            return (currentLevel) -> new Result(true, "Hoe upgraded to level " + (currentLevel + 1));
+            return (currentLevel, tools) -> new Result(true, "Hoe upgraded to level " + (currentLevel + 1));
         }
     },
 
@@ -36,6 +38,7 @@ public enum Tool {
                 TypeOfTile tileType = location.getTypeOfTile();
                 if (tileType == TypeOfTile.STONE) {
                     location.setTypeOfTile(TypeOfTile.GROUND);
+                    App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - tool.getType().getEnergyDamage());
                     return new Result(true, "You broke the stone");
                 }
                 if (tileType == TypeOfTile.QUARRY) {
@@ -56,10 +59,9 @@ public enum Tool {
 
         @Override
         public UpgradeFunction getUpgradeFunction() {
-            return (currentLevel) -> new Result(true, "PickAxe upgraded to level " + (currentLevel + 1));
+            return (currentLevel, tools) -> new Result(true, "PickAxe upgraded to level " + (currentLevel + 1));
         }
     },
-
     AXE("Axe", 5) {
         @Override
         public ToolFunction getUseFunction() {
@@ -67,6 +69,9 @@ public enum Tool {
                 TypeOfTile tileType = location.getTypeOfTile();
                 if (tileType == TypeOfTile.TREE) {
                     location.setTypeOfTile(TypeOfTile.GROUND);
+                    App.getCurrentPlayerLazy().setEnergy(
+                            App.getCurrentPlayerLazy().getEnergy() - tools.getType().getEnergyDamage()
+                    );
                     return new Result(true, "You chopped down the tree and collected wood!");
                 }
                 return new Result(false, "You can't use your axe here!");
@@ -75,7 +80,32 @@ public enum Tool {
 
         @Override
         public UpgradeFunction getUpgradeFunction() {
-            return (currentLevel) -> new Result(true, "Axe upgraded to level " + (currentLevel + 1));
+            return (currentLevel, tools) -> {
+                Tools tool = App.getCurrentPlayerLazy().getCurrentTool();
+                switch (currentLevel) {
+                    case 0:
+                        if(!tool.isTrashCan()){
+                        tool.setType(ToolTypes.COPPER);
+                        tool.setLevel(tool.getLevel() + 1);}
+                        break;
+                    case 1:
+                        tool.setType(ToolTypes.IRON);
+                        tool.setLevel(tool.getLevel() + 1);
+                        break;
+                    case 2:
+                        tool.setType(ToolTypes.GOLD);
+                        tool.setLevel(tool.getLevel() + 1);
+                        break;
+                    case 3:
+                        tool.setType(ToolTypes.IRIDIUM);
+                        tool.setLevel(tool.getLevel() + 1);
+                        break;
+                    default:
+                        tool.setType(ToolTypes.IRIDIUM);
+                        tool.setLevel(tool.getLevel() + 1);
+                }
+                return new Result(true, "Axe upgraded to level " + (currentLevel + 1));
+            };
         }
     },
 
@@ -88,6 +118,7 @@ public enum Tool {
                 if (tileType == TypeOfTile.LAKE) {
                     if (tools != null && tools.isWateringCan()) {
                         Result fillResult = tools.fillWateringCan();
+                        App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - tools.getType().getEnergyDamage());
                         return new Result(true, "You filled your watering can to capacity: " + tools.getCapacity());
                     }
                     return new Result(true, "You filled your watering can");
@@ -102,7 +133,7 @@ public enum Tool {
                     if (!useResult.isSuccessful()) {
                         return useResult;
                     }
-
+                    App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - tools.getType().getEnergyDamage());
                     return new Result(true, "You watered the soil. Water remaining: " + tools.getCurrentWater());
                 }
 
@@ -112,7 +143,7 @@ public enum Tool {
 
         @Override
         public UpgradeFunction getUpgradeFunction() {
-            return (currentLevel) -> new Result(true, "WateringCan upgraded to level " + (currentLevel + 1));
+            return (currentLevel, tools) -> new Result(true, "WateringCan upgraded to level " + (currentLevel + 1));
         }
     },
 
@@ -130,7 +161,7 @@ public enum Tool {
 
         @Override
         public UpgradeFunction getUpgradeFunction() {
-            return (currentLevel) -> new Result(true, "FishingRod upgraded to level " + (currentLevel + 1));
+            return (currentLevel, tools) -> new Result(true, "FishingRod upgraded to level " + (currentLevel + 1));
         }
     },
 
@@ -142,7 +173,7 @@ public enum Tool {
 
         @Override
         public UpgradeFunction getUpgradeFunction() {
-            return (currentLevel) -> new Result(true, "Scythe upgraded to level " + (currentLevel + 1));
+            return (currentLevel, tools) -> new Result(true, "Scythe upgraded to level " + (currentLevel + 1));
         }
     },
 
@@ -165,7 +196,7 @@ public enum Tool {
 
         @Override
         public UpgradeFunction getUpgradeFunction() {
-            return (currentLevel) -> new Result(true, "MilkPail upgraded to level " + (currentLevel + 1));
+            return (currentLevel, tools) -> new Result(true, "MilkPail upgraded to level " + (currentLevel + 1));
         }
     },
 
@@ -188,7 +219,7 @@ public enum Tool {
 
         @Override
         public UpgradeFunction getUpgradeFunction() {
-            return (currentLevel) -> new Result(true, "Shears upgraded to level " + (currentLevel + 1));
+            return (currentLevel, tools) -> new Result(true, "Shears upgraded to level " + (currentLevel + 1));
         }
     },
 
@@ -202,7 +233,7 @@ public enum Tool {
 
         @Override
         public UpgradeFunction getUpgradeFunction() {
-            return (currentLevel) -> new Result(true, "Trash Can upgraded to level " + (currentLevel + 1));
+            return (currentLevel, tools) -> new Result(true, "Trash Can upgraded to level " + (currentLevel + 1));
         }
     };
 

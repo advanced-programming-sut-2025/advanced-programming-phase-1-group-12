@@ -341,6 +341,17 @@ public class Date {
         attackingCrow();
         resetNPCStatus();
         artisansUpdate(day * 13);
+        buffUpdates();
+    }
+
+    public void buffUpdates(){
+        if(App.getCurrentPlayerLazy().isMaxEnergyBuffEaten()){
+            App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - 10000);
+            App.getCurrentPlayerLazy().setMaxEnergyBuffEaten(false);
+        }         if(!App.getCurrentPlayerLazy().isMaxEnergyBuffEaten()){
+            App.getCurrentPlayerLazy().getAbilityByName("Farming").setLevel(App.getCurrentGame().getCurrentPlayer().getAbilityByName("Farming").getLevel() - 1);
+            App.getCurrentPlayerLazy().setSkillBuffEaten(false);
+        }
     }
 
     public String dayName(int dayOfWeek) {
