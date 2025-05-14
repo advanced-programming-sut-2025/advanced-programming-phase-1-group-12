@@ -215,10 +215,10 @@ public class StoreController {
         item.setCurrentDailyLimit(item.getCurrentDailyLimit() - Count);
         int price = 0;
         switch(App.getCurrentGame().getDate().getSeason()){
-            case Season.AUTUMN -> price = item.getType().getFallPrice();
-            case Season.WINTER -> price = item.getType().getWinterPrice();
-            case Season.SUMMER -> price = item.getType().getSummerPrice();
-            case Season.SPRING -> price = item.getType().getSpringPrice();
+            case AUTUMN -> price = item.getType().getFallPrice();
+            case WINTER -> price = item.getType().getWinterPrice();
+            case SUMMER -> price = item.getType().getSummerPrice();
+            case SPRING -> price = item.getType().getSpringPrice();
         }//TODO:handle the ones that are paid differently
         if(App.getCurrentPlayerLazy().getMoney() < price*Count){
             return new Result(false, "You do not have enough money to buy this product");

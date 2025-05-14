@@ -554,9 +554,43 @@ public class FarmingController {
         Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
         Tree tree = (Tree) location.getObjectInTile();
         FruitType fruitType = tree.getType().fruitType;
-        if(tree.isCanPickUp()){
 
+        if (tree.getAge() < tree.getTotalTimeNeeded()) {
+            return new Result(false, "Tree can't give you a fruit because it is young!");
         }
 
+//        if (tree.getType().oneTime) {
+//            // درخت‌هایی که فقط یک‌بار میوه می‌دن
+//            App.getCurrentPlayerLazy().getBackPack().addItem(ItemBuilder.builder(fruitType.getName(), Quality.NORMAL), 1);
+//            App.getCurrentGame().getMainMap().findLocation(x, y).setObjectInTile(null);
+//            App.getCurrentGame().getMainMap().findLocation(x, y).setTypeOfTile(TypeOfTile.GROUND);
+//            App.getCurrentPlayerLazy().getOwnedFarm().getTrees().remove(tree);
+//            for (Ability ability : App.getCurrentPlayerLazy().getAbilitis()) {
+//                if (ability.getName().equalsIgnoreCase("Farming")) {
+//                    ability.increaseAmount(5);
+//                }
+//            }
+//            return new Result(true, "You picked up a fruit and the tree is now removed (one-time harvest).");
+//        } else {
+//            if (tree.isCanPickUp()) {
+//                App.getCurrentPlayerLazy().getBackPack().addItem(ItemBuilder.builder(fruitType.getName(), Quality.NORMAL), 1);
+//                tree.setCanPickUp(false);
+//                tree.setRegrowthTime(0);
+//                for (Ability ability : App.getCurrentPlayerLazy().getAbilitis()) {
+//                    if (ability.getName().equalsIgnoreCase("Farming")) {
+//                        ability.increaseAmount(5);
+//                    }
+//                }
+//                return new Result(true, "You picked up a fruit!");
+//            } else {
+//                tree.setRegrowthTime(tree.getRegrowthTime() + 1);
+//                if (tree.getRegrowthTime() >= tree.getType().regrowthTime) {
+//                    tree.setCanPickUp(true);
+//                    tree.setRegrowthTime(0);
+//                }
+//                return new Result(false, "You must wait until the tree grows fruits again.");
+//            }
+//        }
+        return new Result(true, "uuuu");
     }
 }

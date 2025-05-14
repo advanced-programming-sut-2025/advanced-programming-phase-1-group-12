@@ -15,11 +15,13 @@ public class Tree {
     private int dayPast;
     private int currentStage;
     private int age;
+    private boolean canPickUp;
     private boolean isForaging;
     private FruitType fruitType;
 
     public Tree(Location location, TreeType type, boolean isForaging, FruitType fruitType) {
         this.type = type;
+        this.canPickUp = false;
         this.location = location;
         this.hasBeenFertilized = false;
         this.age = 0;
@@ -34,6 +36,22 @@ public class Tree {
 
     public TreeType getType() {
         return type;
+    }
+
+    public FruitType getFruitType() {
+        return fruitType;
+    }
+
+    public void setFruitType(FruitType fruitType) {
+        this.fruitType = fruitType;
+    }
+
+    public boolean isCanPickUp() {
+        return canPickUp;
+    }
+
+    public void setCanPickUp(boolean canPickUp) {
+        this.canPickUp = canPickUp;
     }
 
     public void setHasBeenWatering(boolean hasBeenWatering) {

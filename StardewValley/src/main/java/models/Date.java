@@ -179,9 +179,11 @@ public class Date {
     public void updateAllPlants() {
         for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
             for (Plant plant : farm.getPlantOfFarm()) {
-                if(plant.isHasBeenWatering()){
+                if (plant.isHasBeenWatering()) {
+                    plant.setHasBeenWatering(false);
                     continue;
                 }
+
                 if (!plant.isHasBeenFertilized()) {
                     plant.setDayPast(plant.getDayPast() - 1);
                     if (plant.getDayPast() <= 0) {
@@ -191,38 +193,60 @@ public class Date {
                         currentLocation.setObjectInTile(null);
                     }
                 }
+
                 plant.setHasBeenFertilized(false);
                 plant.setAge(plant.getAge() + 1);
+
                 int currentStage = plant.getCurrentStage();
                 int dayNeed = 0;
                 for (int i = 0; i < currentStage; i++) {
                     dayNeed += plant.getAllCrops().stages[i];
                 }
-                if (plant.getAge() >= dayNeed) {
-                    plant.setCurrentStage(plant.getCurrentStage() + 1);
+
+                if (plant.getAllCrops().oneTime) {
+                    if (currentStage < plant.getAllCrops().stages.length - 1 && plant.getAge() >= dayNeed) {
+                        plant.setCurrentStage(plant.getCurrentStage() + 1);
+                    } else if (currentStage == plant.getAllCrops().stages.length - 1) {
+                        int harvestTimer = plant.getHarvestTimer();
+                        plant.setHarvestTimer(harvestTimer + 1);
+//                        if (harvestTimer + 1 >= plant.getAllCrops().daysBetweenHarvest) {
+//                            plant.setReadyToHarvest(true);
+//                            plant.setHarvestTimer(0);
+//                        }
+                    }
+                } else {
+                    if (plant.getAge() >= dayNeed && currentStage < plant.getAllCrops().stages.length) {
+                        plant.setCurrentStage(plant.getCurrentStage() + 1);
+                    }
                 }
             }
 
             for (Tree tree : farm.getTrees()) {
-                if (!tree.isHasBeenFertilized()) {
-                    tree.setDayPast(tree.getDayPast() - 1);
-                    if (tree.getDayPast() <= 0) {
-                        System.out.println("you lost plant at location: " + tree.getLocation().getxAxis() + ", " + tree.getLocation().getyAxis());
-                        Location currentLocation = tree.getLocation();
-                        currentLocation.setTypeOfTile(TypeOfTile.GROUND);
-                        currentLocation.setObjectInTile(null);
-                    }
-                }
-                tree.setHasBeenFertilized(false);
                 tree.setAge(tree.getAge() + 1);
+
                 int currentStage = tree.getCurrentStage();
                 int dayNeed = 0;
                 for (int i = 0; i < currentStage; i++) {
                     dayNeed += tree.getType().stages[i];
                 }
-                if (tree.getAge() >= dayNeed) {
-                    tree.setCurrentStage(tree.getCurrentStage() + 1);
-                }
+
+//                if (tree.getType().productInterval) {
+//                    if (currentStage < tree.getType().stages.length - 1 && tree.getAge() >= dayNeed) {
+//                        tree.setCurrentStage(currentStage + 1);
+//                    } else if (currentStage == tree.getType().stages.length - 1) {
+//                        int harvestTimer = tree.getHarvestTimer();
+//                        tree.setHarvestTimer(harvestTimer + 1);
+//                        if (harvestTimer + 1 >= tree.getType().getDaysBetweenHarvest()) {
+//                            tree.setReadyToHarvest(true);
+//                            tree.setHarvestTimer(0);
+//                        }
+//                    }
+//                }
+//                else {
+//                    if (tree.getAge() >= dayNeed && currentStage < tree.getType().stages.length) {
+//                        tree.setCurrentStage(currentStage + 1);
+//                    }
+//                }
             }
         }
     }

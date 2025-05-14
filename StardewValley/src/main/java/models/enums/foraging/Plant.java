@@ -17,6 +17,8 @@ public class Plant extends Item {
     private boolean isOneTime;
     private int regrowthTime;
     private boolean isGiantPlant;
+    private int harvestTimer;
+    private boolean readyToHarvest;
 //    private Quality quality;
 
     public Plant(Location location, Seed seed, boolean isForaging, AllCrops allCrops){
@@ -33,11 +35,29 @@ public class Plant extends Item {
         this.allCrops = allCrops;
         this.hasBeenWatering = false;
         this.regrowthTime = 0;
+        this.harvestTimer = 0;
 //        this.quallity = ....;
     }
 
     public boolean isOneTime() {
         return isOneTime;
+    }
+
+    // Getter و Setterها:
+    public int getHarvestTimer() {
+        return harvestTimer;
+    }
+
+    public void setHarvestTimer(int harvestTimer) {
+        this.harvestTimer = harvestTimer;
+    }
+
+    public boolean isReadyToHarvest() {
+        return readyToHarvest;
+    }
+
+    public void setReadyToHarvest(boolean readyToHarvest) {
+        this.readyToHarvest = readyToHarvest;
     }
 
     public void setOneTime(boolean oneTime) {
