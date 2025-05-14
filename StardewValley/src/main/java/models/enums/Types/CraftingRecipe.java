@@ -6,127 +6,127 @@ public enum
 CraftingRecipe {
     CHERRY_BOMB(
             "Cherry Bomb",
-            Map.of("copper ore", 4, "coal", 1),
+            Map.of("Copper Ore", 4, "Coal", 1),
             "Mining Level 1",
             50
     ),
     BOMB(
             "Bomb",
-            Map.of("iron ore", 4, "coal", 1),
+            Map.of("Iron Ore", 4, "Coal", 1),
             "Mining Level 2",
             50
     ),
     MEGA_BOMB(
             "Mega Bomb",
-            Map.of("gold ore", 4, "coal", 1),
+            Map.of("Gold Ore", 4, "Coal", 1),
             "Mining Level 3",
             50
     ),
     SPRINKLER(
             "Sprinkler",
-            Map.of("copper bar", 1, "iron bar", 1),
+            Map.of("Copper bar", 1, "Iron bar", 1),
             "Farming Level 1",
             0
     ),
     QUALITY_SPRINKLER(
             "Quality Sprinkler",
-            Map.of("iron bar", 1, "gold bar", 1),
+            Map.of("Iron bar", 1, "Gold bar", 1),
             "Farming Level 2",
             0
     ),
     IRIDIUM_SPRINKLER(
             "Iridium Sprinkler",
-            Map.of("gold bar", 1, "iridium bar", 1),
+            Map.of("Gold bar", 1, "Iridium bar", 1),
             "Farming Level 3",
             0
     ),
     CHARCOAL_KILN(
             "Charcoal Kiln",
-            Map.of("wood", 20, "copper bar", 2),
+            Map.of("Wood", 20, "Copper bar", 2),
             "Foraging Level 1",
             0
     ),
     FURNACE(
             "Furnace",
-            Map.of("copper ore", 20, "stone", 25),
+            Map.of("Copper Ore", 20, "Stone", 25),
             "-",
             0
     ),
     SCARECROW(
             "Scarecrow",
-            Map.of("wood", 50, "coal", 1, "fiber", 20),
+            Map.of("Wood", 50, "Coal", 1),
             "-",
             0
     ),
     DELUXE_SCARECROW(
             "Deluxe Scarecrow",
-            Map.of("wood", 50, "coal", 1, "fiber", 20, "iridium ore", 1),
+            Map.of("Wood", 50, "Coal", 1, "Iridium Ore", 1),
             "Farming Level 2",
             0
     ),
     BEE_HOUSE(
             "Bee House",
-            Map.of("wood", 40, "coal", 8, "iron bar", 1),
+            Map.of("Wood", 40, "Coal", 8, "Iron bar", 1),
             "Farming Level 1",
             0
     ),
     CHEESE_PRESS(
             "Cheese Press",
-            Map.of("wood", 45, "stone", 45, "copper bar", 1),
+            Map.of("Wood", 45, "Stone", 45, "Copper bar", 1),
             "Farming Level 2",
             0
     ),
     KEG(
             "Keg",
-            Map.of("wood", 30, "copper bar", 1, "iron bar", 1),
+            Map.of("Wood", 30, "Copper bar", 1, "Iron bar", 1),
             "Farming Level 3",
             0
     ),
     LOOM(
             "Loom",
-            Map.of("wood", 60, "fiber", 30),
+            Map.of("Wood", 60),
             "Farming Level 3",
             0
     ),
     MAYONNAISE_MACHINE(
             "Mayonnaise Machine",
-            Map.of("wood", 15, "stone", 15, "copper bar", 1),
+            Map.of("Wood", 15, "Stone", 15, "Copper bar", 1),
             "-",
             0
     ),
     OIL_MAKER(
             "Oil Maker",
-            Map.of("wood", 100, "gold bar", 1, "iron bar", 1),
+            Map.of("Wood", 100, "Gold bar", 1, "Iron bar", 1),
             "Farming Level 3",
             0
     ),
     PRESERVES_JAR(
             "Preserve Jar",
-            Map.of("wood", 50, "stone", 40, "coal", 8),
+            Map.of("Wood", 50, "Stone", 40, "Coal", 8),
             "Farming Level 2",
             0
     ),
     DEHYDRATOR(
             "Dehydrator",
-            Map.of("wood", 30, "stone", 20, "fiber", 30),
+            Map.of("Wood", 30, "Stone", 20),
             "Pierre's General Store",
             0
     ),
     GRASS_STARTER(
             "Grass Starter",
-            Map.of("wood", 1, "fiber", 1),
+            Map.of("Wood", 1),
             "Pierre's General Store",
             0
     ),
     FISH_SMOKER(
             "Fish Smoker",
-            Map.of("wood", 50, "iron bar", 3, "coal", 10),
+            Map.of("Wood", 50, "Iron bar", 3, "Coal", 10),
             "Fish Shop",
             0
     ),
     MYSTIC_TREE_SEED(
             "Mystic Tree Seed",
-            Map.of("acorn", 5, "maple seed", 5, "pine cone", 5, "mahogany seed", 5),
+            Map.of("Acorn", 5, "Maple seed", 5, "Pine cone", 5, "Mahogany seed", 5),
             "Foraging Level 4",
             100
     );

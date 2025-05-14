@@ -313,5 +313,9 @@ public class Player {
     public void setCurrentTool(Tools currentTool) {
         this.currentTool = currentTool;
     }
+
+    public void setShippingBin(ShippingBin shippingBin) {
+        this.shippingBin = shippingBin;
+    }
 }
 

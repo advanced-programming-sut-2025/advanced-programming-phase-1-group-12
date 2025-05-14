@@ -229,6 +229,14 @@ public class StoreController {
             return new Result(false, "You do not have enough money to buy this product");
         }
 
+        if(item.getName().equalsIgnoreCase(StoreProductsTypes.CARPENTER_SHIPPING_BIN.getName())){
+            ShippingBin shippingBin = new ShippingBin(App.getCurrentPlayerLazy().getOwnedFarm().getShack().getLocation().getTopLeftCorner(), App.getCurrentPlayerLazy());
+            shippingBin.getShippingBinLocation().setObjectInTile(shippingBin);
+
+            App.getCurrentPlayerLazy().setShippingBin(shippingBin);
+            return new Result(true, "You bought this shipping bin");
+        }
+
         // Handle Crafting Recipe
         for (CraftingRecipe recipe : CraftingRecipe.values()) {
             if (productName.equalsIgnoreCase(recipe.getName())) {
