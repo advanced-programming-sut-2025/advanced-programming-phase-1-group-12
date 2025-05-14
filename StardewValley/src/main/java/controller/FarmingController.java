@@ -554,9 +554,10 @@ public class FarmingController {
         Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
         Tree tree = (Tree) location.getObjectInTile();
         FruitType fruitType = tree.getType().fruitType;
-        if(tree.isCanPickUp()){
-
-        }
+//        if(tree.isCanPickUp()){
+//
+//        }
+        return new Result(false, "delete this later");
 
     }
 }

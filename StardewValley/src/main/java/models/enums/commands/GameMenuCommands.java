@@ -53,7 +53,7 @@ public enum GameMenuCommands implements Commands {
     ENERGY_SET("^energy set -v (?<value>.*)$"),
     ENERGY_UNLIMITED("^energy unlimited$"),
     INVENTORY_SHOW("^inventory\\s+show$"),
-    INVENTORY_TRASH("inventory trash -i (?<item>.*) -n (?<number>.*)$"),
+    INVENTORY_TRASH("inventory trash -i (?<item>\\S+)(?: -n (?<number>.*))?$"),
     THOR("^cheat Thor -l (?<X>.+)\\s*,\\s*(?<Y>.+)$"),
 
     //Damdari commands
@@ -121,9 +121,12 @@ public enum GameMenuCommands implements Commands {
     FRIENDSHIP_NPC_LIST("^friendship NPC list$"),
     FRIENDSHIP_LIST("^friendships$"),
     QUESTS_LIST("^quests list$"),
-    QUESTS_FINISH("^quests finish -i (?<index>\\d+)$"),
+    QUESTS_FINISH("^quests finish -i (?<index>\\S+)$"),
+
+    // cheat codes
     CHEAT_NPC_LOCATIONS("^cheat npc locations$"),
     CHEAT_NPC_TEST_ITEMS("^cheat npc test items$"),
+    CHEAT_PLAYER_MONEY("^cheat player money$"),
 
     //store commands
     SHOW_PRODUCTS("show all products"),

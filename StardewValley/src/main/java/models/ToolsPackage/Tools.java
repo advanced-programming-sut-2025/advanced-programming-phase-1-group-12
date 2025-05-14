@@ -107,7 +107,6 @@ public class Tools extends Item {
         return result;
     }
 
-    // Method to get the trash can recovery rate based on level
     public double getTrashCanRecoveryRate() {
         if (!isTrashCan()) {
             return 0.0;
@@ -179,22 +178,18 @@ public class Tools extends Item {
         return new Tools(Tool.TRASH_CAN);
     }
 
-    // Method to check if the tool is a watering can
     public boolean isWateringCan() {
         return toolType == Tool.WATERING_CAN;
     }
 
-    // Method to check if the tool is a trash can
     public boolean isTrashCan() {
         return toolType == Tool.TRASH_CAN;
     }
 
-    // Get the tool type enum
     public Tool getToolType() {
         return toolType;
     }
 
-    // Methods for watering can
     public int getCapacity() {
         return capacity;
     }

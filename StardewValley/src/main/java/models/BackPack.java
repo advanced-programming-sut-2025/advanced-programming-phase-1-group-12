@@ -1,5 +1,7 @@
 package models;
 
+import models.Fundementals.App;
+import models.Fundementals.Player;
 import models.Fundementals.Result;
 import models.ToolsPackage.Tools;
 import models.enums.ToolEnums.BackPackTypes;
@@ -58,6 +60,7 @@ public class BackPack {
 
 
     public Result trash(String name, int amount, Tools trashCan) {
+        Player player = App.getCurrentPlayerLazy();
         Item itemToTrash = null;
         for (Item item : items.keySet()) {
             if (item.getName().equals(name)) {
@@ -75,15 +78,15 @@ public class BackPack {
             recoveryRate = trashCan.getTrashCanRecoveryRate();
         }
 
-        // TODO: Calculate and return coins based on recovery rate
 
         decreaseToolQuantity(name, amount);
 
         if (recoveryRate > 0) {
             return new Result(true, "Trashed " + amount + " " + name + " and recovered " +
-                              (recoveryRate * 100) + "% of its value.");
+                              (recoveryRate * 100) + "% of its value." +"\nMoney: " + player.getMoney());
         } else {
-            return new Result(true, "Trashed " + amount + " " + name + ".");
+            player.increaseMoney(itemToTrash.getPrice() * amount);
+            return new Result(true, "Trashed " + amount + " " + name + ". \nMoney: " + player.getMoney());
         }
     }
 
@@ -92,6 +95,7 @@ public class BackPack {
     }
 
     public Result trashAll(String toolName, Tools trashCan){
+        Player player = App.getCurrentPlayerLazy();
         Item toolToUpdate = null;
         for (Item item : items.keySet()) {
             if (item.getName().equals(toolName)) {
@@ -108,15 +112,14 @@ public class BackPack {
         if (trashCan != null && trashCan.isTrashCan()) {
             recoveryRate = trashCan.getTrashCanRecoveryRate();
         }
-
-        // TODO: Calculate and return coins based on recovery rate
-
+        int count = getItemCount(toolToUpdate);
         items.remove(toolToUpdate);
 
         if (recoveryRate > 0) {
             return new Result(true, "Trashed all " + toolName + " and recovered " +
                               (recoveryRate * 100) + "% of its value.");
         } else {
+            player.increaseMoney((int)recoveryRate * count );
             return new Result(true, "Trashed all " + toolName + ".");
         }
     }

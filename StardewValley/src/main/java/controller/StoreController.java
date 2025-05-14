@@ -229,6 +229,7 @@ public class StoreController {
             return new Result(false, "You do not have enough money to buy this product");
         }
 
+
         // Handle Crafting Recipe
         for (CraftingRecipe recipe : CraftingRecipe.values()) {
             if (productName.equalsIgnoreCase(recipe.getName())) {

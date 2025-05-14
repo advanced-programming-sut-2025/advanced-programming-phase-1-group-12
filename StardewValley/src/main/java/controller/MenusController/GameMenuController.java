@@ -457,7 +457,13 @@ public class GameMenuController implements MenuController {
 
     public Result showEnergy(){
         Player player = App.getCurrentGame().getCurrentPlayer();
-        return new Result(true, String.format("%d", player.getEnergy()));
+        if(player.isEnergyUnlimited()){
+            return new Result(true, "Energy is unlimited!");
+        }
+        else{
+            return new Result(true, String.format("%d", player.getEnergy()));
+
+        }
     }
 
     public Result setEnergy(String energy){
@@ -477,6 +483,7 @@ public class GameMenuController implements MenuController {
         StringBuilder result = new StringBuilder("Inventory items: \n");
         for(Item items : backPack.getItems().keySet()){
             result.append(items.getName());
+            result.append(" -> ");
             result.append(backPack.getItems().get(items));
             result.append("\n");
         }
@@ -484,9 +491,8 @@ public class GameMenuController implements MenuController {
     }
 
     public Result trashItem(String name, String amount) {
-        BackPack backPack = App.getCurrentGame().getCurrentPlayer().getBackPack();
-
-        // Find trash can in player's inventory
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        BackPack backPack = player.getBackPack();
         models.ToolsPackage.Tools trashCan = null;
         for (Item item : backPack.getItems().keySet()) {
             if (item instanceof models.ToolsPackage.Tools) {
@@ -504,10 +510,15 @@ public class GameMenuController implements MenuController {
                 result = backPack.trashAll(name, trashCan);
             } else {
                 backPack.trashAll(name);
-                result = new Result(true, "Trashed all " + name + " successfully!");
+                result = new Result(true, "Trashed all " + name + " successfully!" + "\nMoney: " + player.getMoney());
             }
         } else {
-            int intAmount = Integer.parseInt(amount);
+            int intAmount;
+            try {
+                intAmount=Integer.parseInt(amount);
+            } catch (NumberFormatException e) {
+                return new Result(false, "Amount must be a number!");
+            }
             if (trashCan != null) {
                 result = backPack.trash(name, intAmount, trashCan);
             } else {
