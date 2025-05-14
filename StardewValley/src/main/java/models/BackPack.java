@@ -82,8 +82,10 @@ public class BackPack {
         decreaseToolQuantity(name, amount);
 
         if (recoveryRate > 0) {
+            int putBackAmount = (int) (itemToTrash.getPrice() * amount * recoveryRate);
+            player.increaseMoney(putBackAmount);
             return new Result(true, "Trashed " + amount + " " + name + " and recovered " +
-                              (recoveryRate * 100) + "% of its value." +"\nMoney: " + player.getMoney());
+                              (recoveryRate * 100) + "% of its value." +"\nMoney: " + player.getMoney() + "\nTotal recovery rate: " + recoveryRate + "\n put back amount: " + putBackAmount);
         } else {
             player.increaseMoney(itemToTrash.getPrice() * amount);
             return new Result(true, "Trashed " + amount + " " + name + ". \nMoney: " + player.getMoney());
@@ -116,10 +118,12 @@ public class BackPack {
         items.remove(toolToUpdate);
 
         if (recoveryRate > 0) {
+            int putBackAmount = (int) (toolToUpdate.getPrice() * count * recoveryRate);
+            player.increaseMoney(putBackAmount);
             return new Result(true, "Trashed all " + toolName + " and recovered " +
                               (recoveryRate * 100) + "% of its value.");
         } else {
-            player.increaseMoney((int)recoveryRate * count );
+            player.increaseMoney(toolToUpdate.getPrice() * count );
             return new Result(true, "Trashed all " + toolName + ".");
         }
     }

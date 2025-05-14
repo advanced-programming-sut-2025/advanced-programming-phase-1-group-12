@@ -104,6 +104,7 @@ public class Tools extends Item {
                 initializeWateringCanCapacity();
             }
         }
+        App.getCurrentPlayerLazy().decreaseMoney(30);
         return result;
     }
 
