@@ -203,10 +203,9 @@ public class RelationShip {
     }
 
     public void hug(){
-        if(arePlayersAdjacent() && !hasHugged){
-            this.hasHugged = true;
-            increaseXP(60);
-        }
+        this.hasHugged = true;
+        increaseXP(60);
+
     }
 
     public boolean arePlayersAdjacent(){
@@ -215,25 +214,22 @@ public class RelationShip {
     }
 
     public void flower(){
-        if(arePlayersAdjacent() && !hasBouquet){
-            Item flower = player1.getBackPack().getItemByName("Flower");
-            if(flower != null){
-                hasBouquet = true;
-                player2.getBackPack().addItem(flower, 1);
-                player1.getBackPack().decreaseItem(flower, 1);
-            }
+        Item flower = player1.getBackPack().getItemByName("Flower");
+        if(flower != null){
+            hasBouquet = true;
+            player2.getBackPack().addItem(flower, 1);
+            player1.getBackPack().decreaseItem(flower, 1);
         }
     }
 
     public Boolean askMarriage(String ring){
-        if(arePlayersAdjacent() && !player1.isMarried() && !player1.getUser().isFemale() && friendshipLevel == 3){
-            if(player1.getBackPack().getItemByName(ring) != null){
-                this.askedRing = ring;
-                if(player2.getUser().isFemale()){
-                    return true;
-                }
+        if(player1.getBackPack().getItemByName(ring) != null){
+            this.askedRing = ring;
+            if(player2.getUser().isFemale()){
+                return true;
             }
         }
+
         return false;
     }
 
@@ -268,5 +264,45 @@ public class RelationShip {
         player1.setEnergy(player1.getEnergy() /2);
         player1.setRejectDate(App.getCurrentGame().getDate());
     }
+    public int calculateGiftXp(int rate){
+        int calculatedXp = 0;
+        calculatedXp = (rate - 3) *30 +15;
+        return calculatedXp;
+    }
 
+    public List<String> getTalks() {
+        return talks;
+    }
+
+    public boolean isHasBouquet() {
+        return hasBouquet;
+    }
+
+    public boolean isAreMarried() {
+        return areMarried;
+    }
+
+    public boolean isHasTalked() {
+        return hasTalked;
+    }
+
+    public boolean isHasDealed() {
+        return hasDealed;
+    }
+
+    public boolean isHasGifted() {
+        return hasGifted;
+    }
+
+    public boolean isHasHugged() {
+        return hasHugged;
+    }
+
+    public List<Gift> getReceivedGifts() {
+        return receivedGifts;
+    }
+
+    public List<Gift> getSentGifts() {
+        return sentGifts;
+    }
 }

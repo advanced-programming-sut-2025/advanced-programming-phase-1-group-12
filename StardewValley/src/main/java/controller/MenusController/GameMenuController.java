@@ -76,7 +76,7 @@ public class GameMenuController implements MenuController {
         }
 
         if (type.equals("request") && item == null) {
-            item = new Item(itemName, item.getQuality(), item.getPrice());
+            item = new Item(itemName, Quality.NORMAL, 100);
         }
 
         if (price != null && price > 0 && targetItemName != null && targetAmount != null && targetAmount > 0) {
@@ -675,12 +675,26 @@ public class GameMenuController implements MenuController {
             return new Result(false, "Player with username " + username + " not found!");
         }
         RelationShip relationShip = player1.findRelationShip(player2);
-        if (relationShip == null) {
+        RelationShip relationShip2 = player2.findRelationShip(player1);
+        if (relationShip == null && relationShip2 == null) {
             return new Result(false, "No relationship found with " + username + ". You need to establish a relationship first.");
         }
-        relationShip.hug();
-        return new Result(true, "hugged successfully!" + "\nFriendShip XP: " +
-                relationShip.getXP() + " Friendship level: " + relationShip.getFriendshipLevel());
+        if(relationShip!= null){
+            if(!relationShip.arePlayersAdjacent()){
+                return new Result(false, "Players are not adjacent!");
+            }
+            relationShip.hug();
+            return new Result(true, "hugged successfully!" + "\nFriendShip XP: " +
+                    relationShip.getXP() + " Friendship level: " + relationShip.getFriendshipLevel());
+        }
+        else{
+            if(!relationShip2.arePlayersAdjacent()){
+                return new Result(false, "Players are not adjacent!");
+            }
+            relationShip2.hug();
+            return new Result(true, "hugged successfully!" + "\nFriendShip XP: " +
+                    relationShip2.getXP() + " Friendship level: " + relationShip2.getFriendshipLevel());
+        }
     }
 
     public Result flower(String username){
@@ -699,8 +713,11 @@ public class GameMenuController implements MenuController {
             return  new Result(true, "flowered successfully!" + "\nFriendShip XP: " +
                     relationShip.getXP() + " Friendship level: " + relationShip.getFriendshipLevel());
         }
-        return new Result(true, "flowered successfully!" + "\nFriendShip XP: " +
-                relationShip2.getXP() + " Friendship level: " + relationShip2.getFriendshipLevel());
+        else{
+            relationShip2.flower();
+            return new Result(true, "flowered successfully!" + "\nFriendShip XP: " +
+                    relationShip2.getXP() + " Friendship level: " + relationShip2.getFriendshipLevel());
+        }
     }
 
     public Result askMarriage(String username, String ring){
@@ -715,12 +732,24 @@ public class GameMenuController implements MenuController {
             return new Result(false, "No relationship found with " + username + ". You need to establish a relationship first.");
         }
         if(relationShip!= null){
+            if(!(relationShip.getFriendshipLevel() == 3)){
+                return new Result(false, "You need to be at level 3 to ask for a marriage!");
+            }
+            if(player1.getUser().isFemale()){
+                return new Result(false, "You can only ask for a marriage with a male player!");
+            }
             relationShip.askMarriage(ring);
             return new Result(true, "marriage asked successfully by "
                     + relationShip.getPlayer1().getUser().getUserName() + "\nFriendShip XP: " + relationShip.getXP()
             + "\nFriendShip Level: " + relationShip.getFriendshipLevel());
         }
         else{
+            if(!(relationShip2.getFriendshipLevel() == 3)){
+                return new Result(false, "You need to be at level 3 to ask for a marriage!");
+            }
+            if(player1.getUser().isFemale()){
+                return new Result(false, "You can only ask for a marriage with a male player!");
+            }
             relationShip2.askMarriage(ring);
             return new Result(true, "marriage asked successfully by " + relationShip2.getPlayer1().getUser().getUserName()
                     + "\nFriendShip XP: " + relationShip2.getXP()
@@ -1148,6 +1177,38 @@ public class GameMenuController implements MenuController {
         return new Result(true,
                 player.getShippingBin().getShippingBinLocation().getxAxis()
                         + ", " + player.getShippingBin().getShippingBinLocation().getyAxis());
+    }
+
+    public Result cheatFriendShipLevel(String name, String amount){
+        int intAmount;
+        try{
+            intAmount = Integer.parseInt(amount);
+        } catch (NumberFormatException e) {
+            return new Result(false, "Amount must be a number!");
+        }
+        Player player1 = App.getCurrentGame().getCurrentPlayer();
+        Player player2 = App.getCurrentGame().getPlayerByName(name);
+        if(player2 == null){
+            return new Result(false, "Player with username " + name + " not found!");
+        }
+        RelationShip relationShip = player1.findRelationShip(player2);
+        RelationShip relationShip2 = player2.findRelationShip(player1);
+        if(relationShip2 ==null && relationShip ==null){
+            return new Result(false, "No relationship found with " + name + ". You need to establish a relationship first.");
+        }
+        if(relationShip!= null){
+            relationShip.setFriendshipLevel(intAmount);
+            return new Result(true, "Friendship level set to " + intAmount + " by "
+                    + relationShip.getPlayer1().getUser().getUserName()
+                    + "\nFriendShip XP: " + relationShip.getXP() + "\nFriendShip Level: "+ relationShip.getFriendshipLevel());
+        }
+        else{
+            relationShip2.setFriendshipLevel(intAmount);
+            return new Result(true, "Friendship level set to " + intAmount + " by "
+                    + relationShip2.getPlayer1().getUser().getUserName()
+                    + "\nFriendShip XP: " + relationShip2.getXP() + "\nFriendShip Level: "+ relationShip2.getFriendshipLevel());
+        }
+
     }
 
 }
