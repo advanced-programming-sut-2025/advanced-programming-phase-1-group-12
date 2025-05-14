@@ -156,7 +156,7 @@ public class TradeManager {
 
         RelationShip relationship = requester.findRelationShip(target);
         if (relationship != null) {
-            relationship.increaseXP(30);
+            relationship.increaseXP(50);
         }
 
         return "Trade accepted successfully!";
@@ -178,7 +178,7 @@ public class TradeManager {
         Player target = trade.getTarget();
         RelationShip relationship = requester.findRelationShip(target);
         if (relationship != null) {
-            relationship.decreaseXP(10);
+            relationship.decreaseXP(30);
         }
 
         return "Trade rejected.";

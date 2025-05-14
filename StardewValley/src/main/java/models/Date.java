@@ -6,6 +6,7 @@ import models.Fundementals.App;
 import models.Fundementals.Location;
 import models.Fundementals.LocationOfRectangle;
 import models.Fundementals.Player;
+import models.NPC.NPC;
 import models.Place.Farm;
 import models.ProductsPackage.ArtisanItem;
 import models.enums.Season;
@@ -57,6 +58,7 @@ public class Date {
             foragingAdd();
             changesDayAnimal();
             attackingCrow();
+            resetNPCStatus();
         }
     }
 
@@ -333,6 +335,7 @@ public class Date {
                 changeYear();
             }
         }
+        resetNPCStatus();
         artisansUpdate(day * 13);
     }
 
@@ -479,5 +482,12 @@ public class Date {
 
     public void changeYear(){
         this.year = year + 1;
+    }
+
+    public void resetNPCStatus(){
+        for(NPC npc : App.getCurrentGame().getNPCvillage().getAllNPCs()){
+            npc.resetAllTalkedStatuses();
+            npc.resetAllGiftedStatuses();
+        }
     }
 }

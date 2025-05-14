@@ -20,6 +20,8 @@ public class RelationShip {
     private boolean hasGifted;
     private boolean hasHugged;
     private String askedRing;
+    private List<Gift> receivedGifts;
+    private List<Gift> sentGifts;
 
     public RelationShip(Player player1, Player player2) {
         this.player1 = player1;
@@ -34,6 +36,8 @@ public class RelationShip {
         this.hasGifted = false;
         this.hasHugged = false;
         this.askedRing = null;
+        this.receivedGifts = new ArrayList<>();
+        this.sentGifts = new ArrayList<>();
     }
 
     public int calculateLevelXP(){
@@ -113,8 +117,89 @@ public class RelationShip {
         return result.toString();
     }
 
-    public void gift(Item gift){
+    public boolean gift(Item gift, int amount){
+        if (player1.getBackPack().getItemByName(gift.getName()) == null || 
+            player1.getBackPack().getItemCount(gift) < amount) {
+            return false;
+        }
 
+        player1.getBackPack().decreaseItem(gift, amount);
+        player2.getBackPack().addItem(gift, amount);
+
+        Gift giftRecord = new Gift(player1, player2, gift, amount);
+        player1.findRelationShip(player2).sentGifts.add(giftRecord);
+        player2.findRelationShip(player1).receivedGifts.add(giftRecord);
+
+        this.hasGifted = true;
+        return true;
+    }
+
+    public String listGifts() {
+        if (receivedGifts.isEmpty()) {
+            return "You haven't received any gifts yet.";
+        }
+
+        StringBuilder result = new StringBuilder("Received Gifts:\n");
+        for (int i = 0; i < receivedGifts.size(); i++) {
+            Gift gift = receivedGifts.get(i);
+            result.append(i + 1).append(". ")
+                  .append(gift.getAmount()).append(" ")
+                  .append(gift.getItem().getName())
+                  .append(" from ").append(gift.getSender().getUser().getUserName())
+                  .append(gift.isRated() ? " (Rated: " + gift.getRating() + ")" : " (Not rated yet)")
+                  .append("\n");
+        }
+        return result.toString();
+    }
+
+    public boolean rateGift(int giftNumber, int rating) {
+        if (giftNumber < 1 || giftNumber > receivedGifts.size()) {
+            return false;
+        }
+
+        if (rating < 1 || rating > 5) {
+            return false;
+        }
+
+        Gift gift = receivedGifts.get(giftNumber - 1);
+        if (gift.isRated()) {
+            return false;
+        }
+
+        gift.setRating(rating);
+
+        int friendshipChange = 15 + 30 * (rating - 3);
+        if (friendshipChange > 0) {
+            increaseXP(friendshipChange);
+        } else {
+            decreaseXP(Math.abs(friendshipChange));
+        }
+
+        return true;
+    }
+
+    public String giftHistory() {
+        StringBuilder result = new StringBuilder("Gift History:\n");
+
+        result.append("Sent Gifts:\n");
+        if (sentGifts.isEmpty()) {
+            result.append("  No gifts sent.\n");
+        } else {
+            for (Gift gift : sentGifts) {
+                result.append("  ").append(gift.toString()).append("\n");
+            }
+        }
+
+        result.append("\nReceived Gifts:\n");
+        if (receivedGifts.isEmpty()) {
+            result.append("  No gifts received.\n");
+        } else {
+            for (Gift gift : receivedGifts) {
+                result.append("  ").append(gift.toString()).append("\n");
+            }
+        }
+
+        return result.toString();
     }
 
     public void hug(){

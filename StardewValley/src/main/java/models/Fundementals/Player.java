@@ -202,6 +202,9 @@ public class Player {
     }
 
     public void reduceEnergy(int amount){
+        if(isEnergyUnlimited){
+            return;
+        }
         if(energy - amount < 0){
             energy = 0;
         }
@@ -273,5 +276,12 @@ public class Player {
     public void setCookingRecepies(Map<Cooking, Boolean> cookingRecepies) {
         this.cookingRecepies = cookingRecepies;
     }
-}
 
+    public void addRelationShip(RelationShip relationShip) {
+        this.relationShips.add(relationShip);
+    }
+
+    public ArrayList<RelationShip> getRelationShips() {
+        return relationShips;
+    }
+}

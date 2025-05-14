@@ -99,7 +99,16 @@ public class GameMenu extends AppMenu {
             Result result = controller.talkHistory(matcher.group("username"));
             System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.GIFT.getMather(input)) != null) {
-            Result result = controller.gift(matcher.group(), matcher.group(), matcher.group());
+            Result result = controller.gift(matcher.group("username"), matcher.group("item"), matcher.group("amount"));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.GIFT_LIST.getMather(input)) != null) {
+            Result result = controller.giftList();
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.GIFT_RATE.getMather(input)) != null) {
+            Result result = controller.giftRate(matcher.group("giftNumber"), matcher.group("rate"));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.GIFT_HISTORY.getMather(input)) != null) {
+            Result result = controller.giftHistory(matcher.group("username"));
             System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.HUG.getMather(input)) != null) {
             Result result = controller.hug(matcher.group("username"));
@@ -179,7 +188,16 @@ public class GameMenu extends AppMenu {
             Result result = controller.talkHistory(matcher.group("username"));
             System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.GIFT.getMather(input)) != null) {
-            Result result = controller.gift(matcher.group(), matcher.group(), matcher.group());
+            Result result = controller.gift(matcher.group("username"), matcher.group("item"), matcher.group("amount"));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.GIFT_LIST.getMather(input)) != null) {
+            Result result = controller.giftList();
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.GIFT_RATE.getMather(input)) != null) {
+            Result result = controller.giftRate(matcher.group("gift_number"), matcher.group("rate"));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.GIFT_HISTORY.getMather(input)) != null) {
+            Result result = controller.giftHistory(matcher.group("username"));
             System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.HUG.getMather(input)) != null) {
             Result result = controller.hug(matcher.group("username"));
@@ -249,11 +267,20 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.FRIENDSHIP_NPC_LIST.getMather(input)) != null) {
             Result result = controller.friendshipNPCList();
             System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.FRIENDSHIP_LIST.getMather(input)) != null) {
+            Result result = controller.friendshipList();
+            System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.QUESTS_LIST.getMather(input)) != null) {
             Result result = controller.questsList();
             System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.QUESTS_FINISH.getMather(input)) != null) {
             Result result = controller.questsFinish(Integer.parseInt(matcher.group("index")));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.CHEAT_NPC_LOCATIONS.getMather(input)) != null) {
+            Result result = controller.cheatNPCLocations();
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.CHEAT_NPC_TEST_ITEMS.getMather(input)) != null) {
+            Result result = controller.cheatNPCTestItems();
             System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.SHOW_MONEY.getMather(input)) != null) {
             System.out.println(App.getCurrentPlayerLazy().getMoney());
@@ -350,7 +377,13 @@ public class GameMenu extends AppMenu {
     }
 
     public void createTrade(String username, String type, String item, Matcher matcher) {
-        int amount = Integer.parseInt(matcher.group("amount"));
+        int amount;
+        try{
+            amount=Integer.parseInt(matcher.group("amount"));
+        } catch (Exception e) {
+            System.out.println("amount must be a number!");
+            return;
+        }
         Integer price = null;
         String targetItem = null;
         Integer targetAmount = null;
@@ -359,7 +392,12 @@ public class GameMenu extends AppMenu {
         }
         if (matcher.group("targetItem") != null && matcher.group("targetAmount") != null) {
             targetItem = matcher.group("targetItem");
-            targetAmount = Integer.parseInt(matcher.group("targetAmount"));
+            try {
+                targetAmount = Integer.parseInt(matcher.group("targetAmount"));
+            } catch (NumberFormatException e) {
+                System.out.println("targetAmount must be a number!");
+                return;
+            }
         }
 
         Result result = controller.createTrade(username, type, item, amount, price, targetItem, targetAmount);

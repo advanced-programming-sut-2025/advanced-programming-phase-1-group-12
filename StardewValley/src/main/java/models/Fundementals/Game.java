@@ -100,8 +100,8 @@ public class Game {
 
     public void initializeNPCvillage() {
 
-        Location topLeft = new Location(20, 20);
-        Location bottomRight = new Location(30, 30);
+        Location topLeft = new Location(180, 180);
+        Location bottomRight = new Location(220, 220);
         LocationOfRectangle villageArea = new LocationOfRectangle(topLeft, bottomRight);
         this.npcVillage = new NPCvillage(villageArea);
     }

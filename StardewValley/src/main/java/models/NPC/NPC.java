@@ -264,7 +264,7 @@ public class NPC {
         if (appropriateDialogues.isEmpty()) {
             return "Hello, I'm " + name + ". I work as a " + job + ".";
         }
-        return appropriateDialogues.get(random.nextInt(appropriateDialogues.size()));
+        return appropriateDialogues.get(random.nextInt(appropriateDialogues.size())) + "\nFriendShip XP: " + getFriendshipPoints(player);
     }
 
     public void receiveGift(Player player, Item item) {
@@ -364,5 +364,13 @@ public class NPC {
 
     public NPCdetails getDetails() {
         return details;
+    }
+
+    public void resetAllTalkedStatuses() {
+        talkedToday.replaceAll((player, status) -> false);
+    }
+
+    public void resetAllGiftedStatuses() {
+        giftedToday.replaceAll((player, status) -> false);
     }
 }
