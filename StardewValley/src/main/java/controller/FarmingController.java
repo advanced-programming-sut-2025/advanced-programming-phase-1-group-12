@@ -8,10 +8,7 @@ import models.ItemBuilder;
 import models.ProductsPackage.Quality;
 import models.RelatedToUser.Ability;
 import models.enums.Season;
-import models.enums.Types.FertilizeType;
-import models.enums.Types.SeedTypes;
-import models.enums.Types.TreeType;
-import models.enums.Types.TypeOfTile;
+import models.enums.Types.*;
 import models.enums.foraging.*;
 
 import java.util.ArrayList;
@@ -551,5 +548,15 @@ public class FarmingController {
         plant.setHasBeenWatering(true);
         location.setObjectInTile(plant);
         return new Result(true, "you watering to this plant!");
+    }
+
+    public Result PickingFruit(int x, int y) {
+        Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
+        Tree tree = (Tree) location.getObjectInTile();
+        FruitType fruitType = tree.getType().fruitType;
+        if(tree.isCanPickUp()){
+
+        }
+
     }
 }

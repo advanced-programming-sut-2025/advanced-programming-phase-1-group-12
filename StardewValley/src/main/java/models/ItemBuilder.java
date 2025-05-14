@@ -57,6 +57,10 @@ public class ItemBuilder {
             return new GiantPlant(giantPlants, null, false, false,
                     0, 0, 0, 0);
         }
+        FruitType fruitType = FruitType.getFruitType(name);
+        if (fruitType != null) {
+            return new Fruit(fruitType);
+        }
         return new Item(name);
     }
 
