@@ -102,6 +102,7 @@ public class CraftingController {
             }
             for (Map.Entry<String, Integer> entry : recipe.getIngredients().entrySet()) {
                 Item item = App.getCurrentPlayerLazy().getBackPack().getItemByName(entry.getKey());
+
                 if (item == null) {
                     return new Result(false, "Item not found");
                 } else if (entry.getValue() > App.getCurrentGame().getCurrentPlayer().getBackPack().getItemCount(item)) {
