@@ -3,6 +3,7 @@ package views;
 import controller.*;
 import controller.MenusController.GameMenuController;
 import controller.movingPlayer.UserLocationController;
+import models.Animal.FarmAnimals;
 import models.Fundementals.App;
 import models.Fundementals.Location;
 import models.Fundementals.Result;
@@ -331,6 +332,12 @@ public class GameMenu extends AppMenu {
             System.out.println(controller.cheatAddXP(matcher.group("username")));
         } else if ((matcher = GameMenuCommands.CHEAT_MAXIMIZE_ABILITY_LEVEL.getMather(input))!= null) {
             App.getCurrentPlayerLazy().getAbilityByName(matcher.group("ability")).setLevel(4);
+        } else if ((matcher = GameMenuCommands.PRODUCES.getMather(input))!= null) {
+            for(FarmAnimals farmAnimals: App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()){
+                if(!farmAnimals.isHasCollectedProductToday()){
+                    System.out.println(farmAnimals.getName() + " " + farmAnimals.getAnimal().getDefaultProduct());
+                }
+            }
         } else {
             System.out.println("invalid command");
         }

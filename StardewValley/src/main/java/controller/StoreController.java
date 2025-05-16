@@ -40,7 +40,7 @@ public class StoreController {
         //normal coop, Deluxe coop, big coop, normal barn, Deluxe barn, big barn:
 
         Location otherCorner;
-        if (buildingName.contains("coop")) {
+       if (buildingName.contains("coop")) {
             otherCorner = App.getCurrentGame().getMainMap().findLocation(location.getxAxis() + 3, location.getyAxis() + 4);
             if (otherCorner == null || !App.getCurrentPlayerLazy().getOwnedFarm().getLocation().getLocationsInRectangle().contains(otherCorner)) {
                 return new Result(false, "You can not build this building here");
@@ -225,9 +225,9 @@ public class StoreController {
             return new Result(false, "You are not in any store");
         }
 
-        if(App.getCurrentGame().getDate().getHour() < store.getStartHour() || App.getCurrentGame().getDate().getHour() > store.getCloseHour()){
-            return new Result(false, "Store is currently closed");
-        }
+//        if(App.getCurrentGame().getDate().getHour() < store.getStartHour() || App.getCurrentGame().getDate().getHour() > store.getCloseHour()){
+//            return new Result(false, "Store is currently closed");
+//        }
 
         StoreProducts item = null;
         for (StoreProducts item1 : store.getStoreProducts()) {

@@ -109,6 +109,8 @@ public class AnimalController {
                 }
             }
             animal.setWillProduceToday(false);
+            App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - 1);
+            animal.setHasCollectedProductToday(true);
             return new Result(true, "You just milked " + animalName);
         } else {
             return new Result(false, "You can not milk " + animalName + " now");
@@ -147,6 +149,7 @@ public class AnimalController {
             return new Result(false, "You do not have a shear!");
         }
         Quality quality = findQulaity(animal.getFriendShip());
+        App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - 1);
         ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.WOOL_SHEEP.getName(), quality, AnimalProduct.WOOL_SHEEP.getPrice()), 1, quality);
         return new Result(true, "You just sheared " + animalName);
     }
@@ -330,6 +333,7 @@ public class AnimalController {
 
             animal.setFriendShip(animal.getFriendShip() + 5);
             animal.setWillProduceToday(false);
+            animal.setHasCollectedProductToday(true);
             return new Result(true, "You just collected product from " + animalName);
         } else {
             return new Result(false, "This animal will not produce today");
