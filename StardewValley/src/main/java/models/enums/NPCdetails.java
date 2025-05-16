@@ -1,19 +1,23 @@
 package models.enums;
 
 import models.Item;
+import models.ProductsPackage.Quality;
+import models.enums.Types.ArtisanTypes;
+import models.enums.Types.Cooking;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public enum NPCdetails {
-    SEBASTIAN("Sebastian", "Programmer", "Introverted and thoughtful", 
+    SEBASTIAN("Sebastian", "Programmer", "Introverted and thoughtful",
         Arrays.asList("Wool", "Pumpkin Pie", "Pizza"),
         Arrays.asList(
-            new QuestInfo("Deliver 50 Iron", "Iron", 50, new Item("Diamond"), 2, 5000),
-            new QuestInfo("Deliver a Pumpkin Pie", "Pumpkin Pie", 1, new Item("Diamond"), 1, 0),
-            new QuestInfo("Deliver 150 Stone", "Stone", 150, new Item("Quartz"), 50, 1)
+            new QuestInfo("Deliver 50 Iron", "Iron", 50, new Item("Diamond", Quality.NORMAL, 0), 2, 5000),
+            new QuestInfo("Deliver a Pumpkin Pie", "Pumpkin Pie", 1, new Item("Diamond", Quality.NORMAL, 0), 1, 0),
+            new QuestInfo("Deliver 150 Stone", "Stone", 150, new Item("Quartz", Quality.NORMAL, 0), 50, 1)
         ),
-        Arrays.asList("I prefer to be alone with my thoughts.", 
+        Arrays.asList("I prefer to be alone with my thoughts.",
                      "Programming is like solving puzzles.",
                      "The basement is quiet, just how I like it."),
         Arrays.asList("Coffee helps me code better in the morning."),
@@ -26,17 +30,17 @@ public enum NPCdetails {
         Arrays.asList("You're not as annoying as most people."),
         Arrays.asList("I could show you some programming tricks sometime."),
         Arrays.asList("You're one of the few people I actually enjoy talking to."),
-        Arrays.asList(new Item("Diamond")), 5
+        Arrays.asList(new Item("Diamond", Quality.NORMAL, 0)), 5
     ),
 
-    ABIGAIL("Abigail", "Adventurer", "Curious and adventurous", 
+    ABIGAIL("Abigail", "Adventurer", "Curious and adventurous",
         Arrays.asList("Stone", "Iron Ore", "Coffee"),
         Arrays.asList(
-            new QuestInfo("Deliver a Gold Bar", "Gold Bar", 1, new Item("Gold"), 5000, 0),
-            new QuestInfo("Deliver a Pumpkin", "Pumpkin", 1, new Item("Automatic Watering Can"), 1, 1),
-            new QuestInfo("Deliver 50 Wheat", "Wheat", 50, new Item("Gold"), 750, 2)
+            new QuestInfo("Deliver a Gold Bar", "Gold Bar", 1, new Item("Gold", Quality.NORMAL, ArtisanTypes.Gold_BAR.getSellPrice()), 5000, 0),
+            new QuestInfo("Deliver a Pumpkin", "Pumpkin", 1, new Item("Automatic Watering Can", Quality.NORMAL, 0), 1, 1),
+            new QuestInfo("Deliver 50 Wheat", "Wheat", 50, new Item("Gold", Quality.NORMAL, 0), 750, 2)
         ),
-        Arrays.asList("I've been exploring the mines lately.", 
+        Arrays.asList("I've been exploring the mines lately.",
                      "I love finding rare gems and artifacts.",
                      "Sometimes I practice sword fighting in secret."),
         Arrays.asList("The morning air is perfect for adventure."),
@@ -49,17 +53,17 @@ public enum NPCdetails {
         Arrays.asList("You seem to understand my adventurous spirit."),
         Arrays.asList("Want to go exploring together sometime?"),
         Arrays.asList("You're one of my closest friends now."),
-        Arrays.asList(new Item("Quartz")), 10
+        Arrays.asList(new Item("Quartz", Quality.NORMAL, 50)), 10
     ),
 
-    HARVEY("Harvey", "Doctor", "Caring and cautious", 
+    HARVEY("Harvey", "Doctor", "Caring and cautious",
         Arrays.asList("Coffee", "Pickles", "Wine"),
         Arrays.asList(
-            new QuestInfo("Deliver 12 of any crop", "Crop", 12, new Item("Salmon"), 1, 0),
-            new QuestInfo("Deliver a bottle of Wine", "Wine", 1, new Item("Deluxe Dinner"), 1, 1),
-            new QuestInfo("Deliver 10 Hardwood", "Hardwood", 10, new Item("Gold"), 500, 3)
+            new QuestInfo("Deliver 12 of any crop", "Crop", 12, new Item("Salmon", Quality.NORMAL, 0), 1, 0),
+            new QuestInfo("Deliver a bottle of Wine", "Wine", 1, new Item("Deluxe Dinner", Quality.NORMAL,0), 1, 1),
+            new QuestInfo("Deliver 10 Hardwood", "Hardwood", 10, new Item("Gold ore", Quality.NORMAL, 0), 500, 3)
         ),
-        Arrays.asList("Health should always be your priority.", 
+        Arrays.asList("Health should always be your priority.",
                      "I recommend regular check-ups.",
                      "I've always been fascinated by medicine."),
         Arrays.asList("A good breakfast is essential for health."),
@@ -72,17 +76,17 @@ public enum NPCdetails {
         Arrays.asList("I appreciate your interest in health matters."),
         Arrays.asList("I could teach you some basic medical knowledge."),
         Arrays.asList("Your friendship means a lot to me."),
-        Arrays.asList(new Item("Salad")), 15
+        Arrays.asList(new Item("Salad",Quality.NORMAL, Cooking.Salad.getBaseSellPrice())), 15
     ),
 
-    LEAH("Leah", "Artist", "Creative and nature-loving", 
+    LEAH("Leah", "Artist", "Creative and nature-loving",
         Arrays.asList("Salad", "Grape", "Wine"),
         Arrays.asList(
-            new QuestInfo("Deliver a Salmon", "Salmon", 1, new Item("Salad"), 5, 0),
-            new QuestInfo("Deliver 80 Wood", "Wood", 80, new Item("Beehive"), 3, 2),
-            new QuestInfo("Deliver 10 Iron Bars", "Iron Bar", 10, new Item("Gold"), 1000, 1)
+            new QuestInfo("Deliver a Salmon", "Salmon", 1, new Item("Salad", Quality.NORMAL, 0), 5, 0),
+            new QuestInfo("Deliver 80 Wood", "Wood", 80, new Item("Beehive", Quality.NORMAL, 0), 3, 2),
+            new QuestInfo("Deliver 10 Iron Bars", "Iron Bar", 10, new Item("Gold", Quality.NORMAL, 0), 1000, 1)
         ),
-        Arrays.asList("I find inspiration in nature.", 
+        Arrays.asList("I find inspiration in nature.",
                      "My sculptures are made from foraged materials.",
                      "Art is about expressing your true self."),
         Arrays.asList("Morning light is perfect for sketching."),
@@ -95,17 +99,17 @@ public enum NPCdetails {
         Arrays.asList("You have a good eye for natural beauty."),
         Arrays.asList("I'd love to show you my artistic process sometime."),
         Arrays.asList("You've become a true inspiration for my art."),
-        Arrays.asList(new Item("Grape")), 20
+        Arrays.asList(new Item("Grape", Quality.NORMAL, 0)), 20
     ),
 
-    ROBIN("Robin", "Carpenter", "Hardworking and friendly", 
+    ROBIN("Robin", "Carpenter", "Hardworking and friendly",
         Arrays.asList("Spaghetti", "Wood", "Iron Bar"),
         Arrays.asList(
-            new QuestInfo("Deliver 200 Wood", "Wood", 200, new Item("Scarecrow"), 3, 0),
-            new QuestInfo("Deliver 100 Wood", "Wood", 100, new Item("Gold"), 25000, 1),
-            new QuestInfo("Deliver 1000 Wood", "Wood", 1000, new Item("Gold"), 1000, 2)
+            new QuestInfo("Deliver 200 Wood", "Wood", 200, new Item("Scarecrow", Quality.NORMAL, 0), 3, 0),
+            new QuestInfo("Deliver 100 Wood", "Wood", 100, new Item("Gold", Quality.NORMAL, 0), 25000, 1),
+            new QuestInfo("Deliver 1000 Wood", "Wood", 1000, new Item("Gold", Quality.NORMAL, 0), 1000, 2)
         ),
-        Arrays.asList("I can build anything you need for your farm.", 
+        Arrays.asList("I can build anything you need for your farm.",
                      "Working with wood is my passion.",
                      "Quality craftsmanship takes time and patience."),
         Arrays.asList("Early start means more time for building!"),
@@ -118,7 +122,7 @@ public enum NPCdetails {
         Arrays.asList("You work hard on your farm, I respect that."),
         Arrays.asList("I could give you some carpentry tips sometime."),
         Arrays.asList("You're like family to me now."),
-        Arrays.asList(new Item("Iron Bar")), 25
+        Arrays.asList(new Item("Iron Bar", Quality.NORMAL, 0)), 25
     );
 
     private final String name;
@@ -140,7 +144,7 @@ public enum NPCdetails {
     private final List<Item> giftsToGive;
     private final int delayDay;
 
-    NPCdetails(String name, String job, String personality, 
+    NPCdetails(String name, String job, String personality,
               List<String> favoriteItems, List<QuestInfo> quests,
               List<String> generalDialogues, List<String> morningDialogues,
               List<String> eveningDialogues, List<String> rainyDialogues,
@@ -248,7 +252,7 @@ public enum NPCdetails {
         private final int goldReward;
         private final int activationDelay; // in days
 
-        public QuestInfo(String description, String requiredItemName, int requiredAmount, 
+        public QuestInfo(String description, String requiredItemName, int requiredAmount,
                         Item reward, int goldReward, int activationDelay) {
             this.description = description;
             this.requiredItemName = requiredItemName;

@@ -3,10 +3,12 @@ package views;
 import controller.*;
 import controller.MenusController.GameMenuController;
 import controller.movingPlayer.UserLocationController;
+import models.Animal.FarmAnimals;
 import models.Fundementals.App;
 import models.Fundementals.Location;
 import models.Fundementals.Result;
 import models.RelatedToUser.Ability;
+import models.enums.Types.CraftingRecipe;
 import models.enums.commands.GameMenuCommands;
 
 import java.util.ArrayList;
@@ -27,6 +29,7 @@ public class GameMenu extends AppMenu {
     public void check(Scanner scanner) {
         String input = scanner.nextLine().trim();
         Matcher matcher;
+
         if ((matcher = GameMenuCommands.PLAY.getMather(input)) != null) {
             List<String> players = new ArrayList<>();
 
@@ -75,7 +78,8 @@ public class GameMenu extends AppMenu {
             cheatWeather(matcher.group("type"));
         } else if ((matcher = GameMenuCommands.SHOW_POSITION.getMather(input)) != null) {
             System.out.println(controller.showLocation());
-        } else if (App.getCurrentPlayerLazy().getEnergy() <= 0 && !App.getCurrentPlayerLazy().isEnergyUnlimited()) {
+        }
+        else if (App.getCurrentPlayerLazy().getEnergy() <= 0 && !App.getCurrentPlayerLazy().isEnergyUnlimited()) {
             System.out.println("You are not enough energy to do anything.");
         } else if ((matcher = GameMenuCommands.WALK.getMather(input)) != null) {
             System.out.println(UserLocationController.walkPlayer(matcher.group("x"), matcher.group("y")));
@@ -336,6 +340,22 @@ public class GameMenu extends AppMenu {
             System.out.println(App.getCurrentPlayerLazy().getMoney());
         } else if ((matcher = GameMenuCommands.SHOW_SHIPPING_BIN_LOCATION.getMather(input))!= null) {
             System.out.println(controller.showShippingBinLocation().getMessage());
+        } else if ((matcher = GameMenuCommands.CHEAT_BUY_ITEM.getMather(input)) != null) {
+            System.out.println(storeController.cheatBuyItem(matcher.group("productName"), Integer.parseInt(matcher.group("count"))));
+        }  else if ((matcher = GameMenuCommands.CHEAT_ADD_ITEM.getMather(input)) != null) {
+            System.out.println(storeController.cheatAddItem(matcher.group("productName"), Integer.parseInt(matcher.group("count"))));
+        } else if ((matcher = GameMenuCommands.CHEAT_FRIENDSHIP_LEVEL.getMather(input))!= null) {
+            System.out.println(controller.cheatFriendShipLevel(matcher.group("name"), matcher.group("amount")));
+        } else if ((matcher = GameMenuCommands.CHEAT_FRIENDSHIP_XP.getMather(input))!= null) {
+            System.out.println(controller.cheatAddXP(matcher.group("username")));
+        } else if ((matcher = GameMenuCommands.CHEAT_MAXIMIZE_ABILITY_LEVEL.getMather(input))!= null) {
+            App.getCurrentPlayerLazy().getAbilityByName(matcher.group("ability")).setLevel(4);
+        } else if ((matcher = GameMenuCommands.PRODUCES.getMather(input))!= null) {
+            for(FarmAnimals farmAnimals: App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()){
+                if(!farmAnimals.isHasCollectedProductToday()){
+                    System.out.println(farmAnimals.getName() + " " + farmAnimals.getAnimal().getDefaultProduct());
+                }
+            }
         } else {
             System.out.println("invalid command");
         }
@@ -444,4 +464,5 @@ public class GameMenu extends AppMenu {
         Result result = controller.createTrade(username, type, item, amount, price, targetItem, targetAmount);
         System.out.println(result.getMessage());
     }
+
 }

@@ -2,6 +2,7 @@ package models.enums.foraging;
 
 import models.Fundementals.Location;
 import models.Item;
+import models.ProductsPackage.Quality;
 
 public class Plant extends Item {
     private Location location;
@@ -19,7 +20,7 @@ public class Plant extends Item {
     private boolean isGiantPlant;
 
     public Plant(Location location, Seed seed, boolean isForaging, AllCrops allCrops){
-        super(seed.getName());
+        super(seed.getName(), Quality.NORMAL, seed.getPrice());
         this.location = location;
         this.seed = seed;
         this.hasBeenFertilized = false;

@@ -26,7 +26,7 @@ public class Player {
     private int energy;
     public Refrigrator Refrigrator;
     private ArrayList<Ability> abilitis = new ArrayList<Ability>();
-    private ArrayList<RelationShip> relationShips = new ArrayList<>();
+    private ArrayList<RelationShip> relationShips;
     private Farm ownedFarm;
     private BackPack backPack;
     private boolean isEnergyUnlimited;
@@ -42,6 +42,8 @@ public class Player {
     private ArrayList<ArtisanItem> artisansGettingProcessed = new ArrayList<>();
     private Date rejectDate;
     private int shippingMoney;
+    private boolean isMaxEnergyBuffEaten = false;
+    private boolean isSkillBuffEaten = false;
 
     public Player(User user, Location userLocation, boolean isMarried, Refrigrator refrigrator,
                   ArrayList<RelationShip> relationShips, Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited,
@@ -65,9 +67,9 @@ public class Player {
         this.shippingBin = null;
         this.rejectDate = null;
         this.shippingMoney = 0;
+        this.relationShips = new ArrayList<>();
         initializeAbilities();
         initializerecepies();
-
     }
 
     public User getUser() {
@@ -328,6 +330,22 @@ public class Player {
 
     public void setShippingMoney(int shippingMoney) {
         this.shippingMoney = shippingMoney;
+    }
+
+    public boolean isMaxEnergyBuffEaten() {
+        return isMaxEnergyBuffEaten;
+    }
+
+    public void setMaxEnergyBuffEaten(boolean maxEnergyBuffEaten) {
+        isMaxEnergyBuffEaten = maxEnergyBuffEaten;
+    }
+
+    public boolean isSkillBuffEaten() {
+        return isSkillBuffEaten;
+    }
+
+    public void setSkillBuffEaten(boolean skillBuffEaten) {
+        isSkillBuffEaten = skillBuffEaten;
     }
 }
 

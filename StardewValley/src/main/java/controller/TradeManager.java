@@ -87,7 +87,7 @@ public class TradeManager {
                 if (target.getBackPack().getItemByName(item.getName()) != null) {
                     target.getBackPack().addItem(item, amount);
                 } else {
-                    target.getBackPack().addItem(new Item(item.getName()), amount);
+                    target.getBackPack().addItem(new Item(item.getName(), item.getQuality(), item.getPrice()), amount);
                 }
 
                 target.decreaseMoney(price);
@@ -101,7 +101,7 @@ public class TradeManager {
                 if (requester.getBackPack().getItemByName(item.getName()) != null) {
                     requester.getBackPack().addItem(item, amount);
                 } else {
-                    requester.getBackPack().addItem(new Item(item.getName()), amount);
+                    requester.getBackPack().addItem(new Item(item.getName(), item.getQuality(), item.getPrice()), amount);
                 }
 
                 requester.decreaseMoney(price);
@@ -121,14 +121,14 @@ public class TradeManager {
                 if (target.getBackPack().getItemByName(item.getName()) != null) {
                     target.getBackPack().addItem(item, amount);
                 } else {
-                    target.getBackPack().addItem(new Item(item.getName()), amount);
+                    target.getBackPack().addItem(new Item(item.getName(), item.getQuality(), item.getPrice()), amount);
                 }
 
                 target.getBackPack().decreaseItem(targetItem, targetAmount);
                 if (requester.getBackPack().getItemByName(targetItem.getName()) != null) {
                     requester.getBackPack().addItem(targetItem, targetAmount);
                 } else {
-                    requester.getBackPack().addItem(new Item(targetItem.getName()), targetAmount);
+                    requester.getBackPack().addItem(new Item(item.getName(), item.getQuality(), item.getPrice()), targetAmount);
                 }
             } else {
                 if (requester.getBackPack().getItemByName(targetItem.getName()) == null) {
@@ -140,14 +140,14 @@ public class TradeManager {
                 if (requester.getBackPack().getItemByName(item.getName()) != null) {
                     requester.getBackPack().addItem(item, amount);
                 } else {
-                    requester.getBackPack().addItem(new Item(item.getName()), amount);
+                    requester.getBackPack().addItem(new Item(item.getName(), item.getQuality(), item.getPrice()), amount);
                 }
 
                 requester.getBackPack().decreaseItem(targetItem, targetAmount);
                 if (target.getBackPack().getItemByName(targetItem.getName()) != null) {
                     target.getBackPack().addItem(targetItem, targetAmount);
                 } else {
-                    target.getBackPack().addItem(new Item(targetItem.getName()), targetAmount);
+                    target.getBackPack().addItem(new Item(item.getName(), item.getQuality(), item.getPrice()), targetAmount);
                 }
             }
         }

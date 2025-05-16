@@ -11,6 +11,7 @@ import models.Place.Farm;
 import models.ProductsPackage.ArtisanItem;
 import models.ProductsPackage.Quality;
 import models.enums.Season;
+import models.enums.Types.CraftingRecipe;
 import models.enums.Types.SeedTypes;
 import models.enums.Types.TypeOfTile;
 import models.enums.Weather;
@@ -310,7 +311,7 @@ public class Date {
             for (int i = 0; i < seedCount; i++) {
                 Location location = seedPlacing.get(i);
                 SeedTypes seedSeason = allSeeds.get(i);
-                Seed newSeed = new Seed(seedSeason);
+                Seed newSeed = new Seed(seedSeason.getName(), Quality.NORMAL, 0, seedSeason);
                 AllCrops allCrops = AllCrops.sourceTypeToCraftType(seedSeason);
                 Plant newPlant = new Plant(location, newSeed, true, allCrops);
                 farm.getPlantOfFarm().add(newPlant);
@@ -364,19 +365,7 @@ public class Date {
 
     public void changeAdvancedDay(int day) {
         if (day == 1) {
-            this.weather = this.tommorowWeather;// the day changes
-
-            sellByShippingAllPlayers();
-            updateAllPlants();
-            ThunderAndLightning();
-            foragingAdd();
-            changesDayAnimal();
-            attackingCrow();
-            resetNPCStatus();
-            for(Player player : App.getCurrentGame().getPlayers()){
-                Location location = player.getOwnedFarm().getLocation().getTopLeftCorner();
-                player.setUserLocation(location);
-            }
+            this.weather = this.tommorowWeather;// the day change
 
         }
         this.dayOfWeek += day;
@@ -392,8 +381,27 @@ public class Date {
                 changeYear();
             }
         }
+        sellByShippingAllPlayers();
+
+        updateAllPlants();
+        ThunderAndLightning();
+        foragingAdd();
+        changesDayAnimal();
+        attackingCrow();
         resetNPCStatus();
         artisansUpdate(day * 13);
+        buffUpdates();
+        updateRecepies();
+    }
+
+    public void buffUpdates(){
+        if(App.getCurrentPlayerLazy().isMaxEnergyBuffEaten()){
+            App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - 10000);
+            App.getCurrentPlayerLazy().setMaxEnergyBuffEaten(false);
+        }         if(App.getCurrentPlayerLazy().isSkillBuffEaten()){
+            App.getCurrentPlayerLazy().getAbilityByName("Farming").setLevel(App.getCurrentGame().getCurrentPlayer().getAbilityByName("Farming").getLevel() - 1);
+            App.getCurrentPlayerLazy().setSkillBuffEaten(false);
+        }
     }
 
     public String dayName(int dayOfWeek) {
@@ -556,6 +564,16 @@ public class Date {
             System.out.println(player.getShippingMoney());
             player.increaseMoney(player.getShippingMoney());
             player.setShippingMoney(0);
+        }
+    }
+
+    public void updateRecepies(){
+        if(App.getCurrentPlayerLazy().getAbilityByName("Mining").getLevel() >= 2 && App.getCurrentPlayerLazy().getAbilityByName("Farming").getLevel() >= 2){
+            for(CraftingRecipe recipe : CraftingRecipe.values()){
+                if(!recipe.getName().equalsIgnoreCase("Fish Smoker") && !recipe.getName().equalsIgnoreCase("Dehydrator")){
+                    App.getCurrentPlayerLazy().getRecepies().put(recipe, true);
+                }
+            }
         }
     }
 }

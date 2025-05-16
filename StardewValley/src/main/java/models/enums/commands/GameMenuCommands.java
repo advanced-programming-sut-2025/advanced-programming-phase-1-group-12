@@ -8,6 +8,10 @@ public enum GameMenuCommands implements Commands {
     //hand-made cheat codes
     SHOW_MONEY("show money"),
     ABILITIES_SHOW("abilities show"),
+    CHEAT_BUY_ITEM("cheat buy item (?<productName>.*) -n (?<count>.*)"),
+    CHEAT_MAXIMIZE_ABILITY_LEVEL("cheat maximize ability level (?<ability>.*)"),
+    //chizi ke bahash misazim be price esh kari nadashte bashimmm!!!
+    CHEAT_ADD_ITEM("cheat add item (?<productName>.*) -n (?<count>.*)"),
     //Starting Game
     PLAY("^\\s*game new -u ([\\w-]+)(?: ([\\w-]+))?(?: ([\\w-]+))?\\s*$"),
     PRINT("^print map -l (?<X>.*), (?<Y>.*) -s (?<size>.*)$"),
@@ -41,6 +45,7 @@ public enum GameMenuCommands implements Commands {
     ADD_TO_INVENTORY("^heat add item -n (?<itemName>.+) -c (?<count>.+)"),
     WHICH_FERTILIZING("^which tile was fertilized&"),
     TakeFromGround("^take -n (?<itemName>.+) -d (?<direction>.+) from ground$"),
+
     //weather and ....
     SEASON("^season$"),
     TIME("^time$"),
@@ -71,7 +76,7 @@ public enum GameMenuCommands implements Commands {
     SHEPHERD_ANIMALS("shepherd animals -n (?<animalName>.*) -l <(?<x>\\d+) , (?<y>\\d+)>"),
     FEED_HAY("^feed hay -n (?<animalName>.*)$"),
     PRODUCES("^produces$"),
-    COLLECT ("collect produce -n (?<name>.*)"),
+    COLLECT("collect produce -n (?<name>.*)"),
     SELL_ANIMAL("sell animal -n (?<name>.*)"),
 
     //fishes
@@ -82,7 +87,7 @@ public enum GameMenuCommands implements Commands {
     ARTISAN_GET("artisan get -i (?<itemName>.*)"),
 
     //Cooking commands
-    COOKING_REFRIGERATOR("cooking refrigrator -n (?<name>.*)"),
+    COOKING_REFRIGERATOR("cooking refrigrator -(put|pick) (?<name>.*)"),
     COOKING_RECIPES("cooking show recipes"),
     COOKING_PREPARE("cooking prepare (?<recipeName>.*)"),
 
@@ -106,7 +111,7 @@ public enum GameMenuCommands implements Commands {
     FLOWER("^flower -u (?<username>.+)$"),
     ASK_MARRIAGE("^ask marriage -u (?<username>.+) -r (?<ring>.+)$"),
     RESPOND("^respond -(accept|reject) -u (?<username>.+)$"),
-
+    CHEAT_FRIENDSHIP_XP("cheat add xp (?<username>\\S+)"),
     // Trade commands
     START_TRADE("^start trade$"),
     TRADE_CREATE("^trade -u (?<username>\\S+) -t (?<type>request|offer) -i (?<item>\\S+) -a (?<amount>\\S+)( -p (?<price>\\d+))?( -ti (?<targetItem>\\S+) -ta (?<targetAmount>\\d+))?$"),
@@ -133,6 +138,7 @@ public enum GameMenuCommands implements Commands {
     CHEAT_NPC_TEST_ITEMS("^cheat npc test items$"),
     CHEAT_PLAYER_MONEY("^cheat player money$"),
     SHOW_SHIPPING_BIN_LOCATION("^show shipping bin location$"),
+    CHEAT_FRIENDSHIP_LEVEL("^cheat friendship level -n (?<name>.*) -c (?<amount>.*)$"),
 
     //store commands
     SHOW_PRODUCTS("show all products"),

@@ -22,7 +22,7 @@ public class Tools extends Item {
     private int currentWater;
 
     public Tools(Tool toolType) {
-        super(toolType.getName());
+        super(toolType.getName(), Quality.NORMAL, 100);
         this.toolType = toolType;
         this.level = 0;
         this.baseEnergyCost = toolType.getEnergyCost();
@@ -95,7 +95,7 @@ public class Tools extends Item {
             return new Result(false, "This tool is already at its maximum level");
         }
 
-        Result result = upgradeFunction.execute(level);
+        Result result = upgradeFunction.execute(level, App.getCurrentPlayerLazy().getCurrentTool());
         if (result.isSuccessful()) {
             this.level = newLevel;
 
@@ -103,6 +103,7 @@ public class Tools extends Item {
                 initializeWateringCanCapacity();
             }
         }
+        App.getCurrentPlayerLazy().decreaseMoney(30);
         return result;
     }
 

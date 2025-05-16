@@ -18,10 +18,10 @@ import java.util.Map;
 
 public class ItemBuilder {
 
-    public static Item builder(String name, Quality quality) {
-        SeedTypes seedType = SeedTypes.stringToSeed(name);
+    public static Item builder(String name, Quality quality, int price) {
+            SeedTypes seedType = SeedTypes.stringToSeed(name);
         if (seedType != null) {
-            return new Seed(seedType);
+            return new Seed(seedType.getName(), Quality.NORMAL, 0, seedType);
         }
         Tool abzar = Tool.stringToTool(name);
         if (abzar != null) {
@@ -37,13 +37,13 @@ public class ItemBuilder {
         }
         FoodType foodType = FoodType.stringToFood(name);
         Cooking cooking = Cooking.fromName(name);
-        if (foodType != null) {
+        if (foodType != null || cooking != null) {
             //TODO:cooking?
             return new Food(name, cooking);
         }
         IngredientsType ingredientsType = IngredientsType.stringToIngredient(name);
         if (ingredientsType != null) {
-            return new Item(ingredientsType.name());
+            return new Item(ingredientsType.name(), quality, price);
         }
         CraftingRecipe craftingRecipe = CraftingRecipe.getByName(name);
         if (craftingRecipe != null) {
@@ -66,7 +66,7 @@ public class ItemBuilder {
         if (mineralTypes != null) {
             return new Stone(mineralTypes);
         }
-        return new Item(name);
+        return new Item(name, quality, price);
     }
 
     public static void addToBackPack(Item item, int count, Quality quality) {

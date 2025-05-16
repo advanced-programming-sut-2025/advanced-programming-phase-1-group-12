@@ -2,6 +2,7 @@ package models.Animal;
 
 import models.Fundementals.LocationOfRectangle;
 import models.Item;
+import models.ProductsPackage.Quality;
 
 public class AnimalHome extends Item {
     private int CapacityRemained;
@@ -11,8 +12,8 @@ public class AnimalHome extends Item {
 
     private LocationOfRectangle location;
 
-    public AnimalHome(int capacityRemained, String type, LocationOfRectangle location) {
-        super(type);
+    public AnimalHome(String name, Quality quality, int price, int capacityRemained, String type, LocationOfRectangle location) {
+        super(name, quality, price);
         CapacityRemained = capacityRemained;
         Type = type;
         this.location = location;
