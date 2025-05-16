@@ -1,13 +1,16 @@
 package controller;
 
+import models.Craft;
 import models.Fundementals.App;
 import models.Fundementals.Location;
 import models.Fundementals.Result;
 import models.Item;
 import models.ItemBuilder;
+import models.ProductsPackage.ArtisanItem;
 import models.ProductsPackage.Quality;
 import models.RelatedToUser.Ability;
 import models.enums.Season;
+import models.enums.ToolEnums.Tool;
 import models.enums.Types.*;
 import models.enums.foraging.*;
 
@@ -123,7 +126,7 @@ public class FarmingController {
     public Result plant(String seed, String direction) {
         int Direction = Integer.parseInt(direction);
         Location currentLocation = App.getCurrentGame().getCurrentPlayer().getUserLocation();
-        if(currentLocation.getTypeOfTile().equals(TypeOfTile.GREENHOUSE)){
+        if (currentLocation.getTypeOfTile().equals(TypeOfTile.GREENHOUSE)) {
             return new Result(false, "You can't grow giant plants in a green house");
         }
         int x, y;
@@ -441,76 +444,70 @@ public class FarmingController {
                 return new Result(false, "Invalid direction");
             }
         }
+
         Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
-        if (!newLocation.getTypeOfTile().equals(TypeOfTile.PLANT) && !newLocation.getTypeOfTile().equals(TypeOfTile.TREE)
-                && !newLocation.getTypeOfTile().equals(TypeOfTile.GIANT_PLANT))
-            return new Result(false, "there is no seed for reaping!");
+
+        if (!newLocation.getTypeOfTile().equals(TypeOfTile.PLANT) &&
+                !newLocation.getTypeOfTile().equals(TypeOfTile.TREE) &&
+                !newLocation.getTypeOfTile().equals(TypeOfTile.GIANT_PLANT)) {
+            return new Result(false, "There is no seed for reaping!");
+        }
+
         if (newLocation.getTypeOfTile().equals(TypeOfTile.PLANT)) {
-            Plant plant = (Plant) newLocation.getObjectInTile();if(plant.getAge() < plant.getTotalTimeNeeded()){
-                return new Result(false, "GiantPlant can't be reached cause it stage can't be finished");
+            Plant plant = (Plant) newLocation.getObjectInTile();
+
+            if (plant.getAge() < plant.getTotalTimeNeeded()) {
+                return new Result(false, "Plant is not ready for harvest yet.");
             }
-            if(plant.getAllCrops().oneTime) {
-                App.getCurrentGame().getMainMap().findLocation(x, y).setObjectInTile(null);
-                App.getCurrentGame().getMainMap().findLocation(x, y).setTypeOfTile(TypeOfTile.GROUND);
+
+            if (plant.getAllCrops().oneTime) {
+                newLocation.setObjectInTile(null);
+                newLocation.setTypeOfTile(TypeOfTile.GROUND);
                 App.getCurrentPlayerLazy().getOwnedFarm().getPlantOfFarm().remove(plant);
                 ItemBuilder.addToBackPack(ItemBuilder.builder(plant.getAllCrops().name(), Quality.NORMAL), 1, Quality.NORMAL);
-                for(Ability ability : App.getCurrentPlayerLazy().getAbilitis()){
-                    if(ability.getName().equalsIgnoreCase("Farming")){
-                        ability.increaseAmount(5);
-                    }
-                }
-                return new Result(true, plant.getAllCrops().name + " add to back pack of current player");
-            }else{
-                if(!plant.isOneTime()){
-                    plant.setRegrowthTime(plant.getRegrowthTime() + 1);
-                    if(plant.getRegrowthTime() == plant.getAllCrops().regrowthTime){
-                        plant.setRegrowthTime(0);
-                        plant.setOneTime(true);
-                    }
+            } else {
+                if (!plant.isOneTime()) {
                     return new Result(false, "We must wait until the delivery period arrives.");
-                }
-                else{
-                    ItemBuilder.addToBackPack(ItemBuilder.builder(plant.getAllCrops().name(), Quality.NORMAL), 1, Quality.NORMAL);
-                    for(Ability ability : App.getCurrentPlayerLazy().getAbilitis()){
-                        if(ability.getName().equalsIgnoreCase("Farming")){
-                            ability.increaseAmount(5);
-                        }
-                    }
+                } else {
                     plant.setOneTime(false);
                     plant.setRegrowthTime(0);
-                    return new Result(true, plant.getAllCrops().name + " add to back pack of current player");
+                    ItemBuilder.addToBackPack(ItemBuilder.builder(plant.getAllCrops().name(), Quality.NORMAL), 1, Quality.NORMAL);
                 }
             }
-        } else if(newLocation.getTypeOfTile().equals(TypeOfTile.TREE)) {
-            Tree tree = (Tree) newLocation.getObjectInTile();
-            App.getCurrentGame().getMainMap().findLocation(x, y).setObjectInTile(null);
-            App.getCurrentGame().getMainMap().findLocation(x, y).setTypeOfTile(TypeOfTile.GROUND);
-            App.getCurrentPlayerLazy().getOwnedFarm().getTrees().remove(tree);
-            //TODO: fruit
-            for(Ability ability : App.getCurrentPlayerLazy().getAbilitis()){
-                if(ability.getName().equalsIgnoreCase("Farming")){
+
+            for (Ability ability : App.getCurrentPlayerLazy().getAbilitis()) {
+                if (ability.getName().equalsIgnoreCase("Farming")) {
                     ability.increaseAmount(5);
                 }
             }
-            return new Result(true, tree.getType().name + " add to back pack of current player");
-        }else{
+
+            return new Result(true, plant.getAllCrops().name + " added to backpack of current player");
+        }
+
+        if (newLocation.getTypeOfTile().equals(TypeOfTile.GIANT_PLANT)) {
             GiantPlant giantPlant = (GiantPlant) newLocation.getObjectInTile();
-            if(giantPlant.getAge() < giantPlant.getTotalTimeNeeded()){
-                return new Result(false, "GiantPlant can't be reached cause it stage can't be finished");
+
+            if (giantPlant.getAge() < giantPlant.getTotalTimeNeeded()) {
+                return new Result(false, "GiantPlant can't be harvested because it's not mature yet.");
             }
+
             removeFromFarm(giantPlant);
             ItemBuilder.addToBackPack(ItemBuilder.builder(giantPlant.getGiantPlants().getName(), Quality.NORMAL), 1, Quality.NORMAL);
-            for(Ability ability : App.getCurrentPlayerLazy().getAbilitis()){
-                if(ability.getName().equalsIgnoreCase("Farming")){
+
+            for (Ability ability : App.getCurrentPlayerLazy().getAbilitis()) {
+                if (ability.getName().equalsIgnoreCase("Farming")) {
                     ability.increaseAmount(5);
                 }
             }
-            return new Result(true, giantPlant.getGiantPlants().name + " add to back pack of current player");
+
+            return new Result(true, giantPlant.getGiantPlants().name + " added to backpack of current player");
         }
+
+        return new Result(false, "Unknown error during reaping.");
     }
 
     public void removeFromFarm(GiantPlant plant) {
-        for(Location location : plant.getLocation()){
+        for (Location location : plant.getLocation()) {
             System.out.println("you tack GiantPlant at " + location.getxAxis() + " " + location.getyAxis());
             location.setObjectInTile(null);
             location.setTypeOfTile(TypeOfTile.GROUND);
@@ -537,60 +534,153 @@ public class FarmingController {
 
     public Result watering(int x, int y) {
         Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
-        if(!App.getCurrentPlayerLazy().getCurrentTool().isWateringCan()){
+        if (!App.getCurrentPlayerLazy().getCurrentTool().isWateringCan()) {
             return new Result(false, "There is no water for watering it!");
         }
-        if(location.getTypeOfTile().equals(TypeOfTile.GROUND)){
+        if (location.getTypeOfTile().equals(TypeOfTile.GROUND)) {
             location.setTypeOfTile(TypeOfTile.LAKE);
         }
         App.getCurrentPlayerLazy().getCurrentTool().use(location, App.getCurrentPlayerLazy().getCurrentTool().getLevel());
-        Plant plant = (Plant) location.getObjectInTile();
-        plant.setHasBeenWatering(true);
-        location.setObjectInTile(plant);
-        return new Result(true, "you watering to this plant!");
+        if (location.getObjectInTile() instanceof Plant) {
+            Plant plant = (Plant) location.getObjectInTile();
+            plant.setHasBeenWatering(true);
+            location.setObjectInTile(plant);
+            return new Result(true, "you watering to this plant!");
+        } else if (location.getObjectInTile() instanceof Tree) {
+            Tree tree = (Tree) location.getObjectInTile();
+            tree.setHasBeenWatering(true);
+            location.setObjectInTile(tree);
+            return new Result(true, "you watering to this tree!");
+        } else {
+            return new Result(false, "there i nothing to watering it");
+        }
+    }
+
+    public Result extraction(int x, int y) {
+        Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
+        if (!App.getCurrentPlayerLazy().getCurrentTool().getToolType().equals(Tool.PICKAXE)) {
+            return new Result(false, "we dont have pickaxe!");
+        }
+        if (location.getTypeOfTile().equals(TypeOfTile.STONE)) {
+            Stone stone = (Stone) location.getObjectInTile();
+            Ability ability = App.getCurrentPlayerLazy().getAbilityByName("Mining");
+            App.getCurrentPlayerLazy().getCurrentTool().use(location, App.getCurrentPlayerLazy().getCurrentTool().getLevel());
+            for (Ability ability1 : App.getCurrentPlayerLazy().getAbilitis()) {
+                if (ability1.getName().equalsIgnoreCase("Mining")) {
+                    ability.increaseAmount(10);
+                }
+            }
+            if (ability.getLevel() >= 2) {
+                ItemBuilder.addToBackPack(ItemBuilder.builder(stone.getMineralTypes().getName(), Quality.NORMAL), 2, Quality.NORMAL);
+                location.setTypeOfTile(TypeOfTile.GROUND);
+                return new Result(true, "You have mined with " + ability.getLevel() + " and take 2 stone from ground.");
+            }
+            ItemBuilder.addToBackPack(ItemBuilder.builder(stone.getMineralTypes().getName(), Quality.NORMAL), 1, Quality.NORMAL);
+            location.setTypeOfTile(TypeOfTile.GROUND);
+            return new Result(true, "You have mined with " + ability.getLevel() + " and take 1 stone from ground.");
+        } else if (location.getTypeOfTile().equals(TypeOfTile.QUARRY)) {
+            Stone stone = (Stone) location.getObjectInTile();
+            Ability ability = App.getCurrentPlayerLazy().getAbilityByName("Mining");
+            App.getCurrentPlayerLazy().getCurrentTool().use(location, App.getCurrentPlayerLazy().getCurrentTool().getLevel());
+            for (Ability ability1 : App.getCurrentPlayerLazy().getAbilitis()) {
+                if (ability1.getName().equalsIgnoreCase("Mining")) {
+                    ability.increaseAmount(10);
+                }
+            }
+            if (ability.getLevel() >= 2) {
+                ItemBuilder.addToBackPack(ItemBuilder.builder(stone.getMineralTypes().getName(), Quality.NORMAL), 2, Quality.NORMAL);
+                location.setTypeOfTile(TypeOfTile.QUARRY);
+                return new Result(true, "You have mined with " + ability.getLevel() + " and take 2 stone from quarry.");
+            }
+            ItemBuilder.addToBackPack(ItemBuilder.builder(stone.getMineralTypes().getName(), Quality.NORMAL), 1, Quality.NORMAL);
+            location.setTypeOfTile(TypeOfTile.QUARRY);
+            return new Result(true, "You have mined with " + ability.getLevel() + " and take 1 stone from quarry.");
+        } else {
+            return new Result(false, "You can't extarct in this tile with type: " + location.getTypeOfTile());
+        }
+
     }
 
     public Result PickingFruit(int x, int y) {
         Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
+
+        if (location.getTypeOfTile() != TypeOfTile.TREE)
+            return new Result(false, "There is no tree to pick fruit from!");
+
         Tree tree = (Tree) location.getObjectInTile();
+
+        if (tree.getAge() < tree.getTotalTimeNeeded())
+            return new Result(false, "Tree is not ready to harvest fruit yet.");
+
         FruitType fruitType = tree.getType().fruitType;
 
-        if (tree.getAge() < tree.getTotalTimeNeeded()) {
-            return new Result(false, "Tree can't give you a fruit because it is young!");
+        ItemBuilder.addToBackPack(ItemBuilder.builder(fruitType.getName(), Quality.NORMAL), 1, Quality.NORMAL);
+        tree.setOneTime(false);
+        tree.setRegrowthTime(0);
+        for (Ability ability : App.getCurrentPlayerLazy().getAbilitis()) {
+            if (ability.getName().equalsIgnoreCase("Farming"))
+                ability.increaseAmount(5);
         }
 
-//        if (tree.getType().oneTime) {
-//            // درخت‌هایی که فقط یک‌بار میوه می‌دن
-//            App.getCurrentPlayerLazy().getBackPack().addItem(ItemBuilder.builder(fruitType.getName(), Quality.NORMAL), 1);
-//            App.getCurrentGame().getMainMap().findLocation(x, y).setObjectInTile(null);
-//            App.getCurrentGame().getMainMap().findLocation(x, y).setTypeOfTile(TypeOfTile.GROUND);
-//            App.getCurrentPlayerLazy().getOwnedFarm().getTrees().remove(tree);
-//            for (Ability ability : App.getCurrentPlayerLazy().getAbilitis()) {
-//                if (ability.getName().equalsIgnoreCase("Farming")) {
-//                    ability.increaseAmount(5);
-//                }
-//            }
-//            return new Result(true, "You picked up a fruit and the tree is now removed (one-time harvest).");
-//        } else {
-//            if (tree.isCanPickUp()) {
-//                App.getCurrentPlayerLazy().getBackPack().addItem(ItemBuilder.builder(fruitType.getName(), Quality.NORMAL), 1);
-//                tree.setCanPickUp(false);
-//                tree.setRegrowthTime(0);
-//                for (Ability ability : App.getCurrentPlayerLazy().getAbilitis()) {
-//                    if (ability.getName().equalsIgnoreCase("Farming")) {
-//                        ability.increaseAmount(5);
-//                    }
-//                }
-//                return new Result(true, "You picked up a fruit!");
-//            } else {
-//                tree.setRegrowthTime(tree.getRegrowthTime() + 1);
-//                if (tree.getRegrowthTime() >= tree.getType().regrowthTime) {
-//                    tree.setCanPickUp(true);
-//                    tree.setRegrowthTime(0);
-//                }
-//                return new Result(false, "You must wait until the tree grows fruits again.");
-//            }
-//        }
-        return new Result(true, "uuuu");
+        return new Result(true, fruitType.getName() + " added to backpack of current player.");
+    }
+
+    public Result cuttingTrees(int x, int y){
+        Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
+        if (!App.getCurrentPlayerLazy().getCurrentTool().getToolType().equals(Tool.AXE)) {
+            return new Result(false, "we dont have pickaxe!");
+        }
+
+        if (location.getTypeOfTile() != TypeOfTile.TREE)
+            return new Result(false, "There is no tree to cut it!");
+
+        Tree tree = (Tree) location.getObjectInTile();
+        ItemBuilder.addToBackPack(ItemBuilder.builder(tree.getSaplingTypes().getName(), Quality.NORMAL), 2, Quality.NORMAL);
+        location.setTypeOfTile(TypeOfTile.GROUND);
+        location.setObjectInTile(null);
+        ItemBuilder.addToBackPack(ItemBuilder.builder("Wood", Quality.NORMAL) , 10,Quality.NORMAL);
+        return new Result(true, "you cut tree and get 2 sapling with type: " + tree.getSaplingTypes().getName());
+    }
+
+    public Result plantInGreenHouse(String seed, int x, int y){
+        Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
+        if(!App.isLocationInPlace(location, App.getCurrentPlayerLazy().getOwnedFarm().getGreenHouse().getGreenHouseLocation())){
+            return new Result(false, "it is not in green house!");
+        }
+
+        SeedTypes seedTypes = SeedTypes.stringToSeed(seed);
+        if (seedTypes == null) return new Result(false, "Invalid seed name.");
+        if (!App.getCurrentPlayerLazy().getBackPack().hasItem(seed)) {
+            return new Result(false, "You don't have this seed.");
+        }
+
+        location.setTypeOfTile(TypeOfTile.PLANT);
+        Seed newSeed = new Seed(seedTypes);
+        if (newSeed.getType().equals(SeedTypes.MixedSeeds)) {
+            Season season = App.getCurrentGame().getDate().getSeason();
+            newSeed = switchingSeason(season);
+            AllCrops allCrops = AllCrops.sourceTypeToCraftType(newSeed.getType());
+            Plant newPlant = new Plant(location, newSeed, false, allCrops);
+            App.getCurrentPlayerLazy().getOwnedFarm().getPlantOfFarm().add(newPlant);
+            return new Result(true, "You planting mixed seed in season " + season.name() + " and it appear to: " + newSeed.getName());
+        }
+        AllCrops allCrops = AllCrops.sourceTypeToCraftType(seedTypes);
+        Plant newPlant = new Plant(location, newSeed, false, allCrops);
+        App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getPlantOfFarm().add(newPlant);
+        location.setObjectInTile(newPlant);
+        Item item = App.getCurrentPlayerLazy().getBackPack().getItemByName(seed);
+        App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, 1);
+
+        return new Result(true, "you plant this seed at greenHouse.");
+    }
+
+    public Result putScarecrow(int x, int y) {
+        Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
+        if(App.getCurrentPlayerLazy().getBackPack().hasItem("Scarecrow")){
+            ArtisanItem artisanItem = new ArtisanItem("Scarecroe", null, 0, 0);
+            newLocation.setObjectInTile(artisanItem);
+            return new Result(true, "this location will be product be scarecrow!");
+        }
+        return new Result(false, "we dont have scareCrow in our backpack!");
     }
 }

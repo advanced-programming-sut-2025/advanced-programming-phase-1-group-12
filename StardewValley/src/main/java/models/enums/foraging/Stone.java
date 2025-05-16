@@ -1,10 +1,13 @@
 package models.enums.foraging;
 
-public class Stone {
+import models.Item;
+
+public class Stone extends Item {
 
     private MineralTypes mineralTypes;
 
     public Stone(MineralTypes mineralTypes) {
+        super(mineralTypes.name());
         this.mineralTypes = mineralTypes;
     }
 

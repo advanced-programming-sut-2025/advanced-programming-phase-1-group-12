@@ -10,6 +10,7 @@ import models.ToolsPackage.Tools;
 import models.enums.FishDetails;
 import models.enums.ToolEnums.Tool;
 import models.enums.Types.*;
+import models.enums.foraging.MineralTypes;
 import models.enums.foraging.Seed;
 import models.enums.foraging.*;
 
@@ -60,6 +61,10 @@ public class ItemBuilder {
         FruitType fruitType = FruitType.getFruitType(name);
         if (fruitType != null) {
             return new Fruit(fruitType);
+        }
+        MineralTypes mineralTypes = MineralTypes.getMineralTypeByName(name);
+        if (mineralTypes != null) {
+            return new Stone(mineralTypes);
         }
         return new Item(name);
     }
