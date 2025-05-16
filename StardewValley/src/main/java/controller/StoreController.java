@@ -27,7 +27,6 @@ public class StoreController {
 
     public Result buyAnimalBuilding(String buildingName, Location location) {
         if (!App.isInStore("Carpenter's Shop")) {
-            //TODO:money for building is not decreased
             return new Result(false, "You are not in Carpenter's shop");
         }
         if (!App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getLocation().getLocationsInRectangle().contains(location)) {
@@ -367,11 +366,31 @@ public class StoreController {
         }
         ItemBuilder.addToBackPack(item, count, Quality.NORMAL); // assuming getType() returns Item
         return new Result(true, "You bought this product");
-    } public Result cheatAddItem(String productName, int count) {
+    } 
 
-        //TODO:bullshit price
+    public Result cheatAddItem(String productName, int count) {
+        Item item = ItemBuilder.builder(productName, Quality.NORMAL, 10);
 
-        ItemBuilder.addToBackPack(ItemBuilder.builder(productName, Quality.NORMAL, 10), count, Quality.NORMAL); // assuming getType() returns Item
-        return new Result(true, "You bought this product");
+        if (item.getName().equals(productName) && item.getClass() == Item.class) {
+            boolean isValidItem = false;
+            for (StoreProductsTypes type : StoreProductsTypes.values()) {
+                if (type.getName().equalsIgnoreCase(productName)) {
+                    isValidItem = true;
+                    break;
+                }
+            }
+
+            if (!isValidItem) {
+                return new Result(false, "The item '" + productName + "' does not exist in the game.");
+            }
+        }
+
+        BackPack backpack = App.getCurrentPlayerLazy().getBackPack();
+        if (!backpack.checkCapacity(count)) {
+            return new Result(false, "Not enough space in your inventory to add " + count + " of this item.");
+        }
+
+        ItemBuilder.addToBackPack(item, count, Quality.NORMAL);
+        return new Result(true, "Successfully added " + count + " " + productName + " to your inventory.");
     }
 }

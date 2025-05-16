@@ -328,6 +328,8 @@ public class GameMenu extends AppMenu {
             System.out.println(controller.cheatAddXP(matcher.group("username")));
         } else if ((matcher = GameMenuCommands.CHEAT_SET_BOUQUET.getMather(input))!= null) {
             System.out.println(controller.cheatAddBouquet("username"));
+        } else if ((matcher = GameMenuCommands.CHEAT_GREENHOUSE_BUILD.getMather(input))!=null) {
+            System.out.println(controller.cheatGreenHouse());
         } else if ((matcher = GameMenuCommands.CHEAT_DECREASE_MONEY.getMather(input))!= null) {
             App.getCurrentPlayerLazy().decreaseMoney(Integer.parseInt(matcher.group("amount")));
         } else {

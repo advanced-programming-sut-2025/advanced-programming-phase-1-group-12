@@ -27,7 +27,7 @@ public enum Tool {
 
         @Override
         public UpgradeFunction getUpgradeFunction() {
-            App.getCurrentPlayerLazy().decreaseMoney(35);
+//            App.getCurrentPlayerLazy().decreaseMoney(35);
             return (currentLevel, tools) -> new Result(true, "Hoe upgraded to level " + (currentLevel + 1));
         }
     },
@@ -60,7 +60,7 @@ public enum Tool {
 
         @Override
         public UpgradeFunction getUpgradeFunction() {
-            App.getCurrentPlayerLazy().decreaseMoney(40);
+//            App.getCurrentPlayerLazy().decreaseMoney(40);
             return (currentLevel, tools) -> new Result(true, "PickAxe upgraded to level " + (currentLevel + 1));
         }
     },
@@ -106,7 +106,7 @@ public enum Tool {
                         tool.setType(ToolTypes.IRIDIUM);
                         tool.setLevel(tool.getLevel() + 1);
                 }
-                App.getCurrentPlayerLazy().decreaseMoney(35);
+//                App.getCurrentPlayerLazy().decreaseMoney(35);
                 return new Result(true, "Axe upgraded to level " + (currentLevel + 1));
             };
         }
@@ -146,7 +146,7 @@ public enum Tool {
 
         @Override
         public UpgradeFunction getUpgradeFunction() {
-            App.getCurrentPlayerLazy().decreaseMoney(42);
+//            App.getCurrentPlayerLazy().decreaseMoney(42);
             return (currentLevel, tools) -> new Result(true, "WateringCan upgraded to level " + (currentLevel + 1));
         }
     },
@@ -165,7 +165,7 @@ public enum Tool {
 
         @Override
         public UpgradeFunction getUpgradeFunction() {
-            App.getCurrentPlayerLazy().decreaseMoney(37);
+//            App.getCurrentPlayerLazy().decreaseMoney(37);
             return (currentLevel, tools) -> new Result(true, "FishingRod upgraded to level " + (currentLevel + 1));
         }
     },
@@ -186,7 +186,7 @@ public enum Tool {
 
         @Override
         public UpgradeFunction getUpgradeFunction() {
-            App.getCurrentPlayerLazy().decreaseMoney(35);
+//            App.getCurrentPlayerLazy().decreaseMoney(35);
             return (currentLevel, tools) -> new Result(true, "Scythe upgraded to level " + (currentLevel + 1));
         }
     },
@@ -210,7 +210,7 @@ public enum Tool {
 
         @Override
         public UpgradeFunction getUpgradeFunction() {
-            App.getCurrentPlayerLazy().decreaseMoney(43);
+//            App.getCurrentPlayerLazy().decreaseMoney(43);
             return (currentLevel, tools) -> new Result(true, "MilkPail upgraded to level " + (currentLevel + 1));
         }
     },
@@ -234,7 +234,7 @@ public enum Tool {
 
         @Override
         public UpgradeFunction getUpgradeFunction() {
-            App.getCurrentPlayerLazy().decreaseMoney(16);
+//            App.getCurrentPlayerLazy().decreaseMoney(16);
             return (currentLevel, tools) -> new Result(true, "Shears upgraded to level " + (currentLevel + 1));
         }
     },

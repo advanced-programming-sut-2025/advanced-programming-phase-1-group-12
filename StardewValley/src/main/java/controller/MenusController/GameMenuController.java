@@ -1156,6 +1156,16 @@ public class GameMenuController implements MenuController {
         return new Result(true, message);
     }
 
+    public Result cheatGreenHouse() {
+        Player player = App.getCurrentGame().getCurrentPlayer();
+
+        //build greenhouse
+        player.decreaseMoney(1000);
+        String message = "You built a green house!, Money (-1000) / Wood (-500)\n" + "Money: " + player.getMoney() +
+                "\nWood: " + player.getBackPack().getItemCount(player.getBackPack().getItemByName("Wood")) + "\n";
+        return new Result(true, message);
+    }
+
     public Result showShippingBinLocation() {
         Player player = App.getCurrentGame().getCurrentPlayer();
         if (player.getShippingBin() == null) {

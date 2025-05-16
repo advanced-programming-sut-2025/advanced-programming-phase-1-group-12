@@ -10,7 +10,7 @@ public enum GameMenuCommands implements Commands {
     ABILITIES_SHOW("abilities show"),
     CHEAT_BUY_ITEM("cheat buy item (?<productName>.*) -n (?<count>.*)"),
     //chizi ke bahash misazim be price esh kari nadashte bashimmm!!!
-    CHEAT_ADD_ITEM("cheat add item (?<productName>.*) -n (?<count>.*)"),
+    CHEAT_ADD_ITEM("cheat add item -n (?<productName>.*) -c (?<count>.*)"),
     //Starting Game
     PLAY("^\\s*game new -u ([\\w-]+)(?: ([\\w-]+))?(?: ([\\w-]+))?\\s*$"),
     PRINT("^print map -l (?<X>.*), (?<Y>.*) -s (?<size>.*)$"),
@@ -135,6 +135,7 @@ public enum GameMenuCommands implements Commands {
     CHEAT_FRIENDSHIP_LEVEL("^cheat friendship level -n (?<name>.*) -c (?<amount>.*)$"),
     CHEAT_SET_BOUQUET("^set bouquet -n (?<username>.*)$"),
     CHEAT_DECREASE_MONEY("^decrease money -a (?<username>.*)$"),
+    CHEAT_GREENHOUSE_BUILD("^cheat greenhouse build$"),
 
     //store commands
     SHOW_PRODUCTS("show all products"),

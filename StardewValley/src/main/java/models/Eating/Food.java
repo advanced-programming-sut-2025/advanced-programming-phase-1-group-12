@@ -8,7 +8,7 @@ public class Food extends Item {
     private Cooking foodType;
 
     public Food(String name, Cooking foodType){
-        super(name, Quality.NORMAL, foodType.getBaseSellPrice());
+        super(name, Quality.NORMAL, 10);
         this.foodType = foodType;
     }
 
