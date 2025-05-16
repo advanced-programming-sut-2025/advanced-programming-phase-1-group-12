@@ -2,6 +2,7 @@ package controller;
 
 import models.Fundementals.App;
 import models.Fundementals.Location;
+import models.Fundementals.Player;
 import models.Fundementals.Result;
 import models.BackPack;
 import models.Item;
@@ -51,12 +52,18 @@ public class ToolsController {
 
     private String getLevelName(int level) {
         switch (level) {
-            case 0: return "Normal";
-            case 1: return "Copper";
-            case 2: return "Iron";
-            case 3: return "Gold";
-            case 4: return "Iridium";
-            default: return "Unknown";
+            case 0:
+                return "Normal";
+            case 1:
+                return "Copper";
+            case 2:
+                return "Iron";
+            case 3:
+                return "Gold";
+            case 4:
+                return "Iridium";
+            default:
+                return "Unknown";
         }
     }
 
@@ -114,15 +121,19 @@ public class ToolsController {
                     getLevelName(currentTool.getLevel()));
         } else {
             return upgradeResult;
+
         }
     }
 
     public boolean checkIsInSmithing() {
-        return false;
+        return App.getCurrentGame().getMainMap().getStores().get(0).getLocationOfRectangle().getLocationsInRectangle().contains(App.getCurrentPlayerLazy().getUserLocation());
     }
 
+
     public boolean checkUpdateToolMoney() {
-        // TODO : check money
+        if(App.getCurrentPlayerLazy().getMoney() < 30){
+            return false;
+        }
         return true;
     }
 

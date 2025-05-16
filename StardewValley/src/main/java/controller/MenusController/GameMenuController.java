@@ -17,9 +17,6 @@ import models.enums.*;
 import models.Fundementals.Player;
 import com.google.gson.Gson;
 import models.enums.ToolEnums.BackPackTypes;
-import models.enums.ToolEnums.Tool;
-import models.enums.ToolEnums.TrashcanTypes;
-import models.enums.Types.ArtisanTypes;
 import models.enums.Types.Cooking;
 import models.enums.Types.TypeOfTile;
 import models.NPC.NPC;
@@ -119,9 +116,6 @@ public class GameMenuController implements MenuController {
         String history = TradeManager.getTradeHistory(currentPlayer);
         return new Result(true, history);
     }
-
-
-    // Samin: date comands are here
 
     public Result showHour() {
         int currentHour = App.getCurrentGame().getDate().getHour();
