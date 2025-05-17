@@ -27,8 +27,6 @@ public enum LoginRegisterMenuCommands implements Commands {
 
     VALID_PASS("^[a-zA-Z0-9?=.,\";:/\\[\\]{}()+&*^%$#!]{8,}$");
 
-
-
     private final String regex;
     private final Pattern pattern;
 

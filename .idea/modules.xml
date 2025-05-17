@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/StardewValley/StarDewValley.iml" filepath="$PROJECT_DIR$/StardewValley/StarDewValley.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/advanced-programming-phase-1-group-12.iml" filepath="$PROJECT_DIR$/.idea/advanced-programming-phase-1-group-12.iml" />
+      <module fileurl="file://$PROJECT_DIR$/StardewValley/your-artifact-id.iml" filepath="$PROJECT_DIR$/StardewValley/your-artifact-id.iml" />
     </modules>
   </component>
 </project>

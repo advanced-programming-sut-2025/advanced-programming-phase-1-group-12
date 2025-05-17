@@ -26,7 +26,7 @@ public class Tree {
         this.hasBeenFertilized = false;
         this.age = 0;
         this.hasBeenWatering = false;
-        this.totalTimeNeeded = type.totalHarvestTime;
+        this.totalTimeNeeded = 1;
         this.saplingTypes = type.seedSource;
         this.dayPast = 2;
         this.currentStage = 0;

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import controller.MapSetUp.MapSetUp;
 import controller.NPCcontroller;
 import controller.TradeManager;
+import models.Animal.AnimalHome;
+import models.Animal.FarmAnimals;
 import models.Eating.Food;
 import models.Fundementals.*;
 import models.MapDetails.GreenHouse;
@@ -42,6 +44,7 @@ import java.io.IOException;
 import java.util.*;
 
 import java.io.*;
+import java.util.stream.Collectors;
 
 public class GameMenuController implements MenuController {
     public Result startTrade() {
@@ -1141,6 +1144,28 @@ public class GameMenuController implements MenuController {
 
     public Result EXIT() {
         Game lastGame = App.getCurrentGame();
+
+        Gson gson = new Gson();
+        for (Player player : lastGame.getPlayers()) {
+            String username = player.getUser().getUserName();
+            File userFile = new File(username + ".json");
+
+            if (!userFile.exists()) continue;
+
+            try (BufferedReader reader = new BufferedReader(new FileReader(userFile))) {
+                User user = gson.fromJson(reader, User.class);
+                user.setScore(user.getScore() + player.getMoney());
+                user.setNumberOfPlaying(user.getNumberOfPlaying() + 1);
+                try (FileWriter writer = new FileWriter(userFile)) {
+                    gson.toJson(user, writer);
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                return new Result(false, "Failed to update user file for " + username);
+            }
+        }
+
         int gameID = lastGame.getGameId();
 
         List<Map<String, Object>> playersData = new ArrayList<>();
@@ -1220,52 +1245,45 @@ public class GameMenuController implements MenuController {
         return map;
     }
 
-    public Result loadGameById(int gameIdToLoad) {
+    public Result loadGameById(int gameID) {
         ObjectMapper mapper = new ObjectMapper();
-        File file = new File("saves/saved_game" + gameIdToLoad + ".json");
+        File file = new File("saves/saved_game" + gameID + ".json");
 
-        if (!file.exists())
-            return new Result(false, "No saved game found with gameId: " + gameIdToLoad);
+        if (!file.exists()) {
+            return new Result(false, "Save file not found for game ID: " + gameID);
+        }
 
         try {
-            System.out.println("Reading JSON file...");
             Map<String, Object> saveData = mapper.readValue(file, new TypeReference<>() {});
+
+            Game game = new Game();
+            game.setGameId(gameID);
+            App.setCurrentGame(game);
+
+            // Load players
             List<Map<String, Object>> playersData = (List<Map<String, Object>>) saveData.get("players");
-            List<Map<String, Object>> mapData = (List<Map<String, Object>>) saveData.get("mainMap");
-
-            System.out.println("Building map...");
-            map mainMap = new map();
-            for (Map<String, Object> tileMap : mapData) {
-                int x = ((Number) tileMap.get("x")).intValue(); // safer casting
-                int y = ((Number) tileMap.get("y")).intValue();
-                String typeName = (String) tileMap.get("typeOfTile");
-
-                TypeOfTile type = TypeOfTile.valueOf(typeName);
-                Location loc = new Location(x, y);
-                loc.setTypeOfTile(type);
-                mainMap.getTilesOfMap().add(loc);
-            }
-
-            System.out.println("Rebuilding players...");
             ArrayList<Player> players = new ArrayList<>();
             for (Map<String, Object> playerMap : playersData) {
                 String username = (String) playerMap.get("username");
-                int x = ((Number) playerMap.get("x")).intValue();
-                int y = ((Number) playerMap.get("y")).intValue();
-                int energy = ((Number) playerMap.get("energy")).intValue();
+                int x = (Integer) playerMap.get("x");
+                int y = (Integer) playerMap.get("y");
+                int energy = (Integer) playerMap.get("energy");
 
-                Location loc = new Location(x, y);
+                // Lookup user by username
                 User user = App.getUserByUsername(username);
+                if (user == null) {
+                    return new Result(false, "User " + username + " not found.");
+                }
 
-                Player player = new Player(user, loc, false, null, null, null, null, false, false, null);
-                player.setUserLocation(loc);
+                Player player = new Player(user, new Location(x, y), false, null, null, null, null, false, false, null);
                 player.setEnergy(energy);
 
-                System.out.println("Restoring farm for player " + username);
+                // Load farm
                 Map<String, Object> farmMap = (Map<String, Object>) playerMap.get("farm");
-                Farm farm = new Farm(mapToRect((Map<String, Object>) farmMap.get("location")));
+                LocationOfRectangle farmLocation = mapToRect((Map<String, Object>) farmMap.get("location"));  // این باید تابع کمکت باشه که Map رو به LocationOfRectangle تبدیل کنه
 
-                farm.setFarmLocation(mapToRect((Map<String, Object>) farmMap.get("location")));
+                Farm farm = new Farm(farmLocation);
+
                 farm.setLake1(new Lake(mapToRect((Map<String, Object>) farmMap.get("lake1"))));
                 farm.setLake2(new Lake(mapToRect((Map<String, Object>) farmMap.get("lake2"))));
                 farm.setGreenHouse(new GreenHouse(mapToRect((Map<String, Object>) farmMap.get("greenhouse1"))));
@@ -1274,43 +1292,50 @@ public class GameMenuController implements MenuController {
                 farm.setShack2(new Shack(mapToRect((Map<String, Object>) farmMap.get("shack2"))));
                 farm.setQuarry(new Quarry(mapToRect((Map<String, Object>) farmMap.get("quarry1"))));
                 farm.setQuarry2(new Quarry(mapToRect((Map<String, Object>) farmMap.get("quarry2"))));
-                farm.setOwner(player);
+
+                List<String> animals = (List<String>) farmMap.get("farmAnimals");
+                List<String> homes = (List<String>) farmMap.get("animalHomes");
 
                 player.setOwnedFarm(farm);
                 players.add(player);
             }
+            game.setPlayers(players);
 
-            System.out.println("Finalizing game setup...");
-            Game loadedGame = new Game();
-            loadedGame.setPlayers(players);
-            loadedGame.setMainMap(mainMap);
-            App.setCurrentGame(loadedGame);
-            App.getCurrentGame().setCurrentPlayer(players.get(0));
+            // Load main map
+            List<Map<String, Object>> tilesData = (List<Map<String, Object>>) saveData.get("mainMap");
+            map mainMap = new map();
+            for (Map<String, Object> tileMap : tilesData) {
+                int x = (Integer) tileMap.get("x");
+                int y = (Integer) tileMap.get("y");
+                String tileType = (String) tileMap.get("typeOfTile");
 
-            for (Player player : App.getCurrentGame().getPlayers()) {
-                Location loc = player.getUserLocation();
-                App.getCurrentGame().getMainMap().findLocation(loc.getxAxis(), loc.getyAxis()).setObjectInTile(player);
-                Farm farm = player.getOwnedFarm();
-                App.getCurrentGame().getMainMap().getFarms().add(farm);
+                Location tile = new Location(x, y);
+                tile.setTypeOfTile(TypeOfTile.valueOf(tileType));
+                mainMap.getTilesOfMap().add(tile);
+            }
+            game.setMainMap(mainMap);
+            for(Player player : game.getPlayers()){
+                Location location = player.getUserLocation();
+                Location newLocation = App.getCurrentGame().getMainMap().findLocation(location.getxAxis(), location.getyAxis());
+                newLocation.setObjectInTile(player);
             }
 
-            System.out.println("Game loaded successfully.");
-            return new Result(true, "Game " + gameIdToLoad + " loaded successfully!");
+            App.setCurrentGame(game);
+            App.setCurrentMenu(Menu.GameMenu);
+            return new Result(true, "Game loaded successfully!");
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new Result(false, "Failed to load the game: " + e.getMessage());
+        } catch (IOException | ClassCastException | NullPointerException e) {
+            return new Result(false, "Failed to load game: " + e.getMessage());
         }
     }
 
-
+    // Helper methods
     private LocationOfRectangle mapToRect(Map<String, Object> map) {
         Map<String, Integer> topLeft = (Map<String, Integer>) map.get("topLeft");
         Map<String, Integer> bottomRight = (Map<String, Integer>) map.get("bottomRight");
-        return new LocationOfRectangle(
-                new Location(topLeft.get("x"), topLeft.get("y")),
-                new Location(bottomRight.get("x"), bottomRight.get("y"))
-        );
+        Location topLeftLoc = new Location(topLeft.get("x"), topLeft.get("y"));
+        Location bottomRightLoc = new Location(bottomRight.get("x"), bottomRight.get("y"));
+        return new LocationOfRectangle(topLeftLoc, bottomRightLoc);
     }
 
     public Result showCurrentType(int x, int y) {

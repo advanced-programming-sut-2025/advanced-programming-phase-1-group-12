@@ -9,7 +9,7 @@ public enum GameMenuCommands implements Commands {
     SHOW_MONEY("show money"),
     ABILITIES_SHOW("abilities show"),
     //Starting Game
-    PLAY("^\\s*game new -u ([\\w-]+)(?: ([\\w-]+))?(?: ([\\w-]+))?\\s*$"),
+    PLAY("^\\s*game new -u(?:\\s+[\\w-]+)*\\s*$"),
     PRINT("^print map -l (?<X>.*), (?<Y>.*) -s (?<size>.*)$"),
     HELP("^help reading map$"),
     SHOW_POSITION("^show location of current player$"),
@@ -32,7 +32,7 @@ public enum GameMenuCommands implements Commands {
     EXTRACTION("^extraction -l (?<X>.+) , (?<Y>.+)$"),
     Picking_FRUIT("^Picking fruit -l (?<X>.+)\\s*,\\s*(?<Y>.+)$"),
     CUTTING_TREE("^cutting tree -l (?<X>.+)\\s*,\\s*(?<Y>.+)$"),
-    PLANT_GREENHOUSE("plant -s (?<seed>.+) -l (?<X>.+) , (?<Y>.+)$"),
+    PLANT_GREENHOUSE("plant in green house -s (?<seed>.+) -l (?<X>.+) , (?<Y>.+)$"),
     PRODUCTION("^put scarecrow in -l (?<X>.+) , (?<Y>.+)$"),
     //crafting
     SHOW_RECIPES("^crafting show recipes$"),

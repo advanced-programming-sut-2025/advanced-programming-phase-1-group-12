@@ -161,11 +161,30 @@ public class ProfileMenuController implements MenuController {
         }
     }
 
-    public void userInfo(){
-        System.out.println("user info");
-        System.out.println(App.getLoggedInUser().getUserName());
-        System.out.println(App.getLoggedInUser().getNickname());
-        System.out.println(App.getLoggedInUser().getEmail().length());
-        //TODO:most money is not written
+    public void userInfo() {
+        String username = App.getLoggedInUser().getUserName();
+        File userFile = new File(username + ".json");
+
+        if (!userFile.exists()) {
+            System.out.println("User file not found!");
+            return;
+        }
+
+        Gson gson = new Gson();
+        try (BufferedReader reader = new BufferedReader(new FileReader(userFile))) {
+            User user = gson.fromJson(reader, User.class);
+
+            System.out.println("User info:");
+            System.out.println("Username: " + user.getUserName());
+            System.out.println("Nickname: " + user.getNickname());
+            System.out.println("Email: " + user.getEmail());
+            System.out.println("Most money (Score): " + user.getScore());
+            System.out.println("Number of playing: " + user.getNumberOfPlaying());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Error reading user file.");
+        }
     }
+
 }

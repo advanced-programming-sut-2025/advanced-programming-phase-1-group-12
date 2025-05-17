@@ -5,11 +5,14 @@ import controller.MenusController.GameMenuController;
 import controller.movingPlayer.UserLocationController;
 import models.Fundementals.App;
 import models.Fundementals.Location;
+import models.Fundementals.Player;
 import models.Fundementals.Result;
 import models.RelatedToUser.Ability;
+import models.RelatedToUser.User;
 import models.enums.commands.GameMenuCommands;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -28,19 +31,60 @@ public class GameMenu extends AppMenu {
         String input = scanner.nextLine().trim();
         Matcher matcher;
         if ((matcher = GameMenuCommands.PLAY.getMather(input)) != null) {
-            List<String> players = new ArrayList<>();
+            // Extract usernames using split
+            String[] tokens = input.trim().split("\\s+");
+            int flagIndex = Arrays.asList(tokens).indexOf("-u");
 
-            for (int i = 1; i <= 3; i++) {
-                if (matcher.group(i) != null)
-                    players.add(matcher.group(i).trim());
+            // Check if no usernames provided
+            if (flagIndex == -1 || flagIndex == tokens.length - 1) {
+                System.out.println("Error: No usernames provided after '-u'.");
+                return;
             }
 
-            controller.Play(scanner, players);
-        } else if ((matcher = GameMenuCommands.EXIT.getMather(input)) != null) {
+            List<String> players = new ArrayList<>();
+            for (int i = flagIndex + 1; i < tokens.length; i++) {
+                players.add(tokens[i].trim());
+            }
+
+            // Check for too many usernames
+            if (players.size() > 3) {
+                System.out.println("Error: Too many usernames. Maximum allowed is 3.");
+                return;
+            }
+
+            List<String> validUsernames = new ArrayList<>();
+            for (String username : players) {
+                User user = App.getUserByUsername(username);
+
+                if (user == null) {
+                    System.out.println("Error: User not found: " + username);
+                } else if (App.getCurrentGame() != null && App.getCurrentGame().getPlayers() != null) {
+                    boolean isInGame = App.getCurrentGame().getPlayers().stream()
+                            .anyMatch(p -> p.getUser().getUserName().equalsIgnoreCase(username));
+
+                    if (isInGame) {
+                        System.out.println("Error: User '" + username + "' is already in another game.");
+                    } else {
+                        validUsernames.add(username);
+                    }
+                } else {
+                    validUsernames.add(username);
+                }
+            }
+
+            // If no valid usernames remain
+            if (validUsernames.isEmpty()) {
+                System.out.println("Error: No valid players to start the game.");
+                return;
+            }
+
+            controller.Play(scanner, validUsernames);
+        }
+        else if ((matcher = GameMenuCommands.EXIT.getMather(input)) != null) {
             System.out.println(controller.EXIT());
-        }else if ((matcher = GameMenuCommands.LoadGame.getMather(input)) != null) {
-            controller.loadGameById(matcher.end("gameID"));
-        }  else if ((matcher = GameMenuCommands.PRINT.getMather(input)) != null) {
+        } else if ((matcher = GameMenuCommands.LoadGame.getMather(input)) != null) {
+            System.out.println(controller.loadGameById(Integer.parseInt(matcher.group("gameID"))));
+        } else if ((matcher = GameMenuCommands.PRINT.getMather(input)) != null) {
             controller.printMap(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y")), Integer.parseInt(matcher.group("size")), scanner);
         } else if ((matcher = GameMenuCommands.TIME.getMather(input)) != null) {
             showCurrentTime();
@@ -53,6 +97,8 @@ public class GameMenu extends AppMenu {
                     Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.NextTurn.getMather(input)) != null) {
             System.out.println(GameMenuController.nextTurn());
+        } else if ((matcher = GameMenuCommands.PLANT_GREENHOUSE.getMather(input)) != null) {
+            System.out.println(farmingController.plantInGreenHouse(matcher.group("seed"), Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.PRODUCTION.getMather(input)) != null) {
             System.out.println(farmingController.putScarecrow(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.DATE.getMather(input)) != null) {
@@ -105,7 +151,7 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.CUTTING_TREE.getMather(input)) != null) {
             System.out.println(farmingController.cuttingTrees(Integer.parseInt(matcher.group("X")),
                     Integer.parseInt(matcher.group("Y"))));
-        } else if ((matcher = GameMenuCommands.EXTRACTION.getMather(input)) !=null) {
+        } else if ((matcher = GameMenuCommands.EXTRACTION.getMather(input)) != null) {
             System.out.println(farmingController.extraction(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.SHOW_AVAILABLE_TOOL.getMather(input)) != null) {
             Result result = toolsController.showToolsAvailable();
@@ -318,23 +364,23 @@ public class GameMenu extends AppMenu {
             System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.SHOW_MONEY.getMather(input)) != null) {
             System.out.println(App.getCurrentPlayerLazy().getMoney());
-        } else if ((matcher = GameMenuCommands.SELL.getMather(input))!= null) {
+        } else if ((matcher = GameMenuCommands.SELL.getMather(input)) != null) {
             System.out.println(controller.sellByShipping(matcher.group("productName"), matcher.group("count")).getMessage());
-        } else if ((matcher = GameMenuCommands.SELL_ONE.getMather(input))!= null) {
+        } else if ((matcher = GameMenuCommands.SELL_ONE.getMather(input)) != null) {
             System.out.println(controller.sellByShippingWithoutCount(matcher.group("productName")).getMessage() + "sold without count");
         } else if ((matcher = GameMenuCommands.ARTISAN_GET.getMather(input)) != null) {
             System.out.println(artisanController.artisanGet(matcher.group("itemName")));
         } else if ((matcher = GameMenuCommands.ARTISAN_USE.getMather(input)) != null) {
             System.out.println(artisanController.artisanUse(matcher.group("artisanName"), matcher.group("itemName")));
-        } else if ((matcher = GameMenuCommands.GREENHOUSE_BUILD.getMather(input))!=null) {
+        } else if ((matcher = GameMenuCommands.GREENHOUSE_BUILD.getMather(input)) != null) {
             System.out.println(controller.buildGreenHouse());
         } else if ((matcher = GameMenuCommands.ABILITIES_SHOW.getMather(input)) != null) {
-            for(Ability ability: App.getCurrentPlayerLazy().getAbilitis()){
-                System.out.println(ability.getName() +" "+ ability.getLevel()+" "+ability.getAmount());
+            for (Ability ability : App.getCurrentPlayerLazy().getAbilitis()) {
+                System.out.println(ability.getName() + " " + ability.getLevel() + " " + ability.getAmount());
             }
-        } else if ((matcher = GameMenuCommands.CHEAT_PLAYER_MONEY.getMather(input))!= null) {
+        } else if ((matcher = GameMenuCommands.CHEAT_PLAYER_MONEY.getMather(input)) != null) {
             System.out.println(App.getCurrentPlayerLazy().getMoney());
-        } else if ((matcher = GameMenuCommands.SHOW_SHIPPING_BIN_LOCATION.getMather(input))!= null) {
+        } else if ((matcher = GameMenuCommands.SHOW_SHIPPING_BIN_LOCATION.getMather(input)) != null) {
             System.out.println(controller.showShippingBinLocation().getMessage());
         } else {
             System.out.println("invalid command");
@@ -419,8 +465,8 @@ public class GameMenu extends AppMenu {
 
     public void createTrade(String username, String type, String item, Matcher matcher) {
         int amount;
-        try{
-            amount=Integer.parseInt(matcher.group("amount"));
+        try {
+            amount = Integer.parseInt(matcher.group("amount"));
         } catch (Exception e) {
             System.out.println("amount must be a number!");
             return;

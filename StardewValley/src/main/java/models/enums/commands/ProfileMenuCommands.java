@@ -13,7 +13,9 @@ public enum ProfileMenuCommands implements Commands {
 
     ChangePassword("change password -p (?<newPassword>.*) -o (?<oldPassword>.*)"),
 
-    UserInfo("user info");
+    UserInfo("user info"),
+
+    ChangeMenu("menu enter game");
 
     private final String pattern;
 

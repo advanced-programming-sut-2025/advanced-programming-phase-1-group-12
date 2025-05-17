@@ -1,6 +1,7 @@
 package models;
 
 import controller.MenusController.GameMenuController;
+import controller.movingPlayer.UserLocationController;
 import models.Animal.FarmAnimals;
 import models.Fundementals.App;
 import models.Fundementals.Location;
@@ -180,9 +181,10 @@ public class Date {
 
     public void updateAllPlants() {
         for(Location location : App.getCurrentGame().getMainMap().getTilesOfMap()){
+
             if(App.getCurrentGame().getDate().weather.name().equalsIgnoreCase("rainy") &&
                     !location.getTypeOfTile().equals(TypeOfTile.GREENHOUSE)){
-                return;
+                continue;
             }
             if(location.getTypeOfTile().equals(TypeOfTile.BURNED_GROUND)){
                 location.setTypeOfTile(TypeOfTile.GROUND);
@@ -200,7 +202,10 @@ public class Date {
                     if (plant.getDayPast() <= 0) {
                         System.out.println("you lost plant at location: " + plant.getLocation().getxAxis() + ", " + plant.getLocation().getyAxis());
                         Location currentLocation = plant.getLocation();
-                        currentLocation.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
+                        if(currentLocation.getTypeOfTile().equals(TypeOfTile.GREENHOUSE)){
+                            currentLocation.setTypeOfTile(TypeOfTile.GREENHOUSE);
+                        }else
+                            currentLocation.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
                         currentLocation.setObjectInTile(null);
                         continue;
                     }
@@ -373,12 +378,18 @@ public class Date {
             changesDayAnimal();
             attackingCrow();
             resetNPCStatus();
-            for(Player player : App.getCurrentGame().getPlayers()){
-                Location location = player.getOwnedFarm().getLocation().getTopLeftCorner();
-                player.setUserLocation(location);
-            }
 
+            for(Player player : App.getCurrentGame().getPlayers()){
+                Location currentLocation = player.getUserLocation();
+                currentLocation.setObjectInTile(null);
+                int x = player.getOwnedFarm().getLocation().getTopLeftCorner().getxAxis();
+                int y = player.getOwnedFarm().getLocation().getTopLeftCorner().getyAxis();
+                Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
+                player.setUserLocation(location);
+                location.setObjectInTile(player);
+            }
         }
+
         this.dayOfWeek += day;
         if (this.dayOfWeek > 7) {
             this.dayOfWeek -= 7;

@@ -19,8 +19,13 @@ public class User {
 
     private String answerOfQuestionForSecurity;
 
+    private int score;
+
+    private int numberOfPlaying;
 
     private boolean isFemale;
+
+    private boolean isLoggedIn;
 
     public User(ArrayList<Game> games, String userName, String nickname, String password, String email,
                 String questionForSecurity, String answerOfQuestionForSecurity, boolean isFemale) {
@@ -32,6 +37,8 @@ public class User {
         this.questionForSecurity = questionForSecurity;
         this.answerOfQuestionForSecurity = answerOfQuestionForSecurity;
         this.isFemale = isFemale;
+        this.numberOfPlaying = 0;
+        this.score = 0;
     }
 
     public void setQuestionForSecurity(String questionForSecurity) {
@@ -40,6 +47,34 @@ public class User {
 
     public void setAnswerOfQuestionForSecurity(String answerOfQuestionForSecurity) {
         this.answerOfQuestionForSecurity = answerOfQuestionForSecurity;
+    }
+
+    public int getNumberOfPlaying() {
+        return numberOfPlaying;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public String getQuestionForSecurity() {
+        return questionForSecurity;
+    }
+
+    public void setFemale(boolean female) {
+        isFemale = female;
+    }
+
+    public void setGames(ArrayList<Game> games) {
+        this.games = games;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public void setNumberOfPlaying(int numberOfPlaying) {
+        this.numberOfPlaying = numberOfPlaying;
     }
 
     public String getUserName() {

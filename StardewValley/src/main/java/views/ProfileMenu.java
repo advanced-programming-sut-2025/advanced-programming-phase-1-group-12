@@ -1,6 +1,8 @@
 package views;
 
 import controller.MenusController.ProfileMenuController;
+import models.Fundementals.App;
+import models.enums.Menu;
 import models.enums.commands.ProfileMenuCommands;
 
 import java.util.Scanner;
@@ -25,6 +27,10 @@ public class ProfileMenu extends AppMenu{
             System.out.println(controller.changeUserName(matcher.group("userName")));
         } else if ((matcher = ProfileMenuCommands.UserInfo.getMather(input)) != null){
             controller.userInfo();
+        } else if ((matcher = ProfileMenuCommands.ChangeMenu.getMather(input)) != null) {
+            App.setCurrentMenu(Menu.GameMenu);
+        }else{
+            System.out.println("Invalid command");
         }
     }
 }
