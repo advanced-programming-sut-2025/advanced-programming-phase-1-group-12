@@ -21,7 +21,7 @@ public enum ArtisanTypes {
     JELLY("Jelly", "Gooey.", -1, 3 * 13, "Any Fruit", -1, true),
     DRIED_MUSHROOMS("Dried Mushrooms", "Gourmet mushrooms.", 50, 13, "Any Mushroom (5)", -1, true),
     DRIED_FRUIT("Dried Fruit", "Chewy pieces of dried fruit.", 75, 13, "5 of Any Fruit (except Grapes)", -1, true),
-    RAISINS("Raisins", "Junimos' favorite food.", 125, 13, "Grapes (5)", 600, true),
+    RAISINS("Raisins", "Junimos' favorite food.", 125, 2, "Grapes (5)", 600, true),
     SMOKED_FISH("Smoked Fish", "Fish smoked to perfection.", -1, 1, "Any Fish + Coal", -1, true),
 
     // Crafted Materials

@@ -165,7 +165,6 @@ public class ProfileMenuController implements MenuController {
         System.out.println("user info");
         System.out.println(App.getLoggedInUser().getUserName());
         System.out.println(App.getLoggedInUser().getNickname());
-        System.out.println(App.getLoggedInUser().getEmail().length());
         //TODO:most money is not written
     }
 }

@@ -183,4 +183,17 @@ public class CraftingController {
 
         return new Result(true, "you add on craft to your backpack");
     }
+    public Result showRecipesCrafting() {
+        StringBuilder result = new StringBuilder("Recipes:\n");
+        for (CraftingRecipe recipe : CraftingRecipe.values()) {
+            //if he has learned this recepie
+            if(App.getCurrentPlayerLazy().getRecepies().get(recipe)) {
+                result.append(recipe.getName()).append(":\n");
+                result.append(recipe.getIngredients()).append(":\n");
+
+            }
+            result.append("\n");
+        }
+        return new Result(true, result.toString());
+    }
 }

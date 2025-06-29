@@ -297,6 +297,12 @@ public class StoreController {
         // Handle Crafting Recipe
         for (CraftingRecipe recipe : CraftingRecipe.values()) {
             if (productName.equalsIgnoreCase(recipe.getName())) {
+                //TODO:ghimat hame 50 e alan taghiresh bedam
+                Item wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Wood");
+                if( wood == null || App.getCurrentPlayerLazy().getBackPack().getItems().get(wood) < 30){
+                    return new Result(false, "you do not have enough wood or stone to buy this recipe");
+                }
+                App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Wood"), 30);
                 App.getCurrentPlayerLazy().getRecepies().put(recipe, true);
                 App.getCurrentPlayerLazy().decreaseMoney(totalCost);
                 return new Result(true, "You bought this recipe");

@@ -108,7 +108,7 @@ public enum CraftingRecipe {
     ),
     DEHYDRATOR(
             "Dehydrator",
-            Map.of("Wood", 30, "Stone", 20),
+            Map.of("Wood", 30),
             Map.of("Pierre's General Store", 0),
             0
     ),

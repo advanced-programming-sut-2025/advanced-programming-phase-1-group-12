@@ -18,13 +18,14 @@ public class ArtisanController {
     //TODO:decrease items after building
 
     public Result artisanUse(String artisan, String item) {
-        if (App.getCurrentPlayerLazy().getBackPack().hasItem(artisan)) {
-            return new Result(false, "You do not have this artisan");
-        }
+
 
         CraftingRecipe artisanType = CraftingRecipe.getByName(artisan);
         if (artisanType == null) {
             return new Result(false, "artisan type is invalid");
+        }
+        if (!App.getCurrentPlayerLazy().getRecepies().get(artisanType)) {
+            return new Result(false, "You do not have this artisan");
         }
         switch (artisanType.getName()) {
             case "Bee House":
@@ -252,15 +253,24 @@ public class ArtisanController {
             ArtisanTypes type = ArtisanTypes.RAISINS;
 
             if (item != null && App.getCurrentPlayerLazy().getBackPack().getItems().get(item) >= 5) {
-                ArtisanItem vinegar = new ArtisanItem(type.getName(), type, type.getProcessingTime(), type.getEnergy());
-                vinegar.setPrice(type.getSellPrice());
-                App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(vinegar);
+                ArtisanItem raisins = new ArtisanItem(
+                        type.getName(),
+                        type,
+                        type.getProcessingTime(),
+                        100  // Explicitly set energy like fish smoker does
+                );
+                raisins.setPrice(type.getSellPrice());  // Make sure this is set
 
+                // Add to processing queue
+                App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(raisins);
+
+                // Remove ingredients
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, 5);
 
-                return new Result(true, "Raisins will be produced for you with Large Milk");
-            } else {
-                return new Result(false, "You do not have required ingredient");
+                return new Result(true, "Raisins will be produced for you");
+            }
+            else {
+                return new Result(false, "You need 5 Grapes to make raisins");
             }
         }
         for (TreeType treeType : TreeType.values()) {

@@ -241,4 +241,35 @@ public class LoginRegisterMenuController implements MenuController {
             throw new RuntimeException("SHA-256 algorithm not found", e);
         }
     }
+    public Result loginWithFlag(String username, String password) {
+        File file = new File(username + ".json");
+        if (!file.exists()) {
+            return new Result(false, "User not found");
+        }
+
+        App.getUsers().clear();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            Gson gson = new Gson();
+            User user = gson.fromJson(reader, User.class);
+
+            if (!user.getPassword().equals(hashPassword(password))) {
+                return new Result(false, "Incorrect password");
+            }
+
+            App.setLoggedInUser(user);
+            App.getUsers().put(user.getUserName(), user);
+            Gson gson1 = new GsonBuilder().setPrettyPrinting().create();
+            try (FileWriter writer = new FileWriter("StayLoggedIn" + ".json")) {
+                gson1.toJson(user, writer);
+            } catch (IOException e) {
+                return new Result(false, "Error saving user data: " + e.getMessage());
+            }
+
+            return new Result(true, "Login successful with flag");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new Result(false, "Error loading user file");
+        }
+    }
 }

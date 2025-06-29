@@ -57,13 +57,42 @@ public class Date {
         }
     }
 
-    public void artisansUpdate(int hour) {
+    public void artisansUpdate(int hours) {
         for (Player player : App.getCurrentGame().getPlayers()) {
-            for (ArtisanItem item : player.getArtisansGettingProcessed()) {
-                item.setHoursRemained(item.getHoursRemained() - hour);
+            Iterator<ArtisanItem> iterator = player.getArtisansGettingProcessed().iterator();
+            while (iterator.hasNext()) {
+                ArtisanItem item = iterator.next();
+                // Reduce remaining processing time
+                int newHoursRemaining = item.getHoursRemained() - hours;
+                item.setHoursRemained(newHoursRemaining);
+
+                // Check if processing is complete
+                if (newHoursRemaining <= 0) {
+                    // Get or create the item in backpack
+                    Map<Item, Integer> backpackItems = player.getBackPack().getItems();
+                    Map<String, Item> itemNames = player.getBackPack().getItemNames();
+
+                    // Check if item already exists in backpack
+                    Item existingItem = itemNames.get(item.getName());
+                    if (existingItem != null) {
+                        // Increment count for existing item
+                        backpackItems.put(existingItem, backpackItems.getOrDefault(existingItem, 0) + 1);
+                    } else {
+                        // Add new item to backpack
+                        backpackItems.put(item, 1);
+                        itemNames.put(item.getName(), item);
+                    }
+
+                    // Debug output
+                    System.out.println("Completed " + item.getName() +
+                            " for " + player.getUser().getUserName() +
+                            ", added to backpack");
+
+                    // Remove from processing queue
+                    iterator.remove();
+                }
             }
         }
-
     }
 
     public void attackingCrow() {

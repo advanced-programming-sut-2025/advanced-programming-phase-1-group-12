@@ -340,5 +340,54 @@ public class AnimalController {
         }
     }
 
+    public String whatWillProduceToday(Animal type, FarmAnimals animal) {
+        Quality quality = findQulaity(animal.getFriendShip());
+
+        Random rand = new Random();
+        double randDouble = rand.nextDouble();
+        randDouble += 0.5;
+        double willProduceGood = (animal.getFriendShip() + randDouble * 150) / 1500;
+        double number = rand.nextDouble();
+        switch (type) {
+            case COW, GOAT -> {
+                return "milk";
+            }
+            case SHEEP -> {
+                return "wool";
+            }
+            case CHICKEN -> {
+                if (willProduceGood >= number)
+                    return "Large Egg";
+                else return "egg";
+
+            }
+            case DUCK -> {
+                AnimalProduct product = animal.getFriendShip() >= 150 && willProduceGood >= number
+                        ? AnimalProduct.DUCK_FEATHER
+                        : AnimalProduct.DUCK_EGG;
+                ItemBuilder.addToBackPack(ItemBuilder.builder(product.getName(), quality, product.getPrice()), 1, quality);
+                if (willProduceGood >= number)
+                    return "duck feather";
+                else return "duck egg";
+            }
+            case RABBIT -> {
+                if (willProduceGood >= number)
+                    return "pagshm";
+                else return "rabbit pie";
+
+            }
+            case DINOSAUR -> {
+                return "dinosaur egg";
+            }
+            case PIG -> {
+                if (App.getCurrentGame().getDate().getSeason().equals(Season.WINTER) &&
+                        !App.isLocationInPlace(animal.getPosition(), animal.getHome().getLocation())) {
+                    return ("Pigs do not produce truffles in winter");
+                }
+                return "pig truffle";
+            }
+        }
+        return "wrong animal name";
+    }
 
 }

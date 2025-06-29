@@ -39,11 +39,21 @@ public class LoginRegisterMenu extends AppMenu{
         } else if((matcher = LoginRegisterMenuCommands.LoginUser.getMather(input)) != null){
             String username = matcher.group("username");
             String password = matcher.group("password");
-            Result result = controller.login(username, password);
-            System.out.println(result.getMessage());
-            if(result.isSuccessful()){
-                App.setCurrentMenu(Menu.MainMenu);
+            boolean stayLoggedIn = matcher.group(3) != null;
+            if(!stayLoggedIn){Result result = controller.login(username, password);
+                System.out.println(result.getMessage());
+                if(result.isSuccessful()){
+                    App.setCurrentMenu(Menu.MainMenu);
+                }
             }
+            else{
+                Result result = controller.loginWithFlag(username, password);
+                System.out.println(result.getMessage());
+                if(result.isSuccessful()){
+                    App.setCurrentMenu(Menu.MainMenu);
+                }
+            }
+
         } else if ((matcher = LoginRegisterMenuCommands.ForgetPassword.getMather(input)) != null) {
             controller.forgetPassword(matcher.group("username"));
         }//hatman dastoor balayee ro ghablesh zade bashe

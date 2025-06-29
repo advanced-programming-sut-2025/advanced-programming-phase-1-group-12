@@ -34,7 +34,7 @@ public enum GameMenuCommands implements Commands {
     WATERING("^watering -l (?<X>.+)\\s*,\\s*(?<Y>.+)$"),
     Picking_FRUIT("^Picking fruit -l (?<X>.+)\\s*,\\s*(?<Y>.+)$"),
     //crafting
-    SHOW_RECIPES("^crafting show recipes$"),
+    SHOW_RECIPES_CRAFTING("^crafting show recipes$"),
     MACK_CRAFT("^crafting craft (?<itemName>.+)$"),
     PLACE_ON_GROUND("^place item -n (?<itemName>.+) -d (?<direction>.+)$"),
     ADD_TO_INVENTORY("^heat add item -n (?<itemName>.+) -c (?<count>.+)"),

@@ -270,8 +270,8 @@ public class GameMenu extends AppMenu {
             System.out.println(craftingController.putItem(matcher.group("itemName"), matcher.group("direction")));
         } else if ((matcher = GameMenuCommands.MACK_CRAFT.getMather(input)) != null) {
             System.out.println(craftingController.makeCraft(matcher.group("itemName")));
-        } else if ((matcher = GameMenuCommands.SHOW_RECIPES.getMather(input)) != null) {
-            System.out.println(craftingController.showRecipes());
+        } else if ((matcher = GameMenuCommands.SHOW_RECIPES_CRAFTING.getMather(input)) != null) {
+            System.out.println(craftingController.showRecipesCrafting());
         } else if ((matcher = GameMenuCommands.THOR.getMather(input)) != null) {
             System.out.println(controller.Thor(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.WHICH_FERTILIZING.getMather(input)) != null) {
@@ -335,7 +335,7 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.PRODUCES.getMather(input))!= null) {
             for(FarmAnimals farmAnimals: App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()){
                 if(!farmAnimals.isHasCollectedProductToday()){
-                    System.out.println(farmAnimals.getName() + " " + farmAnimals.getAnimal().getDefaultProduct());
+                    System.out.println(farmAnimals.getName() + " " + animalController.whatWillProduceToday(farmAnimals.getAnimal(), farmAnimals));
                 }
             }
         } else {
