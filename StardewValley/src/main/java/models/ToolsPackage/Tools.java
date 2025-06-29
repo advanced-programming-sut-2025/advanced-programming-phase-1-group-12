@@ -17,7 +17,6 @@ public class Tools extends Item {
     private Tool toolType;
     private ToolTypes type;
 
-
     // watering can
     private int capacity;
     private int currentWater;

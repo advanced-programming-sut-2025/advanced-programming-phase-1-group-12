@@ -39,12 +39,25 @@ public class GameMenu extends AppMenu {
             }
 
             controller.Play(scanner, players);
-        } else if ((matcher = GameMenuCommands.PRINT.getMather(input)) != null) {
+        } else if ((matcher = GameMenuCommands.EXIT.getMather(input)) != null) {
+            System.out.println(controller.EXIT());
+        }else if ((matcher = GameMenuCommands.LoadGame.getMather(input)) != null) {
+            controller.loadGameById(matcher.end("gameID"));
+        }  else if ((matcher = GameMenuCommands.PRINT.getMather(input)) != null) {
             controller.printMap(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y")), Integer.parseInt(matcher.group("size")), scanner);
         } else if ((matcher = GameMenuCommands.TIME.getMather(input)) != null) {
             showCurrentTime();
+        } else if ((matcher = GameMenuCommands.HELP.getMather(input)) != null) {
+            controller.helpToReadMap();
+        } else if ((matcher = GameMenuCommands.SHOW_CURRENT_TYPE.getMather(input)) != null) {
+            System.out.println(controller.showCurrentType(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
+        } else if ((matcher = GameMenuCommands.PLACE_ON_GROUND.getMather(input)) != null) {
+            System.out.println(farmingController.plantInGreenHouse(matcher.group("seed"),
+                    Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.NextTurn.getMather(input)) != null) {
             System.out.println(GameMenuController.nextTurn());
+        } else if ((matcher = GameMenuCommands.PRODUCTION.getMather(input)) != null) {
+            System.out.println(farmingController.putScarecrow(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.DATE.getMather(input)) != null) {
             showCurrentDate();
         } else if ((matcher = GameMenuCommands.DATETIME.getMather(input)) != null) {
@@ -93,6 +106,11 @@ public class GameMenu extends AppMenu {
         } else if ((matcher = GameMenuCommands.Picking_FRUIT.getMather(input)) != null) {
             System.out.println(farmingController.PickingFruit(Integer.parseInt(matcher.group("X")),
                     Integer.parseInt(matcher.group("Y"))));
+        } else if ((matcher = GameMenuCommands.CUTTING_TREE.getMather(input)) != null) {
+            System.out.println(farmingController.cuttingTrees(Integer.parseInt(matcher.group("X")),
+                    Integer.parseInt(matcher.group("Y"))));
+        } else if ((matcher = GameMenuCommands.EXTRACTION.getMather(input)) !=null) {
+            System.out.println(farmingController.extraction(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.SHOW_AVAILABLE_TOOL.getMather(input)) != null) {
             Result result = toolsController.showToolsAvailable();
             System.out.println(result.getMessage());

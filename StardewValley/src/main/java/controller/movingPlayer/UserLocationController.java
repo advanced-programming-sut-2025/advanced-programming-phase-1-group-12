@@ -1,5 +1,3 @@
-
-
 package controller.movingPlayer;
 
 import controller.MenusController.GameMenuController;
@@ -168,7 +166,6 @@ public class UserLocationController {
                 queue.add(new int[]{nx, ny, dist + 1, newTurn, dir[0], dir[1]});
             }
         }
-
         return lastValid.equals(start) ? null : lastValid;
     }
 }

@@ -8,7 +8,11 @@ import models.MapDetails.Lake;
 import models.MapDetails.Quarry;
 import models.MapDetails.Shack;
 import models.Place.Farm;
+import models.enums.Types.TreeType;
 import models.enums.Types.TypeOfTile;
+import models.enums.foraging.MineralTypes;
+import models.enums.foraging.Stone;
+import models.enums.foraging.Tree;
 
 import java.util.*;
 
@@ -112,9 +116,19 @@ public class FarmSetUp {
         }
 
         for(Location location : randomTree(newFarm)){
+            List<TreeType> allTree = new ArrayList<>(Arrays.asList(TreeType.values()));
+            Collections.shuffle(allTree);
+            TreeType treeType = allTree.get(0);
+            Tree tree = new Tree(location, treeType, true, treeType.fruitType);
+            location.setObjectInTile(tree);
             location.setTypeOfTile(TypeOfTile.TREE);
         }
         for(Location location : randomStone(newFarm)){
+            List<MineralTypes> allMinerals = new ArrayList<>(Arrays.asList(MineralTypes.values()));
+            Collections.shuffle(allMinerals);
+            MineralTypes mineralTypes = allMinerals.get(0);
+            Stone stone = new Stone(mineralTypes);
+            location.setObjectInTile(stone);
             location.setTypeOfTile(TypeOfTile.STONE);
         }
     }

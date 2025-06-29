@@ -16,6 +16,8 @@ public class Tree {
     private int currentStage;
     private int age;
     private boolean isForaging;
+    private boolean isOneTime;
+    private int regrowthTime;
     private FruitType fruitType;
 
     public Tree(Location location, TreeType type, boolean isForaging, FruitType fruitType) {
@@ -30,10 +32,22 @@ public class Tree {
         this.currentStage = 0;
         this.isForaging = isForaging;
         this.fruitType = fruitType;
+        this.age = 0;
+        this.isOneTime = true;
+        this.hasBeenWatering = false;
+        this.regrowthTime = 0;
     }
 
     public TreeType getType() {
         return type;
+    }
+
+    public FruitType getFruitType() {
+        return fruitType;
+    }
+
+    public void setFruitType(FruitType fruitType) {
+        this.fruitType = fruitType;
     }
 
     public void setHasBeenWatering(boolean hasBeenWatering) {
@@ -54,6 +68,22 @@ public class Tree {
 
     public int getTotalTimeNeeded() {
         return totalTimeNeeded;
+    }
+
+    public void setRegrowthTime(int regrowthTime) {
+        this.regrowthTime = regrowthTime;
+    }
+
+    public void setOneTime(boolean oneTime) {
+        isOneTime = oneTime;
+    }
+
+    public boolean isOneTime() {
+        return isOneTime;
+    }
+
+    public int getRegrowthTime() {
+        return regrowthTime;
     }
 
     public int getCurrentStage() {

@@ -21,6 +21,7 @@ public enum GameMenuCommands implements Commands {
     EXIT("^exit$"),
     LoadGame("^load game with (?<gameID>.+)$"),
     NextTurn("^next turn"),
+    SHOW_CURRENT_TYPE("^show current type -l (?<x>.*), (?<y>.*)$"),
     //farming
     CRAFT_INFO("^craftinfo -n (?<craftName>.+)$"),
     FORAGING_TREE_TYPE("^foragingTree (?<type>.+)$"),
@@ -32,7 +33,11 @@ public enum GameMenuCommands implements Commands {
     HOW_MUCH_WATER("^how much water$"),
     REAPING("^Reaping (?<direction>.+)$"),
     WATERING("^watering -l (?<X>.+)\\s*,\\s*(?<Y>.+)$"),
+    EXTRACTION("^extraction -l (?<X>.+) , (?<Y>.+)$"),
     Picking_FRUIT("^Picking fruit -l (?<X>.+)\\s*,\\s*(?<Y>.+)$"),
+    CUTTING_TREE("^cutting tree -l (?<X>.+)\\s*,\\s*(?<Y>.+)$"),
+    PLANT_GREENHOUSE("plant -s (?<seed>.+) -l (?<X>.+) , (?<Y>.+)$"),
+    PRODUCTION("^put scarecrow in -l (?<X>.+) , (?<Y>.+)$"),
     //crafting
     SHOW_RECIPES_CRAFTING("^crafting show recipes$"),
     MACK_CRAFT("^crafting craft (?<itemName>.+)$"),

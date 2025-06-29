@@ -124,6 +124,10 @@ public class Date {
             for (int i = 0; i < plantsToDamage; i++) {
                 Plant plant = destroyablePlants.get(i);
                 Location location = plant.getLocation();
+                if(location.getObjectInTile() instanceof ArtisanItem){
+                    System.out.println("crows attacked but can't damaged a Tile cause it product with scareCrow!");
+                    break;
+                }
                 location.setObjectInTile(null);
                 location.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
                 plants.remove(plant);
@@ -199,15 +203,28 @@ public class Date {
         for (int i = 0; i < 3; i++) {
             Location location = shuffled.get(i);
             location.setTypeOfTile(TypeOfTile.BURNED_GROUND);
+            ItemBuilder.addToBackPack(ItemBuilder.builder("Coal",Quality.NORMAL), 1, Quality.NORMAL);
+            System.out.println("you take a coal and it add to your back pack!!");
         }
     }
 
     public void updateAllPlants() {
+        for(Location location : App.getCurrentGame().getMainMap().getTilesOfMap()){
+            if(App.getCurrentGame().getDate().weather.name().equalsIgnoreCase("rainy") &&
+                    !location.getTypeOfTile().equals(TypeOfTile.GREENHOUSE)){
+                return;
+            }
+            if(location.getTypeOfTile().equals(TypeOfTile.BURNED_GROUND)){
+                location.setTypeOfTile(TypeOfTile.GROUND);
+            }
+        }
         for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
             for (Plant plant : farm.getPlantOfFarm()) {
-                if(plant.isHasBeenWatering()){
+                if (plant.isHasBeenWatering()) {
+                    plant.setHasBeenWatering(false);
                     continue;
                 }
+
                 if (!plant.isHasBeenFertilized()) {
                     plant.setDayPast(plant.getDayPast() - 1);
                     if (plant.getDayPast() <= 0) {
@@ -215,21 +232,35 @@ public class Date {
                         Location currentLocation = plant.getLocation();
                         currentLocation.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
                         currentLocation.setObjectInTile(null);
+                        continue;
                     }
                 }
+
                 plant.setHasBeenFertilized(false);
                 plant.setAge(plant.getAge() + 1);
+
                 int currentStage = plant.getCurrentStage();
                 int dayNeed = 0;
                 for (int i = 0; i < currentStage; i++) {
                     dayNeed += plant.getAllCrops().stages[i];
                 }
-                if (plant.getAge() >= dayNeed) {
+                if (plant.getAge() >= dayNeed)
                     plant.setCurrentStage(plant.getCurrentStage() + 1);
+
+                if (!plant.getAllCrops().oneTime && !plant.isOneTime()) {
+                    plant.setRegrowthTime(plant.getRegrowthTime() + 1);
+                    if (plant.getRegrowthTime() >= plant.getAllCrops().regrowthTime) {
+                        plant.setRegrowthTime(0);
+                        plant.setOneTime(true);
+                    }
                 }
             }
 
             for (Tree tree : farm.getTrees()) {
+                if (tree.isHasBeenWatering()) {
+                    tree.setHasBeenWatering(false);
+                    continue;
+                }
                 if (!tree.isHasBeenFertilized()) {
                     tree.setDayPast(tree.getDayPast() - 1);
                     if (tree.getDayPast() <= 0) {
@@ -248,6 +279,13 @@ public class Date {
                 }
                 if (tree.getAge() >= dayNeed) {
                     tree.setCurrentStage(tree.getCurrentStage() + 1);
+                }
+                if (!tree.getType().oneTime && !tree.isOneTime()) {
+                    tree.setRegrowthTime(tree.getRegrowthTime() + 1);
+                    if (tree.getRegrowthTime() >= tree.getType().regrowthTime) {
+                        tree.setRegrowthTime(0);
+                        tree.setOneTime(true);
+                    }
                 }
             }
         }
@@ -315,6 +353,16 @@ public class Date {
                 location.setTypeOfTile(TypeOfTile.PLANT);
                 location.setObjectInTile(newPlant);
             }
+            for (int i = 0; i < 1; i++) {
+                ArrayList<Location> quarryLocation = App.getCurrentPlayerLazy().getOwnedFarm().getQuarry().getLocation().getLocationsInRectangle();
+                Collections.shuffle(quarryLocation);
+
+                Location location = quarryLocation.get(i);
+                MineralTypes mineral = allMinerals.get(i);
+                Stone newStone = new Stone(mineral);
+                location.setObjectInTile(newStone);
+
+            }
         }
     }
 
@@ -345,8 +393,8 @@ public class Date {
     }
 
     public void changeAdvancedDay(int day) {
-        if (day == 1 ){
-            this.weather = this.tommorowWeather;// the day changes
+        if (day == 1) {
+            this.weather = this.tommorowWeather;// the day change
 
         }
         this.dayOfWeek += day;
@@ -358,7 +406,7 @@ public class Date {
             this.dayOfMonth -= 28;
             this.currentSeason = (this.currentSeason + 1) % 4;
             this.season = Season.values()[this.currentSeason];
-            if(this.season.equals(Season.SUMMER)){
+            if (this.season.equals(Season.SUMMER)) {
                 changeYear();
             }
         }
@@ -526,22 +574,23 @@ public class Date {
         return currentTotalDays - dateTotalDays;
     }
 
-    public void changeYear(){
+    public void changeYear() {
         this.year = year + 1;
     }
 
-    public void resetNPCStatus(){
-        if(App.getCurrentGame().getNPCvillage() == null){
+    public void resetNPCStatus() {
+        if (App.getCurrentGame().getNPCvillage() == null) {
             return;
         }
-        for(NPC npc : App.getCurrentGame().getNPCvillage().getAllNPCs()){
+        for (NPC npc : App.getCurrentGame().getNPCvillage().getAllNPCs()) {
             npc.resetAllTalkedStatuses();
             npc.resetAllGiftedStatuses();
         }
     }
 
-    public void sellByShippingAllPlayers(){
+    public void sellByShippingAllPlayers() {
         for (Player player : App.getCurrentGame().getPlayers()) {
+            System.out.println(player.getShippingMoney());
             player.increaseMoney(player.getShippingMoney());
             player.setShippingMoney(0);
         }
