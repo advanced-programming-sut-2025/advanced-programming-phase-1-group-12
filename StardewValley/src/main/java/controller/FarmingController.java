@@ -465,36 +465,14 @@ public class FarmingController {
                 newLocation.setObjectInTile(null);
                 newLocation.setTypeOfTile(TypeOfTile.GROUND);
                 App.getCurrentPlayerLazy().getOwnedFarm().getPlantOfFarm().remove(plant);
-                ItemBuilder.addToBackPack(ItemBuilder.builder(plant.getAllCrops().name(), Quality.NORMAL, plant.getPrice()), 1, Quality.NORMAL);
-                for(Ability ability : App.getCurrentPlayerLazy().getAbilitis()){
-                    if(ability.getName().equalsIgnoreCase("Farming")){
-                        ability.increaseAmount(5);
-                    }
-                }
-                return new Result(true, plant.getAllCrops().name + " add to back pack of current player");
-            }else{
-                if(!plant.isOneTime()){
-                    plant.setRegrowthTime(plant.getRegrowthTime() + 1);
-                    if(plant.getRegrowthTime() == plant.getAllCrops().regrowthTime){
-                        plant.setRegrowthTime(0);
-                        plant.setOneTime(true);
-                    }
-                ItemBuilder.addToBackPack(ItemBuilder.builder(plant.getAllCrops().name(), Quality.NORMAL), 1, Quality.NORMAL);
+                ItemBuilder.addToBackPack(ItemBuilder.builder(plant.getAllCrops().name(), Quality.NORMAL, 0), 1, Quality.NORMAL);
             } else {
                 if (!plant.isOneTime()) {
                     return new Result(false, "We must wait until the delivery period arrives.");
                 } else {
-                }
-                else{
-                    ItemBuilder.addToBackPack(ItemBuilder.builder(plant.getAllCrops().getName(), Quality.NORMAL, plant.getPrice()), 1, Quality.NORMAL);
-                    for(Ability ability : App.getCurrentPlayerLazy().getAbilitis()){
-                        if(ability.getName().equalsIgnoreCase("Farming")){
-                            ability.increaseAmount(5);
-                        }
-                    }
                     plant.setOneTime(false);
                     plant.setRegrowthTime(0);
-                    ItemBuilder.addToBackPack(ItemBuilder.builder(plant.getAllCrops().name(), Quality.NORMAL), 1, Quality.NORMAL);
+                    ItemBuilder.addToBackPack(ItemBuilder.builder(plant.getAllCrops().name(), Quality.NORMAL, 0), 1, Quality.NORMAL);
                 }
             }
 
@@ -515,13 +493,10 @@ public class FarmingController {
             }
 
             removeFromFarm(giantPlant);
-            ItemBuilder.addToBackPack(ItemBuilder.builder(giantPlant.getGiantPlants().getName(), Quality.NORMAL), 1, Quality.NORMAL);
+            ItemBuilder.addToBackPack(ItemBuilder.builder(giantPlant.getGiantPlants().getName(), Quality.NORMAL, 0), 1, Quality.NORMAL);
 
             for (Ability ability : App.getCurrentPlayerLazy().getAbilitis()) {
                 if (ability.getName().equalsIgnoreCase("Farming")) {
-            ItemBuilder.addToBackPack(ItemBuilder.builder(giantPlant.getGiantPlants().getName(), Quality.NORMAL, giantPlant.getPrice()), 1, Quality.NORMAL);
-            for(Ability ability : App.getCurrentPlayerLazy().getAbilitis()){
-                if(ability.getName().equalsIgnoreCase("Farming")){
                     ability.increaseAmount(5);
                 }
             }
@@ -531,6 +506,7 @@ public class FarmingController {
 
         return new Result(false, "Unknown error during reaping.");
     }
+
 
     public void removeFromFarm(GiantPlant plant) {
         for (Location location : plant.getLocation()) {
@@ -597,11 +573,11 @@ public class FarmingController {
                 }
             }
             if (ability.getLevel() >= 2) {
-                ItemBuilder.addToBackPack(ItemBuilder.builder(stone.getMineralTypes().getName(), Quality.NORMAL), 2, Quality.NORMAL);
+                ItemBuilder.addToBackPack(ItemBuilder.builder(stone.getMineralTypes().getName(), Quality.NORMAL, 0), 2, Quality.NORMAL);
                 location.setTypeOfTile(TypeOfTile.GROUND);
                 return new Result(true, "You have mined with " + ability.getLevel() + " and take 2 stone from ground.");
             }
-            ItemBuilder.addToBackPack(ItemBuilder.builder(stone.getMineralTypes().getName(), Quality.NORMAL), 1, Quality.NORMAL);
+            ItemBuilder.addToBackPack(ItemBuilder.builder(stone.getMineralTypes().getName(), Quality.NORMAL, 0), 1, Quality.NORMAL);
             location.setTypeOfTile(TypeOfTile.GROUND);
             return new Result(true, "You have mined with " + ability.getLevel() + " and take 1 stone from ground.");
         } else if (location.getTypeOfTile().equals(TypeOfTile.QUARRY)) {
@@ -614,11 +590,11 @@ public class FarmingController {
                 }
             }
             if (ability.getLevel() >= 2) {
-                ItemBuilder.addToBackPack(ItemBuilder.builder(stone.getMineralTypes().getName(), Quality.NORMAL), 2, Quality.NORMAL);
+                ItemBuilder.addToBackPack(ItemBuilder.builder(stone.getMineralTypes().getName(), Quality.NORMAL, 0), 2, Quality.NORMAL);
                 location.setTypeOfTile(TypeOfTile.QUARRY);
                 return new Result(true, "You have mined with " + ability.getLevel() + " and take 2 stone from quarry.");
             }
-            ItemBuilder.addToBackPack(ItemBuilder.builder(stone.getMineralTypes().getName(), Quality.NORMAL), 1, Quality.NORMAL);
+            ItemBuilder.addToBackPack(ItemBuilder.builder(stone.getMineralTypes().getName(), Quality.NORMAL, 0), 1, Quality.NORMAL);
             location.setTypeOfTile(TypeOfTile.QUARRY);
             return new Result(true, "You have mined with " + ability.getLevel() + " and take 1 stone from quarry.");
         } else {
@@ -640,7 +616,7 @@ public class FarmingController {
 
         FruitType fruitType = tree.getType().fruitType;
 
-        ItemBuilder.addToBackPack(ItemBuilder.builder(fruitType.getName(), Quality.NORMAL), 1, Quality.NORMAL);
+        ItemBuilder.addToBackPack(ItemBuilder.builder(fruitType.getName(), Quality.NORMAL, 0), 1, Quality.NORMAL);
         tree.setOneTime(false);
         tree.setRegrowthTime(0);
         for (Ability ability : App.getCurrentPlayerLazy().getAbilitis()) {
@@ -661,10 +637,10 @@ public class FarmingController {
             return new Result(false, "There is no tree to cut it!");
 
         Tree tree = (Tree) location.getObjectInTile();
-        ItemBuilder.addToBackPack(ItemBuilder.builder(tree.getSaplingTypes().getName(), Quality.NORMAL), 2, Quality.NORMAL);
+        ItemBuilder.addToBackPack(ItemBuilder.builder(tree.getSaplingTypes().getName(), Quality.NORMAL, 0), 2, Quality.NORMAL);
         location.setTypeOfTile(TypeOfTile.GROUND);
         location.setObjectInTile(null);
-        ItemBuilder.addToBackPack(ItemBuilder.builder("Wood", Quality.NORMAL) , 10,Quality.NORMAL);
+        ItemBuilder.addToBackPack(ItemBuilder.builder("Wood", Quality.NORMAL, 0) , 10,Quality.NORMAL);
         return new Result(true, "you cut tree and get 2 sapling with type: " + tree.getSaplingTypes().getName());
     }
 
@@ -681,7 +657,7 @@ public class FarmingController {
         }
 
         location.setTypeOfTile(TypeOfTile.PLANT);
-        Seed newSeed = new Seed(seedTypes);
+        Seed newSeed = new Seed(seedTypes.getName(), Quality.NORMAL, 0, seedTypes);
         if (newSeed.getType().equals(SeedTypes.MixedSeeds)) {
             Season season = App.getCurrentGame().getDate().getSeason();
             newSeed = switchingSeason(season);

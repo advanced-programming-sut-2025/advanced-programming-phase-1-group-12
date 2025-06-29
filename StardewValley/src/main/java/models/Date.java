@@ -203,7 +203,7 @@ public class Date {
         for (int i = 0; i < 3; i++) {
             Location location = shuffled.get(i);
             location.setTypeOfTile(TypeOfTile.BURNED_GROUND);
-            ItemBuilder.addToBackPack(ItemBuilder.builder("Coal",Quality.NORMAL), 1, Quality.NORMAL);
+            ItemBuilder.addToBackPack(ItemBuilder.builder("Coal",Quality.NORMAL, 0), 1, Quality.NORMAL);
             System.out.println("you take a coal and it add to your back pack!!");
         }
     }
