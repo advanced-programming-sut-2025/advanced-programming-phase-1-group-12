@@ -86,6 +86,7 @@ public class LoginRegisterMenuController implements MenuController {
             return new Result(false, "Error saving user data: " + e.getMessage());
         }
 
+        App.setLoggedInUser(newUser);
         return new Result(true, "User registered successfully");
     }
 
@@ -204,7 +205,7 @@ public class LoginRegisterMenuController implements MenuController {
 
     public Result answerQuestion(Matcher matcher) {
         String answer = matcher.group("answer");
-        if(answer.equals(App.getCurrentPlayerLazy().getUser().getAnswerOfQuestionForSecurity())){
+        if(answer.equals(App.getLoggedInUser().getAnswerOfQuestionForSecurity())){
             return new Result(true, "correct answer. now enter your new password like this : i answered so my new password:"
             );
         }
@@ -216,12 +217,12 @@ public class LoginRegisterMenuController implements MenuController {
             newPass = RandomPassword();
             System.out.println("this will be your password : " + newPass);
             App.getLoggedInUser().setPassword(hashPassword(newPass));
-            saveUser(App.getCurrentPlayerLazy().getUser(), App.getLoggedInUser().getUserName() + ".json");
+            saveUser(App.getLoggedInUser(), App.getLoggedInUser().getUserName() + ".json");
             System.out.println("password updated successfully");
             return;
         }
         App.getLoggedInUser().setPassword(hashPassword(newPass));
-        saveUser(App.getCurrentPlayerLazy().getUser(), App.getLoggedInUser().getUserName() + ".json");
+        saveUser(App.getLoggedInUser(), App.getLoggedInUser().getUserName() + ".json");
         System.out.println("password updated successfully");
     }
 
@@ -238,6 +239,37 @@ public class LoginRegisterMenuController implements MenuController {
             return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-256 algorithm not found", e);
+        }
+    }
+    public Result loginWithFlag(String username, String password) {
+        File file = new File(username + ".json");
+        if (!file.exists()) {
+            return new Result(false, "User not found");
+        }
+
+        App.getUsers().clear();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            Gson gson = new Gson();
+            User user = gson.fromJson(reader, User.class);
+
+            if (!user.getPassword().equals(hashPassword(password))) {
+                return new Result(false, "Incorrect password");
+            }
+
+            App.setLoggedInUser(user);
+            App.getUsers().put(user.getUserName(), user);
+            Gson gson1 = new GsonBuilder().setPrettyPrinting().create();
+            try (FileWriter writer = new FileWriter("StayLoggedIn" + ".json")) {
+                gson1.toJson(user, writer);
+            } catch (IOException e) {
+                return new Result(false, "Error saving user data: " + e.getMessage());
+            }
+
+            return new Result(true, "Login successful with flag");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new Result(false, "Error loading user file");
         }
     }
 }

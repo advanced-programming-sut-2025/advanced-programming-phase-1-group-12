@@ -53,7 +53,6 @@ public class Player {
         this.isMarried = isMarried;
         this.energy = 200;
         this.Refrigrator = refrigrator;
-        this.abilitis = abilitis;
         this.relationShips = relationShips;
         this.ownedFarm = ownedFarm;
         this.backPack = backPack;

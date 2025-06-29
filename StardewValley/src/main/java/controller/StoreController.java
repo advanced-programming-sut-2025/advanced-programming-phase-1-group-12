@@ -39,7 +39,7 @@ public class StoreController {
         //normal coop, Deluxe coop, big coop, normal barn, Deluxe barn, big barn:
 
         Location otherCorner;
-        if (buildingName.contains("coop")) {
+       if (buildingName.contains("coop")) {
             otherCorner = App.getCurrentGame().getMainMap().findLocation(location.getxAxis() + 3, location.getyAxis() + 4);
             if (otherCorner == null || !App.getCurrentPlayerLazy().getOwnedFarm().getLocation().getLocationsInRectangle().contains(otherCorner)) {
                 return new Result(false, "You can not build this building here");
@@ -212,6 +212,7 @@ public class StoreController {
     }
 
     public Result buyProduct(String productName, int count) {
+
         Store store = null;
         for (Store store1 : App.getCurrentGame().getMainMap().getStores()) {
             if (App.isLocationInPlace(App.getCurrentPlayerLazy().getUserLocation(), store1.getLocationOfRectangle())) {
@@ -222,6 +223,10 @@ public class StoreController {
         if (store == null) {
             return new Result(false, "You are not in any store");
         }
+
+//        if(App.getCurrentGame().getDate().getHour() < store.getStartHour() || App.getCurrentGame().getDate().getHour() > store.getCloseHour()){
+//            return new Result(false, "Store is currently closed");
+//        }
 
         StoreProducts item = null;
         for (StoreProducts item1 : store.getStoreProducts()) {
@@ -244,6 +249,10 @@ public class StoreController {
             case SUMMER -> item.getType().getSummerPrice();
             case SPRING -> item.getType().getSpringPrice();
         };
+
+        if(price == 0){
+            return new Result(false, "You can not buy this product in this season");
+        }
 
         int totalCost = price * count;
         if (App.getCurrentPlayerLazy().getMoney() < totalCost) {
@@ -287,6 +296,12 @@ public class StoreController {
         // Handle Crafting Recipe
         for (CraftingRecipe recipe : CraftingRecipe.values()) {
             if (productName.equalsIgnoreCase(recipe.getName())) {
+                //TODO:ghimat hame 50 e alan taghiresh bedam
+                Item wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Wood");
+                if( wood == null || App.getCurrentPlayerLazy().getBackPack().getItems().get(wood) < 30){
+                    return new Result(false, "you do not have enough wood or stone to buy this recipe");
+                }
+                App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Wood"), 30);
                 App.getCurrentPlayerLazy().getRecepies().put(recipe, true);
                 App.getCurrentPlayerLazy().decreaseMoney(totalCost);
                 return new Result(true, "You bought this recipe");
@@ -337,6 +352,9 @@ public class StoreController {
             case SUMMER -> item.getType().getSummerPrice();
             case SPRING -> item.getType().getSpringPrice();
         };
+        if(price == 0){
+            return new Result(false, "You can not buy this product in this season");
+        }
 
         int totalCost = price * count;
         if (App.getCurrentPlayerLazy().getMoney() < totalCost) {

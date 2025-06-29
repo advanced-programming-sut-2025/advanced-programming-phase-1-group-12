@@ -9,6 +9,7 @@ public enum GameMenuCommands implements Commands {
     SHOW_MONEY("show money"),
     ABILITIES_SHOW("abilities show"),
     CHEAT_BUY_ITEM("cheat buy item (?<productName>.*) -n (?<count>.*)"),
+    CHEAT_MAXIMIZE_ABILITY_LEVEL("cheat maximize ability level (?<ability>.*)"),
     //chizi ke bahash misazim be price esh kari nadashte bashimmm!!!
     CHEAT_ADD_ITEM("cheat add item -n (?<productName>.*) -c (?<count>.*)"),
     //Starting Game
@@ -20,6 +21,7 @@ public enum GameMenuCommands implements Commands {
     EXIT("^exit$"),
     LoadGame("^load game with (?<gameID>.+)$"),
     NextTurn("^next turn"),
+    SHOW_CURRENT_TYPE("^show current type -l (?<x>.*), (?<y>.*)$"),
     //farming
     CRAFT_INFO("^craftinfo -n (?<craftName>.+)$"),
     FORAGING_TREE_TYPE("^foragingTree (?<type>.+)$"),
@@ -31,9 +33,13 @@ public enum GameMenuCommands implements Commands {
     HOW_MUCH_WATER("^how much water$"),
     REAPING("^Reaping (?<direction>.+)$"),
     WATERING("^watering -l (?<X>.+)\\s*,\\s*(?<Y>.+)$"),
+    EXTRACTION("^extraction -l (?<X>.+) , (?<Y>.+)$"),
     Picking_FRUIT("^Picking fruit -l (?<X>.+)\\s*,\\s*(?<Y>.+)$"),
+    CUTTING_TREE("^cutting tree -l (?<X>.+)\\s*,\\s*(?<Y>.+)$"),
+    PLANT_GREENHOUSE("plant -s (?<seed>.+) -l (?<X>.+) , (?<Y>.+)$"),
+    PRODUCTION("^put scarecrow in -l (?<X>.+) , (?<Y>.+)$"),
     //crafting
-    SHOW_RECIPES("^crafting show recipes$"),
+    SHOW_RECIPES_CRAFTING("^crafting show recipes$"),
     MACK_CRAFT("^crafting craft (?<itemName>.+)$"),
     PLACE_ON_GROUND("^place item -n (?<itemName>.+) -d (?<direction>.+)$"),
     ADD_TO_INVENTORY("^heat add item -n (?<itemName>.+) -c (?<count>.+)"),

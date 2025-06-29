@@ -18,7 +18,6 @@ public class Plant extends Item {
     private boolean isOneTime;
     private int regrowthTime;
     private boolean isGiantPlant;
-//    private Quality quality;
 
     public Plant(Location location, Seed seed, boolean isForaging, AllCrops allCrops){
         super(seed.getName(), Quality.NORMAL, seed.getPrice());

@@ -1,10 +1,16 @@
 package controller.MenusController;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import controller.MapSetUp.MapSetUp;
 import controller.NPCcontroller;
 import controller.TradeController;
 import models.Eating.Food;
 import models.Fundementals.*;
+import models.MapDetails.GreenHouse;
+import models.MapDetails.Lake;
+import models.MapDetails.Quarry;
+import models.MapDetails.Shack;
 import models.Place.Farm;
 import models.Place.Store;
 import models.ProductsPackage.ArtisanItem;
@@ -20,12 +26,21 @@ import models.enums.ToolEnums.BackPackTypes;
 import models.enums.Types.Cooking;
 import models.enums.Types.TypeOfTile;
 import models.NPC.NPC;
+import models.enums.foraging.Plant;
+import models.enums.foraging.Stone;
+import models.enums.foraging.Tree;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
+import java.io.*;
 
 public class GameMenuController implements MenuController {
     public Result startTrade() {
@@ -212,6 +227,7 @@ public class GameMenuController implements MenuController {
     }
 
     public void printMap(int x, int y, int size, Scanner scanner) {
+
         String[][] tileBlock = new String[size][size];
 
         for (int i = 0; i < size; i++) {
@@ -246,6 +262,14 @@ public class GameMenuController implements MenuController {
                     }
                 }
 
+                if(location.getObjectInTile() instanceof Stone){
+                    contentChar = 'S';
+                    bgColor = getBackgroundColorForTile(TypeOfTile.STONE);
+                }
+                if(location.getObjectInTile() instanceof Plant){
+                    contentChar = 'P';
+                    bgColor = getBackgroundColorForTile(TypeOfTile.PLANT);
+                }
                 String block = bgColor + " " + contentChar + " " + "\u001B[0m";
                 tileBlock[i][j] = block;
             }
@@ -380,25 +404,32 @@ public class GameMenuController implements MenuController {
     public static Result nextTurn() {
         List<Player> players = App.getCurrentGame().getPlayers();
         Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
-        App.getCurrentGame().getCurrentPlayer().setEnergy(200);
 
-        int currentIndex = players.indexOf(currentPlayer);
-        int nextIndex = (currentIndex + 1) % players.size();
+        currentPlayer.setEnergy(200);
 
-        App.getCurrentGame().setCurrentPlayer(players.get(nextIndex));
-        if (App.getCurrentGame().getCurrentPlayer().isHasCollapsed() &&
-                (App.getCurrentGame().getDate().getHour() == 8 || App.getCurrentGame().getDate().getHour() == 9)) {
-            App.getCurrentGame().getCurrentPlayer().setHasCollapsed(false);
-            App.getCurrentGame().getCurrentPlayer().setEnergy(150);
-        } else if (App.getCurrentGame().getCurrentPlayer().isHasCollapsed()) {
-            int nextIndex2 = (nextIndex + 1) % players.size();
-            App.getCurrentGame().setCurrentPlayer(players.get(nextIndex2));
-        }
+        int index = players.indexOf(currentPlayer);
+        int tries = 0;
+        Player nextPlayer;
+
+        do {
+            index = (index + 1) % players.size();
+            nextPlayer = players.get(index);
+
+            if (nextPlayer.isHasCollapsed() &&
+                    (App.getCurrentGame().getDate().getHour() == 8 || App.getCurrentGame().getDate().getHour() == 9)) {
+                nextPlayer.setHasCollapsed(false);
+                nextPlayer.setEnergy(150);
+                break;
+            }
+            tries++;
+        } while (nextPlayer.isHasCollapsed() && tries < players.size());
+        App.getCurrentGame().setCurrentPlayer(nextPlayer);
 
         App.getCurrentGame().getDate().changeAdvancedTime(1);
 
-        return new Result(true, "Turn moved to " + players.get(nextIndex).getUser().getUserName());
+        return new Result(true, "Turn moved to " + nextPlayer.getUser().getUserName());
     }
+
 
     private void guideForFarm() {
         System.out.println("Farm selection guide:\n" +
@@ -451,11 +482,12 @@ public class GameMenuController implements MenuController {
     }
 
 
-    public Result showEnergy() {
+    public Result showEnergy(){
         Player player = App.getCurrentGame().getCurrentPlayer();
-        if (player.isEnergyUnlimited()) {
+        if(player.isEnergyUnlimited()){
             return new Result(true, "Energy is unlimited!");
-        } else {
+        }
+        else{
             return new Result(true, String.format("%d", player.getEnergy()));
 
         }
@@ -467,16 +499,16 @@ public class GameMenuController implements MenuController {
         return new Result(true, "Energy set successfully!");
     }
 
-    public Result setUnlimited() {
+    public Result setUnlimited(){
         App.getCurrentGame().getCurrentPlayer().setUnlimited();
         return new Result(true, "Energy unlimited!");
     }
 
-    public Result showInventory() {
+    public Result showInventory(){
         Player player = App.getCurrentGame().getCurrentPlayer();
         BackPack backPack = player.getBackPack();
         StringBuilder result = new StringBuilder("Inventory items: \n");
-        for (Item items : backPack.getItems().keySet()) {
+        for(Item items : backPack.getItems().keySet()){
             result.append(items.getName());
             result.append(" -> ");
             result.append(backPack.getItems().get(items));
@@ -510,7 +542,7 @@ public class GameMenuController implements MenuController {
         } else {
             int intAmount;
             try {
-                intAmount = Integer.parseInt(amount);
+                intAmount=Integer.parseInt(amount);
             } catch (NumberFormatException e) {
                 return new Result(false, "Amount must be a number!");
             }
@@ -659,7 +691,7 @@ public class GameMenuController implements MenuController {
         }
     }
 
-    public Result hug(String username) {
+    public Result hug(String username){
         Player player1 = App.getCurrentGame().getCurrentPlayer();
         Player player2 = App.getCurrentGame().getPlayerByName(username);
         if (player2 == null) {
@@ -687,7 +719,7 @@ public class GameMenuController implements MenuController {
         }
     }
 
-    public Result flower(String username) {
+    public Result flower(String username){
         Player player1 = App.getCurrentGame().getCurrentPlayer();
         Player player2 = App.getCurrentGame().getPlayerByName(username);
         if (player2 == null) {
@@ -748,7 +780,7 @@ public class GameMenuController implements MenuController {
         }
     }
 
-    public Result respond(String answer, String username) {
+    public Result respond(String answer, String username){
         Player player1 = App.getCurrentGame().getCurrentPlayer();
         Player player2 = App.getCurrentGame().getPlayerByName(username);
         if (player2 == null) {
@@ -927,7 +959,7 @@ public class GameMenuController implements MenuController {
         return new Result(true, response.toString());
     }
 
-    public Result refrigerator(String command, String item) {
+    public Result refrigerator(String command, String item){
         Player player = App.getCurrentGame().getCurrentPlayer();
         if (command.equals("put")) {
             Item getItem = App.getItemByName(item);
@@ -954,7 +986,7 @@ public class GameMenuController implements MenuController {
             return new Result(false, "you do not know this recepie");
         }
 
-        if (!player.getBackPack().checkCapacity(1)) {
+        if(!player.getBackPack().checkCapacity(1)){
             return new Result(false, "inventory is full!");
         }
 
@@ -1019,11 +1051,12 @@ public class GameMenuController implements MenuController {
         return new Result(false, "food not found!");
     }
 
-    public ArtisanItem getArtisanItem(String itemName) {
+    public ArtisanItem getArtisanItem(String itemName){
         Player player = App.getCurrentGame().getCurrentPlayer();
-        if (player.getBackPack().getItemByName(itemName) == null) {
+        if(player.getBackPack().getItemByName(itemName) == null){
             return null;
-        } else {
+        }
+        else{
             Item item = player.getBackPack().getItemByName(itemName);
             if (item instanceof ArtisanItem) {
                 return (ArtisanItem) item;
@@ -1041,6 +1074,7 @@ public class GameMenuController implements MenuController {
         location.setTypeOfTile(TypeOfTile.BURNED_GROUND);
         return new Result(true, "Lightning struck the map at location" + x + ", " + y);
     }
+
 
 
     private boolean isNearShippingBin(Player player) {
@@ -1081,7 +1115,7 @@ public class GameMenuController implements MenuController {
         }
 
         int requestedCount;
-        try {
+        try{
             requestedCount = Integer.parseInt(count);
         } catch (NumberFormatException e) {
             return new Result(false, "Count must be a number!");
@@ -1092,13 +1126,13 @@ public class GameMenuController implements MenuController {
             return new Result(false, "You don't have enough of this product.");
         }
         Quality quality = item.getQuality();
-        if (quality == null) {
+        if(quality == null){
             quality = Quality.NORMAL;
         }
         int price = item.getPrice();
-        int returnPrice = (int) (price * quality.getPriceMultiPlier());
+        int returnPrice =(int) (price * quality.getPriceMultiPlier());
         player.increaseShippingMoney(returnPrice * requestedCount);
-
+        System.out.println("price " + returnPrice * requestedCount);
         player.getBackPack().decreaseItem(item, requestedCount);
         player.getShippingBin().addShippingItem(item, requestedCount);
 
@@ -1124,7 +1158,7 @@ public class GameMenuController implements MenuController {
 
         int availableCount = player.getBackPack().getItemCount(item);
         Quality quality = item.getQuality();
-        if (quality == null) {
+        if(quality == null){
             quality = Quality.NORMAL;
         }
         int price = item.getPrice();
@@ -1139,12 +1173,12 @@ public class GameMenuController implements MenuController {
     }
 
 
-    public Result buildGreenHouse() {
+    public Result buildGreenHouse(){
         Player player = App.getCurrentGame().getCurrentPlayer();
-        if (player.getMoney() < 1000) {
+        if(player.getMoney() < 1000 ){
             return new Result(false, "You don't have enough money to build green house.");
         }
-        if (player.getBackPack().getItemCount(player.getBackPack().getItemByName("Wood")) < 500) {
+        if(player.getBackPack().getItemCount(player.getBackPack().getItemByName("Wood")) < 500){
             return new Result(false, "You don't have enough woods to build green house.");
         }
 
@@ -1176,6 +1210,205 @@ public class GameMenuController implements MenuController {
                         + ", " + player.getShippingBin().getShippingBinLocation().getyAxis());
     }
 
+    public Result EXIT() {
+        Game lastGame = App.getCurrentGame();
+        int gameID = lastGame.getGameId();
+
+        List<Map<String, Object>> playersData = new ArrayList<>();
+
+        for (Player player : lastGame.getPlayers()) {
+            Map<String, Object> playerMap = new HashMap<>();
+            playerMap.put("username", player.getUser().getUserName());
+            playerMap.put("x", player.getUserLocation().getxAxis());
+            playerMap.put("y", player.getUserLocation().getyAxis());
+            playerMap.put("energy", player.getEnergy());
+            playerMap.put("groupId", gameID);
+
+            Farm farm = player.getOwnedFarm();
+            Map<String, Object> farmMap = new HashMap<>();
+
+            farmMap.put("location", rectToMap(farm.getLocation()));
+            farmMap.put("lake1", rectToMap(farm.getLake1().getLocation()));
+            farmMap.put("lake2", rectToMap(farm.getLake2().getLocation()));
+            farmMap.put("greenhouse1", rectToMap(farm.getGreenHouse().getLocation()));
+            farmMap.put("greenhouse2", rectToMap(farm.getGreenHouse2().getLocation()));
+            farmMap.put("shack1", rectToMap(farm.getShack().getLocation()));
+            farmMap.put("shack2", rectToMap(farm.getShack2().getLocation()));
+            farmMap.put("quarry1", rectToMap(farm.getQuarry().getLocation()));
+            farmMap.put("quarry2", rectToMap(farm.getQuarry2().getLocation()));
+
+            farmMap.put("farmAnimals", farm.getFarmAnimals().stream().map(Object::toString).toList());
+            farmMap.put("animalHomes", farm.getAnimalHomes().stream().map(Object::toString).toList());
+
+            playerMap.put("farm", farmMap);
+            playersData.add(playerMap);
+        }
+
+        Map<String, Object> saveData = new HashMap<>();
+        saveData.put("gameId", gameID);
+        saveData.put("players", playersData);
+        List<Map<String, Object>> mapData = new ArrayList<>();
+        for (Location tile : lastGame.getMainMap().getTilesOfMap()) {
+            Map<String, Object> tileMap = new HashMap<>();
+            tileMap.put("x", tile.getxAxis());
+            tileMap.put("y", tile.getyAxis());
+            tileMap.put("typeOfTile", tile.getTypeOfTile().name());
+            mapData.add(tileMap);
+        }
+        saveData.put("mainMap", mapData);
+
+        ObjectMapper mapper = new ObjectMapper();
+        File file = new File("saves/saved_game" + gameID + ".json");
+        File parent = file.getParentFile();
+        if (parent != null && !parent.exists()) {
+            parent.mkdirs();
+        }
+
+        try {
+            mapper.writerWithDefaultPrettyPrinter().writeValue(file, saveData);
+        } catch (IOException e) {
+            return new Result(false, "Failed to save the game: " + e.getMessage());
+        }
+
+        App.setCurrentMenu(Menu.MainMenu);
+        App.setCurrentGame(null);
+        int newGameID = gameID + 1;
+        App.setGameId(newGameID);
+        return new Result(true, "Game saved and exited! You are now in Main menu.");
+    }
+
+    private Map<String, Object> rectToMap(LocationOfRectangle rect) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("topLeft", locationToMap(rect.getTopLeftCorner()));
+        map.put("bottomRight", locationToMap(rect.getDownRightCorner()));
+        return map;
+    }
+
+    private Map<String, Integer> locationToMap(Location loc) {
+        Map<String, Integer> map = new HashMap<>();
+        map.put("x", loc.getxAxis());
+        map.put("y", loc.getyAxis());
+        return map;
+    }
+
+    public Result loadGameById(int gameIdToLoad) {
+        ObjectMapper mapper = new ObjectMapper();
+        File file = new File("saves/saved_game" + gameIdToLoad + ".json");
+
+        if (!file.exists())
+            return new Result(false, "No saved game found with gameId: " + gameIdToLoad);
+
+        try {
+            System.out.println("Reading JSON file...");
+            Map<String, Object> saveData = mapper.readValue(file, new TypeReference<>() {});
+            List<Map<String, Object>> playersData = (List<Map<String, Object>>) saveData.get("players");
+            List<Map<String, Object>> mapData = (List<Map<String, Object>>) saveData.get("mainMap");
+
+            System.out.println("Building map...");
+            map mainMap = new map();
+            for (Map<String, Object> tileMap : mapData) {
+                int x = ((Number) tileMap.get("x")).intValue(); // safer casting
+                int y = ((Number) tileMap.get("y")).intValue();
+                String typeName = (String) tileMap.get("typeOfTile");
+
+                TypeOfTile type = TypeOfTile.valueOf(typeName);
+                Location loc = new Location(x, y);
+                loc.setTypeOfTile(type);
+                mainMap.getTilesOfMap().add(loc);
+            }
+
+            System.out.println("Rebuilding players...");
+            ArrayList<Player> players = new ArrayList<>();
+            for (Map<String, Object> playerMap : playersData) {
+                String username = (String) playerMap.get("username");
+                int x = ((Number) playerMap.get("x")).intValue();
+                int y = ((Number) playerMap.get("y")).intValue();
+                int energy = ((Number) playerMap.get("energy")).intValue();
+
+                Location loc = new Location(x, y);
+                User user = App.getUserByUsername(username);
+
+                Player player = new Player(user, loc, false, null, null, null, null, false, false, null);
+                player.setUserLocation(loc);
+                player.setEnergy(energy);
+
+                System.out.println("Restoring farm for player " + username);
+                Map<String, Object> farmMap = (Map<String, Object>) playerMap.get("farm");
+                Farm farm = new Farm(mapToRect((Map<String, Object>) farmMap.get("location")));
+
+                farm.setFarmLocation(mapToRect((Map<String, Object>) farmMap.get("location")));
+                farm.setLake1(new Lake(mapToRect((Map<String, Object>) farmMap.get("lake1"))));
+                farm.setLake2(new Lake(mapToRect((Map<String, Object>) farmMap.get("lake2"))));
+                farm.setGreenHouse(new GreenHouse(mapToRect((Map<String, Object>) farmMap.get("greenhouse1"))));
+                farm.setGreenHouse2(new GreenHouse(mapToRect((Map<String, Object>) farmMap.get("greenhouse2"))));
+                farm.setShack(new Shack(mapToRect((Map<String, Object>) farmMap.get("shack1"))));
+                farm.setShack2(new Shack(mapToRect((Map<String, Object>) farmMap.get("shack2"))));
+                farm.setQuarry(new Quarry(mapToRect((Map<String, Object>) farmMap.get("quarry1"))));
+                farm.setQuarry2(new Quarry(mapToRect((Map<String, Object>) farmMap.get("quarry2"))));
+                farm.setOwner(player);
+
+                player.setOwnedFarm(farm);
+                players.add(player);
+            }
+
+            System.out.println("Finalizing game setup...");
+            Game loadedGame = new Game();
+            loadedGame.setPlayers(players);
+            loadedGame.setMainMap(mainMap);
+            App.setCurrentGame(loadedGame);
+            App.getCurrentGame().setCurrentPlayer(players.get(0));
+
+            for (Player player : App.getCurrentGame().getPlayers()) {
+                Location loc = player.getUserLocation();
+                App.getCurrentGame().getMainMap().findLocation(loc.getxAxis(), loc.getyAxis()).setObjectInTile(player);
+                Farm farm = player.getOwnedFarm();
+                App.getCurrentGame().getMainMap().getFarms().add(farm);
+            }
+
+            System.out.println("Game loaded successfully.");
+            return new Result(true, "Game " + gameIdToLoad + " loaded successfully!");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Result(false, "Failed to load the game: " + e.getMessage());
+        }
+    }
+
+
+    private LocationOfRectangle mapToRect(Map<String, Object> map) {
+        Map<String, Integer> topLeft = (Map<String, Integer>) map.get("topLeft");
+        Map<String, Integer> bottomRight = (Map<String, Integer>) map.get("bottomRight");
+        return new LocationOfRectangle(
+                new Location(topLeft.get("x"), topLeft.get("y")),
+                new Location(bottomRight.get("x"), bottomRight.get("y"))
+        );
+    }
+
+    public Result showCurrentType(int x, int y) {
+        Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
+        Object object = location.getObjectInTile();
+        if (object != null) {
+            return new Result(true, getObjectTypeName(object));
+        }
+        return new Result(true, location.getTypeOfTile().name());
+    }
+    private String getObjectTypeName(Object object) {
+        if (object instanceof Player) {
+            return "Player";
+        } else if (object instanceof Animal) {
+            return "Animal";
+        } else if (object instanceof Craft) {
+            return "Craft";
+        } else if (object instanceof Stone) {
+            return "Stone";
+        } else if (object instanceof Tree) {
+            return "Tree";
+        } else if (object instanceof Plant) {
+            return "Plant";
+        } else {
+            return "Unknown Object";
+        }
+    }
     public Result cheatFriendShipLevel(String name, String amount) {
         int intAmount;
         try {

@@ -61,14 +61,14 @@ public enum StoreProductsTypes {
 
     // Buildings
     //TODO:decrease wood and stone stuff from his inventory
-    CARPENTER_WELL("Well", 0, 0, 0, 0, 1, "Carpenter's Shop"),
-    CARPENTER_SHIPPING_BIN("Shipping Bin", 0, 0, 0, 0, 10000, "Carpenter's Shop"),
-    CARPENTER_BARN("Barn", 0, 0, 0, 0, 10000, "Carpenter's Shop"),
-    CARPENTER_BIG_BARN("Big Barn", 0, 0, 0, 20, 10000, "Carpenter's Shop"),
-    CARPENTER_DELUXE_BARN("Deluxe Barn", 0, 0, 0, 0, 10000, "Carpenter's Shop"),
-    CARPENTER_COOP("Coop", 0, 0, 0, 0, 10000, "Carpenter's Shop"),
-    CARPENTER_BIG_COOP("Big Coop", 0, 0, 0, 0, 10000, "Carpenter's Shop"),
-    CARPENTER_DELUXE_COOP("Deluxe Coop", 0, 0, 0, 0, 10000, "Carpenter's Shop"),
+    CARPENTER_WELL("Well", 10, 10, 10, 10, 1, "Carpenter's Shop"),
+    CARPENTER_SHIPPING_BIN("Shipping Bin", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
+    CARPENTER_BARN("Barn", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
+    CARPENTER_BIG_BARN("Big Barn", 10, 10, 10, 20, 10000, "Carpenter's Shop"),
+    CARPENTER_DELUXE_BARN("Deluxe Barn", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
+    CARPENTER_COOP("Coop", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
+    CARPENTER_BIG_COOP("Big Coop", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
+    CARPENTER_DELUXE_COOP("Deluxe Coop", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
 
     // Fishing Items (from Willy's Fish Shop)
     FISH_SHOP_FISH_SMOKER_RECIPE("Fish Smoker", 10000, 10000, 10000, 10000, 1, "Fish Shop"),
