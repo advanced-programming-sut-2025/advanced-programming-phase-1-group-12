@@ -1,11 +1,26 @@
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 eclipse.project.name = appName + '-core'
 
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(17)
+  }
+}
+
+tasks.withType(JavaExec) {
+  jvmArgs += "--add-opens=java.base/java.util=ALL-UNNAMED"
+}
+
 dependencies {
   api "com.badlogicgames.gdx:gdx:$gdxVersion"
   api "com.github.MrStahlfelge.gdx-websockets:core:$websocketVersion"
+  implementation 'com.google.code.gson:gson:2.10.1'
+  implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+}
 
-  if(enableGraalNative == 'true') {
-    implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
-  }
+// OR (alternative for older Gradle versions)
+compileJava {
+  sourceCompatibility = JavaVersion.VERSION_17
+  targetCompatibility = JavaVersion.VERSION_17
+  options.encoding = 'UTF-8'
 }
