@@ -5,7 +5,8 @@ import java.util.Scanner;
 
 public enum Menu {
     MainMenu(new MainMenu()),
-    LoginRegisterMenu (new LoginRegisterMenu()),
+    RegisterMenu(new RegisterMenuView()),
+    LoginMenu(new LoginMenuView()),
     profileMenu (new ProfileMenu()),
     Exit (new ExitMenu()),
     GameMenu(new GameMenu());

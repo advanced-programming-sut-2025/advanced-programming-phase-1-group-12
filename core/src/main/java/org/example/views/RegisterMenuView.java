@@ -1,0 +1,237 @@
+package org.example.views;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import org.example.Main;
+import org.example.controllers.MenusController.LoginRegisterMenuController;
+import org.example.models.Fundementals.App;
+import org.example.models.Fundementals.Result;
+import org.example.models.GameAssetManager;
+import org.example.models.enums.Menu;
+import org.example.models.enums.commands.LoginRegisterMenuCommands;
+
+import java.util.Scanner;
+import java.util.regex.Matcher;
+
+public class RegisterMenuView extends AppMenu implements Screen {
+
+    private Skin skin = GameAssetManager.skin;
+    private Stage stage;
+    private final Label menuLabel;
+    private final TextButton goToLogin;
+    private final TextButton exitButton;
+    private final TextButton registerButton;
+    private final SelectBox<String> selectSecurityQuestion = new SelectBox<>(skin);
+    private final TextField usernameField;
+    private final TextField passwordField;
+    private final TextButton randomPasswordButton;
+    private final TextField passwordConfirmField;
+    private final TextField answerSecurityQuestionField;
+    private final TextField confirmSecurityQuestionField;
+    private final TextField nickNameField;
+    private final TextField emailField;
+    private final TextField genderField;
+    private final Label errorLabel;
+    public Table table = new Table();
+    LoginRegisterMenuController controller = new LoginRegisterMenuController();
+    private int question = 0;
+
+    public RegisterMenuView() {
+
+        Array<String> questions = new Array<>(new String[]{
+            "what is your favorite color?", "what is your favorite country?"
+        });
+        selectSecurityQuestion.setItems(questions);
+
+        this.menuLabel = new Label("register menu", skin);
+        this.goToLogin = new TextButton("go to login menu", skin);
+        this.exitButton = new TextButton("Exit", skin);
+        this.registerButton = new TextButton("Register", skin);
+        this.usernameField = new TextField("", skin);
+        usernameField.setMessageText("Enter username");
+        this.randomPasswordButton = new TextButton("generate Random password", skin);
+        this.passwordField = new TextField("", skin);
+        passwordField.setMessageText("Enter password");
+        passwordField.setPasswordMode(true);
+        passwordField.setPasswordCharacter('*');
+        this.passwordConfirmField = new TextField("", skin);
+        passwordConfirmField.setMessageText("Confirm password");
+        passwordConfirmField.setPasswordMode(true);
+        passwordConfirmField.setPasswordCharacter('*');
+        this.answerSecurityQuestionField = new TextField("", skin);
+        answerSecurityQuestionField.setMessageText("Answer security question");
+        this.confirmSecurityQuestionField = new TextField("", skin);
+        confirmSecurityQuestionField.setMessageText("Confirm answer");
+        this.nickNameField = new TextField("", skin);
+        nickNameField.setMessageText("Enter nickname");
+        this.emailField = new TextField("", skin);
+        emailField.setMessageText("Enter email");
+        this.genderField = new TextField("", skin);
+        genderField.setMessageText("Enter gender");
+        this.errorLabel = new Label("", skin); // ✅ NEW
+        this.errorLabel.setColor(1, 0, 0, 1);   // Red color
+        this.errorLabel.setVisible(false);
+        menuLabel.setFontScale(2f);
+// Scale buttons
+        goToLogin.getLabel().setFontScale(2f);
+        exitButton.getLabel().setFontScale(2f);
+        registerButton.getLabel().setFontScale(2f);
+        randomPasswordButton.getLabel().setFontScale(2f);
+
+// Scale SelectBox (critical fix)
+        selectSecurityQuestion.getStyle().font.getData().setScale(2f);
+        selectSecurityQuestion.getStyle().listStyle.font.getData().setScale(2f);
+
+
+        errorLabel.setFontScale(2f);
+    }
+
+    @Override
+    public void check(Scanner scanner) {
+        // Leave this unchanged as requested
+    }
+
+    @Override
+    public void show() {
+        stage = new Stage(new ScreenViewport());
+        Gdx.input.setInputProcessor(stage);
+
+        table.setFillParent(true);
+        table.center();
+        table.add(menuLabel);
+
+        table.row().pad(50,0,30,0);  ;
+        table.add(goToLogin);
+        table.row().pad(30,0,30,0);  ;
+        table.add(selectSecurityQuestion);
+        table.row().pad(30,0,30,0);  ;
+        table.add(usernameField);
+        table.row().pad(30,0,30,0);  ;
+        table.add(randomPasswordButton);
+        table.row().pad(30,0,30,0);  ;
+        table.add(passwordField);
+        table.row().pad(30,0,30,0);  ;
+        table.add(passwordConfirmField);
+        table.row().pad(30,0,30,0);  ;
+        table.add(answerSecurityQuestionField);
+        table.row().pad(30,0,30,0);  ;
+        table.add(confirmSecurityQuestionField);
+        table.row().pad(30,0,30,0);  ;
+        table.add(nickNameField);
+        table.row().pad(30,0,30,0);  ;
+        table.add(emailField);
+        table.row().pad(30,0,30,0);  ;
+        table.add(genderField);
+        table.row().pad(30,0,30,0);  ;
+        table.add(registerButton);
+        table.row().pad(30,0,30,0);  ;
+        table.add(exitButton);
+        table.row().pad(30,0,30,0);  ;
+        table.add(errorLabel);
+        stage.addActor(table);
+
+        selectSecurityQuestion.addListener(new ChangeListener() {
+            @Override
+            public void changed (ChangeEvent event, Actor actor) {
+                if(selectSecurityQuestion.getSelected()
+                    .equalsIgnoreCase("what is your favorite country?")){
+                    question = 1;
+                }
+            }
+        });
+
+        registerButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                    Result result = controller.register(
+                        usernameField.getText(),
+                        passwordField.getText(),
+                        passwordConfirmField.getText(),
+                        nickNameField.getText(),
+                        emailField.getText(),
+                        genderField.getText(),
+                        answerSecurityQuestionField.getText(),
+                        confirmSecurityQuestionField.getText(),
+                        question
+                    );
+                    if(result.isSuccessful()){
+                        App.setCurrentMenu(Menu.MainMenu);
+                        Main.getMain().getScreen().dispose();
+                        Main.getMain().setScreen(new MainMenu());
+                    } else {
+                        showError(result.getMessage());
+                    }
+
+            }
+        });
+
+        exitButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                App.setCurrentMenu(Menu.Exit);
+                System.exit(0);
+            }
+        });
+
+        goToLogin.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                App.setCurrentMenu(Menu.LoginMenu);
+                Main.getMain().getScreen().dispose();
+                Main.getMain().setScreen(new LoginMenuView());
+            }
+        });
+
+        randomPasswordButton.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {
+                showError(controller.RandomPassword());
+            }
+        });
+    }
+
+    @Override
+    public void render(float v) {
+        ScreenUtils.clear(0, 0, 0, 1);
+        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        stage.draw();
+    }
+
+    @Override
+    public void resize(int i, int i1) {
+        if (stage != null) {
+            stage.getViewport().update(i, i1, true);
+        }
+    }
+
+    @Override
+    public void pause() {}
+
+    @Override
+    public void resume() {}
+
+    @Override
+    public void hide() {}
+
+    @Override
+    public void dispose() {
+        if (stage != null) {
+            stage.dispose();
+        }
+    }
+    public void showError(String message) {
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
+    }
+    public void hideError() {
+        errorLabel.setVisible(false);
+    }
+}

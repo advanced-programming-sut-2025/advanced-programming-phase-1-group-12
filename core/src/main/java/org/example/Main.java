@@ -1,34 +1,67 @@
 package org.example;
 
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.ScreenUtils;
+import com.google.gson.Gson;
+import org.example.models.Fundementals.App;
+import org.example.models.RelatedToUser.User;
+import org.example.models.enums.Menu;
+import org.example.views.MainMenu;
+import org.example.views.RegisterMenuView;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
-public class Main extends ApplicationAdapter {
+public class Main extends Game {
+    private static Main main;
     private SpriteBatch batch;
-    private Texture image;
 
-    @Override
-    public void create() {
-        batch = new SpriteBatch();
-        image = new Texture("libgdx.png");
+    public static Main getMain() {
+        return main;
     }
 
     @Override
+    public void create() {
+        main = this;
+        batch = new SpriteBatch();
+
+        autoLoginIfPossible();
+
+        if (App.getLoggedInUser() == null) {
+            main.setScreen(new RegisterMenuView()); // Or LoginMenuView
+        } else {
+            System.out.println("Welcome back, " + App.getLoggedInUser().getUserName() + "! (Auto-logged in)");
+            App.setCurrentMenu(Menu.MainMenu);
+            main.setScreen(new MainMenu()); // Or whatever the main screen is
+        }
+    }
+
+
+    @Override
     public void render() {
-        ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
-        batch.begin();
-        batch.draw(image, 140, 210);
-        batch.end();
+        super.render();
     }
 
     @Override
     public void dispose() {
         batch.dispose();
-        image.dispose();
     }
+
+    private void autoLoginIfPossible() {
+        File file = new File("StayLoggedIn.json");
+        if (file.exists()) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                Gson gson = new Gson();
+                User user = gson.fromJson(reader, User.class);
+                App.setLoggedInUser(user);
+                App.getUsers().put(user.getUserName(), user);
+            } catch (IOException e) {
+                System.out.println("Error loading StayLoggedIn.json: " + e.getMessage());
+            }
+        }
+    }
+
 }

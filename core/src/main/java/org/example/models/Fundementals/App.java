@@ -15,7 +15,7 @@ public class App {
     private static Map<String, User> users = new HashMap<>();
     private static Map<String, Item> allItems = new HashMap<>();
     private static User loggedInUser = null;
-    private static Menu currentMenu = Menu.LoginRegisterMenu;
+    private static Menu currentMenu = Menu.RegisterMenu;
     private static ArrayList<Game> game = new ArrayList<>();
     private static int gameId = 1;
     private static Game currentGame = new Game();

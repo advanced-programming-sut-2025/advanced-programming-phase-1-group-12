@@ -1,5 +1,6 @@
 package org.example.views;
 
+import com.badlogic.gdx.Screen;
 import org.example.models.Fundementals.App;
 import org.example.models.enums.Menu;
 import org.example.models.enums.commands.MainMenuCommands;
@@ -8,7 +9,7 @@ import java.io.File;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
-public class MainMenu extends AppMenu {
+public class MainMenu extends AppMenu implements Screen {
     @Override
     public void check(Scanner scanner) {
 
@@ -45,9 +46,44 @@ public class MainMenu extends AppMenu {
             } else {
                 System.out.println("No StayLoggedIn.json file to delete.");
             }
-            App.setCurrentMenu(Menu.LoginRegisterMenu);
+            App.setCurrentMenu(Menu.RegisterMenu);
         } else {
             System.out.println("invalid command");
         }
+    }
+
+    @Override
+    public void show() {
+
+    }
+
+    @Override
+    public void render(float v) {
+
+    }
+
+    @Override
+    public void resize(int i, int i1) {
+
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
+    public void hide() {
+
+    }
+
+    @Override
+    public void dispose() {
+
     }
 }
