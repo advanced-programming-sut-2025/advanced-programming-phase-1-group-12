@@ -17,10 +17,8 @@ import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Result;
 import org.example.models.GameAssetManager;
 import org.example.models.enums.Menu;
-import org.example.models.enums.commands.LoginRegisterMenuCommands;
 
 import java.util.Scanner;
-import java.util.regex.Matcher;
 
 public class RegisterMenuView extends AppMenu implements Screen {
 
@@ -80,19 +78,7 @@ public class RegisterMenuView extends AppMenu implements Screen {
         this.errorLabel = new Label("", skin); // ✅ NEW
         this.errorLabel.setColor(1, 0, 0, 1);   // Red color
         this.errorLabel.setVisible(false);
-        menuLabel.setFontScale(2f);
-// Scale buttons
-        goToLogin.getLabel().setFontScale(2f);
-        exitButton.getLabel().setFontScale(2f);
-        registerButton.getLabel().setFontScale(2f);
-        randomPasswordButton.getLabel().setFontScale(2f);
-
-// Scale SelectBox (critical fix)
-        selectSecurityQuestion.getStyle().font.getData().setScale(2f);
-        selectSecurityQuestion.getStyle().listStyle.font.getData().setScale(2f);
-
-
-        errorLabel.setFontScale(2f);
+        setScale();
     }
 
     @Override
@@ -105,39 +91,46 @@ public class RegisterMenuView extends AppMenu implements Screen {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
+        float width = 400f;
+
         table.setFillParent(true);
         table.center();
         table.add(menuLabel);
 
-        table.row().pad(50,0,30,0);  ;
-        table.add(goToLogin);
-        table.row().pad(30,0,30,0);  ;
-        table.add(selectSecurityQuestion);
-        table.row().pad(30,0,30,0);  ;
-        table.add(usernameField);
-        table.row().pad(30,0,30,0);  ;
-        table.add(randomPasswordButton);
-        table.row().pad(30,0,30,0);  ;
-        table.add(passwordField);
-        table.row().pad(30,0,30,0);  ;
-        table.add(passwordConfirmField);
-        table.row().pad(30,0,30,0);  ;
-        table.add(answerSecurityQuestionField);
-        table.row().pad(30,0,30,0);  ;
-        table.add(confirmSecurityQuestionField);
-        table.row().pad(30,0,30,0);  ;
-        table.add(nickNameField);
-        table.row().pad(30,0,30,0);  ;
-        table.add(emailField);
-        table.row().pad(30,0,30,0);  ;
-        table.add(genderField);
-        table.row().pad(30,0,30,0);  ;
-        table.add(registerButton);
-        table.row().pad(30,0,30,0);  ;
-        table.add(exitButton);
-        table.row().pad(30,0,30,0);  ;
-        table.add(errorLabel);
-        stage.addActor(table);
+        table.row().pad(30, 0, 30, 0);
+        table.add(goToLogin).width(width);
+        table.row().pad(30, 0, 30, 0);
+        table.add(selectSecurityQuestion).width(width);
+        table.row().pad(30, 0, 30, 0);
+        table.add(usernameField).width(width);
+        table.row().pad(30, 0, 30, 0);
+        table.add(randomPasswordButton).width(width);
+        table.row().pad(30, 0, 30, 0);
+        table.add(passwordField).width(width);
+        table.row().pad(30, 0, 30, 0);
+        table.add(passwordConfirmField).width(width);
+        table.row().pad(30, 0, 30, 0);
+        table.add(answerSecurityQuestionField).width(width);
+        table.row().pad(30, 0, 30, 0);
+        table.add(confirmSecurityQuestionField).width(width);
+        table.row().pad(30, 0, 30, 0);
+        table.add(nickNameField).width(width);
+        table.row().pad(30, 0, 30, 0);
+        table.add(emailField).width(width);
+        table.row().pad(30, 0, 30, 0);
+        table.add(genderField).width(width);
+        table.row().pad(30, 0, 30, 0);
+        table.add(registerButton).width(width);
+        table.row().pad(30, 0, 30, 0);
+        table.add(exitButton).width(width);
+        table.row().pad(30, 0, 30, 0);
+        table.add(errorLabel).width(width);
+
+        ScrollPane scrollPane = new ScrollPane(table, skin);
+        scrollPane.setFillParent(true);
+        scrollPane.setFadeScrollBars(false);
+        stage.addActor(scrollPane);
+
 
         selectSecurityQuestion.addListener(new ChangeListener() {
             @Override
@@ -233,5 +226,18 @@ public class RegisterMenuView extends AppMenu implements Screen {
     }
     public void hideError() {
         errorLabel.setVisible(false);
+    }
+
+    public void setScale(){
+        menuLabel.setFontScale(2f);
+
+        goToLogin.getLabel().setFontScale(2f);
+        exitButton.getLabel().setFontScale(2f);
+        registerButton.getLabel().setFontScale(2f);
+        randomPasswordButton.getLabel().setFontScale(2f);
+        selectSecurityQuestion.getStyle().font.getData().setScale(2f);
+        selectSecurityQuestion.getStyle().listStyle.font.getData().setScale(2f);
+
+        errorLabel.setFontScale(2f);
     }
 }

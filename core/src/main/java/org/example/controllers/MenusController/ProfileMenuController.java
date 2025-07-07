@@ -10,8 +10,36 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 
 public class ProfileMenuController implements MenuController {
+
+    public String saveChanges(String username, String password, String nickName, String email) {
+        StringBuilder resultMessages = new StringBuilder();
+
+        if (username != null) {
+            Result result = changeUserName(username);
+            resultMessages.append("Username: ").append(result.getMessage()).append("\n");
+        }
+
+        if (password != null) {
+            Result result = changePassword(App.getLoggedInUser().getPassword(), password);
+            resultMessages.append("Password: ").append(result.getMessage()).append("\n");
+        }
+
+        if (nickName != null) {
+            Result result = changeNickname(nickName);
+            resultMessages.append("Nickname: ").append(result.getMessage()).append("\n");
+        }
+
+        if (email != null) {
+            Result result = changeEmail(email);
+            resultMessages.append("Email: ").append(result.getMessage()).append("\n");
+        }
+
+        return resultMessages.toString().trim();
+    }
+
 
     public Result changeUserName(String userName) {
         if (userName.equals(App.getLoggedInUser().getUserName())) {

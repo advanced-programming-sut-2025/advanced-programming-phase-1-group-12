@@ -1,5 +1,11 @@
 package org.example.views;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.controllers.*;
 import org.example.controllers.MenusController.GameMenuController;
 import org.example.controllers.movingPlayer.UserLocationController;
@@ -7,15 +13,18 @@ import org.example.models.Animal.FarmAnimals;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Result;
+import org.example.models.GameAssetManager;
 import org.example.models.RelatedToUser.Ability;
 import org.example.models.enums.commands.GameMenuCommands;
 
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
-public class GameMenu extends AppMenu {
+//TODO:we should add a pregame menu i guess
+public class GameMenu extends AppMenu implements Screen {
     private final GameMenuController controller = new GameMenuController();
     private final ToolsController toolsController = new ToolsController();
     private final AnimalController animalController = new AnimalController();
@@ -23,6 +32,9 @@ public class GameMenu extends AppMenu {
     private final FarmingController farmingController = new FarmingController();
     private final CraftingController craftingController = new CraftingController();
     private final ArtisanController artisanController = new ArtisanController();
+
+    private Skin skin = GameAssetManager.skin;
+    private Stage stage;
 
     @Override
     public void check(Scanner scanner) {
@@ -464,4 +476,41 @@ public class GameMenu extends AppMenu {
         System.out.println(result.getMessage());
     }
 
+    @Override
+    public void show() {
+        stage = new Stage(new ScreenViewport());
+        Gdx.input.setInputProcessor(stage);
+    }
+
+    @Override
+    public void render(float v) {
+        ScreenUtils.clear(0, 0, 0, 1);
+        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        stage.draw();
+    }
+
+    @Override
+    public void resize(int i, int i1) {
+
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
+    public void hide() {
+
+    }
+
+    @Override
+    public void dispose() {
+
+    }
 }

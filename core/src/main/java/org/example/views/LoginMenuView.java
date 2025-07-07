@@ -38,7 +38,7 @@ public class LoginMenuView extends AppMenu implements Screen {
     public LoginMenuView() {
 
         Array<String> questions = new Array<>(new String[]{
-            "stay logged in", "do not stay logged in"
+             "do not stay logged in", "stay logged in"
         });
 
         selectFlag.setItems(questions);
@@ -47,7 +47,7 @@ public class LoginMenuView extends AppMenu implements Screen {
         this.exitButton = new TextButton("Exit", skin);
         this.usernameField = new TextField("", skin);
         usernameField.setMessageText("Enter username");
-        this.forgetPassword = new TextButton("Forget", skin);
+        this.forgetPassword = new TextButton("Forget password", skin);
         this.passwordField = new TextField("", skin);
         passwordField.setMessageText("Enter password");
         passwordField.setPasswordMode(true);
@@ -73,17 +73,17 @@ public class LoginMenuView extends AppMenu implements Screen {
         table.add(menuLabel);
 
         table.row().pad(20, 0, 20, 0);
-        table.add(selectFlag);
+        table.add(selectFlag).width(300);
         table.row().pad(20, 0, 20, 0);
-        table.add(usernameField);
+        table.add(usernameField).width(300);
         table.row().pad(20, 0, 20, 0);
-        table.add(passwordField);
+        table.add(passwordField).width(300);
         table.row().pad(20, 0, 20, 0);
-        table.add(forgetPassword);
+        table.add(forgetPassword).width(300);
         table.row().pad(20, 0, 20, 0);
-        table.add(exitButton);
+        table.add(exitButton).width(300);
         table.row().pad(20, 0, 20, 0);
-        table.add(loginButton);
+        table.add(loginButton).width(300);
         table.row().pad(20, 0, 20, 0);
         table.add(errorLabel);
         stage.addActor(table);
@@ -198,7 +198,7 @@ class forgetPass implements Screen {
         newPasswordField.setMessageText("Enter new password");
         this.generateRandomPassword = new TextButton("generate", skin);
         this.showPassword = new TextButton("show password", skin);
-        this.errorLabel = new Label("", skin); // ✅ NEW
+        this.errorLabel = new Label("", skin);
         this.errorLabel.setColor(1, 0, 0, 1);   // Red color
         this.errorLabel.setVisible(false);
     }
@@ -213,17 +213,17 @@ class forgetPass implements Screen {
         table.add(menuLabel);
 
         table.row().pad(20, 0, 20, 0);
-        table.add(usernameField);
+        table.add(usernameField).width(300);
         table.row().pad(20, 0, 20, 0);
-        table.add(answerOfSecurity);
+        table.add(answerOfSecurity).width(300);
         table.row().pad(20, 0, 20, 0);
-        table.add(newPasswordField);
+        table.add(newPasswordField).width(300);
         table.row().pad(20, 0, 20, 0);
-        table.add(generateRandomPassword);
+        table.add(generateRandomPassword).width(300);
         table.row().pad(20, 0, 20, 0);
-        table.add(showPassword);
+        table.add(showPassword).width(300);
         table.row().pad(20, 0, 20, 0);
-        table.add(back);
+        table.add(back).width(300);
         table.row().pad(20, 0, 20, 0);
         table.add(errorLabel);
         stage.addActor(table);

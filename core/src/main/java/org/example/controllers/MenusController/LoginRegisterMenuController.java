@@ -64,8 +64,6 @@ public class LoginRegisterMenuController implements MenuController {
         password = hashPassword(password);
         User newUser = new User(null, username, nickname, password, email, "",
                 "", isFemale);
-        App.setLoggedInUser(newUser);
-        String question = App.getSecurityQuestions().get(questionNumber);
 
         if (!answer.equals(answerConfirm)) {
             return new Result(false, "Answer and answer confirmation don't match");
@@ -79,7 +77,6 @@ public class LoginRegisterMenuController implements MenuController {
         } catch (IOException e) {
             return new Result(false, "Error saving user data: " + e.getMessage());
         }
-        System.out.println("User " + username + " has been registered yohoo");
         return new Result(true, "User registered successfully");
     }
 
