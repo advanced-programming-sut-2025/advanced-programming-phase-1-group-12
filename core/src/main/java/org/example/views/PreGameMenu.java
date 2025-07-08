@@ -183,9 +183,9 @@ public class PreGameMenu extends AppMenu implements Screen {
                         for (String name : playerNames) {
                             playersList.add(name);
                         }
-                        dispose();
-                        Main.getMain().setScreen(new FarmGraphicSelectionMenu(playersList));
 
+//                        dispose();
+                        Main.getMain().setScreen(new FarmGraphicSelectionMenu(playersList));
                     }
                 });
             }
