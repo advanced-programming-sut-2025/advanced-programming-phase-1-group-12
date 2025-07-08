@@ -2,6 +2,7 @@ package org.example.views;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -31,6 +32,8 @@ public class GameMenu extends AppMenu implements Screen {
     private final FarmingController farmingController = new FarmingController();
     private final CraftingController craftingController = new CraftingController();
     private final ArtisanController artisanController = new ArtisanController();
+    private PixelMapRenderer pixelMapRenderer;
+    private SpriteBatch batch;
 
     private Skin skin = GameAssetManager.skin;
     private Stage stage;
@@ -474,13 +477,26 @@ public class GameMenu extends AppMenu implements Screen {
     public void show() {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
+        batch = new SpriteBatch();
+
+        pixelMapRenderer = new PixelMapRenderer(App.getCurrentGame().getMainMap()); // then create renderer
+    }
+
+
+    @Override
+    public void render(float delta) {
+        ScreenUtils.clear(0, 0, 0, 1);
+
+        pixelMapRenderer.render(batch, 0, 0);
+        stage.act(delta);
+        stage.draw();
     }
 
     @Override
-    public void render(float v) {
-        ScreenUtils.clear(0, 0, 0, 1);
-        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
-        stage.draw();
+    public void dispose() {
+        stage.dispose();
+        batch.dispose();
+        GameAssetManager.dispose();
     }
 
     @Override
@@ -500,11 +516,6 @@ public class GameMenu extends AppMenu implements Screen {
 
     @Override
     public void hide() {
-
-    }
-
-    @Override
-    public void dispose() {
 
     }
 }
