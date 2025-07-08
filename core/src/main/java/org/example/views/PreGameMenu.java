@@ -12,7 +12,6 @@ import org.example.Main;
 import org.example.models.Fundementals.App;
 import org.example.models.GameAssetManager;
 import org.example.models.enums.Menu;
-
 import java.util.Scanner;
 
 public class PreGameMenu extends AppMenu implements Screen {
@@ -59,7 +58,6 @@ public class PreGameMenu extends AppMenu implements Screen {
 
         stage.addActor(table);
 
-        // Add listeners
         addListeners();
     }
 
