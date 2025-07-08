@@ -73,6 +73,7 @@ public class MainMenu extends AppMenu implements Screen {
                     System.out.println("profile menu selected");
                     Main.getMain().setScreen(new ProfileMenu());
                 } else{
+                    GameAssetManager.loadFarmTextures(); // ← This must be FIRST
                     App.setCurrentMenu(Menu.PreGameMenu);
                     Main.getMain().getScreen().dispose();
                     Main.getMain().setScreen(new PreGameMenu());

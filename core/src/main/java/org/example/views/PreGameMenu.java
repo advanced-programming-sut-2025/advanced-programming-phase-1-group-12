@@ -180,11 +180,10 @@ public class PreGameMenu extends AppMenu implements Screen {
                         }
                         // Correct conversion from LibGDX Array to java.util.List
                         List<String> playersList = new ArrayList<>();
+                        playersList.add(App.getLoggedInUser().getUserName());
                         for (String name : playerNames) {
                             playersList.add(name);
                         }
-
-//                        dispose();
                         Main.getMain().setScreen(new FarmGraphicSelectionMenu(playersList));
                     }
                 });
