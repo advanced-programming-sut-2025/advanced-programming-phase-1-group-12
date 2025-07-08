@@ -33,7 +33,7 @@ public class MainMenu extends AppMenu implements Screen {
     public MainMenu() {
 
         Array<String> questions = new Array<>(new String[]{
-            "profile menu", "game menu"
+            "profile menu", "pre_game menu"
         });
         selectMenu.setItems(questions);
 
