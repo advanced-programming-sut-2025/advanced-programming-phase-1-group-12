@@ -6,12 +6,15 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Main;
 import org.example.models.Fundementals.App;
 import org.example.models.GameAssetManager;
 import org.example.models.enums.Menu;
+
+import java.util.List;
 import java.util.Scanner;
 
 public class PreGameMenu extends AppMenu implements Screen {
@@ -23,6 +26,7 @@ public class PreGameMenu extends AppMenu implements Screen {
     private final TextButton showInformation;
     private final TextButton exitGame;
     public Table table = new Table();
+    private final Array<String> playerNames = new Array<>();
 
     public PreGameMenu() {
         this.newGame = new TextButton("new Game", skin);
@@ -101,10 +105,57 @@ public class PreGameMenu extends AppMenu implements Screen {
         newGame.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                System.out.println("New game clicked!");
-                App.setCurrentMenu(Menu.GameMenu);
-                Main.getMain().getScreen().dispose();
-                Main.getMain().setScreen(new GameMenu());
+                table.clear(); // Clear current buttons
+                playerNames.clear(); // Clear previous names if any
+
+                Label instruction = new Label("Enter player names:", skin);
+                TextField nameField = new TextField("", skin);
+                TextButton addPlayerButton = new TextButton("+", skin);
+                TextButton startGameButton = new TextButton("Start Game", skin);
+                Table playersTable = new Table(); // To show added names
+
+                table.row().pad(10);
+                table.add(instruction).colspan(2).center();
+
+                table.row().pad(10);
+                table.add(nameField).width(200);
+                table.add(addPlayerButton).width(60);
+
+                table.row().pad(10);
+                table.add(playersTable).colspan(2);
+
+                table.row().pad(30);
+                table.add(startGameButton).colspan(2).width(200).height(50);
+
+                // Add player button listener
+                addPlayerButton.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        String name = nameField.getText().trim();
+                        if (!name.isEmpty() && !playerNames.contains(name, false)) {
+                            playerNames.add(name);
+                            nameField.setText("");
+
+                            playersTable.clear();
+                            for (String player : playerNames) {
+                                playersTable.row().pad(5);
+                                playersTable.add(new Label(player, skin));
+                            }
+                        }
+                    }
+                });
+
+                // Start game button listener
+                startGameButton.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        if (playerNames.size > 0) {
+                            Main.getMain().setScreen(new GameMenu((List<String>) playerNames));
+                        } else {
+                            System.out.println("Add at least one player to start.");
+                        }
+                    }
+                });
             }
         });
 
@@ -129,7 +180,7 @@ public class PreGameMenu extends AppMenu implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Exit game clicked!");
                 // TODO: Clean up if needed before exit
-                Gdx.app.exit();
+//                Gdx.app.exit();
             }
         });
     }

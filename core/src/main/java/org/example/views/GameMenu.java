@@ -35,6 +35,11 @@ public class GameMenu extends AppMenu implements Screen {
 
     private Skin skin = GameAssetManager.skin;
     private Stage stage;
+    private final List<String> players;
+
+    public GameMenu(List<String> players) {
+        this.players = players;
+    }
 
     @Override
     public void check(Scanner scanner) {
@@ -52,9 +57,9 @@ public class GameMenu extends AppMenu implements Screen {
             controller.Play(scanner, players);
         } else if ((matcher = GameMenuCommands.EXIT.getMather(input)) != null) {
             System.out.println(controller.EXIT());
-        }else if ((matcher = GameMenuCommands.LoadGame.getMather(input)) != null) {
+        } else if ((matcher = GameMenuCommands.LoadGame.getMather(input)) != null) {
             controller.loadGameById(matcher.end("gameID"));
-        }  else if ((matcher = GameMenuCommands.PRINT.getMather(input)) != null) {
+        } else if ((matcher = GameMenuCommands.PRINT.getMather(input)) != null) {
             controller.printMap(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y")), Integer.parseInt(matcher.group("size")), scanner);
         } else if ((matcher = GameMenuCommands.TIME.getMather(input)) != null) {
             showCurrentTime();
@@ -64,7 +69,7 @@ public class GameMenu extends AppMenu implements Screen {
             System.out.println(controller.showCurrentType(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.PLACE_ON_GROUND.getMather(input)) != null) {
             System.out.println(farmingController.plantInGreenHouse(matcher.group("seed"),
-                    Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
+                Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.NextTurn.getMather(input)) != null) {
             System.out.println(GameMenuController.nextTurn());
         } else if ((matcher = GameMenuCommands.PRODUCTION.getMather(input)) != null) {
@@ -89,8 +94,7 @@ public class GameMenu extends AppMenu implements Screen {
             cheatWeather(matcher.group("type"));
         } else if ((matcher = GameMenuCommands.SHOW_POSITION.getMather(input)) != null) {
             System.out.println(controller.showLocation());
-        }
-        else if (App.getCurrentPlayerLazy().getEnergy() <= 0 && !App.getCurrentPlayerLazy().isEnergyUnlimited()) {
+        } else if (App.getCurrentPlayerLazy().getEnergy() <= 0 && !App.getCurrentPlayerLazy().isEnergyUnlimited()) {
             System.out.println("You are not enough energy to do anything.");
         } else if ((matcher = GameMenuCommands.WALK.getMather(input)) != null) {
             System.out.println(UserLocationController.walkPlayer(matcher.group("x"), matcher.group("y")));
@@ -116,11 +120,11 @@ public class GameMenu extends AppMenu implements Screen {
             System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.Picking_FRUIT.getMather(input)) != null) {
             System.out.println(farmingController.PickingFruit(Integer.parseInt(matcher.group("X")),
-                    Integer.parseInt(matcher.group("Y"))));
+                Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.CUTTING_TREE.getMather(input)) != null) {
             System.out.println(farmingController.cuttingTrees(Integer.parseInt(matcher.group("X")),
-                    Integer.parseInt(matcher.group("Y"))));
-        } else if ((matcher = GameMenuCommands.EXTRACTION.getMather(input)) !=null) {
+                Integer.parseInt(matcher.group("Y"))));
+        } else if ((matcher = GameMenuCommands.EXTRACTION.getMather(input)) != null) {
             System.out.println(farmingController.extraction(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.SHOW_AVAILABLE_TOOL.getMather(input)) != null) {
             Result result = toolsController.showToolsAvailable();
@@ -289,12 +293,12 @@ public class GameMenu extends AppMenu implements Screen {
             System.out.println(farmingController.reaping(matcher.group("direction")));
         } else if ((matcher = GameMenuCommands.WATERING.getMather(input)) != null) {
             System.out.println(farmingController.watering(Integer.parseInt(matcher.group("X")),
-                    Integer.parseInt(matcher.group("Y"))));
+                Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.HOW_MUCH_WATER.getMather(input)) != null) {
             System.out.println(farmingController.howMuchWater());
         } else if ((matcher = GameMenuCommands.ADD_TO_INVENTORY.getMather(input)) != null) {
             System.out.println(craftingController.addItem(matcher.group("itemName"),
-                    Integer.parseInt(matcher.group("count"))));
+                Integer.parseInt(matcher.group("count"))));
         } else if ((matcher = GameMenuCommands.PLACE_ON_GROUND.getMather(input)) != null) {
             System.out.println(craftingController.putItem(matcher.group("itemName"), matcher.group("direction")));
         } else if ((matcher = GameMenuCommands.MACK_CRAFT.getMather(input)) != null) {
@@ -333,37 +337,37 @@ public class GameMenu extends AppMenu implements Screen {
             System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.SHOW_MONEY.getMather(input)) != null) {
             System.out.println(App.getCurrentPlayerLazy().getMoney());
-        } else if ((matcher = GameMenuCommands.SELL.getMather(input))!= null) {
+        } else if ((matcher = GameMenuCommands.SELL.getMather(input)) != null) {
             System.out.println(controller.sellByShipping(matcher.group("productName"), matcher.group("count")).getMessage());
-        } else if ((matcher = GameMenuCommands.SELL_ONE.getMather(input))!= null) {
+        } else if ((matcher = GameMenuCommands.SELL_ONE.getMather(input)) != null) {
             System.out.println(controller.sellByShippingWithoutCount(matcher.group("productName")).getMessage() + "sold without count");
         } else if ((matcher = GameMenuCommands.ARTISAN_GET.getMather(input)) != null) {
             System.out.println(artisanController.artisanGet(matcher.group("itemName")));
         } else if ((matcher = GameMenuCommands.ARTISAN_USE.getMather(input)) != null) {
             System.out.println(artisanController.artisanUse(matcher.group("artisanName"), matcher.group("itemName")));
-        } else if ((matcher = GameMenuCommands.GREENHOUSE_BUILD.getMather(input))!=null) {
+        } else if ((matcher = GameMenuCommands.GREENHOUSE_BUILD.getMather(input)) != null) {
             System.out.println(controller.buildGreenHouse());
         } else if ((matcher = GameMenuCommands.ABILITIES_SHOW.getMather(input)) != null) {
-            for(Ability ability: App.getCurrentPlayerLazy().getAbilitis()){
-                System.out.println(ability.getName() +" "+ ability.getLevel()+" "+ability.getAmount());
+            for (Ability ability : App.getCurrentPlayerLazy().getAbilitis()) {
+                System.out.println(ability.getName() + " " + ability.getLevel() + " " + ability.getAmount());
             }
-        } else if ((matcher = GameMenuCommands.CHEAT_PLAYER_MONEY.getMather(input))!= null) {
+        } else if ((matcher = GameMenuCommands.CHEAT_PLAYER_MONEY.getMather(input)) != null) {
             System.out.println(App.getCurrentPlayerLazy().getMoney());
-        } else if ((matcher = GameMenuCommands.SHOW_SHIPPING_BIN_LOCATION.getMather(input))!= null) {
+        } else if ((matcher = GameMenuCommands.SHOW_SHIPPING_BIN_LOCATION.getMather(input)) != null) {
             System.out.println(controller.showShippingBinLocation().getMessage());
         } else if ((matcher = GameMenuCommands.CHEAT_BUY_ITEM.getMather(input)) != null) {
             System.out.println(storeController.cheatBuyItem(matcher.group("productName"), Integer.parseInt(matcher.group("count"))));
-        }  else if ((matcher = GameMenuCommands.CHEAT_ADD_ITEM.getMather(input)) != null) {
+        } else if ((matcher = GameMenuCommands.CHEAT_ADD_ITEM.getMather(input)) != null) {
             System.out.println(storeController.cheatAddItem(matcher.group("productName"), Integer.parseInt(matcher.group("count"))));
-        } else if ((matcher = GameMenuCommands.CHEAT_FRIENDSHIP_LEVEL.getMather(input))!= null) {
+        } else if ((matcher = GameMenuCommands.CHEAT_FRIENDSHIP_LEVEL.getMather(input)) != null) {
             System.out.println(controller.cheatFriendShipLevel(matcher.group("name"), matcher.group("amount")));
-        } else if ((matcher = GameMenuCommands.CHEAT_FRIENDSHIP_XP.getMather(input))!= null) {
+        } else if ((matcher = GameMenuCommands.CHEAT_FRIENDSHIP_XP.getMather(input)) != null) {
             System.out.println(controller.cheatAddXP(matcher.group("username")));
-        } else if ((matcher = GameMenuCommands.CHEAT_MAXIMIZE_ABILITY_LEVEL.getMather(input))!= null) {
+        } else if ((matcher = GameMenuCommands.CHEAT_MAXIMIZE_ABILITY_LEVEL.getMather(input)) != null) {
             App.getCurrentPlayerLazy().getAbilityByName(matcher.group("ability")).setLevel(4);
-        } else if ((matcher = GameMenuCommands.PRODUCES.getMather(input))!= null) {
-            for(FarmAnimals farmAnimals: App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()){
-                if(!farmAnimals.isHasCollectedProductToday()){
+        } else if ((matcher = GameMenuCommands.PRODUCES.getMather(input)) != null) {
+            for (FarmAnimals farmAnimals : App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()) {
+                if (!farmAnimals.isHasCollectedProductToday()) {
                     System.out.println(farmAnimals.getName() + " " + animalController.whatWillProduceToday(farmAnimals.getAnimal(), farmAnimals));
                 }
             }
@@ -450,8 +454,8 @@ public class GameMenu extends AppMenu implements Screen {
 
     public void createTrade(String username, String type, String item, Matcher matcher) {
         int amount;
-        try{
-            amount=Integer.parseInt(matcher.group("amount"));
+        try {
+            amount = Integer.parseInt(matcher.group("amount"));
         } catch (Exception e) {
             System.out.println("amount must be a number!");
             return;
@@ -480,6 +484,7 @@ public class GameMenu extends AppMenu implements Screen {
     public void show() {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
+        controller.Play(new Scanner(System.in), players);
     }
 
     @Override

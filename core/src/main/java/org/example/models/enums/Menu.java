@@ -1,6 +1,7 @@
 package org.example.models.enums;
 import org.example.views.*;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public enum Menu {
@@ -9,7 +10,7 @@ public enum Menu {
     LoginMenu(new LoginMenuView()),
     profileMenu (new ProfileMenu()),
     Exit (new ExitMenu()),
-    GameMenu(new GameMenu()),
+    GameMenu(new GameMenu(new ArrayList<>())),
     PreGameMenu(new PreGameMenu());
 
     private final AppMenu menu;
