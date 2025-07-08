@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
-//TODO:we should add a pregame menu i guess
 public class GameMenu extends AppMenu implements Screen {
     private final GameMenuController controller = new GameMenuController();
     private final ToolsController toolsController = new ToolsController();
@@ -46,16 +45,7 @@ public class GameMenu extends AppMenu implements Screen {
         String input = scanner.nextLine().trim();
         Matcher matcher;
 
-        if ((matcher = GameMenuCommands.PLAY.getMather(input)) != null) {
-            List<String> players = new ArrayList<>();
-
-            for (int i = 1; i <= 3; i++) {
-                if (matcher.group(i) != null)
-                    players.add(matcher.group(i).trim());
-            }
-
-            controller.Play(scanner, players);
-        } else if ((matcher = GameMenuCommands.EXIT.getMather(input)) != null) {
+        if ((matcher = GameMenuCommands.EXIT.getMather(input)) != null) {
             System.out.println(controller.EXIT());
         } else if ((matcher = GameMenuCommands.LoadGame.getMather(input)) != null) {
             controller.loadGameById(matcher.end("gameID"));
@@ -484,7 +474,6 @@ public class GameMenu extends AppMenu implements Screen {
     public void show() {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
-        controller.Play(new Scanner(System.in), players);
     }
 
     @Override

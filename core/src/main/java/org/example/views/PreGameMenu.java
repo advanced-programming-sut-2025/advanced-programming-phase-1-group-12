@@ -12,15 +12,15 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Main;
 import org.example.models.Fundementals.App;
 import org.example.models.GameAssetManager;
-import org.example.models.enums.Menu;
-
+import org.example.models.RelatedToUser.User;
+import java.util.*;
 import java.util.List;
-import java.util.Scanner;
 
 public class PreGameMenu extends AppMenu implements Screen {
 
     private Skin skin = GameAssetManager.skin;
     private Stage stage;
+    private final Label menuLabel;
     private final TextButton newGame;
     private final TextButton loadLastGame;
     private final TextButton showInformation;
@@ -29,6 +29,8 @@ public class PreGameMenu extends AppMenu implements Screen {
     private final Array<String> playerNames = new Array<>();
 
     public PreGameMenu() {
+        this.menuLabel = new Label("pre_game menu", skin);
+
         this.newGame = new TextButton("new Game", skin);
         this.loadLastGame = new TextButton("Load last game", skin);
         this.showInformation = new TextButton("show information of current play", skin);
@@ -47,6 +49,7 @@ public class PreGameMenu extends AppMenu implements Screen {
 
         table.setFillParent(true);
         table.center();
+        table.add(menuLabel);
 
         table.row().pad(30, 0, 10, 0);
         table.add(newGame).width(300).height(60);
@@ -145,15 +148,44 @@ public class PreGameMenu extends AppMenu implements Screen {
                     }
                 });
 
-                // Start game button listener
                 startGameButton.addListener(new ClickListener() {
-                    @Override
-                    public void clicked(InputEvent event, float x, float y) {
-                        if (playerNames.size > 0) {
-                            Main.getMain().setScreen(new GameMenu((List<String>) playerNames));
-                        } else {
-                            System.out.println("Add at least one player to start.");
+                    @Override public void clicked(InputEvent event, float x, float y) {
+
+                        if (playerNames.size == 0) {
+                            new Dialog("Error", skin)
+                                .text("At least one player is required!")
+                                .button("OK").show(stage);
+                            return;
                         }
+                        App.loadAllUsersFromFiles();
+
+                        Iterator<String> iterator = playerNames.iterator();
+                        while (iterator.hasNext()) {
+                            String playerName = iterator.next().trim();
+                            User user = App.getUserByUsername(playerName);
+                            if (user == null) {
+                                new Dialog("Player Error", skin)
+                                    .text("User not found: " + playerName + ". Removed from list.")
+                                    .button("OK").show(stage);
+                                iterator.remove(); // remove from list
+
+                                // refresh the playersTable visually
+                                playersTable.clear();
+                                for (String validPlayer : playerNames) {
+                                    playersTable.row().pad(5);
+                                    playersTable.add(new Label(validPlayer, skin));
+                                }
+                                return;
+                            }
+                        }
+                        // Correct conversion from LibGDX Array to java.util.List
+                        List<String> playersList = new ArrayList<>();
+                        for (String name : playerNames) {
+                            playersList.add(name);
+                        }
+                        dispose();
+                        Main.getMain().setScreen(new FarmGraphicSelectionMenu(playersList));
+
                     }
                 });
             }

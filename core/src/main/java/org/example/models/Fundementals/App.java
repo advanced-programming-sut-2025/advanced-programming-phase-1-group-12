@@ -1,11 +1,16 @@
 package org.example.models.Fundementals;
 
+import com.google.gson.Gson;
 import org.example.models.Date;
 import org.example.models.Item;
 import org.example.models.Place.Store;
 import org.example.models.RelatedToUser.User;
 import org.example.models.enums.Menu;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -134,5 +139,22 @@ public class App {
     }
     public static Item getItemByName(String name) {
         return allItems.get(name);
+    }
+
+    public static void loadAllUsersFromFiles() {
+        File folder = new File(".");
+        File[] files = folder.listFiles((dir, name) -> name.endsWith(".json"));
+
+        if (files == null) return;
+
+        Gson gson = new Gson();
+        for (File file : files) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                User user = gson.fromJson(reader, User.class);
+                App.getUsers().put(user.getUserName(), user);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

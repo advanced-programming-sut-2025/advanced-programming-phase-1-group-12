@@ -309,88 +309,41 @@ public class GameMenuController implements MenuController {
         };
     }
 
-    public void Play(Scanner scanner, List<String> usernames) {
-
+    public void Play(Scanner scanner, List<String> usernames, Map<String, Integer> farmSelections) {
         Game newGame = new Game();
         App.setCurrentGame(newGame);
         MapSetUp.initializeFarms();
         MapSetUp.storesSetUp();
         MapSetUp.NPCsetUp();
 
-        loadAllUsersFromFiles();
+        App.loadAllUsersFromFiles();
 
-        ArrayList<Integer> chosenFarmNumbers = new ArrayList<>();
-        ArrayList<Player> players = new ArrayList<>();
-
+        List<Player> players = new ArrayList<>();
         for (String username : usernames) {
-            if (username == null || username.isBlank()) continue;
-
             User user = App.getUserByUsername(username.trim());
-            if (user == null) {
-                System.out.println("User not found: " + username);
-                continue;
-            }
-
-            System.out.println("User: " + username);
             Player newPlayer = new Player(user, null, false, null, new ArrayList<>(),
-                    null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
-            players.add(newPlayer);
+                null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
 
+            players.add(newPlayer);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Hoe", Quality.NORMAL, 0), 1);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("PickAxe", Quality.NORMAL, 0), 1);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Axe", Quality.NORMAL, 0), 1);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Watering can", Quality.NORMAL, 0), 1);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Scythe", Quality.NORMAL, 0), 1);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Trash Can", Quality.NORMAL, 0), 1);
-            newPlayer.setCurrentTool((Tools) newPlayer.getBackPack().getItemByName("Hoe"));
 
-            System.out.println("Do you want to know what each farm has?");
-            String selection = scanner.nextLine();
-            if (selection.equals("yes")) guideForFarm();
-
-            while (true) {
-                System.out.println("Choosing farm for " + username + ":");
-                String input = scanner.nextLine().trim();
-
-                if (!input.matches("\\d+")) {
-                    System.out.println("Invalid input, please enter a number.");
-                    continue;
-                }
-                int farmId = Integer.parseInt(input);
-                if (farmId < 0 || farmId >= 4) {
-                    System.out.println("Farm number must be between 0 and 3!");
-                    continue;
-                }
-                if (chosenFarmNumbers.contains(farmId)) {
-                    System.out.println("This farm is already taken, please try again.");
-                    continue;
-                }
-                chosenFarmNumbers.add(farmId);
-                Farm newFarm = App.getCurrentGame().getMainMap().getFarms().get(farmId);
-                newFarm.setOwner(newPlayer);
-                newFarm.getOwner().setUserLocation(App.getCurrentGame().getMainMap().findLocation(newFarm.getLocation().getTopLeftCorner().getxAxis(), newFarm.getLocation().getTopLeftCorner().getyAxis()));
-                App.getCurrentGame().getMainMap().findLocation(newFarm.getLocation().getTopLeftCorner().getxAxis(), newFarm.getLocation().getTopLeftCorner().getyAxis()).setObjectInTile(newPlayer);
-                break;
-            }
+            int farmId = farmSelections.get(username);
+            Farm farm = App.getCurrentGame().getMainMap().getFarms().get(farmId);
+            farm.setOwner(newPlayer);
+            Location loc = farm.getLocation().getTopLeftCorner();
+            newPlayer.setUserLocation(App.getCurrentGame().getMainMap().findLocation(loc.getxAxis(), loc.getyAxis()));
         }
 
-        for (Player player : App.getCurrentGame().getPlayers()) {
-            Location tile = App.getCurrentGame().getMainMap().findLocation(
-                    player.getOwnedFarm().getLocation().getTopLeftCorner().getxAxis(),
-                    player.getOwnedFarm().getLocation().getTopLeftCorner().getyAxis());
-
-            player.setUserLocation(tile);
-            tile.setObjectInTile(player);
-        }
-
-        Map<Farm, Player> farmOwnership = getFarmPlayerMap(players, chosenFarmNumbers);
-
-        App.getCurrentGame().setUserAndMap(farmOwnership);
-        App.getCurrentGame().setPlayers(players);
+        App.getCurrentGame().setPlayers((ArrayList<Player>) players);
         App.getCurrentGame().setCurrentPlayer(players.get(0));
+        App.getCurrentGame().setGameId(App.getGameId());
 
         MapSetUp.showMapWithFarms(App.getCurrentGame().getMainMap());
-        App.getCurrentGame().setGameId(App.getGameId());
         System.out.println("All farms have been assigned!");
     }
 
@@ -450,24 +403,6 @@ public class GameMenuController implements MenuController {
             }
         }
         return farmOwnership;
-    }
-
-
-    private void loadAllUsersFromFiles() {
-        File folder = new File(".");
-        File[] files = folder.listFiles((dir, name) -> name.endsWith(".json"));
-
-        if (files == null) return;
-
-        Gson gson = new Gson();
-        for (File file : files) {
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                User user = gson.fromJson(reader, User.class);
-                App.getUsers().put(user.getUserName(), user);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     public Result showLocation() {
