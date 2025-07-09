@@ -4,6 +4,7 @@ import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -15,10 +16,8 @@ import org.example.controllers.movingPlayer.PlayerController;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Player;
 import org.example.models.Assets.GameAssetManager;
-import org.example.models.Fundementals.Result;
 
 import java.util.List;
-import java.util.regex.Matcher;
 
 public class GameMenu extends InputAdapter implements Screen {
     private final GameMenuController controller = new GameMenuController();
@@ -39,7 +38,8 @@ public class GameMenu extends InputAdapter implements Screen {
     private float homeZoom, mapZoom;
     private float homeX, homeY, mapCenterX, mapCenterY;
     private float savedX, savedY, savedZoom;
-
+    public static final float WORLD_WIDTH  = 400 * 100f;
+    public static final float WORLD_HEIGHT = 400 * 100f;
 
     public GameMenu(List<String> players) {
         this.players = players;
@@ -90,6 +90,7 @@ public class GameMenu extends InputAdapter implements Screen {
         if (!showingAllMap) {
             camera.position.set(px, py, 0);
         }
+        clampCameraToMap();
         camera.update();
 
         batch.setProjectionMatrix(camera.combined);
@@ -117,8 +118,19 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     @Override
-    public void resize(int i, int i1) {
+    public void resize (int width, int height) {
+        camera.viewportWidth  = width;
+        camera.viewportHeight = height;
 
+        float zoomX = WORLD_WIDTH  / width;
+        float zoomY = WORLD_HEIGHT / height;
+        mapZoom = Math.max(zoomX, zoomY);   // no 1.05 fudge – keeps the view inside
+
+        if (showingAllMap) camera.zoom = mapZoom;
+
+        clampCameraToMap();   // <<< ADD THIS
+        camera.update();
+        stage.getViewport().update(width, height, true);
     }
 
     @Override
@@ -152,6 +164,7 @@ public class GameMenu extends InputAdapter implements Screen {
         homeY = p.getUserLocation().getyAxis() + p.getPlayerSprite().getHeight() / 2f;
         camera.position.set(homeX, homeY, 0);
         camera.zoom = homeZoom;
+        clampCameraToMap();
         camera.update();
     }
 
@@ -169,6 +182,32 @@ public class GameMenu extends InputAdapter implements Screen {
             camera.zoom = savedZoom;
             showingAllMap = false;
         }
+        clampCameraToMap();
         camera.update();
     }
+
+    /** Keep the camera view fully inside the map rectangle. */
+    private void clampCameraToMap () {
+        // visible size after zooming
+        float halfViewW = camera.viewportWidth  * camera.zoom * 0.5f;
+        float halfViewH = camera.viewportHeight * camera.zoom * 0.5f;
+
+        // when the map is smaller than the view, just centre the camera
+        if (WORLD_WIDTH < halfViewW * 2) {
+            camera.position.x = WORLD_WIDTH * 0.5f;
+        } else {
+            camera.position.x = MathUtils.clamp(camera.position.x,
+                halfViewW,
+                WORLD_WIDTH - halfViewW);
+        }
+
+        if (WORLD_HEIGHT < halfViewH * 2) {
+            camera.position.y = WORLD_HEIGHT * 0.5f;
+        } else {
+            camera.position.y = MathUtils.clamp(camera.position.y,
+                halfViewH,
+                WORLD_HEIGHT - halfViewH);
+        }
+    }
+
 }
