@@ -54,29 +54,29 @@ public class PixelMapRenderer {
     private Texture getTextureForTile(TypeOfTile tileType) {
         switch (tileType) {
             case LAKE:
-                return LAKE_TEXTURE;  // Texture for LAKE
+                return LAKE_TEXTURE;
             case GROUND:
-                return FLOORING_03;  // Texture for GROUND
+                return FLOORING_03;
             case TREE:
-                return FLOORING_09;  // Texture for TREE
+                return FLOORING_09;
             case HOUSE:
-                return FLOORING_10;  // Texture for HOUSE
+                return FLOORING_10;
             case GREENHOUSE:
-                return GREEN_HOUSE;  // Texture for GREENHOUSE
+                return GREEN_HOUSE;
             case QUARRY:
-                return QUARRY;  // Texture for QUARRY
+                return QUARRY;
             case STORE:
-                return DARK_GREEN_FLOOR;  // Texture for STORE
+                return DARK_GREEN_FLOOR;
             case NPC_VILLAGE:
-                return NPC_VILLAGE;  // Texture for NPC_VILLAGE
+                return NPC_VILLAGE;
             case BURNED_GROUND:
-                return FLOORING_03;  // Texture for BURNED_GROUND
+                return FLOORING_03;
             case STONE:
-                return STONE;  // Texture for STONE
+                return STONE;
             case PLANT:
-                return PLANTS;  // Texture for PLANT
+                return PLANTS;
             default:
-                return LAKE_TEXTURE;  // Default texture
+                return LAKE_TEXTURE;
         }
     }
 
