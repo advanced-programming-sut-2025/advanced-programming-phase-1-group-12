@@ -5,7 +5,6 @@ import org.example.models.Date;
 import org.example.models.Item;
 import org.example.models.Place.Store;
 import org.example.models.RelatedToUser.User;
-import org.example.models.enums.Menu;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,7 +19,6 @@ public class App {
     private static Map<String, User> users = new HashMap<>();
     private static Map<String, Item> allItems = new HashMap<>();
     private static User loggedInUser = null;
-    private static Menu currentMenu = Menu.RegisterMenu;
     private static ArrayList<Game> game = new ArrayList<>();
     private static int gameId = 1;
     private static Game currentGame = new Game();
@@ -45,10 +43,6 @@ public class App {
 
     public ArrayList<Game> getAllGames() {
         return allGames;
-    }
-
-    public static Menu getCurrentMenu() {
-        return currentMenu;
     }
 
     public void setAllGames(ArrayList<Game> allGames) {
@@ -85,10 +79,6 @@ public class App {
 
     public static void setLoggedInUser(User loggedInUser) {
         App.loggedInUser = loggedInUser;
-    }
-
-    public static void setCurrentMenu(Menu currentMenu) {
-        App.currentMenu = currentMenu;
     }
 
     public static ArrayList<String> getSecurityQuestions() {

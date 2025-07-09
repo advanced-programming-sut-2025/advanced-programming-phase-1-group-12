@@ -14,12 +14,11 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Main;
 import org.example.models.Fundementals.App;
 import org.example.models.Assets.GameAssetManager;
-import org.example.models.enums.Menu;
 
 import java.io.File;
 import java.util.Scanner;
 
-public class MainMenu extends AppMenu implements Screen {
+public class MainMenu implements Screen {
     private Skin skin = GameAssetManager.skin;
     private Stage stage;
     private final Label menuLabel;
@@ -38,10 +37,6 @@ public class MainMenu extends AppMenu implements Screen {
         this.menuLabel = new Label("main menu", skin);
         this.LogOut = new TextButton("log out", skin);
         this.exitButton = new TextButton("Exit", skin);
-    }
-
-    @Override
-    public void check(Scanner scanner) {
     }
 
     @Override
@@ -66,12 +61,10 @@ public class MainMenu extends AppMenu implements Screen {
             public void changed (ChangeEvent event, Actor actor) {
                 if(selectMenu.getSelected()
                     .equalsIgnoreCase("profile menu")) {
-                    App.setCurrentMenu(Menu.profileMenu);
                     Main.getMain().getScreen().dispose();
                     System.out.println("profile menu selected");
                     Main.getMain().setScreen(new ProfileMenu());
                 } else{
-                    App.setCurrentMenu(Menu.PreGameMenu);
                     Main.getMain().getScreen().dispose();
                     Main.getMain().setScreen(new PreGameMenu());
                 }
@@ -93,7 +86,6 @@ public class MainMenu extends AppMenu implements Screen {
                 } else {
                     System.out.println("No StayLoggedIn.json file to delete.");
                 }
-                App.setCurrentMenu(Menu.RegisterMenu);
                 Main.getMain().getScreen().dispose();
                 Main.getMain().setScreen(new RegisterMenuView());
             }
@@ -102,7 +94,7 @@ public class MainMenu extends AppMenu implements Screen {
         exitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                App.setCurrentMenu(Menu.Exit);
+
                 System.exit(0);
             }
         });

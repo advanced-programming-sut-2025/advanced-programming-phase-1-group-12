@@ -38,7 +38,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-public class GameMenuController implements MenuController {
+public class GameMenuController {
     public Result startTrade() {
         StringBuilder playerList = new StringBuilder("Available players for trading:\n");
         Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
@@ -293,20 +293,20 @@ public class GameMenuController implements MenuController {
 
     private String getBackgroundColorForTile(TypeOfTile type) {
         return switch (type) {
-            case GREENHOUSE -> "\u001B[42m"; // green background
+            case GREENHOUSE -> "\u001B[42m";
             case GROUND -> "\u001B[48;5;180m";
-            case HOUSE -> "\u001B[47m";      // white/gray background
-            case QUARRY -> "\u001B[43m";     // yellow background
-            case STONE -> "\u001B[103m";     // bright yellow background
-            case TREE -> "\u001B[102m";      // bright green background
-            case LAKE -> "\u001B[46m";       // cyan background
-            case STORE -> "\u001B[104m";       // Bright Blue
-            case BARN -> "\u001B[44m";         // Dark Blue (Standard ANSI)
-            case COOP -> "\u001B[48;5;155m";        // light green
-            case PLOUGHED_LAND -> "\u001B[48;5;214m"; //orange
-            case NPC_VILLAGE -> "\u001B[48;5;209m"; //Pink
-            case BURNED_GROUND -> "\u001B[40m"; //black
-            case PLANT -> "\u001B[105m"; // Bright Magenta (Pink-ish); // Dark red
+            case HOUSE -> "\u001B[47m";
+            case QUARRY -> "\u001B[43m";
+            case STONE -> "\u001B[103m";
+            case TREE -> "\u001B[102m";
+            case LAKE -> "\u001B[46m";
+            case STORE -> "\u001B[104m";
+            case BARN -> "\u001B[44m";
+            case COOP -> "\u001B[48;5;155m";
+            case PLOUGHED_LAND -> "\u001B[48;5;214m";
+            case NPC_VILLAGE -> "\u001B[48;5;209m";
+            case BURNED_GROUND -> "\u001B[40m";
+            case PLANT -> "\u001B[105m";
             default -> "\u001B[41m";
         };
     }
@@ -1202,7 +1202,6 @@ public class GameMenuController implements MenuController {
             return new Result(false, "Failed to save the game: " + e.getMessage());
         }
 
-        App.setCurrentMenu(Menu.MainMenu);
         App.setCurrentGame(null);
         int newGameID = gameID + 1;
         App.setGameId(newGameID);

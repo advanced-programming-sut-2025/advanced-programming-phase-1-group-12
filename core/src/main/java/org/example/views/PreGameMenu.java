@@ -16,7 +16,7 @@ import org.example.models.RelatedToUser.User;
 import java.util.*;
 import java.util.List;
 
-public class PreGameMenu extends AppMenu implements Screen {
+public class PreGameMenu implements Screen {
 
     private Skin skin = GameAssetManager.skin;
     private Stage stage;
@@ -35,11 +35,6 @@ public class PreGameMenu extends AppMenu implements Screen {
         this.loadLastGame = new TextButton("Load last game", skin);
         this.showInformation = new TextButton("show information of current play", skin);
         this.exitGame = new TextButton("Exit and delete game", skin);
-    }
-
-    @Override
-    public void check(Scanner scanner) {
-
     }
 
     @Override
