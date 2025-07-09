@@ -69,7 +69,6 @@ public class GameMenu extends InputAdapter implements Screen {
         mapZoom = Math.max(zoomX, zoomY) * 1.05f;
 
         updateCameraToPlayer();
-
         pixelMapRenderer = new PixelMapRenderer(App.getCurrentGame().getMainMap());
 
         Player player = App.getCurrentPlayerLazy();
