@@ -16,6 +16,7 @@ import org.example.models.Fundementals.App;
 import org.example.models.Assets.GameAssetManager;
 
 import java.io.File;
+import java.util.Scanner;
 
 public class MainMenu implements Screen {
     private Skin skin = GameAssetManager.skin;
@@ -49,11 +50,11 @@ public class MainMenu implements Screen {
         table.add(menuLabel);
 
         table.row().pad(50,0,30,0);  ;
-        table.add(LogOut).width(400f);
+        table.add(LogOut);
         table.row().pad(30,0,30,0);  ;
-        table.add(selectMenu).width(400f);
+        table.add(selectMenu);
         table.row().pad(30,0,30,0);  ;
-        table.add(exitButton).width(400f);
+        table.add(exitButton);
         stage.addActor(table);
 
         selectMenu.addListener(new ChangeListener() {
