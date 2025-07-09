@@ -37,6 +37,7 @@ public class MainMenu implements Screen {
         this.menuLabel = new Label("main menu", skin);
         this.LogOut = new TextButton("log out", skin);
         this.exitButton = new TextButton("Exit", skin);
+        setScale();
     }
 
     @Override
@@ -94,7 +95,6 @@ public class MainMenu implements Screen {
         exitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-
                 System.exit(0);
             }
         });
@@ -128,5 +128,13 @@ public class MainMenu implements Screen {
         if (stage != null) {
             stage.dispose();
         }
+    }
+
+    public void setScale() {
+        menuLabel.setFontScale(2f);
+        exitButton.getLabel().setFontScale(2f);
+        LogOut.getLabel().setFontScale(2f);
+        selectMenu.getStyle().font.getData().setScale(2f);
+      selectMenu.getStyle().listStyle.font.getData().setScale(2f);
     }
 }

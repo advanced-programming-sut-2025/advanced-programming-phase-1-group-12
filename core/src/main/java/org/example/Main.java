@@ -33,7 +33,7 @@ public class Main extends Game {
             main.setScreen(new RegisterMenuView()); // Or LoginMenuView
         } else {
             System.out.println("Welcome back, " + App.getLoggedInUser().getUserName() + "! (Auto-logged in)");
-            main.setScreen(new MainMenu());
+            main.setScreen(new MainMenu()); // Or whatever the main screen is
         }
     }
 

@@ -15,8 +15,6 @@ import org.example.controllers.MenusController.ProfileMenuController;
 import org.example.models.Fundementals.App;
 import org.example.models.Assets.GameAssetManager;
 
-import java.util.Scanner;
-
 public class ProfileMenu implements Screen {
 
     private Skin skin = GameAssetManager.skin;

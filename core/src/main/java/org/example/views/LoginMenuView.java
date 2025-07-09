@@ -35,7 +35,7 @@ public class LoginMenuView implements Screen {
     public LoginMenuView() {
 
         Array<String> questions = new Array<>(new String[]{
-            "do not stay logged in", "stay logged in"
+             "do not stay logged in", "stay logged in"
         });
 
         selectFlag.setItems(questions);
@@ -53,6 +53,8 @@ public class LoginMenuView implements Screen {
         this.errorLabel.setColor(1, 0, 0, 1);   // Red color
         this.errorLabel.setVisible(false);
         this.loginButton = new TextButton("Login", skin);
+
+        setScale();
     }
 
     @Override
@@ -160,6 +162,12 @@ public class LoginMenuView implements Screen {
     }
     public void hideError() {
         errorLabel.setVisible(false);
+    }
+
+    public void setScale() {
+        menuLabel.setFontScale(2f);
+        exitButton.getLabel().setFontScale(2f);
+        errorLabel.setFontScale(2f);
     }
 }
 class forgetPass implements Screen {
