@@ -15,7 +15,7 @@ import org.example.Main;
 import org.example.controllers.MenusController.LoginRegisterMenuController;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Result;
-import org.example.models.GameAssetManager;
+import org.example.models.Assets.GameAssetManager;
 import org.example.models.enums.Menu;
 
 import java.util.Scanner;

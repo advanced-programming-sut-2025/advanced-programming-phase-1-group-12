@@ -11,7 +11,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Main;
 import org.example.models.Fundementals.App;
-import org.example.models.GameAssetManager;
+import org.example.models.Assets.GameAssetManager;
 import org.example.models.RelatedToUser.User;
 import java.util.*;
 import java.util.List;

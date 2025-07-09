@@ -30,18 +30,18 @@ public class PixelMapRenderer {
     }
 
     private void loadTextures() {
-        LAKE_TEXTURE = new Texture("Stardew_Valley_Images-main/Flooring/Flooring_26.png");
-        PLANTS = new Texture("Stardew_Valley_Images-main/Flooring/Flooring_50.png");
-        STONE = new Texture("Stardew_Valley_Images-main/Flooring/Flooring_52.png");
-        NPC_VILLAGE = new Texture("Stardew_Valley_Images-main/Flooring/Flooring_83.png");
-        GREEN_HOUSE = new Texture("Stardew_Valley_Images-main/Flooring/Flooring_03.png");
-        QUARRY = new Texture("Stardew_Valley_Images-main/Flooring/Flooring_08.png");
-        BURNED_GROUND = new Texture("Stardew_Valley_Images-main/Flooring/Flooring_39.png");
-        GROUND = new Texture("Stardew_Valley_Images-main/Flooring/Flooring_53.png");
-        STORE = new Texture("Stardew_Valley_Images-main/Flooring/Flooring_02.png");
-        TREE = new Texture("Stardew_Valley_Images-main/Flooring/Flooring_29.png");
-        DARK_GREEN_FLOOR = new Texture("Stardew_Valley_Images-main/Flooring/Flooring_02.png");
-        HOUSE = new Texture("Stardew_Valley_Images-main/Flooring/Flooring_27.png");
+        LAKE_TEXTURE = new Texture("Flooring/Flooring_26.png");
+        PLANTS = new Texture("Flooring/Flooring_50.png");
+        STONE = new Texture("Flooring/Flooring_52.png");
+        NPC_VILLAGE = new Texture("Flooring/Flooring_83.png");
+        GREEN_HOUSE = new Texture("Flooring/Flooring_03.png");
+        QUARRY = new Texture("Flooring/Flooring_08.png");
+        BURNED_GROUND = new Texture("Flooring/Flooring_39.png");
+        GROUND = new Texture("Flooring/Flooring_53.png");
+        STORE = new Texture("Flooring/Flooring_02.png");
+        TREE = new Texture("Flooring/Flooring_29.png");
+        DARK_GREEN_FLOOR = new Texture("Flooring/Flooring_02.png");
+        HOUSE = new Texture("Flooring/Flooring_27.png");
     }
 
     private void generatePixmap() {

@@ -5,12 +5,11 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import org.example.Main;
 import org.example.controllers.MenusController.GameMenuController;
 import org.example.models.Fundementals.Player;
-import org.example.models.GameAssetManager;
+import org.example.models.Assets.GameAssetManager;
 
 public class PlayerController {
     private Player player;
@@ -63,5 +62,4 @@ public class PlayerController {
         stateTime += Gdx.graphics.getDeltaTime();
         return playerAnimation.getKeyFrame(stateTime, true);
     }
-
 }

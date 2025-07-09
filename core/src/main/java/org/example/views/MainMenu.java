@@ -12,10 +12,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Main;
-import org.example.controllers.MenusController.LoginRegisterMenuController;
 import org.example.models.Fundementals.App;
-import org.example.models.Fundementals.Result;
-import org.example.models.GameAssetManager;
+import org.example.models.Assets.GameAssetManager;
 import org.example.models.enums.Menu;
 
 import java.io.File;
@@ -73,7 +71,6 @@ public class MainMenu extends AppMenu implements Screen {
                     System.out.println("profile menu selected");
                     Main.getMain().setScreen(new ProfileMenu());
                 } else{
-                    GameAssetManager.loadFarmTextures(); // ← This must be FIRST
                     App.setCurrentMenu(Menu.PreGameMenu);
                     Main.getMain().getScreen().dispose();
                     Main.getMain().setScreen(new PreGameMenu());

@@ -24,7 +24,7 @@ import java.util.Map;
 public class Player {
     private Texture playerTexture;
     private Sprite playerSprite;
-    private float Speed = 100f;
+    private float Speed = 1000f;
     private CollisionRect rect;
     private User user;
     private Location userLocation;
@@ -55,7 +55,7 @@ public class Player {
     public Player(User user, Location userLocation, boolean isMarried, Refrigrator refrigrator,
                   ArrayList<RelationShip> relationShips, Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited,
                   boolean hasCollapsed, ArrayList<Ability> abilitis) {
-        this.playerTexture = new Texture("Stardew_Valley_Images-main/Emoji/Emojis000.png");
+        this.playerTexture = new Texture("Emoji/Emojis000.png");
         this.playerSprite = new Sprite(playerTexture);
         this.user = user;
         this.userLocation = userLocation;

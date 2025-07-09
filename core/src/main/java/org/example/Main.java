@@ -4,7 +4,6 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.google.gson.Gson;
 import org.example.models.Fundementals.App;
-import org.example.models.GameAssetManager;
 import org.example.models.RelatedToUser.User;
 import org.example.models.enums.Menu;
 import org.example.views.MainMenu;

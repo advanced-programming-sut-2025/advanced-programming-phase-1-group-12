@@ -8,16 +8,14 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Main;
 import org.example.controllers.MenusController.ProfileMenuController;
 import org.example.models.Fundementals.App;
-import org.example.models.GameAssetManager;
+import org.example.models.Assets.GameAssetManager;
 import org.example.models.enums.Menu;
 
-import java.io.File;
 import java.util.Scanner;
 
 public class ProfileMenu extends AppMenu implements Screen {
