@@ -16,11 +16,10 @@ import org.example.controllers.MenusController.LoginRegisterMenuController;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Result;
 import org.example.models.Assets.GameAssetManager;
-import org.example.models.enums.Menu;
 
 import java.util.Scanner;
 
-public class RegisterMenuView extends AppMenu implements Screen {
+public class RegisterMenuView implements Screen {
 
     private Skin skin = GameAssetManager.skin;
     private Stage stage;
@@ -79,11 +78,6 @@ public class RegisterMenuView extends AppMenu implements Screen {
         this.errorLabel.setColor(1, 0, 0, 1);
         this.errorLabel.setVisible(false);
         setScale();
-    }
-
-    @Override
-    public void check(Scanner scanner) {
-        // Leave this unchanged as requested
     }
 
     @Override
@@ -154,7 +148,6 @@ public class RegisterMenuView extends AppMenu implements Screen {
                     question
                 );
                 if (result.isSuccessful()) {
-                    App.setCurrentMenu(Menu.MainMenu);
                     Main.getMain().getScreen().dispose();
                     Main.getMain().setScreen(new MainMenu());
                 } else {
@@ -166,7 +159,6 @@ public class RegisterMenuView extends AppMenu implements Screen {
         exitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                App.setCurrentMenu(Menu.Exit);
                 System.exit(0);
             }
         });
@@ -174,7 +166,6 @@ public class RegisterMenuView extends AppMenu implements Screen {
         goToLogin.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                App.setCurrentMenu(Menu.LoginMenu);
                 Main.getMain().getScreen().dispose();
                 Main.getMain().setScreen(new LoginMenuView());
             }

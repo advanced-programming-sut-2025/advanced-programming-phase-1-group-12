@@ -16,11 +16,8 @@ import org.example.controllers.MenusController.LoginRegisterMenuController;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Result;
 import org.example.models.Assets.GameAssetManager;
-import org.example.models.enums.Menu;
 
-import java.util.Scanner;
-
-public class LoginMenuView extends AppMenu implements Screen {
+public class LoginMenuView implements Screen {
     private Skin skin = GameAssetManager.skin;
     private Stage stage;
     private final Label menuLabel;
@@ -56,11 +53,8 @@ public class LoginMenuView extends AppMenu implements Screen {
         this.errorLabel.setColor(1, 0, 0, 1);   // Red color
         this.errorLabel.setVisible(false);
         this.loginButton = new TextButton("Login", skin);
-    }
 
-    @Override
-    public void check(Scanner scanner) {
-        // Leave this unchanged as requested
+        setScale();
     }
 
     @Override
@@ -109,7 +103,6 @@ public class LoginMenuView extends AppMenu implements Screen {
                 }
 
                 if(result.isSuccessful()){
-                    App.setCurrentMenu(Menu.MainMenu);
                     Main.getMain().getScreen().dispose();
                     Main.getMain().setScreen(new MainMenu());
                 } else {
@@ -122,7 +115,6 @@ public class LoginMenuView extends AppMenu implements Screen {
         exitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                App.setCurrentMenu(Menu.Exit);
                 System.exit(0);
             }
         });
@@ -170,6 +162,12 @@ public class LoginMenuView extends AppMenu implements Screen {
     }
     public void hideError() {
         errorLabel.setVisible(false);
+    }
+
+    public void setScale() {
+        menuLabel.setFontScale(2f);
+        exitButton.getLabel().setFontScale(2f);
+        errorLabel.setFontScale(2f);
     }
 }
 class forgetPass implements Screen {
@@ -239,7 +237,6 @@ class forgetPass implements Screen {
         back.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                App.setCurrentMenu(Menu.LoginMenu);
                 Main.getMain().getScreen().dispose();
                 Main.getMain().setScreen(new LoginMenuView());
             }

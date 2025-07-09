@@ -12,7 +12,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
-public class ProfileMenuController implements MenuController {
+public class ProfileMenuController{
 
     public String saveChanges(String username, String password, String nickName, String email) {
         StringBuilder resultMessages = new StringBuilder();

@@ -38,7 +38,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-public class GameMenuController implements MenuController {
+public class GameMenuController {
     public Result startTrade() {
         StringBuilder playerList = new StringBuilder("Available players for trading:\n");
         Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
@@ -1202,7 +1202,6 @@ public class GameMenuController implements MenuController {
             return new Result(false, "Failed to save the game: " + e.getMessage());
         }
 
-        App.setCurrentMenu(Menu.MainMenu);
         App.setCurrentGame(null);
         int newGameID = gameID + 1;
         App.setGameId(newGameID);
