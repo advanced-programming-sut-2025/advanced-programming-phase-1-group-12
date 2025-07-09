@@ -108,8 +108,7 @@ public class FarmGraphicSelectionMenu implements Screen {
 
     private void startGame() {
         GameMenuController controller = new GameMenuController();
-        controller.Play(null, players, chosenFarms);
-        Main.getMain().setScreen(new GameMenu(players));
+        controller.Play( players, chosenFarms);
     }
 
     @Override public void render(float delta) {

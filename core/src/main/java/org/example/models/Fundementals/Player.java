@@ -1,5 +1,9 @@
 package org.example.models.Fundementals;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import org.example.controllers.movingPlayer.PlayerController;
 import org.example.models.*;
 import org.example.models.NPC.NPC;
 import org.example.models.Place.Farm;
@@ -18,6 +22,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Player {
+    private Texture playerTexture;
+    private Sprite playerSprite;
+    private float Speed = 100f;
+    private CollisionRect rect;
     private User user;
     private Location userLocation;
     private boolean isMarried;
@@ -42,10 +50,13 @@ public class Player {
     private int shippingMoney;
     private boolean isMaxEnergyBuffEaten = false;
     private boolean isSkillBuffEaten = false;
+    private PlayerController playerController;
 
     public Player(User user, Location userLocation, boolean isMarried, Refrigrator refrigrator,
                   ArrayList<RelationShip> relationShips, Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited,
                   boolean hasCollapsed, ArrayList<Ability> abilitis) {
+        this.playerTexture = new Texture("Stardew_Valley_Images-main/Emoji/Emojis000.png");
+        this.playerSprite = new Sprite(playerTexture);
         this.user = user;
         this.userLocation = userLocation;
         this.isMarried = isMarried;
@@ -68,6 +79,28 @@ public class Player {
         this.relationShips = new ArrayList<>();
         initializeAbilities();
         initializerecepies();
+
+//        centerPlayerOnScreen();
+        rect = new CollisionRect(playerSprite.getX(), playerSprite.getY(), playerSprite.getWidth(), playerSprite.getHeight());
+    }
+
+    private void centerPlayerOnScreen() {
+        float centerX = (Gdx.graphics.getWidth() - playerSprite.getWidth()) / 2f;
+        float centerY = (Gdx.graphics.getHeight() - playerSprite.getHeight()) / 2f;
+
+        userLocation.setxAxis((int)centerX);
+        userLocation.setyAxis((int)centerY);
+
+        playerSprite.setPosition(centerX, centerY);
+    }
+
+    public void updatePosition(float deltaX, float deltaY) {
+        int posX = userLocation.getxAxis() + (int) deltaX;
+        int posY = userLocation.getyAxis() + (int) deltaY;
+        userLocation.setxAxis(posX);
+        userLocation.setyAxis(posY);
+        rect.move(posX, posY);
+        playerSprite.setPosition(posX, posY);
     }
 
     public User getUser() {
@@ -90,10 +123,6 @@ public class Player {
         return backPack;
     }
 
-    public boolean isMarried() {
-        return isMarried;
-    }
-
     public void setUserLocation(Location userLocation) {
         this.userLocation = userLocation;
     }
@@ -103,18 +132,17 @@ public class Player {
         this.energy = energy;
     }
 
-    public void increaseEnergy(int amount){
-        if(App.getCurrentGame().getDate().getDaysPassed(getRejectDate()) <= 7){
-            if(energy + amount > 200 && !isEnergyUnlimited){
+    public void increaseEnergy(int amount) {
+        if (App.getCurrentGame().getDate().getDaysPassed(getRejectDate()) <= 7) {
+            if (energy + amount > 200 && !isEnergyUnlimited) {
                 energy = 200;
-            }else {
+            } else {
                 energy += amount / 2;
             }
-        }
-        else{
-            if(energy + amount > 200 && !isEnergyUnlimited){
+        } else {
+            if (energy + amount > 200 && !isEnergyUnlimited) {
                 energy = 200;
-            }else {
+            } else {
                 energy += amount;
             }
         }
@@ -124,51 +152,51 @@ public class Player {
         return energy;
     }
 
-    public void setUnlimited(){
+    public void setUnlimited() {
         this.isEnergyUnlimited = true;
     }
 
 
-    public RelationShip findRelationShip(Player player2){
-        for(RelationShip relationShip : relationShips){
-            if(relationShip.getPlayer1().equals(player2) || relationShip.getPlayer2().equals(player2)){
+    public RelationShip findRelationShip(Player player2) {
+        for (RelationShip relationShip : relationShips) {
+            if (relationShip.getPlayer1().equals(player2) || relationShip.getPlayer2().equals(player2)) {
                 return relationShip;
             }
         }
         return null;
     }
 
-    public void setMarried(){
+    public void setMarried() {
         isMarried = true;
     }
 
-    public void decreaseMoney(int amount){
-        if(isMarried){
+    public void decreaseMoney(int amount) {
+        if (isMarried) {
             money -= amount / 2;
-            partner.setMoney(partner.getMoney() - amount /2);
-        }
-        else {
+            partner.setMoney(partner.getMoney() - amount / 2);
+        } else {
             money -= amount;
         }
     }
-    public int getMoney(){
+
+    public int getMoney() {
         return money;
     }
-    public void increaseMoney(int amount){
-        if(isMarried){
-            money += amount /2;
+
+    public void increaseMoney(int amount) {
+        if (isMarried) {
+            money += amount / 2;
             partner.setMoney(partner.getMoney() + amount / 2);
-        }
-        else{
+        } else {
             money += amount;
         }
     }
 
-    public void setPartner(Player partner){
+    public void setPartner(Player partner) {
         this.partner = partner;
     }
 
-    public void setMoney(int money){
+    public void setMoney(int money) {
         this.money = money;
     }
 
@@ -186,31 +214,31 @@ public class Player {
 
     private void initializerecepies() {
         recepies = new HashMap<>();  // Initialize the class field, not a local variable
-        for(CraftingRecipe craftingRecipe : CraftingRecipe.values()){
+        for (CraftingRecipe craftingRecipe : CraftingRecipe.values()) {
             recepies.put(craftingRecipe, false);
         }
         cookingRecepies = new HashMap<>();  // Initialize the class field
-        for(Cooking cooking : Cooking.values()){
+        for (Cooking cooking : Cooking.values()) {
             cookingRecepies.put(cooking, false);
         }
     }
-    public Ability getAbilityByName(String name){
-        for(Ability ability : abilitis){
-            if(ability.getName().equalsIgnoreCase(name)){
+
+    public Ability getAbilityByName(String name) {
+        for (Ability ability : abilitis) {
+            if (ability.getName().equalsIgnoreCase(name)) {
                 return ability;
             }
         }
         return null;
     }
 
-    public void reduceEnergy(int amount){
-        if(isEnergyUnlimited){
+    public void reduceEnergy(int amount) {
+        if (isEnergyUnlimited) {
             return;
         }
-        if(energy - amount < 0){
+        if (energy - amount < 0) {
             energy = 0;
-        }
-        else{
+        } else {
             energy -= amount;
         }
     }
@@ -235,15 +263,15 @@ public class Player {
         return Refrigrator;
     }
 
-    public void addMetDates(NPC npc){
+    public void addMetDates(NPC npc) {
         this.metDates.put(npc, App.getCurrentGame().getDate());
     }
 
-    public Date getMetDate(NPC npc){
+    public Date getMetDate(NPC npc) {
         return metDates.get(npc);
     }
 
-    public ShippingBin getShippingBin(){
+    public ShippingBin getShippingBin() {
         return shippingBin;
     }
 
@@ -299,6 +327,18 @@ public class Player {
         isMarried = married;
     }
 
+    public PlayerController getPlayerController() {
+        return playerController;
+    }
+
+    public void setPlayerController(PlayerController playerController) {
+        this.playerController = playerController;
+    }
+
+    public float getSpeed(){
+        return this.Speed;
+    }
+
     public Tools getCurrentTool() {
         return currentTool;
     }
@@ -319,10 +359,11 @@ public class Player {
         this.shippingBin = shippingBin;
     }
 
-    public void increaseShippingMoney(int amount){
+    public void increaseShippingMoney(int amount) {
         this.shippingMoney += amount;
     }
-    public int getShippingMoney(){
+
+    public int getShippingMoney() {
         return shippingMoney;
     }
 
@@ -345,5 +386,10 @@ public class Player {
     public void setSkillBuffEaten(boolean skillBuffEaten) {
         isSkillBuffEaten = skillBuffEaten;
     }
+
+    public Sprite getPlayerSprite() {
+        return playerSprite;
+    }
+
 }
 

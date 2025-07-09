@@ -2,19 +2,24 @@ package org.example.views;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.controllers.*;
 import org.example.controllers.MenusController.GameMenuController;
+import org.example.controllers.movingPlayer.PlayerController;
 import org.example.controllers.movingPlayer.UserLocationController;
 import org.example.models.Animal.FarmAnimals;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
+import org.example.models.Fundementals.Player;
 import org.example.models.Fundementals.Result;
 import org.example.models.GameAssetManager;
+import org.example.models.Place.Farm;
 import org.example.models.RelatedToUser.Ability;
 import org.example.models.enums.commands.GameMenuCommands;
 
@@ -34,7 +39,8 @@ public class GameMenu extends AppMenu implements Screen {
     private final ArtisanController artisanController = new ArtisanController();
     private PixelMapRenderer pixelMapRenderer;
     private SpriteBatch batch;
-
+    private OrthographicCamera camera;
+    private PlayerController playerController;
     private Skin skin = GameAssetManager.skin;
     private Stage stage;
     private final List<String> players;
@@ -473,21 +479,72 @@ public class GameMenu extends AppMenu implements Screen {
         System.out.println(result.getMessage());
     }
 
+//    private void setCameraToFarm(Farm farm) {
+//        int tileSize = 100;
+//        Location[][] tiles = MainApp.getInstance().getCurrentGame().getMap().getMap();
+//        Location tile = tiles[farm.getX() + (farm.getWidth() / 2)][farm.getY() + (farm.getHeight() / 2)];
+//        float centerX = tile.getX() * tileSize + tileSize / 2f;
+//        float centerY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tile.getY() - 1) * tileSize + tileSize / 2f;
+//
+//        camera.position.set(centerX, centerY, 0);
+//        float zoomX = (float) 600 / camera.viewportWidth;
+//        float zoomY = (float)  600 / camera.viewportHeight;
+//        camera.zoom = Math.max(zoomX, zoomY);
+//    }
+
     @Override
     public void show() {
-        stage = new Stage(new ScreenViewport());
+        batch  = new SpriteBatch();
+        stage  = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
-        batch = new SpriteBatch();
 
-        pixelMapRenderer = new PixelMapRenderer(App.getCurrentGame().getMainMap()); // then create renderer
+        // 1) Setup camera to our window size (e.g. 800×600 world units):
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false, 800, 600);
+
+        // 2) Create map renderer
+        pixelMapRenderer = new PixelMapRenderer(App.getCurrentGame().getMainMap());
+
+        // 3) Grab your Player model & instantiate its controller:
+        Player player = App.getCurrentPlayerLazy();
+        player.getPlayerSprite().setPosition(
+            player.getUserLocation().getxAxis(),
+            player.getUserLocation().getyAxis()
+        );
+        playerController = new PlayerController(player, /*characterName=*/"default", controller);
     }
-
 
     @Override
     public void render(float delta) {
+        // clear screen
         ScreenUtils.clear(0, 0, 0, 1);
 
+        // 1) Update player movement & model position
+        playerController.update(delta);
+
+        // 2) Tell camera to follow player
+        float px = playerController.getPlayer().getUserLocation().getxAxis();
+        float py = playerController.getPlayer().getUserLocation().getyAxis();
+        camera.position.set(px, py, 0);
+        camera.update();
+
+        // 3) Apply camera to batch
+        batch.setProjectionMatrix(camera.combined);
+
+        // 4) Draw map & player in one pass
+        batch.begin();
         pixelMapRenderer.render(batch, 0, 0);
+        Player player = App.getCurrentPlayerLazy();
+        // draw the current frame of the player animation:
+        TextureRegion frame = playerController.getCurrentFrame();  // see note below
+        batch.draw(frame,
+            px, py,
+            player.getPlayerSprite().getWidth(),
+            player.getPlayerSprite().getHeight()
+        );
+        batch.end();
+
+        // 5) UI on top
         stage.act(delta);
         stage.draw();
     }

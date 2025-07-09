@@ -2,6 +2,7 @@ package org.example.controllers.MenusController;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.Main;
 import org.example.controllers.MapSetUp.MapSetUp;
 import org.example.controllers.NPCcontroller;
 import org.example.controllers.TradeController;
@@ -29,6 +30,7 @@ import org.example.models.NPC.NPC;
 import org.example.models.enums.foraging.Plant;
 import org.example.models.enums.foraging.Stone;
 import org.example.models.enums.foraging.Tree;
+import org.example.views.GameMenu;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -309,7 +311,7 @@ public class GameMenuController implements MenuController {
         };
     }
 
-    public void Play(Scanner scanner, List<String> usernames, Map<String, Integer> farmSelections) {
+    public void Play(List<String> usernames, Map<String, Integer> farmSelections) {
         Game newGame = new Game();
         App.setCurrentGame(newGame);
         MapSetUp.initializeFarms();
@@ -345,6 +347,7 @@ public class GameMenuController implements MenuController {
 
         MapSetUp.showMapWithFarms(App.getCurrentGame().getMainMap());
         System.out.println("All farms have been assigned!");
+        Main.getMain().setScreen(new GameMenu(usernames));
     }
 
 

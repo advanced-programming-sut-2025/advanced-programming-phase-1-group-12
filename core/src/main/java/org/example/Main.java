@@ -65,4 +65,15 @@ public class Main extends Game {
         }
     }
 
+    public void setBatch(SpriteBatch batch) {
+        this.batch = batch;
+    }
+
+    public SpriteBatch getBatch() {
+        return batch;
+    }
+
+    public static void setMain(Main main) {
+        Main.main = main;
+    }
 }

@@ -8,10 +8,8 @@ import org.example.models.map;
 
 public class PixelMapRenderer {
     private map gameMap;
-    private Texture mapTexture;
-    private final int tileSize = 100; // Tile size 100x100
+    private final int tileSize = 100;
 
-    // Textures
     public static Texture PLANTS;
     public static Texture DARK_GREEN_FLOOR;
     public static Texture LAKE_TEXTURE;
@@ -59,8 +57,6 @@ public class PixelMapRenderer {
         switch (tileType) {
             case LAKE:
                 return LAKE_TEXTURE;
-            case GROUND:
-                return GROUND;
             case TREE:
                 return TREE;
             case HOUSE:
