@@ -62,7 +62,6 @@ public class GameMenu extends InputAdapter implements Screen {
 
         mapCenterX = 400 * 100f / 2f;
         mapCenterY = 400 * 100f / 2f;
-
         float worldWidth  = 400 * 100f;
         float worldHeight = 400 * 100f;
         float zoomX = worldWidth  / camera.viewportWidth;
