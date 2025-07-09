@@ -16,11 +16,8 @@ import org.example.controllers.MenusController.LoginRegisterMenuController;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Result;
 import org.example.models.Assets.GameAssetManager;
-import org.example.models.enums.Menu;
 
-import java.util.Scanner;
-
-public class LoginMenuView extends AppMenu implements Screen {
+public class LoginMenuView implements Screen {
     private Skin skin = GameAssetManager.skin;
     private Stage stage;
     private final Label menuLabel;
@@ -38,7 +35,7 @@ public class LoginMenuView extends AppMenu implements Screen {
     public LoginMenuView() {
 
         Array<String> questions = new Array<>(new String[]{
-             "do not stay logged in", "stay logged in"
+            "do not stay logged in", "stay logged in"
         });
 
         selectFlag.setItems(questions);
@@ -56,11 +53,6 @@ public class LoginMenuView extends AppMenu implements Screen {
         this.errorLabel.setColor(1, 0, 0, 1);   // Red color
         this.errorLabel.setVisible(false);
         this.loginButton = new TextButton("Login", skin);
-    }
-
-    @Override
-    public void check(Scanner scanner) {
-        // Leave this unchanged as requested
     }
 
     @Override
@@ -109,7 +101,6 @@ public class LoginMenuView extends AppMenu implements Screen {
                 }
 
                 if(result.isSuccessful()){
-                    App.setCurrentMenu(Menu.MainMenu);
                     Main.getMain().getScreen().dispose();
                     Main.getMain().setScreen(new MainMenu());
                 } else {
@@ -122,7 +113,6 @@ public class LoginMenuView extends AppMenu implements Screen {
         exitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                App.setCurrentMenu(Menu.Exit);
                 System.exit(0);
             }
         });
@@ -239,7 +229,6 @@ class forgetPass implements Screen {
         back.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                App.setCurrentMenu(Menu.LoginMenu);
                 Main.getMain().getScreen().dispose();
                 Main.getMain().setScreen(new LoginMenuView());
             }

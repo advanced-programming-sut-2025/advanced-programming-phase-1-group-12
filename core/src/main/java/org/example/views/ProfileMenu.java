@@ -14,11 +14,10 @@ import org.example.Main;
 import org.example.controllers.MenusController.ProfileMenuController;
 import org.example.models.Fundementals.App;
 import org.example.models.Assets.GameAssetManager;
-import org.example.models.enums.Menu;
 
 import java.util.Scanner;
 
-public class ProfileMenu extends AppMenu implements Screen {
+public class ProfileMenu implements Screen {
 
     private Skin skin = GameAssetManager.skin;
     private Stage stage;
@@ -52,10 +51,6 @@ public class ProfileMenu extends AppMenu implements Screen {
         this.errorLabel.setColor(1, 0, 0, 1);   // Red color
         this.errorLabel.setVisible(false);
 
-    }
-
-    @Override
-    public void check(Scanner scanner) {
     }
 
     @Override
@@ -116,7 +111,6 @@ public class ProfileMenu extends AppMenu implements Screen {
         });
         backButton.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
-                App.setCurrentMenu(Menu.MainMenu);
                 Main.getMain().getScreen().dispose();
                 Main.getMain().setScreen(new MainMenu());
             }

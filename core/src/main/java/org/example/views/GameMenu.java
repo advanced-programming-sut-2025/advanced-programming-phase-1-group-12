@@ -1,6 +1,8 @@
 package org.example.views;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -27,7 +29,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
-public class GameMenu extends AppMenu implements Screen {
+public class GameMenu extends InputAdapter implements Screen {
     private final GameMenuController controller = new GameMenuController();
     private final ToolsController toolsController = new ToolsController();
     private final AnimalController animalController = new AnimalController();
@@ -47,7 +49,6 @@ public class GameMenu extends AppMenu implements Screen {
         this.players = players;
     }
 
-    @Override
     public void check(Scanner scanner) {
         String input = scanner.nextLine().trim();
         Matcher matcher;
@@ -576,4 +577,15 @@ public class GameMenu extends AppMenu implements Screen {
     public void hide() {
 
     }
+
+    @Override
+    public boolean keyDown(int keycode) {
+
+        if (keycode == Input.Keys.M) {
+//            showAllMap();
+            return true;
+        }
+        return false;
+    }
+
 }

@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.google.gson.Gson;
 import org.example.models.Fundementals.App;
 import org.example.models.RelatedToUser.User;
-import org.example.models.enums.Menu;
 import org.example.views.MainMenu;
 import org.example.views.RegisterMenuView;
 
@@ -34,8 +33,7 @@ public class Main extends Game {
             main.setScreen(new RegisterMenuView()); // Or LoginMenuView
         } else {
             System.out.println("Welcome back, " + App.getLoggedInUser().getUserName() + "! (Auto-logged in)");
-            App.setCurrentMenu(Menu.MainMenu);
-            main.setScreen(new MainMenu()); // Or whatever the main screen is
+            main.setScreen(new MainMenu());
         }
     }
 
