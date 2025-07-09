@@ -15,18 +15,12 @@ import org.example.Main;
 import org.example.controllers.*;
 import org.example.controllers.MenusController.GameMenuController;
 import org.example.controllers.movingPlayer.PlayerController;
-import org.example.controllers.movingPlayer.UserLocationController;
-import org.example.models.Animal.FarmAnimals;
 import org.example.models.Fundementals.App;
-import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Player;
-import org.example.models.Fundementals.Result;
 import org.example.models.Assets.GameAssetManager;
-import org.example.models.RelatedToUser.Ability;
-import org.example.models.enums.commands.GameMenuCommands;
+import org.example.models.Fundementals.Result;
 
 import java.util.List;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 
 public class GameMenu extends InputAdapter implements Screen {
@@ -44,6 +38,9 @@ public class GameMenu extends InputAdapter implements Screen {
     private Skin skin = GameAssetManager.skin;
     private Stage stage;
     private final List<String> players;
+    private boolean showingAllMap = false;
+    private float homeZoom, mapZoom;
+    private float homeX, homeY, mapCenterX, mapCenterY;
 
     public GameMenu(List<String> players) {
         this.players = players;
@@ -478,19 +475,6 @@ public class GameMenu extends InputAdapter implements Screen {
         System.out.println(result.getMessage());
     }
 
-//    private void setCameraToFarm(Farm farm) {
-//        int tileSize = 100;
-//        Location[][] tiles = MainApp.getInstance().getCurrentGame().getMap().getMap();
-//        Location tile = tiles[farm.getX() + (farm.getWidth() / 2)][farm.getY() + (farm.getHeight() / 2)];
-//        float centerX = tile.getX() * tileSize + tileSize / 2f;
-//        float centerY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tile.getY() - 1) * tileSize + tileSize / 2f;
-//
-//        camera.position.set(centerX, centerY, 0);
-//        float zoomX = (float) 600 / camera.viewportWidth;
-//        float zoomY = (float)  600 / camera.viewportHeight;
-//        camera.zoom = Math.max(zoomX, zoomY);
-//    }
-
     @Override
     public void show() {
         // … your existing setup …
@@ -500,6 +484,16 @@ public class GameMenu extends InputAdapter implements Screen {
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 600);
+        homeZoom = camera.zoom;
+
+        mapCenterX = 400 * 100f / 2f;
+        mapCenterY = 400 * 100f / 2f;
+
+        float zoomX = (400 * 100f) / camera.viewportWidth;
+        float zoomY = (400 * 100f) / camera.viewportHeight;
+        mapZoom = Math.max(zoomX, zoomY);
+
+        updateCameraToPlayer();
 
         pixelMapRenderer = new PixelMapRenderer(App.getCurrentGame().getMainMap());
 
@@ -582,10 +576,32 @@ public class GameMenu extends InputAdapter implements Screen {
     public boolean keyDown(int keycode) {
 
         if (keycode == Input.Keys.M) {
-//            showAllMap();
+            showAllMap();
             return true;
         }
         return false;
     }
 
+    private void updateCameraToPlayer() {
+        Player p = App.getCurrentPlayerLazy();
+        homeX = p.getUserLocation().getxAxis() + p.getPlayerSprite().getWidth()  / 2f;
+        homeY = p.getUserLocation().getyAxis() + p.getPlayerSprite().getHeight() / 2f;
+        camera.position.set(homeX, homeY, 0);
+        camera.zoom = homeZoom;
+        camera.update();
+    }
+
+    private void showAllMap() {
+        if (!showingAllMap) {
+            // switch to full‑map view
+            camera.position.set(mapCenterX, mapCenterY, 0);
+            camera.zoom = mapZoom;
+            showingAllMap = true;
+        } else {
+            // switch back to follow‑player
+            updateCameraToPlayer();
+            showingAllMap = false;
+        }
+        camera.update();
+    }
 }
