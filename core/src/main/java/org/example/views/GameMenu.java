@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import org.example.Main;
 import org.example.controllers.*;
 import org.example.controllers.MenusController.GameMenuController;
 import org.example.controllers.movingPlayer.PlayerController;
@@ -495,7 +496,7 @@ public class GameMenu extends AppMenu implements Screen {
     @Override
     public void show() {
         // … your existing setup …
-        batch  = new SpriteBatch();
+        batch  = Main.getMain().getBatch();
         stage  = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
@@ -536,7 +537,6 @@ public class GameMenu extends AppMenu implements Screen {
         batch.setProjectionMatrix(camera.combined);
 
         // 4) Draw map & player in one pass
-        batch.begin();
         pixelMapRenderer.render(batch, 0, 0);
         Player player = App.getCurrentPlayerLazy();
         // draw the current frame of the player animation:

@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import org.example.Main;
 import org.example.controllers.MenusController.GameMenuController;
@@ -32,6 +33,7 @@ public class PlayerController {
     }
 
     public void update(float delta) {
+        Main.getMain().getBatch().begin();
         float dx = 0, dy = 0;
 
         if (Gdx.input.isKeyPressed(Input.Keys.W)) dy += player.getSpeed() * delta;

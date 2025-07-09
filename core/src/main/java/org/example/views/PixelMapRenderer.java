@@ -81,6 +81,7 @@ public class PixelMapRenderer {
     }
 
     public void render(SpriteBatch batch, int x, int y) {
+        batch.end();
         batch.begin();
 
         for (Location location : gameMap.getTilesOfMap()) {
@@ -88,7 +89,6 @@ public class PixelMapRenderer {
             batch.draw(texture, x + location.getxAxis() * tileSize, y + (399 - location.getyAxis()) * tileSize, tileSize, tileSize);
         }
 
-        batch.end();
     }
 
     public void dispose() {
