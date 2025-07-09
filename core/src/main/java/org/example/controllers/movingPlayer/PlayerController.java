@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Array;
 import org.example.Main;
 import org.example.controllers.MenusController.GameMenuController;
 import org.example.models.Fundementals.Player;
+import org.example.models.GameAssetManager;
 
 public class PlayerController {
     private Player player;
@@ -17,10 +18,11 @@ public class PlayerController {
     private Animation<Texture> rawAnim;
     private GameMenuController gameController;
 
-    public PlayerController(Player player, String characterName, GameMenuController gameController) {
+    public PlayerController(Player player, GameMenuController gameController) {
         this.gameController = gameController;
         this.player = player;
         player.setPlayerController(this);
+        rawAnim = GameAssetManager.getGameAssetManager().getCharacter1_Emojis_animation();
 
         Array<TextureRegion> frames = new Array<>();
         for (Texture t : rawAnim.getKeyFrames()) {
@@ -61,5 +63,3 @@ public class PlayerController {
     }
 
 }
-
-

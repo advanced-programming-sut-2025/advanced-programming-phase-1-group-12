@@ -494,24 +494,28 @@ public class GameMenu extends AppMenu implements Screen {
 
     @Override
     public void show() {
+        // … your existing setup …
         batch  = new SpriteBatch();
         stage  = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
-        // 1) Setup camera to our window size (e.g. 800×600 world units):
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 600);
 
-        // 2) Create map renderer
         pixelMapRenderer = new PixelMapRenderer(App.getCurrentGame().getMainMap());
 
-        // 3) Grab your Player model & instantiate its controller:
+        // ←––– THIS is the bit you’re missing:
         Player player = App.getCurrentPlayerLazy();
+        if (player == null) {
+            throw new IllegalStateException("No current player set in App!");
+        }
+        // Position the sprite at its logical Location
         player.getPlayerSprite().setPosition(
             player.getUserLocation().getxAxis(),
             player.getUserLocation().getyAxis()
         );
-        playerController = new PlayerController(player, /*characterName=*/"default", controller);
+        // Create and store your PlayerController
+        playerController = new PlayerController(player, controller);
     }
 
     @Override
