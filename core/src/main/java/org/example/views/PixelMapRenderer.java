@@ -3,7 +3,10 @@ package org.example.views;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.example.models.Fundementals.Location;
+import org.example.models.Place.Farm;
+import org.example.models.enums.Types.TreeType;
 import org.example.models.enums.Types.TypeOfTile;
+import org.example.models.enums.foraging.Tree;
 import org.example.models.map;
 
 import java.util.ArrayList;
@@ -41,7 +44,7 @@ public class PixelMapRenderer {
     private void loadTextures() {
         LAKE_TEXTURE = new Texture("Flooring/Flooring_26.png");
         PLANTS = new Texture("Flooring/Flooring_50.png");
-        STONE = new Texture("Flooring/Flooring_52.png");
+        STONE = new Texture("Rock/Farm_Boulder.png");
         NPC_VILLAGE = new Texture("Flooring/Flooring_83.png");
         GREEN_HOUSE = new Texture("Greenhouse/greenhouse.png");
         QUARRY = new Texture("Flooring/Flooring_08.png");
@@ -74,7 +77,7 @@ public class PixelMapRenderer {
             case LAKE:
                 return LAKE_TEXTURE;
             case TREE:
-                return TREE;
+                return treeType();
             case QUARRY:
                 return QUARRY;
             case STORE:
@@ -90,6 +93,47 @@ public class PixelMapRenderer {
             default:
                 return GROUND;
         }
+    }
+
+    private Texture treeType() {
+        List<Tree> trees = new ArrayList<>();
+        for(Farm farm : gameMap.getFarms()){
+            for(Tree tree : farm.getTrees()){
+                trees.add(tree);
+            }
+        }
+        for (Tree tree : trees) {
+            TreeType type = tree.getType();
+            switch (type) {
+                case APRICOT_TREE:
+                    return new Texture("Trees/Apricot_Stage_5_Fruit.png");
+                case APPLE_TREE:
+                    return new Texture("Trees/Apple_Stage_5_Fruit.png");
+                case CHERRY_TREE:
+                    return new Texture("Trees/Cherry_Stage_5_Fruit.png");
+                case OAK_TREE:
+                    return new Texture("Trees/Oak_Stage_1.png");
+                case MAPLE_TREE:
+                    return new Texture("Trees/Maple_Stage_4.png");
+                case PINE_TREE:
+                    return new Texture("Trees/Pine_Stage_4.png");
+                case MUSHROOM_TREE:
+                    return new Texture("Trees/MushroomTree_Stage_5.png");
+                case PEACH_TREE:
+                    return new Texture("Trees/Peach_Stage_5_Fruit.png");
+                case MYSTIC_TREE:
+                    return new Texture("Trees/Mystic_Tree_Stage_5.png");
+                case ORANGE_TREE:
+                    return new Texture("Trees/Orange_Stage_5_Fruit.png");
+                case MANGO_TREE:
+                    return new Texture("Trees/Mango_Stage_5_Fruit.png");
+                case BANANA_TREE:
+                    return new Texture("Trees/Banana_Stage_5_Fruit.png");
+                default:
+                    return TREE;
+            }
+        }
+        return TREE;
     }
 
     public void render(SpriteBatch batch, int offsetX, int offsetY) {
