@@ -20,6 +20,13 @@ import java.util.List;
 
 public class GameMenu extends InputAdapter implements Screen {
     private final GameMenuController controller = new GameMenuController();
+    private final FarmingController farmingController = new FarmingController();
+    private final ToolsController toolsController = new ToolsController();
+    private final  AnimalController animalController = new AnimalController();
+    private final StoreController storeController = new StoreController();
+    private final CraftingController craftingController = new CraftingController();
+    private final ArtisanController artisanController = new ArtisanController();
+
     private PixelMapRenderer pixelMapRenderer;
     private SpriteBatch batch;
     private static OrthographicCamera camera;
@@ -32,6 +39,14 @@ public class GameMenu extends InputAdapter implements Screen {
     private float savedX, savedY, savedZoom;
     public static final float WORLD_WIDTH = 400 * 100f;
     public static final float WORLD_HEIGHT = 400 * 100f;
+    GameConsoleCommandHandler cmdHandler =
+        new GameConsoleCommandHandler(controller,
+            farmingController,
+            toolsController,
+            animalController,
+            storeController,
+            craftingController,
+            artisanController);
 
     public GameMenu(List<String> players) {
         this.players = players;
@@ -209,7 +224,7 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void openTerminalScreen() {
-        TerminalWindow console = new TerminalWindow(controller);
+        TerminalWindow console = new TerminalWindow(cmdHandler);
         console.attach(stage);
     }
 
