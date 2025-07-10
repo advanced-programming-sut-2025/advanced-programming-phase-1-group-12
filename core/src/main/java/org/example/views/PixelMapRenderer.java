@@ -6,10 +6,18 @@ import org.example.models.Fundementals.Location;
 import org.example.models.enums.Types.TypeOfTile;
 import org.example.models.map;
 
-public class PixelMapRenderer {
-    private map gameMap;
-    private final int tileSize = 100;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
+public class PixelMapRenderer {
+
+    private final int tileSize = 100;
+    private static final int GH_TILES_W = 4;
+    private static final int GH_TILES_H = 4;
+    private final map gameMap;
+    private final Set<String> greenhouseTiles = new HashSet<>();
     public static Texture PLANTS;
     public static Texture DARK_GREEN_FLOOR;
     public static Texture LAKE_TEXTURE;
@@ -26,7 +34,7 @@ public class PixelMapRenderer {
     public PixelMapRenderer(map gameMap) {
         this.gameMap = gameMap;
         loadTextures();
-        generatePixmap();
+        cacheGreenhouseTiles();
     }
 
     private void loadTextures() {
@@ -34,7 +42,7 @@ public class PixelMapRenderer {
         PLANTS = new Texture("Flooring/Flooring_50.png");
         STONE = new Texture("Flooring/Flooring_52.png");
         NPC_VILLAGE = new Texture("Flooring/Flooring_83.png");
-        GREEN_HOUSE = new Texture("Flooring/Flooring_03.png");
+        GREEN_HOUSE = new Texture("Greenhouse/greenhouse.png");
         QUARRY = new Texture("Flooring/Flooring_08.png");
         BURNED_GROUND = new Texture("Flooring/Flooring_39.png");
         GROUND = new Texture("Flooring/Flooring_53.png");
@@ -44,12 +52,11 @@ public class PixelMapRenderer {
         HOUSE = new Texture("Flooring/Flooring_27.png");
     }
 
-    private void generatePixmap() {
-        int width = 400 * tileSize;
-        int height = 400 * tileSize;
-
-        for (Location location : gameMap.getTilesOfMap()) {
-            Texture texture = getTextureForTile(location.getTypeOfTile());
+    private void cacheGreenhouseTiles() {
+        for (Location l : gameMap.getTilesOfMap()) {
+            if (l.getTypeOfTile() == TypeOfTile.GREENHOUSE) {
+                greenhouseTiles.add(l.getxAxis() + "," + l.getyAxis());
+            }
         }
     }
 
@@ -61,8 +68,6 @@ public class PixelMapRenderer {
                 return TREE;
             case HOUSE:
                 return HOUSE;
-            case GREENHOUSE:
-                return GREEN_HOUSE;
             case QUARRY:
                 return QUARRY;
             case STORE:
@@ -80,15 +85,31 @@ public class PixelMapRenderer {
         }
     }
 
-    public void render(SpriteBatch batch, int x, int y) {
+    public void render(SpriteBatch batch, int offsetX, int offsetY) {
         batch.end();
         batch.begin();
 
-        for (Location location : gameMap.getTilesOfMap()) {
-            Texture texture = getTextureForTile(location.getTypeOfTile());
-            batch.draw(texture, x + location.getxAxis() * tileSize, y + (399 - location.getyAxis()) * tileSize, tileSize, tileSize);
+        List<Location> greenhouseAnchors = new ArrayList<>();
+
+        for (Location loc : gameMap.getTilesOfMap()) {
+            Texture base = getTextureForTile(loc.getTypeOfTile());
+            batch.draw(base,
+                offsetX + loc.getxAxis() * tileSize, offsetY + (399 - loc.getyAxis()) * tileSize,
+                tileSize, tileSize);
+
+            if (loc.getTypeOfTile() == TypeOfTile.GREENHOUSE) {
+                boolean hasLeft = greenhouseTiles.contains((loc.getxAxis() - 1) + "," + loc.getyAxis());
+                boolean hasBelow = greenhouseTiles.contains(loc.getxAxis() + "," + (loc.getyAxis() - 1));
+
+                if (!hasLeft && !hasBelow) greenhouseAnchors.add(loc);
+            }
         }
 
+        for (Location anchor : greenhouseAnchors) {
+            float drawX = offsetX + anchor.getxAxis() * tileSize;
+            float drawY = offsetY + (399 - anchor.getyAxis()) * tileSize - tileSize * (GH_TILES_H - 1);
+            batch.draw(GREEN_HOUSE, drawX, drawY, tileSize * GH_TILES_W, tileSize * GH_TILES_H);
+        }
     }
 
     public void dispose() {
