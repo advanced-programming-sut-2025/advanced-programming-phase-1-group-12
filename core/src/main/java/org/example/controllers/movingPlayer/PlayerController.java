@@ -36,8 +36,8 @@ public class PlayerController {
         Texture sheet = new Texture("sprites/Penny.png");
         TextureRegion[][] grid = TextureRegion.split(sheet, FRAME_W, FRAME_H);
 
-        walkDown  = buildAnim(grid[0]);
-        walkLeft  = buildAnim(grid[1]);
+        walkDown  = buildAnim(grid[1]);
+        walkLeft  = buildAnim(grid[4]);
         walkRight = buildAnim(grid[2]);
         walkUp    = buildAnim(grid[3]);
 
