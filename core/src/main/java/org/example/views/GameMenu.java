@@ -155,6 +155,10 @@ public class GameMenu extends InputAdapter implements Screen {
             showAllMap();
             return true;
         }
+        if(keycode == Input.Keys.GRAVE) { // the ~ key, right under Esc
+            openTerminalScreen();
+            return true;
+        }
         return false;
     }
 
@@ -209,4 +213,8 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
+    private void openTerminalScreen() {
+        //TODO
+        Main.getMain().setScreen(new TerminalScreen(this, controller));
+    }
 }
