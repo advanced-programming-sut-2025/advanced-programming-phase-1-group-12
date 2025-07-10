@@ -133,7 +133,7 @@ class buyView implements Screen{
         this.productName = productName;
         this.productNameLabel = new Label(productName, skin);
         quantityLabel = new Label("", skin);
-        this.quantityLabel.setColor(0, 1, 0, 1);
+        this.quantityLabel.setColor(1, 0, 0, 1);
         this.quantityLabel.setVisible(false);
 
         addProductButton = new TextButton("+", skin);
