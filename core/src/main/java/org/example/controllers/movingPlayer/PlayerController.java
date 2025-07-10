@@ -26,35 +26,71 @@ import org.example.views.StoreMenuView;
 import java.util.List;
 
 public class PlayerController {
-    private Player player;
-    private Animation<TextureRegion> playerAnimation;
+
+    private static final int FRAME_W = 16;
+    private static final int FRAME_H = 32;
+    private static final float FRAME_DURATION = 0.15f;
+
+    private final Player player;
+    private final GameMenuController gameController;
+
+    private final Animation<TextureRegion> walkDown;
+    private final Animation<TextureRegion> walkLeft;
+    private final Animation<TextureRegion> walkRight;
+    private final Animation<TextureRegion> walkUp;
+
+    private Animation<TextureRegion> currentAnim;
     private float stateTime = 0f;
+    private enum Dir {DOWN, LEFT, RIGHT, UP}
+    private Dir facing = Dir.DOWN;
     private Animation<Texture> rawAnim;
-    private GameMenuController gameController;
     List<String> players;
 
     public PlayerController(Player player, GameMenuController gameController, List<String> players) {
-        this.gameController = gameController;
         this.players = players;
-        this.player = player;
+        this.player        = player;
+        this.gameController = gameController;
         player.setPlayerController(this);
-        rawAnim = GameAssetManager.getGameAssetManager().getCharacter1_Emojis_animation();
+        Texture sheet = new Texture("sprites/Penny.png");
+        TextureRegion[][] grid = TextureRegion.split(sheet, FRAME_W, FRAME_H);
 
-        Array<TextureRegion> frames = new Array<>();
-        for (Texture t : rawAnim.getKeyFrames()) {
-            frames.add(new TextureRegion(t));
-        }
-        this.playerAnimation = new Animation<>(rawAnim.getFrameDuration(), frames, Animation.PlayMode.LOOP);
+        walkDown  = buildAnim(grid[1]);
+        walkLeft  = buildAnim(grid[4]);
+        walkRight = buildAnim(grid[2]);
+        walkUp    = buildAnim(grid[3]);
+
+        currentAnim = walkDown;
+    }
+
+    private static Animation<TextureRegion> buildAnim(TextureRegion[] row) {
+        Array<TextureRegion> frames = new Array<>(3);
+        for (int i = 0; i < 3; i++) frames.add(row[i]);
+        return new Animation<>(FRAME_DURATION, frames, Animation.PlayMode.LOOP_PINGPONG);
     }
 
     public void update(float delta) {
+        handleInput(delta);
+
+        stateTime += delta;
+
+        TextureRegion frame = currentAnim.getKeyFrame(stateTime, true);
         Main.getMain().getBatch().begin();
+        Main.getMain().getBatch().draw(
+            frame,
+            player.getUserLocation().getxAxis(),
+            player.getUserLocation().getyAxis(),
+            player.getPlayerSprite().getWidth(),
+            player.getPlayerSprite().getHeight()
+        );
+    }
+
+    private void handleInput(float delta) {
         float dx = 0, dy = 0;
 
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) dy += player.getSpeed() * delta;
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) dy -= player.getSpeed() * delta;
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) dx -= player.getSpeed() * delta;
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) dx += player.getSpeed() * delta;
+        if (Gdx.input.isKeyPressed(Input.Keys.W)) { dy += player.getSpeed() * delta; facing = Dir.UP;    }
+        if (Gdx.input.isKeyPressed(Input.Keys.S)) { dy -= player.getSpeed() * delta; facing = Dir.DOWN;  }
+        if (Gdx.input.isKeyPressed(Input.Keys.A)) { dx -= player.getSpeed() * delta; facing = Dir.LEFT;  }
+        if (Gdx.input.isKeyPressed(Input.Keys.D)) { dx += player.getSpeed() * delta; facing = Dir.RIGHT; }
 
         final int TILE_SIZE = 100;   // each tile is 100×100 pixels
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
@@ -80,25 +116,20 @@ public class PlayerController {
 
         player.updatePosition(dx, dy);
 
-        stateTime += Gdx.graphics.getDeltaTime();
-
-        TextureRegion currentFrame = playerAnimation.getKeyFrame(stateTime, true);
-        Main.getMain().getBatch().draw(currentFrame, player.getUserLocation().getxAxis(), player.getUserLocation().getyAxis(),
-            player.getPlayerSprite().getWidth(), player.getPlayerSprite().getHeight());
-
+        switch (facing) {
+            case UP    -> currentAnim = walkUp;
+            case DOWN  -> currentAnim = walkDown;
+            case LEFT  -> currentAnim = walkLeft;
+            case RIGHT -> currentAnim = walkRight;
+        }
     }
 
-    public Player getPlayer() {
-        return player;
-    }
+    public Player getPlayer() { return player; }
 
-    public void setPlayer(Player player) {
-        this.player = player;
-    }
+    public void setPlayer(Player player) { /* kept for compatibility */ }
 
     public TextureRegion getCurrentFrame() {
-        stateTime += Gdx.graphics.getDeltaTime();
-        return playerAnimation.getKeyFrame(stateTime, true);
+        return currentAnim.getKeyFrame(stateTime, true);
     }
 
     public Store findStore(Location location) {

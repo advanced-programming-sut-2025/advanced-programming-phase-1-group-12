@@ -124,11 +124,11 @@ public class GameMenu extends InputAdapter implements Screen {
 
         float zoomX = WORLD_WIDTH  / width;
         float zoomY = WORLD_HEIGHT / height;
-        mapZoom = Math.max(zoomX, zoomY);   // no 1.05 fudge – keeps the view inside
+        mapZoom = Math.max(zoomX, zoomY);
 
         if (showingAllMap) camera.zoom = mapZoom;
 
-        clampCameraToMap();   // <<< ADD THIS
+        clampCameraToMap();
         camera.update();
         stage.getViewport().update(width, height, true);
     }
@@ -153,6 +153,10 @@ public class GameMenu extends InputAdapter implements Screen {
 
         if (keycode == Input.Keys.M) {
             showAllMap();
+            return true;
+        }
+        if(keycode == Input.Keys.GRAVE) { // the ~ key, right under Esc
+            openTerminalScreen();
             return true;
         }
         return false;
@@ -210,6 +214,10 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
+    private void openTerminalScreen() {
+        //TODO
+        Main.getMain().setScreen(new TerminalScreen(this, controller));
+    }
     public static OrthographicCamera getCamera() {
         return camera;
     }
