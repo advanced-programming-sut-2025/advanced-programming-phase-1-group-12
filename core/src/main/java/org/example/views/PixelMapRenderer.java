@@ -82,12 +82,12 @@ public class PixelMapRenderer {
                 return QUARRY;
             case STORE:
                 return STORE;
+            case STONE:
+                return STONE;
             case NPC_VILLAGE:
                 return NPC_VILLAGE;
             case BURNED_GROUND:
                 return BURNED_GROUND;
-            case STONE:
-                return STONE;
             case PLANT:
                 return PLANTS;
             default:
@@ -171,6 +171,13 @@ public class PixelMapRenderer {
             float drawY = offsetY + (399 - anchor.getyAxis()) * tileSize;
             batch.draw(HOUSE, drawX, drawY, tileSize * TILES_W, tileSize * TILES_H);
         }
+//        for(Location anchor : gameMap.getTilesOfMap()) {
+//            float drawX = offsetX + anchor.getxAxis();
+//            float drawY = offsetY + (399 - anchor.getyAxis());
+//            if(anchor.getTypeOfTile() == TypeOfTile.STONE) {
+//                batch.draw(STONE, drawX, drawY);
+//            }
+//        }
     }
 
     public void dispose() {
