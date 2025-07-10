@@ -214,7 +214,6 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void openTerminalScreen() {
-        //TODO
         Main.getMain().setScreen(new TerminalScreen(this, controller));
     }
 }

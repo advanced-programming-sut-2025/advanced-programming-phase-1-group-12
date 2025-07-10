@@ -14,23 +14,26 @@ import java.util.regex.Matcher;
 
 public class TerminalScreen extends InputAdapter implements Screen {
 
-    /** the game or menu screen to return to */
+    /**
+     * the game or menu screen to return to
+     */
     private final Screen backScreen;
     private final GameMenuController controller;
 
-    private Stage   stage;
-    private Skin    skin = GameAssetManager.skin;
+    private Stage stage;
+    private Skin skin = GameAssetManager.skin;
     private TextArea output;
     private TextField input;
 
     public TerminalScreen(Screen backScreen, GameMenuController controller) {
-        this.backScreen  = backScreen;
-        this.controller  = controller;
+        this.backScreen = backScreen;
+        this.controller = controller;
     }
 
     /* ────────────────────── Screen lifecycle ────────────────────── */
 
-    @Override public void show() {
+    @Override
+    public void show() {
         stage = new Stage(new ScreenViewport());
 
         /* 1️⃣  dim the background slightly */
@@ -49,7 +52,7 @@ public class TerminalScreen extends InputAdapter implements Screen {
         output.setDisabled(true);
         output.setPrefRows(15);
 
-        input  = new TextField("", skin);
+        input = new TextField("", skin);
         input.setMessageText("type command …");
         input.setTextFieldListener((f, c) -> {
             if (c == '\n' || c == '\r') {              // Enter pressed
@@ -62,36 +65,56 @@ public class TerminalScreen extends InputAdapter implements Screen {
         console.add(output).grow().row();
         console.add(input).growX();
 
-        float w = Gdx.graphics.getWidth()  * 0.60f;   // 60 % of screen size
+        float w = Gdx.graphics.getWidth() * 0.60f;
         float h = Gdx.graphics.getHeight() * 0.40f;
         console.setSize(w, h);
-        console.setPosition((Gdx.graphics.getWidth()  - w) / 2f,
-            (Gdx.graphics.getHeight() - h) / 2f);
+        console.setPosition((Gdx.graphics.getWidth() - w) / 2f, (Gdx.graphics.getHeight() - h) / 2f);
 
         stage.addActor(console);
         stage.setKeyboardFocus(input);
-        InputMultiplexer mux = new InputMultiplexer(stage, this);
+        input.selectAll();
 
+        InputMultiplexer mux = new InputMultiplexer(this, stage);
         Gdx.input.setInputProcessor(mux);
     }
 
-    @Override public void render(float delta) {
+    @Override
+    public void render(float delta) {
         backScreen.render(delta);
         stage.act(delta);
         stage.draw();
     }
 
-    @Override public boolean keyDown(int keycode) {
-        if (keycode == Input.Keys.ESCAPE) {            // close console
+    @Override
+    public boolean keyDown(int keycode) {
+        if (keycode == Input.Keys.GRAVE) {
             Main.getMain().setScreen(backScreen);
             return true;
         }
         return false;
     }
 
-    @Override public void resize(int w, int h) { stage.getViewport().update(w, h, true); }
-    @Override public void pause(){}   @Override public void resume(){}   @Override public void hide(){}
-    @Override public void dispose() { stage.dispose(); }
+    @Override
+    public void resize(int w, int h) {
+        stage.getViewport().update(w, h, true);
+    }
+
+    @Override
+    public void pause() {
+    }
+
+    @Override
+    public void resume() {
+    }
+
+    @Override
+    public void hide() {
+    }
+
+    @Override
+    public void dispose() {
+        stage.dispose();
+    }
 
     /* ────────────────────── command handling ────────────────────── */
 
@@ -100,7 +123,7 @@ public class TerminalScreen extends InputAdapter implements Screen {
         String in = scanner.nextLine().trim();
         Matcher m;
 
-         if ((m = GameMenuCommands.LoadGame.getMather(in)) != null) {
+        if ((m = GameMenuCommands.LoadGame.getMather(in)) != null) {
             controller.loadGameById(Integer.parseInt(m.group("gameID")));
             append(in, "loaded game " + m.group("gameID"));
 
