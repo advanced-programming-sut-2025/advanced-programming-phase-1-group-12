@@ -44,16 +44,17 @@ public class MainMenu implements Screen {
     public void show() {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
+        selectMenu.setItems("profile menu", "pre_game menu");
 
         table.setFillParent(true);
         table.center();
         table.add(menuLabel);
 
-        table.row().pad(50,0,30,0);  ;
+        table.row().pad(50,0,40,0);
         table.add(LogOut);
-        table.row().pad(30,0,30,0);  ;
+        table.row().pad(40,0,40,0);
         table.add(selectMenu);
-        table.row().pad(30,0,30,0);  ;
+        table.row().pad(40,0,40,0);
         table.add(exitButton);
         stage.addActor(table);
 
@@ -103,7 +104,7 @@ public class MainMenu implements Screen {
     @Override
     public void render(float v) {
         ScreenUtils.clear(0, 0, 0, 1);
-        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 40f));
         stage.draw();
     }
 

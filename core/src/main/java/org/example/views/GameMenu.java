@@ -29,7 +29,7 @@ public class GameMenu extends InputAdapter implements Screen {
     private final ArtisanController artisanController = new ArtisanController();
     private PixelMapRenderer pixelMapRenderer;
     private SpriteBatch batch;
-    private OrthographicCamera camera;
+    private static OrthographicCamera camera;
     private PlayerController playerController;
     private Skin skin = GameAssetManager.skin;
     private Stage stage;
@@ -77,7 +77,7 @@ public class GameMenu extends InputAdapter implements Screen {
             player.getUserLocation().getxAxis(),
             player.getUserLocation().getyAxis()
         );
-        playerController = new PlayerController(player, controller);
+        playerController = new PlayerController(player, controller, players);
     }
 
     @Override
@@ -112,9 +112,9 @@ public class GameMenu extends InputAdapter implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
-        batch.dispose();
+    //    batch.dispose();
         pixelMapRenderer.dispose();
-        GameAssetManager.dispose();
+    //    GameAssetManager.dispose();
     }
 
     @Override
@@ -210,4 +210,7 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
+    public static OrthographicCamera getCamera() {
+        return camera;
+    }
 }
