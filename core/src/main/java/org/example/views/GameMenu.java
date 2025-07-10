@@ -124,11 +124,11 @@ public class GameMenu extends InputAdapter implements Screen {
 
         float zoomX = WORLD_WIDTH  / width;
         float zoomY = WORLD_HEIGHT / height;
-        mapZoom = Math.max(zoomX, zoomY);   // no 1.05 fudge – keeps the view inside
+        mapZoom = Math.max(zoomX, zoomY);
 
         if (showingAllMap) camera.zoom = mapZoom;
 
-        clampCameraToMap();   // <<< ADD THIS
+        clampCameraToMap();
         camera.update();
         stage.getViewport().update(width, height, true);
     }
@@ -192,7 +192,6 @@ public class GameMenu extends InputAdapter implements Screen {
         float halfViewW = camera.viewportWidth  * camera.zoom * 0.5f;
         float halfViewH = camera.viewportHeight * camera.zoom * 0.5f;
 
-        // when the map is smaller than the view, just centre the camera
         if (WORLD_WIDTH < halfViewW * 2) {
             camera.position.x = WORLD_WIDTH * 0.5f;
         } else {
