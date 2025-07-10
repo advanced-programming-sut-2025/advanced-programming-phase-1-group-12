@@ -97,8 +97,9 @@ public class PixelMapRenderer {
 
     private Texture treeType() {
         List<Tree> trees = new ArrayList<>();
-        for(Farm farm : gameMap.getFarms()){
-            for(Tree tree : farm.getTrees()){
+        for(Location location: gameMap.getTilesOfMap()) {
+            if(location.getTypeOfTile() == TypeOfTile.TREE) {
+                Tree tree = (Tree)location.getObjectInTile();
                 trees.add(tree);
             }
         }
