@@ -209,7 +209,6 @@ public class RegisterMenuView implements Screen {
     }
 
     public void showError(String message) {
-        System.out.println("SHOW ERROR CALLED: " + message);
         errorLabel.setText(message);
         errorLabel.setVisible(true);
         errorLabel.invalidateHierarchy();

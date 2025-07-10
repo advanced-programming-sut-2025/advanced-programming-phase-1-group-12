@@ -209,22 +209,14 @@ public class StoreController {
     public void showTotalProducts(List<Store> stores) {
     }
 
-    public Result buyProduct(String productName, int count) {
-
-        Store store = null;
-        for (Store store1 : App.getCurrentGame().getMainMap().getStores()) {
-            if (App.isLocationInPlace(App.getCurrentPlayerLazy().getUserLocation(), store1.getLocationOfRectangle())) {
-                store = store1;
-                break;
-            }
-        }
+    public Result buyProduct(Store store,String productName, int count) {
         if (store == null) {
             return new Result(false, "You are not in any store");
         }
 
-//        if(App.getCurrentGame().getDate().getHour() < store.getStartHour() || App.getCurrentGame().getDate().getHour() > store.getCloseHour()){
-//            return new Result(false, "Store is currently closed");
-//        }
+        if(App.getCurrentGame().getDate().getHour() < store.getStartHour() || App.getCurrentGame().getDate().getHour() > store.getCloseHour()){
+            return new Result(false, "Store is currently closed");
+        }
 
         StoreProducts item = null;
         for (StoreProducts item1 : store.getStoreProducts()) {
@@ -382,7 +374,7 @@ public class StoreController {
         }
         ItemBuilder.addToBackPack(item, count, Quality.NORMAL); // assuming getType() returns Item
         return new Result(true, "You bought this product");
-    } 
+    }
 
     public Result cheatAddItem(String productName, int count) {
         Item item = ItemBuilder.builder(productName, Quality.NORMAL, 10);

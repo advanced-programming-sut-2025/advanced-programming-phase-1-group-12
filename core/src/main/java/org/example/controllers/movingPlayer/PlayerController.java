@@ -5,10 +5,25 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import org.example.Main;
 import org.example.controllers.MenusController.GameMenuController;
+import org.example.models.Fundementals.App;
+import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Player;
+import org.example.models.Assets.GameAssetManager;
+import com.badlogic.gdx.math.MathUtils;
+import org.example.models.Place.Store;
+import org.example.models.ProductsPackage.StoreProducts;
+import org.example.models.enums.Types.TypeOfTile;
+import org.example.views.GameMenu;
+import org.example.views.LoginMenuView;
+import org.example.views.StoreMenuView;
+
+import java.util.List;
 
 public class PlayerController {
 
@@ -28,8 +43,11 @@ public class PlayerController {
     private float stateTime = 0f;
     private enum Dir {DOWN, LEFT, RIGHT, UP}
     private Dir facing = Dir.DOWN;
+    private Animation<Texture> rawAnim;
+    List<String> players;
 
-    public PlayerController(Player player, GameMenuController gameController) {
+    public PlayerController(Player player, GameMenuController gameController, List<String> players) {
+        this.players = players;
         this.player        = player;
         this.gameController = gameController;
         player.setPlayerController(this);
@@ -74,6 +92,28 @@ public class PlayerController {
         if (Gdx.input.isKeyPressed(Input.Keys.A)) { dx -= player.getSpeed() * delta; facing = Dir.LEFT;  }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) { dx += player.getSpeed() * delta; facing = Dir.RIGHT; }
 
+        final int TILE_SIZE = 100;   // each tile is 100×100 pixels
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+
+            Vector3 world = GameMenu.getCamera().unproject(new Vector3(
+                Gdx.input.getX(),           // screen X
+                Gdx.input.getY(),           // screen Y
+                0));
+
+            // 2️⃣ world → tile indices (int cast floors the value)
+            int tileX = (int)(world.x / TILE_SIZE);
+            int tileY = (int)(world.y / TILE_SIZE);
+            Location location = App.getCurrentGame().getMainMap().findLocation(tileX, tileY);
+            if (location.getTypeOfTile() == TypeOfTile.STORE) {
+                Gdx.app.postRunnable(() ->
+                    Main.getMain().setScreen(new StoreMenuView(findStore(location), players))
+                );
+
+                return;
+            }
+
+        }
+
         player.updatePosition(dx, dy);
 
         switch (facing) {
@@ -90,5 +130,16 @@ public class PlayerController {
 
     public TextureRegion getCurrentFrame() {
         return currentAnim.getKeyFrame(stateTime, true);
+    }
+
+    public Store findStore(Location location) {
+        Store store = null;
+        for (Store store1 : App.getCurrentGame().getMainMap().getStores()) {
+            if (App.isLocationInPlace(location, store1.getLocation())) {
+                store = store1;
+                break;
+            }
+        }
+        return store;
     }
 }

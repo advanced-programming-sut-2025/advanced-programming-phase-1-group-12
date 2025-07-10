@@ -30,10 +30,10 @@ public class Main extends Game {
         autoLoginIfPossible();
 
         if (App.getLoggedInUser() == null) {
-            main.setScreen(new RegisterMenuView()); // Or LoginMenuView
+            main.setScreen(new RegisterMenuView());
         } else {
             System.out.println("Welcome back, " + App.getLoggedInUser().getUserName() + "! (Auto-logged in)");
-            main.setScreen(new MainMenu()); // Or whatever the main screen is
+            main.setScreen(new MainMenu());
         }
     }
 
