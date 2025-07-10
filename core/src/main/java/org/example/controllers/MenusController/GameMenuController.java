@@ -278,10 +278,7 @@ public class GameMenuController {
             }
             System.out.println();
         }
-
-        System.out.println("Do you want to enable map guidance?");
-        String selection = scanner.nextLine();
-        if (selection.equalsIgnoreCase("yes")) helpToReadMap();
+        helpToReadMap();
     }
 
     public void helpToReadMap() {

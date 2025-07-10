@@ -15,30 +15,22 @@ import org.example.controllers.MenusController.GameMenuController;
 import org.example.controllers.movingPlayer.PlayerController;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Player;
-import org.example.models.Assets.GameAssetManager;
 
 import java.util.List;
 
 public class GameMenu extends InputAdapter implements Screen {
     private final GameMenuController controller = new GameMenuController();
-    private final ToolsController toolsController = new ToolsController();
-    private final AnimalController animalController = new AnimalController();
-    private final StoreController storeController = new StoreController();
-    private final FarmingController farmingController = new FarmingController();
-    private final CraftingController craftingController = new CraftingController();
-    private final ArtisanController artisanController = new ArtisanController();
     private PixelMapRenderer pixelMapRenderer;
     private SpriteBatch batch;
     private static OrthographicCamera camera;
     private PlayerController playerController;
-    private Skin skin = GameAssetManager.skin;
     private Stage stage;
     private final List<String> players;
     private boolean showingAllMap = false;
     private float homeZoom, mapZoom;
     private float homeX, homeY, mapCenterX, mapCenterY;
     private float savedX, savedY, savedZoom;
-    public static final float WORLD_WIDTH  = 400 * 100f;
+    public static final float WORLD_WIDTH = 400 * 100f;
     public static final float WORLD_HEIGHT = 400 * 100f;
 
     public GameMenu(List<String> players) {
@@ -47,8 +39,8 @@ public class GameMenu extends InputAdapter implements Screen {
 
     @Override
     public void show() {
-        batch  = Main.getMain().getBatch();
-        stage  = new Stage(new ScreenViewport());
+        batch = Main.getMain().getBatch();
+        stage = new Stage(new ScreenViewport());
 
         InputMultiplexer mux = new InputMultiplexer();
         mux.addProcessor(this);
@@ -62,9 +54,9 @@ public class GameMenu extends InputAdapter implements Screen {
 
         mapCenterX = 400 * 100f / 2f;
         mapCenterY = 400 * 100f / 2f;
-        float worldWidth  = 400 * 100f;
+        float worldWidth = 400 * 100f;
         float worldHeight = 400 * 100f;
-        float zoomX = worldWidth  / camera.viewportWidth;
+        float zoomX = worldWidth / camera.viewportWidth;
         float zoomY = worldHeight / camera.viewportHeight;
         mapZoom = Math.max(zoomX, zoomY) * 1.05f;
 
@@ -112,17 +104,17 @@ public class GameMenu extends InputAdapter implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
-    //    batch.dispose();
+        //    batch.dispose();
         pixelMapRenderer.dispose();
-    //    GameAssetManager.dispose();
+        //    GameAssetManager.dispose();
     }
 
     @Override
-    public void resize (int width, int height) {
-        camera.viewportWidth  = width;
+    public void resize(int width, int height) {
+        camera.viewportWidth = width;
         camera.viewportHeight = height;
 
-        float zoomX = WORLD_WIDTH  / width;
+        float zoomX = WORLD_WIDTH / width;
         float zoomY = WORLD_HEIGHT / height;
         mapZoom = Math.max(zoomX, zoomY);
 
@@ -155,7 +147,7 @@ public class GameMenu extends InputAdapter implements Screen {
             showAllMap();
             return true;
         }
-        if(keycode == Input.Keys.GRAVE) { // the ~ key, right under Esc
+        if (keycode == Input.Keys.GRAVE) { // the ~ key, right under Esc
             openTerminalScreen();
             return true;
         }
@@ -164,7 +156,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
     private void updateCameraToPlayer() {
         Player p = App.getCurrentPlayerLazy();
-        homeX = p.getUserLocation().getxAxis() + p.getPlayerSprite().getWidth()  / 2f;
+        homeX = p.getUserLocation().getxAxis() + p.getPlayerSprite().getWidth() / 2f;
         homeY = p.getUserLocation().getyAxis() + p.getPlayerSprite().getHeight() / 2f;
         camera.position.set(homeX, homeY, 0);
         camera.zoom = homeZoom;
@@ -174,8 +166,8 @@ public class GameMenu extends InputAdapter implements Screen {
 
     private void showAllMap() {
         if (!showingAllMap) {
-            savedX    = camera.position.x;
-            savedY    = camera.position.y;
+            savedX = camera.position.x;
+            savedY = camera.position.y;
             savedZoom = camera.zoom;
 
             camera.position.set(mapCenterX, mapCenterY, 0);
@@ -190,10 +182,12 @@ public class GameMenu extends InputAdapter implements Screen {
         camera.update();
     }
 
-    /** Keep the camera view fully inside the map rectangle. */
-    private void clampCameraToMap () {
+    /**
+     * Keep the camera view fully inside the map rectangle.
+     */
+    private void clampCameraToMap() {
         // visible size after zooming
-        float halfViewW = camera.viewportWidth  * camera.zoom * 0.5f;
+        float halfViewW = camera.viewportWidth * camera.zoom * 0.5f;
         float halfViewH = camera.viewportHeight * camera.zoom * 0.5f;
 
         // when the map is smaller than the view, just centre the camera
@@ -215,8 +209,10 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void openTerminalScreen() {
-        Main.getMain().setScreen(new TerminalScreen(this, controller));
+        TerminalWindow console = new TerminalWindow(controller);
+        console.attach(stage);
     }
+
     public static OrthographicCamera getCamera() {
         return camera;
     }
