@@ -24,7 +24,7 @@ import java.util.Map;
 public class Player {
     private Texture playerTexture;
     private Sprite playerSprite;
-    private float Speed = 10f;
+    private float Speed = 100f;
     private CollisionRect rect;
     private User user;
     private Location userLocation;
@@ -94,9 +94,7 @@ public class Player {
         playerSprite.setPosition(centerX, centerY);
     }
 
-    public void updatePosition(float deltaX, float deltaY) {
-        int posX = userLocation.getxAxis() + (int) deltaX;
-        int posY = userLocation.getyAxis() + (int) deltaY;
+    public void updatePosition(int posX, int posY) {
         userLocation.setxAxis(posX);
         userLocation.setyAxis(posY);
         rect.move(posX, posY);

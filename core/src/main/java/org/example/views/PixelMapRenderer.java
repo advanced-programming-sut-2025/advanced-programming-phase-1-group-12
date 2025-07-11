@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 public class PixelMapRenderer {
-    private final int tileSize = 70;
+    private final int tileSize = 100;
     private static final int TILES_W = 4;
     private static final int TILES_H = 4;
     private final map gameMap;

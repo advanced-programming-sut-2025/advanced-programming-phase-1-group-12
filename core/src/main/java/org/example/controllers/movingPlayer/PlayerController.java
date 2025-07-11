@@ -86,26 +86,14 @@ public class PlayerController {
         );
     }
 
-//            if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
-//        Vector3 world = GameMenu.getCamera().unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-//        int tileX = (int)(world.x / TILE_SIZE);
-//        int tileY = (int)(world.y / TILE_SIZE);
-//        Location location = App.getCurrentGame().getMainMap().findLocation(tileX, tileY);
-//        if (location.getTypeOfTile() == TypeOfTile.STORE) {
-//            Gdx.app.postRunnable(() -> Main.getMain().setScreen(new StoreMenuView(findStore(location), players))
-//            );
-//            return;
-//        }
-//    }
-
     private void handleInput(float delta) {
         int newX = App.getCurrentGame().getCurrentPlayer().getUserLocation().getxAxis();
         int newY = App.getCurrentGame().getCurrentPlayer().getUserLocation().getyAxis();
 
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
             Vector3 world = GameMenu.getCamera().unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-            int tileX = (int) (world.x / 70f);
-            int tileY = (int) (world.y / 70f);
+            int tileX = (int) (world.x / 100f);
+            int tileY = (int) (world.y / 100f);
             Location location = App.getCurrentGame().getMainMap().findLocation(tileX, tileY);
             System.out.println(location.getTypeOfTile());
             System.out.println(player.getUser().getUserName());
@@ -134,11 +122,10 @@ public class PlayerController {
         }
 
         // Keep positions in logical coordinates (1 to 400)
-        newX = MathUtils.clamp(newX, 0, 400);
-        newY = MathUtils.clamp(newY, 0, 400);
+//        newX = MathUtils.clamp(newX, 0, 40000);
+//        newY = MathUtils.clamp(newY, 0, 40000);
 
-        player.getUserLocation().setxAxis(newX);
-        player.getUserLocation().setyAxis(newY);
+        player.updatePosition(newX, newY);
 
         switch (facing) {
             case UP -> currentAnim = walkUp;
