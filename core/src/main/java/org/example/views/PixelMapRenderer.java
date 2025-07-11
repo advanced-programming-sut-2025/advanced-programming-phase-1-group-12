@@ -78,8 +78,8 @@ public class PixelMapRenderer {
 
             batch.draw(base,
                 offsetX + loc.getxAxis() * tileSize,
-                offsetY +  loc.getyAxis() * tileSize,  // Flip Y-axis
-                tileSize, tileSize);  // Render each tile as 100x100 pixels
+                offsetY +  loc.getyAxis() * tileSize,
+                tileSize, tileSize);
 
             if (loc.getTypeOfTile() == TypeOfTile.GREENHOUSE) {
                 boolean hasLeft = greenhouseTiles.contains((loc.getxAxis() - 1) + "," + loc.getyAxis());

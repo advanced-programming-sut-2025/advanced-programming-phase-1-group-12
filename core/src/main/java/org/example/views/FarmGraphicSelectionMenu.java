@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.controllers.MenusController.GameMenuController;
 import org.example.models.Assets.GameAssetManager;
+
 import java.util.*;
 import java.util.List;
 
@@ -44,10 +45,25 @@ public class FarmGraphicSelectionMenu implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 int selectedFarm = getFarmIdFromCoordinates(x, y);
+                int mainSelectedFarm;
+                switch (selectedFarm) {
+                    case 0:
+                        mainSelectedFarm = 1;
+                        break;
+                    case 1:
+                        mainSelectedFarm = 3;
+                        break;
+                    case 2:
+                        mainSelectedFarm = 0;
+                        break;
+                    default:
+                        mainSelectedFarm = 2;
+                        break;
+                }
 
-                if (!chosenFarms.containsValue(selectedFarm)) {
+                if (!chosenFarms.containsValue(mainSelectedFarm)) {
                     String playerName = players.get(currentPlayerIndex);
-                    chosenFarms.put(playerName, selectedFarm);
+                    chosenFarms.put(playerName, mainSelectedFarm);
                     markFarmAsChosen(playerName, selectedFarm);
                     currentPlayerIndex++;
                     if (currentPlayerIndex >= players.size()) {
@@ -109,14 +125,31 @@ public class FarmGraphicSelectionMenu implements Screen {
         controller.Play(players, chosenFarms);
     }
 
-    @Override public void render(float delta) {
+    @Override
+    public void render(float delta) {
         stage.act(delta);
         stage.draw();
     }
 
-    @Override public void resize(int w, int h) { stage.getViewport().update(w, h, true); }
-    @Override public void pause() {}
-    @Override public void resume() {}
-    @Override public void hide() {}
-    @Override public void dispose() { stage.dispose(); }
+    @Override
+    public void resize(int w, int h) {
+        stage.getViewport().update(w, h, true);
+    }
+
+    @Override
+    public void pause() {
+    }
+
+    @Override
+    public void resume() {
+    }
+
+    @Override
+    public void hide() {
+    }
+
+    @Override
+    public void dispose() {
+        stage.dispose();
+    }
 }
