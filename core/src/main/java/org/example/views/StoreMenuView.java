@@ -17,6 +17,7 @@ import org.example.controllers.StoreController;
 import org.example.models.Assets.GameAssetManager;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
+import org.example.models.Fundementals.Player;
 import org.example.models.Fundementals.Result;
 import org.example.models.Place.Farm;
 import org.example.models.Place.Store;
@@ -37,10 +38,12 @@ public class StoreMenuView implements Screen {
     private TextButton back = new TextButton("back", skin);
     List<String> players;
     Store store;
+    private final List<Player> playerList;
 
-    public StoreMenuView(Store store, List<String> players) {
+    public StoreMenuView(Store store, List<String> players, List<Player> playerList) {
         this.store = store;
         this.players = players;
+        this.playerList = playerList;
         for(StoreProducts product1 : store.getStoreProducts()){
             products.add(new TextButton(product1.getName(), skin));
         }
@@ -77,7 +80,7 @@ public class StoreMenuView implements Screen {
         back.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                Main.getMain().setScreen(new GameMenu(players));
+                Main.getMain().setScreen(new GameMenu(players, playerList));
             }
         });
 
@@ -87,8 +90,9 @@ public class StoreMenuView implements Screen {
             button.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
+                    Main.getMain().setScreen(new GameMenu(players, playerList));
                     Gdx.app.postRunnable(() ->
-                        Main.getMain().setScreen(new buyView(productName, store, players))
+                        Main.getMain().setScreen(new buyView(productName, store, players, playerList))
                     );
                 }
             });
@@ -143,8 +147,9 @@ class buyView implements Screen{
     StoreController controller;
     Store store;
     List<String> players;
+    List<Player> playerList;
 
-    public buyView(String productName, Store store, List<String> players) {
+    public buyView(String productName, Store store, List<String> players, List<Player> playerList) {
         this.productName = productName;
         this.productNameLabel = new Label(productName, skin);
         quantityLabel = new Label("", skin);
@@ -161,6 +166,7 @@ class buyView implements Screen{
         controller = new StoreController();
         this.store = store;
         this.players = players;
+        this.playerList = playerList;
     }
 
     @Override
@@ -217,7 +223,7 @@ class buyView implements Screen{
                     if(result.isSuccessful()){
                         if(store.getNameOfStore().equalsIgnoreCase("Carpenter's Shop")) {
                             Gdx.app.postRunnable(() ->
-                                Main.getMain().setScreen(new FarmView(productName, players))
+                                Main.getMain().setScreen(new FarmView(productName, players, playerList))
                             );
                         } else if(quantity > 0) {
                             showError(controller.buyProduct(store, productName, quantity).getMessage());
@@ -231,7 +237,7 @@ class buyView implements Screen{
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 dispose();
-                Main.getMain().setScreen(new GameMenu(players));
+                Main.getMain().setScreen(new GameMenu(players, playerList));
             }
         });
 
@@ -292,12 +298,23 @@ class FarmView implements Screen {
     private PixelMapRenderer pixelMapRenderer;
     private Farm farm;
 
+    private final int tileSize = 40;  // Tile size
+    private final List<Player> playerList;
     private int farmX1, farmY1;
-    private final int tileSize = 40;
 
-    public FarmView(String productName, List<String> players) {
+    public FarmView(String productName, List<String> players, List<Player> playerList) {
         this.productName = productName;
         this.players = players;
+        this.farm = App.getCurrentPlayerLazy().getOwnedFarm();  // Get the player's farm
+        this.playerList = playerList;
+
+        System.out.println(App.getCurrentPlayerLazy());
+        System.out.println(farm);
+        this.farmX1 = App.getCurrentPlayerLazy().getOwnedFarm().getFarmLocation().getTopLeftCorner().getxAxis();  // Farm starting X coordinate
+        this.farmY1 = App.getCurrentPlayerLazy().getOwnedFarm().getFarmLocation().getTopLeftCorner().getyAxis();  // Farm starting Y coordinate// Farm ending Y coordinate
+
+        // Initialize PixelMapRenderer for the specific farm
+        this.pixelMapRenderer = new PixelMapRenderer(App.getCurrentGame().getMainMap());  // Initialize PixelMapRenderer
         this.farm = App.getCurrentPlayerLazy().getOwnedFarm();
         this.farmX1 = farm.getFarmLocation().getDownRightCorner().getxAxis()-30;
         this.farmY1 = farm.getFarmLocation().getDownRightCorner().getyAxis()-30;
@@ -310,15 +327,19 @@ class FarmView implements Screen {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
+        // Create a back button for navigation
         TextButton back = new TextButton("Back", skin);
         back.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                dispose();
-                Main.getMain().setScreen(new GameMenu(players));
+                // Ensure we're not disposing the global resources like SpriteBatch
+                dispose();  // Dispose only resources tied to this screen (FarmView)
+                Main.getMain().setScreen(new GameMenu(players, playerList));  // Go back to the GameMenu
             }
         });
 
+
+        // Add back button to the stage
         Table table = new Table();
         table.setFillParent(true);
         table.top().left(); // Changed to top-left to avoid overlapping with farm
@@ -353,14 +374,18 @@ class FarmView implements Screen {
 
         // Render farm first
         batch.begin();
+
+        // Use the coordinates of the farm (farmX1, farmY1, farmX2, farmY2) to render only that part of the map
         renderFarmTiles();
+
         batch.end();
 
-        // Then render UI
+        // Act and draw the stage (for UI elements like the back button)
         stage.act(delta);
         stage.draw();
     }
 
+    // This method renders the farm area using the farm coordinates
     private void renderFarmTiles() {
         List<Location> greenhouseAnchors = new ArrayList<>();
         List<Location> houseAnchors = new ArrayList<>();

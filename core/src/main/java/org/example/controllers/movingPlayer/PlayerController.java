@@ -41,6 +41,7 @@ public class PlayerController {
     private Dir facing = Dir.DOWN;
     private Animation<Texture> rawAnim;
     List<String> players;
+    List<Player> playerList;
 
     public PlayerController(Player player, GameMenuController gameController, List<String> players) {
         this.players = players;
@@ -96,7 +97,7 @@ public class PlayerController {
             System.out.println(location.getTypeOfTile() + " " + location.getxAxis() + " " + location.getyAxis());
 
             if (location.getTypeOfTile() == TypeOfTile.STORE) {
-                Gdx.app.postRunnable(() -> Main.getMain().setScreen(new StoreMenuView(findStore(location), players)));
+                Gdx.app.postRunnable(() -> Main.getMain().setScreen(new StoreMenuView(findStore(location), players, playerList)));
                 return;
             }
         }

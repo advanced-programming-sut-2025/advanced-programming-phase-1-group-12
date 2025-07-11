@@ -33,6 +33,7 @@ public class GameMenu extends InputAdapter implements Screen {
     private PlayerController playerController;
     private Stage stage;
     private final List<String> players;
+    private final List<Player> playerList;
     private boolean showingAllMap = false;
     private float homeZoom, mapZoom;
     private float homeX, homeY, mapCenterX, mapCenterY;
@@ -48,8 +49,9 @@ public class GameMenu extends InputAdapter implements Screen {
             craftingController,
             artisanController);
 
-    public GameMenu(List<String> players) {
+    public GameMenu(List<String> players, List<Player> playerList) {
         this.players = players;
+        this.playerList = playerList;
     }
 
     @Override
