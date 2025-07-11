@@ -1,15 +1,11 @@
 package org.example.views;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.example.models.Assets.GameAssetManager;
 import org.example.models.Fundementals.Location;
 import org.example.models.Place.Farm;
-import org.example.models.enums.Types.TreeType;
 import org.example.models.enums.Types.TypeOfTile;
-import org.example.models.enums.foraging.Tree;
 import org.example.models.map;
 
 import java.util.*;
@@ -21,6 +17,7 @@ public class PixelMapRenderer {
     private final map gameMap;
     private final Set<String> greenhouseTiles = new HashSet<>();
     private final Set<String> houseTiles = new HashSet<>();
+
     public PixelMapRenderer(map gameMap) {
         this.gameMap = gameMap;
         cacheGreenhouseTiles();
@@ -66,6 +63,58 @@ public class PixelMapRenderer {
         }
     }
 
+//    public void render(SpriteBatch batch, int offsetX, int offsetY) {
+//        batch.end();
+//        batch.begin();
+//
+//        List<Location> greenhouseAnchors = new ArrayList<>();
+//        List<Location> houseAnchors = new ArrayList<>();
+//
+//        for (Location loc : gameMap.getTilesOfMap()) {
+//            Texture base = getTextureForTile(loc.getTypeOfTile(), loc);
+//
+//            int rotatedX = 399 - loc.getyAxis();  // Flip Y for new X
+//            int rotatedY = loc.getxAxis();        // Old X becomes new Y
+//
+//            batch.draw(base,
+//                offsetX + rotatedX * tileSize,
+//                offsetY + rotatedY * tileSize,
+//                tileSize, tileSize);
+//
+//            if (loc.getTypeOfTile() == TypeOfTile.GREENHOUSE) {
+//                boolean hasLeft = greenhouseTiles.contains((loc.getxAxis() - 1) + "," + loc.getyAxis());
+//                boolean hasBelow = greenhouseTiles.contains(loc.getxAxis() + "," + (loc.getyAxis() - 1));
+//                if (!hasLeft && !hasBelow) greenhouseAnchors.add(loc);
+//            } else if (loc.getTypeOfTile() == TypeOfTile.HOUSE) {
+//                boolean hasLeft = houseTiles.contains((loc.getxAxis() - 1) + "," + loc.getyAxis());
+//                boolean hasAbove = houseTiles.contains(loc.getxAxis() + "," + (loc.getyAxis() + 1));
+//                if (!hasLeft && !hasAbove) houseAnchors.add(loc);
+//            }
+//        }
+//
+//        for (Location anchor : greenhouseAnchors) {
+//            int rotatedX = 399 - anchor.getyAxis();
+//            int rotatedY = anchor.getxAxis();
+//
+//            float drawX = offsetX + rotatedX * tileSize;
+//            float drawY = offsetY + rotatedY * tileSize - tileSize * (TILES_H - 1);
+//
+//            batch.draw(GameAssetManager.getGameAssetManager().getGREEN_HOUSE(),
+//                drawX, drawY, tileSize * TILES_W, tileSize * TILES_H);
+//        }
+//
+//        for (Location anchor : houseAnchors) {
+//            int rotatedX = 399 - anchor.getyAxis();
+//            int rotatedY = anchor.getxAxis();
+//
+//            float drawX = offsetX + rotatedX * tileSize;
+//            float drawY = offsetY + rotatedY * tileSize;
+//
+//            batch.draw(GameAssetManager.getGameAssetManager().getHOUSE(),
+//                drawX, drawY, tileSize * TILES_W, tileSize * TILES_H);
+//        }
+//    }
+
     public void render(SpriteBatch batch, int offsetX, int offsetY) {
         batch.end();
         batch.begin();
@@ -76,36 +125,54 @@ public class PixelMapRenderer {
         for (Location loc : gameMap.getTilesOfMap()) {
             Texture base = getTextureForTile(loc.getTypeOfTile(), loc);
 
-            // Use 100x100 scaling for rendering but keep logical coordinates (1 to 400)
+            // Rotate 90 degrees clockwise
+            int rotatedX = 399 - loc.getyAxis();  // mapHeight - 1 - y
+            int rotatedY = loc.getxAxis();        // x becomes y
+
             batch.draw(base,
-                offsetX + loc.getxAxis() * tileSize,
-                offsetY + (399 - loc.getyAxis()) * tileSize,  // Flip Y-axis
-                tileSize, tileSize);  // Render each tile as 100x100 pixels
+                offsetX + rotatedX * tileSize,
+                offsetY + rotatedY * tileSize,
+                tileSize, tileSize);
 
             if (loc.getTypeOfTile() == TypeOfTile.GREENHOUSE) {
                 boolean hasLeft = greenhouseTiles.contains((loc.getxAxis() - 1) + "," + loc.getyAxis());
                 boolean hasBelow = greenhouseTiles.contains(loc.getxAxis() + "," + (loc.getyAxis() - 1));
-
                 if (!hasLeft && !hasBelow) greenhouseAnchors.add(loc);
             } else if (loc.getTypeOfTile() == TypeOfTile.HOUSE) {
                 boolean hasLeft = houseTiles.contains((loc.getxAxis() - 1) + "," + loc.getyAxis());
                 boolean hasAbove = houseTiles.contains(loc.getxAxis() + "," + (loc.getyAxis() + 1));
-
                 if (!hasLeft && !hasAbove) houseAnchors.add(loc);
             }
         }
+
+        // Draw Greenhouses
         for (Location anchor : greenhouseAnchors) {
-            float drawX = offsetX + anchor.getxAxis() * tileSize;
-            float drawY = offsetY + (399 - anchor.getyAxis()) * tileSize - tileSize * (TILES_H - 1);
-            batch.draw(GameAssetManager.getGameAssetManager().getGREEN_HOUSE(), drawX, drawY, tileSize * TILES_W, tileSize * TILES_H);
+            int rotatedX = 399 - anchor.getyAxis();
+            int rotatedY = anchor.getxAxis();
+
+            float drawX = offsetX + rotatedX * tileSize;
+            float drawY = offsetY + rotatedY * tileSize - tileSize * (TILES_H - 1);
+
+            batch.draw(GameAssetManager.getGameAssetManager().getGREEN_HOUSE(),
+                drawX, drawY, tileSize * TILES_W, tileSize * TILES_H);
         }
+
+        // Draw Houses
         for (Location anchor : houseAnchors) {
-            float drawX = offsetX + anchor.getxAxis() * tileSize;
-            float drawY = offsetY + (399 - anchor.getyAxis()) * tileSize;
-            batch.draw(GameAssetManager.getGameAssetManager().getHOUSE(), drawX, drawY, tileSize * TILES_W, tileSize * TILES_H);
+            int rotatedX = 399 - anchor.getyAxis();
+            int rotatedY = anchor.getxAxis();
+
+            float drawX = offsetX + rotatedX * tileSize;
+            float drawY = offsetY + rotatedY * tileSize;
+
+            batch.draw(GameAssetManager.getGameAssetManager().getHOUSE(),
+                drawX, drawY, tileSize * TILES_W, tileSize * TILES_H);
         }
-//        batch.end();
     }
+
+
+
+
 
 
     public void dispose() {
@@ -133,6 +200,5 @@ public class PixelMapRenderer {
         GameAssetManager.getMAPLE_TREE().dispose();
         GameAssetManager.getAPRICOT_TREE().dispose();
         GameAssetManager.getPINE_TREE().dispose();
-
     }
 }

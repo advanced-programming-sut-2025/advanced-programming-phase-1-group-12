@@ -64,7 +64,7 @@ public class GameMenu extends InputAdapter implements Screen {
         Gdx.input.setInputProcessor(mux);
 
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 800, 600);
+        camera.setToOrtho(true, 800, 600);
         homeZoom = camera.zoom;
 
         mapCenterX = 400 * 100f / 2f;
