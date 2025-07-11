@@ -93,11 +93,9 @@ public class GameMenu extends InputAdapter implements Screen {
 
         playerController.update(delta);
 
-        // Get the logical positions
         float px = playerController.getPlayer().getUserLocation().getxAxis();
         float py = playerController.getPlayer().getUserLocation().getyAxis();
 
-        // Apply scaling (multiply by 100 for the visual map size)
         float scaledX = px * 100;
         float scaledY = py * 100;
 
@@ -115,13 +113,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
         pixelMapRenderer.render(batch, 0, 0);
 
-        // Draw the player at the scaled position
-        batch.draw(frame,
-            scaledX, scaledY,  // Use scaled coordinates for the player
-            player.getPlayerSprite().getWidth(),
-            player.getPlayerSprite().getHeight()
-        );
-
+        batch.draw(frame, scaledX, scaledY, player.getPlayerSprite().getWidth(), player.getPlayerSprite().getHeight());
         batch.end();
 
         stage.act(delta);
