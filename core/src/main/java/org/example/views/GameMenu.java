@@ -92,11 +92,19 @@ public class GameMenu extends InputAdapter implements Screen {
         ScreenUtils.clear(0, 0, 0, 1);
 
         playerController.update(delta);
+
+        // Get the logical positions
         float px = playerController.getPlayer().getUserLocation().getxAxis();
         float py = playerController.getPlayer().getUserLocation().getyAxis();
+
+        // Apply scaling (multiply by 100 for the visual map size)
+        float scaledX = px * 100;
+        float scaledY = py * 100;
+
         if (!showingAllMap) {
-            camera.position.set(px, py, 0);
+            camera.position.set(scaledX, scaledY, 0);  // Use scaled positions for the camera
         }
+
         clampCameraToMap();
         camera.update();
 
@@ -104,17 +112,22 @@ public class GameMenu extends InputAdapter implements Screen {
 
         Player player = App.getCurrentPlayerLazy();
         TextureRegion frame = playerController.getCurrentFrame();
+
         pixelMapRenderer.render(batch, 0, 0);
+
+        // Draw the player at the scaled position
         batch.draw(frame,
-            px, py,
+            scaledX, scaledY,  // Use scaled coordinates for the player
             player.getPlayerSprite().getWidth(),
             player.getPlayerSprite().getHeight()
         );
+
         batch.end();
 
         stage.act(delta);
         stage.draw();
     }
+
 
     @Override
     public void dispose() {
@@ -171,13 +184,18 @@ public class GameMenu extends InputAdapter implements Screen {
 
     private void updateCameraToPlayer() {
         Player p = App.getCurrentPlayerLazy();
-        homeX = p.getUserLocation().getxAxis() + p.getPlayerSprite().getWidth() / 2f;
-        homeY = p.getUserLocation().getyAxis() + p.getPlayerSprite().getHeight() / 2f;
+
+        // Update the player's logical position to include scaling (scale by 100)
+        homeX = p.getUserLocation().getxAxis() * 100 + p.getPlayerSprite().getWidth() / 2f;
+        homeY = p.getUserLocation().getyAxis() * 100 + p.getPlayerSprite().getHeight() / 2f;
+
+        // Set camera position to the scaled coordinates
         camera.position.set(homeX, homeY, 0);
         camera.zoom = homeZoom;
         clampCameraToMap();
         camera.update();
     }
+
 
     private void showAllMap() {
         if (!showingAllMap) {

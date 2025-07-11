@@ -147,7 +147,8 @@ public class PixelMapRenderer {
         for (Location loc : gameMap.getTilesOfMap()) {
             Texture base = getTextureForTile(loc.getTypeOfTile());
             batch.draw(base,
-                offsetX + loc.getxAxis() * tileSize, offsetY + (399 - loc.getyAxis()) * tileSize,
+                offsetX + loc.getxAxis() * tileSize,
+                offsetY + (399 - loc.getyAxis()) * tileSize,
                 tileSize, tileSize);
 
             if (loc.getTypeOfTile() == TypeOfTile.GREENHOUSE) {

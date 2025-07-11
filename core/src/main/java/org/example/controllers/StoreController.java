@@ -167,7 +167,20 @@ public class StoreController {
         App.getCurrentPlayerLazy().decreaseMoney(type.getPurchaseCost());
         FarmAnimals newAnimal = new FarmAnimals(type, 0, home, name,
                 App.getCurrentGame().getMainMap().findLocation(home.getLocation().getTopLeftCorner().getxAxis() + 1, home.getLocation().getTopLeftCorner().getyAxis() + 1));
-        //vaghti too khoonan roo haman
+        //TODO:vaghti too khoonan roo ham bood,doroste in?
+        boolean isEmpty = true;
+        for(Location location : home.getLocation().getLocationsInRectangle()){
+            for(FarmAnimals animals: App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()){
+                if(animals.getPosition().equals(location)){
+                    isEmpty = false;
+                }
+                if(isEmpty){
+                    newAnimal.setPosition(location);
+                    break;
+                }
+            }
+            break;
+        }
         App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals().add(newAnimal);
         home.setCapacityRemained(home.getCapacityRemained() - 1);
 

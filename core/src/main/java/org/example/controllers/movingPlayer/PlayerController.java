@@ -72,18 +72,18 @@ public class PlayerController {
 
     public void update(float delta) {
         handleInput(delta);
-
         stateTime += delta;
 
         TextureRegion frame = currentAnim.getKeyFrame(stateTime, true);
         Main.getMain().getBatch().begin();
         Main.getMain().getBatch().draw(
             frame,
-            player.getUserLocation().getxAxis(),
-            player.getUserLocation().getyAxis(),
-            player.getPlayerSprite().getWidth(),
-            player.getPlayerSprite().getHeight()
+            player.getUserLocation().getxAxis() * 100f,  // Visual scaling only
+            player.getUserLocation().getyAxis() * 100f,  // Visual scaling only
+            FRAME_W * 6.25f,  // Scale width (16*6.25=100)
+            FRAME_H * 3.125f  // Scale height (32*3.125=100)
         );
+    //    Main.getMain().getBatch().end();
     }
 
     private void handleInput(float delta) {
