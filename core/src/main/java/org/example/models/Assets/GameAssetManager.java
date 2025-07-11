@@ -45,6 +45,8 @@ public class GameAssetManager {
     private final Texture TREE = new Texture("Flooring/Flooring_29.png");
     private final Texture DARK_GREEN_FLOOR = new Texture("Flooring/Flooring_02.png");
     private final Texture HOUSE = new Texture("House_farmer.png");
+    private final Texture barn = new Texture("Decor/Weathered_Floor_Tile.png");
+    private final Texture coop = new Texture("Decor/Stone_Floor_Tile.png");
 
     private static final Texture APRICOT_TREE = new Texture("Trees/Apricot_Stage_5_Fruit.png");
     private static final Texture APPLE_TREE = new Texture("Trees/Apple_Stage_5_Fruit.png");
@@ -205,5 +207,13 @@ public class GameAssetManager {
 
     public static Texture getBANANA_TREE() {
         return BANANA_TREE;
+    }
+
+    public Texture getBarn() {
+        return barn;
+    }
+
+    public Texture getCoop() {
+        return coop;
     }
 }

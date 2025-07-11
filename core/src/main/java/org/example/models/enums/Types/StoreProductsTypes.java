@@ -60,12 +60,12 @@ public enum StoreProductsTypes {
     //TODO:decrease wood and stone stuff from his inventory
     CARPENTER_WELL("Well", 10, 10, 10, 10, 1, "Carpenter's Shop"),
     CARPENTER_SHIPPING_BIN("Shipping Bin", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
-    CARPENTER_BARN("Barn", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
-    CARPENTER_BIG_BARN("Big Barn", 10, 10, 10, 20, 10000, "Carpenter's Shop"),
-    CARPENTER_DELUXE_BARN("Deluxe Barn", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
-    CARPENTER_COOP("Coop", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
-    CARPENTER_BIG_COOP("Big Coop", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
-    CARPENTER_DELUXE_COOP("Deluxe Coop", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
+    CARPENTER_BARN("barn", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
+    CARPENTER_BIG_BARN("big barn", 10, 10, 10, 20, 10000, "Carpenter's Shop"),
+    CARPENTER_DELUXE_BARN("deluxe barn", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
+    CARPENTER_COOP("coop", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
+    CARPENTER_BIG_COOP("big coop", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
+    CARPENTER_DELUXE_COOP("deluxe coop", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
 
     // Fishing Items (from Willy's Fish Shop)
     FISH_SHOP_FISH_SMOKER_RECIPE("Fish Smoker", 10000, 10000, 10000, 10000, 1, "Fish Shop"),

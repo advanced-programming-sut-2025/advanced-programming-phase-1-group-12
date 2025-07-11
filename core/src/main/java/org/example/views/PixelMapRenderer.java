@@ -61,6 +61,10 @@ public class PixelMapRenderer {
                 return GameAssetManager.getGameAssetManager().getBURNED_GROUND();
             case PLANT:
                 return GameAssetManager.getGameAssetManager().getPLANTS();
+            case BARN:
+                return GameAssetManager.getGameAssetManager().getBarn();
+                case COOP:
+                    return GameAssetManager.getGameAssetManager().getCoop();
             default:
                 return GameAssetManager.getGameAssetManager().getGROUND();
         }
@@ -119,6 +123,9 @@ public class PixelMapRenderer {
         GameAssetManager.getGameAssetManager().getDARK_GREEN_FLOOR().dispose();
         GameAssetManager.getGameAssetManager().getHOUSE().dispose();
         GameAssetManager.getGameAssetManager().getLAKE_TEXTURE().dispose();
+
+        GameAssetManager.getGameAssetManager().getBarn().dispose();
+        GameAssetManager.getGameAssetManager().getCoop().dispose();
 
         GameAssetManager.getBANANA_TREE().dispose();
         GameAssetManager.getMUSHROOM_TREE().dispose();
