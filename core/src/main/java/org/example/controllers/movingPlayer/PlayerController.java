@@ -90,6 +90,7 @@ public class PlayerController {
             int tileX = (int) (world.x / 100f);
             int tileY = (int) (world.y / 100f);
             Location location = App.getCurrentGame().getMainMap().findLocation(tileX, tileY);
+            System.out.println(location.getTypeOfTile() + " " + location.getxAxis() + " " + location.getyAxis());
 
             if (location.getTypeOfTile() == TypeOfTile.STORE) {
                 Gdx.app.postRunnable(() -> Main.getMain().setScreen(new StoreMenuView(findStore(location), players)));
@@ -161,6 +162,9 @@ public class PlayerController {
 
     private boolean isGroundTile(int x, int y) {
         Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
+        if(location == null) {
+            return false;
+        }
         return location.getTypeOfTile() == TypeOfTile.GROUND;
     }
 }
