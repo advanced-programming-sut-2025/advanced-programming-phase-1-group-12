@@ -146,9 +146,12 @@ public class PixelMapRenderer {
 
         for (Location loc : gameMap.getTilesOfMap()) {
             Texture base = getTextureForTile(loc.getTypeOfTile());
+
+            // Use 100x100 scaling for rendering but keep logical coordinates (1 to 400)
             batch.draw(base,
-                offsetX + loc.getxAxis() * tileSize, offsetY + (399 - loc.getyAxis()) * tileSize,
-                tileSize, tileSize);
+                offsetX + loc.getxAxis() * tileSize,
+                offsetY + (399 - loc.getyAxis()) * tileSize,  // Flip Y-axis
+                tileSize, tileSize);  // Render each tile as 100x100 pixels
 
             if (loc.getTypeOfTile() == TypeOfTile.GREENHOUSE) {
                 boolean hasLeft = greenhouseTiles.contains((loc.getxAxis() - 1) + "," + loc.getyAxis());
@@ -172,14 +175,9 @@ public class PixelMapRenderer {
             float drawY = offsetY + (399 - anchor.getyAxis()) * tileSize;
             batch.draw(HOUSE, drawX, drawY, tileSize * TILES_W, tileSize * TILES_H);
         }
-//        for(Location anchor : gameMap.getTilesOfMap()) {
-//            float drawX = offsetX + anchor.getxAxis();
-//            float drawY = offsetY + (399 - anchor.getyAxis());
-//            if(anchor.getTypeOfTile() == TypeOfTile.STONE) {
-//                batch.draw(STONE, drawX, drawY);
-//            }
-//        }
+//        batch.end();
     }
+
 
     public void dispose() {
         PLANTS.dispose();

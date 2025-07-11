@@ -95,7 +95,7 @@ public class PlayerController {
             int tileX = (int) (world.x / 100f);
             int tileY = (int) (world.y / 100f);
             Location location = App.getCurrentGame().getMainMap().findLocation(tileX, tileY);
-            System.out.println(location.getTypeOfTile());
+            System.out.println(location.getTypeOfTile() + "ho"+location.getxAxis() + " hfhhfhf" +location.getyAxis());
             System.out.println(player.getUser().getUserName());
             if (location.getTypeOfTile() == TypeOfTile.STORE) {
                 Gdx.app.postRunnable(() -> Main.getMain().setScreen(new StoreMenuView(findStore(location), players))
