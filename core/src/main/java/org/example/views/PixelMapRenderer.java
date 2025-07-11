@@ -48,7 +48,7 @@ public class PixelMapRenderer {
             case LAKE:
                 return GameAssetManager.getGameAssetManager().getLAKE_TEXTURE();
             case TREE:
-                return GameAssetManager.treeType();
+                return GameAssetManager.getGameAssetManager().getPLANTS();
             case QUARRY:
                 return GameAssetManager.getGameAssetManager().getQUARRY();
             case STORE:
@@ -118,8 +118,9 @@ public class PixelMapRenderer {
         GameAssetManager.getGameAssetManager().getSTORE().dispose();
         GameAssetManager.getGameAssetManager().getTREE().dispose();
         GameAssetManager.getGameAssetManager().getDARK_GREEN_FLOOR().dispose();
-        Objects.requireNonNull(GameAssetManager.treeType()).dispose();
-        GameAssetManager.dispose();
+        GameAssetManager.getGameAssetManager().getHOUSE().dispose();
+        GameAssetManager.getGameAssetManager().getLAKE_TEXTURE().dispose();
+    //    Objects.requireNonNull(GameAssetManager.treeType()).dispose();
 
     }
 }
