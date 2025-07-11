@@ -1,15 +1,10 @@
 package org.example.views;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.example.models.Assets.GameAssetManager;
 import org.example.models.Fundementals.Location;
-import org.example.models.Place.Farm;
-import org.example.models.enums.Types.TreeType;
 import org.example.models.enums.Types.TypeOfTile;
-import org.example.models.enums.foraging.Tree;
 import org.example.models.map;
 
 import java.util.*;
@@ -76,11 +71,10 @@ public class PixelMapRenderer {
         for (Location loc : gameMap.getTilesOfMap()) {
             Texture base = getTextureForTile(loc.getTypeOfTile(), loc);
 
-            // Use 100x100 scaling for rendering but keep logical coordinates (1 to 400)
             batch.draw(base,
                 offsetX + loc.getxAxis() * tileSize,
-                offsetY + (399 - loc.getyAxis()) * tileSize,  // Flip Y-axis
-                tileSize, tileSize);  // Render each tile as 100x100 pixels
+                offsetY + (399 - loc.getyAxis()) * tileSize,
+                tileSize, tileSize);
 
             if (loc.getTypeOfTile() == TypeOfTile.GREENHOUSE) {
                 boolean hasLeft = greenhouseTiles.contains((loc.getxAxis() - 1) + "," + loc.getyAxis());

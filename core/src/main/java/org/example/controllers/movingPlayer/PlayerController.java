@@ -84,40 +84,51 @@ public class PlayerController {
         int newX = App.getCurrentGame().getCurrentPlayer().getUserLocation().getxAxis();
         int newY = App.getCurrentGame().getCurrentPlayer().getUserLocation().getyAxis();
 
+        // Check if the player clicked on the map
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
             Vector3 world = GameMenu.getCamera().unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
             int tileX = (int) (world.x / 100f);
             int tileY = (int) (world.y / 100f);
             Location location = App.getCurrentGame().getMainMap().findLocation(tileX, tileY);
-            System.out.println(location.getTypeOfTile() + "ho"+location.getxAxis() + " hfhhfhf" +location.getyAxis());
-            System.out.println(player.getUser().getUserName());
+
             if (location.getTypeOfTile() == TypeOfTile.STORE) {
-                Gdx.app.postRunnable(() -> Main.getMain().setScreen(new StoreMenuView(findStore(location), players))
-                );
+                Gdx.app.postRunnable(() -> Main.getMain().setScreen(new StoreMenuView(findStore(location), players)));
                 return;
             }
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             newY += player.getSpeed();
-            facing = Dir.UP;
+            if (isGroundTile(newX, newY)) {
+                facing = Dir.UP;
+            } else {
+                newY -= player.getSpeed();
+            }
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             newY -= player.getSpeed();
-            facing = Dir.DOWN;
+            if (isGroundTile(newX, newY)) {
+                facing = Dir.DOWN;
+            } else {
+                newY += player.getSpeed();
+            }
         }
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             newX -= player.getSpeed();
-            facing = Dir.LEFT;
+            if (isGroundTile(newX, newY)) {
+                facing = Dir.LEFT;
+            } else {
+                newX += player.getSpeed();
+            }
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             newX += player.getSpeed();
-            facing = Dir.RIGHT;
+            if (isGroundTile(newX, newY)) {
+                facing = Dir.RIGHT;
+            } else {
+                newX -= player.getSpeed();
+            }
         }
-
-        // Keep positions in logical coordinates (1 to 400)
-//        newX = MathUtils.clamp(newX, 0, 40000);
-//        newY = MathUtils.clamp(newY, 0, 40000);
 
         player.updatePosition(newX, newY);
 
@@ -133,8 +144,6 @@ public class PlayerController {
         return player;
     }
 
-    public void setPlayer(Player player) { /* kept for compatibility */ }
-
     public TextureRegion getCurrentFrame() {
         return currentAnim.getKeyFrame(stateTime, true);
     }
@@ -148,5 +157,10 @@ public class PlayerController {
             }
         }
         return store;
+    }
+
+    private boolean isGroundTile(int x, int y) {
+        Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
+        return location.getTypeOfTile() == TypeOfTile.GROUND;
     }
 }
