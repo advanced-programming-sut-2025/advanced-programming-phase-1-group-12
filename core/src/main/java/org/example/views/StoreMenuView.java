@@ -1,12 +1,11 @@
 package org.example.views;
 
-import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -23,10 +22,13 @@ import org.example.models.Fundementals.Result;
 import org.example.models.Place.Farm;
 import org.example.models.Place.Store;
 import org.example.models.ProductsPackage.StoreProducts;
+import org.example.models.enums.Types.TypeOfTile;
 
 import javax.swing.text.View;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class StoreMenuView implements Screen {
     private Skin skin = GameAssetManager.skin;
@@ -292,13 +294,13 @@ class FarmView implements Screen {
     private Skin skin = GameAssetManager.skin;
     private List<String> players;
     private String productName;
-    private SpriteBatch batch;  // To render textures
-    private PixelMapRenderer pixelMapRenderer; // Instance of PixelMapRenderer to render the farm grid
-    private Farm farm;  // The farm to render
+    private SpriteBatch batch;
+    private PixelMapRenderer pixelMapRenderer;
+    private Farm farm;
 
-    private int farmX1, farmY1, farmX2, farmY2;  // Coordinates of the farm
-    private final int tileSize = 100;  // Tile size
+    private final int tileSize = 40;  // Tile size
     private final List<Player> playerList;
+    private int farmX1, farmY1;
 
     public FarmView(String productName, List<String> players, List<Player> playerList) {
         this.productName = productName;
@@ -309,17 +311,19 @@ class FarmView implements Screen {
         System.out.println(App.getCurrentPlayerLazy());
         System.out.println(farm);
         this.farmX1 = App.getCurrentPlayerLazy().getOwnedFarm().getFarmLocation().getTopLeftCorner().getxAxis();  // Farm starting X coordinate
-        this.farmY1 = App.getCurrentPlayerLazy().getOwnedFarm().getFarmLocation().getTopLeftCorner().getyAxis();  // Farm starting Y coordinate
-        this.farmX2 = farmX1 + 30; // Farm ending X coordinate
-        this.farmY2 = farmY1 + 30; // Farm ending Y coordinate
+        this.farmY1 = App.getCurrentPlayerLazy().getOwnedFarm().getFarmLocation().getTopLeftCorner().getyAxis();  // Farm starting Y coordinate// Farm ending Y coordinate
 
         // Initialize PixelMapRenderer for the specific farm
         this.pixelMapRenderer = new PixelMapRenderer(App.getCurrentGame().getMainMap());  // Initialize PixelMapRenderer
+        this.farm = App.getCurrentPlayerLazy().getOwnedFarm();
+        this.farmX1 = farm.getFarmLocation().getDownRightCorner().getxAxis()-30;
+        this.farmY1 = farm.getFarmLocation().getDownRightCorner().getyAxis()-30;
+        this.pixelMapRenderer = new PixelMapRenderer(App.getCurrentGame().getMainMap());
     }
 
     @Override
     public void show() {
-        batch = Main.getMain().getBatch();  // Get the global SpriteBatch
+        batch = new SpriteBatch(); // Create new batch instead of using global one
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
@@ -338,17 +342,37 @@ class FarmView implements Screen {
         // Add back button to the stage
         Table table = new Table();
         table.setFillParent(true);
-        table.center();
-        table.add(back).padTop(20);
+        table.top().left(); // Changed to top-left to avoid overlapping with farm
+        table.add(back).pad(20);
         stage.addActor(table);
     }
 
     @Override
     public void render(float delta) {
-        // Clear the screen
-        ScreenUtils.clear(0, 0, 0, 1);
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+            Vector3 worldCoords = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+            Vector3 world = stage.getCamera().unproject(worldCoords); // Use stage's camera (viewport is updated in resize)
 
-        // Render only the farm area, adjust the offsets for the selected farm
+            int screenX = (int) ((world.x) / tileSize);
+            int screenY = (int) ((Gdx.graphics.getHeight() - world.y - 60) / tileSize); // offset of 60 used in draw
+
+            int tileX = screenX + farmX1;
+            int tileY = screenY + farmY1;
+
+            Location location = App.getCurrentGame().getMainMap().findLocation(tileX, tileY);
+            if (location != null) {
+                StoreController storeController = new StoreController();
+                String success = storeController.buyAnimalBuilding(productName, location).getMessage();
+                System.out.println("Clicked on tile: (" + tileX + "," + tileY + "), Purchase result: " + success);
+            } else {
+                System.out.println("Invalid tile clicked");
+            }
+        }
+
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        // Render farm first
         batch.begin();
 
         // Use the coordinates of the farm (farmX1, farmY1, farmX2, farmY2) to render only that part of the map
@@ -363,26 +387,76 @@ class FarmView implements Screen {
 
     // This method renders the farm area using the farm coordinates
     private void renderFarmTiles() {
-        // Loop through the farm's specific area and render the tiles for the selected farm
-        for (int y = farmY1; y < farmY2; y++) {
-            for (int x = farmX1; x < farmX2; x++) {
-                Location l = App.getCurrentGame().getMainMap().findLocation(x, y);
-                // Calculate the correct position and draw the tile
-                Texture tileTexture = pixelMapRenderer.getTextureForTile(l.getTypeOfTile(), l);
-                batch.draw(tileTexture, x * tileSize, (farmY2 - y - 1) * tileSize, tileSize, tileSize);  // Adjust positions for tile size
+        List<Location> greenhouseAnchors = new ArrayList<>();
+        List<Location> houseAnchors = new ArrayList<>();
+        Set<String> greenhouseTiles = new HashSet<>();
+        Set<String> houseTiles = new HashSet<>();
+
+        for (Location l : App.getCurrentGame().getMainMap().getTilesOfMap()) {
+            if (l.getTypeOfTile() == TypeOfTile.GREENHOUSE) {
+                greenhouseTiles.add(l.getxAxis() + "," + l.getyAxis());
             }
+        }
+
+        for (Location l : App.getCurrentGame().getMainMap().getTilesOfMap()) {
+            if (l.getTypeOfTile() == TypeOfTile.HOUSE) {
+                houseTiles.add(l.getxAxis() + "," + l.getyAxis());
+            }
+        }
+
+        for (int y = farmY1; y < farmY1+30; y++) {
+            for (int x = farmX1; x < farmX1 + 30; x++) {
+                Location l = App.getCurrentGame().getMainMap().findLocation(x, y);
+                if (l != null) {
+                    if (l.getTypeOfTile() == TypeOfTile.GREENHOUSE) {
+                        boolean hasLeft = greenhouseTiles.contains((l.getxAxis() - 1) + "," + l.getyAxis());
+                        boolean hasBelow = greenhouseTiles.contains(l.getxAxis() + "," + (l.getyAxis() - 1));
+
+                        if (!hasLeft && !hasBelow) greenhouseAnchors.add(l);
+                    } else if (l.getTypeOfTile() == TypeOfTile.HOUSE) {
+                        boolean hasLeft = houseTiles.contains((l.getxAxis() - 1) + "," + l.getyAxis());
+                        boolean hasAbove = houseTiles.contains(l.getxAxis() + "," + (l.getyAxis() + 1));
+
+                        if (!hasLeft && !hasAbove) houseAnchors.add(l);
+                    }
+                    Texture tileTexture = pixelMapRenderer.getTextureForTile(l.getTypeOfTile(), l);
+                    // Draw relative to screen with offset for UI
+                    batch.draw(tileTexture,
+                        (x - farmX1) * tileSize,
+                        Gdx.graphics.getHeight() - ((y - farmY1 + 1) * tileSize) , // Offset for UI
+                        tileSize, tileSize);
+                }
+            }
+        }
+        for (Location anchor : greenhouseAnchors) {
+            float drawX = anchor.getxAxis() * tileSize;
+            float drawY = anchor.getyAxis() * tileSize - tileSize ;
+            batch.draw(GameAssetManager.getGameAssetManager().getGREEN_HOUSE(), drawX, drawY-80, tileSize * 4 , tileSize * 4 );
+        }
+        for (Location anchor : houseAnchors) {
+            float drawX =  anchor.getxAxis() * tileSize;
+            float drawY =  anchor.getyAxis() * tileSize;
+            batch.draw(GameAssetManager.getGameAssetManager().getHOUSE(), drawX, drawY-80, tileSize * 4, tileSize * 4);
         }
     }
 
-    @Override public void resize(int width, int height) {
+
+    @Override
+    public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
     }
 
-    @Override public void pause() {}
-    @Override public void resume() {}
-    @Override public void hide() {}
-    @Override public void dispose() {
-        stage.dispose();  // Clean up the stage and batch
+    @Override
+    public void pause() {}
+    @Override
+    public void resume() {}
+    @Override
+    public void hide() {}
+
+    @Override
+    public void dispose() {
+        stage.dispose();
+        batch.dispose();
     }
 }
 

@@ -89,6 +89,9 @@ public class PlayerController {
             int tileX = (int) (world.x / 100f);
             int tileY = (int) (world.y / 100f);
             Location location = App.getCurrentGame().getMainMap().findLocation(tileX, tileY);
+            if (location == null) {
+                return;
+            }
             System.out.println(location.getTypeOfTile() + " " + location.getxAxis() + " " + location.getyAxis());
 
             if (location.getTypeOfTile() == TypeOfTile.STORE) {
