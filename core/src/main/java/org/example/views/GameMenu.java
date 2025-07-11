@@ -128,7 +128,6 @@ public class GameMenu extends InputAdapter implements Screen {
         stage.draw();
     }
 
-
     @Override
     public void dispose() {
         stage.dispose();

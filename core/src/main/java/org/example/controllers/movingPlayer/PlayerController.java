@@ -72,18 +72,18 @@ public class PlayerController {
 
     public void update(float delta) {
         handleInput(delta);
+
         stateTime += delta;
 
         TextureRegion frame = currentAnim.getKeyFrame(stateTime, true);
         Main.getMain().getBatch().begin();
         Main.getMain().getBatch().draw(
             frame,
-            player.getUserLocation().getxAxis() * 100f,  // Visual scaling only
-            player.getUserLocation().getyAxis() * 100f,  // Visual scaling only
-            FRAME_W * 6.25f,  // Scale width (16*6.25=100)
-            FRAME_H * 3.125f  // Scale height (32*3.125=100)
+            player.getUserLocation().getxAxis(),
+            player.getUserLocation().getyAxis(),
+            player.getPlayerSprite().getWidth(),
+            player.getPlayerSprite().getHeight()
         );
-    //    Main.getMain().getBatch().end();
     }
 
     private void handleInput(float delta) {
@@ -95,7 +95,7 @@ public class PlayerController {
             int tileX = (int) (world.x / 100f);
             int tileY = (int) (world.y / 100f);
             Location location = App.getCurrentGame().getMainMap().findLocation(tileX, tileY);
-            System.out.println(location.getTypeOfTile());
+            System.out.println(location.getTypeOfTile() + "ho"+location.getxAxis() + " hfhhfhf" +location.getyAxis());
             System.out.println(player.getUser().getUserName());
             if (location.getTypeOfTile() == TypeOfTile.STORE) {
                 Gdx.app.postRunnable(() -> Main.getMain().setScreen(new StoreMenuView(findStore(location), players))
