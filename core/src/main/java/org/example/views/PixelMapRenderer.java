@@ -43,12 +43,12 @@ public class PixelMapRenderer {
         }
     }
 
-    public Texture getTextureForTile(TypeOfTile tileType) {
+    public Texture getTextureForTile(TypeOfTile tileType, Location location) {
         switch (tileType) {
             case LAKE:
                 return GameAssetManager.getGameAssetManager().getLAKE_TEXTURE();
             case TREE:
-                return GameAssetManager.getGameAssetManager().getPLANTS();
+                return GameAssetManager.treeType(location);
             case QUARRY:
                 return GameAssetManager.getGameAssetManager().getQUARRY();
             case STORE:
@@ -74,7 +74,7 @@ public class PixelMapRenderer {
         List<Location> houseAnchors = new ArrayList<>();
 
         for (Location loc : gameMap.getTilesOfMap()) {
-            Texture base = getTextureForTile(loc.getTypeOfTile());
+            Texture base = getTextureForTile(loc.getTypeOfTile(), loc);
 
             // Use 100x100 scaling for rendering but keep logical coordinates (1 to 400)
             batch.draw(base,
@@ -120,7 +120,19 @@ public class PixelMapRenderer {
         GameAssetManager.getGameAssetManager().getDARK_GREEN_FLOOR().dispose();
         GameAssetManager.getGameAssetManager().getHOUSE().dispose();
         GameAssetManager.getGameAssetManager().getLAKE_TEXTURE().dispose();
-    //    Objects.requireNonNull(GameAssetManager.treeType()).dispose();
+
+        GameAssetManager.getBANANA_TREE().dispose();
+        GameAssetManager.getMUSHROOM_TREE().dispose();
+        GameAssetManager.getMYSTIC_TREE().dispose();
+        GameAssetManager.getMANGO_TREE().dispose();
+        GameAssetManager.getOAK_TREE().dispose();
+        GameAssetManager.getPEACH_TREE().dispose();
+        GameAssetManager.getCHERRY_TREE().dispose();
+        GameAssetManager.getAPPLE_TREE().dispose();
+        GameAssetManager.getORANGE_TREE().dispose();
+        GameAssetManager.getMAPLE_TREE().dispose();
+        GameAssetManager.getAPRICOT_TREE().dispose();
+        GameAssetManager.getPINE_TREE().dispose();
 
     }
 }

@@ -359,8 +359,9 @@ class FarmView implements Screen {
         // Loop through the farm's specific area and render the tiles for the selected farm
         for (int y = farmY1; y < farmY2; y++) {
             for (int x = farmX1; x < farmX2; x++) {
+                Location l = App.getCurrentGame().getMainMap().findLocation(x, y);
                 // Calculate the correct position and draw the tile
-                Texture tileTexture = pixelMapRenderer.getTextureForTile(App.getCurrentGame().getMainMap().findLocation(x, y).getTypeOfTile());
+                Texture tileTexture = pixelMapRenderer.getTextureForTile(l.getTypeOfTile(), l);
                 batch.draw(tileTexture, x * tileSize, (farmY2 - y - 1) * tileSize, tileSize, tileSize);  // Adjust positions for tile size
             }
         }
