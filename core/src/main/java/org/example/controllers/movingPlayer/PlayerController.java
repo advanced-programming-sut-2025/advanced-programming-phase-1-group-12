@@ -41,23 +41,25 @@ public class PlayerController {
 
     private Animation<TextureRegion> currentAnim;
     private float stateTime = 0f;
+
     private enum Dir {DOWN, LEFT, RIGHT, UP}
+
     private Dir facing = Dir.DOWN;
     private Animation<Texture> rawAnim;
     List<String> players;
 
     public PlayerController(Player player, GameMenuController gameController, List<String> players) {
         this.players = players;
-        this.player        = player;
+        this.player = player;
         this.gameController = gameController;
         player.setPlayerController(this);
         Texture sheet = new Texture("sprites/Penny.png");
         TextureRegion[][] grid = TextureRegion.split(sheet, FRAME_W, FRAME_H);
 
-        walkDown  = buildAnim(grid[1]);
-        walkLeft  = buildAnim(grid[4]);
+        walkDown = buildAnim(grid[1]);
+        walkLeft = buildAnim(grid[4]);
         walkRight = buildAnim(grid[2]);
-        walkUp    = buildAnim(grid[3]);
+        walkUp = buildAnim(grid[3]);
 
         currentAnim = walkDown;
     }
@@ -84,20 +86,29 @@ public class PlayerController {
         );
     }
 
+//            if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+//        Vector3 world = GameMenu.getCamera().unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+//        int tileX = (int)(world.x / TILE_SIZE);
+//        int tileY = (int)(world.y / TILE_SIZE);
+//        Location location = App.getCurrentGame().getMainMap().findLocation(tileX, tileY);
+//        if (location.getTypeOfTile() == TypeOfTile.STORE) {
+//            Gdx.app.postRunnable(() -> Main.getMain().setScreen(new StoreMenuView(findStore(location), players))
+//            );
+//            return;
+//        }
+//    }
+
     private void handleInput(float delta) {
-        float dx = 0, dy = 0;
+        int newX = App.getCurrentGame().getCurrentPlayer().getUserLocation().getxAxis();
+        int newY = App.getCurrentGame().getCurrentPlayer().getUserLocation().getyAxis();
 
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) { dy += player.getSpeed() * delta; facing = Dir.UP; }
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) { dy -= player.getSpeed() * delta; facing = Dir.DOWN; }
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) { dx -= player.getSpeed() * delta; facing = Dir.LEFT; }
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) { dx += player.getSpeed() * delta; facing = Dir.RIGHT; }
-
-        final int TILE_SIZE = 100;
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
             Vector3 world = GameMenu.getCamera().unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-            int tileX = (int)(world.x / TILE_SIZE);
-            int tileY = (int)(world.y / TILE_SIZE);
+            int tileX = (int) (world.x / 70f);
+            int tileY = (int) (world.y / 70f);
             Location location = App.getCurrentGame().getMainMap().findLocation(tileX, tileY);
+            System.out.println(location.getTypeOfTile());
+            System.out.println(player.getUser().getUserName());
             if (location.getTypeOfTile() == TypeOfTile.STORE) {
                 Gdx.app.postRunnable(() -> Main.getMain().setScreen(new StoreMenuView(findStore(location), players))
                 );
@@ -105,17 +116,41 @@ public class PlayerController {
             }
         }
 
-        player.updatePosition(dx * TILE_SIZE, dy * TILE_SIZE);
+        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+            newY += player.getSpeed();
+            facing = Dir.UP;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+            newY -= player.getSpeed();
+            facing = Dir.DOWN;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+            newX -= player.getSpeed();
+            facing = Dir.LEFT;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+            newX += player.getSpeed();
+            facing = Dir.RIGHT;
+        }
+
+        // Keep positions in logical coordinates (1 to 400)
+        newX = MathUtils.clamp(newX, 0, 400);
+        newY = MathUtils.clamp(newY, 0, 400);
+
+        player.getUserLocation().setxAxis(newX);
+        player.getUserLocation().setyAxis(newY);
 
         switch (facing) {
-            case UP    -> currentAnim = walkUp;
-            case DOWN  -> currentAnim = walkDown;
-            case LEFT  -> currentAnim = walkLeft;
+            case UP -> currentAnim = walkUp;
+            case DOWN -> currentAnim = walkDown;
+            case LEFT -> currentAnim = walkLeft;
             case RIGHT -> currentAnim = walkRight;
         }
     }
 
-    public Player getPlayer() { return player; }
+    public Player getPlayer() {
+        return player;
+    }
 
     public void setPlayer(Player player) { /* kept for compatibility */ }
 

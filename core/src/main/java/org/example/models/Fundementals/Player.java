@@ -24,7 +24,7 @@ import java.util.Map;
 public class Player {
     private Texture playerTexture;
     private Sprite playerSprite;
-    private float Speed = 1f;
+    private float Speed = 10f;
     private CollisionRect rect;
     private User user;
     private Location userLocation;

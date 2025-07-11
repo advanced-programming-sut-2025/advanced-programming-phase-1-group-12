@@ -24,17 +24,15 @@ import java.util.regex.Matcher;
 public class StoreController {
 
     public Result buyAnimalBuilding(String buildingName, Location location) {
-        if (!App.isInStore("Carpenter's Shop")) {
-            return new Result(false, "You are not in Carpenter's shop");
-        }
+//        if (!App.isInStore("Carpenter's Shop")) {
+//            return new Result(false, "You are not in Carpenter's shop");
+//        }
         if (!App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getLocation().getLocationsInRectangle().contains(location)) {
             return new Result(false, "given location is not in your farm at all");
         }
         if (!location.getTypeOfTile().equals(TypeOfTile.GROUND)) {
             return new Result(false, "You can not build this building here");
         }
-        //i put the given location in the top left corner of the building
-        //normal coop, Deluxe coop, big coop, normal barn, Deluxe barn, big barn:
 
         Location otherCorner;
        if (buildingName.contains("coop")) {

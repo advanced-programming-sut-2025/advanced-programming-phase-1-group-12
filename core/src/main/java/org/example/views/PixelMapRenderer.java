@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 public class PixelMapRenderer {
-    private final int tileSize = 100;
+    private final int tileSize = 70;
     private static final int TILES_W = 4;
     private static final int TILES_H = 4;
     private final map gameMap;
@@ -72,7 +72,7 @@ public class PixelMapRenderer {
         }
     }
 
-    private Texture getTextureForTile(TypeOfTile tileType) {
+    public Texture getTextureForTile(TypeOfTile tileType) {
         switch (tileType) {
             case LAKE:
                 return LAKE_TEXTURE;
