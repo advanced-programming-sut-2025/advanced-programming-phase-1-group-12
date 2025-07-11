@@ -21,7 +21,6 @@ public class PixelMapRenderer {
     private final map gameMap;
     private final Set<String> greenhouseTiles = new HashSet<>();
     private final Set<String> houseTiles = new HashSet<>();
-
     public PixelMapRenderer(map gameMap) {
         this.gameMap = gameMap;
         cacheGreenhouseTiles();

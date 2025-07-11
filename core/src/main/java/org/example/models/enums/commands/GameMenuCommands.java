@@ -17,11 +17,11 @@ public enum GameMenuCommands implements Commands {
     PRINT("^print map -l (?<X>.*), (?<Y>.*) -s (?<size>.*)$"),
     HELP("^help reading map$"),
     SHOW_POSITION("^show location of current player$"),
-    WALK("^walk -l (?<x>.*), (?<y>.*)$"),
+    WALK("^walk -l (?<x>.*) , (?<y>.*)$"),
     EXIT("^exit$"),
     LoadGame("^load game with (?<gameID>.+)$"),
     NextTurn("^next turn"),
-    SHOW_CURRENT_TYPE("^show current type -l (?<x>.*), (?<y>.*)$"),
+    SHOW_CURRENT_TYPE("^show current type (?<X>\\d+) (?<Y>\\d+)$"),
     //farming
     CRAFT_INFO("^craftinfo -n (?<craftName>.+)$"),
     FORAGING_TREE_TYPE("^foragingTree (?<type>.+)$"),
