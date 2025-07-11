@@ -344,7 +344,7 @@ public class GameMenuController {
 
         MapSetUp.showMapWithFarms(App.getCurrentGame().getMainMap());
         System.out.println("All farms have been assigned!");
-        Main.getMain().setScreen(new GameMenu(usernames));
+        Main.getMain().setScreen(new GameMenu(usernames , players));
     }
 
 
