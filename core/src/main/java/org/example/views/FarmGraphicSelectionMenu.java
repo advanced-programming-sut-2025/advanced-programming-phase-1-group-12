@@ -93,7 +93,6 @@ public class FarmGraphicSelectionMenu implements Screen {
         farmLabels.put(farmId, nameLabel);
         stage.addActor(nameLabel);
 
-        // Darken the farm image slightly (overlay effect)
         Image overlay = new Image(skin.newDrawable("white", new Color(0, 0, 0, 0.5f)));
         overlay.setBounds((farmId % 2 == 0) ? farmImage.getX() : farmImage.getX() + imgWidth / 2f,
             (farmId < 2) ? farmImage.getY() + imgHeight / 2f : farmImage.getY(),
@@ -107,7 +106,7 @@ public class FarmGraphicSelectionMenu implements Screen {
 
     private void startGame() {
         GameMenuController controller = new GameMenuController();
-        controller.Play( players, chosenFarms);
+        controller.Play(players, chosenFarms);
     }
 
     @Override public void render(float delta) {
