@@ -48,7 +48,7 @@ public class FarmGraphicSelectionMenu implements Screen {
                 int mainSelectedFarm;
                 switch (selectedFarm) {
                     case 0:
-                        mainSelectedFarm = 1;
+                        mainSelectedFarm = 2;
                         break;
                     case 1:
                         mainSelectedFarm = 3;
@@ -57,7 +57,7 @@ public class FarmGraphicSelectionMenu implements Screen {
                         mainSelectedFarm = 0;
                         break;
                     default:
-                        mainSelectedFarm = 2;
+                        mainSelectedFarm = 1;
                         break;
                 }
 
