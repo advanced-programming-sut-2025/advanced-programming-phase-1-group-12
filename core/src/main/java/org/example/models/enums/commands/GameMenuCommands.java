@@ -57,14 +57,13 @@ public enum GameMenuCommands implements Commands {
     CHEAT_ADVANCED_TIME("^cheat advance time (?<time>.*) h$"),
     CHEAT_ADVANCED_DATE("^cheat advance date (?<date>.*) d$"),
     CHEAT_WEATHER_SET("^cheat\\s+weather\\s+set\\s+(?<type>.*)$"),
-    CHEAT_THOR("^cheat\\s+Thor\\s+-l\\s+<(\\S+),(\\S+)>"),
     ENERGY_SHOW("^energy\\s+show$"),
     GREENHOUSE_BUILD("^greenhouse\\s+build$"),
     ENERGY_SET("^energy set -v (?<value>.*)$"),
     ENERGY_UNLIMITED("^energy unlimited$"),
     INVENTORY_SHOW("^inventory\\s+show$"),
     INVENTORY_TRASH("inventory trash -i (?<item>\\S+)(?: -n (?<number>.*))?$"),
-    THOR("^cheat Thor -l (?<X>.+)\\s*,\\s*(?<Y>.+)$"),
+    THOR("^cheat Thor (?<X>\\d+),(?<Y>\\d+)$"),
 
     //Damdari commands
     //animals

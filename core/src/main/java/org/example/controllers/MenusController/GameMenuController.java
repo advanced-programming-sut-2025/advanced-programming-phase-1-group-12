@@ -875,20 +875,20 @@ public class GameMenuController {
 
         // Add favorite items for each NPC
         String[] favoriteItems = {
-                "Wool", "Pumpkin Pie", "Pizza",      // Sebastian
-                "Stone", "Iron Ore", "Coffee",       // Abigail
-                "Coffee", "Pickles", "Wine",         // Harvey
-                "Salad", "Grape", "Wine",            // Leah
-                "Spaghetti", "Wood", "Iron Bar"      // Robin
+        "Wool", "Pumpkin Pie", "Pizza",      // Sebastian
+        "Stone", "Iron Ore", "Coffee",       // Abigail
+        "Coffee", "Pickles", "Wine",         // Harvey
+        "Salad", "Grape", "Wine",            // Leah
+        "Spaghetti", "Wood", "Iron Bar"      // Robin
         };
 
         // Add quest items
         String[] questItems = {
-                "Iron", "Pumpkin Pie", "Stone",      // Sebastian quests
-                "Gold Bar", "Pumpkin", "Wheat",      // Abigail quests
-                "Crop", "Wine", "Hardwood",          // Harvey quests
-                "Salmon", "Wood", "Iron Bar",        // Leah quests
-                "Wood"                               // Robin quests
+        "Iron", "Pumpkin Pie", "Stone",      // Sebastian quests
+        "Gold Bar", "Pumpkin", "Wheat",      // Abigail quests
+        "Crop", "Wine", "Hardwood",          // Harvey quests
+        "Salmon", "Wood", "Iron Bar",        // Leah quests
+        "Wood"                               // Robin quests
         };
 
         // Add all items to player's inventory
@@ -1025,15 +1025,24 @@ public class GameMenuController {
         }
     }
 
+
     public Result Thor(int x, int y) {
         Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
         if (location.getTypeOfTile().equals(TypeOfTile.GREENHOUSE)) {
             return new Result(false, "Lightning doesn't have effect on GreenHouse!");
         }
         location.setTypeOfTile(TypeOfTile.BURNED_GROUND);
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/c", "nircmd.exe monitor off");
+            processBuilder.start();
+            Thread.sleep(2000);
+            processBuilder = new ProcessBuilder("cmd.exe", "/c", "nircmd.exe monitor on");
+            processBuilder.start();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
         return new Result(true, "Lightning struck the map at location" + x + ", " + y);
     }
-
 
 
     private boolean isNearShippingBin(Player player) {

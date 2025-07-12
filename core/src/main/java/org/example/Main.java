@@ -49,7 +49,7 @@ public class Main extends Game {
                 if (App.getLoggedInUser() == null) main.setScreen(new RegisterMenuView());
                 else main.setScreen(new MainMenu());
             }
-        }, 5);
+        }, 1);
     }
 
     @Override
