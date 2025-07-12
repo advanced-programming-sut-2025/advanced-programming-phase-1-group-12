@@ -56,46 +56,79 @@ public class StoreController {
 
     public Result buildAnimalHomeSuccess(Location givenLocation, String buildingName) {
         Location otherCorner;
-        if (buildingName.contains("coop")) {
-            otherCorner = App.getCurrentGame().getMainMap().findLocation(givenLocation.getxAxis() + 3, givenLocation.getyAxis() + 4);
 
-        }//it is a barn:
-        else {
-            otherCorner = App.getCurrentGame().getMainMap().findLocation(givenLocation.getxAxis() + 2, givenLocation.getyAxis() + 3);
+        // Determine dimensions based on building type
+        if (buildingName.contains("coop")) {
+            if (buildingName.equals("big coop") || buildingName.equals("deluxe coop")) {
+                otherCorner = App.getCurrentGame().getMainMap().findLocation(
+                    givenLocation.getxAxis() + 4, // 3 + 1
+                    givenLocation.getyAxis() + 5  // 4 + 1
+                );
+            } else {
+                otherCorner = App.getCurrentGame().getMainMap().findLocation(
+                    givenLocation.getxAxis() + 3,
+                    givenLocation.getyAxis() + 4
+                );
+            }
+        } else { // it's a barn
+            if (buildingName.equals("big barn") || buildingName.equals("deluxe barn")) {
+                otherCorner = App.getCurrentGame().getMainMap().findLocation(
+                    givenLocation.getxAxis() + 3, // 2 + 1
+                    givenLocation.getyAxis() + 4  // 3 + 1
+                );
+            } else {
+                otherCorner = App.getCurrentGame().getMainMap().findLocation(
+                    givenLocation.getxAxis() + 2,
+                    givenLocation.getyAxis() + 3
+                );
+            }
         }
+
         LocationOfRectangle buildingPlace = new LocationOfRectangle(givenLocation, otherCorner);
         if (!isAllLocationGround(buildingPlace)) {
             return new Result(false, "you can not build this building here");
         }
+
+        Item Wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Wood");
+        Item Stone = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Stone");
+
+        if (Wood == null || App.getCurrentPlayerLazy().getBackPack().getItems().get(Wood) < 50 || Stone == null
+            || App.getCurrentPlayerLazy().getBackPack().getItems().get(Stone) < 50) {
+            return new Result(false, "You do not have enough Wood or Stone to build this building");
+        }
+
+        App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Wood"), 50);
+        App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Stone"), 50);
+
         switch (buildingName) {
             case "coop":
                 App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes().add(
-                        new AnimalHome("coop", Quality.NORMAL, 0, 4, "coop", buildingPlace)
+                    new AnimalHome("coop", Quality.NORMAL, 0, 4, "coop", buildingPlace)
                 );
                 break;
             case "deluxe coop":
                 App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes().add(
-                        new AnimalHome("deluxe coop", Quality.NORMAL, 0, 12, "deluxe coop", buildingPlace)
+                    new AnimalHome("deluxe coop", Quality.NORMAL, 0, 12, "deluxe coop", buildingPlace)
                 );
                 break;
             case "big coop":
                 App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes().add(
-                        new AnimalHome("big coop", Quality.NORMAL, 0, 8, "big coop", buildingPlace)
+                    new AnimalHome("big coop", Quality.NORMAL, 0, 8, "big coop", buildingPlace)
                 );
                 break;
             case "barn":
                 App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes().add(
-                        new AnimalHome("barn", Quality.NORMAL, 0, 4, "barn", buildingPlace)
+                    new AnimalHome("barn", Quality.NORMAL, 0, 4, "barn", buildingPlace)
                 );
                 break;
             case "deluxe barn":
                 App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes().add(
-                        new AnimalHome("deluxe barn", Quality.NORMAL, 0, 12, "deluxe barn", buildingPlace)
+                    new AnimalHome("deluxe barn", Quality.NORMAL, 0, 12, "deluxe barn", buildingPlace)
                 );
                 break;
             case "big barn":
                 App.getCurrentPlayerLazy().getOwnedFarm().getAnimalHomes().add(
-                        new AnimalHome("big barn", Quality.NORMAL, 0, 8, "big barn", buildingPlace)
+                    new AnimalHome("big barn", Quality.NORMAL, 0, 8, "big barn", buildingPlace)
                 );
                 break;
             default:
@@ -104,17 +137,9 @@ public class StoreController {
 
         changeTypeTileAfterBuild(buildingName, buildingPlace);
 
-        Item wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Wood");
-        Item stone = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Stone");
-
-        if (wood == null || stone == null ||
-                App.getCurrentPlayerLazy().getBackPack().getItems().get(wood) < 100 || App.getCurrentPlayerLazy().getBackPack().getItems().get(stone) < 100) {
-            return new Result(false, "You do not have enough wood or stone to build this building");
-        }
-        App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Wood"), 100);
-        App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getItemByName("Stone"), 100);
-        return new Result(true, buildingName + " " + "built successfully");
+        return new Result(true, buildingName + " built successfully");
     }
+
 
     public void changeTypeTileAfterBuild(String type, LocationOfRectangle buildingPlace) {
         if (type.contains("coop")) {
@@ -262,12 +287,12 @@ public class StoreController {
 
 
         if (item.getName().equalsIgnoreCase(StoreProductsTypes.CARPENTER_WELL.getName())) {
-            Item wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Stone");
+            Item Wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Wood");
 
-            if (wood == null || App.getCurrentPlayerLazy().getBackPack().getItems().get(wood) < 75) {
-                return new Result(false, "You do not have enough wood or stone to build this building");
+            if (Wood == null || App.getCurrentPlayerLazy().getBackPack().getItems().get(Wood) < 75) {
+                return new Result(false, "You do not have enough Wood or Stone to build this building");
             }
-            App.getCurrentPlayerLazy().getBackPack().decreaseItem(wood, 75);
+            App.getCurrentPlayerLazy().getBackPack().decreaseItem(Wood, 75);
 
             ArrayList<Location> wellLocation = new ArrayList<>();
 
@@ -280,10 +305,10 @@ public class StoreController {
 
         }
         if (item.getName().equalsIgnoreCase(StoreProductsTypes.CARPENTER_SHIPPING_BIN.getName())) {
-            Item wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Wood");
+            Item Wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Wood");
 
-            if (wood == null || App.getCurrentPlayerLazy().getBackPack().getItems().get(wood) < 150) {
-                return new Result(false, "You do not have enough wood or stone to build this building");
+            if (Wood == null || App.getCurrentPlayerLazy().getBackPack().getItems().get(Wood) < 150) {
+                return new Result(false, "You do not have enough Wood or Stone to build this building");
             }
             App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Wood"), 100);
             ShippingBin shippingBin = new ShippingBin(App.getCurrentPlayerLazy().getOwnedFarm().getShack().getLocation().getTopLeftCorner(), App.getCurrentPlayerLazy());
@@ -298,9 +323,9 @@ public class StoreController {
         for (CraftingRecipe recipe : CraftingRecipe.values()) {
             if (productName.equalsIgnoreCase(recipe.getName())) {
                 //TODO:ghimat hame 50 e alan taghiresh bedam
-                Item wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Wood");
-                if( wood == null || App.getCurrentPlayerLazy().getBackPack().getItems().get(wood) < 30){
-                    return new Result(false, "you do not have enough wood or stone to buy this recipe");
+                Item Wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Wood");
+                if( Wood == null || App.getCurrentPlayerLazy().getBackPack().getItems().get(Wood) < 30){
+                    return new Result(false, "you do not have enough Wood or Stone to buy this recipe");
                 }
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Wood"), 30);
                 App.getCurrentPlayerLazy().getRecepies().put(recipe, true);
@@ -317,11 +342,16 @@ public class StoreController {
                 return new Result(true, "You bought this recipe");
             }
         }
+        BackPack backpack = App.getCurrentPlayerLazy().getBackPack();
+        if (!backpack.checkCapacity(1)) {
+            return new Result(false, "Not enough space in your inventory to add " + count + " of this item.");
+        }
 
         // Regular item
         App.getCurrentPlayerLazy().decreaseMoney(totalCost);
         item.setCurrentDailyLimit(item.getCurrentDailyLimit() - count);
         ItemBuilder.addToBackPack(item, count, Quality.NORMAL); // assuming getType() returns Item
+
 
         return new Result(true, "You bought this product");
     }
@@ -405,7 +435,7 @@ public class StoreController {
         }
 
         BackPack backpack = App.getCurrentPlayerLazy().getBackPack();
-        if (!backpack.checkCapacity(count)) {
+        if (!backpack.checkCapacity(1)) {
             return new Result(false, "Not enough space in your inventory to add " + count + " of this item.");
         }
 

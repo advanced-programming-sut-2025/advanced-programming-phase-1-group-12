@@ -34,7 +34,7 @@ public class StoreMenuView implements Screen {
     private Skin skin = GameAssetManager.skin;
     private Stage stage;
     public Table table = new Table();
-    ArrayList<TextButton>products = new ArrayList<>();
+    ArrayList<TextButton> products = new ArrayList<>();
     private TextButton back = new TextButton("back", skin);
     List<String> players;
     Store store;
@@ -44,7 +44,7 @@ public class StoreMenuView implements Screen {
         this.store = store;
         this.players = players;
         this.playerList = playerList;
-        for(StoreProducts product1 : store.getStoreProducts()){
+        for (StoreProducts product1 : store.getStoreProducts()) {
             products.add(new TextButton(product1.getName(), skin));
         }
     }
@@ -56,11 +56,11 @@ public class StoreMenuView implements Screen {
         Table contentTable = new Table();
         contentTable.top().left();
 
-        for(TextButton button : products){
+        for (TextButton button : products) {
             contentTable.row().pad(20, 0, 20, 0);
             contentTable.add(button).width(400f);
         }
-        contentTable.row().pad(20, 0 , 20, 0);
+        contentTable.row().pad(20, 0, 20, 0);
         contentTable.add(back).width(400f);
 
         ScrollPane scrollPane = new ScrollPane(contentTable, skin);
@@ -85,7 +85,7 @@ public class StoreMenuView implements Screen {
         });
 
         // Product buttons listeners
-        for(TextButton button : products){
+        for (TextButton button : products) {
             final String productName = button.getText().toString();
             button.addListener(new ClickListener() {
                 @Override
@@ -131,7 +131,8 @@ public class StoreMenuView implements Screen {
         stage.dispose();
     }
 }
-class buyView implements Screen{
+
+class buyView implements Screen {
     private Skin skin = GameAssetManager.skin;
     private Stage stage;
     String productName;
@@ -208,7 +209,7 @@ class buyView implements Screen{
         removeProductButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if(quantity > 0){
+                if (quantity > 0) {
                     quantity--;
                     showQuantity(String.valueOf(quantity));
                 }
@@ -217,18 +218,17 @@ class buyView implements Screen{
         buyButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if(quantity > 0) {
-                    Result result = controller.buyProduct(store, productName, quantity);
-                    showError(result.getMessage());
-                    if(result.isSuccessful()){
-                        if(store.getNameOfStore().equalsIgnoreCase("Carpenter's Shop")) {
-                            Gdx.app.postRunnable(() ->
-                                Main.getMain().setScreen(new FarmView(productName, players, playerList))
-                            );
-                        } else if(quantity > 0) {
-                            showError(controller.buyProduct(store, productName, quantity).getMessage());
-                        }
+                if (quantity > 0) {
+                    if (store.getNameOfStore().equalsIgnoreCase("Carpenter's Shop") && (productName.contains("coop") || productName.contains("barn"))) {
+                        Gdx.app.postRunnable(() ->
+                            Main.getMain().setScreen(new FarmView(productName, players, playerList))
+                        );
                     }
+                    else {
+                        Result result = controller.buyProduct(store, productName, quantity);
+                        showError(result.getMessage());
+                    }
+
                 }
             }
         });
@@ -289,6 +289,7 @@ class buyView implements Screen{
         table.invalidateHierarchy();
     }
 }
+
 class FarmView implements Screen {
     private Stage stage;
     private Skin skin = GameAssetManager.skin;
@@ -297,6 +298,7 @@ class FarmView implements Screen {
     private SpriteBatch batch;
     private PixelMapRenderer pixelMapRenderer;
     private Farm farm;
+    Label errorLabel;
 
     private final int tileSize = 40;  // Tile size
     private final List<Player> playerList;
@@ -307,17 +309,18 @@ class FarmView implements Screen {
         this.players = players;
         this.farm = App.getCurrentPlayerLazy().getOwnedFarm();  // Get the player's farm
         this.playerList = playerList;
+        errorLabel = new Label("", skin);
+        errorLabel.setColor(1, 0, 0, 1);
+        errorLabel.setVisible(false);
 
-        System.out.println(App.getCurrentPlayerLazy());
-        System.out.println(farm);
         this.farmX1 = App.getCurrentPlayerLazy().getOwnedFarm().getFarmLocation().getTopLeftCorner().getxAxis();  // Farm starting X coordinate
         this.farmY1 = App.getCurrentPlayerLazy().getOwnedFarm().getFarmLocation().getTopLeftCorner().getyAxis();  // Farm starting Y coordinate// Farm ending Y coordinate
 
         // Initialize PixelMapRenderer for the specific farm
         this.pixelMapRenderer = new PixelMapRenderer(App.getCurrentGame().getMainMap());  // Initialize PixelMapRenderer
         this.farm = App.getCurrentPlayerLazy().getOwnedFarm();
-        this.farmX1 = farm.getFarmLocation().getDownRightCorner().getxAxis()-30;
-        this.farmY1 = farm.getFarmLocation().getDownRightCorner().getyAxis()-30;
+        this.farmX1 = farm.getFarmLocation().getDownRightCorner().getxAxis() - 30;
+        this.farmY1 = farm.getFarmLocation().getDownRightCorner().getyAxis() - 30;
         this.pixelMapRenderer = new PixelMapRenderer(App.getCurrentGame().getMainMap());
     }
 
@@ -329,6 +332,7 @@ class FarmView implements Screen {
 
         // Create a back button for navigation
         TextButton back = new TextButton("Back", skin);
+
         back.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -344,6 +348,7 @@ class FarmView implements Screen {
         table.setFillParent(true);
         table.top().left(); // Changed to top-left to avoid overlapping with farm
         table.add(back).pad(20);
+        table.add(errorLabel);
         stage.addActor(table);
     }
 
@@ -365,6 +370,7 @@ class FarmView implements Screen {
                 StoreController storeController = new StoreController();
                 String success = storeController.buyAnimalBuilding(productName, location).getMessage();
                 System.out.println("Clicked on tile: (" + tileX + "," + tileY + "), Purchase result: " + success);
+                showError(success);
             } else {
                 System.out.println("Invalid tile clicked");
             }
@@ -374,8 +380,6 @@ class FarmView implements Screen {
 
         // Render farm first
         batch.begin();
-
-        // Use the coordinates of the farm (farmX1, farmY1, farmX2, farmY2) to render only that part of the map
         renderFarmTiles();
 
         batch.end();
@@ -404,7 +408,7 @@ class FarmView implements Screen {
             }
         }
 
-        for (int y = farmY1; y < farmY1+30; y++) {
+        for (int y = farmY1; y < farmY1 + 30; y++) {
             for (int x = farmX1; x < farmX1 + 30; x++) {
                 Location l = App.getCurrentGame().getMainMap().findLocation(x, y);
                 if (l != null) {
@@ -423,20 +427,20 @@ class FarmView implements Screen {
                     // Draw relative to screen with offset for UI
                     batch.draw(tileTexture,
                         (x - farmX1) * tileSize,
-                        Gdx.graphics.getHeight() - ((y - farmY1 + 1) * tileSize) , // Offset for UI
+                        Gdx.graphics.getHeight() - ((y - farmY1 + 1) * tileSize), // Offset for UI
                         tileSize, tileSize);
                 }
             }
         }
         for (Location anchor : greenhouseAnchors) {
             float drawX = anchor.getxAxis() * tileSize;
-            float drawY = anchor.getyAxis() * tileSize - tileSize ;
-            batch.draw(GameAssetManager.getGameAssetManager().getGREEN_HOUSE(), drawX, drawY-80, tileSize * 4 , tileSize * 4 );
+            float drawY = anchor.getyAxis() * tileSize - tileSize;
+            batch.draw(GameAssetManager.getGameAssetManager().getGREEN_HOUSE(), drawX, drawY - 80, tileSize * 4, tileSize * 4);
         }
         for (Location anchor : houseAnchors) {
-            float drawX =  anchor.getxAxis() * tileSize;
-            float drawY =  anchor.getyAxis() * tileSize;
-            batch.draw(GameAssetManager.getGameAssetManager().getHOUSE(), drawX, drawY-80, tileSize * 4, tileSize * 4);
+            float drawX = anchor.getxAxis() * tileSize;
+            float drawY = anchor.getyAxis() * tileSize;
+            batch.draw(GameAssetManager.getGameAssetManager().getHOUSE(), drawX, drawY - 80, tileSize * 4, tileSize * 4);
         }
     }
 
@@ -447,16 +451,27 @@ class FarmView implements Screen {
     }
 
     @Override
-    public void pause() {}
+    public void pause() {
+    }
+
     @Override
-    public void resume() {}
+    public void resume() {
+    }
+
     @Override
-    public void hide() {}
+    public void hide() {
+    }
 
     @Override
     public void dispose() {
         stage.dispose();
         batch.dispose();
+    }
+
+    public void showError(String message) {
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
+        errorLabel.invalidateHierarchy();
     }
 }
 

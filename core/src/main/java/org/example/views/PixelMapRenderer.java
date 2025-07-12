@@ -112,33 +112,6 @@ public class PixelMapRenderer {
 
 
     public void dispose() {
-        GameAssetManager.getGameAssetManager().getGROUND().dispose();
-        GameAssetManager.getGameAssetManager().getSTONE().dispose();
-        GameAssetManager.getGameAssetManager().getPLANTS().dispose();
-        GameAssetManager.getGameAssetManager().getNPC_VILLAGE().dispose();
-        GameAssetManager.getGameAssetManager().getBURNED_GROUND().dispose();
-        GameAssetManager.getGameAssetManager().getQUARRY().dispose();
-        GameAssetManager.getGameAssetManager().getSTORE().dispose();
-        GameAssetManager.getGameAssetManager().getTREE().dispose();
-        GameAssetManager.getGameAssetManager().getDARK_GREEN_FLOOR().dispose();
-        GameAssetManager.getGameAssetManager().getHOUSE().dispose();
-        GameAssetManager.getGameAssetManager().getLAKE_TEXTURE().dispose();
-
-        GameAssetManager.getGameAssetManager().getBarn().dispose();
-        GameAssetManager.getGameAssetManager().getCoop().dispose();
-
-        GameAssetManager.getBANANA_TREE().dispose();
-        GameAssetManager.getMUSHROOM_TREE().dispose();
-        GameAssetManager.getMYSTIC_TREE().dispose();
-        GameAssetManager.getMANGO_TREE().dispose();
-        GameAssetManager.getOAK_TREE().dispose();
-        GameAssetManager.getPEACH_TREE().dispose();
-        GameAssetManager.getCHERRY_TREE().dispose();
-        GameAssetManager.getAPPLE_TREE().dispose();
-        GameAssetManager.getORANGE_TREE().dispose();
-        GameAssetManager.getMAPLE_TREE().dispose();
-        GameAssetManager.getAPRICOT_TREE().dispose();
-        GameAssetManager.getPINE_TREE().dispose();
-
+        GameAssetManager.dispose();
     }
 }
