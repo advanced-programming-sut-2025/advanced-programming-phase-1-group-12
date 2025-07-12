@@ -184,7 +184,8 @@ public class PlayerController {
 //            else if (farm.contains(x, y)) return false;
 //        }
 
-        return location.getTypeOfTile() == TypeOfTile.GROUND;
+        return (location.getTypeOfTile() == TypeOfTile.GROUND || location.getTypeOfTile() == TypeOfTile.BARN
+        || location.getTypeOfTile() == TypeOfTile.COOP);
     }
 
     public GameMenuController getGameController() {

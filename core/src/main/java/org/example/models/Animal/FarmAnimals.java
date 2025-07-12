@@ -25,7 +25,9 @@ public class FarmAnimals extends Item {
     private boolean willProduceToday;
     //TODO:not sure we need this
     private boolean hasCollectedProductToday;
-
+    private boolean isMoving;
+    private Location target;
+    private Location previousPosition;
 
     public Animal getAnimal() {
         return animal;
@@ -102,7 +104,32 @@ public class FarmAnimals extends Item {
     public void setHasCollectedProductToday(boolean hasCollectedProductToday) {
         this.hasCollectedProductToday = hasCollectedProductToday;
     }
+
+    public boolean isMoving() {
+        return isMoving;
+    }
+
+    public void setMoving(boolean moving) {
+        isMoving = moving;
+    }
+
+    public Location getTarget() {
+        return target;
+    }
+
+    public void setTarget(Location target) {
+        this.target = target;
+    }
+
     public Texture getTexture() {
         return texture;
+    }
+
+    public Location getPreviousPosition() {
+        return previousPosition;
+    }
+
+    public void setPreviousPosition(Location previousPosition) {
+        this.previousPosition = previousPosition;
     }
 }

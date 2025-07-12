@@ -175,11 +175,18 @@ public class AnimalController {
                 App.getCurrentGame().getDate().getWeather().equals(Weather.STORM) ||
                 App.getCurrentGame().getDate().getWeather().equals(Weather.SNOW))) {
             return new Result(false, "Weather is bad for getting " + animal.getName() + " out");
+        } if(!isDestinationNear(destination, animal.getPosition())){
+            return new Result(false, "Destination is not near destination(it should be less than 5");
         }
-        animal.setPosition(destination);
-        destination.setObjectInTile(animal);
-        animal.setHasBeenFedToday(true);
+        animal.setMoving(true);
+        animal.setPreviousPosition(animal.getPosition());
+        animal.setTarget(destination);
         return new Result(true, "You just shepherd " + animal.getName());
+    }
+
+    public boolean isDestinationNear(Location destination, Location origin) {
+        return (destination.getyAxis() - origin.getyAxis())* (destination.getyAxis() - origin.getyAxis()) +
+            (destination.getxAxis() - origin.getxAxis()) * (destination.getxAxis() - origin.getxAxis()) <= 25;
     }
 
     public Result fishing(String fishingPole) {
@@ -387,5 +394,36 @@ public class AnimalController {
         }
         return "wrong animal name";
     }
+
+    public void moveAnimalStep(FarmAnimals animal, Location target) {
+        Location current = animal.getPosition();
+        System.out.println(current.getxAxis() + " " + current.getyAxis());
+
+        if (target == null || current.equals(target)) {
+            animal.setMoving(false);
+            return;
+        }
+
+        int stepX = Integer.compare(target.getxAxis(), current.getxAxis());
+        int stepY = Integer.compare(target.getyAxis(), current.getyAxis());
+
+        int nextX = current.getxAxis() + stepX;
+        int nextY = current.getyAxis() + stepY;
+        System.out.println(nextX + " " + nextY + " " + stepX + " " + stepY);
+
+        Location nextLocation = App.getCurrentGame().getMainMap().findLocation(nextX, nextY);
+
+        if (nextLocation != null && nextLocation.getTypeOfTile().equals(TypeOfTile.GROUND)) {
+            current.setObjectInTile(null);
+
+            // Save old
+            animal.setPreviousPosition(current);
+
+            // Move to new
+            animal.setPosition(nextLocation);
+            nextLocation.setObjectInTile(animal);
+        }
+    }
+
 
 }

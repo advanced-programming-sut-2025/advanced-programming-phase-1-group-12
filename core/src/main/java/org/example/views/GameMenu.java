@@ -23,6 +23,7 @@ import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Player;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import org.example.models.Place.Farm;
 
 import java.util.List;
 
@@ -51,6 +52,7 @@ public class GameMenu extends InputAdapter implements Screen {
     public static final float WORLD_HEIGHT = 400 * 100f;
     private Skin skin = GameAssetManager.skin;
     private BitmapFont font;
+    private float timeForAnimalMove = 0;
 
     GameConsoleCommandHandler cmdHandler =
         new GameConsoleCommandHandler(controller,
@@ -105,6 +107,7 @@ public class GameMenu extends InputAdapter implements Screen {
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
+        timeForAnimalMove += delta;
 
         Player player = App.getCurrentPlayerLazy();
         playerController = player.getPlayerController();
@@ -154,6 +157,41 @@ public class GameMenu extends InputAdapter implements Screen {
                 batch.draw(portrait, farmCornerX - portrait.getWidth() / 2f, farmCornerY - portrait.getHeight() / 2f, 3000, 3000);
             }
         }
+        if (timeForAnimalMove >= 0.5f) {  // Move every 0.5 seconds (adjustable)
+            for (Farm farm : App.getCurrentGame().getFarms()) {
+                for (FarmAnimals animal : farm.getFarmAnimals()) {
+                    if (animal.isMoving()) {
+                        animalController.moveAnimalStep(animal, animal.getTarget());
+                    }
+                }
+            }
+            timeForAnimalMove = 0f;
+        }
+
+        for(Farm farm : App.getCurrentGame().getFarms()){
+            for (FarmAnimals animal : farm.getFarmAnimals()) {
+                Location current = animal.getPosition();
+                Location previous = animal.getPreviousPosition();
+
+                float progress = timeForAnimalMove / 0.5f;
+                if (progress > 1f) progress = 1f;
+
+                float renderX = MathUtils.lerp(
+                    previous != null ? previous.getxAxis() : current.getxAxis(),
+                    current.getxAxis(),
+                    progress
+                ) * 100f;
+
+                float renderY = MathUtils.lerp(
+                    previous != null ? previous.getyAxis() : current.getyAxis(),
+                    current.getyAxis(),
+                    progress
+                ) * 100f;
+
+                batch.draw(animal.getTexture(), renderX, renderY);
+            }
+        }
+
 
         batch.end();
 
@@ -281,6 +319,7 @@ public class GameMenu extends InputAdapter implements Screen {
         TextButton sellButton = new TextButton("Sell", skin);
         TextButton gatherProducts = new TextButton("Gather Products", skin);
         TextButton closeButton = new TextButton("Close", skin);
+        Label homeLable = new Label("", skin);
 
         TextField shepherdXField = new TextField("", skin);
         shepherdXField.setMessageText("X position");
@@ -289,6 +328,17 @@ public class GameMenu extends InputAdapter implements Screen {
 
         errorLabel.setColor(1, 0, 0, 1);
         errorLabel.setVisible(false);
+        for(Location location : animal.getHome().getLocation().getLocationsInRectangle()){
+            boolean isEmpty = true;
+            for(FarmAnimals farmAnimals : App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()){
+                if(location.equals(farmAnimals.getHome().getLocation())){
+                    isEmpty = false;
+                }
+            } if(isEmpty){
+                homeLable.setText("your home x:" + location.getxAxis() + " y:" + location.getyAxis());
+                break;
+            }
+        }
 
         petButton.addListener(new ClickListener() {
             @Override
@@ -335,20 +385,21 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Lay out widgets properly in the content table
         Table content = dialog.getContentTable();
+        content.add(homeLable).pad(10).width(400f).row();
         content.add(new Label("What do you want to do?", skin)).colspan(2).pad(10).row();
-        content.add(petButton).pad(5);
-        content.add(feedButton).pad(5).row();
-        content.add(gatherProducts).pad(5);
-        content.add(sellButton).pad(5).row();
-        content.add(new Label("Shepherd X:", skin)).pad(5);
-        content.add(shepherdXField).pad(5).row();
-        content.add(new Label("Shepherd Y:", skin)).pad(5);
-        content.add(shepherdYField).pad(5).row();
-        content.add(shepherdButton).colspan(2).pad(5).row();
-        content.add(errorLabel).colspan(2).pad(10).row();
+        content.add(petButton).pad(5).width(400f);
+        content.add(feedButton).pad(5).width(400f).row();
+        content.add(gatherProducts).pad(5).width(400f);
+        content.add(sellButton).pad(5).width(400f).row();
+        content.add(new Label("Shepherd X:", skin)).pad(5).width(400f);
+        content.add(shepherdXField).pad(5).width(400f).row();
+        content.add(new Label("Shepherd Y:", skin)).pad(5).width(400f);
+        content.add(shepherdYField).pad(5).width(400f).row();
+        content.add(shepherdButton).colspan(2).pad(5).width(400f).row();
+        content.add(errorLabel).colspan(2).pad(10).width(600f).row();
 
-        dialog.button(closeButton); // Close button as standard dialog button
-        dialog.show(stage);         // Don't forget this!
+        dialog.button(closeButton);
+        dialog.show(stage);
     }
 
 
