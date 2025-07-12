@@ -123,9 +123,6 @@ public class GameMenu extends InputAdapter implements Screen {
 
         if (showingAllMap) {
             for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
-//                if (App.getCurrentPlayerLazy() == otherPlayer) {
-//                    continue;
-//                }
                 Location farmLocation = otherPlayer.getUserLocation();
                 float farmCornerX = farmLocation.getxAxis() * 100;
                 float farmCornerY = farmLocation.getyAxis() * 100;
