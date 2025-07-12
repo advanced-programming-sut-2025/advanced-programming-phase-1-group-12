@@ -53,19 +53,19 @@ public enum StoreProductsTypes {
     GENERAL_STORE_COOKIE_RECIPE("Cookie Recipe", 300, 300, 300, 300, 1, "The Stardrop Saloon"),
 
     // Basic Materials (Robin's Carpenter Shop)
-    CARPENTER_WOOD("Wood", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
-    CARPENTER_STONE("Stone", 20, 20, 20, 20, 10000, "Carpenter's Shop"),
+    CARPENTER_WOOD("Wood", 10, 10, 10, 10, 100000, "Carpenter's Shop"),
+    CARPENTER_STONE("Stone", 20, 20, 20, 20, 100000, "Carpenter's Shop"),
 
     // Buildings
-    //TODO:decrease wood and stone stuff from his inventory
+    //TODO:prices weere zero but it is 10 now
     CARPENTER_WELL("Well", 10, 10, 10, 10, 1, "Carpenter's Shop"),
-    CARPENTER_SHIPPING_BIN("Shipping Bin", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
-    CARPENTER_BARN("barn", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
-    CARPENTER_BIG_BARN("big barn", 10, 10, 10, 20, 10000, "Carpenter's Shop"),
-    CARPENTER_DELUXE_BARN("deluxe barn", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
-    CARPENTER_COOP("coop", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
-    CARPENTER_BIG_COOP("big coop", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
-    CARPENTER_DELUXE_COOP("deluxe coop", 10, 10, 10, 10, 10000, "Carpenter's Shop"),
+    CARPENTER_SHIPPING_BIN("Shipping Bin", 10, 10, 10, 10, 1, "Carpenter's Shop"),
+    CARPENTER_BARN("barn", 10, 10, 10, 10, 1, "Carpenter's Shop"),
+    CARPENTER_BIG_BARN("big barn", 10, 10, 10, 20, 1, "Carpenter's Shop"),
+    CARPENTER_DELUXE_BARN("deluxe barn", 10, 10, 10, 10, 1, "Carpenter's Shop"),
+    CARPENTER_COOP("coop", 10, 10, 10, 10, 1, "Carpenter's Shop"),
+    CARPENTER_BIG_COOP("big coop", 10, 10, 10, 10, 1, "Carpenter's Shop"),
+    CARPENTER_DELUXE_COOP("deluxe coop", 10, 10, 10, 10, 1, "Carpenter's Shop"),
 
     // Fishing Items (from Willy's Fish Shop)
     FISH_SHOP_FISH_SMOKER_RECIPE("Fish Smoker", 10000, 10000, 10000, 10000, 1, "Fish Shop"),
