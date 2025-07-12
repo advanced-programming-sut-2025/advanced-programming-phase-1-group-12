@@ -100,6 +100,9 @@ public class GameMenu extends InputAdapter implements Screen {
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
 
+        Player player = App.getCurrentPlayerLazy();
+        playerController = player.getPlayerController();
+        TextureRegion frame = playerController.getCurrentFrame();
         playerController.update(delta);
 
         float px = playerController.getPlayer().getUserLocation().getxAxis();
@@ -115,9 +118,6 @@ public class GameMenu extends InputAdapter implements Screen {
 
         batch.setProjectionMatrix(camera.combined);
 
-        Player player = App.getCurrentPlayerLazy();
-        playerController = player.getPlayerController();
-        TextureRegion frame = playerController.getCurrentFrame();
 
         pixelMapRenderer.render(batch, 0, 0);
 
