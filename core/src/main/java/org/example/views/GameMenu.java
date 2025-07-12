@@ -112,6 +112,7 @@ public class GameMenu extends InputAdapter implements Screen {
         batch.setProjectionMatrix(camera.combined);
 
         Player player = App.getCurrentPlayerLazy();
+        playerController = player.getPlayerController();
         TextureRegion frame = playerController.getCurrentFrame();
 
         pixelMapRenderer.render(batch, 0, 0);
@@ -121,7 +122,7 @@ public class GameMenu extends InputAdapter implements Screen {
             if(App.getCurrentPlayerLazy() == otherPlayer){
                 continue;
             }
-            Location farmLocation = otherPlayer.getOwnedFarm().getLocation().getTopLeftCorner();
+            Location farmLocation = otherPlayer.getUserLocation();
             float farmCornerX = farmLocation.getxAxis() * 100;
             float farmCornerY = farmLocation.getyAxis() * 100;
 

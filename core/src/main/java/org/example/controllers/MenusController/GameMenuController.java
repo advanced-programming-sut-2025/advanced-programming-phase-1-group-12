@@ -387,25 +387,7 @@ public class GameMenuController {
             tries++;
         } while (nextPlayer.isHasCollapsed() && tries < players.size());
 
-        // Set the next player as the current player
         App.getCurrentGame().setCurrentPlayer(nextPlayer);
-        ArrayList<String> playerNames = new ArrayList<>();
-        for(Player player: App.getCurrentGame().getPlayers()){
-            playerNames.add(player.getUser().getUserName());
-        }
-        PlayerController playerController = new PlayerController(nextPlayer, this, playerNames);
-        nextPlayer.setPlayerController(playerController);
-
-        Texture newTexture;
-        switch (nextPlayer.getOwnedFarm().getFarmId()) {
-            case 0 -> newTexture = new Texture("sprites/Robin.png");
-            case 1 -> newTexture = new Texture("sprites/Pam.png");
-            case 2 -> newTexture = new Texture("sprites/Maru.png");
-            case 3 -> newTexture = new Texture("sprites/Leah.png");
-            default -> newTexture = new Texture("sprites/Marnie.png");
-        }
-        nextPlayer.setPlayerTexture(newTexture); // Update texture
-
         App.getCurrentGame().getDate().changeAdvancedTime(1);
 
         return new Result(true, "Turn moved to " + nextPlayer.getUser().getUserName());
