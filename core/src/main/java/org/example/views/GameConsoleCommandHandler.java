@@ -80,7 +80,7 @@ public class GameConsoleCommandHandler {
             System.out.println(farmingController.plantInGreenHouse(matcher.group("seed"),
                 Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.NextTurn.getMather(input)) != null) {
-            System.out.println(GameMenuController.nextTurn());
+            System.out.println(App.getCurrentPlayerLazy().getPlayerController().getGameController().nextTurn());
         } else if ((matcher = GameMenuCommands.PRODUCTION.getMather(input)) != null) {
             System.out.println(farmingController.putScarecrow(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.DATE.getMather(input)) != null) {

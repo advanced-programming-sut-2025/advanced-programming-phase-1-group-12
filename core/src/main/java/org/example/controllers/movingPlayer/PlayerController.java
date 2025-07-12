@@ -46,14 +46,15 @@ public class PlayerController {
         this.players = players;
         this.player = player;
         this.gameController = gameController;
+
         player.setPlayerController(this);
-        Texture sheet = new Texture("sprites/Penny.png");
+        Texture sheet = player.getPlayerTexture();
         TextureRegion[][] grid = TextureRegion.split(sheet, FRAME_W, FRAME_H);
 
-        walkDown = buildAnim(grid[1]);
-        walkLeft = buildAnim(grid[4]);
-        walkRight = buildAnim(grid[2]);
-        walkUp = buildAnim(grid[3]);
+        walkDown = buildAnim(grid[0]);
+        walkLeft = buildAnim(grid[3]);
+        walkRight = buildAnim(grid[1]);
+        walkUp = buildAnim(grid[2]);
 
         currentAnim = walkDown;
     }
@@ -168,5 +169,9 @@ public class PlayerController {
             return false;
         }
         return location.getTypeOfTile() == TypeOfTile.GROUND;
+    }
+
+    public GameMenuController getGameController() {
+        return gameController;
     }
 }

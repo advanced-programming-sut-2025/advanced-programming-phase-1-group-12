@@ -18,6 +18,7 @@ public class Farm implements Place {
     private LocationOfRectangle farmLocation;
 
     private Player owner;
+    private int farmID;
     private Lake lake1;
     private Lake lake2;
     private GreenHouse greenHouse;
@@ -256,5 +257,19 @@ public class Farm implements Place {
 
     public void setTrees(ArrayList<Tree> trees) {
         this.trees = trees;
+    }
+
+    public boolean contains(int newX, int newY) {
+        Location newLocation = new Location(newX, newY);
+        ArrayList<Location> farmLocations = getFarmLocation().getLocationsInRectangle();
+        return !farmLocations.contains(newLocation);
+    }
+
+    public void setFarmID(int farmID) {
+        this.farmID = farmID;
+    }
+
+    public int getFarmId() {
+        return this.farmID;
     }
 }
