@@ -185,7 +185,7 @@ public class PlayerController {
             if(farm.getOwner().equals(App.getCurrentPlayerLazy())) continue;
             badLocations.addAll(farm.getLocation().getLocationsInRectangle());
         }
-        if(badLocations.contains(location)) return false;
+        if(badLocations.contains(location)) return true;
 
         return location.getTypeOfTile() == TypeOfTile.GROUND;
     }

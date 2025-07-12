@@ -70,6 +70,8 @@ public class GameMenu extends InputAdapter implements Screen {
     public void show() {
         batch = Main.getMain().getBatch();
         stage = new Stage(new ScreenViewport());
+        GameMenuController.setStage(this.stage);
+        GameConsoleCommandHandler.setStage(stage);
         font = new BitmapFont(Gdx.files.internal("fonts/new.fnt"));
         InputMultiplexer mux = new InputMultiplexer();
         mux.addProcessor(this);
@@ -353,5 +355,9 @@ public class GameMenu extends InputAdapter implements Screen {
         errorLabel.setText(message);
         errorLabel.setVisible(true);
         errorLabel.invalidateHierarchy();
+    }
+
+    public Stage getStage() {
+        return this.stage;
     }
 }
