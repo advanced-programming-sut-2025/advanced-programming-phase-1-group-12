@@ -102,7 +102,7 @@ public class GameMenu extends InputAdapter implements Screen {
         float scaledY = py * 100;
 
         if (!showingAllMap) {
-            camera.position.set(scaledX, scaledY, 0);  // Use scaled positions for the camera
+            camera.position.set(scaledX, scaledY, 0);
         }
 
         clampCameraToMap();

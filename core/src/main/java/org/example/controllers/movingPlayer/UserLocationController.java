@@ -60,7 +60,8 @@ public class UserLocationController {
             App.getCurrentGame().getCurrentPlayer().setHasCollapsed(true);
             System.out.println(App.getCurrentGame().getCurrentPlayer().getUser().getUserName() + " fainted on the way.");
 
-            GameMenuController.nextTurn();
+            GameMenuController gameMenuController = App.getCurrentPlayerLazy().getPlayerController().getGameController();
+            gameMenuController.nextTurn();
             return new Result(false, "You didn't have enough energy. You moved partially and fainted at "
                     + finalReachable.getxAxis() + ", " + finalReachable.getyAxis());
         }

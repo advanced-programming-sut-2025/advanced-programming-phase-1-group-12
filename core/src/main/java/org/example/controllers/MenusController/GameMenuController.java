@@ -7,6 +7,7 @@ import org.example.Main;
 import org.example.controllers.MapSetUp.MapSetUp;
 import org.example.controllers.NPCcontroller;
 import org.example.controllers.TradeController;
+import org.example.controllers.movingPlayer.PlayerController;
 import org.example.models.Eating.Food;
 import org.example.models.Fundementals.*;
 import org.example.models.MapDetails.GreenHouse;
@@ -346,6 +347,7 @@ public class GameMenuController {
 
             Farm farm = App.getCurrentGame().getMainMap().getFarms().get(farmId);
             farm.setOwner(newPlayer);
+            farm.setFarmID(farmId);
             newPlayer.setOwnedFarm(farm);
             Location loc = farm.getLocation().getTopLeftCorner();
             newPlayer.setUserLocation(App.getCurrentGame().getMainMap().findLocation(loc.getxAxis(), loc.getyAxis()));
@@ -360,8 +362,7 @@ public class GameMenuController {
         Main.getMain().setScreen(new GameMenu(usernames , players));
     }
 
-
-    public static Result nextTurn() {
+    public Result nextTurn() {
         List<Player> players = App.getCurrentGame().getPlayers();
         Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
 
@@ -376,20 +377,37 @@ public class GameMenuController {
             nextPlayer = players.get(index);
 
             if (nextPlayer.isHasCollapsed() &&
-                    (App.getCurrentGame().getDate().getHour() == 8 || App.getCurrentGame().getDate().getHour() == 9)) {
+                (App.getCurrentGame().getDate().getHour() == 8 || App.getCurrentGame().getDate().getHour() == 9)) {
                 nextPlayer.setHasCollapsed(false);
                 nextPlayer.setEnergy(150);
                 break;
             }
             tries++;
         } while (nextPlayer.isHasCollapsed() && tries < players.size());
+
+        // Set the next player as the current player
         App.getCurrentGame().setCurrentPlayer(nextPlayer);
+        ArrayList<String> playerNames = new ArrayList<>();
+        for(Player player: App.getCurrentGame().getPlayers()){
+            playerNames.add(player.getUser().getUserName());
+        }
+        PlayerController playerController = new PlayerController(nextPlayer, this, playerNames);
+        nextPlayer.setPlayerController(playerController);
+
+        Texture newTexture;
+        switch (nextPlayer.getOwnedFarm().getFarmId()) {
+            case 0 -> newTexture = new Texture("sprites/Robin.png");
+            case 1 -> newTexture = new Texture("sprites/Pam.png");
+            case 2 -> newTexture = new Texture("sprites/Maru.png");
+            case 3 -> newTexture = new Texture("sprites/Leah.png");
+            default -> newTexture = new Texture("sprites/Marnie.png");
+        }
+        nextPlayer.setPlayerTexture(newTexture); // Update texture
 
         App.getCurrentGame().getDate().changeAdvancedTime(1);
 
         return new Result(true, "Turn moved to " + nextPlayer.getUser().getUserName());
     }
-
 
     private void guideForFarm() {
         System.out.println("Farm selection guide:\n" +

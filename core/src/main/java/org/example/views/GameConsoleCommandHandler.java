@@ -81,7 +81,7 @@ public class GameConsoleCommandHandler {
                 Integer.parseInt(matcher.group("X")),
                 Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.NextTurn.getMather(input)) != null) {
-            System.out.println(GameMenuController.nextTurn());
+            System.out.println(App.getCurrentPlayerLazy().getPlayerController().getGameController().nextTurn());
         } else if ((matcher = GameMenuCommands.PRODUCTION.getMather(input)) != null) {
             System.out.println(farmingController.putScarecrow(Integer.parseInt(matcher.group("X")),
                 Integer.parseInt(matcher.group("Y"))));

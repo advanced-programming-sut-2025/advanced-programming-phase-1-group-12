@@ -46,6 +46,7 @@ public class PlayerController {
         this.players = players;
         this.player = player;
         this.gameController = gameController;
+
         player.setPlayerController(this);
         Texture sheet = player.getPlayerTexture();
         TextureRegion[][] grid = TextureRegion.split(sheet, FRAME_W, FRAME_H);
@@ -168,5 +169,9 @@ public class PlayerController {
             return false;
         }
         return location.getTypeOfTile() == TypeOfTile.GROUND;
+    }
+
+    public GameMenuController getGameController() {
+        return gameController;
     }
 }
