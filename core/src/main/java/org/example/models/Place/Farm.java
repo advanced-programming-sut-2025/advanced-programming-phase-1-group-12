@@ -257,4 +257,10 @@ public class Farm implements Place {
     public void setTrees(ArrayList<Tree> trees) {
         this.trees = trees;
     }
+
+    public boolean contains(int newX, int newY) {
+        Location newLocation = new Location(newX, newY);
+        ArrayList<Location> farmLocations = getFarmLocation().getLocationsInRectangle();
+        return !farmLocations.contains(newLocation);
+    }
 }

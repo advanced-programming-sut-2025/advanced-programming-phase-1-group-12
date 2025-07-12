@@ -321,9 +321,21 @@ public class GameMenuController {
         List<Player> players = new ArrayList<>();
         for (String username : usernames) {
             User user = App.getUserByUsername(username.trim());
-            Player newPlayer = new Player(user, null, false, null, new ArrayList<>(),
-                null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
 
+            int farmId = farmSelections.get(username);
+            Texture playerTexture;
+
+            switch (farmId) {
+                case 0 -> playerTexture = new Texture("sprites/Robin.png");
+                case 1 -> playerTexture = new Texture("sprites/Pam.png");
+                case 2 -> playerTexture = new Texture("sprites/Maru.png");
+                case 3 -> playerTexture = new Texture("sprites/Leah.png");
+                default -> playerTexture = new Texture("sprites/Marnie.png");
+            }
+            Player newPlayer = new Player(user, null, false, null, new ArrayList<>(),
+                null, new BackPack(BackPackTypes.PRIMARY), false, false,
+                new ArrayList<>());
+            newPlayer.setPlayerTexture(playerTexture);
             players.add(newPlayer);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Hoe", Quality.NORMAL, 0), 1);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("PickAxe", Quality.NORMAL, 0), 1);
@@ -331,17 +343,6 @@ public class GameMenuController {
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Watering can", Quality.NORMAL, 0), 1);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Scythe", Quality.NORMAL, 0), 1);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Trash Can", Quality.NORMAL, 0), 1);
-
-            int farmId = farmSelections.get(username);
-            Texture playerTexture;
-
-            switch (farmId) {
-                case 0 -> playerTexture = new Texture("sprites/Penny.png");
-                case 1 -> playerTexture = new Texture("sprites/Haley.png");
-                case 2 -> playerTexture = new Texture("sprites/Jodi.png");
-                case 3 -> playerTexture = new Texture("sprites/Leah.png");
-                default -> playerTexture = new Texture("sprites/Marnie.png");
-            }
 
             Farm farm = App.getCurrentGame().getMainMap().getFarms().get(farmId);
             farm.setOwner(newPlayer);

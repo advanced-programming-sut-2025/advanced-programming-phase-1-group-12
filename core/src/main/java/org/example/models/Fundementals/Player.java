@@ -80,18 +80,7 @@ public class Player {
         initializeAbilities();
         initializerecepies();
 
-//        centerPlayerOnScreen();
         rect = new CollisionRect(playerSprite.getX(), playerSprite.getY(), playerSprite.getWidth(), playerSprite.getHeight());
-    }
-
-    private void centerPlayerOnScreen() {
-        float centerX = (Gdx.graphics.getWidth() - playerSprite.getWidth()) / 2f;
-        float centerY = (Gdx.graphics.getHeight() - playerSprite.getHeight()) / 2f;
-
-        userLocation.setxAxis((int)centerX);
-        userLocation.setyAxis((int)centerY);
-
-        playerSprite.setPosition(centerX, centerY);
     }
 
     public void updatePosition(int posX, int posY) {
@@ -211,11 +200,11 @@ public class Player {
     }
 
     private void initializerecepies() {
-        recepies = new HashMap<>();  // Initialize the class field, not a local variable
+        recepies = new HashMap<>();
         for (CraftingRecipe craftingRecipe : CraftingRecipe.values()) {
             recepies.put(craftingRecipe, false);
         }
-        cookingRecepies = new HashMap<>();  // Initialize the class field
+        cookingRecepies = new HashMap<>();
         for (Cooking cooking : Cooking.values()) {
             cookingRecepies.put(cooking, false);
         }
@@ -389,4 +378,11 @@ public class Player {
         return playerSprite;
     }
 
+    public void setPlayerTexture(Texture playerTexture) {
+        this.playerTexture = playerTexture;
+    }
+
+    public Texture getPlayerTexture() {
+        return playerTexture;
+    }
 }
