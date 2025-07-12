@@ -1,5 +1,6 @@
 package org.example.controllers.MenusController;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.Main;
@@ -332,6 +333,16 @@ public class GameMenuController {
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Trash Can", Quality.NORMAL, 0), 1);
 
             int farmId = farmSelections.get(username);
+            Texture playerTexture;
+
+            switch (farmId) {
+                case 0 -> playerTexture = new Texture("sprites/Penny.png");
+                case 1 -> playerTexture = new Texture("sprites/Haley.png");
+                case 2 -> playerTexture = new Texture("sprites/Jodi.png");
+                case 3 -> playerTexture = new Texture("sprites/Leah.png");
+                default -> playerTexture = new Texture("sprites/Marnie.png");
+            }
+
             Farm farm = App.getCurrentGame().getMainMap().getFarms().get(farmId);
             farm.setOwner(newPlayer);
             newPlayer.setOwnedFarm(farm);
