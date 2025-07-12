@@ -2,7 +2,6 @@ package org.example.models.Assets;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import org.example.models.Fundementals.Location;
 import org.example.models.enums.Types.TreeType;
@@ -40,7 +39,11 @@ public class GameAssetManager {
     private static final Texture MANGO_TREE = new Texture("Trees/Mango_Stage_5_Fruit.png");
     private static final Texture BANANA_TREE = new Texture("Trees/Banana_Stage_5_Fruit.png");
 
-    private static final Texture pamPortrait = new Texture("NPC/Abigail/face_0.png");
+    private static final Texture LeahPortrait = new Texture("sprites/LeahPortrait.png");
+    private static final Texture MarniePortrait = new Texture("sprites/MarniePortrait.png");
+    private static final Texture AbigailPortrait = new Texture("sprites/AbigailPortrait.png");
+    private static final Texture MaruPortrait = new Texture("sprites/MaruPortrait.png");
+    private static final Texture RobinPortrait = new Texture("sprites/RobinPortrait.png");
 
     public static GameAssetManager getGameAssetManager() {
         if (gameAssetManager == null) {
@@ -193,7 +196,23 @@ public class GameAssetManager {
         return coop;
     }
 
-    public static Texture getPamPortrait() {
-        return pamPortrait;
+    public static Texture getLeahPortrait() {
+        return LeahPortrait;
+    }
+
+    public static Texture getAbigailPortrait() {
+        return AbigailPortrait;
+    }
+
+    public static Texture getMaruPortrait() {
+        return MaruPortrait;
+    }
+
+    public static Texture getMarniePortrait() {
+        return MarniePortrait;
+    }
+
+    public static Texture getRobinPortrait() {
+        return RobinPortrait;
     }
 }

@@ -1,7 +1,6 @@
 package org.example.controllers.MenusController;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.Main;
@@ -26,7 +25,6 @@ import org.example.models.RelationShips.RelationShip;
 import org.example.models.ToolsPackage.Tools;
 import org.example.models.enums.*;
 import org.example.models.Fundementals.Player;
-import com.google.gson.Gson;
 import org.example.models.enums.ToolEnums.BackPackTypes;
 import org.example.models.enums.Types.Cooking;
 import org.example.models.enums.Types.TypeOfTile;
@@ -36,9 +34,7 @@ import org.example.models.enums.foraging.Stone;
 import org.example.models.enums.foraging.Tree;
 import org.example.views.GameMenu;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
@@ -327,14 +323,29 @@ public class GameMenuController {
 
             int farmId = farmSelections.get(username);
             Texture playerTexture;
-            Texture portraitFrame = GameAssetManager.getGameAssetManager().getPamPortrait();
+            Texture portraitFrame;
 
             switch (farmId) {
-                case 0 -> playerTexture = new Texture("sprites/Robin.png");
-                case 1 -> playerTexture = new Texture("sprites/Pam.png");
-                case 2 -> playerTexture = new Texture("sprites/Maru.png");
-                case 3 -> playerTexture = new Texture("sprites/Leah.png");
-                default -> playerTexture = new Texture("sprites/Marnie.png");
+                case 0 -> {
+                    playerTexture = new Texture("sprites/Robin.png");
+                    portraitFrame = GameAssetManager.getRobinPortrait();
+                }
+                case 1 -> {
+                    playerTexture = new Texture("sprites/Abigail.png");
+                    portraitFrame = GameAssetManager.getAbigailPortrait();
+                }
+                case 2 -> {
+                    playerTexture = new Texture("sprites/Maru.png");
+                    portraitFrame = GameAssetManager.getMaruPortrait();
+                }
+                case 3 -> {
+                    playerTexture = new Texture("sprites/Leah.png");
+                    portraitFrame = GameAssetManager.getLeahPortrait();
+                }
+                default -> {
+                    playerTexture = new Texture("sprites/Marnie.png");
+                    portraitFrame = GameAssetManager.getMarniePortrait();
+                }
             }
             Player newPlayer = new Player(user, null, false, null, new ArrayList<>(),
                 null, new BackPack(BackPackTypes.PRIMARY), false, false,
