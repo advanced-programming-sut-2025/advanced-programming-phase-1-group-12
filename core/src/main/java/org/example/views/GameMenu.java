@@ -24,7 +24,7 @@ public class GameMenu extends InputAdapter implements Screen {
     private final GameMenuController controller = new GameMenuController();
     private final FarmingController farmingController = new FarmingController();
     private final ToolsController toolsController = new ToolsController();
-    private final  AnimalController animalController = new AnimalController();
+    private final AnimalController animalController = new AnimalController();
     private final StoreController storeController = new StoreController();
     private final CraftingController craftingController = new CraftingController();
     private final ArtisanController artisanController = new ArtisanController();
@@ -88,7 +88,8 @@ public class GameMenu extends InputAdapter implements Screen {
             player.getUserLocation().getxAxis(),
             player.getUserLocation().getyAxis()
         );
-        playerController = new PlayerController(player, controller, players);
+
+        playerController = player.getPlayerController();
     }
 
     @Override
@@ -103,9 +104,7 @@ public class GameMenu extends InputAdapter implements Screen {
         float scaledX = px * 100;
         float scaledY = py * 100;
 
-        if (!showingAllMap) {
-            camera.position.set(scaledX, scaledY, 0);
-        }
+        if (!showingAllMap) camera.position.set(scaledX, scaledY, 0);
 
         clampCameraToMap();
         camera.update();
@@ -120,6 +119,16 @@ public class GameMenu extends InputAdapter implements Screen {
 
         batch.draw(frame, scaledX, scaledY, player.getPlayerSprite().getWidth(), player.getPlayerSprite().getHeight());
 
+        for(Player otherPlayer : App.getCurrentGame().getPlayers()){
+            if(App.getCurrentPlayerLazy() == otherPlayer){
+                continue;
+            }
+            Location farmLocation = otherPlayer.getOwnedFarm().getLocation().getTopLeftCorner();
+            float farmCornerX = farmLocation.getxAxis() * 100;
+            float farmCornerY = farmLocation.getyAxis() * 100;
+
+            batch.draw(otherPlayer.getPlayerController().getCurrentFrame(), farmCornerX, farmCornerY, otherPlayer.getPlayerSprite().getWidth(), otherPlayer.getPlayerSprite().getHeight());
+        }
         if (showingAllMap) {
             for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
                 Location farmLocation = otherPlayer.getUserLocation();
@@ -181,7 +190,7 @@ public class GameMenu extends InputAdapter implements Screen {
             showAllMap();
             return true;
         }
-        if (keycode == Input.Keys.GRAVE) { // the ~ key, right under Esc
+        if (keycode == Input.Keys.GRAVE) {
             openTerminalScreen();
             return true;
         }
@@ -191,11 +200,9 @@ public class GameMenu extends InputAdapter implements Screen {
     private void updateCameraToPlayer() {
         Player p = App.getCurrentPlayerLazy();
 
-        // Update the player's logical position to include scaling (scale by 100)
         homeX = p.getUserLocation().getxAxis() * 100 + p.getPlayerSprite().getWidth() / 2f;
         homeY = p.getUserLocation().getyAxis() * 100 + p.getPlayerSprite().getHeight() / 2f;
 
-        // Set camera position to the scaled coordinates
         camera.position.set(homeX, homeY, 0);
         camera.zoom = homeZoom;
         clampCameraToMap();
@@ -222,26 +229,17 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void clampCameraToMap() {
-        // visible size after zooming
         float halfViewW = camera.viewportWidth * camera.zoom * 0.5f;
         float halfViewH = camera.viewportHeight * camera.zoom * 0.5f;
 
-        // when the map is smaller than the view, just centre the camera
-        if (WORLD_WIDTH < halfViewW * 2) {
+        if (WORLD_WIDTH < halfViewW * 2)
             camera.position.x = WORLD_WIDTH * 0.5f;
-        } else {
-            camera.position.x = MathUtils.clamp(camera.position.x,
-                halfViewW,
-                WORLD_WIDTH - halfViewW);
-        }
+        else camera.position.x = MathUtils.clamp(camera.position.x,
+            halfViewW, WORLD_WIDTH - halfViewW);
 
-        if (WORLD_HEIGHT < halfViewH * 2) {
-            camera.position.y = WORLD_HEIGHT * 0.5f;
-        } else {
-            camera.position.y = MathUtils.clamp(camera.position.y,
-                halfViewH,
-                WORLD_HEIGHT - halfViewH);
-        }
+        if (WORLD_HEIGHT < halfViewH * 2) camera.position.y = WORLD_HEIGHT * 0.5f;
+        else camera.position.y = MathUtils.clamp(camera.position.y,
+                halfViewH, WORLD_HEIGHT - halfViewH);
     }
 
     private void openTerminalScreen() {
