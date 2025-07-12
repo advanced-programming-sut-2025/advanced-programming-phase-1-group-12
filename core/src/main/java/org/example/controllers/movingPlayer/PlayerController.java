@@ -176,8 +176,14 @@ public class PlayerController {
         }
         return location.getTypeOfTile() == TypeOfTile.GROUND;
     }
-    
+
     public GameMenuController getGameController() {
         return gameController;
     }
+
+    public Texture getPortraitFrame() {
+        return player.getPortraitFrame();
+    }
+
 }
+

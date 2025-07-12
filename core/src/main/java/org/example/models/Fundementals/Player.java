@@ -3,6 +3,7 @@ package org.example.models.Fundementals;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import org.example.controllers.movingPlayer.PlayerController;
 import org.example.models.*;
 import org.example.models.NPC.NPC;
@@ -51,6 +52,7 @@ public class Player {
     private boolean isMaxEnergyBuffEaten = false;
     private boolean isSkillBuffEaten = false;
     private PlayerController playerController;
+    private Texture portraitFrame;
 
     public Player(User user, Location userLocation, boolean isMarried, Refrigrator refrigrator,
                   ArrayList<RelationShip> relationShips, Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited,
@@ -384,5 +386,13 @@ public class Player {
 
     public Texture getPlayerTexture() {
         return playerTexture;
+    }
+
+    public Texture getPortraitFrame() {
+        return this.portraitFrame;
+    }
+
+    public void setPortraitFrame(Texture portraitFrame) {
+        this.portraitFrame = portraitFrame;
     }
 }

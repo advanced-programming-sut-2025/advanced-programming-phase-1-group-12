@@ -1,6 +1,7 @@
 package org.example.controllers.MenusController;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.Main;
@@ -8,6 +9,7 @@ import org.example.controllers.MapSetUp.MapSetUp;
 import org.example.controllers.NPCcontroller;
 import org.example.controllers.TradeController;
 import org.example.controllers.movingPlayer.PlayerController;
+import org.example.models.Assets.GameAssetManager;
 import org.example.models.Eating.Food;
 import org.example.models.Fundementals.*;
 import org.example.models.MapDetails.GreenHouse;
@@ -325,6 +327,7 @@ public class GameMenuController {
 
             int farmId = farmSelections.get(username);
             Texture playerTexture;
+            Texture portraitFrame = GameAssetManager.getGameAssetManager().getPamPortrait();
 
             switch (farmId) {
                 case 0 -> playerTexture = new Texture("sprites/Robin.png");
@@ -337,6 +340,7 @@ public class GameMenuController {
                 null, new BackPack(BackPackTypes.PRIMARY), false, false,
                 new ArrayList<>());
             newPlayer.setPlayerTexture(playerTexture);
+            newPlayer.setPortraitFrame(portraitFrame);
             players.add(newPlayer);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("Hoe", Quality.NORMAL, 0), 1);
             newPlayer.getBackPack().addItem(ItemBuilder.builder("PickAxe", Quality.NORMAL, 0), 1);

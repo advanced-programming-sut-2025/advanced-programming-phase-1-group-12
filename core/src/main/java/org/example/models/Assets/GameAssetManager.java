@@ -2,16 +2,11 @@ package org.example.models.Assets;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.enums.Types.TreeType;
-import org.example.models.enums.Types.TypeOfTile;
 import org.example.models.enums.foraging.Tree;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class GameAssetManager {
     public static Skin skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
@@ -45,6 +40,7 @@ public class GameAssetManager {
     private static final Texture MANGO_TREE = new Texture("Trees/Mango_Stage_5_Fruit.png");
     private static final Texture BANANA_TREE = new Texture("Trees/Banana_Stage_5_Fruit.png");
 
+    private static final Texture pamPortrait = new Texture("NPC/Abigail/face_0.png");
 
     public static GameAssetManager getGameAssetManager() {
         if (gameAssetManager == null) {
@@ -195,5 +191,9 @@ public class GameAssetManager {
 
     public Texture getCoop() {
         return coop;
+    }
+
+    public static Texture getPamPortrait() {
+        return pamPortrait;
     }
 }
