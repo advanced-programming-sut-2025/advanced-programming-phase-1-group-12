@@ -20,8 +20,7 @@ import org.example.models.enums.Types.TreeType;
 
 import java.util.*;
 
-public class Date {
-    private GameMenuController gameMenuController;
+public class Date implements Runnable {
     private int hour;
     private int year;
     private int dayOfMonth; // Max : 28 days
@@ -31,10 +30,15 @@ public class Date {
     private Weather tommorowWeather;
     private Map<Season, List<Weather>> weatherOfSeason;
     private int currentSeason; // value of each season
+    private boolean threadRunning = true;
+    private Thread timeThread;
 
 
     //Date setUp
     public Date() {
+        timeThread = new Thread(this);
+        timeThread.setDaemon(true);
+        timeThread.start();
         this.hour = 9; // the game starts at 9 AM
         this.dayOfMonth = 1;
         this.dayOfWeek = 1;
@@ -44,7 +48,21 @@ public class Date {
         this.weather = Weather.SUNNY;
         this.weatherOfSeason = initializeWeatherMap();
         this.tommorowWeather = weatherForecast(season);
-        this.gameMenuController = new GameMenuController();
+    }
+
+    public void run(){
+        while(threadRunning){
+            try {
+                timeThread.sleep(6000 * 60); //every 6 minutes 1 hour passes
+                changeAdvancedTime(1);
+            } catch (InterruptedException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    public void stop(){
+        threadRunning = false;
     }
 
     public void changeAdvancedTime(int hour) {

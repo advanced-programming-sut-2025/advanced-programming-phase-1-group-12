@@ -138,7 +138,7 @@ public class GameMenu extends InputAdapter implements Screen {
             if(App.getCurrentPlayerLazy() == otherPlayer){
                 continue;
             }
-            Location farmLocation = otherPlayer.getOwnedFarm().getLocation().getTopLeftCorner();
+            Location farmLocation = otherPlayer.getUserLocation();
             float farmCornerX = farmLocation.getxAxis() * 100;
             float farmCornerY = farmLocation.getyAxis() * 100;
 
@@ -254,11 +254,9 @@ public class GameMenu extends InputAdapter implements Screen {
     private void updateCameraToPlayer() {
         Player p = App.getCurrentPlayerLazy();
 
-        // Update the player's logical position to include scaling (scale by 100)
         homeX = p.getUserLocation().getxAxis() * 100 + p.getPlayerSprite().getWidth() / 2f;
         homeY = p.getUserLocation().getyAxis() * 100 + p.getPlayerSprite().getHeight() / 2f;
 
-        // Set camera position to the scaled coordinates
         camera.position.set(homeX, homeY, 0);
         camera.zoom = homeZoom;
         clampCameraToMap();
@@ -285,7 +283,6 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void clampCameraToMap() {
-        // visible size after zooming
         float halfViewW = camera.viewportWidth * camera.zoom * 0.5f;
         float halfViewH = camera.viewportHeight * camera.zoom * 0.5f;
 
