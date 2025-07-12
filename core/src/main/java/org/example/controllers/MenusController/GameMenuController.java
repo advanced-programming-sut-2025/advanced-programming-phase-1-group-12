@@ -406,7 +406,7 @@ public class GameMenuController {
         } while (nextPlayer.isHasCollapsed() && tries < players.size());
 
         App.getCurrentGame().setCurrentPlayer(nextPlayer);
-        App.getCurrentGame().getDate().changeAdvancedTime(1);
+//        App.getCurrentGame().getDate().changeAdvancedTime(1);
 
         return new Result(true, "Turn moved to " + nextPlayer.getUser().getUserName());
     }
