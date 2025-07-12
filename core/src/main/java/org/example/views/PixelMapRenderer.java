@@ -102,17 +102,17 @@ public class PixelMapRenderer {
 
                 if (!hasLeft && !hasAbove) houseAnchors.add(loc);
             }
-            for (Farm farm : App.getCurrentGame().getFarms()) {
-                for (FarmAnimals farmAnimal : farm.getFarmAnimals()) {
-                    if (farmAnimal.getPosition().equals(loc)) {
-                        int animalSize = 50;
-                        float animalX = offsetX + loc.getxAxis() * tileSize + (tileSize - animalSize) / 2f;
-                        float animalY = offsetY + loc.getyAxis() * tileSize + (tileSize - animalSize) / 2f;
-
-                        batch.draw(farmAnimal.getTexture(), animalX, animalY, animalSize, animalSize);
-                    }
-                }
-            }
+//            for (Farm farm : App.getCurrentGame().getFarms()) {
+//                for (FarmAnimals farmAnimal : farm.getFarmAnimals()) {
+//                    if (farmAnimal.getPosition().equals(loc)) {
+//                        int animalSize = 50;
+//                        float animalX = offsetX + loc.getxAxis() * tileSize + (tileSize - animalSize) / 2f;
+//                        float animalY = offsetY + loc.getyAxis() * tileSize + (tileSize - animalSize) / 2f;
+//
+//                        batch.draw(farmAnimal.getTexture(), animalX, animalY, animalSize, animalSize);
+//                    }
+//                }
+//            }
         }
         for (Location anchor : greenhouseAnchors) {
             float drawX = offsetX + anchor.getxAxis() * tileSize;

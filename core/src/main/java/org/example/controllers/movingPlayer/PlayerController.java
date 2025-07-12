@@ -185,9 +185,10 @@ public class PlayerController {
             if(farm.getOwner().equals(App.getCurrentPlayerLazy())) continue;
             badLocations.addAll(farm.getLocation().getLocationsInRectangle());
         }
-        if(badLocations.contains(location)) return true;
+        if(badLocations.contains(location)) return false;
 
-        return location.getTypeOfTile() == TypeOfTile.GROUND;
+        return (location.getTypeOfTile() == TypeOfTile.GROUND || location.getTypeOfTile() == TypeOfTile.BARN
+        || location.getTypeOfTile() == TypeOfTile.COOP);
     }
 
     public GameMenuController getGameController() {
