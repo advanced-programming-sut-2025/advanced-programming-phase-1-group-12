@@ -118,7 +118,6 @@ public class GameMenu extends InputAdapter implements Screen {
 
         pixelMapRenderer.render(batch, 0, 0);
 
-        // Render the player sprite
         batch.draw(frame, scaledX, scaledY, player.getPlayerSprite().getWidth(), player.getPlayerSprite().getHeight());
 
         if (showingAllMap) {
@@ -128,7 +127,7 @@ public class GameMenu extends InputAdapter implements Screen {
                 float farmCornerY = farmLocation.getyAxis() * 100;
 
                 Texture portrait = otherPlayer.getPortraitFrame();
-                batch.draw(portrait, farmCornerX - portrait.getWidth() / 2f, farmCornerY - portrait.getHeight() / 2f, 4000, 4000);
+                batch.draw(portrait, farmCornerX - portrait.getWidth() / 2f, farmCornerY - portrait.getHeight() / 2f, 3000, 3000);
             }
         }
 
@@ -137,51 +136,6 @@ public class GameMenu extends InputAdapter implements Screen {
         stage.act(delta);
         stage.draw();
     }
-
-//    @Override
-//    public void render(float delta) {
-//        ScreenUtils.clear(0, 0, 0, 1);
-//
-//        playerController.update(delta);
-//
-//        float px = playerController.getPlayer().getUserLocation().getxAxis();
-//        float py = playerController.getPlayer().getUserLocation().getyAxis();
-//
-//        float scaledX = px * 100;
-//        float scaledY = py * 100;
-//
-//        if (!showingAllMap) {
-//            camera.position.set(scaledX, scaledY, 0);
-//        }
-//
-//        clampCameraToMap();
-//        camera.update();
-//
-//        batch.setProjectionMatrix(camera.combined);
-//
-//        Player player = App.getCurrentPlayerLazy();
-//        playerController = player.getPlayerController();
-//        TextureRegion frame = playerController.getCurrentFrame();
-//
-//        pixelMapRenderer.render(batch, 0, 0);
-//
-//        batch.draw(frame, scaledX, scaledY, player.getPlayerSprite().getWidth(), player.getPlayerSprite().getHeight());
-//        for(Player otherPlayer : App.getCurrentGame().getPlayers()){
-//            if(App.getCurrentPlayerLazy() == otherPlayer){
-//                continue;
-//            }
-//            Location farmLocation = otherPlayer.getUserLocation();
-//            float farmCornerX = farmLocation.getxAxis() * 100;
-//            float farmCornerY = farmLocation.getyAxis() * 100;
-//
-//            batch.draw(otherPlayer.getPlayerController().getCurrentFrame(), farmCornerX, farmCornerY, otherPlayer.getPlayerSprite().getWidth(), otherPlayer.getPlayerSprite().getHeight());
-//        }
-//
-//        batch.end();
-//
-//        stage.act(delta);
-//        stage.draw();
-//    }
 
     @Override
     public void dispose() {
