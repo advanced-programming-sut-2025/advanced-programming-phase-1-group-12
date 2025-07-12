@@ -12,6 +12,7 @@ import org.example.controllers.MenusController.GameMenuController;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Player;
+import org.example.models.Place.Farm;
 import org.example.models.Place.Store;
 import org.example.models.enums.Types.TypeOfTile;
 import org.example.views.GameMenu;
@@ -165,12 +166,17 @@ public class PlayerController {
 
     private boolean isGroundTile(int x, int y) {
         Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
-        if(location == null) {
-            return false;
+        if (location == null) return false;
+        if (App.getCurrentPlayerLazy().getOwnedFarm().contains(x, y))
+            return location.getTypeOfTile() == TypeOfTile.GROUND;
+
+        for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
+            if (farm.equals(App.getCurrentPlayerLazy().getOwnedFarm())) continue;
+            if (farm.contains(x, y)) return false;
         }
         return location.getTypeOfTile() == TypeOfTile.GROUND;
     }
-
+    
     public GameMenuController getGameController() {
         return gameController;
     }

@@ -351,6 +351,8 @@ public class GameMenuController {
             newPlayer.setOwnedFarm(farm);
             Location loc = farm.getLocation().getTopLeftCorner();
             newPlayer.setUserLocation(App.getCurrentGame().getMainMap().findLocation(loc.getxAxis(), loc.getyAxis()));
+            PlayerController playerController = new PlayerController(newPlayer, this, usernames);
+            newPlayer.setPlayerController(playerController);
         }
 
         App.getCurrentGame().setPlayers((ArrayList<Player>) players);

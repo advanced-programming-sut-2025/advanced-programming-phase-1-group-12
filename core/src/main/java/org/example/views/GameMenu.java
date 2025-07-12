@@ -14,6 +14,7 @@ import org.example.controllers.*;
 import org.example.controllers.MenusController.GameMenuController;
 import org.example.controllers.movingPlayer.PlayerController;
 import org.example.models.Fundementals.App;
+import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Player;
 
 import java.util.List;
@@ -116,6 +117,16 @@ public class GameMenu extends InputAdapter implements Screen {
         pixelMapRenderer.render(batch, 0, 0);
 
         batch.draw(frame, scaledX, scaledY, player.getPlayerSprite().getWidth(), player.getPlayerSprite().getHeight());
+        for(Player otherPlayer : App.getCurrentGame().getPlayers()){
+            if(App.getCurrentPlayerLazy() == otherPlayer){
+                continue;
+            }
+            Location farmLocation = otherPlayer.getOwnedFarm().getLocation().getTopLeftCorner();
+            float farmCornerX = farmLocation.getxAxis() * 100;
+            float farmCornerY = farmLocation.getyAxis() * 100;
+
+            batch.draw(otherPlayer.getPlayerController().getCurrentFrame(), farmCornerX, farmCornerY, otherPlayer.getPlayerSprite().getWidth(), otherPlayer.getPlayerSprite().getHeight());
+        }
         batch.end();
 
         stage.act(delta);
