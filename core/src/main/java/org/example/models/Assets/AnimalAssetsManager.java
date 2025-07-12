@@ -20,7 +20,7 @@ public class AnimalAssetsManager {
     private final Texture Cow = new Texture("Animals/White_Cow.png");
     private final Texture Pig = new Texture("Animals/Pig.png");
     private final Texture Sheep = new Texture("Animals/Sheep.png");
-    private final Texture Goat = new Texture("Animals/Snake.png");
+    private final Texture Goat = new Texture("Animals/Goat.png");
 
     //animal products
     private final Texture egg = new Texture("Animal_product/Egg.png");

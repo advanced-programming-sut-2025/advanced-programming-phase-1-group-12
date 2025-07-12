@@ -1,5 +1,6 @@
 package org.example.models.Animal;
 
+import com.badlogic.gdx.graphics.Texture;
 import org.example.models.Fundementals.Location;
 import org.example.models.Item;
 import org.example.models.ProductsPackage.Quality;
@@ -8,6 +9,7 @@ import org.example.models.enums.Animal;
 public class FarmAnimals extends Item {
     //Animal enum with its information:
     private Animal animal;
+    private Texture texture;
 
     private int friendShip;
 
@@ -74,6 +76,7 @@ public class FarmAnimals extends Item {
         //produce first day
         this.daysLeftToProduce = 0;
         this.hasCollectedProductToday = false;
+        this.texture = animal.getAnimalTexture();
     }
 
     public boolean isWillProduceToday() {
@@ -98,5 +101,8 @@ public class FarmAnimals extends Item {
 
     public void setHasCollectedProductToday(boolean hasCollectedProductToday) {
         this.hasCollectedProductToday = hasCollectedProductToday;
+    }
+    public Texture getTexture() {
+        return texture;
     }
 }

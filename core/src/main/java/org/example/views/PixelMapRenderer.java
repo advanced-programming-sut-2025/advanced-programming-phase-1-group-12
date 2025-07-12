@@ -4,8 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import org.example.models.Animal.FarmAnimals;
+import org.example.models.Assets.AnimalAssetsManager;
 import org.example.models.Assets.GameAssetManager;
+import org.example.models.Fundementals.App;
+import org.example.models.Fundementals.Game;
 import org.example.models.Fundementals.Location;
+import org.example.models.Fundementals.Player;
 import org.example.models.Place.Farm;
 import org.example.models.enums.Types.TreeType;
 import org.example.models.enums.Types.TypeOfTile;
@@ -21,6 +26,7 @@ public class PixelMapRenderer {
     private final map gameMap;
     private final Set<String> greenhouseTiles = new HashSet<>();
     private final Set<String> houseTiles = new HashSet<>();
+
     public PixelMapRenderer(map gameMap) {
         this.gameMap = gameMap;
         cacheGreenhouseTiles();
@@ -63,8 +69,8 @@ public class PixelMapRenderer {
                 return GameAssetManager.getGameAssetManager().getPLANTS();
             case BARN:
                 return GameAssetManager.getGameAssetManager().getBarn();
-                case COOP:
-                    return GameAssetManager.getGameAssetManager().getCoop();
+            case COOP:
+                return GameAssetManager.getGameAssetManager().getCoop();
             default:
                 return GameAssetManager.getGameAssetManager().getGROUND();
         }
@@ -82,7 +88,7 @@ public class PixelMapRenderer {
 
             batch.draw(base,
                 offsetX + loc.getxAxis() * tileSize,
-                offsetY +  loc.getyAxis() * tileSize,
+                offsetY + loc.getyAxis() * tileSize,
                 tileSize, tileSize);
 
             if (loc.getTypeOfTile() == TypeOfTile.GREENHOUSE) {
@@ -96,10 +102,23 @@ public class PixelMapRenderer {
 
                 if (!hasLeft && !hasAbove) houseAnchors.add(loc);
             }
+            for (Farm farm : App.getCurrentGame().getFarms()) {
+            //    System.out.println("inja0");
+                    for(FarmAnimals farmAnimal : farm.getFarmAnimals()) {
+            //            System.out.println("inja1");
+                        if(farmAnimal.getPosition().equals(loc)) {
+            //                System.out.println("inja2");
+                            batch.draw(farmAnimal.getTexture(),
+                                offsetX + loc.getxAxis() * tileSize,
+                                offsetY + loc.getyAxis() * tileSize,
+                                tileSize, tileSize);
+                        }
+                    }
+            }
         }
         for (Location anchor : greenhouseAnchors) {
             float drawX = offsetX + anchor.getxAxis() * tileSize;
-            float drawY = offsetY +  anchor.getyAxis() * tileSize - tileSize * (TILES_H - 1);
+            float drawY = offsetY + anchor.getyAxis() * tileSize - tileSize * (TILES_H - 1);
             batch.draw(GameAssetManager.getGameAssetManager().getGREEN_HOUSE(), drawX, drawY, tileSize * TILES_W, tileSize * TILES_H);
         }
         for (Location anchor : houseAnchors) {
@@ -107,7 +126,6 @@ public class PixelMapRenderer {
             float drawY = offsetY + anchor.getyAxis() * tileSize;
             batch.draw(GameAssetManager.getGameAssetManager().getHOUSE(), drawX, drawY, tileSize * TILES_W, tileSize * TILES_H);
         }
-//        batch.end();
     }
 
 

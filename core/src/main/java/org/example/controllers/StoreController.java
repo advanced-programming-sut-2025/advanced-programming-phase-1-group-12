@@ -164,13 +164,9 @@ public class StoreController {
     }
 
     //TODO:daily limits are not conducted with this yet:
-    public Result buyAnimal(Matcher matcher) {
-        String name = matcher.group("name");
-        String animalType = matcher.group("animal");
-
-        Animal type = findAnimalType(animalType);
+    public Result buyAnimal(String name, Animal type) {
         if (type == null) {
-            return new Result(false, "Animal type " + animalType + " not found");
+            return new Result(false, "Animal type " + type + " not found");
         }
         if (!App.isInStore("Marnie's Ranch")) {
             return new Result(false, "You are not in Marnie's Ranch");
@@ -210,15 +206,6 @@ public class StoreController {
         home.setCapacityRemained(home.getCapacityRemained() - 1);
 
         return new Result(true, "You bought this animal");
-    }
-
-    public Animal findAnimalType(String animalType) {
-        for (Animal type : Animal.values()) {
-            if (animalType.equalsIgnoreCase(type.name())) {
-                return type;
-            }
-        }
-        return null;
     }
 
     public void ShowProducts() {

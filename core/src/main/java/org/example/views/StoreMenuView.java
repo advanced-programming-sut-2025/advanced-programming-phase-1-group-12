@@ -22,6 +22,7 @@ import org.example.models.Fundementals.Result;
 import org.example.models.Place.Farm;
 import org.example.models.Place.Store;
 import org.example.models.ProductsPackage.StoreProducts;
+import org.example.models.enums.Animal;
 import org.example.models.enums.Types.TypeOfTile;
 
 import javax.swing.text.View;
@@ -130,6 +131,12 @@ public class StoreMenuView implements Screen {
     public void dispose() {
         stage.dispose();
     }
+
+    public static void showError(String message, Label errorLabel) {
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
+        errorLabel.invalidateHierarchy();
+    }
 }
 
 class buyView implements Screen {
@@ -222,6 +229,12 @@ class buyView implements Screen {
                     if (store.getNameOfStore().equalsIgnoreCase("Carpenter's Shop") && (productName.contains("coop") || productName.contains("barn"))) {
                         Gdx.app.postRunnable(() ->
                             Main.getMain().setScreen(new FarmView(productName, players, playerList))
+                        );
+                    } else if(store.getNameOfStore().equalsIgnoreCase("Marnie's Ranch") &&
+                        !(productName.equalsIgnoreCase("hay") || productName.equalsIgnoreCase("Milk Pail")
+                            || productName.equalsIgnoreCase("Shears"))) {
+                        Gdx.app.postRunnable(() ->
+                            Main.getMain().setScreen(new BuyAnimal(players, playerList, productName))
                         );
                     }
                     else {
@@ -370,7 +383,7 @@ class FarmView implements Screen {
                 StoreController storeController = new StoreController();
                 String success = storeController.buyAnimalBuilding(productName, location).getMessage();
                 System.out.println("Clicked on tile: (" + tileX + "," + tileY + "), Purchase result: " + success);
-                showError(success);
+                StoreMenuView.showError(success, errorLabel);
             } else {
                 System.out.println("Invalid tile clicked");
             }
@@ -467,13 +480,107 @@ class FarmView implements Screen {
         stage.dispose();
         batch.dispose();
     }
+}
+class BuyAnimal implements Screen{
+    Label errorLabel;
+    TextButton backButton;
+    Skin skin = GameAssetManager.skin;
+    private Stage stage;
+    private TextField nameField;
+    private Table table;
+    private List<String>players;
+    private List<Player> playerList;
+    private TextButton buyButton;
+    private String typeOfAnimal;
 
-    public void showError(String message) {
-        errorLabel.setText(message);
-        errorLabel.setVisible(true);
-        errorLabel.invalidateHierarchy();
+    public BuyAnimal( List<String> players, List<Player> playerList, String typeOfAnimal) {
+        errorLabel = new Label("", skin);
+        errorLabel.setColor(1, 0, 0, 1);
+        errorLabel.setVisible(false);
+        this.nameField = new TextField("", skin);
+        nameField.setMessageText("Enter name of animal");
+        backButton = new TextButton("Back", skin);
+        buyButton = new TextButton("Buy", skin);
+        table = new Table(skin);
+        this.players = players;
+        this.playerList = playerList;
+        this.typeOfAnimal = typeOfAnimal;
+    }
+
+    @Override
+    public void show() {
+        stage = new Stage(new ScreenViewport());
+        Gdx.input.setInputProcessor(stage);
+
+        table.setFillParent(true);
+        table.center();
+        table.add(nameField).width(400f);
+        table.row().pad(40, 0, 0, 0);
+        table.add(buyButton);
+        table.row().pad(40, 0, 0, 0);
+        table.add(errorLabel);
+        table.row().pad(40, 0, 0, 0);
+        table.add(backButton);
+        table.row().pad(40, 0, 0, 0);
+        stage.addActor(table);
+
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dispose();
+                Main.getMain().setScreen(new GameMenu(players, playerList));  // Go back to the GameMenu
+            }
+        });
+
+        buyButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                StoreController storeController = new StoreController();
+                Result result = storeController.buyAnimal(nameField.getText(), findAnimalType(typeOfAnimal));
+                StoreMenuView.showError(result.getMessage(), errorLabel);
+            }
+        });
+
+    }
+
+    @Override
+    public void render(float v) {
+        ScreenUtils.clear(0, 1, 0, 1);
+        stage.act(v);
+        stage.draw();
+    }
+
+    @Override
+    public void resize(int i, int i1) {
+
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
+    public void hide() {
+
+    }
+
+    @Override
+    public void dispose() {
+        stage.dispose();
+    }
+
+    public Animal findAnimalType(String animalType) {
+        for (Animal type : Animal.values()) {
+            if (animalType.equalsIgnoreCase(type.name())) {
+                return type;
+            }
+        }
+        return null;
     }
 }
-
-
-

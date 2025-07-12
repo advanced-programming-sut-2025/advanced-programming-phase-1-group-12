@@ -18,7 +18,7 @@ public class Game {
     private map mainMap = new map();
     Map<Farm, Player> userAndMap = new HashMap<>();
     private ArrayList<Player> players = new ArrayList<>();
-    private static ArrayList<Farm> farms = new ArrayList<>();
+    private ArrayList<Farm> farms = new ArrayList<>();
     private NPCvillage npcVillage;
 
     public Player getCurrentPlayer() {
@@ -79,12 +79,12 @@ public class Game {
         this.players = players;
     }
 
-    public static ArrayList<Farm> getFarms() {
+    public ArrayList<Farm> getFarms() {
         return farms;
     }
 
-    public static void setFarms(ArrayList<Farm> farms) {
-        Game.farms = farms;
+    public void setFarms(ArrayList<Farm> farms) {
+        this.farms = farms;
     }
 
     public Player getPlayerByName(String playerName) {

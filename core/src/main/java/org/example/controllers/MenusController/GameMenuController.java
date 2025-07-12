@@ -314,6 +314,7 @@ public class GameMenuController {
         MapSetUp.initializeFarms();
         MapSetUp.storesSetUp();
         MapSetUp.NPCsetUp();
+        ArrayList<Farm> farms = new ArrayList<>();
 
         App.loadAllUsersFromFiles();
 
@@ -368,11 +369,13 @@ public class GameMenuController {
             newPlayer.setUserLocation(App.getCurrentGame().getMainMap().findLocation(loc.getxAxis(), loc.getyAxis()));
             PlayerController playerController = new PlayerController(newPlayer, this, usernames);
             newPlayer.setPlayerController(playerController);
+            farms.add(farm);
         }
 
         App.getCurrentGame().setPlayers((ArrayList<Player>) players);
         App.getCurrentGame().setCurrentPlayer(players.get(0));
         App.getCurrentGame().setGameId(App.getGameId());
+        App.getCurrentGame().setFarms(farms);
 
         MapSetUp.showMapWithFarms(App.getCurrentGame().getMainMap());
         System.out.println("All farms have been assigned!");

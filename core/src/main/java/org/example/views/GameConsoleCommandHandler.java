@@ -216,8 +216,6 @@ public class GameConsoleCommandHandler {
             System.out.println(animalController.pet(matcher.group("name")).getMessage());
         } else if ((matcher = GameMenuCommands.FEED_HAY.getMather(input)) != null) {
             System.out.println(animalController.feedHay(matcher.group("animalName")).getMessage());
-        } else if ((matcher = GameMenuCommands.BUY_ANIMAL.getMather(input)) != null) {
-            System.out.println(storeController.buyAnimal(matcher).getMessage());
         } else if ((matcher = GameMenuCommands.SHOW_PRODUCTS.getMather(input)) != null) {
             storeController.ShowProducts();
         } else if ((matcher = GameMenuCommands.BUILD_BUILDING.getMather(input)) != null) {
