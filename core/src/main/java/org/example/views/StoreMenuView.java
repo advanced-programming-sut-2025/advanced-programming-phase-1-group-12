@@ -81,7 +81,7 @@ public class StoreMenuView implements Screen {
         back.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                Main.getMain().setScreen(new GameMenu(players, playerList));
+                Main.getMain().setScreen(new GameMenu(players));
             }
         });
 
@@ -91,7 +91,7 @@ public class StoreMenuView implements Screen {
             button.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    Main.getMain().setScreen(new GameMenu(players, playerList));
+                    Main.getMain().setScreen(new GameMenu(players));
                     Gdx.app.postRunnable(() ->
                         Main.getMain().setScreen(new buyView(productName, store, players, playerList))
                     );
@@ -250,7 +250,7 @@ class buyView implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 dispose();
-                Main.getMain().setScreen(new GameMenu(players, playerList));
+                Main.getMain().setScreen(new GameMenu(players));
             }
         });
 
@@ -351,7 +351,7 @@ class FarmView implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 // Ensure we're not disposing the global resources like SpriteBatch
                 dispose();  // Dispose only resources tied to this screen (FarmView)
-                Main.getMain().setScreen(new GameMenu(players, playerList));  // Go back to the GameMenu
+                Main.getMain().setScreen(new GameMenu(players));  // Go back to the GameMenu
             }
         });
 
@@ -528,7 +528,7 @@ class BuyAnimal implements Screen{
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 dispose();
-                Main.getMain().setScreen(new GameMenu(players, playerList));  // Go back to the GameMenu
+                Main.getMain().setScreen(new GameMenu(players));  // Go back to the GameMenu
             }
         });
 

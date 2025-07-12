@@ -103,17 +103,15 @@ public class PixelMapRenderer {
                 if (!hasLeft && !hasAbove) houseAnchors.add(loc);
             }
             for (Farm farm : App.getCurrentGame().getFarms()) {
-            //    System.out.println("inja0");
-                    for(FarmAnimals farmAnimal : farm.getFarmAnimals()) {
-            //            System.out.println("inja1");
-                        if(farmAnimal.getPosition().equals(loc)) {
-            //                System.out.println("inja2");
-                            batch.draw(farmAnimal.getTexture(),
-                                offsetX + loc.getxAxis() * tileSize,
-                                offsetY + loc.getyAxis() * tileSize,
-                                tileSize, tileSize);
-                        }
+                for (FarmAnimals farmAnimal : farm.getFarmAnimals()) {
+                    if (farmAnimal.getPosition().equals(loc)) {
+                        int animalSize = 50;
+                        float animalX = offsetX + loc.getxAxis() * tileSize + (tileSize - animalSize) / 2f;
+                        float animalY = offsetY + loc.getyAxis() * tileSize + (tileSize - animalSize) / 2f;
+
+                        batch.draw(farmAnimal.getTexture(), animalX, animalY, animalSize, animalSize);
                     }
+                }
             }
         }
         for (Location anchor : greenhouseAnchors) {
