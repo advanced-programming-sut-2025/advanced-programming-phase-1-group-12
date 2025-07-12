@@ -167,11 +167,11 @@ public class PlayerController {
     private boolean isWalkable(int x, int y) {
         Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
         if (location == null) return false;
-        for (Farm farm : App.getCurrentGame().getFarms()) {
-            if (farm.equals(App.getCurrentPlayerLazy().getOwnedFarm()))
-                return location.getTypeOfTile() == TypeOfTile.GROUND;
-            else if (farm.contains(x, y)) return false;
-        }
+//        for (Farm farm : App.getCurrentGame().getFarms()) {
+//            if (farm.equals(App.getCurrentPlayerLazy().getOwnedFarm()))
+//                return location.getTypeOfTile() == TypeOfTile.GROUND;
+//            else if (farm.contains(x, y)) return false;
+//        }
 
         return location.getTypeOfTile() == TypeOfTile.GROUND;
     }

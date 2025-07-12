@@ -17,6 +17,8 @@ import org.example.controllers.movingPlayer.PlayerController;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Player;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import java.util.List;
 
@@ -42,6 +44,8 @@ public class GameMenu extends InputAdapter implements Screen {
     private float savedX, savedY, savedZoom;
     public static final float WORLD_WIDTH = 400 * 100f;
     public static final float WORLD_HEIGHT = 400 * 100f;
+    private BitmapFont font;
+
     GameConsoleCommandHandler cmdHandler =
         new GameConsoleCommandHandler(controller,
             farmingController,
@@ -60,7 +64,7 @@ public class GameMenu extends InputAdapter implements Screen {
     public void show() {
         batch = Main.getMain().getBatch();
         stage = new Stage(new ScreenViewport());
-
+        font = new BitmapFont(Gdx.files.internal("fonts/new.fnt"));
         InputMultiplexer mux = new InputMultiplexer();
         mux.addProcessor(this);
         mux.addProcessor(stage);
@@ -118,6 +122,8 @@ public class GameMenu extends InputAdapter implements Screen {
         pixelMapRenderer.render(batch, 0, 0);
 
         batch.draw(frame, scaledX, scaledY, player.getPlayerSprite().getWidth(), player.getPlayerSprite().getHeight());
+        font.getData().setScale(0.5f);
+        font.draw(batch, player.getUser().getUserName(), scaledX, scaledY + player.getPlayerSprite().getHeight() + 10); // Adjust the +10 for vertical space
 
         for(Player otherPlayer : App.getCurrentGame().getPlayers()){
             if(App.getCurrentPlayerLazy() == otherPlayer){
@@ -127,7 +133,10 @@ public class GameMenu extends InputAdapter implements Screen {
             float farmCornerX = farmLocation.getxAxis() * 100;
             float farmCornerY = farmLocation.getyAxis() * 100;
 
-            batch.draw(otherPlayer.getPlayerController().getCurrentFrame(), farmCornerX, farmCornerY, otherPlayer.getPlayerSprite().getWidth(), otherPlayer.getPlayerSprite().getHeight());
+            batch.draw(otherPlayer.getPlayerController().getCurrentFrame(), farmCornerX, farmCornerY, otherPlayer.getPlayerSprite().getWidth(),
+                otherPlayer.getPlayerSprite().getHeight());
+            font.draw(batch, otherPlayer.getUser().getUserName(), farmCornerX, farmCornerY + otherPlayer.getPlayerSprite().getHeight() + 10);
+
         }
         if (showingAllMap) {
             for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
@@ -150,6 +159,7 @@ public class GameMenu extends InputAdapter implements Screen {
     public void dispose() {
         stage.dispose();
         pixelMapRenderer.dispose();
+        font.dispose();
     }
 
     @Override
