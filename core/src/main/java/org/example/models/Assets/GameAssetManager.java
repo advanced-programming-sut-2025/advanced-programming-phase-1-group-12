@@ -138,8 +138,6 @@ public class GameAssetManager {
         return null;
     }
 
-
-
     public static Texture getAPRICOT_TREE() {
         return APRICOT_TREE;
     }

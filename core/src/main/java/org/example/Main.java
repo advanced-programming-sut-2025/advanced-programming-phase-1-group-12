@@ -1,7 +1,12 @@
 package org.example;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.Timer;
 import com.google.gson.Gson;
 import org.example.models.Fundementals.App;
 import org.example.models.RelatedToUser.User;
@@ -13,10 +18,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-/** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends Game {
     private static Main main;
     private SpriteBatch batch;
+    private Texture backgroundTexture;
+    private Sprite backgroundSprite;
+    private float timeElapsed;
+    private boolean backgroundVisible;
 
     public static Main getMain() {
         return main;
@@ -26,26 +34,37 @@ public class Main extends Game {
     public void create() {
         main = this;
         batch = new SpriteBatch();
+        backgroundTexture = new Texture("background.png");
+        backgroundSprite = new Sprite(backgroundTexture);
 
         autoLoginIfPossible();
+        timeElapsed = 0;
+        backgroundVisible = true;
 
-        if (App.getLoggedInUser() == null) {
-            main.setScreen(new RegisterMenuView());
-        } else {
-            System.out.println("Welcome back, " + App.getLoggedInUser().getUserName() + "! (Auto-logged in)");
-            main.setScreen(new MainMenu());
-        }
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                backgroundVisible = false;
+
+                if (App.getLoggedInUser() == null) main.setScreen(new RegisterMenuView());
+                else main.setScreen(new MainMenu());
+            }
+        }, 5);
     }
-
 
     @Override
     public void render() {
         super.render();
+        batch.begin();
+
+        if (backgroundVisible) backgroundSprite.draw(batch);
+        batch.end();
     }
 
     @Override
     public void dispose() {
         batch.dispose();
+        backgroundTexture.dispose();
     }
 
     private void autoLoginIfPossible() {
