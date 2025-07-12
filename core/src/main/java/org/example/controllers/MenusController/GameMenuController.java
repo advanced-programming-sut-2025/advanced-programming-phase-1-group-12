@@ -384,7 +384,7 @@ public class GameMenuController {
 
     public Result nextTurn() {
         List<Player> players = App.getCurrentGame().getPlayers();
-        Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
+        Player currentPlayer = App.getCurrentPlayerLazy();
 
         currentPlayer.setEnergy(200);
 
@@ -396,8 +396,8 @@ public class GameMenuController {
             index = (index + 1) % players.size();
             nextPlayer = players.get(index);
 
-            if (nextPlayer.isHasCollapsed() &&
-                (App.getCurrentGame().getDate().getHour() == 8 || App.getCurrentGame().getDate().getHour() == 9)) {
+            if (nextPlayer.isHasCollapsed() && (App.getCurrentGame().getDate().getHour() == 8
+                || App.getCurrentGame().getDate().getHour() == 9)) {
                 nextPlayer.setHasCollapsed(false);
                 nextPlayer.setEnergy(150);
                 break;

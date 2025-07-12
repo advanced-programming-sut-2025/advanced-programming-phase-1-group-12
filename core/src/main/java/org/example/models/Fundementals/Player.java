@@ -86,8 +86,8 @@ public class Player {
     }
 
     public void updatePosition(int posX, int posY) {
-        userLocation.setxAxis(posX);
-        userLocation.setyAxis(posY);
+        Location newLocation = App.getCurrentGame().getMainMap().findLocation(posX, posY);
+        setUserLocation(newLocation);
         rect.move(posX, posY);
         playerSprite.setPosition(posX, posY);
     }

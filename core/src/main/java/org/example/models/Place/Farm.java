@@ -2,6 +2,7 @@ package org.example.models.Place;
 
 import org.example.models.Animal.AnimalHome;
 import org.example.models.Animal.FarmAnimals;
+import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.LocationOfRectangle;
 import org.example.models.Fundementals.Player;
@@ -260,7 +261,7 @@ public class Farm implements Place {
     }
 
     public boolean contains(int newX, int newY) {
-        Location newLocation = new Location(newX, newY);
+        Location newLocation = App.getCurrentGame().getMainMap().findLocation(newX, newY);
         ArrayList<Location> farmLocations = getFarmLocation().getLocationsInRectangle();
         return !farmLocations.contains(newLocation);
     }

@@ -115,7 +115,7 @@ public class PlayerController {
 
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             newY += player.getSpeed();
-            if (isGroundTile(newX, newY)) {
+            if (isWalkable(newX, newY)) {
                 facing = Dir.UP;
             } else {
                 newY -= player.getSpeed();
@@ -123,7 +123,7 @@ public class PlayerController {
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             newY -= player.getSpeed();
-            if (isGroundTile(newX, newY)) {
+            if (isWalkable(newX, newY)) {
                 facing = Dir.DOWN;
             } else {
                 newY += player.getSpeed();
@@ -131,7 +131,7 @@ public class PlayerController {
         }
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             newX -= player.getSpeed();
-            if (isGroundTile(newX, newY)) {
+            if (isWalkable(newX, newY)) {
                 facing = Dir.LEFT;
             } else {
                 newX += player.getSpeed();
@@ -139,7 +139,7 @@ public class PlayerController {
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             newX += player.getSpeed();
-            if (isGroundTile(newX, newY)) {
+            if (isWalkable(newX, newY)) {
                 facing = Dir.RIGHT;
             } else {
                 newX -= player.getSpeed();
@@ -175,25 +175,20 @@ public class PlayerController {
         return store;
     }
 
-    private boolean isGroundTile(int x, int y) {
+    private boolean isWalkable(int x, int y) {
         Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
         if (location == null) return false;
-        if (App.getCurrentPlayerLazy().getOwnedFarm().contains(x, y))
-            return location.getTypeOfTile() == TypeOfTile.GROUND;
+//        for (Farm farm : App.getCurrentGame().getFarms()) {
+//            if (farm.equals(App.getCurrentPlayerLazy().getOwnedFarm()))
+//                return location.getTypeOfTile() == TypeOfTile.GROUND;
+//            else if (farm.contains(x, y)) return false;
+//        }
 
-        for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
-            if (farm.equals(App.getCurrentPlayerLazy().getOwnedFarm())) continue;
-            if (farm.contains(x, y)) return false;
-        }
         return location.getTypeOfTile() == TypeOfTile.GROUND;
     }
 
     public GameMenuController getGameController() {
         return gameController;
-    }
-
-    public Texture getPortraitFrame() {
-        return player.getPortraitFrame();
     }
 
 }
