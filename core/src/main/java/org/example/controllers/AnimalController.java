@@ -154,13 +154,11 @@ public class AnimalController {
         return new Result(true, "You just sheared " + animalName);
     }
 
-    public Result shepherd(Matcher matcher) {
-        String animalName = matcher.group("animalName");
-        FarmAnimals animal = findAnimalByName(animalName);
+    public Result shepherd(FarmAnimals animal, int x, int y) {
         if (animal == null) {
             return new Result(false, "You do not own an animal with such name!");
         }
-        Location destination = App.getCurrentGame().getMainMap().findLocation(Integer.parseInt(matcher.group("x")), Integer.parseInt(matcher.group("y")));
+        Location destination = App.getCurrentGame().getMainMap().findLocation(x, y);
 
         if (destination == null || !App.getCurrentPlayerLazy().getOwnedFarm().getLocation().getLocationsInRectangle().contains(destination)) {
             return new Result(false, "Given location is not in your farm or not valid");
@@ -168,7 +166,7 @@ public class AnimalController {
         //returning home
         if (App.isLocationInPlace(destination, animal.getHome().getLocation())) {
             animal.setPosition(destination);
-            return new Result(true, "You just shepherd " + animalName);
+            return new Result(true, "You just shepherd " + animal.getName());
         }// is going out
         if (!destination.getTypeOfTile().equals(TypeOfTile.GROUND)) {
             return new Result(false, "Type of given destination makes it unavailable");
@@ -176,12 +174,12 @@ public class AnimalController {
         if ((App.getCurrentGame().getDate().getWeather().equals(Weather.RAINY) ||
                 App.getCurrentGame().getDate().getWeather().equals(Weather.STORM) ||
                 App.getCurrentGame().getDate().getWeather().equals(Weather.SNOW))) {
-            return new Result(false, "Weather is bad for getting " + animalName + " out");
+            return new Result(false, "Weather is bad for getting " + animal.getName() + " out");
         }
         animal.setPosition(destination);
         destination.setObjectInTile(animal);
         animal.setHasBeenFedToday(true);
-        return new Result(true, "You just shepherd " + animalName);
+        return new Result(true, "You just shepherd " + animal.getName());
     }
 
     public Result fishing(String fishingPole) {

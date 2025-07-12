@@ -13,7 +13,7 @@ public class GameAssetManager {
 
     private final Texture LAKE_TEXTURE = new Texture("Flooring/Flooring_26.png");
     private final Texture PLANTS = new Texture("Flooring/Flooring_50.png");
-    private final Texture STONE = new Texture("Rock/Farm_Boulder.png");
+    private final Texture STONE = new Texture("Rock/mainStone.png");
     private final Texture NPC_VILLAGE = new Texture("Flooring/Flooring_83.png");
     private final Texture GREEN_HOUSE = new Texture("Greenhouse/greenhouse.png");
     private final Texture QUARRY = new Texture("Flooring/Flooring_08.png");

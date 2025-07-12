@@ -66,7 +66,11 @@ public class GameConsoleCommandHandler {
 
         if ((matcher = GameMenuCommands.EXIT.getMather(input)) != null) {
             System.out.println(controller.EXIT());
-        }else if ((matcher = GameMenuCommands.LoadGame.getMather(input)) != null) {
+        }else if ((matcher = GameMenuCommands.addWoodAndStone.getMather(input)) != null) {
+            System.out.println(storeController.cheatAddItem("Wood", 100));
+            System.out.println(storeController.cheatAddItem("Stone", 100));
+        }
+        else if ((matcher = GameMenuCommands.LoadGame.getMather(input)) != null) {
             controller.loadGameById(matcher.end("gameID"));
         }  else if ((matcher = GameMenuCommands.PRINT.getMather(input)) != null) {
             controller.printMap(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y")), Integer.parseInt(matcher.group("size")), scanner);
@@ -200,12 +204,8 @@ public class GameConsoleCommandHandler {
             System.out.println(animalController.sellAnimal(matcher.group("name")).getMessage());
         } else if ((matcher = GameMenuCommands.FISHING.getMather(input)) != null) {
             System.out.println(animalController.fishing(matcher.group("fishingPole")).getMessage());
-        } else if ((matcher = GameMenuCommands.SHEPHERD_ANIMALS.getMather(input)) != null) {
-            System.out.println(animalController.shepherd(matcher).getMessage());
         } else if ((matcher = GameMenuCommands.ANIMALS_LIST.getMather(input)) != null) {
             animalController.animalsList();
-        } else if ((matcher = GameMenuCommands.SHEPHERD_ANIMALS.getMather(input)) != null) {
-            System.out.println(animalController.shepherd(matcher).getMessage());
         } else if ((matcher = GameMenuCommands.CHEAT_SET_FRIENDSHIP.getMather(input)) != null) {
             System.out.println(animalController.cheatFriendship(matcher).getMessage());
         } else if ((matcher = GameMenuCommands.MILK.getMather(input)) != null) {

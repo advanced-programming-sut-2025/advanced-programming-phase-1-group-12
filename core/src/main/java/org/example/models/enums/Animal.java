@@ -24,7 +24,7 @@ public enum Animal {
 
     DINOSAUR(14000, AnimalProduct.DINOSAUR_EGG, Set.of(), true,
             "Lives in a Big Coop (capacity 8). Produces every 7 days.",
-            new ArrayList<>(List.of("big coop")), 7, AnimalAssetsManager.animalAssetsManager().getDinosaur()),
+            new ArrayList<>(List.of("big coop", "deluxe coop")), 7, AnimalAssetsManager.animalAssetsManager().getDinosaur()),
 
     COW(1500, AnimalProduct.MILK, Set.of(AnimalProduct.LARGE_MILK), false,
             "Lives in a Barn (capacity 4). Produces milk daily. Requires milk pail.",

@@ -8,7 +8,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import org.example.Main;
+import org.example.controllers.AnimalController;
 import org.example.controllers.MenusController.GameMenuController;
+import org.example.models.Animal.FarmAnimals;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Player;
@@ -87,6 +89,7 @@ public class PlayerController {
         int newY = App.getCurrentGame().getCurrentPlayer().getUserLocation().getyAxis();
 
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+
             Vector3 world = GameMenu.getCamera().unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
             int tileX = (int) (world.x / 100f);
             int tileY = (int) (world.y / 100f);
@@ -96,6 +99,14 @@ public class PlayerController {
             }
             System.out.println(location.getTypeOfTile() + " " + location.getxAxis() + " " + location.getyAxis());
 
+            for(FarmAnimals animals: App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()) {
+                if(animals.getPosition().equals(location)) {
+                    GameMenu gameMenu = new GameMenu(players);
+                    Main.getMain().setScreen(gameMenu);
+                    gameMenu.showAnimalDialog(animals);
+                    return;
+                }
+            }
             if (location.getTypeOfTile() == TypeOfTile.STORE) {
                 Gdx.app.postRunnable(() -> Main.getMain().setScreen(new StoreMenuView(findStore(location), players, playerList)));
                 return;

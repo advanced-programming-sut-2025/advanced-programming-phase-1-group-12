@@ -6,14 +6,18 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Main;
 import org.example.controllers.*;
 import org.example.controllers.MenusController.GameMenuController;
 import org.example.controllers.movingPlayer.PlayerController;
+import org.example.models.Animal.FarmAnimals;
+import org.example.models.Assets.GameAssetManager;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Player;
@@ -31,19 +35,21 @@ public class GameMenu extends InputAdapter implements Screen {
     private final CraftingController craftingController = new CraftingController();
     private final ArtisanController artisanController = new ArtisanController();
 
+    Label errorLabel;
+
     private PixelMapRenderer pixelMapRenderer;
     private SpriteBatch batch;
     private static OrthographicCamera camera;
     private PlayerController playerController;
     private Stage stage;
     private final List<String> players;
-    private final List<Player> playerList;
     private boolean showingAllMap = false;
     private float homeZoom, mapZoom;
     private float homeX, homeY, mapCenterX, mapCenterY;
     private float savedX, savedY, savedZoom;
     public static final float WORLD_WIDTH = 400 * 100f;
     public static final float WORLD_HEIGHT = 400 * 100f;
+    private Skin skin = GameAssetManager.skin;
     private BitmapFont font;
 
     GameConsoleCommandHandler cmdHandler =
@@ -55,9 +61,9 @@ public class GameMenu extends InputAdapter implements Screen {
             craftingController,
             artisanController);
 
-    public GameMenu(List<String> players, List<Player> playerList) {
+    public GameMenu(List<String> players) {
         this.players = players;
-        this.playerList = playerList;
+        errorLabel = new Label("", skin);
     }
 
     @Override
@@ -100,6 +106,9 @@ public class GameMenu extends InputAdapter implements Screen {
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
 
+        Player player = App.getCurrentPlayerLazy();
+        playerController = player.getPlayerController();
+        TextureRegion frame = playerController.getCurrentFrame();
         playerController.update(delta);
 
         float px = playerController.getPlayer().getUserLocation().getxAxis();
@@ -115,9 +124,6 @@ public class GameMenu extends InputAdapter implements Screen {
 
         batch.setProjectionMatrix(camera.combined);
 
-        Player player = App.getCurrentPlayerLazy();
-        playerController = player.getPlayerController();
-        TextureRegion frame = playerController.getCurrentFrame();
 
         pixelMapRenderer.render(batch, 0, 0);
 
@@ -210,9 +216,11 @@ public class GameMenu extends InputAdapter implements Screen {
     private void updateCameraToPlayer() {
         Player p = App.getCurrentPlayerLazy();
 
+        // Update the player's logical position to include scaling (scale by 100)
         homeX = p.getUserLocation().getxAxis() * 100 + p.getPlayerSprite().getWidth() / 2f;
         homeY = p.getUserLocation().getyAxis() * 100 + p.getPlayerSprite().getHeight() / 2f;
 
+        // Set camera position to the scaled coordinates
         camera.position.set(homeX, homeY, 0);
         camera.zoom = homeZoom;
         clampCameraToMap();
@@ -239,6 +247,7 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void clampCameraToMap() {
+        // visible size after zooming
         float halfViewW = camera.viewportWidth * camera.zoom * 0.5f;
         float halfViewH = camera.viewportHeight * camera.zoom * 0.5f;
 
@@ -259,5 +268,93 @@ public class GameMenu extends InputAdapter implements Screen {
 
     public static OrthographicCamera getCamera() {
         return camera;
+    }
+
+    public void showAnimalDialog(FarmAnimals animal) {
+        AnimalController animalController = new AnimalController();
+        Skin skin = GameAssetManager.skin;
+        Dialog dialog = new Dialog("Interact with Animal", skin);
+
+        TextButton petButton = new TextButton("Pet", skin);
+        TextButton feedButton = new TextButton("Feed", skin);
+        TextButton shepherdButton = new TextButton("Shepherd", skin);
+        TextButton sellButton = new TextButton("Sell", skin);
+        TextButton gatherProducts = new TextButton("Gather Products", skin);
+        TextButton closeButton = new TextButton("Close", skin);
+
+        TextField shepherdXField = new TextField("", skin);
+        shepherdXField.setMessageText("X position");
+        TextField shepherdYField = new TextField("", skin);
+        shepherdYField.setMessageText("Y position");
+
+        errorLabel.setColor(1, 0, 0, 1);
+        errorLabel.setVisible(false);
+
+        petButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                showError(animalController.pet(animal.getName()).getMessage());
+            }
+        });
+        feedButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                showError(animalController.feedHay(animal.getName()).getMessage());
+            }
+        });
+        gatherProducts.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                showError(animalController.collectProduce(animal.getName()).getMessage());
+            }
+        });
+        sellButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                showError(animalController.sellAnimal(animal.getName()).getMessage());
+            }
+        });
+        shepherdButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                try {
+                    int xx = Integer.parseInt(shepherdXField.getText());
+                    int yy = Integer.parseInt(shepherdYField.getText());
+                    showError(animalController.shepherd(animal, xx, yy).getMessage());
+                } catch (NumberFormatException e) {
+                    showError("Invalid number format");
+                }
+            }
+        });
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+            }
+        });
+
+        // Lay out widgets properly in the content table
+        Table content = dialog.getContentTable();
+        content.add(new Label("What do you want to do?", skin)).colspan(2).pad(10).row();
+        content.add(petButton).pad(5);
+        content.add(feedButton).pad(5).row();
+        content.add(gatherProducts).pad(5);
+        content.add(sellButton).pad(5).row();
+        content.add(new Label("Shepherd X:", skin)).pad(5);
+        content.add(shepherdXField).pad(5).row();
+        content.add(new Label("Shepherd Y:", skin)).pad(5);
+        content.add(shepherdYField).pad(5).row();
+        content.add(shepherdButton).colspan(2).pad(5).row();
+        content.add(errorLabel).colspan(2).pad(10).row();
+
+        dialog.button(closeButton); // Close button as standard dialog button
+        dialog.show(stage);         // Don't forget this!
+    }
+
+
+    public void showError(String message) {
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
+        errorLabel.invalidateHierarchy();
     }
 }

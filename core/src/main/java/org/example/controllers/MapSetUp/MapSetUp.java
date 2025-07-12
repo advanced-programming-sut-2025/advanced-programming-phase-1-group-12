@@ -53,11 +53,11 @@ public class MapSetUp {
         for (Farm farm : newMap.getFarms()) {
             String ownerName = (farm.getOwner() != null) ? farm.getOwner().getUser().getUserName() : "No Owner";
             System.out.println("- Farm from (" +
-                    farm.getLocation().getTopLeftCorner().getxAxis() + "," +
-                    farm.getLocation().getTopLeftCorner().getyAxis() + ") to (" +
-                    farm.getLocation().getDownRightCorner().getxAxis() + "," +
-                    farm.getLocation().getDownRightCorner().getyAxis() + ") owned by " +
-                    ownerName);
+                farm.getLocation().getTopLeftCorner().getxAxis() + "," +
+                farm.getLocation().getTopLeftCorner().getyAxis() + ") to (" +
+                farm.getLocation().getDownRightCorner().getxAxis() + "," +
+                farm.getLocation().getDownRightCorner().getyAxis() + ") owned by " +
+                ownerName);
         }
     }
 
