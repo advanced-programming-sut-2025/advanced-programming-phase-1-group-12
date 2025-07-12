@@ -20,6 +20,7 @@ import org.example.models.enums.Types.TypeOfTile;
 import org.example.views.GameMenu;
 import org.example.views.StoreMenuView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PlayerController {
@@ -178,11 +179,13 @@ public class PlayerController {
     private boolean isWalkable(int x, int y) {
         Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
         if (location == null) return false;
-//        for (Farm farm : App.getCurrentGame().getFarms()) {
-//            if (farm.equals(App.getCurrentPlayerLazy().getOwnedFarm()))
-//                return location.getTypeOfTile() == TypeOfTile.GROUND;
-//            else if (farm.contains(x, y)) return false;
-//        }
+        ArrayList<Location> badLocations = new ArrayList<>();
+
+        for (Farm farm : App.getCurrentGame().getFarms()) {
+            if(farm.getOwner().equals(App.getCurrentPlayerLazy())) continue;
+            badLocations.addAll(farm.getLocation().getLocationsInRectangle());
+        }
+        if(badLocations.contains(location)) return false;
 
         return location.getTypeOfTile() == TypeOfTile.GROUND;
     }
