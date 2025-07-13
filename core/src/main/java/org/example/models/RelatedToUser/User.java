@@ -18,8 +18,11 @@ public class User {
 
     private String answerOfQuestionForSecurity;
 
-
     private boolean isFemale;
+
+    private transient String token;
+
+    private transient long tokenExpiration;
 
     public User(ArrayList<Game> games, String userName, String nickname, String password, String email,
                 String questionForSecurity, String answerOfQuestionForSecurity, boolean isFemale) {
@@ -83,5 +86,25 @@ public class User {
 
     public Boolean isFemale() {
         return isFemale;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public long getTokenExpiration() {
+        return tokenExpiration;
+    }
+
+    public void setTokenExpiration(long tokenExpiration) {
+        this.tokenExpiration = tokenExpiration;
+    }
+
+    public boolean isTokenExpired() {
+        return System.currentTimeMillis() > tokenExpiration;
     }
 }

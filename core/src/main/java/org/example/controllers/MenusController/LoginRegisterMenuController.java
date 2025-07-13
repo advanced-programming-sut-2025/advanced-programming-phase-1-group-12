@@ -61,8 +61,8 @@ public class LoginRegisterMenuController {
         }
 
         boolean isFemale = !gender.equals("male");
-        password = hashPassword(password);
-        User newUser = new User(null, username, nickname, password, email, "",
+        String hashedPassword = hashPassword(password);
+        User newUser = new User(null, username, nickname, hashedPassword, email, "",
                 "", isFemale);
 
         if (!answer.equals(answerConfirm)) {
@@ -71,6 +71,10 @@ public class LoginRegisterMenuController {
         newUser.setAnswerOfQuestionForSecurity(answer);
 
         App.setLoggedInUser(newUser);
+        App.getUsers().put(newUser.getUserName(), newUser);
+
+        org.example.models.auth.AuthService.authenticate(username, hashedPassword);
+
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         try (FileWriter writer = new FileWriter(username + ".json")) {
             gson.toJson(newUser, writer);
@@ -106,6 +110,11 @@ public class LoginRegisterMenuController {
 
             App.setLoggedInUser(user);
             App.getUsers().put(user.getUserName(), user);
+
+            org.example.models.auth.AuthService.authenticate(username, user.getPassword());
+
+            saveUser(user, username + ".json");
+
             return new Result(true, "Login successful");
         } catch (IOException e) {
             e.printStackTrace();
@@ -158,7 +167,6 @@ public class LoginRegisterMenuController {
             }
         }
 
-        // Rest of your existing logic remains exactly the same
         if (!answer.equals(user.getAnswerOfQuestionForSecurity())) {
             return new Result(false, "Incorrect security answer");
         }
@@ -207,6 +215,11 @@ public class LoginRegisterMenuController {
 
             App.setLoggedInUser(user);
             App.getUsers().put(user.getUserName(), user);
+
+            org.example.models.auth.AuthService.authenticate(username, user.getPassword());
+
+            saveUser(user, username + ".json");
+
             Gson gson1 = new GsonBuilder().setPrettyPrinting().create();
             try (FileWriter writer = new FileWriter("StayLoggedIn" + ".json")) {
                 gson1.toJson(user, writer);
