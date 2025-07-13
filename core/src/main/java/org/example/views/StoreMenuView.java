@@ -54,30 +54,47 @@ public class StoreMenuView implements Screen {
     public void show() {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
+
+        // Create content table with consistent formatting
         Table contentTable = new Table();
         contentTable.top().left();
+        contentTable.defaults().pad(10).left().fillX(); // Consistent padding and alignment
 
+        // Add all product buttons with consistent styling
         for (TextButton button : products) {
-            contentTable.row().pad(20, 0, 20, 0);
-            contentTable.add(button).width(400f);
+            contentTable.row();
+            contentTable.add(button).width(300).height(50).left(); // Fixed size for consistency
         }
-        contentTable.row().pad(20, 0, 20, 0);
-        contentTable.add(back).width(400f);
 
+        // Add back button with same styling
+        contentTable.row();
+        contentTable.add(back).width(300).height(50).padTop(20);
+
+        // Create scroll pane with proper settings
         ScrollPane scrollPane = new ScrollPane(contentTable, skin);
-        scrollPane.setScrollingDisabled(true, false);
+        scrollPane.setScrollingDisabled(true, false); // Vertical scrolling only
         scrollPane.setFadeScrollBars(false);
-        float maxHeight = Gdx.graphics.getHeight() * 0.8f;
-        scrollPane.setHeight(maxHeight);
+        scrollPane.setSmoothScrolling(true);
 
+        // Calculate max height based on screen size
+        float maxHeight = Gdx.graphics.getHeight() * 0.8f;
+
+        // Main container table
         Table container = new Table();
         container.setFillParent(true);
-        container.center();
+        container.top(); // Align to top
 
-        container.add(scrollPane).width(400f).height(maxHeight);
+        // Add scroll pane with constraints
+        container.add(scrollPane)
+            .width(350) // Slightly wider than content for scrollbar
+            .height(maxHeight)
+            .expandY()
+            .fillY()
+            .pad(20);
 
         stage.addActor(container);
 
+        // Add listeners (unchanged)
         back.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -85,13 +102,11 @@ public class StoreMenuView implements Screen {
             }
         });
 
-        // Product buttons listeners
         for (TextButton button : products) {
             final String productName = button.getText().toString();
             button.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    Main.getMain().setScreen(new GameMenu(players));
                     Gdx.app.postRunnable(() ->
                         Main.getMain().setScreen(new buyView(productName, store, players, playerList))
                     );

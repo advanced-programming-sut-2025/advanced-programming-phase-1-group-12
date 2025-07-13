@@ -134,8 +134,8 @@ public class GameMenu extends InputAdapter implements Screen {
         font.getData().setScale(0.5f);
         font.draw(batch, player.getUser().getUserName(), scaledX, scaledY + player.getPlayerSprite().getHeight() + 10); // Adjust the +10 for vertical space
 
-        for(Player otherPlayer : App.getCurrentGame().getPlayers()){
-            if(App.getCurrentPlayerLazy() == otherPlayer){
+        for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
+            if (App.getCurrentPlayerLazy() == otherPlayer) {
                 continue;
             }
             Location farmLocation = otherPlayer.getUserLocation();
@@ -167,32 +167,14 @@ public class GameMenu extends InputAdapter implements Screen {
             }
             timeForAnimalMove = 0f;
         }
-
-        for(Farm farm : App.getCurrentGame().getFarms()){
+        for (Farm farm : App.getCurrentGame().getFarms()) {
             for (FarmAnimals animal : farm.getFarmAnimals()) {
-                Location current = animal.getPosition();
-                Location previous = animal.getPreviousPosition();
-
-                float progress = timeForAnimalMove / 0.5f;
-                if (progress > 1f) progress = 1f;
-
-                float renderX = MathUtils.lerp(
-                    previous != null ? previous.getxAxis() : current.getxAxis(),
-                    current.getxAxis(),
-                    progress
-                ) * 100f;
-
-                float renderY = MathUtils.lerp(
-                    previous != null ? previous.getyAxis() : current.getyAxis(),
-                    current.getyAxis(),
-                    progress
-                ) * 100f;
+                float renderX = animal.getPosition().getxAxis() * 100f;
+                float renderY = animal.getPosition().getyAxis() * 100f;
 
                 batch.draw(animal.getTexture(), renderX, renderY);
             }
         }
-
-
         batch.end();
 
         stage.act(delta);
@@ -293,7 +275,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
         if (WORLD_HEIGHT < halfViewH * 2) camera.position.y = WORLD_HEIGHT * 0.5f;
         else camera.position.y = MathUtils.clamp(camera.position.y,
-                halfViewH, WORLD_HEIGHT - halfViewH);
+            halfViewH, WORLD_HEIGHT - halfViewH);
     }
 
     private void openTerminalScreen() {
@@ -325,13 +307,14 @@ public class GameMenu extends InputAdapter implements Screen {
 
         errorLabel.setColor(1, 0, 0, 1);
         errorLabel.setVisible(false);
-        for(Location location : animal.getHome().getLocation().getLocationsInRectangle()){
+        for (Location location : animal.getHome().getLocation().getLocationsInRectangle()) {
             boolean isEmpty = true;
-            for(FarmAnimals farmAnimals : App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()){
-                if(location.equals(farmAnimals.getHome().getLocation())){
+            for (FarmAnimals farmAnimals : App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()) {
+                if (location.equals(farmAnimals.getHome().getLocation())) {
                     isEmpty = false;
                 }
-            } if(isEmpty){
+            }
+            if (isEmpty) {
                 homeLable.setText("your home x:" + location.getxAxis() + " y:" + location.getyAxis());
                 break;
             }
