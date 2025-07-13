@@ -1,5 +1,11 @@
 package org.example.controllers.MenusController;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.Json;
 import com.google.gson.Gson;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Result;
@@ -189,10 +195,36 @@ public class ProfileMenuController{
         }
     }
 
-    public void userInfo(){
-        System.out.println("user info");
-        System.out.println(App.getLoggedInUser().getUserName());
-        System.out.println(App.getLoggedInUser().getNickname());
-        //TODO:most money is not written
+    public void changeAvatar(String avatarPath) {
+        if (App.getLoggedInUser() != null) {
+            App.getLoggedInUser().setAvatarPath(avatarPath);
+
+            User user = loadUserFromJson(App.getLoggedInUser().getUserName());
+
+            user.setAvatarPath(avatarPath);
+            updateUserFile(user);
+        }
+    }
+
+    public void showInfo(String message, Stage stage, Skin skin) {
+        Dialog dialog = new Dialog("Info", skin);
+        dialog.text(message);
+        dialog.button("OK");
+        dialog.show(stage);
+    }
+
+    private void updateUserFile(User user) {
+        Json json = new Json();
+        FileHandle file = Gdx.files.local("users/" + user.getUserName() + ".json");
+        file.writeString(json.prettyPrint(user), false); // false = overwrite
+    }
+
+    private User loadUserFromJson(String username) {
+        FileHandle file = Gdx.files.local(username + ".json");
+
+        if (!file.exists()) return null;
+
+        Json json = new Json();
+        return json.fromJson(User.class, file);
     }
 }

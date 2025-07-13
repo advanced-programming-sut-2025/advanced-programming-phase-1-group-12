@@ -8,6 +8,8 @@ public class User {
     private ArrayList<Game> games;
     private String userName;
 
+    private String avatarPath;
+
     private String nickname;
 
     private String password;
@@ -18,11 +20,13 @@ public class User {
 
     private String answerOfQuestionForSecurity;
 
-
     private boolean isFemale;
 
+    public User() {
+    }
+
     public User(ArrayList<Game> games, String userName, String nickname, String password, String email,
-                String questionForSecurity, String answerOfQuestionForSecurity, boolean isFemale) {
+                String questionForSecurity, String answerOfQuestionForSecurity, boolean isFemale, String avatarPath) {
         this.games = games;
         this.userName = userName;
         this.nickname = nickname;
@@ -31,6 +35,7 @@ public class User {
         this.questionForSecurity = questionForSecurity;
         this.answerOfQuestionForSecurity = answerOfQuestionForSecurity;
         this.isFemale = isFemale;
+        this.avatarPath = avatarPath;
     }
 
     public void setQuestionForSecurity(String questionForSecurity) {
@@ -83,5 +88,13 @@ public class User {
 
     public Boolean isFemale() {
         return isFemale;
+    }
+
+    public void setAvatarPath(String avatarPath) {
+        this.avatarPath = avatarPath;
+    }
+
+    public String getAvatarPath() {
+        return avatarPath;
     }
 }

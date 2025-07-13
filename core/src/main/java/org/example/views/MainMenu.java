@@ -2,41 +2,35 @@ package org.example.views;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Main;
-import org.example.models.Fundementals.App;
 import org.example.models.Assets.GameAssetManager;
-
-import java.io.File;
-import java.util.Scanner;
 
 public class MainMenu implements Screen {
     private Skin skin = GameAssetManager.skin;
+    private Image backgroundImage;
     private Stage stage;
     private final Label menuLabel;
     private final TextButton LogOut;
     private final TextButton exitButton;
-    private final SelectBox<String> selectMenu = new SelectBox<>(skin);
+    private final TextButton profileButton;
+    private final TextButton preGameButton;
     public Table table = new Table();
 
     public MainMenu() {
-
-        Array<String> questions = new Array<>(new String[]{
-            "profile menu", "pre_game menu"
-        });
-        selectMenu.setItems(questions);
-
         this.menuLabel = new Label("main menu", skin);
+        menuLabel.setFontScale(20f);
         this.LogOut = new TextButton("log out", skin);
         this.exitButton = new TextButton("Exit", skin);
+        this.profileButton = new TextButton("Profile Menu", skin);
+        this.preGameButton = new TextButton("Pre-Game Menu", skin);
         setScale();
     }
 
@@ -44,50 +38,49 @@ public class MainMenu implements Screen {
     public void show() {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
-        selectMenu.setItems("profile menu", "pre_game menu");
+        Texture backgroundTexture = new Texture(Gdx.files.internal("menu_background.png"));
+        backgroundImage = new Image(backgroundTexture);
+        backgroundImage.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         table.setFillParent(true);
         table.center();
-        table.add(menuLabel);
+        table.add(menuLabel).colspan(2).pad(10);
 
-        table.row().pad(50,0,40,0);
-        table.add(LogOut);
-        table.row().pad(40,0,40,0);
-        table.add(selectMenu);
-        table.row().pad(40,0,40,0);
-        table.add(exitButton);
+        table.row().pad(50, 0, 40, 0);
+        table.add(profileButton).width(200).height(50);
+        table.row().pad(40, 0, 40, 0);
+        table.add(preGameButton).width(200).height(50);
+        table.row().pad(40, 0, 40, 0);
+        table.add(LogOut).width(200).height(50);
+        table.row().pad(40, 0, 40, 0);
+        table.add(exitButton).width(200).height(50);
+
+        stage.addActor(backgroundImage);
         stage.addActor(table);
 
-        selectMenu.addListener(new ChangeListener() {
+        profileButton.addListener(new ClickListener() {
             @Override
-            public void changed (ChangeEvent event, Actor actor) {
-                if(selectMenu.getSelected()
-                    .equalsIgnoreCase("profile menu")) {
-                    Main.getMain().getScreen().dispose();
-                    System.out.println("profile menu selected");
-                    Main.getMain().setScreen(new ProfileMenu());
-                } else{
-                    Main.getMain().getScreen().dispose();
-                    Main.getMain().setScreen(new PreGameMenu());
-                }
+            public void clicked(InputEvent event, float x, float y) {
+                Main.getMain().getScreen().dispose();
+                Main.getMain().setScreen(new ProfileMenu());
+                System.out.println("Profile Menu selected");
+            }
+        });
+
+        preGameButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Main.getMain().getScreen().dispose();
+                Main.getMain().setScreen(new PreGameMenu());
+                System.out.println("Pre-Game Menu selected");
             }
         });
 
         LogOut.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                //TODO:is this right?
                 System.out.println("now you are logged out");
-                File file = new File("StayLoggedIn.json");
-                if (file.exists()) {
-                    if (file.delete()) {
-                        System.out.println("Logged out successfully. StayLoggedIn.json removed.");
-                    } else {
-                        System.out.println("Failed to delete StayLoggedIn.json.");
-                    }
-                } else {
-                    System.out.println("No StayLoggedIn.json file to delete.");
-                }
+                // Handle logout logic
                 Main.getMain().getScreen().dispose();
                 Main.getMain().setScreen(new RegisterMenuView());
             }
@@ -102,16 +95,16 @@ public class MainMenu implements Screen {
     }
 
     @Override
-    public void render(float v) {
+    public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 40f));
         stage.draw();
     }
 
     @Override
-    public void resize(int i, int i1) {
+    public void resize(int width, int height) {
         if (stage != null) {
-            stage.getViewport().update(i, i1, true);
+            stage.getViewport().update(width, height, true);
         }
     }
 
@@ -135,7 +128,7 @@ public class MainMenu implements Screen {
         menuLabel.setFontScale(2f);
         exitButton.getLabel().setFontScale(2f);
         LogOut.getLabel().setFontScale(2f);
-        selectMenu.getStyle().font.getData().setScale(2f);
-      selectMenu.getStyle().listStyle.font.getData().setScale(2f);
+        profileButton.getLabel().setFontScale(2f);
+        preGameButton.getLabel().setFontScale(2f);
     }
 }

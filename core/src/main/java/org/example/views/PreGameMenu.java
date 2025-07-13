@@ -2,6 +2,7 @@ package org.example.views;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -20,6 +21,7 @@ public class PreGameMenu implements Screen {
 
     private Skin skin = GameAssetManager.skin;
     private Stage stage;
+    private Image backgroundImage;
     private final Label menuLabel;
     private final TextButton newGame;
     private final TextButton loadLastGame;
@@ -41,6 +43,9 @@ public class PreGameMenu implements Screen {
     public void show() {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
+        Texture backgroundTexture = new Texture(Gdx.files.internal("menu_background.png"));
+        backgroundImage = new Image(backgroundTexture);
+        backgroundImage.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         table.setFillParent(true);
         table.center();
@@ -57,7 +62,7 @@ public class PreGameMenu implements Screen {
 
         table.row().pad(30, 0, 10, 0);
         table.add(exitGame).width(300).height(60);
-
+        stage.addActor(backgroundImage);
         stage.addActor(table);
 
         addListeners();

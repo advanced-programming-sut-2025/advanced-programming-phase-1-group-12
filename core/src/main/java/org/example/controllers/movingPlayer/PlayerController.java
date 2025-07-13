@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import org.example.Main;
-import org.example.controllers.AnimalController;
 import org.example.controllers.MenusController.GameMenuController;
 import org.example.models.Animal.FarmAnimals;
 import org.example.models.Fundementals.App;

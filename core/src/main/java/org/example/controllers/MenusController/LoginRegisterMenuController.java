@@ -1,7 +1,14 @@
 package org.example.controllers.MenusController;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.Json;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.example.Main;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Result;
 import org.example.models.RelatedToUser.User;
@@ -37,7 +44,7 @@ public class LoginRegisterMenuController {
     }
 
     public Result register(String username, String password, String passwordConfirm, String nickname, String email, String gender,
-                           String answer, String answerConfirm, int questionNumber) {
+                           String answer, String answerConfirm, int questionNumber, String avatarPath) {
         if (username == null || password == null || passwordConfirm == null || email == null ||
             nickname == null || gender == null || answer == null || answerConfirm == null) {
             return new Result(false, "Required fields cannot be null");
@@ -63,7 +70,7 @@ public class LoginRegisterMenuController {
         boolean isFemale = !gender.equals("male");
         password = hashPassword(password);
         User newUser = new User(null, username, nickname, password, email, "",
-                "", isFemale);
+                "", isFemale, avatarPath);
 
         if (!answer.equals(answerConfirm)) {
             return new Result(false, "Answer and answer confirmation don't match");
@@ -117,23 +124,6 @@ public class LoginRegisterMenuController {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), StandardCharsets.UTF_8))) {
             Gson gson = new Gson();
             gson.toJson(user, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void loadUsersFromFile(String fileName) {
-        File file = new File(fileName);
-        if (!file.exists()) {
-            System.out.println("please sign in first");
-            return;
-        }
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
-            Gson gson = new Gson();
-            User user = gson.fromJson(reader, User.class);
-            App.getUsers().clear();
-            App.getUsers().put(user.getUserName(), user);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -219,5 +209,38 @@ public class LoginRegisterMenuController {
             e.printStackTrace();
             return new Result(false, "Error loading user file");
         }
+    }
+
+    public void changeAvatar(String avatarPath) {
+        if (App.getLoggedInUser() != null) {
+            App.getLoggedInUser().setAvatarPath(avatarPath);
+
+            User user = loadUserFromJson(App.getLoggedInUser().getUserName());
+
+            user.setAvatarPath(avatarPath);
+            updateUserFile(user);
+        }
+    }
+
+    public void showInfo(String message, Stage stage, Skin skin) {
+        Dialog dialog = new Dialog("Info", skin);
+        dialog.text(message);
+        dialog.button("OK");
+        dialog.show(stage);
+    }
+
+    private void updateUserFile(User user) {
+        Json json = new Json();
+        FileHandle file = Gdx.files.local("users/" + user.getUserName() + ".json");
+        file.writeString(json.prettyPrint(user), false);
+    }
+
+    private User loadUserFromJson(String username) {
+        FileHandle file = Gdx.files.local(username + ".json");
+
+        if (!file.exists()) return null;
+
+        Json json = new Json();
+        return json.fromJson(User.class, file);
     }
 }
