@@ -2,6 +2,7 @@ package org.example.views;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -19,6 +20,7 @@ import org.example.models.Assets.GameAssetManager;
 
 public class LoginMenuView implements Screen {
     private Skin skin = GameAssetManager.skin;
+    private Image backgroundImage;
     private Stage stage;
     private final Label menuLabel;
     private final TextButton exitButton;
@@ -61,6 +63,9 @@ public class LoginMenuView implements Screen {
     public void show() {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
+        Texture backgroundTexture = new Texture(Gdx.files.internal("menu_background.png"));
+        backgroundImage = new Image(backgroundTexture);
+        backgroundImage.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         table.setFillParent(true);
         table.center();
@@ -80,6 +85,7 @@ public class LoginMenuView implements Screen {
         table.add(loginButton).width(300);
         table.row().pad(20, 0, 20, 0);
         table.add(errorLabel);
+        stage.addActor(backgroundImage);
         stage.addActor(table);
 
         selectFlag.addListener(new ChangeListener() {
@@ -172,6 +178,7 @@ public class LoginMenuView implements Screen {
 }
 class forgetPass implements Screen {
     private Skin skin = GameAssetManager.skin;
+    private Image backgroundImage;
     private Stage stage;
     private final Label menuLabel;
     private final TextButton back;
@@ -205,6 +212,9 @@ class forgetPass implements Screen {
     public void show() {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
+        Texture backgroundTexture = new Texture(Gdx.files.internal("menu_background.png"));
+        backgroundImage = new Image(backgroundTexture);
+        backgroundImage.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         table.setFillParent(true);
         table.center();
@@ -224,6 +234,7 @@ class forgetPass implements Screen {
         table.add(back).width(300);
         table.row().pad(20, 0, 20, 0);
         table.add(errorLabel);
+        stage.addActor(backgroundImage);
         stage.addActor(table);
 
         showPassword.addListener(new ChangeListener() {

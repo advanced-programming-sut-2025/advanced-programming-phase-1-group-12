@@ -411,14 +411,6 @@ public class GameMenuController {
         return new Result(true, "Turn moved to " + nextPlayer.getUser().getUserName());
     }
 
-    private void guideForFarm() {
-        System.out.println("Farm selection guide:\n" +
-                "Farm with ID 0 has two lakes, a Shack, a quarry, and a greenhouse\n" +
-                "Farm with ID 1 has one lake, a Shack, two quarries, and a greenhouse\n" +
-                "Farm with ID 2 has one lake, a Shack, a quarry, and two greenhouses\n" +
-                "Farm with ID 3 has one lake, two Shack, a quarry, and a greenhouse\n" +
-                "Be careful, you do not have the right to change your mind after choosing a farm!");
-    }
 
 
     private static Map<Farm, Player> getFarmPlayerMap(ArrayList<Player> players, ArrayList<Integer> chosenFarmNumbers) {
