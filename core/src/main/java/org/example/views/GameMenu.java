@@ -157,7 +157,7 @@ public class GameMenu extends InputAdapter implements Screen {
                 batch.draw(portrait, farmCornerX - portrait.getWidth() / 2f, farmCornerY - portrait.getHeight() / 2f, 3000, 3000);
             }
         }
-        if (timeForAnimalMove >= 0.5f) {  // Move every 0.5 seconds (adjustable)
+        if (timeForAnimalMove >= 0.5f) {
             for (Farm farm : App.getCurrentGame().getFarms()) {
                 for (FarmAnimals animal : farm.getFarmAnimals()) {
                     if (animal.isMoving()) {
@@ -165,12 +165,36 @@ public class GameMenu extends InputAdapter implements Screen {
                     }
                 }
             }
-            timeForAnimalMove = 0f;
+            timeForAnimalMove = 0f; // Only reset when a step was done!
         }
+
+// Render logic
         for (Farm farm : App.getCurrentGame().getFarms()) {
             for (FarmAnimals animal : farm.getFarmAnimals()) {
-                float renderX = animal.getPosition().getxAxis() * 100f;
-                float renderY = animal.getPosition().getyAxis() * 100f;
+                float renderX;
+                float renderY;
+                if(animal.isMoving()) {
+                    Location current = animal.getPosition();
+                    Location previous = animal.getPreviousPosition();
+
+                    float progress = timeForAnimalMove / 0.5f;
+                    if (progress > 1f) progress = 1f;
+
+                    renderX = MathUtils.lerp(
+                        previous != null ? previous.getxAxis() : current.getxAxis(),
+                        current.getxAxis(),
+                        progress
+                    ) * 100f;
+
+                    renderY = MathUtils.lerp(
+                        previous != null ? previous.getyAxis() : current.getyAxis(),
+                        current.getyAxis(),
+                        progress
+                    ) * 100f;
+                } else {
+                    renderX = animal.getPosition().getxAxis() * 100f;
+                    renderY = animal.getPosition().getyAxis() * 100f;
+                }
 
                 batch.draw(animal.getTexture(), renderX, renderY);
             }

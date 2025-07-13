@@ -406,11 +406,13 @@ public class AnimalController {
 
         if (dx == 0 && dy == 0) {
             animal.setMoving(false);
+            animal.setTarget(null);
             return;
         }
 
         if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1) {
             // Close enough, snap
+            current.setObjectInTile(null);
             animal.setPreviousPosition(current);
             animal.setPosition(target);
             target.setObjectInTile(animal);
@@ -431,6 +433,9 @@ public class AnimalController {
             animal.setPreviousPosition(current);
             animal.setPosition(nextLocation);
             nextLocation.setObjectInTile(animal);
+        } else {
+            animal.setMoving(false);
+            animal.setTarget(null);
         }
     }
 
