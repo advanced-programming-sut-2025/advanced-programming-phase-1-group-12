@@ -394,34 +394,48 @@ public class AnimalController {
         }
         return "wrong animal name";
     }
-
     public void moveAnimalStep(FarmAnimals animal, Location target) {
         Location current = animal.getPosition();
-        System.out.println(current.getxAxis() + " " + current.getyAxis());
-
-        if (target == null || current.equals(target)) {
+        if (target == null) {
             animal.setMoving(false);
             return;
         }
 
-        int stepX = Integer.compare(target.getxAxis(), current.getxAxis());
-        int stepY = Integer.compare(target.getyAxis(), current.getyAxis());
+        int dx = target.getxAxis() - current.getxAxis();
+        int dy = target.getyAxis() - current.getyAxis();
+
+        if (dx == 0 && dy == 0) {
+            animal.setMoving(false);
+            animal.setTarget(null);
+            return;
+        }
+
+        if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1) {
+            // Close enough, snap
+            current.setObjectInTile(null);
+            animal.setPreviousPosition(current);
+            animal.setPosition(target);
+            target.setObjectInTile(animal);
+            animal.setMoving(false);
+            animal.setTarget(null);
+            return;
+        }
+
+        int stepX = Integer.compare(dx, 0);
+        int stepY = Integer.compare(dy, 0);
 
         int nextX = current.getxAxis() + stepX;
         int nextY = current.getyAxis() + stepY;
-        System.out.println(nextX + " " + nextY + " " + stepX + " " + stepY);
 
         Location nextLocation = App.getCurrentGame().getMainMap().findLocation(nextX, nextY);
-
-        if (nextLocation != null && nextLocation.getTypeOfTile().equals(TypeOfTile.GROUND)) {
+        if (nextLocation != null) {
             current.setObjectInTile(null);
-
-            // Save old
             animal.setPreviousPosition(current);
-
-            // Move to new
             animal.setPosition(nextLocation);
             nextLocation.setObjectInTile(animal);
+        } else {
+            animal.setMoving(false);
+            animal.setTarget(null);
         }
     }
 

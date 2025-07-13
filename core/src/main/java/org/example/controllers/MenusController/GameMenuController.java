@@ -1,14 +1,6 @@
 package org.example.controllers.MenusController;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.Main;
@@ -41,20 +33,12 @@ import org.example.models.enums.foraging.Plant;
 import org.example.models.enums.foraging.Stone;
 import org.example.models.enums.foraging.Tree;
 import org.example.views.GameMenu;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.List;
 
 public class GameMenuController {
-    private static Stage stage;
-
-    public static void setStage(Stage stage) {
-        GameMenuController.stage = stage;
-    }
-
     public Result startTrade() {
         StringBuilder playerList = new StringBuilder("Available players for trading:\n");
         Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
@@ -193,7 +177,7 @@ public class GameMenuController {
             Random random = new Random();
             int x = random.nextInt(200) + 1;
             int y = random.nextInt(200) + 1;
-            Result thorResult = Thor(x, y, stage);
+            Result thorResult = Thor(x, y);
             String result = "Day changed successfully! " + thorResult.getMessage();
             return new Result(true, result);
         }
@@ -395,9 +379,7 @@ public class GameMenuController {
 
         MapSetUp.showMapWithFarms(App.getCurrentGame().getMainMap());
         System.out.println("All farms have been assigned!");
-        GameMenu gameMenu = new GameMenu(usernames);
-        stage = gameMenu.getStage();
-        Main.getMain().setScreen(gameMenu);
+        Main.getMain().setScreen(new GameMenu(usernames));
     }
 
     public Result nextTurn() {
@@ -424,19 +406,11 @@ public class GameMenuController {
         } while (nextPlayer.isHasCollapsed() && tries < players.size());
 
         App.getCurrentGame().setCurrentPlayer(nextPlayer);
-        App.getCurrentGame().getDate().changeAdvancedTime(1);
+//        App.getCurrentGame().getDate().changeAdvancedTime(1);
 
         return new Result(true, "Turn moved to " + nextPlayer.getUser().getUserName());
     }
 
-    private void guideForFarm() {
-        System.out.println("Farm selection guide:\n" +
-                "Farm with ID 0 has two lakes, a Shack, a quarry, and a greenhouse\n" +
-                "Farm with ID 1 has one lake, a Shack, two quarries, and a greenhouse\n" +
-                "Farm with ID 2 has one lake, a Shack, a quarry, and two greenhouses\n" +
-                "Farm with ID 3 has one lake, two Shack, a quarry, and a greenhouse\n" +
-                "Be careful, you do not have the right to change your mind after choosing a farm!");
-    }
 
 
     private static Map<Farm, Player> getFarmPlayerMap(ArrayList<Player> players, ArrayList<Integer> chosenFarmNumbers) {
@@ -1046,66 +1020,25 @@ public class GameMenuController {
         }
     }
 
-    public Result Thor(int x, int y, Stage stage) {
+
+    public Result Thor(int x, int y) {
         Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
         if (location.getTypeOfTile().equals(TypeOfTile.GREENHOUSE)) {
             return new Result(false, "Lightning doesn't have effect on GreenHouse!");
         }
-
         location.setTypeOfTile(TypeOfTile.BURNED_GROUND);
-
-        // Black overlay
-        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pixmap.setColor(0, 0, 0, 1);
-        pixmap.fill();
-        Texture blackTexture = new Texture(pixmap);
-        pixmap.dispose();
-
-        Image blackOverlay = new Image(new TextureRegionDrawable(new TextureRegion(blackTexture)));
-        blackOverlay.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        blackOverlay.getColor().a = 0f;
-        stage.addActor(blackOverlay);
-
-        blackOverlay.addAction(Actions.sequence(
-            Actions.fadeIn(0.5f),
-            Actions.delay(1f),
-            Actions.fadeOut(0.5f),
-            Actions.run(() -> blackTexture.dispose()),
-            Actions.removeActor()
-        ));
-
-        Sound thunderSound = Gdx.audio.newSound(Gdx.files.internal("sounds/thunder.mp3"));
-        thunderSound.play();
-
-        OrthographicCamera camera = (OrthographicCamera) stage.getCamera();
-        final float duration = 0.5f;
-        final float intensity = 5f;
-        final long startTime = System.currentTimeMillis();
-
-        new Thread(() -> {
-            while (System.currentTimeMillis() - startTime < duration * 1000) {
-                float offsetX = (float) (Math.random() * 2 - 1) * intensity;
-                float offsetY = (float) (Math.random() * 2 - 1) * intensity;
-
-                camera.position.set(
-                    Gdx.graphics.getWidth() / 2f + offsetX,
-                    Gdx.graphics.getHeight() / 2f + offsetY,
-                    0
-                );
-                camera.update();
-
-                try {
-                    Thread.sleep(16);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            camera.position.set(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f, 0);
-            camera.update();
-        }).start();
-
-        return new Result(true, "⚡ Lightning struck the map at location " + x + ", " + y + "!");
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/c", "nircmd.exe monitor off");
+            processBuilder.start();
+            Thread.sleep(2000);
+            processBuilder = new ProcessBuilder("cmd.exe", "/c", "nircmd.exe monitor on");
+            processBuilder.start();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return new Result(true, "Lightning struck the map at location" + x + ", " + y);
     }
+
 
     private boolean isNearShippingBin(Player player) {
         if (player.getShippingBin() == null) {
