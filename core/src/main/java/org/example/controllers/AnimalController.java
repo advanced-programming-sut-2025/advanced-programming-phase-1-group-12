@@ -1,5 +1,6 @@
 package org.example.controllers;
 
+import org.example.Main;
 import org.example.models.Animal.FarmAnimals;
 import org.example.models.Fundementals.*;
 import org.example.models.Item;
@@ -12,6 +13,7 @@ import org.example.models.enums.Season;
 import org.example.models.enums.Types.AnimalProduct;
 import org.example.models.enums.Types.TypeOfTile;
 import org.example.models.enums.Weather;
+import org.example.views.FishingScreen;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -189,7 +191,7 @@ public class AnimalController {
             (destination.getxAxis() - origin.getxAxis()) * (destination.getxAxis() - origin.getxAxis()) <= 25;
     }
 
-    public Result fishing(String fishingPole) {
+    public Result fishing(String fishingPole, List<String>players) {
         boolean hasPole = App.getCurrentPlayerLazy().getBackPack().getItemNames().containsKey(fishingPole);
 
         if (!hasPole) {
@@ -231,8 +233,6 @@ public class AnimalController {
         } else {
             fishQuality = Quality.IRIDIUM;
         }
-
-        // Initialize as mutable ArrayList
         List<FishDetails> fishTypes = new ArrayList<>();
 
         //possible fish types
@@ -256,6 +256,9 @@ public class AnimalController {
         }
 
         fishing.increaseAmount(5);
+        if(randomItems.size() > 0) {
+            Main.getMain().setScreen(new FishingScreen(randomItems.get(0), players));
+        }
         return new Result(true, "You just caught " + numberOfCaught + " fishes");
     }
 

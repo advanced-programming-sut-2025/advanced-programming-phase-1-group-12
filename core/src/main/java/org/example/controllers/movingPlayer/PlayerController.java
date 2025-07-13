@@ -17,6 +17,7 @@ import org.example.models.Fundementals.Player;
 import org.example.models.Place.Farm;
 import org.example.models.Place.Store;
 import org.example.models.enums.Types.TypeOfTile;
+import org.example.views.FishingScreen;
 import org.example.views.GameMenu;
 import org.example.views.StoreMenuView;
 
@@ -111,6 +112,11 @@ public class PlayerController {
             if (location.getTypeOfTile() == TypeOfTile.STORE) {
                 Gdx.app.postRunnable(() -> Main.getMain().setScreen(new StoreMenuView(findStore(location), players, playerList)));
                 return;
+            } if(location.getTypeOfTile().equals(TypeOfTile.LAKE)){
+                //TODO:baraye hame mahi haye gerefte shode! felan ye mahie
+                AnimalController animalController = new AnimalController();
+                //TODO bayad fishing pole esh ro choose kone?
+                System.out.println(animalController.fishing("Bamboo Pole", players));
             }
         }
 

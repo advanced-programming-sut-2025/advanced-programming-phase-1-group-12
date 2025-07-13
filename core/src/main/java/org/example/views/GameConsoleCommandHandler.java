@@ -69,6 +69,7 @@ public class GameConsoleCommandHandler {
         }else if ((matcher = GameMenuCommands.addWoodAndStone.getMather(input)) != null) {
             System.out.println(storeController.cheatAddItem("Wood", 100));
             System.out.println(storeController.cheatAddItem("Stone", 100));
+            System.out.println(storeController.cheatAddItem("Bamboo Pole", 1));
         }
         else if ((matcher = GameMenuCommands.LoadGame.getMather(input)) != null) {
             controller.loadGameById(matcher.end("gameID"));
@@ -202,8 +203,6 @@ public class GameConsoleCommandHandler {
             System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.SELL_ANIMAL.getMather(input)) != null) {
             System.out.println(animalController.sellAnimal(matcher.group("name")).getMessage());
-        } else if ((matcher = GameMenuCommands.FISHING.getMather(input)) != null) {
-            System.out.println(animalController.fishing(matcher.group("fishingPole")).getMessage());
         } else if ((matcher = GameMenuCommands.ANIMALS_LIST.getMather(input)) != null) {
             animalController.animalsList();
         } else if ((matcher = GameMenuCommands.CHEAT_SET_FRIENDSHIP.getMather(input)) != null) {
