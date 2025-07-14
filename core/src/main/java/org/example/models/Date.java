@@ -23,18 +23,16 @@ import java.util.*;
 public class Date implements Runnable {
     private int hour;
     private int year;
-    private int dayOfMonth; // Max : 28 days
-    private int dayOfWeek; //Max : 7 days
-    private Season season; // season changes after 28 days
+    private int dayOfMonth;
+    private int dayOfWeek;
+    private Season season;
     private Weather weather;
     private Weather tommorowWeather;
     private Map<Season, List<Weather>> weatherOfSeason;
-    private int currentSeason; // value of each season
+    private int currentSeason;
     private boolean threadRunning = true;
     private Thread timeThread;
 
-
-    //Date setUp
     public Date() {
         timeThread = new Thread(this);
         timeThread.setDaemon(true);

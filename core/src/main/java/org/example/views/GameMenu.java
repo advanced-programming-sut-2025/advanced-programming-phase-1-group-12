@@ -1,14 +1,17 @@
 package org.example.views;
 
 import com.badlogic.gdx.*;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -26,7 +29,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.example.models.Fundementals.Result;
 import org.example.models.Place.Farm;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GameMenu extends InputAdapter implements Screen {
     private final GameMenuController controller = new GameMenuController();
@@ -36,8 +41,7 @@ public class GameMenu extends InputAdapter implements Screen {
     private final StoreController storeController = new StoreController();
     private final CraftingController craftingController = new CraftingController();
     private final ArtisanController artisanController = new ArtisanController();
-
-    Label errorLabel;
+    private Label errorLabel;
 
     private PixelMapRenderer pixelMapRenderer;
     private SpriteBatch batch;
@@ -54,6 +58,9 @@ public class GameMenu extends InputAdapter implements Screen {
     private Skin skin = GameAssetManager.skin;
     private BitmapFont font;
     private float timeForAnimalMove = 0;
+
+    //expressBar for players
+    private Map<Player, ProgressBar> energyBars;
 
     GameConsoleCommandHandler cmdHandler =
         new GameConsoleCommandHandler(controller,
@@ -95,6 +102,34 @@ public class GameMenu extends InputAdapter implements Screen {
         updateCameraToPlayer();
         pixelMapRenderer = new PixelMapRenderer(App.getCurrentGame().getMainMap());
 
+        energyBars = new HashMap<>();
+
+        float barHeight = 20f;
+        float yOffset = stage.getHeight() - 40f; // Top of screen
+        float spacing = 30f;
+        float rightMargin = 20f;
+
+        for (Player p : App.getCurrentGame().getPlayers()) {
+            ProgressBar bar = new ProgressBar(0, 200, 1, false, skin.get("default-horizontal", ProgressBar.ProgressBarStyle.class));
+            bar.setValue(p.getEnergy());
+            bar.setAnimateDuration(0.25f);
+            bar.setSize(200, barHeight);
+
+            Label nameLabel = new Label(p.getUser().getUserName(), skin);
+            nameLabel.setFontScale(0.5f);
+
+            Table playerTable = new Table();
+            playerTable.add(nameLabel).left().padRight(10);
+            playerTable.add(bar).width(200).height(barHeight);
+            playerTable.pack();
+
+            playerTable.setPosition(stage.getWidth() - playerTable.getWidth() - rightMargin, yOffset);
+            yOffset -= spacing;
+
+            stage.addActor(playerTable);
+            energyBars.put(p, bar);
+        }
+
         Player player = App.getCurrentPlayerLazy();
 
         player.getPlayerSprite().setPosition(
@@ -127,9 +162,19 @@ public class GameMenu extends InputAdapter implements Screen {
         camera.update();
 
         batch.setProjectionMatrix(camera.combined);
-
-
         pixelMapRenderer.render(batch, 0, 0);
+
+        for (Player p : App.getCurrentGame().getPlayers()) {
+            ProgressBar bar = energyBars.get(p);
+            if (bar != null) {
+                bar.setValue(p.getEnergy());
+
+                if (p.getEnergy() <= 0 && App.getCurrentPlayerLazy().equals(p)) {
+                    controller.nextTurn();
+                    break;
+                }
+            }
+        }
 
         batch.draw(frame, scaledX, scaledY, player.getPlayerSprite().getWidth(), player.getPlayerSprite().getHeight());
         font.getData().setScale(0.5f);

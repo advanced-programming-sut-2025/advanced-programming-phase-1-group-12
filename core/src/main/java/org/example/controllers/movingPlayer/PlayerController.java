@@ -123,6 +123,8 @@ public class PlayerController {
             newY += player.getSpeed();
             if (isWalkable(newX, newY)) {
                 facing = Dir.UP;
+                int newEnergy = player.getEnergy() - 1;
+                player.setEnergy(newEnergy);
             } else {
                 newY -= player.getSpeed();
             }
@@ -131,6 +133,8 @@ public class PlayerController {
             newY -= player.getSpeed();
             if (isWalkable(newX, newY)) {
                 facing = Dir.DOWN;
+                int newEnergy = player.getEnergy() - 1;
+                player.setEnergy(newEnergy);
             } else {
                 newY += player.getSpeed();
             }
@@ -139,6 +143,8 @@ public class PlayerController {
             newX -= player.getSpeed();
             if (isWalkable(newX, newY)) {
                 facing = Dir.LEFT;
+                int newEnergy = player.getEnergy() - 1;
+                player.setEnergy(newEnergy);
             } else {
                 newX += player.getSpeed();
             }
@@ -147,6 +153,8 @@ public class PlayerController {
             newX += player.getSpeed();
             if (isWalkable(newX, newY)) {
                 facing = Dir.RIGHT;
+                int newEnergy = player.getEnergy() - 1;
+                player.setEnergy(newEnergy);
             } else {
                 newX -= player.getSpeed();
             }
