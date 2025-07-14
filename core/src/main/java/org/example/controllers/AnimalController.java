@@ -192,11 +192,6 @@ public class AnimalController {
     }
 
     public Result fishing(String fishingPole, List<String>players) {
-        boolean hasPole = App.getCurrentPlayerLazy().getBackPack().getItemNames().containsKey(fishingPole);
-
-        if (!hasPole) {
-            return new Result(false, "You do not have any poles of this type");
-        }
         double M = switch (App.getCurrentGame().getDate().getWeather()) {
             case RAINY -> 1.2;
             case STORM -> 0.5;
@@ -238,7 +233,7 @@ public class AnimalController {
         //possible fish types
         for (FishDetails types : FishDetails.values()) {
             if (types.getSeason().equals(App.getCurrentGame().getDate().getSeason())) {
-                if (!types.isLegendary() || fishing.getLevel() == 4) {
+                if (!(types.isLegendary() && fishing.getLevel() != 4)) {
                     fishTypes.add(types);
                 }
             }
@@ -257,7 +252,7 @@ public class AnimalController {
 
         fishing.increaseAmount(5);
         if(randomItems.size() > 0) {
-            Main.getMain().setScreen(new FishingScreen(randomItems.get(0), players));
+            Main.getMain().setScreen(new FishingScreen(randomItems, players, fishQuality, numberOfCaught, fishingPole));
         }
         return new Result(true, "You just caught " + numberOfCaught + " fishes");
     }

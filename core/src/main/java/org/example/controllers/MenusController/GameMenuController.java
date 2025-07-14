@@ -411,8 +411,6 @@ public class GameMenuController {
         return new Result(true, "Turn moved to " + nextPlayer.getUser().getUserName());
     }
 
-
-
     private static Map<Farm, Player> getFarmPlayerMap(ArrayList<Player> players, ArrayList<Integer> chosenFarmNumbers) {
         Map<Farm, Player> farmOwnership = new HashMap<>();
         ArrayList<Farm> farms = App.getCurrentGame().getMainMap().getFarms();

@@ -37,6 +37,7 @@ public class PlayerController {
     private final Animation<TextureRegion> walkLeft;
     private final Animation<TextureRegion> walkRight;
     private final Animation<TextureRegion> walkUp;
+    private final Animation<TextureRegion> collapse;
 
     private Animation<TextureRegion> currentAnim;
     private float stateTime = 0f;
@@ -46,6 +47,11 @@ public class PlayerController {
     private Dir facing = Dir.DOWN;
     List<String> players;
     List<Player> playerList;
+
+    //for collapse:
+    private boolean isCollapsing = false;
+    private float collapseTimer = 0f;
+    private static final float COLLAPSE_TIME = 5f;
 
     public PlayerController(Player player, GameMenuController gameController, List<String> players) {
         this.players = players;
@@ -60,6 +66,7 @@ public class PlayerController {
         walkLeft = buildAnim(grid[3]);
         walkRight = buildAnim(grid[1]);
         walkUp = buildAnim(grid[2]);
+        collapse = buildAnim(grid[4]);
 
         currentAnim = walkDown;
     }
@@ -71,6 +78,35 @@ public class PlayerController {
     }
 
     public void update(float delta) {
+
+        if (isCollapsing) {
+            collapseTimer += delta;
+
+            if (collapseTimer >= COLLAPSE_TIME) {
+                isCollapsing = false;
+                collapseTimer = 0f;
+                switch (facing) {
+                    case UP -> currentAnim = walkUp;
+                    case DOWN -> currentAnim = walkDown;
+                    case LEFT -> currentAnim = walkLeft;
+                    case RIGHT -> currentAnim = walkRight;
+                }
+                player.setEnergy(100);
+                return;
+            }
+
+            TextureRegion frame = collapse.getKeyFrame(collapseTimer, true);
+            Main.getMain().getBatch().begin();
+            Main.getMain().getBatch().draw(
+                frame,
+                player.getUserLocation().getxAxis(),
+                player.getUserLocation().getyAxis(),
+                player.getPlayerSprite().getWidth(),
+                player.getPlayerSprite().getHeight()
+            );
+            return;
+        }
+
         handleInput(delta);
 
         stateTime += delta;
@@ -89,6 +125,15 @@ public class PlayerController {
     private void handleInput(float delta) {
         int newX = App.getCurrentGame().getCurrentPlayer().getUserLocation().getxAxis();
         int newY = App.getCurrentGame().getCurrentPlayer().getUserLocation().getyAxis();
+
+        if (player.getEnergy() <= 0) {
+            if (!isCollapsing) {
+                isCollapsing = true;
+                App.getCurrentPlayerLazy().setHasCollapsed(true);
+                currentAnim = collapse;
+                return;
+            }
+        }
 
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
 
@@ -113,10 +158,9 @@ public class PlayerController {
                 Gdx.app.postRunnable(() -> Main.getMain().setScreen(new StoreMenuView(findStore(location), players, playerList)));
                 return;
             } if(location.getTypeOfTile().equals(TypeOfTile.LAKE)){
-                //TODO:baraye hame mahi haye gerefte shode! felan ye mahie
-                AnimalController animalController = new AnimalController();
-                //TODO bayad fishing pole esh ro choose kone?
-                System.out.println(animalController.fishing("Bamboo Pole", players));
+                GameMenu gameMenu = new GameMenu(players);
+                Main.getMain().setScreen(gameMenu);
+                gameMenu.showFishingPoleDialog();
             }
         }
 
@@ -124,6 +168,8 @@ public class PlayerController {
             newY += player.getSpeed();
             if (isWalkable(newX, newY)) {
                 facing = Dir.UP;
+                int newEnergy = player.getEnergy() - 1;
+                player.setEnergy(newEnergy);
             } else {
                 newY -= player.getSpeed();
             }
@@ -132,6 +178,8 @@ public class PlayerController {
             newY -= player.getSpeed();
             if (isWalkable(newX, newY)) {
                 facing = Dir.DOWN;
+                int newEnergy = player.getEnergy() - 1;
+                player.setEnergy(newEnergy);
             } else {
                 newY += player.getSpeed();
             }
@@ -140,6 +188,8 @@ public class PlayerController {
             newX -= player.getSpeed();
             if (isWalkable(newX, newY)) {
                 facing = Dir.LEFT;
+                int newEnergy = player.getEnergy() - 1;
+                player.setEnergy(newEnergy);
             } else {
                 newX += player.getSpeed();
             }
@@ -148,6 +198,8 @@ public class PlayerController {
             newX += player.getSpeed();
             if (isWalkable(newX, newY)) {
                 facing = Dir.RIGHT;
+                int newEnergy = player.getEnergy() - 1;
+                player.setEnergy(newEnergy);
             } else {
                 newX -= player.getSpeed();
             }
