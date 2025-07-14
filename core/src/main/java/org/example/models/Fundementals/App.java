@@ -141,10 +141,18 @@ public class App {
         for (File file : files) {
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 User user = gson.fromJson(reader, User.class);
+
+                if (user == null || user.getUserName() == null) {
+                    System.err.println("Corrupt or invalid user file: " + file.getName());
+                    continue;
+                }
+
                 App.getUsers().put(user.getUserName(), user);
             } catch (IOException e) {
+                System.err.println("Failed to load user from file: " + file.getName());
                 e.printStackTrace();
             }
         }
+
     }
 }

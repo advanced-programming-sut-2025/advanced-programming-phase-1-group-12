@@ -53,6 +53,8 @@ public class GameMenu extends InputAdapter implements Screen {
     private Skin skin = GameAssetManager.skin;
     private BitmapFont font;
     private float timeForAnimalMove = 0;
+    private Texture clockTexture;
+    private Image clockImage;
 
     GameConsoleCommandHandler cmdHandler =
         new GameConsoleCommandHandler(controller,
@@ -73,6 +75,15 @@ public class GameMenu extends InputAdapter implements Screen {
         batch = Main.getMain().getBatch();
         stage = new Stage(new ScreenViewport());
         font = new BitmapFont(Gdx.files.internal("fonts/new.fnt"));
+        clockTexture = new Texture(Gdx.files.internal("Clock/clock.png"));
+        clockImage = new Image(clockTexture);
+
+        float clockSize = 50f;
+        clockImage.setSize(clockSize , clockSize);
+        clockImage.setPosition(stage.getWidth() - clockSize - 10f, stage.getHeight() - clockSize - 10f);
+
+        stage.addActor(clockImage);
+
         InputMultiplexer mux = new InputMultiplexer();
         mux.addProcessor(this);
         mux.addProcessor(stage);
@@ -207,6 +218,9 @@ public class GameMenu extends InputAdapter implements Screen {
 
     @Override
     public void dispose() {
+        if (clockTexture != null) {
+            clockTexture.dispose();
+        }
         stage.dispose();
         pixelMapRenderer.dispose();
         font.dispose();
