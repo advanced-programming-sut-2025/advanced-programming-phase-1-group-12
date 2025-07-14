@@ -19,6 +19,12 @@ import io.github.fourlastor.construo.Target
 
 sourceSets.main.resources.srcDirs += [ rootProject.file('assets').path ]
 mainClassName = 'org.example.lwjgl3.Lwjgl3Launcher'
+applicationDefaultJvmArgs = [
+  '--add-opens=java.base/java.util=ALL-UNNAMED',
+  '--add-opens=java.base/java.lang=ALL-UNNAMED',
+  '--add-opens=java.base/java.security=ALL-UNNAMED',
+  '--add-opens=java.base/java.lang.ref=ALL-UNNAMED'
+]
 application.setMainClass(mainClassName)
 eclipse.project.name = appName + '-lwjgl3'
 java.sourceCompatibility = 17
