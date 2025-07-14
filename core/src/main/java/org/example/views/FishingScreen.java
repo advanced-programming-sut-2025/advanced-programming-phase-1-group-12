@@ -213,7 +213,7 @@ public class FishingScreen extends InputAdapter implements Screen {
         progressBar = new ProgressBar(0, 1, 0.01f, false, style);
 
         progressBar.setSize(250, 30);
-        progressBar.setPosition(camRight - 260, camTop - 40);
+        progressBar.setPosition(camRight - 760, camTop - 40);
         fishingStage.addActor(progressBar);
     }
 
@@ -240,7 +240,7 @@ public class FishingScreen extends InputAdapter implements Screen {
             }
         }
 
-        progressBar.setPosition(camRight - 260, camTop - 40);
+        progressBar.setPosition(camRight - 760, camTop - 40);
 
         progressBar.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         progressBar.draw(fishingBatch, 1);
