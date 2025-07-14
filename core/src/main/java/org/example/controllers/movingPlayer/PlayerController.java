@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import org.example.Main;
+import org.example.controllers.AnimalController;
 import org.example.controllers.MenusController.GameMenuController;
 import org.example.models.Animal.FarmAnimals;
 import org.example.models.Fundementals.App;
@@ -112,10 +113,9 @@ public class PlayerController {
                 Gdx.app.postRunnable(() -> Main.getMain().setScreen(new StoreMenuView(findStore(location), players, playerList)));
                 return;
             } if(location.getTypeOfTile().equals(TypeOfTile.LAKE)){
-                //TODO:baraye hame mahi haye gerefte shode! felan ye mahie
-                AnimalController animalController = new AnimalController();
-                //TODO bayad fishing pole esh ro choose kone?
-                System.out.println(animalController.fishing("Bamboo Pole", players));
+                GameMenu gameMenu = new GameMenu(players);
+                Main.getMain().setScreen(gameMenu);
+                gameMenu.showFishingPoleDialog();
             }
         }
 

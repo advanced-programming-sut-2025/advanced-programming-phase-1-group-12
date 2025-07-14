@@ -32,6 +32,12 @@ public class Ability {
 
     public void increaseAmount(int amount) {
         this.amount += amount;
+        if(amount >= 10){
+            if(level <= 3){
+                level++;
+                amount = 0;
+            }
+        }
     }
 
     public void increaseLevel() {

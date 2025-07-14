@@ -2,22 +2,31 @@ package org.example.views;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Main;
 import org.example.models.Assets.GameAssetManager;
+import org.example.models.Fundementals.App;
+import org.example.models.Item;
+import org.example.models.ItemBuilder;
+import org.example.models.ProductsPackage.Quality;
+import org.example.models.RelatedToUser.Ability;
 import org.example.models.enums.FishDetails;
 
 import java.util.List;
 
-public class FishingScreen implements Screen {
+public class FishingScreen extends InputAdapter implements Screen {
 
     private Stage fishingStage;
     private SpriteBatch fishingBatch;
@@ -28,33 +37,42 @@ public class FishingScreen implements Screen {
     private Texture bobberTexture;
 
     private float bobberYPosition;
-    private boolean isReelingIn;
-    private float reelProgress;
-    private FishDetails fishDetails;
+    private FishDetails fishDetail;
+    private List<FishDetails> fishDetails;
     private int fishY;
     List<String> players;
     ProgressBar progressBar;
     private float progressTimer = 0.0f;
     private int progress = 4;
     private FishMovementType movementType = FishMovementType.MIXED;
-    private float fishYVelocity = 0;
     private float fishStateTimer = 0;
-    private float timeSinceDirectionChange = 0;
     private int fishDirection = 0; // -1 = down, 0 = still, 1 = up
+    private Quality fishQuality;
+    private boolean perfectFish = true;
+    private int numberOfFishes;
+    private boolean fishingOver = false;
+    Label errorLabel;
+    Skin skin = GameAssetManager.skin;
+    private String message = "";
+    private String bobberType;
 
-
-    public FishingScreen(FishDetails fishDetails, List<String> players) {
+    public FishingScreen(List<FishDetails> fishDetails, List<String> players, Quality fishQuality, int numberOfFishes, String bobberType) {
+        this.bobberType = bobberType;
         this.fishDetails = fishDetails;
-        this.fishTexture = fishDetails.getTexture();
+        this.fishDetail = fishDetails.get(numberOfFishes - 1);
+        this.fishTexture = fishDetails.get(numberOfFishes - 1).getTexture();
         fishingStage = new Stage(new ScreenViewport());
         fishingBatch = new SpriteBatch();
         fishingCamera = new OrthographicCamera();
         fishingCamera.setToOrtho(false, 800, 600); // Adjust the screen size
         this.fishY = 350;
         this.players = players;
-        ProgressBar.ProgressBarStyle style = GameAssetManager.skin.get("default-horizontal", ProgressBar.ProgressBarStyle.class);
+        this.numberOfFishes = numberOfFishes;
+        errorLabel = new Label("", skin);
+        ProgressBar.ProgressBarStyle style = skin.get("default-horizontal", ProgressBar.ProgressBarStyle.class);
         progressBar = new ProgressBar(0, 1, 0.01f, false, style);
-        initializeprogressBar(GameAssetManager.skin, fishingCamera);
+        this.fishQuality = fishQuality;
+        initializeprogressBar(skin, fishingCamera);
         int rand = MathUtils.random(0, 5);
         switch (rand) {
             case 0:
@@ -72,7 +90,8 @@ public class FishingScreen implements Screen {
             case 4:
                 movementType = FishMovementType.SMOOTH;
                 break;
-        } System.out.println(movementType.name());
+        }
+        System.out.println(movementType.name());
     }
 
     @Override
@@ -84,8 +103,6 @@ public class FishingScreen implements Screen {
 
         // Set the bobber starting position
         bobberYPosition = 500; // Adjust this based on your scene height
-        isReelingIn = false;
-        reelProgress = 0;
         fishingBatch = new SpriteBatch(); // Create new batch instead of using global one
         fishingStage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(fishingStage);
@@ -95,22 +112,27 @@ public class FishingScreen implements Screen {
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);
-        progressTimer += delta;
-        if (progressTimer >= 0.5f) {
-            float bobberTop = bobberYPosition + 50;
-            float bobberBottom = bobberYPosition;
 
-            if (fishY >= bobberBottom && fishY <= bobberTop) {
-                progress += 4;
+        if (!fishingOver) {
+            progressTimer += delta;
+            if (progressTimer >= 0.5f) {
+                float bobberTop = bobberYPosition + 50;
+                float bobberBottom = bobberYPosition;
+
+                if (fishY >= bobberBottom && fishY <= bobberTop) {
+                    progress += 4;
+                } else {
+                    perfectFish = false;
+                    progress--;
+                }
                 progressTimer = 0;
             }
-        }
-        handleInput(delta);
-        // Animate fish up and down
-        updateFishMovement(delta);
 
-        // Clamp bobber position before rendering
-        bobberYPosition = Math.max(0, Math.min(bobberYPosition, 800 - 50));
+            progress = MathUtils.clamp(progress, 0, 20);
+            handleInput(delta);
+            updateFishMovement(delta);
+            bobberYPosition = Math.max(0, Math.min(bobberYPosition, 800 - 50));
+        }
 
         fishingBatch.setProjectionMatrix(fishingCamera.combined);
         fishingBatch.begin();
@@ -118,20 +140,19 @@ public class FishingScreen implements Screen {
         fishingBatch.draw(waterTexture, 0, 0, 1000, 800);
         fishingBatch.draw(bobberTexture, 580, bobberYPosition, 15, 50);
         fishingBatch.draw(fishTexture, 380, fishY);
-
-        if (isReelingIn) {
-            reelProgress += delta * 0.5f;
-            if (reelProgress >= 1) {
-                reelProgress = 1;
-                catchFish();
-            }
+        if ("Bamboo Pole".equals(bobberType)) {
+            BitmapFont font = new BitmapFont();
+            font.setColor(1, 0, 0, 1);  // Red color for the name
+            font.draw(fishingBatch, fishDetail.getName(), 380, fishY + 100);
         }
+
         drawprogressBar(fishingCamera);
 
         fishingBatch.end();
         fishingStage.act(delta);
         fishingStage.draw();
     }
+
 
     private void handleInput(float delta) {
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
@@ -149,13 +170,13 @@ public class FishingScreen implements Screen {
 
 
     private void catchFish() {
-        if (reelProgress >= 1) {
-            // Display feedback on success
-            System.out.println("You caught a fish!");
-        } else {
-            // Handle a failed catch (missed)
-            System.out.println("You missed the fish.");
+        Item item = ItemBuilder.builder(fishDetail.getName(), fishQuality, fishDetail.getBasePrice());
+        ItemBuilder.addToBackPack(item, 1, fishQuality);
+        message = "you caught it";
+        if (perfectFish) {
+            message = "you caught it perfect!!!";
         }
+        endOneFish();
     }
 
     @Override
@@ -192,8 +213,8 @@ public class FishingScreen implements Screen {
         progressBar = new ProgressBar(0, 1, 0.01f, false, style);
 
         progressBar.setSize(250, 30);
-        progressBar.setPosition(camRight - 260, camTop - 40); // Final position
-        fishingStage.addActor(progressBar); // ✅ Add to stage!
+        progressBar.setPosition(camRight - 260, camTop - 40);
+        fishingStage.addActor(progressBar);
     }
 
 
@@ -202,9 +223,22 @@ public class FishingScreen implements Screen {
         float camTop = cam.position.y + cam.viewportHeight / 2;
 
         float progress1 = (float) progress / 20;
-        progress1 = Math.min(progress1, 1); // Ensure it does not exceed 100%
+        progress1 = Math.min(progress1, 1);
 
-        progressBar.setValue(progress1); // Set the value of the XP progress bar
+        progressBar.setValue(progress1);
+        if (!fishingOver) {
+            if (progress1 <= 0) {
+                message = "you lost it";
+                numberOfFishes--;
+                endOneFish();
+            } else if (progress1 >= 1) {
+                numberOfFishes--;
+                if (perfectFish) {
+                    applyPerfectFish();
+                }
+                catchFish();
+            }
+        }
 
         progressBar.setPosition(camRight - 260, camTop - 40);
 
@@ -266,6 +300,110 @@ public class FishingScreen implements Screen {
 
     public enum FishMovementType {
         MIXED, SMOOTH, SINKER, FLOATER, DART
+    }
+
+    public void applyPerfectFish() {
+        if (fishQuality.equals(Quality.SILVER)) {
+            fishQuality = Quality.GOLDEN;
+        } else if (fishQuality.equals(Quality.GOLDEN)) {
+            fishQuality = Quality.IRIDIUM;
+        }
+        Ability fishing = App.getCurrentPlayerLazy().getAbilityByName("fishing");
+        fishing.increaseAmount((int) (1.4 * fishing.getAmount()));
+    }
+
+    public void endOneFish() {
+        if (fishingOver) {
+            return; // Avoid double processing if the fishing is already over
+        }
+
+        fishingOver = true; // ⬅️ Important to stop the game loop and avoid repeated dialogs
+
+        Dialog dialog = new Dialog("Fishing Finished", skin);
+
+        errorLabel.setColor(1, 0, 0, 1);
+        errorLabel.setVisible(false);
+
+        TextButton exitButton = new TextButton("Exit", skin);
+        TextButton nextFishButton = new TextButton("Next Fish", skin);
+        Label messageLabel = new Label(message, skin);
+
+        exitButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Main.getMain().setScreen(new GameMenu(players));
+            }
+        });
+
+        nextFishButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (numberOfFishes > 0) {
+                    dialog.hide();
+                    restartFishing();
+                } else {
+                    Main.getMain().setScreen(new GameMenu(players));
+                }
+            }
+        });
+
+        Table content = dialog.getContentTable();
+        content.add(messageLabel).pad(10).width(400f).row();
+        content.add(nextFishButton).colspan(2).pad(5).width(400f).row();
+        content.add(exitButton).colspan(2).pad(5).width(400f).row();
+        content.add(errorLabel).colspan(2).pad(10).width(600f).row();
+
+        dialog.button(exitButton);
+        dialog.button(nextFishButton);
+        dialog.setModal(true);
+        dialog.setMovable(false);
+        dialog.pack();
+        dialog.show(fishingStage);
+
+        // After the dialog is dismissed, set input processor again to allow 'Q' to work
+        fishingStage.addListener(new InputListener() {
+            @Override
+            public boolean keyDown(InputEvent event, int keycode) {
+                if (keycode == Input.Keys.Q) {
+                    System.out.println("Exiting fishing screen...");
+                    Main.getMain().setScreen(new GameMenu(players));
+                    return true;
+                }
+                return super.keyDown(event, keycode);
+            }
+        });
+    }
+
+
+    public void restartFishing() {
+        fishDetail = fishDetails.get(numberOfFishes - 1);
+        fishTexture = fishDetail.getTexture();
+        progressTimer = 0.0f;
+        progress = 4;
+        fishY = 350;
+        fishStateTimer = 0;
+        fishDirection = 0; // -1 = down, 0 = still, 1 = up
+        perfectFish = true;
+        fishingOver = false;
+        int rand = MathUtils.random(0, 5);
+        switch (rand) {
+            case 0:
+                movementType = FishMovementType.MIXED;
+                break;
+            case 1:
+                movementType = FishMovementType.DART;
+                break;
+            case 2:
+                movementType = FishMovementType.FLOATER;
+                break;
+            case 3:
+                movementType = FishMovementType.SINKER;
+                break;
+            case 4:
+                movementType = FishMovementType.SMOOTH;
+                break;
+        }
+        System.out.println(movementType.name());
     }
 
 }

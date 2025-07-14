@@ -23,6 +23,7 @@ import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Player;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import org.example.models.Fundementals.Result;
 import org.example.models.Place.Farm;
 
 import java.util.List;
@@ -407,9 +408,51 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
 
-    public void showError(String message) {
+    private void showError(String message) {
         errorLabel.setText(message);
+        errorLabel.setColor(1, 0, 0, 1);  // Red color for error
+
+        errorLabel.getStyle().font.getData().setScale(2f);
+        errorLabel.setPosition(camera.viewportWidth / 2 - errorLabel.getWidth() / 2, camera.viewportHeight - 50);
+        stage.addActor(errorLabel);
         errorLabel.setVisible(true);
-        errorLabel.invalidateHierarchy();
     }
+
+    public void showFishingPoleDialog() {
+        Skin skin = GameAssetManager.skin;  // Assuming you're using a skin asset to style the UI
+        Dialog dialog = new Dialog("Choose Fishing Pole", skin);
+
+        Label label = new Label("Enter the name of the fishing pole:", skin);
+        TextField poleNameField = new TextField("", skin);  // TextField for the user to enter the name
+
+        // Add OK button to submit the fishing pole name
+        TextButton okButton = new TextButton("OK", skin);
+        okButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                String poleName = poleNameField.getText().trim();  // Get the entered pole name
+                boolean hasPole = App.getCurrentPlayerLazy().getBackPack().getItemNames().containsKey(poleName);
+
+                if (!hasPole) {
+                    showError( "You do not have any poles of this type");
+                }
+
+                else if (!poleName.isEmpty()) {
+                    AnimalController animalController = new AnimalController();
+                    animalController.fishing(poleName, players);  // Pass the fishing pole name to AnimalController
+                    dialog.hide();  // Close the dialog after submission
+                } else {
+                    showError("Please enter a valid fishing pole name.");
+                }
+            }
+        });
+
+        dialog.getContentTable().add(label).pad(10).width(400f).row();
+        dialog.getContentTable().add(poleNameField).pad(10).width(400f).row();
+        dialog.getContentTable().add(okButton).pad(10).width(400f).row();
+
+        dialog.pack();
+        dialog.show(stage);  // Show the dialog on the stage
+    }
+
 }
