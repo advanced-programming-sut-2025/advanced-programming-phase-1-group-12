@@ -300,6 +300,10 @@ public class GameMenu extends InputAdapter implements Screen {
             openTerminalScreen();
             return true;
         }
+        if(keycode == Input.Keys.E){
+            App.getCurrentPlayerLazy().setEnergy(2000);
+            return true;
+        }
         return false;
     }
 
