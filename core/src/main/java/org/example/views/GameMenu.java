@@ -61,6 +61,10 @@ public class GameMenu extends InputAdapter implements Screen {
     private Texture clockTexture;
     private Image clockImage;
 
+    // Clock display labels
+    private Label dayLabel;
+    private Label timeLabel;
+
     //expressBar for players
     private Map<Player, ProgressBar> energyBars;
 
@@ -91,6 +95,28 @@ public class GameMenu extends InputAdapter implements Screen {
         clockImage.setPosition(stage.getWidth() - clockSize - 20f, stage.getHeight() - clockSize - 20f);
 
         stage.addActor(clockImage);
+
+        // Create day and time labels
+        dayLabel = new Label("", skin);
+        dayLabel.setColor(Color.BLACK);
+        dayLabel.setFontScale(0.8f);
+
+        timeLabel = new Label("", skin);
+        timeLabel.setColor(Color.BLACK);
+        timeLabel.setFontScale(0.8f);
+
+        // Position labels relative to clock
+        float clockX = stage.getWidth() - clockSize - 20f;
+        float clockY = stage.getHeight() - clockSize - 20f;
+
+        // Day label above clock
+        dayLabel.setPosition(clockX + clockSize/2 - dayLabel.getWidth()/2, clockY + clockSize + 5f);
+
+        // Time label below clock
+        timeLabel.setPosition(clockX + clockSize/2 - timeLabel.getWidth()/2, clockY - 25f);
+
+        stage.addActor(dayLabel);
+        stage.addActor(timeLabel);
 
         InputMultiplexer mux = new InputMultiplexer();
         mux.addProcessor(this);
@@ -155,6 +181,8 @@ public class GameMenu extends InputAdapter implements Screen {
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
         timeForAnimalMove += delta;
+
+        updateClockDisplay();
 
         Player player = App.getCurrentPlayerLazy();
         playerController = player.getPlayerController();
@@ -262,6 +290,35 @@ public class GameMenu extends InputAdapter implements Screen {
         stage.draw();
     }
 
+    private void updateClockDisplay() {
+        org.example.models.Date currentDate = App.getCurrentGame().getDate();
+
+        String dayName = currentDate.getDayName(currentDate.getDayOfWeek());
+        String dayInfo = dayName + " " + currentDate.getDayOfMonth();
+
+        int hour = currentDate.getHour();
+        String timeInfo;
+        if (hour == 0) {
+            timeInfo = "12:00 AM";
+        } else if (hour < 12) {
+            timeInfo = hour + ":00 AM";
+        } else if (hour == 12) {
+            timeInfo = "12:00 PM";
+        } else {
+            timeInfo = (hour - 12) + ":00 PM";
+        }
+
+        dayLabel.setText(dayInfo);
+        timeLabel.setText(timeInfo);
+
+        float clockSize = 100f;
+        float clockX = stage.getWidth() - clockSize - 20f;
+        float clockY = stage.getHeight() - clockSize - 20f;
+
+        dayLabel.setPosition(clockX + clockSize/2 - dayLabel.getWidth()/2, clockY + 90f);
+        timeLabel.setPosition(clockX + clockSize/2 - timeLabel.getWidth()/2, clockY + 45f);
+    }
+
     @Override
     public void dispose() {
         if (clockTexture != null) {
@@ -286,6 +343,10 @@ public class GameMenu extends InputAdapter implements Screen {
         clampCameraToMap();
         camera.update();
         stage.getViewport().update(width, height, true);
+
+        float clockSize = 100f;
+        clockImage.setPosition(stage.getWidth() - clockSize - 20f, stage.getHeight() - clockSize - 20f);
+        updateClockDisplay();
     }
 
     @Override
@@ -515,7 +576,7 @@ public class GameMenu extends InputAdapter implements Screen {
         dialog.getContentTable().add(okButton).pad(10).width(400f).row();
 
         dialog.pack();
-        dialog.show(stage);  // Show the dialog on the stage
+        dialog.show(stage);
     }
 
 }
