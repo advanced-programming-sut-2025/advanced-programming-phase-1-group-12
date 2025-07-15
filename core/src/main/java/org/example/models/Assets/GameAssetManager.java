@@ -45,6 +45,18 @@ public class GameAssetManager {
     private static final Texture MaruPortrait = new Texture("sprites/MaruPortrait.png");
     private static final Texture RobinPortrait = new Texture("sprites/RobinPortrait.png");
 
+    //Season assets
+    private  final Texture winter = new Texture("Clock/Seasons/Winter.png");
+    private  final Texture summer = new Texture("Clock/Seasons/Summer.png");
+    private  final Texture fall = new Texture("Clock/Seasons/Fall.png");
+    private  final Texture spring = new Texture("Clock/Seasons/Spring.png");
+
+    //Weather assets
+    private final Texture snowy = new Texture("Clock/Weather/Snowy.png");
+    private final Texture rainy = new Texture("Clock/Weather/Rainy.png");
+    private final Texture sunny = new Texture("Clock/Weather/Sunny.png");
+    private final Texture stormy = new Texture("Clock/Weather/Stormy.png");
+
     public static GameAssetManager getGameAssetManager() {
         if (gameAssetManager == null) {
             gameAssetManager = new GameAssetManager();
@@ -212,5 +224,37 @@ public class GameAssetManager {
 
     public static Texture getRobinPortrait() {
         return RobinPortrait;
+    }
+
+    public Texture getWinter() {
+        return winter;
+    }
+
+    public Texture getSummer() {
+        return summer;
+    }
+
+    public Texture getFall() {
+        return fall;
+    }
+
+    public Texture getSpring() {
+        return spring;
+    }
+
+    public Texture getSnowy() {
+        return snowy;
+    }
+
+    public Texture getRainy() {
+        return rainy;
+    }
+
+    public Texture getSunny() {
+        return sunny;
+    }
+
+    public Texture getStormy() {
+        return stormy;
     }
 }

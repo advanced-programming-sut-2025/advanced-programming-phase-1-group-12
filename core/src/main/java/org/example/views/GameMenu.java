@@ -576,4 +576,12 @@ public class GameMenu extends InputAdapter implements Screen {
         dialog.show(stage);
     }
 
+    public String getSeason(){
+        return App.getCurrentGame().getDate().getSeason().name();
+    }
+
+    public String getWeather(){
+        return App.getCurrentGame().getDate().getWeather().name();
+    }
+
 }
