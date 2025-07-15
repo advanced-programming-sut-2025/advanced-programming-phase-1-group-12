@@ -19,6 +19,7 @@ import org.example.controllers.MenusController.GameMenuController;
 import org.example.controllers.movingPlayer.PlayerController;
 import org.example.models.Animal.FarmAnimals;
 import org.example.models.Assets.GameAssetManager;
+import org.example.models.BackPack;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Player;
@@ -631,6 +632,114 @@ public class GameMenu extends InputAdapter implements Screen {
 
         dialog.pack();
         dialog.show(stage);  // Show the dialog on the stage
+    }
+
+    public void inventoryMenu() {
+        Skin skin = GameAssetManager.skin;
+        Dialog dialog = new Dialog("Your inventory", skin);
+
+        TextButton skillButton = new TextButton("show skills", skin);
+        TextButton mapButton = new TextButton("map", skin);
+        TextButton settingsButton = new TextButton("settings", skin);
+        TextButton socialButton = new TextButton("social", skin);
+        TextButton inventoryButton = new TextButton("inventory items", skin);
+        TextButton closeButton = new TextButton("Close", skin);
+
+        inventoryButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+                inventoryItemsMenu();
+            }
+        });
+
+        skillButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+
+            }
+        });
+        mapButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+
+            }
+        });
+        settingsButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+
+            }
+        });
+        socialButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+
+            }
+        });
+
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+            }
+        });
+        Table content = dialog.getContentTable();
+        content.add(inventoryButton).pad(5).width(400f).row();
+        content.add(socialButton).pad(5).width(400f).row();
+        content.add(mapButton).pad(5).width(400f).row();
+        content.add(settingsButton).pad(5).width(400f).row();
+        content.add(skillButton).pad(5).width(400f).row();
+        content.add(closeButton).pad(5).width(400f).row();
+
+        dialog.button(closeButton);
+        dialog.show(stage);
+    }
+    public void inventoryItemsMenu() {
+        Skin skin = GameAssetManager.skin;
+        Dialog dialog = new Dialog("Your inventory items and trash can", skin);
+
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        BackPack backPack = player.getBackPack();
+
+        Table content = dialog.getContentTable();
+
+        TextButton closeButton = new TextButton("Close", skin);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+            }
+        });
+        TextField nameOfDeletingItem = new TextField("", skin);
+        nameOfDeletingItem.setMessageText("name of the item that will to be deleted");
+        TextField whatCount = new TextField("", skin);
+        whatCount.setMessageText("count of the item that will to be deleted");
+
+        content.add(closeButton).pad(5).width(400f).row();
+        TextButton trashButton = new TextButton("Trash", skin);
+        trashButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                // Call trash method when trash button is clicked
+                GameMenuController gameMenuController = new GameMenuController();
+                Result result = gameMenuController.trashItem(nameOfDeletingItem.getText(), whatCount.getText());
+                showError(result.getMessage());
+                content.clear();
+                inventoryItemsMenu();
+            }
+        });
+        content.add(nameOfDeletingItem).pad(5).width(400f).row();
+        content.add(whatCount).pad(5).width(400f).row();
+        content.add(trashButton).pad(5).width(400f).row();
+        for (Item item : backPack.getItems().keySet()) {
+            Label itemLabel = new Label(item.getName() + " -> " + backPack.getItems().get(item), skin);
+            content.add(itemLabel).pad(5).width(400f).row();
+        }
+
+        dialog.button(trashButton);
+        dialog.button(closeButton);
+        dialog.show(stage);
     }
 
     public void showToolsDialog() {

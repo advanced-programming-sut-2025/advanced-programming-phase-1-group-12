@@ -8,8 +8,10 @@ import org.example.models.Fundementals.LocationOfRectangle;
 import org.example.models.Fundementals.Player;
 import org.example.models.NPC.NPC;
 import org.example.models.Place.Farm;
+import org.example.models.Place.Store;
 import org.example.models.ProductsPackage.ArtisanItem;
 import org.example.models.ProductsPackage.Quality;
+import org.example.models.ProductsPackage.StoreProducts;
 import org.example.models.enums.Season;
 import org.example.models.enums.Types.CraftingRecipe;
 import org.example.models.enums.Types.SeedTypes;
@@ -437,6 +439,15 @@ public class Date implements Runnable {
         artisansUpdate(day * 13);
         buffUpdates();
         updateRecepies();
+        resetDailyLimit();
+    }
+
+    public void resetDailyLimit() {
+        for(Store store: App.getCurrentGame().getMainMap().getStores()){
+            for(StoreProducts products : store.getStoreProducts()){
+                products.setCurrentDailyLimit(products.getType().getDailyLimit());
+            }
+        }
     }
 
     public void buffUpdates(){
