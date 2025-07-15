@@ -86,9 +86,9 @@ public class GameMenu extends InputAdapter implements Screen {
         clockTexture = new Texture(Gdx.files.internal("Clock/clock.png"));
         clockImage = new Image(clockTexture);
 
-        float clockSize = 50f;
+        float clockSize = 100f;
         clockImage.setSize(clockSize , clockSize);
-        clockImage.setPosition(stage.getWidth() - clockSize - 10f, stage.getHeight() - clockSize - 10f);
+        clockImage.setPosition(stage.getWidth() - clockSize - 20f, stage.getHeight() - clockSize - 20f);
 
         stage.addActor(clockImage);
 
