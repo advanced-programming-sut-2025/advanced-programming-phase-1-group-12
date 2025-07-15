@@ -9,7 +9,7 @@ import org.example.models.ProductsPackage.ArtisanItem;
 import org.example.models.ProductsPackage.Quality;
 import org.example.models.RelatedToUser.Ability;
 import org.example.models.enums.Season;
-import org.example.models.enums.ToolEnums.Tool;
+import org.example.models.ToolsPackage.ToolEnums.Tool;
 import org.example.models.enums.Types.*;
 import org.example.models.enums.foraging.*;
 

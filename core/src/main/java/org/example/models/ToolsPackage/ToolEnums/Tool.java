@@ -1,4 +1,4 @@
-package org.example.models.enums.ToolEnums;
+package org.example.models.ToolsPackage.ToolEnums;
 
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Result;

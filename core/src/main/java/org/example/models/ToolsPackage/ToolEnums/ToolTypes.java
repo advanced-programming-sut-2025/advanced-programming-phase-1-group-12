@@ -1,4 +1,4 @@
-package org.example.models.enums.ToolEnums;
+package org.example.models.ToolsPackage.ToolEnums;
 
 public enum ToolTypes {
     NORMAL(5, "normal"),
