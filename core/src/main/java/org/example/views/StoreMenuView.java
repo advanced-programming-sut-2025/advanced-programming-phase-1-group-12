@@ -55,63 +55,89 @@ public class StoreMenuView implements Screen {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
-        // Create content table with consistent formatting
+        CheckBox showAvailableOnlyCheckbox = new CheckBox(" Show only available", skin);
+
+        // === Scrollable content ===
         Table contentTable = new Table();
         contentTable.top().left();
-        contentTable.defaults().pad(10).left().fillX(); // Consistent padding and alignment
+        contentTable.defaults().pad(10).left().fillX();
 
-        // Add all product buttons with consistent styling
-        for (TextButton button : products) {
-            contentTable.row();
-            contentTable.add(button).width(300).height(50).left(); // Fixed size for consistency
-        }
+        // Product list
+        Table productsTable = new Table();
+        productsTable.defaults().expandX().fillX();
+        productsTable.top().left();
+        updateProductButtons(productsTable, showAvailableOnlyCheckbox.isChecked());
 
-        // Add back button with same styling
+        contentTable.row();
+        contentTable.add(productsTable).colspan(2).left();
+        productsTable.invalidateHierarchy();
+
         contentTable.row();
         contentTable.add(back).width(300).height(50).padTop(20);
 
-        // Create scroll pane with proper settings
         ScrollPane scrollPane = new ScrollPane(contentTable, skin);
-        scrollPane.setScrollingDisabled(true, false); // Vertical scrolling only
+        scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFadeScrollBars(false);
-        scrollPane.setSmoothScrolling(true);
+        scrollPane.setSmoothScrolling(false);
+        scrollPane.setFlickScroll(false);
 
-        // Calculate max height based on screen size
         float maxHeight = Gdx.graphics.getHeight() * 0.8f;
 
-        // Main container table
+        // === Final layout (checkbox outside scrollpane) ===
         Table container = new Table();
         container.setFillParent(true);
-        container.top(); // Align to top
-
-        // Add scroll pane with constraints
-        container.add(scrollPane)
-            .width(350) // Slightly wider than content for scrollbar
-            .height(maxHeight)
-            .expandY()
-            .fillY()
-            .pad(20);
+        container.top();
+        container.add(showAvailableOnlyCheckbox).left().pad(10).row(); // FIX: moved here
+        container.add(scrollPane).width(350).height(maxHeight).expandY().fillY().pad(20);
 
         stage.addActor(container);
 
-        // Add listeners (unchanged)
+        showAvailableOnlyCheckbox.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                productsTable.clear();
+                updateProductButtons(productsTable, showAvailableOnlyCheckbox.isChecked());
+            }
+        });
+
         back.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 Main.getMain().setScreen(new GameMenu(players));
             }
         });
+    }
 
-        for (TextButton button : products) {
-            final String productName = button.getText().toString();
-            button.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    Gdx.app.postRunnable(() ->
-                        Main.getMain().setScreen(new buyView(productName, store, players, playerList))
-                    );
-                }
-            });
+    private void updateProductButtons(Table table, boolean showAvailableOnly) {
+        table.clear();
+        products.clear();
+
+        for (StoreProducts product : store.getStoreProducts()) {
+            if (showAvailableOnly && !product.isAvailable()) {
+                continue; // skip unavailable if filtering
+            }
+
+            TextButton productButton = new TextButton(product.getName(), skin);
+            if (!product.isAvailable()) {
+                productButton.getLabel().setColor(0.5f, 0.5f, 0.5f, 1);
+            }
+
+            table.row();
+            table.add(productButton).width(300).height(50).left();
+
+            if (product.isAvailable()) {
+                final String productName = product.getName();
+                productButton.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        Gdx.app.postRunnable(() ->
+                            Main.getMain().setScreen(new buyView(productName, store, players, playerList))
+                        );
+                    }
+                });
+            }
+
+            products.add(productButton);
         }
     }
 
