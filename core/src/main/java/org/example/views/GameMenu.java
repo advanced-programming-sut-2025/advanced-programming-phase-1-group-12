@@ -30,6 +30,7 @@ import org.example.models.Fundementals.Result;
 import org.example.models.Place.Farm;
 import org.example.models.enums.Weather;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,8 @@ public class GameMenu extends InputAdapter implements Screen {
     private float timeForAnimalMove = 0;
     private Texture clockTexture;
     private Image clockImage;
+    private Image seasonImage;
+    private Image weatherImage;
 
     private Label dayLabel;
     private Label timeLabel;
@@ -93,6 +96,16 @@ public class GameMenu extends InputAdapter implements Screen {
         clockImage.setSize(clockSize , clockSize);
         clockImage.setPosition(stage.getWidth() - clockSize - 20f, stage.getHeight() - clockSize - 20f);
         stage.addActor(clockImage);
+
+        seasonImage = new Image();
+        weatherImage = new Image();
+
+        float iconSize = 20f;
+        seasonImage.setSize(iconSize, iconSize);
+        weatherImage.setSize(iconSize, iconSize);
+
+        stage.addActor(seasonImage);
+        stage.addActor(weatherImage);
 
         dayLabel = new Label("", skin);
         dayLabel.setColor(Color.BLACK);
@@ -180,6 +193,7 @@ public class GameMenu extends InputAdapter implements Screen {
         timeForAnimalMove += delta;
 
         updateClockDisplay();
+        updateSeasonAndWeatherDisplay();
 
         Player player = App.getCurrentPlayerLazy();
         playerController = player.getPlayerController();
@@ -315,6 +329,39 @@ public class GameMenu extends InputAdapter implements Screen {
         timeLabel.setPosition(clockX + clockSize/2 - timeLabel.getWidth()/2, clockY + 45f);
     }
 
+    private void updateSeasonAndWeatherDisplay() {
+        try {
+            GameAssetManager assetManager = GameAssetManager.getGameAssetManager();
+
+            String seasonName = getSeason();
+            String seasonMethodName = "get" + seasonName.substring(0, 1).toUpperCase() + seasonName.substring(1).toLowerCase();
+            Method seasonMethod = GameAssetManager.class.getMethod(seasonMethodName);
+            Texture seasonTexture = (Texture) seasonMethod.invoke(assetManager);
+
+            String weatherName = getWeather();
+            String weatherMethodName = "get" + weatherName.substring(0, 1).toUpperCase() + weatherName.substring(1).toLowerCase();
+            Method weatherMethod = GameAssetManager.class.getMethod(weatherMethodName);
+            Texture weatherTexture = (Texture) weatherMethod.invoke(assetManager);
+
+            seasonImage.setDrawable(new com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable(seasonTexture));
+
+            weatherImage.setDrawable(new com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable(weatherTexture));
+
+            float clockSize = 100f;
+            float clockX = stage.getWidth() - clockSize - 20f;
+            float clockY = stage.getHeight() - clockSize - 20f;
+            float iconSize = 10f;
+
+            seasonImage.setPosition(clockX + 74f  , clockY + clockSize/2 - iconSize/2 + 10f);
+
+            weatherImage.setPosition(clockX + 37f, clockY + clockSize/2 - iconSize/2 + 10f);
+
+        } catch (Exception e) {
+            System.err.println("Error updating season/weather display: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void dispose() {
         if (clockTexture != null) {
@@ -343,6 +390,7 @@ public class GameMenu extends InputAdapter implements Screen {
         float clockSize = 100f;
         clockImage.setPosition(stage.getWidth() - clockSize - 20f, stage.getHeight() - clockSize - 20f);
         updateClockDisplay();
+        updateSeasonAndWeatherDisplay();
     }
 
     @Override
@@ -585,6 +633,10 @@ public class GameMenu extends InputAdapter implements Screen {
 
     public String getWeather(){
         return App.getCurrentGame().getDate().getWeather().name();
+    }
+
+    public int getGold(){
+        return App.getCurrentPlayerLazy().getMoney();
     }
 
 }
