@@ -3,7 +3,7 @@ package org.example.models.enums.ToolEnums;
 public enum ToolTypes {
     NORMAL(5, "normal"),
     COPPER(4, "copper"),
-    IRON(3, "iron"),
+    STEEL(3, "steel"),
     GOLD(2, "gold"),
     IRIDIUM(1, "iridium"),;
 
@@ -21,6 +21,5 @@ public enum ToolTypes {
     public String getName() {
         return name;
     }
-
 
 }

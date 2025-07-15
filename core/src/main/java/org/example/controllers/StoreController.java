@@ -256,16 +256,15 @@ public class StoreController {
             return new Result(false, "Not enough stock in the store today.");
         }
 
+        if(!item.isAvailable()){
+            return new Result(false, "Not enough stock in the store today.");
+        }
         int price = switch (App.getCurrentGame().getDate().getSeason()) {
             case AUTUMN -> item.getType().getFallPrice();
             case WINTER -> item.getType().getWinterPrice();
             case SUMMER -> item.getType().getSummerPrice();
             case SPRING -> item.getType().getSpringPrice();
         };
-
-        if(price == 0){
-            return new Result(false, "You can not buy this product in this season");
-        }
 
         int totalCost = price * count;
         if (App.getCurrentPlayerLazy().getMoney() < totalCost) {

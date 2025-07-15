@@ -121,7 +121,13 @@ public class MapSetUp {
     public static void StoreProductsSetUp(Store store) {
         for(StoreProductsTypes type : StoreProductsTypes.values()) {
             if(type.getShop().equals(store.getNameOfStore())){
-                StoreProducts storeProducts = new StoreProducts(type);
+                int price = switch (App.getCurrentGame().getDate().getSeason()) {
+                    case AUTUMN -> type.getFallPrice();
+                    case WINTER -> type.getWinterPrice();
+                    case SUMMER -> type.getSummerPrice();
+                    case SPRING -> type.getSpringPrice();
+                };
+                StoreProducts storeProducts = new StoreProducts(type, price);
                 store.getStoreProducts().add(storeProducts);
             }
         }
