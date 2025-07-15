@@ -7,9 +7,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -28,9 +31,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.example.models.Fundementals.Result;
 import org.example.models.Item;
 import org.example.models.Place.Farm;
+import org.example.models.RelatedToUser.Ability;
 import org.example.models.ToolsPackage.Tools;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -636,45 +641,43 @@ public class GameMenu extends InputAdapter implements Screen {
 
     public void inventoryMenu() {
         Skin skin = GameAssetManager.skin;
-        Dialog dialog = new Dialog("Your inventory", skin);
+        Dialog dialog = new Dialog("Your Inventory", skin);
 
-        TextButton skillButton = new TextButton("show skills", skin);
-        TextButton mapButton = new TextButton("map", skin);
-        TextButton settingsButton = new TextButton("settings", skin);
-        TextButton socialButton = new TextButton("social", skin);
-        TextButton inventoryButton = new TextButton("inventory items", skin);
+        TextButton skillButton = new TextButton("Show Skills", skin);
+        TextButton mapButton = new TextButton("Map", skin);
+        TextButton settingsButton = new TextButton("Settings", skin);
+        TextButton socialButton = new TextButton("Social", skin);
+        TextButton inventoryButton = new TextButton("Inventory Items", skin);
         TextButton closeButton = new TextButton("Close", skin);
 
         inventoryButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 dialog.hide();
-                inventoryItemsMenu();
+                inventoryItemsMenu(); // Assuming you have an `inventoryItemsMenu` method
+            }
+        });
+
+        socialButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+                socialMenu();
             }
         });
 
         skillButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-
+                showSkillsDialog(skin); // Show the skills dialog
             }
         });
+
         mapButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-
-            }
-        });
-        settingsButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-
-            }
-        });
-        socialButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-
+                dialog.hide();
+                showAllMap();
             }
         });
 
@@ -684,6 +687,7 @@ public class GameMenu extends InputAdapter implements Screen {
                 dialog.hide();
             }
         });
+
         Table content = dialog.getContentTable();
         content.add(inventoryButton).pad(5).width(400f).row();
         content.add(socialButton).pad(5).width(400f).row();
@@ -695,15 +699,92 @@ public class GameMenu extends InputAdapter implements Screen {
         dialog.button(closeButton);
         dialog.show(stage);
     }
+
+    private void showSkillsDialog(Skin skin) {
+        Dialog skillsDialog = new Dialog("Your Abilities", skin) {
+            @Override
+            public float getPrefWidth() {
+                return 850;
+            }
+
+            @Override
+            public float getPrefHeight() {
+                return 400;
+            }
+        };
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        ArrayList<Ability> abilities = player.getAbilitis(); // Make sure to use correct method for abilities
+
+        Table content = skillsDialog.getContentTable();
+
+        for (Ability ability : abilities) {
+            String abilityName = ability.getName();
+            int abilityLevel = ability.getLevel();
+
+            Label abilityLabel = new Label(abilityName + " - Level: " + abilityLevel, skin);
+
+            abilityLabel.addListener(new InputListener() {
+                @Override
+                public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                    showHoverInfo("By performing more " + abilityName + " actions, this ability increases.");
+                }
+
+                @Override
+                public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                    hideHoverInfo();
+                }
+            });
+
+            content.add(abilityLabel).pad(5).width(400f).row();
+        }
+
+        // Add close button to the dialog
+        TextButton closeButton = new TextButton("Close", skin);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                skillsDialog.hide();
+            }
+        });
+        content.add(closeButton).pad(5).width(400f).row();
+
+        skillsDialog.show(stage);
+    }
+
+
+    private void showHoverInfo(String info) {
+        Label.LabelStyle labelStyle = new Label.LabelStyle();
+        labelStyle.font = font;
+        labelStyle.fontColor = Color.GREEN;
+
+        Label hoverInfoLabel = new Label(info, labelStyle);
+        hoverInfoLabel.setPosition(stage.getWidth() / 2 - 80, stage.getHeight() / 2);
+        hoverInfoLabel.setScale(0.5f);
+        stage.addActor(hoverInfoLabel);
+    }
+
+    private void hideHoverInfo() {
+        // Remove or hide the hover info label
+        for (Actor actor : stage.getActors()) {
+            if (actor instanceof Label) {
+                actor.remove();
+            }
+        }
+    }
+
     public void inventoryItemsMenu() {
         Skin skin = GameAssetManager.skin;
         Dialog dialog = new Dialog("Your inventory items and trash can", skin);
 
         Player player = App.getCurrentGame().getCurrentPlayer();
         BackPack backPack = player.getBackPack();
+        Table content = new Table();
+        content.top();
 
-        Table content = dialog.getContentTable();
+        ScrollPane scrollPane = new ScrollPane(content, skin);
+        scrollPane.setScrollingDisabled(true, false); // Allow vertical and horizontal scrolling
 
+        // Create a close button
         TextButton closeButton = new TextButton("Close", skin);
         closeButton.addListener(new ClickListener() {
             @Override
@@ -711,12 +792,16 @@ public class GameMenu extends InputAdapter implements Screen {
                 dialog.hide();
             }
         });
+
         TextField nameOfDeletingItem = new TextField("", skin);
-        nameOfDeletingItem.setMessageText("name of the item that will to be deleted");
+        nameOfDeletingItem.setMessageText("Name of the item to be deleted");
         TextField whatCount = new TextField("", skin);
-        whatCount.setMessageText("count of the item that will to be deleted");
+        whatCount.setMessageText("Count of the item to be deleted");
 
         content.add(closeButton).pad(5).width(400f).row();
+        content.add(nameOfDeletingItem).pad(5).width(400f).row();
+        content.add(whatCount).pad(5).width(400f).row();
+
         TextButton trashButton = new TextButton("Trash", skin);
         trashButton.addListener(new ClickListener() {
             @Override
@@ -725,22 +810,57 @@ public class GameMenu extends InputAdapter implements Screen {
                 GameMenuController gameMenuController = new GameMenuController();
                 Result result = gameMenuController.trashItem(nameOfDeletingItem.getText(), whatCount.getText());
                 showError(result.getMessage());
-                content.clear();
+                content.clear(); // Clear the content and reload the inventory items
                 inventoryItemsMenu();
             }
         });
-        content.add(nameOfDeletingItem).pad(5).width(400f).row();
-        content.add(whatCount).pad(5).width(400f).row();
+
         content.add(trashButton).pad(5).width(400f).row();
         for (Item item : backPack.getItems().keySet()) {
             Label itemLabel = new Label(item.getName() + " -> " + backPack.getItems().get(item), skin);
             content.add(itemLabel).pad(5).width(400f).row();
         }
+        dialog.getContentTable().add(scrollPane).expand().fill().pad(5).row();
 
         dialog.button(trashButton);
         dialog.button(closeButton);
         dialog.show(stage);
     }
+
+    public void socialMenu() {
+        Skin skin = GameAssetManager.skin;
+        Dialog dialog = new Dialog("Your friends and NPCs", skin);
+
+        Table content = new Table();
+        content.top();
+        GameMenuController gameMenuController = new GameMenuController();
+        String message = gameMenuController.friendshipNPCList().getMessage();
+
+        // Create a label for the message
+        Label label = new Label(message, skin);
+        label.setWrap(true);
+
+        ScrollPane scrollPane = new ScrollPane(label, skin);
+        scrollPane.setScrollingDisabled(true, false);
+
+        // Create a close button
+        TextButton closeButton = new TextButton("Close", skin);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+            }
+        });
+
+        content.add(scrollPane).expand().fill().pad(5).width(400f).height(300f).row();
+
+        content.add(closeButton).pad(5).width(400f).row();
+        dialog.getContentTable().add(content).expand().fill().pad(5).row();
+
+        dialog.button(closeButton);
+        dialog.show(stage);
+    }
+
 
     public void showToolsDialog() {
         Skin skin = GameAssetManager.skin;  // Assuming you're using a skin asset to style the UI
@@ -748,7 +868,6 @@ public class GameMenu extends InputAdapter implements Screen {
 
         Table content = dialog.getContentTable();
 
-        // Adding tool buttons dynamically
         for (Item tool : App.getCurrentPlayerLazy().getBackPack().getItems().keySet()) {
             if(!(tool instanceof Tools))continue;
 
@@ -774,8 +893,6 @@ public class GameMenu extends InputAdapter implements Screen {
 
             content.add(toolButton).pad(10).width(400f).row();
         }
-
-        // Add Close Button
         TextButton closeButton = new TextButton("Close", skin);
         closeButton.addListener(new ClickListener() {
             @Override
@@ -788,7 +905,6 @@ public class GameMenu extends InputAdapter implements Screen {
         dialog.pack();
         dialog.show(stage);
     }
-
     private String getLevelName(int level) {
         switch (level) {
             case 0: return "Normal";
