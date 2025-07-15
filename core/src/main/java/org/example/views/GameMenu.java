@@ -61,11 +61,9 @@ public class GameMenu extends InputAdapter implements Screen {
     private Texture clockTexture;
     private Image clockImage;
 
-    // Clock display labels
     private Label dayLabel;
     private Label timeLabel;
 
-    //expressBar for players
     private Map<Player, ProgressBar> energyBars;
 
     GameConsoleCommandHandler cmdHandler =
@@ -96,7 +94,6 @@ public class GameMenu extends InputAdapter implements Screen {
 
         stage.addActor(clockImage);
 
-        // Create day and time labels
         dayLabel = new Label("", skin);
         dayLabel.setColor(Color.BLACK);
         dayLabel.setFontScale(0.8f);
@@ -105,14 +102,11 @@ public class GameMenu extends InputAdapter implements Screen {
         timeLabel.setColor(Color.BLACK);
         timeLabel.setFontScale(0.8f);
 
-        // Position labels relative to clock
         float clockX = stage.getWidth() - clockSize - 20f;
         float clockY = stage.getHeight() - clockSize - 20f;
 
-        // Day label above clock
         dayLabel.setPosition(clockX + clockSize/2 - dayLabel.getWidth()/2, clockY + clockSize + 5f);
 
-        // Time label below clock
         timeLabel.setPosition(clockX + clockSize/2 - timeLabel.getWidth()/2, clockY - 25f);
 
         stage.addActor(dayLabel);
@@ -142,9 +136,11 @@ public class GameMenu extends InputAdapter implements Screen {
         energyBars = new HashMap<>();
 
         float barHeight = 20f;
-        float yOffset = stage.getHeight() - 40f; // Top of screen
         float spacing = 30f;
         float rightMargin = 20f;
+
+        float yOffset = clockY - spacing;
+
 
         for (Player p : App.getCurrentGame().getPlayers()) {
             ProgressBar bar = new ProgressBar(0, 200, 1, false, skin.get("default-horizontal", ProgressBar.ProgressBarStyle.class));
@@ -315,7 +311,7 @@ public class GameMenu extends InputAdapter implements Screen {
         float clockX = stage.getWidth() - clockSize - 20f;
         float clockY = stage.getHeight() - clockSize - 20f;
 
-        dayLabel.setPosition(clockX + clockSize/2 - dayLabel.getWidth()/2, clockY + 90f);
+        dayLabel.setPosition(clockX + clockSize/2 - dayLabel.getWidth()/2, clockY + 85f);
         timeLabel.setPosition(clockX + clockSize/2 - timeLabel.getWidth()/2, clockY + 45f);
     }
 
