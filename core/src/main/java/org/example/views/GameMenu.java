@@ -28,6 +28,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.example.models.Fundementals.Result;
 import org.example.models.Place.Farm;
+import org.example.models.enums.Weather;
 
 import java.util.HashMap;
 import java.util.List;
