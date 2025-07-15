@@ -89,9 +89,8 @@ public class ToolsController {
             }
         }
 
-        if (!hasTools) {
+        if (!hasTools)
             return new Result(false, "You don't have any tools in your backpack");
-        }
 
         return new Result(true, result.toString());
     }
@@ -228,5 +227,6 @@ public class ToolsController {
     public boolean isValidUse() {
         return currentTool != null && checkEnergy();
     }
+
 
 }

@@ -25,7 +25,7 @@ import org.example.models.RelationShips.RelationShip;
 import org.example.models.ToolsPackage.Tools;
 import org.example.models.enums.*;
 import org.example.models.Fundementals.Player;
-import org.example.models.enums.ToolEnums.BackPackTypes;
+import org.example.models.ToolsPackage.ToolEnums.BackPackTypes;
 import org.example.models.enums.Types.Cooking;
 import org.example.models.enums.Types.TypeOfTile;
 import org.example.models.NPC.NPC;

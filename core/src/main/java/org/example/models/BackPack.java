@@ -4,7 +4,7 @@ import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Player;
 import org.example.models.Fundementals.Result;
 import org.example.models.ToolsPackage.Tools;
-import org.example.models.enums.ToolEnums.BackPackTypes;
+import org.example.models.ToolsPackage.ToolEnums.BackPackTypes;
 import java.util.HashMap;
 import java.util.Map;
 

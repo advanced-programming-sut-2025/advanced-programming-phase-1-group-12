@@ -5,8 +5,8 @@ import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Result;
 import org.example.models.Item;
 import org.example.models.ProductsPackage.Quality;
-import org.example.models.enums.ToolEnums.Tool;
-import org.example.models.enums.ToolEnums.ToolTypes;
+import org.example.models.ToolsPackage.ToolEnums.Tool;
+import org.example.models.ToolsPackage.ToolEnums.ToolTypes;
 import org.example.models.enums.Weather;
 
 public class Tools extends Item {

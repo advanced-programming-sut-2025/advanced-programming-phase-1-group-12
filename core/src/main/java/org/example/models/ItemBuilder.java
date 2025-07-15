@@ -7,7 +7,7 @@ import org.example.models.ProductsPackage.AnimalProducts;
 import org.example.models.ProductsPackage.Quality;
 import org.example.models.ToolsPackage.Tools;
 import org.example.models.enums.FishDetails;
-import org.example.models.enums.ToolEnums.Tool;
+import org.example.models.ToolsPackage.ToolEnums.Tool;
 import org.example.models.enums.Types.*;
 import org.example.models.enums.foraging.MineralTypes;
 import org.example.models.enums.foraging.Seed;

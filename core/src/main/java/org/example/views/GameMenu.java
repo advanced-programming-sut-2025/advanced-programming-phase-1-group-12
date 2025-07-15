@@ -7,11 +7,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -27,8 +25,9 @@ import org.example.models.Fundementals.Player;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.example.models.Fundementals.Result;
+import org.example.models.Item;
 import org.example.models.Place.Farm;
-import org.example.models.enums.Weather;
+import org.example.models.ToolsPackage.Tools;
 
 import java.util.HashMap;
 import java.util.List;
@@ -66,6 +65,9 @@ public class GameMenu extends InputAdapter implements Screen {
     private Label timeLabel;
 
     private Map<Player, ProgressBar> energyBars;
+
+    private float errorDisplayTime = 5f;
+    private float timeSinceError = 0f;
 
     GameConsoleCommandHandler cmdHandler =
         new GameConsoleCommandHandler(controller,
@@ -140,9 +142,6 @@ public class GameMenu extends InputAdapter implements Screen {
         float spacing = 30f;
         float leftMargin = 20f;
 
-//        float yOffset = clockY - spacing;
-
-
         for (Player p : App.getCurrentGame().getPlayers()) {
             ProgressBar bar = new ProgressBar(0, 200, 1, false, skin.get("default-horizontal", ProgressBar.ProgressBarStyle.class));
             bar.setValue(p.getEnergy());
@@ -180,6 +179,15 @@ public class GameMenu extends InputAdapter implements Screen {
         timeForAnimalMove += delta;
 
         updateClockDisplay();
+
+        if (errorLabel.isVisible()) {
+            timeSinceError += delta;
+
+            if (timeSinceError >= errorDisplayTime) {
+                errorLabel.setVisible(false);
+                timeSinceError = 0f;
+            }
+        }
 
         Player player = App.getCurrentPlayerLazy();
         playerController = player.getPlayerController();
@@ -376,7 +384,7 @@ public class GameMenu extends InputAdapter implements Screen {
             return true;
         }
         if(keycode == Input.Keys.T){
-            toolsController.showToolsAvailable();
+            showToolsDialog();
             return true;
         }
         return false;
@@ -531,17 +539,6 @@ public class GameMenu extends InputAdapter implements Screen {
         dialog.show(stage);
     }
 
-
-    private void showError(String message) {
-        errorLabel.setText(message);
-        errorLabel.setColor(1, 0, 0, 1);  // Red color for error
-
-        errorLabel.getStyle().font.getData().setScale(2f);
-        errorLabel.setPosition(camera.viewportWidth / 2 - errorLabel.getWidth() / 2, camera.viewportHeight - 50);
-        stage.addActor(errorLabel);
-        errorLabel.setVisible(true);
-    }
-
     public void showFishingPoleDialog() {
         Skin skin = GameAssetManager.skin;  // Assuming you're using a skin asset to style the UI
         Dialog dialog = new Dialog("Choose Fishing Pole", skin);
@@ -579,4 +576,76 @@ public class GameMenu extends InputAdapter implements Screen {
         dialog.show(stage);  // Show the dialog on the stage
     }
 
+    public void showToolsDialog() {
+        Skin skin = GameAssetManager.skin;  // Assuming you're using a skin asset to style the UI
+        Dialog dialog = new Dialog("Choose a Tool", skin);
+
+        Table content = dialog.getContentTable();
+
+        // Adding tool buttons dynamically
+        for (Item tool : App.getCurrentPlayerLazy().getBackPack().getItems().keySet()) {
+            if(!(tool instanceof Tools))continue;
+
+            TextButton toolButton = new TextButton(tool.getName() + " (Level: " + getLevelName(((Tools) tool).getLevel()) + ")", skin);
+
+            // Check if the tool is the current tool and mark it (either color change or checkmark)
+            if (tool.equals(App.getCurrentPlayerLazy().getCurrentTool())) {
+                toolButton.setColor(Color.GREEN); // Highlight the current tool
+            }
+
+            // Listener to equip the tool
+            toolButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    // Equip the tool if it's not already equipped
+                    if (!tool.equals(App.getCurrentPlayerLazy().getCurrentTool())) {
+                        toolsController.equipTool(tool.getName());  // Equip tool
+                    } else {
+                        showError("This tool is already equipped.");
+                    }
+                }
+            });
+
+            content.add(toolButton).pad(10).width(400f).row();
+        }
+
+        // Add Close Button
+        TextButton closeButton = new TextButton("Close", skin);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+            }
+        });
+        content.add(closeButton).colspan(2).pad(10).width(400f).row();
+
+        dialog.pack();
+        dialog.show(stage);
+    }
+
+    private String getLevelName(int level) {
+        switch (level) {
+            case 0: return "Normal";
+            case 1: return "Copper";
+            case 2: return "Iron";
+            case 3: return "Gold";
+            case 4: return "Iridium";
+            default: return "Unknown";
+        }
+    }
+
+    private void showError(String message) {
+        errorLabel.setText(message);
+        errorLabel.setColor(1, 0, 0, 1);
+
+        errorLabel.getStyle().font.getData().setScale(2f);
+        errorLabel.setVisible(true);
+
+        errorLabel.setPosition(camera.viewportWidth / 2 - errorLabel.getWidth() / 2, camera.viewportHeight - 50);
+        if (!stage.getActors().contains(errorLabel, true)) {
+            stage.addActor(errorLabel);
+        }
+
+        timeSinceError = 0f;
+    }
 }
