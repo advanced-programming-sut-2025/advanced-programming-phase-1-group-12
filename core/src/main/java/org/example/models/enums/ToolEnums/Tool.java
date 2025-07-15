@@ -90,7 +90,7 @@ public enum Tool {
                         tool.setLevel(tool.getLevel() + 1);}
                         break;
                     case 1:
-                        tool.setType(ToolTypes.IRON);
+                        tool.setType(ToolTypes.STEEL);
                         tool.setLevel(tool.getLevel() + 1);
                         break;
                     case 2:

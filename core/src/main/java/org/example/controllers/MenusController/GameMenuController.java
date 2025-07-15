@@ -385,7 +385,6 @@ public class GameMenuController {
     public Result nextTurn() {
         List<Player> players = App.getCurrentGame().getPlayers();
         Player currentPlayer = App.getCurrentPlayerLazy();
-
         currentPlayer.setEnergy(200);
 
         int index = players.indexOf(currentPlayer);

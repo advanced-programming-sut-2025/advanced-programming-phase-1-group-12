@@ -92,7 +92,6 @@ public class GameMenu extends InputAdapter implements Screen {
         float clockSize = 100f;
         clockImage.setSize(clockSize , clockSize);
         clockImage.setPosition(stage.getWidth() - clockSize - 20f, stage.getHeight() - clockSize - 20f);
-
         stage.addActor(clockImage);
 
         dayLabel = new Label("", skin);
@@ -137,10 +136,11 @@ public class GameMenu extends InputAdapter implements Screen {
         energyBars = new HashMap<>();
 
         float barHeight = 20f;
+        float yOffset = stage.getHeight() - 40f;
         float spacing = 30f;
-        float rightMargin = 20f;
+        float leftMargin = 20f;
 
-        float yOffset = clockY - spacing;
+//        float yOffset = clockY - spacing;
 
 
         for (Player p : App.getCurrentGame().getPlayers()) {
@@ -150,14 +150,14 @@ public class GameMenu extends InputAdapter implements Screen {
             bar.setSize(200, barHeight);
 
             Label nameLabel = new Label(p.getUser().getUserName(), skin);
-            nameLabel.setFontScale(0.5f);
+            nameLabel.setFontScale(1.5f);
 
             Table playerTable = new Table();
-            playerTable.add(nameLabel).left().padRight(10);
-            playerTable.add(bar).width(200).height(barHeight);
+            playerTable.add(bar).width(200).height(barHeight).padRight(10);
+            playerTable.add(nameLabel).left();
             playerTable.pack();
 
-            playerTable.setPosition(stage.getWidth() - playerTable.getWidth() - rightMargin, yOffset);
+            playerTable.setPosition(leftMargin, yOffset);
             yOffset -= spacing;
 
             stage.addActor(playerTable);
@@ -250,7 +250,6 @@ public class GameMenu extends InputAdapter implements Screen {
             timeForAnimalMove = 0f; // Only reset when a step was done!
         }
 
-// Render logic
         for (Farm farm : App.getCurrentGame().getFarms()) {
             for (FarmAnimals animal : farm.getFarmAnimals()) {
                 float renderX;
@@ -374,6 +373,10 @@ public class GameMenu extends InputAdapter implements Screen {
         }
         if(keycode == Input.Keys.E){
             App.getCurrentPlayerLazy().setEnergy(2000);
+            return true;
+        }
+        if(keycode == Input.Keys.T){
+            toolsController.showToolsAvailable();
             return true;
         }
         return false;
@@ -573,7 +576,7 @@ public class GameMenu extends InputAdapter implements Screen {
         dialog.getContentTable().add(okButton).pad(10).width(400f).row();
 
         dialog.pack();
-        dialog.show(stage);
+        dialog.show(stage);  // Show the dialog on the stage
     }
 
 }
