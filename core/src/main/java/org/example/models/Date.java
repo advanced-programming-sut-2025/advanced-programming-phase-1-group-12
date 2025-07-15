@@ -51,7 +51,7 @@ public class Date implements Runnable {
     public void run(){
         while(threadRunning){
             try {
-                timeThread.sleep(6000 * 60); //every 6 minutes 1 hour passes
+                timeThread.sleep(6000 ); //every 6 seconds 1 hour passes
                 changeAdvancedTime(1);
             } catch (InterruptedException e) {
                 System.out.println(e.getMessage());

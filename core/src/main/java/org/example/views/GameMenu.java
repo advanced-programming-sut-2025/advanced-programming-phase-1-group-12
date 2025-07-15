@@ -67,6 +67,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
     private Label dayLabel;
     private Label timeLabel;
+    private Label goldLabel;
 
     private Map<Player, ProgressBar> energyBars;
 
@@ -115,6 +116,10 @@ public class GameMenu extends InputAdapter implements Screen {
         timeLabel.setColor(Color.BLACK);
         timeLabel.setFontScale(0.8f);
 
+        goldLabel = new Label("", skin);
+        goldLabel.setColor(Color.BLACK);
+        goldLabel.setFontScale(1f);
+
         float clockX = stage.getWidth() - clockSize - 20f;
         float clockY = stage.getHeight() - clockSize - 20f;
 
@@ -124,6 +129,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
         stage.addActor(dayLabel);
         stage.addActor(timeLabel);
+        stage.addActor(goldLabel);
 
         InputMultiplexer mux = new InputMultiplexer();
         mux.addProcessor(this);
@@ -318,15 +324,19 @@ public class GameMenu extends InputAdapter implements Screen {
             timeInfo = (hour - 12) + ":00 PM";
         }
 
+        String goldInfo = "" + getGold();
+
         dayLabel.setText(dayInfo);
         timeLabel.setText(timeInfo);
+        goldLabel.setText(goldInfo);
 
         float clockSize = 100f;
         float clockX = stage.getWidth() - clockSize - 20f;
         float clockY = stage.getHeight() - clockSize - 20f;
 
-        dayLabel.setPosition(clockX + clockSize/2 - dayLabel.getWidth()/2, clockY + 85f);
-        timeLabel.setPosition(clockX + clockSize/2 - timeLabel.getWidth()/2, clockY + 45f);
+        dayLabel.setPosition(clockX + clockSize/2 - dayLabel.getWidth()/2 - 3f, clockY + 85f);
+        timeLabel.setPosition(clockX + clockSize/2 - timeLabel.getWidth()/2 -3f, clockY + 45f);
+        goldLabel.setPosition(clockX + clockSize/2 + goldLabel.getWidth()/2 - 20f, clockY + 12f);
     }
 
     private void updateSeasonAndWeatherDisplay() {
