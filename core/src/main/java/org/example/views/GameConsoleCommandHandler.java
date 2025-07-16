@@ -297,9 +297,6 @@ public class GameConsoleCommandHandler {
                 Integer.parseInt(matcher.group("Y"))));
         } else if ((matcher = GameMenuCommands.HOW_MUCH_WATER.getMather(input)) != null) {
             System.out.println(farmingController.howMuchWater());
-        } else if ((matcher = GameMenuCommands.ADD_TO_INVENTORY.getMather(input)) != null) {
-            System.out.println(craftingController.addItem(matcher.group("itemName"),
-                Integer.parseInt(matcher.group("count"))));
         } else if ((matcher = GameMenuCommands.PLACE_ON_GROUND.getMather(input)) != null) {
             System.out.println(craftingController.putItem(matcher.group("itemName"), matcher.group("direction")));
         } else if ((matcher = GameMenuCommands.SHOW_RECIPES_CRAFTING.getMather(input)) != null) {

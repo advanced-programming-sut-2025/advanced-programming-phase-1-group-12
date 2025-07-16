@@ -111,7 +111,7 @@ public class StoreMenuView implements Screen {
 
         for (StoreProducts product : store.getStoreProducts()) {
             if (showAvailableOnly && !product.isAvailable()) {
-                continue; // skip unavailable if filtering
+                continue;
             }
 
             TextButton productButton = new TextButton(product.getName(), skin);
