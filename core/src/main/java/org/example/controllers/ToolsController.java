@@ -141,23 +141,19 @@ public class ToolsController {
     public void updateTools() {
     }
 
-    public Result useTool(String direction) {
-        if (currentTool == null) {
+    public Result useTool(Location targetLocation) {
+        if (App.getCurrentPlayerLazy().getCurrentTool() == null) {
             return new Result(false, "You don't have any tool equipped");
         }
         if (!checkEnergy()) {
             return new Result(false, "Not enough energy to use this tool");
         }
-        Location playerLocation = App.getCurrentPlayerLazy().getUserLocation();
-        Location targetLocation = getTargetLocation(playerLocation, direction);
 
         if (targetLocation == null) {
             return new Result(false, "Invalid direction");
         }
-
         int skillLevel = 0;
-
-        return currentTool.use(targetLocation, skillLevel);
+        return App.getCurrentPlayerLazy().getCurrentTool().use(targetLocation, skillLevel);
     }
 
     private Location getTargetLocation(Location playerLocation, String direction) {
@@ -238,8 +234,8 @@ public class ToolsController {
         float toolCenterX = (float) Gdx.graphics.getWidth() / 2;
         float toolCenterY = (float) Gdx.graphics.getHeight() / 2;
 
-        float angle = (float) Math.atan2(y - toolCenterY, x - toolCenterX);
+        float angle = (float) Math.atan2(y - toolCenterY, x - toolCenterX); // Calculate angle based on mouse position
 
-        toolSprite.setRotation((float) (3.14 - angle * MathUtils.radiansToDegrees));
+        toolSprite.setRotation((float) (Math.PI - angle * MathUtils.radiansToDegrees)); // Adjust angle
     }
 }
