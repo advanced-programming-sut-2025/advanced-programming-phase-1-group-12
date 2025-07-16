@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -266,8 +267,23 @@ public class GameMenu extends InputAdapter implements Screen {
         Tools equipped = App.getCurrentPlayerLazy().getCurrentTool();
         if (equipped != null) {
             Texture toolTex = getToolTexture(equipped);
-            Sprite smgSprite = new Sprite(toolTex);
+            TextureRegion toolRegion = new TextureRegion(toolTex);
+
+            Sprite smgSprite = new Sprite(toolRegion);
             equipped.setSmgSprite(smgSprite);
+
+            float mouseX = Gdx.input.getX();
+            float mouseY = Gdx.input.getY();
+
+            Vector3 mousePosition = camera.unproject(new Vector3(mouseX, mouseY, 0));
+            float playerX = playerController.getPlayer().getUserLocation().getxAxis() * 100;
+            float playerY = playerController.getPlayer().getUserLocation().getyAxis() * 100;
+
+            float deltaX = mousePosition.x - playerX;
+            float deltaY = mousePosition.y - playerY;
+            float angle = MathUtils.atan2(deltaY, deltaX) * MathUtils.radiansToDegrees;
+
+            smgSprite.setRotation(angle);
 
             float offX = 0, offY = 0;
             switch (player.getPlayerController().getFacing()) {
@@ -277,13 +293,10 @@ public class GameMenu extends InputAdapter implements Screen {
                 case RIGHT -> { offX = 18;  offY = 12; }
             }
 
-            float toolW = 32, toolH = 32;
-            batch.draw(toolTex,
-                scaledX + offX,
-                scaledY + offY,
-                toolW, toolH);
-            smgSprite.draw(Main.getMain().getBatch());
-
+            float toolW = 44, toolH = 44;
+            batch.draw(toolRegion, scaledX + offX, scaledY + offY, toolW / 2f,
+                toolH / 2f, toolW, toolH, 1, 1, angle);
+            smgSprite.draw(batch);
         }
 
         for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
@@ -464,6 +477,102 @@ public class GameMenu extends InputAdapter implements Screen {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        if(App.getCurrentPlayerLazy().getCurrentTool() != null) {
+            Location targetLocation = getClickedLocation(screenX, screenY);
+            if (targetLocation != null) {
+                showToolUseDialog(targetLocation);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void showToolUseDialog(Location targetLocation) {
+        Skin skin = GameAssetManager.skin;
+        Dialog dialog = new Dialog("Use Tool", skin);
+
+        TextButton useButton = new TextButton("Use Tool", skin);
+        TextButton cancelButton = new TextButton("Cancel", skin);
+
+        float buttonWidth = 200f;
+        float buttonHeight = 60f;
+
+        useButton.getLabel().setFontScale(1.5f);
+        cancelButton.getLabel().setFontScale(1.5f);
+
+        useButton.setSize(buttonWidth, buttonHeight);
+        cancelButton.setSize(buttonWidth, buttonHeight);
+
+        useButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                toolsController.useTool(targetLocation);
+                dialog.hide();
+            }
+        });
+
+        cancelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+            }
+        });
+
+        dialog.button(cancelButton);
+        dialog.button(useButton);
+        dialog.show(stage);
+    }
+
+    public Location getClickedLocation(int screenX, int screenY) {
+        float screenWorldX = camera.unproject(new Vector3(screenX, screenY, 0)).x;
+        float screenWorldY = camera.unproject(new Vector3(screenX, screenY, 0)).y;
+
+        Location north = getNearbyLocation("north");
+        Location south = getNearbyLocation("south");
+        Location east = getNearbyLocation("east");
+        Location west = getNearbyLocation("west");
+
+        if (Math.abs(screenWorldX - (north.getxAxis() * 100)) < 50 && Math.abs(screenWorldY - (north.getyAxis() * 100)) < 50) {
+            return north;
+        } else if (Math.abs(screenWorldX - (south.getxAxis() * 100)) < 50 && Math.abs(screenWorldY - (south.getyAxis() * 100)) < 50) {
+            return south;
+        } else if (Math.abs(screenWorldX - (east.getxAxis() * 100)) < 50 && Math.abs(screenWorldY - (east.getyAxis() * 100)) < 50) {
+            return east;
+        } else if (Math.abs(screenWorldX - (west.getxAxis() * 100)) < 50 && Math.abs(screenWorldY - (west.getyAxis() * 100)) < 50) {
+            return west;
+        }
+        return null;
+    }
+
+    public Location getNearbyLocation(String direction) {
+        Location playerLocation = App.getCurrentPlayerLazy().getUserLocation();
+        int xOffset = 0;
+        int yOffset = 0;
+
+        direction = direction.toLowerCase();
+
+        switch (direction) {
+            case "north":
+                yOffset = -1;
+                break;
+            case "south":
+                yOffset = 1;
+                break;
+            case "east":
+                xOffset = 1;
+                break;
+            case "west":
+                xOffset = -1;
+                break;
+            default:
+                return null; // Invalid direction
+        }
+
+        return App.getCurrentGame().getMainMap().findLocation(playerLocation.getxAxis() + xOffset, playerLocation.getyAxis() + yOffset);
     }
 
     @Override
