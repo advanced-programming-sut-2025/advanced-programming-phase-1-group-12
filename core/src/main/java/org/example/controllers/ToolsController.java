@@ -1,5 +1,8 @@
 package org.example.controllers;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.MathUtils;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Result;
@@ -46,7 +49,7 @@ public class ToolsController {
 
         String levelName = getLevelName(currentTool.getLevel());
         return new Result(true, "Current tool: " + App.getCurrentPlayerLazy().getCurrentTool().getName() +
-                " (Level: " + levelName + ")");
+            " (Level: " + levelName + ")");
     }
 
     private String getLevelName(int level) {
@@ -83,8 +86,8 @@ public class ToolsController {
                 Tools tool = (Tools) item;
                 Integer quantity = entry.getValue();
                 result.append("- ").append(tool.getName())
-                        .append(" (Level: ").append(getLevelName(tool.getLevel()))
-                        .append(") x").append(quantity).append("\n");
+                    .append(" (Level: ").append(getLevelName(tool.getLevel()))
+                    .append(") x").append(quantity).append("\n");
                 hasTools = true;
             }
         }
@@ -116,7 +119,7 @@ public class ToolsController {
 
         if (upgradeResult.isSuccessful()) {
             return new Result(true, "Successfully upgraded your " + name + " to " +
-                    getLevelName(currentTool.getLevel()));
+                getLevelName(currentTool.getLevel()));
         } else {
             return upgradeResult;
 
@@ -129,7 +132,7 @@ public class ToolsController {
 
 
     public boolean checkUpdateToolMoney() {
-        if(App.getCurrentPlayerLazy().getMoney() < 30){
+        if (App.getCurrentPlayerLazy().getMoney() < 30) {
             return false;
         }
         return true;
@@ -229,4 +232,14 @@ public class ToolsController {
     }
 
 
+    public void handleToolRotation(int x, int y) {
+        Sprite toolSprite = App.getCurrentPlayerLazy().getCurrentTool().getSmgSprite();
+
+        float toolCenterX = (float) Gdx.graphics.getWidth() / 2;
+        float toolCenterY = (float) Gdx.graphics.getHeight() / 2;
+
+        float angle = (float) Math.atan2(y - toolCenterY, x - toolCenterX);
+
+        toolSprite.setRotation((float) (3.14 - angle * MathUtils.radiansToDegrees));
+    }
 }

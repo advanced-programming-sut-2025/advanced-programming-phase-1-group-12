@@ -70,8 +70,8 @@ public class TerminalWindow extends Window {
         addListener(new ClickListener() {
             @Override
             public boolean keyDown(InputEvent e, int keycode) {
-                if (keycode == Keys.ESCAPE || keycode == Keys.GRAVE) {
-                    remove();  // Close the terminal window
+                if (keycode == Keys.GRAVE) {
+                    remove();
                     return true;
                 }
                 return false;
