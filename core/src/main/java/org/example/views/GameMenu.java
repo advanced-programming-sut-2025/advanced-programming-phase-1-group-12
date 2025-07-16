@@ -1188,13 +1188,13 @@ public class GameMenu extends InputAdapter implements Screen {
             } else if (hour >= 13 && hour <= 15) {
                 float progress = (hour - 13) / 2f;
                 baseAlpha = -0.1f + (progress * 0.1f);
-            } else if (hour >= 16 && hour <= 18) {
+            } else if (hour >= 16 && hour <= 19) {
                 float progress = (hour - 16) / 2f;
                 baseAlpha = 0f + (progress * 0.2f);
             }
-        } else if (hour >= 19 && hour <= 22) {
-            float progress = (hour - 19) / 3f;
-        } else if (hour >= 23 || hour <= 5) {
+        } else if (hour >= 20 && hour <= 22) {
+            baseAlpha = 0.6f;
+        } else {
             baseAlpha = 0.6f;
         }
 
@@ -1223,6 +1223,6 @@ public class GameMenu extends InputAdapter implements Screen {
                 break;
         }
 
-        lightingAlpha = Math.max(-0.2f, Math.min(1f, baseAlpha)); // Allow slight negative for brightness
+        lightingAlpha = Math.max(-0.2f, Math.min(1f, baseAlpha));
     }
 }
