@@ -27,7 +27,7 @@ public class GameAssetManager {
     private final Texture HOUSE = new Texture("House_farmer.png");
     private final Texture barn = new Texture("Decor/Weathered_Floor_Tile.png");
     private final Texture coop = new Texture("Decor/Stone_Floor_Tile.png");
-    private final Texture ploughedLand = new Texture("Flooring/Flooring_16.png");
+    private final Texture ploughedLand = new Texture("Flooring/Flooring_14.png");
 
     private static final Texture APRICOT_TREE = new Texture("Trees/Apricot_Stage_5_Fruit.png");
     private static final Texture APPLE_TREE = new Texture("Trees/Apple_Stage_5_Fruit.png");

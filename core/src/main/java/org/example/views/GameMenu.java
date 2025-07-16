@@ -265,8 +265,23 @@ public class GameMenu extends InputAdapter implements Screen {
         Tools equipped = App.getCurrentPlayerLazy().getCurrentTool();
         if (equipped != null) {
             Texture toolTex = getToolTexture(equipped);
-            Sprite smgSprite = new Sprite(toolTex);
+            TextureRegion toolRegion = new TextureRegion(toolTex);
+
+            Sprite smgSprite = new Sprite(toolRegion);
             equipped.setSmgSprite(smgSprite);
+
+            float mouseX = Gdx.input.getX();
+            float mouseY = Gdx.input.getY();
+
+            Vector3 mousePosition = camera.unproject(new Vector3(mouseX, mouseY, 0));
+            float playerX = playerController.getPlayer().getUserLocation().getxAxis() * 100;
+            float playerY = playerController.getPlayer().getUserLocation().getyAxis() * 100;
+
+            float deltaX = mousePosition.x - playerX;
+            float deltaY = mousePosition.y - playerY;
+            float angle = MathUtils.atan2(deltaY, deltaX) * MathUtils.radiansToDegrees;
+
+            smgSprite.setRotation(angle);
 
             float offX = 0, offY = 0;
             switch (player.getPlayerController().getFacing()) {
@@ -276,13 +291,10 @@ public class GameMenu extends InputAdapter implements Screen {
                 case RIGHT -> { offX = 18;  offY = 12; }
             }
 
-            float toolW = 32, toolH = 32;
-            batch.draw(toolTex,
-                scaledX + offX,
-                scaledY + offY,
-                toolW, toolH);
-            smgSprite.draw(Main.getMain().getBatch());
-
+            float toolW = 44, toolH = 44;
+            batch.draw(toolRegion, scaledX + offX, scaledY + offY, toolW / 2f,
+                toolH / 2f, toolW, toolH, 1, 1, angle);
+            smgSprite.draw(batch);
         }
 
         for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
