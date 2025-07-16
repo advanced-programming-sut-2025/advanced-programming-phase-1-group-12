@@ -306,8 +306,6 @@ public class GameConsoleCommandHandler {
                 Integer.parseInt(matcher.group("count"))));
         } else if ((matcher = GameMenuCommands.PLACE_ON_GROUND.getMather(input)) != null) {
             System.out.println(craftingController.putItem(matcher.group("itemName"), matcher.group("direction")));
-        } else if ((matcher = GameMenuCommands.MACK_CRAFT.getMather(input)) != null) {
-            System.out.println(craftingController.makeCraft(matcher.group("itemName")));
         } else if ((matcher = GameMenuCommands.SHOW_RECIPES_CRAFTING.getMather(input)) != null) {
             System.out.println(craftingController.showRecipesCrafting());
         } else if ((matcher = GameMenuCommands.THOR.getMather(input)) != null) {

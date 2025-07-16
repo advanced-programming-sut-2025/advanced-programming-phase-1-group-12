@@ -204,7 +204,11 @@ public class Player {
     private void initializerecepies() {
         recepies = new HashMap<>();
         for (CraftingRecipe craftingRecipe : CraftingRecipe.values()) {
-            recepies.put(craftingRecipe, false);
+            if(craftingRecipe.getSource().isEmpty()){
+                recepies.put(craftingRecipe, true);
+            } else{
+                recepies.put(craftingRecipe, false);
+            }
         }
         cookingRecepies = new HashMap<>();
         for (Cooking cooking : Cooking.values()) {

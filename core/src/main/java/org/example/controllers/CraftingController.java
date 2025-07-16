@@ -10,6 +10,8 @@ import org.example.models.ProductsPackage.Quality;
 import org.example.models.enums.Types.Cooking;
 import org.example.models.enums.Types.CraftingRecipe;
 import org.example.models.enums.Types.TypeOfTile;
+
+import java.util.List;
 import java.util.Map;
 
 public class CraftingController {
@@ -91,7 +93,7 @@ public class CraftingController {
         return new Result(true, "it is not possible to put craft here!");
     }
 
-    public Result makeCraft(String itemName) {
+    public Result makeCraft(String itemName, Location location) {
         CraftingRecipe recipe = CraftingRecipe.getByName(itemName);
         if (recipe == null) {
             return new Result(false, "Recipe not found");
@@ -103,24 +105,26 @@ public class CraftingController {
                 Item item = App.getCurrentPlayerLazy().getBackPack().getItemByName(entry.getKey());
 
                 if (item == null) {
-                    return new Result(false, "Item not found");
+                    return new Result(false, "you do not have the required items to pay");
                 } else if (entry.getValue() > App.getCurrentGame().getCurrentPlayer().getBackPack().getItemCount(item)) {
                     return new Result(false, "You are out of stock");
-                } else {
-                    App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, entry.getValue());
-                   // return new Result(true, "you decrease " + entry.getValue() + " ingredients");
                 }
             }
+            for (Map.Entry<String, Integer> entry : recipe.getIngredients().entrySet()) {
+                Item item = App.getCurrentPlayerLazy().getBackPack().getItemByName(entry.getKey());
+                    App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, entry.getValue());
+                    // return new Result(true, "you decrease " + entry.getValue() + " ingredients");
+                }
             App.getCurrentPlayerLazy().setEnergy(App.getCurrentGame().getCurrentPlayer().getEnergy() - 2);
             ItemBuilder.addToBackPack(ItemBuilder.builder(itemName, Quality.NORMAL, recipe.getSellPrice()), 1, Quality.NORMAL);
-            for(Location location : App.getCurrentPlayerLazy().getOwnedFarm().getFarmLocation().getLocationsInRectangle()){
+
                 if(location.getTypeOfTile().equals(TypeOfTile.GROUND) && location.getObjectInTile() == null){
                     location.setTypeOfTile(TypeOfTile.CRAFT);
                     location.setObjectInTile(new Craft(recipe));
-                    break;
+                    return new Result(true, "we add " + itemName + " to the back pack" + " it will be shown on map");
+            } else{
+                    return new Result(false, "click on an acceptable location");
                 }
-            }
-            return new Result(true, "we add " + itemName + " to the back pack" + " it will be shown on map");
         }
     }
 

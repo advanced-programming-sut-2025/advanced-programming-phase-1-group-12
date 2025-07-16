@@ -1,5 +1,8 @@
 package org.example.models.RelatedToUser;
 
+import org.example.models.Fundementals.App;
+import org.example.models.enums.Types.CraftingRecipe;
+
 public class Ability {
     private final String name;
     private int level;
@@ -30,11 +33,16 @@ public class Ability {
         return amount;
     }
 
-    public void increaseAmount(int amount) {
-        this.amount += amount;
+    public void increaseAmount(int amount1) {
+        this.amount += amount1;
         if(amount >= 10){
             if(level <= 3){
                 level++;
+                for(CraftingRecipe craftingRecipe : CraftingRecipe.values()){
+                    if(craftingRecipe.getSource().get(name) <= level){
+                        App.getCurrentPlayerLazy().getRecepies().put(craftingRecipe, true);
+                    }
+                }
                 amount = 0;
             }
         }

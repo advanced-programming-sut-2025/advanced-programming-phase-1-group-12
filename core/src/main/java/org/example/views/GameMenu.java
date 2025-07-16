@@ -30,6 +30,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.example.models.Fundementals.Result;
 import org.example.models.Item;
 import org.example.models.Place.Farm;
+import org.example.models.ProductsPackage.StoreProducts;
 import org.example.models.RelatedToUser.Ability;
 import org.example.models.ToolsPackage.Tools;
 
@@ -41,6 +42,7 @@ import java.util.Map;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.GL20;
+import org.example.models.enums.Types.CraftingRecipe;
 
 public class GameMenu extends InputAdapter implements Screen {
     private final GameMenuController controller = new GameMenuController();
@@ -1225,4 +1227,67 @@ public class GameMenu extends InputAdapter implements Screen {
 
         lightingAlpha = Math.max(-0.2f, Math.min(1f, baseAlpha));
     }
+    public void craftingView() {
+        Skin skin = GameAssetManager.skin;
+        Dialog dialog = new Dialog("Crafting Menu", skin);
+        TextButton back = new TextButton("Back", skin);
+
+        Table contentTable = new Table();
+        contentTable.top().left();
+        contentTable.defaults().pad(10).left().fillX();
+
+        // Add crafting buttons to the table
+        craftingsButtons(contentTable, dialog, skin);
+
+        // Scrollable content
+        ScrollPane scrollPane = new ScrollPane(contentTable);
+        scrollPane.setScrollingDisabled(true, false);
+        scrollPane.setFadeScrollBars(false);
+
+        // Add scrollPane to dialog
+        dialog.getContentTable().add(scrollPane).maxHeight(Gdx.graphics.getHeight() * 0.8f).width(400).expand().fill();
+
+        // Back button to close dialog
+        back.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+            }
+        });
+
+        dialog.button(back);
+        dialog.show(stage);
+    }
+
+    private void craftingsButtons(Table table, Dialog dialog, Skin skin) {
+        table.clear();
+
+        for (CraftingRecipe craftingRecipe : App.getCurrentPlayerLazy().getRecepies().keySet()) {
+            boolean unlocked = App.getCurrentPlayerLazy().getRecepies().get(craftingRecipe);
+
+            TextButton craftButton = new TextButton(craftingRecipe.getName(), skin);
+            if (!unlocked) {
+                craftButton.setDisabled(true);
+                craftButton.getLabel().setColor(0.5f, 0.5f, 0.5f, 1);
+            } else {
+                craftButton.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        Gdx.app.postRunnable(() -> {
+                            Main.getMain().setScreen(new FarmView(
+                                craftingRecipe.getName(),
+                                players, // make sure `players` is accessible
+                                App.getCurrentGame().getPlayers(),
+                                true
+                            ));
+                        });
+                    }
+                });
+            }
+
+            table.row();
+            table.add(craftButton).width(300).height(50).left();
+        }
+    }
+
 }

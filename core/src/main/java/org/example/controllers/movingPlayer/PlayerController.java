@@ -17,7 +17,7 @@ import org.example.models.Fundementals.Player;
 import org.example.models.Place.Farm;
 import org.example.models.Place.Store;
 import org.example.models.enums.Types.TypeOfTile;
-import org.example.views.FishingScreen;
+import org.example.views.FarmView;
 import org.example.views.GameMenu;
 import org.example.views.StoreMenuView;
 
@@ -134,6 +134,12 @@ public class PlayerController {
                 return;
             }
         }
+        if(Gdx.input.isKeyPressed(Input.Keys.B)) {
+            GameMenu gameMenu = new GameMenu(players);
+            Main.getMain().setScreen(gameMenu);
+            gameMenu.craftingView();
+            return;
+        }
 
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
 
@@ -161,6 +167,7 @@ public class PlayerController {
                 GameMenu gameMenu = new GameMenu(players);
                 Main.getMain().setScreen(gameMenu);
                 gameMenu.showFishingPoleDialog();
+                return;
             }
         }
 
