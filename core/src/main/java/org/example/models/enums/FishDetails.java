@@ -1,33 +1,34 @@
 package org.example.models.enums;
 
 import com.badlogic.gdx.graphics.Texture;
+import org.example.models.Assets.GameAssetManager;
 
 public enum FishDetails {
     //TODO:change textures if i had the time :)
-    SALMON("Salmon", 75, Season.AUTUMN, false, new Texture("Fish/Blue_Discus.png")),
-    SARDINE("Sardine", 40, Season.AUTUMN, false, new Texture("Fish/Blue_Discus.png")),
-    SHAD("Shad", 60, Season.AUTUMN, false, new Texture("Fish/Blue_Discus.png")),
-    BLUE_DISCUS("Blue Discus", 120, Season.AUTUMN, false, new Texture("Fish/Blue_Discus.png")),
+    SALMON("Salmon", 75, Season.AUTUMN, false, GameAssetManager.getGameAssetManager().getNonLegendFish()),
+    SARDINE("Sardine", 40, Season.AUTUMN, false,GameAssetManager.getGameAssetManager().getNonLegendFish()),
+    SHAD("Shad", 60, Season.AUTUMN, false,GameAssetManager.getGameAssetManager().getNonLegendFish()),
+    BLUE_DISCUS("Blue Discus", 120, Season.AUTUMN, false,GameAssetManager.getGameAssetManager().getNonLegendFish()),
 
-    MIDNIGHT_CARP("Midnight Carp", 150, Season.WINTER, false, new Texture("Fish/Blue_Discus.png")),
-    SQUID("Squid", 80, Season.WINTER, false, new Texture("Fish/Blue_Discus.png")),
-    TUNA("Tuna", 100, Season.WINTER, false, new Texture("Fish/Blue_Discus.png")),
-    PERCH("Perch", 55, Season.WINTER, false, new Texture("Fish/Blue_Discus.png")),
+    MIDNIGHT_CARP("Midnight Carp", 150, Season.WINTER, false,GameAssetManager.getGameAssetManager().getNonLegendFish()),
+    SQUID("Squid", 80, Season.WINTER, false,GameAssetManager.getGameAssetManager().getNonLegendFish()),
+    TUNA("Tuna", 100, Season.WINTER, false,GameAssetManager.getGameAssetManager().getNonLegendFish()),
+    PERCH("Perch", 55, Season.WINTER, false,GameAssetManager.getGameAssetManager().getNonLegendFish()),
 
-    FLOUNDER("Flounder", 100, Season.SPRING, false, new Texture("Fish/Blue_Discus.png")),
-    LIONFISH("Lionfish", 100, Season.SPRING, false, new Texture("Fish/Blue_Discus.png")),
-    HERRING("Herring", 30, Season.SPRING, false, new Texture("Fish/Blue_Discus.png")),
-    GHOSTFISH("Ghostfish", 45, Season.SPRING, false, new Texture("Fish/Blue_Discus.png")),
+    FLOUNDER("Flounder", 100, Season.SPRING, false,GameAssetManager.getGameAssetManager().getNonLegendFish()),
+    LIONFISH("Lionfish", 100, Season.SPRING, false,GameAssetManager.getGameAssetManager().getNonLegendFish()),
+    HERRING("Herring", 30, Season.SPRING, false,GameAssetManager.getGameAssetManager().getNonLegendFish()),
+    GHOSTFISH("Ghostfish", 45, Season.SPRING, false,GameAssetManager.getGameAssetManager().getNonLegendFish()),
 
-    TILAPIA("Tilapia", 75, Season.SUMMER, false, new Texture("Fish/Blue_Discus.png")),
-    DORADO("Dorado", 100, Season.SUMMER, false, new Texture("Fish/Blue_Discus.png")),
-    SUNFISH("Sunfish", 30, Season.SUMMER, false, new Texture("Fish/Blue_Discus.png")),
-    RAINBOW_TROUT("Rainbow Trout", 65, Season.SUMMER, false, new Texture("Fish/Blue_Discus.png")),
+    TILAPIA("Tilapia", 75, Season.SUMMER, false,GameAssetManager.getGameAssetManager().getNonLegendFish()),
+    DORADO("Dorado", 100, Season.SUMMER, false,GameAssetManager.getGameAssetManager().getNonLegendFish()),
+    SUNFISH("Sunfish", 30, Season.SUMMER, false,GameAssetManager.getGameAssetManager().getNonLegendFish()),
+    RAINBOW_TROUT("Rainbow Trout", 65, Season.SUMMER, false,GameAssetManager.getGameAssetManager().getNonLegendFish()),
 
-    LEGEND("Legend", 5000, Season.SPRING, true, new Texture("Fish/Legend_II.png")),
-    GLACIERFISH("Glacierfish", 1000, Season.WINTER, true, new Texture("Fish/Legend_II.png")),
-    ANGLER("Angler", 900, Season.AUTUMN, true, new Texture("Fish/Legend.png")),
-    CRIMSONFISH("Crimsonfish", 1500, Season.SUMMER, true, new Texture("Fish/Legend.png"));
+    LEGEND("Legend", 5000, Season.SPRING, true, GameAssetManager.getGameAssetManager().getLegendFish()),
+    GLACIERFISH("Glacierfish", 1000, Season.WINTER, true, GameAssetManager.getGameAssetManager().getLegendFish()),
+    ANGLER("Angler", 900, Season.AUTUMN, true, GameAssetManager.getGameAssetManager().getLegendFish()),
+    CRIMSONFISH("Crimsonfish", 1500, Season.SUMMER, true, GameAssetManager.getGameAssetManager().getLegendFish());
 
     private final String name;
     private final int basePrice;

@@ -3,7 +3,9 @@ package org.example.models.Assets;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import org.example.models.Craft;
 import org.example.models.Fundementals.Location;
+import org.example.models.enums.Types.CraftingRecipe;
 import org.example.models.enums.Types.TreeType;
 import org.example.models.enums.foraging.Tree;
 
@@ -47,16 +49,32 @@ public class GameAssetManager {
     private static final Texture RobinPortrait = new Texture("sprites/RobinPortrait.png");
 
     //Season assets
-    private  final Texture winter = new Texture("Clock/Seasons/Winter.png");
-    private  final Texture summer = new Texture("Clock/Seasons/Summer.png");
-    private  final Texture fall = new Texture("Clock/Seasons/Fall.png");
-    private  final Texture spring = new Texture("Clock/Seasons/Spring.png");
+    private final Texture winter = new Texture("Clock/Seasons/Winter.png");
+    private final Texture summer = new Texture("Clock/Seasons/Summer.png");
+    private final Texture fall = new Texture("Clock/Seasons/Fall.png");
+    private final Texture spring = new Texture("Clock/Seasons/Spring.png");
 
     //Weather assets
     private final Texture snowy = new Texture("Clock/Weather/Snowy.png");
     private final Texture rainy = new Texture("Clock/Weather/Rainy.png");
     private final Texture sunny = new Texture("Clock/Weather/Sunny.png");
     private final Texture stormy = new Texture("Clock/Weather/Stormy.png");
+
+    private static final Texture furnace = new Texture("Crafting/Furnace.png");
+    private static final Texture charcoal = new Texture("Crafting/Charcoal_Kiln.png");
+    private static final Texture Bee_House = new Texture("Crafting/Bee_House.png");
+    private static final Texture CHEESE_PRESS = new Texture("Crafting/Cheese_Press.png");
+    private static final Texture Keg = new Texture("Crafting/Keg.png");
+    private static final Texture Loom = new Texture("Crafting/Loom.png");
+    private static final Texture Mayonnaise_Machine = new Texture("Crafting/Mayonnaise_Machine.png");
+    private static final Texture Oil_Maker = new Texture("Crafting/Oil_Maker.png");
+    private static final Texture Preserves_Jar = new Texture("Crafting/Preserves_Jar.png");
+    private static final Texture Dehydrator = new Texture("Crafting/Dehydrator.png");
+    private static final Texture Fish_Smoker = new Texture("Crafting/Fish_Smoker.png");
+
+    //fish
+    private final Texture nonLegendFish = new Texture("Fish/Blue_Discus.png");
+    private final Texture legendFish = new Texture("Fish/Legend.png");
 
     public static GameAssetManager getGameAssetManager() {
         if (gameAssetManager == null) {
@@ -123,29 +141,72 @@ public class GameAssetManager {
 
         switch (type) {
             case APRICOT_TREE:
-                return  getAPRICOT_TREE();
+                return getAPRICOT_TREE();
             case APPLE_TREE:
-                return  getAPPLE_TREE();
+                return getAPPLE_TREE();
             case CHERRY_TREE:
-                return  getCHERRY_TREE();
+                return getCHERRY_TREE();
             case OAK_TREE:
-                return  getOAK_TREE();
+                return getOAK_TREE();
             case MAPLE_TREE:
-                return  getMAPLE_TREE();
+                return getMAPLE_TREE();
             case PINE_TREE:
-                return  getPINE_TREE();
+                return getPINE_TREE();
             case MUSHROOM_TREE:
-                return  getMUSHROOM_TREE();
+                return getMUSHROOM_TREE();
             case PEACH_TREE:
-                return  getPEACH_TREE();
+                return getPEACH_TREE();
             case MYSTIC_TREE:
-                return  getMYSTIC_TREE();
+                return getMYSTIC_TREE();
             case ORANGE_TREE:
-                return  getORANGE_TREE();
+                return getORANGE_TREE();
             case MANGO_TREE:
-                return  getMANGO_TREE();
+                return getMANGO_TREE();
             case BANANA_TREE:
-                return  getBANANA_TREE();
+                return getBANANA_TREE();
+        }
+
+        return null;
+    }
+
+    public static Texture craftType(Location location) {
+        Craft craft = (Craft) location.getObjectInTile();
+        CraftingRecipe recipe = craft.getRecipe();
+
+        switch (recipe) {
+            case CHARCOAL_KILN -> {
+                return charcoal;
+            }
+            case FURNACE -> {
+                return furnace;
+            }
+            case KEG -> {
+                return Keg;
+            }
+            case BEE_HOUSE -> {
+                return Bee_House;
+            }
+            case CHEESE_PRESS -> {
+                return CHEESE_PRESS;
+            }
+            case LOOM -> {
+                return Loom;
+            }
+            case MAYONNAISE_MACHINE -> {
+                return Mayonnaise_Machine;
+            }
+            case OIL_MAKER -> {
+                return Oil_Maker;
+            }
+            case PRESERVES_JAR -> {
+                return Preserves_Jar;
+            }
+            case DEHYDRATOR -> {
+                return Dehydrator;
+            }
+            case FISH_SMOKER -> {
+                return Fish_Smoker;
+            }
         }
 
         return null;
@@ -261,5 +322,13 @@ public class GameAssetManager {
 
     public Texture getPloughedLand() {
         return ploughedLand;
+    }
+
+    public Texture getNonLegendFish() {
+        return nonLegendFish;
+    }
+
+    public Texture getLegendFish() {
+        return legendFish;
     }
 }

@@ -1,7 +1,7 @@
 package org.example.models.ToolsPackage.ToolEnums;
 
 public enum BackPackTypes {
-    PRIMARY("primary", 12), //capacity = 12
+    PRIMARY("primary", 15), //capacity = 12
     BIG("big", 24), //capacity = 24
     DELUXE("deluxe", 10000);  //capacity unlimited
 

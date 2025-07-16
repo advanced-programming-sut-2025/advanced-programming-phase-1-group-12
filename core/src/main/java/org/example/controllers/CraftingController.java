@@ -108,13 +108,20 @@ public class CraftingController {
                     return new Result(false, "You are out of stock");
                 } else {
                     App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, entry.getValue());
-                    return new Result(true, "you decrease " + entry.getValue() + " ingredients");
+                   // return new Result(true, "you decrease " + entry.getValue() + " ingredients");
                 }
             }
             App.getCurrentPlayerLazy().setEnergy(App.getCurrentGame().getCurrentPlayer().getEnergy() - 2);
             ItemBuilder.addToBackPack(ItemBuilder.builder(itemName, Quality.NORMAL, recipe.getSellPrice()), 1, Quality.NORMAL);
+            for(Location location : App.getCurrentPlayerLazy().getOwnedFarm().getFarmLocation().getLocationsInRectangle()){
+                if(location.getTypeOfTile().equals(TypeOfTile.GROUND) && location.getObjectInTile() == null){
+                    location.setTypeOfTile(TypeOfTile.CRAFT);
+                    location.setObjectInTile(new Craft(recipe));
+                    break;
+                }
+            }
+            return new Result(true, "we add " + itemName + " to the back pack" + " it will be shown on map");
         }
-        return null;
     }
 
     public Result showRecipes() {
