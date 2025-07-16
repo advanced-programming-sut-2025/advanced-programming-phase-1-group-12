@@ -680,6 +680,13 @@ public class GameMenu extends InputAdapter implements Screen {
                 showAllMap();
             }
         });
+        settingsButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+                settingsMenu();
+            }
+        });
 
         closeButton.addListener(new ClickListener() {
             @Override
@@ -697,6 +704,60 @@ public class GameMenu extends InputAdapter implements Screen {
         content.add(closeButton).pad(5).width(400f).row();
 
         dialog.button(closeButton);
+        dialog.show(stage);
+    }
+
+    public void settingsMenu() {
+        Skin skin = GameAssetManager.skin;
+        Dialog dialog = new Dialog("Your Inventory", skin);
+
+        TextButton exitGameButton = new TextButton("exit", skin);
+        TextButton closeButton = new TextButton("Close", skin);
+
+        exitGameButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                //TODO:does it mean this?
+                System.exit(0);
+            }
+        });
+
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+            }
+        });
+
+        Table content = dialog.getContentTable();
+
+        content.add(closeButton).pad(5).width(400f).row();
+        content.add(exitGameButton).pad(5).width(400f).row();
+
+        HashMap<TextButton, Player>removePlayers = new HashMap<>();
+        for(Player player : App.getCurrentGame().getPlayers()) {
+            if(!player.equals(App.getCurrentGame().getCurrentPlayer())) {
+                removePlayers.put(new TextButton("Remove " + player.getUser().getUserName(), skin), player);
+            }
+        }
+        for(TextButton textButton : removePlayers.keySet()) {
+            content.add(textButton).pad(5).width(400f).row();
+            dialog.button(textButton);
+        }
+        for(TextButton textButton : removePlayers.keySet()) {
+            textButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    App.getCurrentGame().getPlayers().remove(removePlayers.get(textButton));
+                    GameMenu gameMenu = new GameMenu(players);
+                    dialog.hide();
+                    Main.getMain().setScreen(gameMenu);
+
+                }
+            });
+        }
+        dialog.button(closeButton);
+        dialog.button(exitGameButton);
         dialog.show(stage);
     }
 
@@ -782,9 +843,8 @@ public class GameMenu extends InputAdapter implements Screen {
         content.top();
 
         ScrollPane scrollPane = new ScrollPane(content, skin);
-        scrollPane.setScrollingDisabled(true, false); // Allow vertical and horizontal scrolling
+        scrollPane.setScrollingDisabled(true, false);
 
-        // Create a close button
         TextButton closeButton = new TextButton("Close", skin);
         closeButton.addListener(new ClickListener() {
             @Override
@@ -806,11 +866,10 @@ public class GameMenu extends InputAdapter implements Screen {
         trashButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // Call trash method when trash button is clicked
                 GameMenuController gameMenuController = new GameMenuController();
                 Result result = gameMenuController.trashItem(nameOfDeletingItem.getText(), whatCount.getText());
                 showError(result.getMessage());
-                content.clear(); // Clear the content and reload the inventory items
+                content.clear();
                 inventoryItemsMenu();
             }
         });
@@ -834,10 +893,15 @@ public class GameMenu extends InputAdapter implements Screen {
         Table content = new Table();
         content.top();
         GameMenuController gameMenuController = new GameMenuController();
-        String message = gameMenuController.friendshipNPCList().getMessage();
+        StringBuilder message = new StringBuilder(gameMenuController.friendshipNPCList().getMessage());
+        message.append("\n\n");
+        message.append(gameMenuController.friendshipList().getMessage());
+        message.append("\n\n");
+        NPCcontroller npcController = new NPCcontroller();
+        message.append(npcController.listQuests());
 
         // Create a label for the message
-        Label label = new Label(message, skin);
+        Label label = new Label(message.toString(), skin);
         label.setWrap(true);
 
         ScrollPane scrollPane = new ScrollPane(label, skin);
