@@ -1,5 +1,8 @@
 package org.example.models.ToolsPackage;
 
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import org.example.models.Assets.ToolAssetsManager;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Result;
@@ -16,6 +19,7 @@ public class Tools extends Item {
     private UpgradeFunction upgradeFunction;
     private Tool toolType;
     private ToolTypes type;
+    private Sprite smgSprite;
 
     // watering can
     private int capacity;
@@ -141,43 +145,6 @@ public class Tools extends Item {
         return useFunction.execute(targetLocation, skillLevel, App.getCurrentPlayerLazy().getCurrentTool());
     }
 
-
-    public static Tools createAxe() {
-        return new Tools(Tool.AXE);
-    }
-
-    public static Tools createHoe() {
-        return new Tools(Tool.HOE);
-    }
-
-    public static Tools createPickAxe() {
-        return new Tools(Tool.PICKAXE);
-    }
-
-    public static Tools createWateringCan() {
-        return new Tools(Tool.WATERING_CAN);
-    }
-
-    public static Tools createFishingRod() {
-        return new Tools(Tool.FISHING_POLE);
-    }
-
-    public static Tools createScythe() {
-        return new Tools(Tool.SCYTHE);
-    }
-
-    public static Tools createMilkPail() {
-        return new Tools(Tool.MILKPALE);
-    }
-
-    public static Tools createShears() {
-        return new Tools(Tool.SHEAR);
-    }
-
-    public static Tools createTrashCan() {
-        return new Tools(Tool.TRASH_CAN);
-    }
-
     public boolean isWateringCan() {
         return toolType == Tool.WATERING_CAN;
     }
@@ -234,7 +201,16 @@ public class Tools extends Item {
         return type;
     }
 
+    public Sprite getSmgSprite() {
+        return smgSprite;
+    }
+
+    public void setSmgSprite(Sprite smgSprite) {
+        this.smgSprite = smgSprite;
+    }
+
     public void setType(ToolTypes type) {
         this.type = type;
     }
+
 }

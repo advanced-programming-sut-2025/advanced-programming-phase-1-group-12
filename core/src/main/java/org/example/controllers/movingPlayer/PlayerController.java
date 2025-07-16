@@ -42,7 +42,7 @@ public class PlayerController {
     private Animation<TextureRegion> currentAnim;
     private float stateTime = 0f;
 
-    private enum Dir {DOWN, LEFT, RIGHT, UP}
+    public enum Dir {DOWN, LEFT, RIGHT, UP}
 
     private Dir facing = Dir.DOWN;
     List<String> players;
@@ -252,11 +252,15 @@ public class PlayerController {
         if(badLocations.contains(location)) return false;
 
         return (location.getTypeOfTile() == TypeOfTile.GROUND || location.getTypeOfTile() == TypeOfTile.BARN
-        || location.getTypeOfTile() == TypeOfTile.COOP);
+        || location.getTypeOfTile() == TypeOfTile.COOP || location.getTypeOfTile() == TypeOfTile.STORE);
     }
 
     public GameMenuController getGameController() {
         return gameController;
+    }
+
+    public Dir getFacing() {
+        return facing;
     }
 
 }

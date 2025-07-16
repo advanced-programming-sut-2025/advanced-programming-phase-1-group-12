@@ -1,5 +1,6 @@
 package org.example.models;
 
+import com.badlogic.gdx.Gdx;
 import org.example.controllers.MenusController.GameMenuController;
 import org.example.models.Animal.FarmAnimals;
 import org.example.models.Fundementals.App;
@@ -53,16 +54,20 @@ public class Date implements Runnable {
     public void run(){
         while(threadRunning){
             try {
-                timeThread.sleep(6000 ); //every 6 seconds 1 hour passes
+                timeThread.sleep(6000); //every 6 seconds 1 hour passes
                 changeAdvancedTime(1);
             } catch (InterruptedException e) {
                 System.out.println(e.getMessage());
+                break;
             }
         }
     }
 
     public void stop(){
         threadRunning = false;
+        if (timeThread != null) {
+            timeThread.interrupt();
+        }
     }
 
     public void changeAdvancedTime(int hour) {
@@ -71,7 +76,6 @@ public class Date implements Runnable {
         if (this.hour > 22) {
             this.hour -= 13;
             changeAdvancedDay(1);
-
         }
     }
 
@@ -103,8 +107,8 @@ public class Date implements Runnable {
 
                     // Debug output
                     System.out.println("Completed " + item.getName() +
-                            " for " + player.getUser().getUserName() +
-                            ", added to backpack");
+                        " for " + player.getUser().getUserName() +
+                        ", added to backpack");
 
                     // Remove from processing queue
                     iterator.remove();
@@ -115,7 +119,7 @@ public class Date implements Runnable {
 
     public void attackingCrow() {
         if (App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getPlantOfFarm().size() +
-                App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getTrees().size() < 16) return;
+            App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getTrees().size() < 16) return;
 
         Random random = new Random();
         int randomInt = random.nextInt(100);
@@ -129,7 +133,7 @@ public class Date implements Runnable {
                 if (plant.isGiantPlant()) {
                     removeGiantPlant(plant);
                     System.out.println("crows attacked and damaged a GiantPlant at: " +
-                            plant.getLocation().getxAxis() + ", " + plant.getLocation().getyAxis());
+                        plant.getLocation().getxAxis() + ", " + plant.getLocation().getyAxis());
                     return;
                 } else {
                     destroyablePlants.add(plant);
@@ -150,7 +154,7 @@ public class Date implements Runnable {
                 location.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
                 plants.remove(plant);
                 System.out.println("crows attacked and damaged a plant at: " +
-                        location.getxAxis() + ", " + location.getyAxis());
+                    location.getxAxis() + ", " + location.getyAxis());
             }
         }
 
@@ -170,7 +174,6 @@ public class Date implements Runnable {
         }
     }
 
-
     public void removeGiantPlant(Plant plant) {
         Location baseLocation = plant.getLocation();
         int x = baseLocation.getxAxis();
@@ -178,10 +181,10 @@ public class Date implements Runnable {
         SeedTypes type = plant.getSeed().getType();
 
         int[][][] cornerOffsets = {
-                {{0, 0}, {1, 0}, {0, 1}, {1, 1}},
-                {{-1, 0}, {0, 0}, {-1, 1}, {0, 1}},
-                {{0, -1}, {1, -1}, {0, 0}, {1, 0}},
-                {{-1, -1}, {0, -1}, {-1, 0}, {0, 0}}
+            {{0, 0}, {1, 0}, {0, 1}, {1, 1}},
+            {{-1, 0}, {0, 0}, {-1, 1}, {0, 1}},
+            {{0, -1}, {1, -1}, {0, 0}, {1, 0}},
+            {{-1, -1}, {0, -1}, {-1, 0}, {0, 0}}
         };
 
         for (int[][] squareOffsets : cornerOffsets) {
@@ -194,7 +197,7 @@ public class Date implements Runnable {
                 Location loc = App.getCurrentGame().getMainMap().findLocation(checkX, checkY);
 
                 if (loc == null || !(loc.getObjectInTile() instanceof Plant p) ||
-                        !p.getSeed().getType().equals(type) || !p.isGiantPlant()) {
+                    !p.getSeed().getType().equals(type) || !p.isGiantPlant()) {
                     match = false;
                     break;
                 }
@@ -221,15 +224,18 @@ public class Date implements Runnable {
         for (int i = 0; i < 3; i++) {
             Location location = shuffled.get(i);
             location.setTypeOfTile(TypeOfTile.BURNED_GROUND);
-            ItemBuilder.addToBackPack(ItemBuilder.builder("Coal",Quality.NORMAL, 0), 1, Quality.NORMAL);
-            System.out.println("you take a coal and it add to your back pack!!");
+
+            Gdx.app.postRunnable(() -> {
+                ItemBuilder.addToBackPack(ItemBuilder.builder("Coal", Quality.NORMAL, 0), 1, Quality.NORMAL);
+                System.out.println("you take a coal and it add to your back pack!!");
+            });
         }
     }
 
     public void updateAllPlants() {
         for(Location location : App.getCurrentGame().getMainMap().getTilesOfMap()){
             if(App.getCurrentGame().getDate().weather.name().equalsIgnoreCase("rainy") &&
-                    !location.getTypeOfTile().equals(TypeOfTile.GREENHOUSE)){
+                !location.getTypeOfTile().equals(TypeOfTile.GREENHOUSE)){
                 return;
             }
             if(location.getTypeOfTile().equals(TypeOfTile.BURNED_GROUND)){
@@ -318,9 +324,9 @@ public class Date implements Runnable {
 
             List<MineralTypes> allMinerals = new ArrayList<>(Arrays.asList(MineralTypes.values()));
             List<TreeType> foragingTrees = new ArrayList<>(
-                    Arrays.stream(TreeType.values())
-                            .filter(TreeType::isCanBeForaging)
-                            .toList()
+                Arrays.stream(TreeType.values())
+                    .filter(TreeType::isCanBeForaging)
+                    .toList()
             );
 
             List<SeedTypes> allSeeds = new ArrayList<>(Arrays.asList(SeedTypes.values()));
@@ -345,7 +351,7 @@ public class Date implements Runnable {
                 Tree newTree = new Tree(location, type, true, type.fruitType);
                 farm.getTrees().add(newTree);
                 System.out.println("new Tree with type: " + newTree.getType().name + " add to location" +
-                        location.getxAxis() + ", " + location.getyAxis());
+                    location.getxAxis() + ", " + location.getyAxis());
 
                 location.setTypeOfTile(TypeOfTile.TREE);
                 location.setObjectInTile(newTree);
@@ -364,10 +370,10 @@ public class Date implements Runnable {
                 farm.getPlantOfFarm().add(newPlant);
                 if (newPlant.getAllCrops() != null)
                     System.out.println("new Plant with type: " + newPlant.getAllCrops().name() + " add to location" +
-                            location.getxAxis() + ", " + location.getyAxis());
+                        location.getxAxis() + ", " + location.getyAxis());
                 else
                     System.out.println("new Plant with type: " + newPlant.getSeed().getName().toLowerCase() + " add to location" +
-                            location.getxAxis() + ", " + location.getyAxis());
+                        location.getxAxis() + ", " + location.getyAxis());
                 location.setTypeOfTile(TypeOfTile.PLANT);
                 location.setObjectInTile(newPlant);
             }
@@ -379,7 +385,6 @@ public class Date implements Runnable {
                 MineralTypes mineral = allMinerals.get(i);
                 Stone newStone = new Stone(mineral);
                 location.setObjectInTile(newStone);
-
             }
         }
     }
@@ -413,7 +418,6 @@ public class Date implements Runnable {
     public void changeAdvancedDay(int day) {
         if (day == 1) {
             this.weather = this.tommorowWeather;// the day change
-
         }
         this.dayOfWeek += day;
         if (this.dayOfWeek > 7) {
@@ -454,7 +458,8 @@ public class Date implements Runnable {
         if(App.getCurrentPlayerLazy().isMaxEnergyBuffEaten()){
             App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - 10000);
             App.getCurrentPlayerLazy().setMaxEnergyBuffEaten(false);
-        }         if(App.getCurrentPlayerLazy().isSkillBuffEaten()){
+        }
+        if(App.getCurrentPlayerLazy().isSkillBuffEaten()){
             App.getCurrentPlayerLazy().getAbilityByName("Farming").setLevel(App.getCurrentGame().getCurrentPlayer().getAbilityByName("Farming").getLevel() - 1);
             App.getCurrentPlayerLazy().setSkillBuffEaten(false);
         }
@@ -548,8 +553,8 @@ public class Date implements Runnable {
         ArrayList<Location> availableLocations = new ArrayList<>();
         for (Location location : App.getCurrentGame().getMainMap().getTilesOfMap()) {
             if (location.getTypeOfTile() != TypeOfTile.BARN || location.getTypeOfTile() != TypeOfTile.LAKE ||
-                    location.getTypeOfTile() != TypeOfTile.COOP || location.getTypeOfTile() != TypeOfTile.QUARRY ||
-                    location.getTypeOfTile() != TypeOfTile.STONE || location.getTypeOfTile() != TypeOfTile.NPC_VILLAGE) {
+                location.getTypeOfTile() != TypeOfTile.COOP || location.getTypeOfTile() != TypeOfTile.QUARRY ||
+                location.getTypeOfTile() != TypeOfTile.STONE || location.getTypeOfTile() != TypeOfTile.NPC_VILLAGE) {
                 availableLocations.add(location);
             }
         }
@@ -582,9 +587,9 @@ public class Date implements Runnable {
         ArrayList<Location> result = new ArrayList<>();
         for (Location loc : App.getCurrentGame().getMainMap().getTilesOfMap()) {
             if (loc.getxAxis() >= rect.getTopLeftCorner().getxAxis() &&
-                    loc.getxAxis() <= rect.getDownRightCorner().getxAxis() &&
-                    loc.getyAxis() >= rect.getTopLeftCorner().getyAxis() &&
-                    loc.getyAxis() <= rect.getDownRightCorner().getyAxis()) {
+                loc.getxAxis() <= rect.getDownRightCorner().getxAxis() &&
+                loc.getyAxis() >= rect.getTopLeftCorner().getyAxis() &&
+                loc.getyAxis() <= rect.getDownRightCorner().getyAxis()) {
                 result.add(loc);
             }
         }

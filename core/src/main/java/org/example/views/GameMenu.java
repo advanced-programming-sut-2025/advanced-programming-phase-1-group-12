@@ -4,8 +4,7 @@ import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -23,10 +22,10 @@ import org.example.controllers.movingPlayer.PlayerController;
 import org.example.models.Animal.FarmAnimals;
 import org.example.models.Assets.GameAssetManager;
 import org.example.models.BackPack;
+import org.example.models.Assets.ToolAssetsManager;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Player;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.example.models.Fundementals.Result;
 import org.example.models.Item;
@@ -39,6 +38,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.GL20;
 
 public class GameMenu extends InputAdapter implements Screen {
     private final GameMenuController controller = new GameMenuController();
@@ -48,6 +50,7 @@ public class GameMenu extends InputAdapter implements Screen {
     private final StoreController storeController = new StoreController();
     private final CraftingController craftingController = new CraftingController();
     private final ArtisanController artisanController = new ArtisanController();
+    ToolAssetsManager toolAssets = ToolAssetsManager.toolAssetsManager();
     private Label errorLabel;
 
     private PixelMapRenderer pixelMapRenderer;
@@ -73,10 +76,11 @@ public class GameMenu extends InputAdapter implements Screen {
     private Label dayLabel;
     private Label timeLabel;
     private Label goldLabel;
+    private ShapeRenderer shapeRenderer;
+    private float lightingAlpha = 0f;
 
     private Map<Player, ProgressBar> energyBars;
 
-    private float errorDisplayTime = 5f;
     private float timeSinceError = 0f;
 
     GameConsoleCommandHandler cmdHandler =
@@ -101,8 +105,11 @@ public class GameMenu extends InputAdapter implements Screen {
         clockTexture = new Texture(Gdx.files.internal("Clock/clock.png"));
         clockImage = new Image(clockTexture);
 
+        // Initialize lighting system
+        initializeLighting();
+
         float clockSize = 100f;
-        clockImage.setSize(clockSize , clockSize);
+        clockImage.setSize(clockSize, clockSize);
         clockImage.setPosition(stage.getWidth() - clockSize - 20f, stage.getHeight() - clockSize - 20f);
         stage.addActor(clockImage);
 
@@ -131,9 +138,9 @@ public class GameMenu extends InputAdapter implements Screen {
         float clockX = stage.getWidth() - clockSize - 20f;
         float clockY = stage.getHeight() - clockSize - 20f;
 
-        dayLabel.setPosition(clockX + clockSize/2 - dayLabel.getWidth()/2, clockY + clockSize + 5f);
+        dayLabel.setPosition(clockX + clockSize / 2 - dayLabel.getWidth() / 2, clockY + clockSize + 5f);
 
-        timeLabel.setPosition(clockX + clockSize/2 - timeLabel.getWidth()/2, clockY - 25f);
+        timeLabel.setPosition(clockX + clockSize / 2 - timeLabel.getWidth() / 2, clockY - 25f);
 
         stage.addActor(dayLabel);
         stage.addActor(timeLabel);
@@ -205,10 +212,12 @@ public class GameMenu extends InputAdapter implements Screen {
 
         updateClockDisplay();
         updateSeasonAndWeatherDisplay();
+        updateLightingWithSeasons();
 
         if (errorLabel.isVisible()) {
             timeSinceError += delta;
 
+            float errorDisplayTime = 5f;
             if (timeSinceError >= errorDisplayTime) {
                 errorLabel.setVisible(false);
                 timeSinceError = 0f;
@@ -246,9 +255,34 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
 
-        batch.draw(frame, scaledX, scaledY, player.getPlayerSprite().getWidth(), player.getPlayerSprite().getHeight());
+        batch.draw(frame, scaledX, scaledY, player.getPlayerSprite().getWidth(),
+            player.getPlayerSprite().getHeight());
         font.getData().setScale(0.5f);
-        font.draw(batch, player.getUser().getUserName(), scaledX, scaledY + player.getPlayerSprite().getHeight() + 10); // Adjust the +10 for vertical space
+        font.draw(batch, player.getUser().getUserName(), scaledX,
+            scaledY + player.getPlayerSprite().getHeight() + 10);
+
+        Tools equipped = App.getCurrentPlayerLazy().getCurrentTool();
+        if (equipped != null) {
+            Texture toolTex = getToolTexture(equipped);
+            Sprite smgSprite = new Sprite(toolTex);
+            equipped.setSmgSprite(smgSprite);
+
+            float offX = 0, offY = 0;
+            switch (player.getPlayerController().getFacing()) {
+                case UP    -> { offX =  6;  offY = 20; }
+                case DOWN  -> { offX = 10;  offY =  4; }
+                case LEFT  -> { offX = -4;  offY = 12; }
+                case RIGHT -> { offX = 18;  offY = 12; }
+            }
+
+            float toolW = 32, toolH = 32;
+            batch.draw(toolTex,
+                scaledX + offX,
+                scaledY + offY,
+                toolW, toolH);
+            smgSprite.draw(Main.getMain().getBatch());
+
+        }
 
         for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
             if (App.getCurrentPlayerLazy() == otherPlayer) {
@@ -288,7 +322,7 @@ public class GameMenu extends InputAdapter implements Screen {
             for (FarmAnimals animal : farm.getFarmAnimals()) {
                 float renderX;
                 float renderY;
-                if(animal.isMoving()) {
+                if (animal.isMoving()) {
                     Location current = animal.getPosition();
                     Location previous = animal.getPreviousPosition();
 
@@ -315,6 +349,8 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
         batch.end();
+        renderLightingOverlay();
+
 
         stage.act(delta);
         stage.draw();
@@ -376,9 +412,9 @@ public class GameMenu extends InputAdapter implements Screen {
             float clockY = stage.getHeight() - clockSize - 20f;
             float iconSize = 10f;
 
-            seasonImage.setPosition(clockX + 74f  , clockY + clockSize/2 - iconSize/2 + 10f);
+            seasonImage.setPosition(clockX + 74f, clockY + clockSize / 2 - iconSize / 2 + 10f);
 
-            weatherImage.setPosition(clockX + 37f, clockY + clockSize/2 - iconSize/2 + 10f);
+            weatherImage.setPosition(clockX + 37f, clockY + clockSize / 2 - iconSize / 2 + 10f);
 
         } catch (Exception e) {
             System.err.println("Error updating season/weather display: " + e.getMessage());
@@ -390,6 +426,9 @@ public class GameMenu extends InputAdapter implements Screen {
     public void dispose() {
         if (clockTexture != null) {
             clockTexture.dispose();
+        }
+        if (shapeRenderer != null) {
+            shapeRenderer.dispose();
         }
         stage.dispose();
         pixelMapRenderer.dispose();
@@ -417,6 +456,15 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     @Override
+    public boolean mouseMoved(int screenX, int screenY) {
+        if(App.getCurrentPlayerLazy().getCurrentTool() != null) {
+            toolsController.handleToolRotation(screenX, screenY);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public void pause() {
 
     }
@@ -434,6 +482,8 @@ public class GameMenu extends InputAdapter implements Screen {
     @Override
     public boolean keyDown(int keycode) {
 
+        if (stage.getKeyboardFocus() instanceof TextField) return false;
+
         if (keycode == Input.Keys.M) {
             showAllMap();
             return true;
@@ -442,11 +492,11 @@ public class GameMenu extends InputAdapter implements Screen {
             openTerminalScreen();
             return true;
         }
-        if(keycode == Input.Keys.E){
+        if (keycode == Input.Keys.E) {
             App.getCurrentPlayerLazy().setEnergy(2000);
             return true;
         }
-        if(keycode == Input.Keys.T){
+        if (keycode == Input.Keys.T) {
             showToolsDialog();
             return true;
         }
@@ -603,13 +653,12 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     public void showFishingPoleDialog() {
-        Skin skin = GameAssetManager.skin;  // Assuming you're using a skin asset to style the UI
+        Skin skin = GameAssetManager.skin;
         Dialog dialog = new Dialog("Choose Fishing Pole", skin);
 
         Label label = new Label("Enter the name of the fishing pole:", skin);
         TextField poleNameField = new TextField("", skin);  // TextField for the user to enter the name
 
-        // Add OK button to submit the fishing pole name
         TextButton okButton = new TextButton("OK", skin);
         okButton.addListener(new ClickListener() {
             @Override
@@ -618,13 +667,11 @@ public class GameMenu extends InputAdapter implements Screen {
                 boolean hasPole = App.getCurrentPlayerLazy().getBackPack().getItemNames().containsKey(poleName);
 
                 if (!hasPole) {
-                    showError( "You do not have any poles of this type");
-                }
-
-                else if (!poleName.isEmpty()) {
+                    showError("You do not have any poles of this type");
+                } else if (!poleName.isEmpty()) {
                     AnimalController animalController = new AnimalController();
-                    animalController.fishing(poleName, players);  // Pass the fishing pole name to AnimalController
-                    dialog.hide();  // Close the dialog after submission
+                    animalController.fishing(poleName, players);
+                    dialog.hide();
                 } else {
                     showError("Please enter a valid fishing pole name.");
                 }
@@ -927,36 +974,46 @@ public class GameMenu extends InputAdapter implements Screen {
 
 
     public void showToolsDialog() {
-        Skin skin = GameAssetManager.skin;  // Assuming you're using a skin asset to style the UI
+        Skin skin = GameAssetManager.skin;
         Dialog dialog = new Dialog("Choose a Tool", skin);
-
         Table content = dialog.getContentTable();
 
         for (Item tool : App.getCurrentPlayerLazy().getBackPack().getItems().keySet()) {
-            if(!(tool instanceof Tools))continue;
+            if (!(tool instanceof Tools toolItem)) continue;
 
-            TextButton toolButton = new TextButton(tool.getName() + " (Level: " + getLevelName(((Tools) tool).getLevel()) + ")", skin);
+            int count = App.getCurrentPlayerLazy().getBackPack().getItems().get(tool);
+            Texture toolTexture = getToolTexture(toolItem);
+            ImageButton toolButton = getImageButton(toolItem, toolTexture);
 
-            // Check if the tool is the current tool and mark it (either color change or checkmark)
-            if (tool.equals(App.getCurrentPlayerLazy().getCurrentTool())) {
-                toolButton.setColor(Color.GREEN); // Highlight the current tool
-            }
+            String toolInfo = toolItem.getName() + " (Lv: " + toolItem.getLevel() + ") *" + count;
+            Label toolLabel = new Label(toolInfo, skin);
+            Label checkmarkLabel = new Label("<<=", skin);
+            checkmarkLabel.setColor(Color.GREEN);
 
-            // Listener to equip the tool
             toolButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    // Equip the tool if it's not already equipped
                     if (!tool.equals(App.getCurrentPlayerLazy().getCurrentTool())) {
-                        toolsController.equipTool(tool.getName());  // Equip tool
+                        toolsController.equipTool(tool.getName());
                     } else {
-                        showError("This tool is already equipped.");
+                        App.getCurrentPlayerLazy().setCurrentTool(null);
+                        showError("This tool is already equipped. and now you put it in the backpack!");
                     }
                 }
             });
 
-            content.add(toolButton).pad(10).width(400f).row();
+            boolean isCurrent = tool.equals(App.getCurrentPlayerLazy().getCurrentTool());
+            if(isCurrent) toolLabel.setColor(Color.GREEN);
+            content.add(toolLabel).pad(10).left();
+            content.add(toolButton).pad(10).width(100f).height(100f);
+            if (isCurrent) {
+                content.add(checkmarkLabel).pad(10).width(30f);
+            } else {
+                content.add().width(30f);
+            }
+            content.row();
         }
+
         TextButton closeButton = new TextButton("Close", skin);
         closeButton.addListener(new ClickListener() {
             @Override
@@ -969,15 +1026,93 @@ public class GameMenu extends InputAdapter implements Screen {
         dialog.pack();
         dialog.show(stage);
     }
-    private String getLevelName(int level) {
-        switch (level) {
-            case 0: return "Normal";
-            case 1: return "Copper";
-            case 2: return "Iron";
-            case 3: return "Gold";
-            case 4: return "Iridium";
-            default: return "Unknown";
+
+    private static ImageButton getImageButton(Item tool, Texture toolTexture) {
+        ImageButton toolButton = new ImageButton(new Image(toolTexture).getDrawable());
+
+        if (tool.equals(App.getCurrentPlayerLazy().getCurrentTool())) {
+            toolButton.setColor(Color.GREEN);
+        } else if (App.getCurrentPlayerLazy().getBackPack().getItems().containsKey(tool)) {
+            toolButton.setColor(Color.WHITE);
+        } else {
+            toolButton.setColor(Color.GRAY);
         }
+        return toolButton;
+    }
+
+    private Texture getToolTexture(Tools tool) {
+
+        return switch (tool.getToolType()) {
+            case HOE -> getHoeTexture(tool.getLevel());
+            case PICKAXE -> getPickaxeTexture(tool.getLevel());
+            case AXE -> getAxeTexture(tool.getLevel());
+            case WATERING_CAN -> getWateringCanTexture(tool.getLevel());
+            case FISHING_POLE -> getFishingPoleTexture(tool.getLevel());
+            case SCYTHE -> toolAssets.Scythe;
+            case MILKPALE -> toolAssets.Milk_Pail;
+            case SHEAR -> toolAssets.Shears;
+            case TRASH_CAN -> getTrashCanTexture(tool.getLevel());
+        };
+    }
+
+    // Get Hoe texture based on level
+    private Texture getHoeTexture(int level) {
+        return switch (level) {
+            case 1 -> toolAssets.Copper_Hoe;
+            case 2 -> toolAssets.Steel_Hoe;
+            case 3 -> toolAssets.Gold_Hoe;
+            case 4 -> toolAssets.Iridium_Hoe;
+            default -> toolAssets.Hoe;
+        };
+    }
+
+    // Get Pickaxe texture based on level
+    private Texture getPickaxeTexture(int level) {
+        return switch (level) {
+            case 1 -> toolAssets.Copper_Pickaxe;
+            case 2 -> toolAssets.Steel_Pickaxe;
+            case 3 -> toolAssets.Gold_Pickaxe;
+            case 4 -> toolAssets.Iridium_Pickaxe;
+            default -> toolAssets.Pickaxe;
+        };
+    }
+
+    private Texture getAxeTexture(int level) {
+        return switch (level) {
+            case 1 -> toolAssets.Copper_Axe;
+            case 2 -> toolAssets.Steel_Axe;
+            case 3 -> toolAssets.Gold_Axe;
+            case 4 -> toolAssets.Iridium_Axe;
+            default -> toolAssets.Axe;
+        };
+    }
+
+    private Texture getWateringCanTexture(int level) {
+        return switch (level) {
+            case 1 -> toolAssets.Copper_Watering_Can;
+            case 2 -> toolAssets.Steel_Watering_Can;
+            case 3 -> toolAssets.Gold_Watering_Can;
+            case 4 -> toolAssets.Iridium_Watering_Can;
+            default -> toolAssets.Watering_Can;
+        };
+    }
+
+    private Texture getFishingPoleTexture(int level) {
+        return switch (level) {
+            case 1 -> toolAssets.Fiberglass_Rod;
+            case 2 -> toolAssets.Iridium_Rod;
+            default -> toolAssets.Bamboo_Pole;
+        };
+    }
+
+    private Texture getTrashCanTexture(int level){
+        return switch (level){
+            case 1 -> toolAssets.Trash_Can_Copper;
+            case 2 -> toolAssets.Trash_Can_Steel;
+            case 3 -> toolAssets.Trash_Can_Gold;
+            case 4 -> toolAssets.Trash_Can_Iridium;
+            default -> toolAssets.Trash_can;
+        };
     }
 
     private void showError(String message) {
@@ -994,16 +1129,100 @@ public class GameMenu extends InputAdapter implements Screen {
 
         timeSinceError = 0f;
     }
-    public String getSeason(){
+
+    public String getSeason() {
         return App.getCurrentGame().getDate().getSeason().name();
     }
 
-    public String getWeather(){
+    public String getWeather() {
         return App.getCurrentGame().getDate().getWeather().name();
     }
 
-    public int getGold(){
+    public int getGold() {
         return App.getCurrentPlayerLazy().getMoney();
     }
 
+    private void initializeLighting() {
+        shapeRenderer = new ShapeRenderer();
+    }
+
+
+    private void renderLightingOverlay() {
+        if (lightingAlpha > 0f) {
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+            shapeRenderer.setProjectionMatrix(stage.getCamera().combined);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+            shapeRenderer.setColor(0.05f, 0.05f, 0.2f, lightingAlpha);
+
+            shapeRenderer.rect(0, 0, stage.getWidth(), stage.getHeight());
+
+            shapeRenderer.end();
+
+            Gdx.gl.glDisable(GL20.GL_BLEND);
+        }
+    }
+
+    public float getLightingIntensity() {
+        return lightingAlpha;
+    }
+
+    private void updateLightingWithSeasons() {
+        org.example.models.Date currentDate = App.getCurrentGame().getDate();
+        int hour = currentDate.getHour();
+        String season = currentDate.getSeason().name();
+
+        float baseAlpha = 0f;
+
+        if (hour >= 6 && hour <= 18) {
+            if (hour >= 6 && hour <= 8) {
+                float progress = (hour - 6) / 2f;
+                baseAlpha = 0.3f - (progress * 0.3f);
+            } else if (hour >= 9 && hour <= 11) {
+                float progress = (hour - 9) / 2f;
+                baseAlpha = 0.1f - (progress * 0.1f);
+            } else if (hour == 12) {
+                baseAlpha = -0.1f;
+            } else if (hour >= 13 && hour <= 15) {
+                float progress = (hour - 13) / 2f;
+                baseAlpha = -0.1f + (progress * 0.1f);
+            } else if (hour >= 16 && hour <= 19) {
+                float progress = (hour - 16) / 2f;
+                baseAlpha = 0f + (progress * 0.2f);
+            }
+        } else if (hour >= 20 && hour <= 22) {
+            baseAlpha = 0.6f;
+        } else {
+            baseAlpha = 0.6f;
+        }
+
+        switch (season) {
+            case "Winter":
+                baseAlpha += 0.1f;
+                break;
+            case "Fall":
+                baseAlpha += 0.05f;
+                break;
+            case "Spring":
+            case "Summer":
+                break;
+        }
+
+        String weather = App.getCurrentGame().getDate().getWeather().name();
+        switch (weather) {
+            case "Stormy":
+                baseAlpha += 0.3f;
+                break;
+            case "Rainy":
+                baseAlpha += 0.2f;
+                break;
+            case "Snowy":
+                baseAlpha += 0.1f;
+                break;
+        }
+
+        lightingAlpha = Math.max(-0.2f, Math.min(1f, baseAlpha));
+    }
 }
