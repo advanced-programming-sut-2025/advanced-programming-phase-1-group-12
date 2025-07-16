@@ -436,9 +436,7 @@ public class GameMenu extends InputAdapter implements Screen {
     @Override
     public boolean keyDown(int keycode) {
 
-        if (stage.getKeyboardFocus() instanceof TextField) {
-            return false;
-        }
+        if (stage.getKeyboardFocus() instanceof TextField) return false;
 
         if (keycode == Input.Keys.M) {
             showAllMap();
