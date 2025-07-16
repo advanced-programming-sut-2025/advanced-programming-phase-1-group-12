@@ -40,6 +40,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.GL20;
 
 public class GameMenu extends InputAdapter implements Screen {
     private final GameMenuController controller = new GameMenuController();
@@ -75,6 +78,8 @@ public class GameMenu extends InputAdapter implements Screen {
     private Label dayLabel;
     private Label timeLabel;
     private Label goldLabel;
+    private ShapeRenderer shapeRenderer;
+    private float lightingAlpha = 0f;
 
     private Map<Player, ProgressBar> energyBars;
 
@@ -101,6 +106,9 @@ public class GameMenu extends InputAdapter implements Screen {
         font = new BitmapFont(Gdx.files.internal("fonts/new.fnt"));
         clockTexture = new Texture(Gdx.files.internal("Clock/clock.png"));
         clockImage = new Image(clockTexture);
+
+        // Initialize lighting system
+        initializeLighting();
 
         float clockSize = 100f;
         clockImage.setSize(clockSize, clockSize);
@@ -206,6 +214,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
         updateClockDisplay();
         updateSeasonAndWeatherDisplay();
+        updateLightingWithSeasons();
 
         if (errorLabel.isVisible()) {
             timeSinceError += delta;
@@ -317,6 +326,8 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
         batch.end();
+        renderLightingOverlay();
+
 
         stage.act(delta);
         stage.draw();
@@ -392,6 +403,9 @@ public class GameMenu extends InputAdapter implements Screen {
     public void dispose() {
         if (clockTexture != null) {
             clockTexture.dispose();
+        }
+        if (shapeRenderer != null) {
+            shapeRenderer.dispose();
         }
         stage.dispose();
         pixelMapRenderer.dispose();
@@ -1095,5 +1109,89 @@ public class GameMenu extends InputAdapter implements Screen {
 
     public int getGold() {
         return App.getCurrentPlayerLazy().getMoney();
+    }
+
+    private void initializeLighting() {
+        shapeRenderer = new ShapeRenderer();
+    }
+
+
+    private void renderLightingOverlay() {
+        if (lightingAlpha > 0f) {
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+            shapeRenderer.setProjectionMatrix(stage.getCamera().combined);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+            shapeRenderer.setColor(0.05f, 0.05f, 0.2f, lightingAlpha);
+
+            shapeRenderer.rect(0, 0, stage.getWidth(), stage.getHeight());
+
+            shapeRenderer.end();
+
+            Gdx.gl.glDisable(GL20.GL_BLEND);
+        }
+    }
+
+    public float getLightingIntensity() {
+        return lightingAlpha;
+    }
+
+    private void updateLightingWithSeasons() {
+        org.example.models.Date currentDate = App.getCurrentGame().getDate();
+        int hour = currentDate.getHour();
+        String season = currentDate.getSeason().name();
+
+        float baseAlpha = 0f;
+
+        if (hour >= 6 && hour <= 18) {
+            if (hour >= 6 && hour <= 8) {
+                float progress = (hour - 6) / 2f;
+                baseAlpha = 0.3f - (progress * 0.3f);
+            } else if (hour >= 9 && hour <= 11) {
+                float progress = (hour - 9) / 2f;
+                baseAlpha = 0.1f - (progress * 0.1f);
+            } else if (hour == 12) {
+                baseAlpha = -0.1f;
+            } else if (hour >= 13 && hour <= 15) {
+                float progress = (hour - 13) / 2f;
+                baseAlpha = -0.1f + (progress * 0.1f);
+            } else if (hour >= 16 && hour <= 18) {
+                float progress = (hour - 16) / 2f;
+                baseAlpha = 0f + (progress * 0.2f);
+            }
+        } else if (hour >= 19 && hour <= 22) {
+            float progress = (hour - 19) / 3f;
+        } else if (hour >= 23 || hour <= 5) {
+            baseAlpha = 0.6f;
+        }
+
+        switch (season) {
+            case "Winter":
+                baseAlpha += 0.1f;
+                break;
+            case "Fall":
+                baseAlpha += 0.05f;
+                break;
+            case "Spring":
+            case "Summer":
+                break;
+        }
+
+        String weather = App.getCurrentGame().getDate().getWeather().name();
+        switch (weather) {
+            case "Stormy":
+                baseAlpha += 0.3f;
+                break;
+            case "Rainy":
+                baseAlpha += 0.2f;
+                break;
+            case "Snowy":
+                baseAlpha += 0.1f;
+                break;
+        }
+
+        lightingAlpha = Math.max(-0.2f, Math.min(1f, baseAlpha)); // Allow slight negative for brightness
     }
 }
