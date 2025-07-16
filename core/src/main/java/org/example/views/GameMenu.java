@@ -531,7 +531,6 @@ public class GameMenu extends InputAdapter implements Screen {
         } else if (Math.abs(screenWorldX - (west.getxAxis() * 100)) < 50 && Math.abs(screenWorldY - (west.getyAxis() * 100)) < 50) {
             return west;
         }
-
         return null;
     }
 
