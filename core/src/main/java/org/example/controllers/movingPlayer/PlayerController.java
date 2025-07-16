@@ -204,6 +204,12 @@ public class PlayerController {
                 newX -= player.getSpeed();
             }
         }
+        if(Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
+            GameMenu gameMenu = new GameMenu(players);
+            Main.getMain().setScreen(gameMenu);
+            gameMenu.inventoryMenu();
+            return;
+        }
 
         player.updatePosition(newX, newY);
 

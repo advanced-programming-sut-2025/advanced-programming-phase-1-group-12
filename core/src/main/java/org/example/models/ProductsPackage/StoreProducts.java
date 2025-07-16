@@ -10,8 +10,6 @@ public class StoreProducts extends Item {
 
     private int currentDailyLimit;
 
-    private boolean Available;
-
     public StoreProductsTypes getType() {
         return type;
     }

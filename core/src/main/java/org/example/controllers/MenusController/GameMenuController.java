@@ -459,6 +459,7 @@ public class GameMenuController {
         Player player = App.getCurrentGame().getCurrentPlayer();
         BackPack backPack = player.getBackPack();
         StringBuilder result = new StringBuilder("Inventory items: \n");
+        result.append("initial capacity: " + App.getCurrentPlayerLazy().getBackPack().getType().getBackPackCapacity() + "\n");
         for(Item items : backPack.getItems().keySet()){
             result.append(items.getName());
             result.append(" -> ");

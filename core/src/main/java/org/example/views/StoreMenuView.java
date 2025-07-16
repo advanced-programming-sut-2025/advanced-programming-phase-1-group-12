@@ -57,12 +57,10 @@ public class StoreMenuView implements Screen {
 
         CheckBox showAvailableOnlyCheckbox = new CheckBox(" Show only available", skin);
 
-        // === Scrollable content ===
         Table contentTable = new Table();
         contentTable.top().left();
         contentTable.defaults().pad(10).left().fillX();
 
-        // Product list
         Table productsTable = new Table();
         productsTable.defaults().expandX().fillX();
         productsTable.top().left();
@@ -83,7 +81,6 @@ public class StoreMenuView implements Screen {
 
         float maxHeight = Gdx.graphics.getHeight() * 0.8f;
 
-        // === Final layout (checkbox outside scrollpane) ===
         Table container = new Table();
         container.setFillParent(true);
         container.top();

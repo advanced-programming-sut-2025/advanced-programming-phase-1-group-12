@@ -11,6 +11,7 @@ import org.example.models.MapDetails.Shack;
 import org.example.models.Place.Store;
 import org.example.models.ProductsPackage.Quality;
 import org.example.models.ProductsPackage.StoreProducts;
+import org.example.models.ToolsPackage.ToolEnums.BackPackTypes;
 import org.example.models.enums.Animal;
 import org.example.models.enums.Types.Cooking;
 import org.example.models.enums.Types.CraftingRecipe;
@@ -219,17 +220,14 @@ public class StoreController {
         if (store == null) {
             System.out.println("You are not in any store");
             return;
-        }//TODO:does it print it right?
+        }
         String storeName = store.getNameOfStore();
         for (StoreProductsTypes storeProductsTypes : StoreProductsTypes.values()) {
             if (storeProductsTypes.getShop().equalsIgnoreCase(storeName)) {
                 System.out.println(storeProductsTypes.getName());
-                //TODO:print price
+
             }
         }
-    }
-
-    public void showTotalProducts(List<Store> stores) {
     }
 
     public Result buyProduct(Store store,String productName, int count) {
@@ -240,7 +238,6 @@ public class StoreController {
         if(App.getCurrentGame().getDate().getHour() < store.getStartHour() || App.getCurrentGame().getDate().getHour() > store.getCloseHour()){
             return new Result(false, "Store is currently closed");
         }
-
         StoreProducts item = null;
         for (StoreProducts item1 : store.getStoreProducts()) {
             if (item1.getName().equalsIgnoreCase(productName)) {
@@ -251,11 +248,9 @@ public class StoreController {
         if (item == null) {
             return new Result(false, "The store doesn't have this product");
         }
-
         if (item.getCurrentDailyLimit() < count) {
             return new Result(false, "Not enough stock in the store today.");
         }
-
         if(!item.isAvailable()){
             return new Result(false, "Not enough stock in the store today.");
         }
@@ -270,7 +265,23 @@ public class StoreController {
         if (App.getCurrentPlayerLazy().getMoney() < totalCost) {
             return new Result(false, "You do not have enough money to buy this product");
         }
-
+        if(item.getType().getName().equalsIgnoreCase("Large Backpack")){
+            if(App.getCurrentPlayerLazy().getBackPack().getType().equals(BackPackTypes.PRIMARY)){
+                App.getCurrentPlayerLazy().getBackPack().setType(BackPackTypes.BIG);
+                App.getCurrentPlayerLazy().decreaseMoney(totalCost);
+                item.setCurrentDailyLimit(item.getCurrentDailyLimit() - count);
+                return new Result(true, "You upgraded yor back pack to big");
+            }
+            return new Result(true, "you do not have a primary backPack now");
+        } if(item.getType().getName().equalsIgnoreCase("Deluxe Backpack")){
+            if(App.getCurrentPlayerLazy().getBackPack().getType().equals(BackPackTypes.BIG)){
+                App.getCurrentPlayerLazy().getBackPack().setType(BackPackTypes.BIG);
+                App.getCurrentPlayerLazy().decreaseMoney(totalCost);
+                item.setCurrentDailyLimit(item.getCurrentDailyLimit() - count);
+                return new Result(true, "You upgraded yor back pack to deluxe");
+            }
+            return new Result(true, "First upgrade your backpack to big");
+        }
 
         if (item.getName().equalsIgnoreCase(StoreProductsTypes.CARPENTER_WELL.getName())) {
             Item Wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Wood");
