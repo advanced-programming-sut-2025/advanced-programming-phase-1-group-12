@@ -66,10 +66,9 @@ public class GameConsoleCommandHandler {
 
         if ((matcher = GameMenuCommands.EXIT.getMather(input)) != null) {
             System.out.println(controller.EXIT());
-        }else if ((matcher = GameMenuCommands.addWoodAndStone.getMather(input)) != null) {
-            System.out.println(storeController.cheatAddItem("Wood", 100));
-            System.out.println(storeController.cheatAddItem("Stone", 100));
-            System.out.println(storeController.cheatAddItem("Bamboo Pole", 1));
+        }else if ((matcher = GameMenuCommands.abarCheat.getMather(input)) != null) {
+            GameMenuController controller = new GameMenuController();
+            controller.abarCheat();
         }
         else if ((matcher = GameMenuCommands.LoadGame.getMather(input)) != null) {
             controller.loadGameById(matcher.end("gameID"));

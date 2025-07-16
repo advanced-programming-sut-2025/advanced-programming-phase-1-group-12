@@ -997,11 +997,9 @@ public class GameMenu extends InputAdapter implements Screen {
 
         Player player = App.getCurrentGame().getCurrentPlayer();
         BackPack backPack = player.getBackPack();
-        Table content = new Table();
-        content.top();
 
-        ScrollPane scrollPane = new ScrollPane(content, skin);
-        scrollPane.setScrollingDisabled(true, false);
+        Table mainContent = new Table(); // Main container
+        mainContent.top();
 
         TextButton closeButton = new TextButton("Close", skin);
         closeButton.addListener(new ClickListener() {
@@ -1013,36 +1011,54 @@ public class GameMenu extends InputAdapter implements Screen {
 
         TextField nameOfDeletingItem = new TextField("", skin);
         nameOfDeletingItem.setMessageText("Name of the item to be deleted");
+
         TextField whatCount = new TextField("", skin);
         whatCount.setMessageText("Count of the item to be deleted");
-
-        content.add(closeButton).pad(5).width(400f).row();
-        content.add(nameOfDeletingItem).pad(5).width(400f).row();
-        content.add(whatCount).pad(5).width(400f).row();
+        whatCount.setWidth(400);
 
         TextButton trashButton = new TextButton("Trash", skin);
+        trashButton.setWidth(400);
         trashButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 GameMenuController gameMenuController = new GameMenuController();
                 Result result = gameMenuController.trashItem(nameOfDeletingItem.getText(), whatCount.getText());
                 showError(result.getMessage());
-                content.clear();
+                dialog.hide(); // Instead of recursively calling menu, close and reopen
                 inventoryItemsMenu();
             }
         });
 
-        content.add(trashButton).pad(5).width(400f).row();
+        mainContent.add(nameOfDeletingItem).pad(5).width(400f).row();
+        mainContent.add(whatCount).pad(5).width(400f).row();
+        mainContent.add(trashButton).pad(5).width(400f).row();
+
+        Table scrollContent = new Table();
+        scrollContent.top();
         for (Item item : backPack.getItems().keySet()) {
             Label itemLabel = new Label(item.getName() + " -> " + backPack.getItems().get(item), skin);
-            content.add(itemLabel).pad(5).width(400f).row();
+            scrollContent.add(itemLabel).pad(5).width(400f).row();
         }
-        dialog.getContentTable().add(scrollPane).expand().fill().pad(5).row();
 
-        dialog.button(trashButton);
+        ScrollPane scrollPane = new ScrollPane(scrollContent, skin);
+        scrollPane.setScrollingDisabled(false, false);
+        scrollPane.setFadeScrollBars(false);
+
+        mainContent.add(scrollPane).pad(5).width(400f).height(300f).row();
+        mainContent.add(closeButton).pad(5).width(400f).row();
+
+        dialog.getContentTable().add(mainContent).expand().fill().pad(5).row();
         dialog.button(closeButton);
+        dialog.pack();
+        dialog.setPosition(
+            (Gdx.graphics.getWidth() - dialog.getWidth()) / 2f,
+            (Gdx.graphics.getHeight() - dialog.getHeight()) / 2f
+        );
+        dialog.show(stage);
+
         dialog.show(stage);
     }
+
 
     public void socialMenu() {
         Skin skin = GameAssetManager.skin;

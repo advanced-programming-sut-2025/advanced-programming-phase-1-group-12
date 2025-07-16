@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.Main;
 import org.example.controllers.MapSetUp.MapSetUp;
 import org.example.controllers.NPCcontroller;
+import org.example.controllers.StoreController;
 import org.example.controllers.TradeController;
 import org.example.controllers.movingPlayer.PlayerController;
 import org.example.models.Assets.GameAssetManager;
@@ -19,6 +20,7 @@ import org.example.models.Place.Farm;
 import org.example.models.Place.Store;
 import org.example.models.ProductsPackage.ArtisanItem;
 import org.example.models.ProductsPackage.Quality;
+import org.example.models.ProductsPackage.StoreProducts;
 import org.example.models.RelatedToUser.User;
 import org.example.models.*;
 import org.example.models.RelationShips.RelationShip;
@@ -27,6 +29,7 @@ import org.example.models.enums.*;
 import org.example.models.Fundementals.Player;
 import org.example.models.ToolsPackage.ToolEnums.BackPackTypes;
 import org.example.models.enums.Types.Cooking;
+import org.example.models.enums.Types.StoreProductsTypes;
 import org.example.models.enums.Types.TypeOfTile;
 import org.example.models.NPC.NPC;
 import org.example.models.enums.foraging.Plant;
@@ -39,6 +42,13 @@ import java.io.IOException;
 import java.util.*;
 
 public class GameMenuController {
+    public void abarCheat() {
+        App.getCurrentPlayerLazy().getBackPack().setType(BackPackTypes.DELUXE);
+        StoreController storeController = new StoreController();
+        for(StoreProductsTypes products : StoreProductsTypes.values()) {
+            storeController.cheatAddItem(products.getName(), 50);
+        }
+    }
     public Result startTrade() {
         StringBuilder playerList = new StringBuilder("Available players for trading:\n");
         Player currentPlayer = App.getCurrentGame().getCurrentPlayer();

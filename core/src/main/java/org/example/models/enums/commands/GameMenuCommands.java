@@ -77,7 +77,7 @@ public enum GameMenuCommands implements Commands {
     PRODUCES("^produces$"),
     COLLECT("collect produce -n (?<name>.*)"),
     SELL_ANIMAL("sell animal -n (?<name>.*)"),
-    addWoodAndStone("b"),
+    abarCheat("e"),
 
     //fishes
     FISHING("fishing -p (?<fishingPole>.*)"),

@@ -180,8 +180,6 @@ public class BackPack {
     }
 
     public boolean checkCapacity(int amount){
-        System.out.println(items.size() + " " + itemNames.size() + " " + amount);
-
         if((items.size() + amount)<this.getType().getBackPackCapacity()){
             return true;
         }else{
