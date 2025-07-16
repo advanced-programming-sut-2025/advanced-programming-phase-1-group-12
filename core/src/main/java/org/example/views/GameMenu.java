@@ -4,8 +4,7 @@ import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -27,7 +26,6 @@ import org.example.models.Assets.ToolAssetsManager;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Player;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.example.models.Fundementals.Result;
 import org.example.models.Item;
@@ -257,9 +255,34 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
 
-        batch.draw(frame, scaledX, scaledY, player.getPlayerSprite().getWidth(), player.getPlayerSprite().getHeight());
+        batch.draw(frame, scaledX, scaledY, player.getPlayerSprite().getWidth(),
+            player.getPlayerSprite().getHeight());
         font.getData().setScale(0.5f);
-        font.draw(batch, player.getUser().getUserName(), scaledX, scaledY + player.getPlayerSprite().getHeight() + 10); // Adjust the +10 for vertical space
+        font.draw(batch, player.getUser().getUserName(), scaledX,
+            scaledY + player.getPlayerSprite().getHeight() + 10);
+
+        Tools equipped = App.getCurrentPlayerLazy().getCurrentTool();
+        if (equipped != null) {
+            Texture toolTex = getToolTexture(equipped);
+            Sprite smgSprite = new Sprite(toolTex);
+            equipped.setSmgSprite(smgSprite);
+
+            float offX = 0, offY = 0;
+            switch (player.getPlayerController().getFacing()) {
+                case UP    -> { offX =  6;  offY = 20; }
+                case DOWN  -> { offX = 10;  offY =  4; }
+                case LEFT  -> { offX = -4;  offY = 12; }
+                case RIGHT -> { offX = 18;  offY = 12; }
+            }
+
+            float toolW = 32, toolH = 32;
+            batch.draw(toolTex,
+                scaledX + offX,
+                scaledY + offY,
+                toolW, toolH);
+            smgSprite.draw(Main.getMain().getBatch());
+
+        }
 
         for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
             if (App.getCurrentPlayerLazy() == otherPlayer) {
@@ -430,6 +453,15 @@ public class GameMenu extends InputAdapter implements Screen {
         float clockSize = 100f;
         clockImage.setPosition(stage.getWidth() - clockSize - 20f, stage.getHeight() - clockSize - 20f);
         updateClockDisplay();
+    }
+
+    @Override
+    public boolean mouseMoved(int screenX, int screenY) {
+        if(App.getCurrentPlayerLazy().getCurrentTool() != null) {
+            toolsController.handleToolRotation(screenX, screenY);
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -944,13 +976,11 @@ public class GameMenu extends InputAdapter implements Screen {
     public void showToolsDialog() {
         Skin skin = GameAssetManager.skin;
         Dialog dialog = new Dialog("Choose a Tool", skin);
-        Texture checkmarkTexture = toolAssets.checkmarkTexture;
         Table content = dialog.getContentTable();
 
         for (Item tool : App.getCurrentPlayerLazy().getBackPack().getItems().keySet()) {
-            if (!(tool instanceof Tools)) continue;
+            if (!(tool instanceof Tools toolItem)) continue;
 
-            Tools toolItem = (Tools) tool;
             int count = App.getCurrentPlayerLazy().getBackPack().getItems().get(tool);
             Texture toolTexture = getToolTexture(toolItem);
             ImageButton toolButton = getImageButton(toolItem, toolTexture);
@@ -960,18 +990,19 @@ public class GameMenu extends InputAdapter implements Screen {
             Label checkmarkLabel = new Label("<<=", skin);
             checkmarkLabel.setColor(Color.GREEN);
 
-            boolean isCurrent = tool.equals(App.getCurrentPlayerLazy().getCurrentTool());
-
             toolButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
                     if (!tool.equals(App.getCurrentPlayerLazy().getCurrentTool())) {
                         toolsController.equipTool(tool.getName());
                     } else {
-                        showError("This tool is already equipped.");
+                        App.getCurrentPlayerLazy().setCurrentTool(null);
+                        showError("This tool is already equipped. and now you put it in the backpack!");
                     }
                 }
             });
+
+            boolean isCurrent = tool.equals(App.getCurrentPlayerLazy().getCurrentTool());
             if(isCurrent) toolLabel.setColor(Color.GREEN);
             content.add(toolLabel).pad(10).left();
             content.add(toolButton).pad(10).width(100f).height(100f);

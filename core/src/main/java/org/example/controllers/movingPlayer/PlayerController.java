@@ -42,7 +42,7 @@ public class PlayerController {
     private Animation<TextureRegion> currentAnim;
     private float stateTime = 0f;
 
-    private enum Dir {DOWN, LEFT, RIGHT, UP}
+    public enum Dir {DOWN, LEFT, RIGHT, UP}
 
     private Dir facing = Dir.DOWN;
     List<String> players;
@@ -257,6 +257,10 @@ public class PlayerController {
 
     public GameMenuController getGameController() {
         return gameController;
+    }
+
+    public Dir getFacing() {
+        return facing;
     }
 
 }
