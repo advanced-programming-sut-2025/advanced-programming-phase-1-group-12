@@ -71,6 +71,8 @@ public class PixelMapRenderer {
                 return GameAssetManager.getGameAssetManager().getBarn();
             case COOP:
                 return GameAssetManager.getGameAssetManager().getCoop();
+            case CRAFT:
+                return GameAssetManager.craftType(location);
             default:
                 return GameAssetManager.getGameAssetManager().getGROUND();
         }

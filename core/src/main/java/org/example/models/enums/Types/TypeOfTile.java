@@ -14,11 +14,13 @@ public enum TypeOfTile {
     GIANT_PLANT('G'),
 
     //this is used for seeing if we can buy an animal
-    //TODO:big or Deluxe stuff is not shown
     COOP('C'),
     BARN('B'),
     NPC_VILLAGE('N'),
-    PLANT('p');
+    PLANT('p'),
+
+    //crafting system
+    CRAFT('c');
 
     private final char nameOfMap;
 
