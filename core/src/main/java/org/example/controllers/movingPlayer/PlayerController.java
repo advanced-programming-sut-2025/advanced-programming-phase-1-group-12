@@ -246,7 +246,7 @@ public class PlayerController {
         if(badLocations.contains(location)) return false;
 
         return (location.getTypeOfTile() == TypeOfTile.GROUND || location.getTypeOfTile() == TypeOfTile.BARN
-        || location.getTypeOfTile() == TypeOfTile.COOP);
+        || location.getTypeOfTile() == TypeOfTile.COOP || location.getTypeOfTile() == TypeOfTile.STORE);
     }
 
     public GameMenuController getGameController() {

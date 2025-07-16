@@ -40,12 +40,12 @@ public class ToolsController {
     }
 
     public Result showCurrentTool() {
-        if (currentTool == null) {
+        if (App.getCurrentPlayerLazy().getCurrentTool() == null) {
             return new Result(false, "You don't have any tool equipped");
         }
 
         String levelName = getLevelName(currentTool.getLevel());
-        return new Result(true, "Current tool: " + currentTool.getName() +
+        return new Result(true, "Current tool: " + App.getCurrentPlayerLazy().getCurrentTool().getName() +
                 " (Level: " + levelName + ")");
     }
 
