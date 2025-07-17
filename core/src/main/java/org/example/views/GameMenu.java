@@ -80,6 +80,12 @@ public class GameMenu extends InputAdapter implements Screen {
     private Label goldLabel;
     private ShapeRenderer shapeRenderer;
     private float lightingAlpha = 0f;
+    private List<RainDrop> rainDrops;
+    private Texture rainTexture1;
+    private Texture rainTexture2;
+    private boolean isRaining = false;
+    private float rainSpawnTimer = 0f;
+    private final float RAIN_SPAWN_INTERVAL = 0.05f;
 
     private Map<Player, ProgressBar> energyBars;
 
@@ -99,6 +105,33 @@ public class GameMenu extends InputAdapter implements Screen {
         errorLabel = new Label("", skin);
     }
 
+    public static class RainDrop {
+        public float x, y;
+        public float speed;
+        public float alpha;
+        public Texture texture;
+        public float rotation;
+
+        public RainDrop(float x, float y, float speed, Texture texture) {
+            this.x = x;
+            this.y = y;
+            this.speed = speed;
+            this.texture = texture;
+            this.alpha = 0.6f + (float)Math.random() * 0.4f; // Random alpha between 0.6-1.0
+            this.rotation = -10f + (float)Math.random() * 20f; // Slight random rotation
+        }
+
+        public void update(float delta) {
+            y -= speed * delta;
+            // Optional: slight horizontal movement for wind effect
+            x += Math.sin(y * 0.01f) * 10f * delta;
+        }
+
+        public boolean isOffScreen() {
+            return y < -50f; // Remove when off screen
+        }
+    }
+
     @Override
     public void show() {
         batch = Main.getMain().getBatch();
@@ -109,6 +142,8 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Initialize lighting system
         initializeLighting();
+        initializeRainSystem();
+
 
         float clockSize = 100f;
         clockImage.setSize(clockSize, clockSize);
@@ -216,6 +251,10 @@ public class GameMenu extends InputAdapter implements Screen {
         updateSeasonAndWeatherDisplay();
         updateLightingWithSeasons();
 
+
+        // Update rain system
+        updateRainSystem(delta);
+
         if (errorLabel.isVisible()) {
             timeSinceError += delta;
 
@@ -243,6 +282,7 @@ public class GameMenu extends InputAdapter implements Screen {
         camera.update();
 
         batch.setProjectionMatrix(camera.combined);
+
         pixelMapRenderer.render(batch, 0, 0);
 
         for (Player p : App.getCurrentGame().getPlayers()) {
@@ -311,6 +351,7 @@ public class GameMenu extends InputAdapter implements Screen {
             font.draw(batch, otherPlayer.getUser().getUserName(), farmCornerX, farmCornerY + otherPlayer.getPlayerSprite().getHeight() + 10);
 
         }
+
         if (showingAllMap) {
             for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
                 Location farmLocation = otherPlayer.getUserLocation();
@@ -321,6 +362,7 @@ public class GameMenu extends InputAdapter implements Screen {
                 batch.draw(portrait, farmCornerX - portrait.getWidth() / 2f, farmCornerY - portrait.getHeight() / 2f, 3000, 3000);
             }
         }
+
         if (timeForAnimalMove >= 0.5f) {
             for (Farm farm : App.getCurrentGame().getFarms()) {
                 for (FarmAnimals animal : farm.getFarmAnimals()) {
@@ -362,9 +404,12 @@ public class GameMenu extends InputAdapter implements Screen {
                 batch.draw(animal.getTexture(), renderX, renderY);
             }
         }
-        batch.end();
-        renderLightingOverlay();
 
+        renderRain(batch);
+
+        batch.end();
+
+        renderLightingOverlay();
 
         stage.act(delta);
         stage.draw();
@@ -1468,5 +1513,85 @@ public class GameMenu extends InputAdapter implements Screen {
     }
     public FarmingController getFarmingController() {
         return farmingController;
+    }
+
+    private void initializeRainSystem() {
+        rainDrops = new ArrayList<>();
+        try {
+            rainTexture1 = new Texture(Gdx.files.internal("Clock/Rain/rain_0.png"));
+            rainTexture2 = new Texture(Gdx.files.internal("Clock/Rain/rain_1.png"));
+        } catch (Exception e) {
+            System.err.println("Could not load rain textures: " + e.getMessage());
+        }
+    }
+    private void updateRainSystem(float delta) {
+        String currentWeather = getWeather();
+        boolean shouldRain = currentWeather.equals("Rainy") || currentWeather.equals("Stormy");
+
+        if (shouldRain && !isRaining) {
+            isRaining = true;
+        } else if (!shouldRain && isRaining) {
+            isRaining = false;
+        }
+
+        if (isRaining && rainTexture1 != null && rainTexture2 != null) {
+            rainSpawnTimer += delta;
+            if (rainSpawnTimer >= RAIN_SPAWN_INTERVAL) {
+                spawnRainDrops();
+                rainSpawnTimer = 0f;
+            }
+        }
+
+        for (int i = rainDrops.size() - 1; i >= 0; i--) {
+            RainDrop drop = rainDrops.get(i);
+            drop.update(delta);
+
+            if (drop.isOffScreen()) {
+                rainDrops.remove(i);
+            }
+        }
+    }
+
+    private void spawnRainDrops() {
+        float cameraLeft = camera.position.x - camera.viewportWidth * camera.zoom * 0.5f;
+        float cameraRight = camera.position.x + camera.viewportWidth * camera.zoom * 0.5f;
+        float cameraTop = camera.position.y + camera.viewportHeight * camera.zoom * 0.5f;
+
+        int dropsToSpawn = 3 + (int)(Math.random() * 5); // 3-7 drops
+
+        for (int i = 0; i < dropsToSpawn; i++) {
+            float x = cameraLeft + (float)Math.random() * (cameraRight - cameraLeft);
+            float y = cameraTop + 100f; // Start above screen
+            float speed = 200f + (float)Math.random() * 300f; // Random speed 200-500
+
+            Texture rainTexture = Math.random() < 0.5f ? rainTexture1 : rainTexture2;
+
+            rainDrops.add(new RainDrop(x, y, speed, rainTexture));
+        }
+    }
+
+    private void renderRain(SpriteBatch batch) {
+        if (!isRaining || rainDrops.isEmpty()) return;
+
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+        for (RainDrop drop : rainDrops) {
+            Color oldColor = batch.getColor();
+            batch.setColor(oldColor.r, oldColor.g, oldColor.b, drop.alpha);
+
+            TextureRegion rainRegion = new TextureRegion(drop.texture);
+
+            batch.draw(rainRegion,
+                drop.x - rainRegion.getRegionWidth() / 2f,
+                drop.y - rainRegion.getRegionHeight() / 2f,
+                rainRegion.getRegionWidth() / 2f,
+                rainRegion.getRegionHeight() / 2f,
+                rainRegion.getRegionWidth(),
+                rainRegion.getRegionHeight(),
+                1f, 1f, // scale
+                drop.rotation);
+
+            batch.setColor(oldColor);
+        }
     }
 }
