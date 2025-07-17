@@ -50,6 +50,10 @@ public class ItemBuilder {
             plant.setPlantType(typeOfPlant.getPlantType());
             return plant;
         }
+        SeedTypes seedTypes = SeedTypes.stringToSeed(name);
+        if(seedTypes != null){
+            return new Seed(seedTypes.getName(), Quality.NORMAL, 0 ,seedTypes);
+        }
         GiantPlants giantPlants = GiantPlants.nameToCraftType(name);
         if(giantPlants != null) {
             return new GiantPlant(giantPlants, null, false, false,
