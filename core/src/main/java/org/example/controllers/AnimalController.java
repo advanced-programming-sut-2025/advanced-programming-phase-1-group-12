@@ -101,7 +101,7 @@ public class AnimalController {
                 if (animal.getAnimal().equals(Animal.GOAT)) {
                     ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.GOAT_MILK.getName(), quality, AnimalProduct.GOAT_MILK.getPrice()), 1, quality);
                 }
-            }//produces the good product
+            }
             else {
                 if (animal.getAnimal().equals(Animal.COW)) {
                     ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.LARGE_MILK.getName(), quality, AnimalProduct.LARGE_MILK.getPrice()), 1, quality);

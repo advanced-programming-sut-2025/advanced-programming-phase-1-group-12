@@ -8,11 +8,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Main;
+import org.example.controllers.FarmingController;
 import org.example.models.Assets.GameAssetManager;
 import org.example.models.Fundementals.App;
+import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Player;
 import org.example.models.Item;
-import org.example.models.enums.foraging.Seed;
+import org.example.models.enums.Types.TypeOfTile;
+import org.example.models.enums.foraging.Plant;
 import org.example.models.BackPack;
 
 import java.util.List;
@@ -24,12 +27,15 @@ public class FarmingMenuView implements Screen {
     private Stage stage;
     private Table table;
     private TextButton backButton;
-    private List<String> players;
+    private final List<String> players;
     private final List<Player> playerList;
+    private final Location location;
+    private FarmingController farmingController = new FarmingController();
 
-    public FarmingMenuView(List<String> players, List<Player> playerList) {
+    public FarmingMenuView(List<String> players, List<Player> playerList, Location location) {
         this.players = players;
         this.playerList = playerList;
+        this.location = location;
     }
 
     @Override
@@ -43,38 +49,36 @@ public class FarmingMenuView implements Screen {
 
         BackPack backpack = App.getCurrentPlayerLazy().getBackPack();
         Map<Item, Integer> items = backpack.getItems();
-        System.out.println("hhhrhr");
 
         for (Map.Entry<Item, Integer> entry : items.entrySet()) {
             Item item = entry.getKey();
-            System.out.println(item.getName());
-            if (item instanceof Seed) {
-                Seed seed = (Seed) item;
-                TextButton seedButton = new TextButton(seed.getName(), skin);
+            if (item instanceof Plant plant) {
+                TextButton seedButton = new TextButton(plant.getName(), skin);
                 seedButton.addListener(event -> {
-                    plantSeed(seed);
+                    farmingController.plant(plant.getTypeOfPlant().getSource().getName(), location);
                     return true;
                 });
-                table.add(seedButton).pad(10).width(200).height(50); // Define size for buttons
-                table.row().padBottom(10); // Move to the next row with bottom padding
+                table.add(seedButton).pad(10).width(200).height(50);
+                table.row().padBottom(10);
             }
         }
 
         backButton = new TextButton("Back", skin);
         backButton.addListener(event -> {
-            Main.getMain().setScreen(new GameMenu(players)); // Transition to the game menu
+            Main.getMain().setScreen(new GameMenu(players));
             return true;
         });
 
-        // Set back button size and alignment
         table.add(backButton).width(200).height(50).center().pad(10);
-        table.row().padTop(20); // Give some space above the back button
+        table.row().padTop(20);
 
-        stage.addActor(table); // Add the table to the stage
+        stage.addActor(table);
     }
 
-    private void plantSeed(Seed seed) {
-        System.out.println("Planting seed: " + seed.getName());
+    private void plantSeed(Plant plant, Location location) {
+        App.getCurrentPlayerLazy().getBackPack().decreaseItem(plant, 1);
+        location.setObjectInTile(plant);
+        location.setTypeOfTile(TypeOfTile.PLANT);
     }
 
     @Override

@@ -2,7 +2,6 @@ package org.example.models.enums.foraging;
 
 import org.example.models.Item;
 import org.example.models.ProductsPackage.Quality;
-import org.example.models.enums.Types.FruitType;
 
 public class Fruit extends Item {
     private FruitType fruitType;

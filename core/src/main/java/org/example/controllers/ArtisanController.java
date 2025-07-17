@@ -10,7 +10,8 @@ import org.example.models.ProductsPackage.ArtisanItem;
 import org.example.models.ProductsPackage.Quality;
 import org.example.models.enums.FishDetails;
 import org.example.models.enums.Types.*;
-import org.example.models.enums.foraging.AllCrops;
+import org.example.models.enums.foraging.PlantType;
+import org.example.models.enums.foraging.TypeOfPlant;
 
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -233,8 +234,7 @@ public class ArtisanController {
             }
 
         }
-        AllCrops vegetable = AllCrops.nameToCraftType(items);
-
+        TypeOfPlant vegetable = TypeOfPlant.nameToCraftType(items);
 
         if (vegetable != null && App.getCurrentPlayerLazy().getBackPack().hasItem(vegetable.getName())) {
             type = ArtisanTypes.JUICE;
@@ -245,8 +245,10 @@ public class ArtisanController {
             App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, 1); // Add this line
             return new Result(true, "Artisan added to your inventory");
         }
-        for (TreeType treeType : TreeType.values()) {
-            if (treeType.getProduct().equalsIgnoreCase(items) && App.getCurrentPlayerLazy().getBackPack().hasItem(treeType.getProduct())) {
+        for (TypeOfPlant treeType : TypeOfPlant.values()) {
+            if(treeType.plantType != PlantType.Tree) continue;
+
+            if (treeType.fruitType.getName().equalsIgnoreCase(items) && App.getCurrentPlayerLazy().getBackPack().hasItem(treeType.fruitType.getName())) {
                 type = ArtisanTypes.WINE;
                 ArtisanItem wine = new ArtisanItem(type.getName(), type, type.getProcessingTime(), treeType.energy * 2);
                 wine.setPrice(treeType.baseSellPrice + 50);
@@ -288,9 +290,10 @@ public class ArtisanController {
                 return new Result(false, "You need 5 Grapes to make raisins");
             }
         }
-        for (TreeType treeType : TreeType.values()) {
+        for (TypeOfPlant treeType : TypeOfPlant.values()) {
+            if(treeType.plantType != PlantType.Tree) continue;
 
-            if (treeType.getProduct().equalsIgnoreCase(items) && App.getCurrentPlayerLazy().getBackPack().hasItem(treeType.getProduct())) {
+            if (treeType.fruitType.getName().equalsIgnoreCase(items) && App.getCurrentPlayerLazy().getBackPack().hasItem(treeType.fruitType.getName())) {
                 ArtisanTypes type = ArtisanTypes.DRIED_FRUIT;
                 ArtisanItem dried = new ArtisanItem(type.getName(), type, type.getProcessingTime(), treeType.energy * 2);
                 dried.setPrice(treeType.baseSellPrice + 50);
@@ -578,7 +581,7 @@ public class ArtisanController {
         if (item == null) {
             return new Result(false, "invalid item name");
         }
-        AllCrops vegetable = AllCrops.nameToCraftType(itemName);
+        TypeOfPlant vegetable = TypeOfPlant.nameToCraftType(itemName);
 
         if (vegetable != null) {
             ArtisanTypes type = ArtisanTypes.PICKLES;
@@ -590,11 +593,13 @@ public class ArtisanController {
             craft.setArtisanInIt(pickle);
             return new Result(true, "Artisan added to your inventory");
         }
-        for (TreeType treeType : TreeType.values()) {
-            if (treeType.getProduct().equalsIgnoreCase(itemName)) {
+        for (TypeOfPlant typeOfPlant : TypeOfPlant.values()) {
+            if(typeOfPlant.plantType != PlantType.Tree) continue;
+
+            if (typeOfPlant.fruitType.getName().equalsIgnoreCase(itemName)) {
                 ArtisanTypes type = ArtisanTypes.JELLY;
-                ArtisanItem jelly = new ArtisanItem(type.getName(), type, type.getProcessingTime(), treeType.energy * 2);
-                jelly.setPrice(2 * treeType.baseSellPrice + 50);
+                ArtisanItem jelly = new ArtisanItem(type.getName(), type, type.getProcessingTime(), typeOfPlant.energy * 2);
+                jelly.setPrice(2 * typeOfPlant.baseSellPrice + 50);
 
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, 1);
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(jelly);

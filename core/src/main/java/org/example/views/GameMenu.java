@@ -202,6 +202,7 @@ public class GameMenu extends InputAdapter implements Screen {
         }
 
         Player player = App.getCurrentPlayerLazy();
+
         player.getPlayerSprite().setPosition(
             player.getUserLocation().getxAxis(),
             player.getUserLocation().getyAxis()
@@ -248,13 +249,11 @@ public class GameMenu extends InputAdapter implements Screen {
         batch.setProjectionMatrix(camera.combined);
         pixelMapRenderer.render(batch, 0, 0);
 
-        // Update Energy Bars
         for (Player p : App.getCurrentGame().getPlayers()) {
             ProgressBar bar = energyBars.get(p);
             if (bar != null) {
                 bar.setValue(p.getEnergy());
 
-                // Handle energy depletion and next turn logic
                 if (p.getEnergy() <= 0 && App.getCurrentPlayerLazy().equals(p)) {
                     controller.nextTurn();
                     break;
@@ -341,7 +340,29 @@ public class GameMenu extends InputAdapter implements Screen {
             smgSprite.draw(batch);
         }
 
-        // Render Animals
+        for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
+            if (App.getCurrentPlayerLazy() == otherPlayer) {
+                continue;
+            }
+            Location farmLocation = otherPlayer.getUserLocation();
+            float farmCornerX = farmLocation.getxAxis() * 100;
+            float farmCornerY = farmLocation.getyAxis() * 100;
+
+            batch.draw(otherPlayer.getPlayerController().getCurrentFrame(), farmCornerX, farmCornerY, otherPlayer.getPlayerSprite().getWidth(),
+                otherPlayer.getPlayerSprite().getHeight());
+            font.draw(batch, otherPlayer.getUser().getUserName(), farmCornerX, farmCornerY + otherPlayer.getPlayerSprite().getHeight() + 10);
+
+        }
+        if (showingAllMap) {
+            for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
+                Location farmLocation = otherPlayer.getUserLocation();
+                float farmCornerX = farmLocation.getxAxis() * 100;
+                float farmCornerY = farmLocation.getyAxis() * 100;
+
+                Texture portrait = otherPlayer.getPortraitFrame();
+                batch.draw(portrait, farmCornerX - portrait.getWidth() / 2f, farmCornerY - portrait.getHeight() / 2f, 3000, 3000);
+            }
+        }
         if (timeForAnimalMove >= 0.5f) {
             for (Farm farm : App.getCurrentGame().getFarms()) {
                 for (FarmAnimals animal : farm.getFarmAnimals()) {
@@ -350,7 +371,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     }
                 }
             }
-            timeForAnimalMove = 0f;
+            timeForAnimalMove = 0f; // Only reset when a step was done!
         }
 
         for (Farm farm : App.getCurrentGame().getFarms()) {
@@ -383,15 +404,13 @@ public class GameMenu extends InputAdapter implements Screen {
                 batch.draw(animal.getTexture(), renderX, renderY);
             }
         }
-
         batch.end();
         renderLightingOverlay();
+
+
         stage.act(delta);
         stage.draw();
     }
-
-
-
 
     private void updateClockDisplay() {
         org.example.models.Date currentDate = App.getCurrentGame().getDate();
@@ -1454,6 +1473,7 @@ public class GameMenu extends InputAdapter implements Screen {
         TextField nameOfDeletingItem = new TextField("", skin);
         nameOfDeletingItem.setMessageText("Name of the item to put in the system");
 
+
         mainContent.add(nameOfDeletingItem).pad(5).width(400f).row();
 
         Table scrollContent = new Table();
@@ -1470,8 +1490,6 @@ public class GameMenu extends InputAdapter implements Screen {
                 showError(artisanController.artisanUse(craft, nameOfDeletingItem.getText()).getMessage());
             }
         });
-
-        // ScrollPane for the list of items
         ScrollPane scrollPane = new ScrollPane(scrollContent, skin);
         scrollPane.setScrollingDisabled(false, false);
         scrollPane.setFadeScrollBars(false);
@@ -1501,7 +1519,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
         dialog.getContentTable().add(mainContent).expand().fill().pad(5).row();
         dialog.button(closeButton);
-
+        dialog.button(start);
         dialog.pack();
         dialog.setPosition(
             (Gdx.graphics.getWidth() - dialog.getWidth()) / 2f,
@@ -1510,6 +1528,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
         dialog.show(stage);
     }
-
-
+    public FarmingController getFarmingController() {
+        return farmingController;
+    }
 }

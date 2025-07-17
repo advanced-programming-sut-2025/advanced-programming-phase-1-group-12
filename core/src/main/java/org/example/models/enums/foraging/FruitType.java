@@ -1,4 +1,4 @@
-package org.example.models.enums.Types;
+package org.example.models.enums.foraging;
 
 public enum FruitType {
     Apricot("Apricot"),

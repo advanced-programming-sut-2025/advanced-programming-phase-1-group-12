@@ -1,7 +1,6 @@
 package org.example.models;
 
 import com.badlogic.gdx.Gdx;
-import org.example.controllers.MenusController.GameMenuController;
 import org.example.models.Animal.FarmAnimals;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
@@ -15,11 +14,10 @@ import org.example.models.ProductsPackage.Quality;
 import org.example.models.ProductsPackage.StoreProducts;
 import org.example.models.enums.Season;
 import org.example.models.enums.Types.CraftingRecipe;
-import org.example.models.enums.Types.SeedTypes;
+import org.example.models.enums.foraging.SeedTypes;
 import org.example.models.enums.Types.TypeOfTile;
 import org.example.models.enums.Weather;
 import org.example.models.enums.foraging.*;
-import org.example.models.enums.Types.TreeType;
 
 import java.util.*;
 
@@ -92,68 +90,68 @@ public class Date implements Runnable {
         }
     }
 
-    public void attackingCrow() {
-        if (App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getPlantOfFarm().size() +
-            App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getTrees().size() < 16) return;
-
-        Random random = new Random();
-        int randomInt = random.nextInt(100);
-
-        List<Plant> plants = App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getPlantOfFarm();
-        List<Plant> destroyablePlants = new ArrayList<>();
-        List<Tree> trees = App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getTrees();
-
-        if (randomInt < 26 && !plants.isEmpty()) {
-            for (Plant plant : new ArrayList<>(plants)) {
-                if (plant.isGiantPlant()) {
-                    removeGiantPlant(plant);
-                    System.out.println("crows attacked and damaged a GiantPlant at: " +
-                        plant.getLocation().getxAxis() + ", " + plant.getLocation().getyAxis());
-                    return;
-                } else {
-                    destroyablePlants.add(plant);
-                }
-            }
-
-            int plantsToDamage = Math.min(3, destroyablePlants.size());
-            Collections.shuffle(destroyablePlants);
-
-            for (int i = 0; i < plantsToDamage; i++) {
-                Plant plant = destroyablePlants.get(i);
-                Location location = plant.getLocation();
-                if(location.getObjectInTile() instanceof ArtisanItem){
-                    System.out.println("crows attacked but can't damaged a Tile cause it product with scareCrow!");
-                    break;
-                }
-                location.setObjectInTile(null);
-                location.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
-                plants.remove(plant);
-                System.out.println("crows attacked and damaged a plant at: " +
-                    location.getxAxis() + ", " + location.getyAxis());
-            }
-        }
-
-        if (randomInt > 74 && !trees.isEmpty()) {
-            int treesToDamage = Math.min(3, trees.size());
-            Collections.shuffle(trees);
-
-            for (int i = 0; i < treesToDamage; i++) {
-                Tree tree = trees.get(i);
-                Location location = tree.getLocation();
-                location.setObjectInTile(null);
-                location.setTypeOfTile(TypeOfTile.GROUND);
-                System.out.println("crows attacked and damaged tree at " + location.getxAxis() + ", " + location.getyAxis());
-            }
-
-            trees.subList(0, treesToDamage).clear();
-        }
-    }
+//    public void attackingCrow() {
+//        if (App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getPlantOfFarm().size() +
+//            App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getTrees().size() < 16) return;
+//
+//        Random random = new Random();
+//        int randomInt = random.nextInt(100);
+//
+//        List<Plant> plants = App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getPlantOfFarm();
+//        List<Plant> destroyablePlants = new ArrayList<>();
+//        List<Tree> trees = App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getTrees();
+//
+//        if (randomInt < 26 && !plants.isEmpty()) {
+//            for (Plant plant : new ArrayList<>(plants)) {
+//                if (plant.isGiantPlant()) {
+//                    removeGiantPlant(plant);
+//                    System.out.println("crows attacked and damaged a GiantPlant at: " +
+//                        plant.getLocation().getxAxis() + ", " + plant.getLocation().getyAxis());
+//                    return;
+//                } else {
+//                    destroyablePlants.add(plant);
+//                }
+//            }
+//
+//            int plantsToDamage = Math.min(3, destroyablePlants.size());
+//            Collections.shuffle(destroyablePlants);
+//
+//            for (int i = 0; i < plantsToDamage; i++) {
+//                Plant plant = destroyablePlants.get(i);
+//                Location location = plant.getLocation();
+//                if(location.getObjectInTile() instanceof ArtisanItem){
+//                    System.out.println("crows attacked but can't damaged a Tile cause it product with scareCrow!");
+//                    break;
+//                }
+//                location.setObjectInTile(null);
+//                location.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
+//                plants.remove(plant);
+//                System.out.println("crows attacked and damaged a plant at: " +
+//                    location.getxAxis() + ", " + location.getyAxis());
+//            }
+//        }
+//
+//        if (randomInt > 74 && !trees.isEmpty()) {
+//            int treesToDamage = Math.min(3, trees.size());
+//            Collections.shuffle(trees);
+//
+//            for (int i = 0; i < treesToDamage; i++) {
+//                Tree tree = trees.get(i);
+//                Location location = tree.getLocation();
+//                location.setObjectInTile(null);
+//                location.setTypeOfTile(TypeOfTile.GROUND);
+//                System.out.println("crows attacked and damaged tree at " + location.getxAxis() + ", " + location.getyAxis());
+//            }
+//
+//            trees.subList(0, treesToDamage).clear();
+//        }
+//    }
 
     public void removeGiantPlant(Plant plant) {
         Location baseLocation = plant.getLocation();
         int x = baseLocation.getxAxis();
         int y = baseLocation.getyAxis();
-        SeedTypes type = plant.getSeed().getType();
+        SeedTypes type = plant.getTypeOfPlant().getSource();
 
         int[][][] cornerOffsets = {
             {{0, 0}, {1, 0}, {0, 1}, {1, 1}},
@@ -172,7 +170,7 @@ public class Date implements Runnable {
                 Location loc = App.getCurrentGame().getMainMap().findLocation(checkX, checkY);
 
                 if (loc == null || !(loc.getObjectInTile() instanceof Plant p) ||
-                    !p.getSeed().getType().equals(type) || !p.isGiantPlant()) {
+                    !p.getTypeOfPlant().getSource().equals(type) || !p.isGiantPlant()) {
                     match = false;
                     break;
                 }
@@ -241,52 +239,52 @@ public class Date implements Runnable {
                 int currentStage = plant.getCurrentStage();
                 int dayNeed = 0;
                 for (int i = 0; i < currentStage; i++) {
-                    dayNeed += plant.getAllCrops().stages[i];
+                    dayNeed += plant.getTypeOfPlant().stages[i];
                 }
                 if (plant.getAge() >= dayNeed)
                     plant.setCurrentStage(plant.getCurrentStage() + 1);
 
-                if (!plant.getAllCrops().oneTime && !plant.isOneTime()) {
+                if (!plant.getTypeOfPlant().oneTime && !plant.isOneTime()) {
                     plant.setRegrowthTime(plant.getRegrowthTime() + 1);
-                    if (plant.getRegrowthTime() >= plant.getAllCrops().regrowthTime) {
+                    if (plant.getRegrowthTime() >= plant.getTypeOfPlant().regrowthTime) {
                         plant.setRegrowthTime(0);
                         plant.setOneTime(true);
                     }
                 }
             }
 
-            for (Tree tree : farm.getTrees()) {
-                if (tree.isHasBeenWatering()) {
-                    tree.setHasBeenWatering(false);
-                    continue;
-                }
-                if (!tree.isHasBeenFertilized()) {
-                    tree.setDayPast(tree.getDayPast() - 1);
-                    if (tree.getDayPast() <= 0) {
-                        System.out.println("you lost plant at location: " + tree.getLocation().getxAxis() + ", " + tree.getLocation().getyAxis());
-                        Location currentLocation = tree.getLocation();
-                        currentLocation.setTypeOfTile(TypeOfTile.GROUND);
-                        currentLocation.setObjectInTile(null);
-                    }
-                }
-                tree.setHasBeenFertilized(false);
-                tree.setAge(tree.getAge() + 1);
-                int currentStage = tree.getCurrentStage();
-                int dayNeed = 0;
-                for (int i = 0; i < currentStage; i++) {
-                    dayNeed += tree.getType().stages[i];
-                }
-                if (tree.getAge() >= dayNeed) {
-                    tree.setCurrentStage(tree.getCurrentStage() + 1);
-                }
-                if (!tree.getType().oneTime && !tree.isOneTime()) {
-                    tree.setRegrowthTime(tree.getRegrowthTime() + 1);
-                    if (tree.getRegrowthTime() >= tree.getType().regrowthTime) {
-                        tree.setRegrowthTime(0);
-                        tree.setOneTime(true);
-                    }
-                }
-            }
+//            for (Tree tree : farm.getTrees()) {
+//                if (tree.isHasBeenWatering()) {
+//                    tree.setHasBeenWatering(false);
+//                    continue;
+//                }
+//                if (!tree.isHasBeenFertilized()) {
+//                    tree.setDayPast(tree.getDayPast() - 1);
+//                    if (tree.getDayPast() <= 0) {
+//                        System.out.println("you lost plant at location: " + tree.getLocation().getxAxis() + ", " + tree.getLocation().getyAxis());
+//                        Location currentLocation = tree.getLocation();
+//                        currentLocation.setTypeOfTile(TypeOfTile.GROUND);
+//                        currentLocation.setObjectInTile(null);
+//                    }
+//                }
+//                tree.setHasBeenFertilized(false);
+//                tree.setAge(tree.getAge() + 1);
+//                int currentStage = tree.getCurrentStage();
+//                int dayNeed = 0;
+//                for (int i = 0; i < currentStage; i++) {
+//                    dayNeed += tree.getType().stages[i];
+//                }
+//                if (tree.getAge() >= dayNeed) {
+//                    tree.setCurrentStage(tree.getCurrentStage() + 1);
+//                }
+//                if (!tree.getType().oneTime && !tree.isOneTime()) {
+//                    tree.setRegrowthTime(tree.getRegrowthTime() + 1);
+//                    if (tree.getRegrowthTime() >= tree.getType().regrowthTime) {
+//                        tree.setRegrowthTime(0);
+//                        tree.setOneTime(true);
+//                    }
+//                }
+//            }
         }
     }
 
@@ -298,11 +296,12 @@ public class Date implements Runnable {
             Collections.shuffle(availableLocation);
 
             List<MineralTypes> allMinerals = new ArrayList<>(Arrays.asList(MineralTypes.values()));
-            List<TreeType> foragingTrees = new ArrayList<>(
-                Arrays.stream(TreeType.values())
-                    .filter(TreeType::isCanBeForaging)
-                    .toList()
-            );
+
+            List<TypeOfPlant> foragingTrees = new ArrayList<>();
+            for(TypeOfPlant typeOfPlant : TypeOfPlant.values()){
+                if(typeOfPlant.getPlantType() == PlantType.ForagingTree)
+                    foragingTrees.add(typeOfPlant);
+            }
 
             List<SeedTypes> allSeeds = new ArrayList<>(Arrays.asList(SeedTypes.values()));
             Collections.shuffle(allMinerals);
@@ -322,13 +321,13 @@ public class Date implements Runnable {
 
             for (int i = 0; i < count; i++) {
                 Location location = availableLocation.get(i);
-                TreeType type = foragingTrees.get(i);
-                Tree newTree = new Tree(location, type, true, type.fruitType);
-                farm.getTrees().add(newTree);
-                System.out.println("new Tree with type: " + newTree.getType().name + " add to location" +
+                TypeOfPlant type = foragingTrees.get(i);
+                Plant newTree = new Plant(location, true, type);
+                farm.getPlantOfFarm().add(newTree);
+                System.out.println("new Tree with type: " + newTree.getTypeOfPlant().getName() + " add to location" +
                     location.getxAxis() + ", " + location.getyAxis());
 
-                location.setTypeOfTile(TypeOfTile.TREE);
+                location.setTypeOfTile(TypeOfTile.PLANT);
                 location.setObjectInTile(newTree);
             }
 
@@ -339,15 +338,14 @@ public class Date implements Runnable {
             for (int i = 0; i < seedCount; i++) {
                 Location location = seedPlacing.get(i);
                 SeedTypes seedSeason = allSeeds.get(i);
-                Seed newSeed = new Seed(seedSeason.getName(), Quality.NORMAL, 0, seedSeason);
-                AllCrops allCrops = AllCrops.sourceTypeToCraftType(seedSeason);
-                Plant newPlant = new Plant(location, newSeed, true, allCrops);
+                TypeOfPlant allCrops = TypeOfPlant.sourceTypeToCraftType(seedSeason);
+                Plant newPlant = new Plant(location, true, allCrops);
                 farm.getPlantOfFarm().add(newPlant);
-                if (newPlant.getAllCrops() != null)
-                    System.out.println("new Plant with type: " + newPlant.getAllCrops().name() + " add to location" +
+                if (newPlant.getTypeOfPlant() != null)
+                    System.out.println("new Plant with type: " + newPlant.getTypeOfPlant().getName() + " add to location" +
                         location.getxAxis() + ", " + location.getyAxis());
                 else
-                    System.out.println("new Plant with type: " + newPlant.getSeed().getName().toLowerCase() + " add to location" +
+                    System.out.println("new Plant with type: " + newPlant.getTypeOfPlant().getSource().getName().toLowerCase() + " add to location" +
                         location.getxAxis() + ", " + location.getyAxis());
                 location.setTypeOfTile(TypeOfTile.PLANT);
                 location.setObjectInTile(newPlant);
@@ -413,7 +411,7 @@ public class Date implements Runnable {
         ThunderAndLightning();
         foragingAdd();
         changesDayAnimal();
-        attackingCrow();
+//        attackingCrow();
         resetNPCStatus();
         artisansUpdate(day * 13);
         buffUpdates();

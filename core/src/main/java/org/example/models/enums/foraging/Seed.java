@@ -2,7 +2,6 @@ package org.example.models.enums.foraging;
 
 import org.example.models.Item;
 import org.example.models.ProductsPackage.Quality;
-import org.example.models.enums.Types.SeedTypes;
 
 public class Seed extends Item {
 
@@ -20,5 +19,4 @@ public class Seed extends Item {
     public SeedTypes getType() {
         return type;
     }
-
 }

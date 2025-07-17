@@ -68,7 +68,7 @@ public enum Tool {
         public ToolFunction getUseFunction() {
             return (location, skillLevel, tools) -> {
                 TypeOfTile tileType = location.getTypeOfTile();
-                if (tileType == TypeOfTile.TREE) {
+                if (tileType == TypeOfTile.PLANT) {
                     location.setTypeOfTile(TypeOfTile.GROUND);
                     App.getCurrentPlayerLazy().setEnergy(
                             App.getCurrentPlayerLazy().getEnergy() - tools.getType().getEnergyDamage()
