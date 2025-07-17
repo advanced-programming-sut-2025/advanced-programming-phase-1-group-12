@@ -110,25 +110,23 @@ public class GameMenu extends InputAdapter implements Screen {
         public float speed;
         public float alpha;
         public Texture texture;
-        public float rotation;
 
         public RainDrop(float x, float y, float speed, Texture texture) {
             this.x = x;
             this.y = y;
             this.speed = speed;
             this.texture = texture;
-            this.alpha = 0.6f + (float)Math.random() * 0.4f; // Random alpha between 0.6-1.0
-            this.rotation = -10f + (float)Math.random() * 20f; // Slight random rotation
+            this.alpha = 0.8f + (float)Math.random() * 0.2f; // More visible alpha 0.8-1.0
         }
 
         public void update(float delta) {
             y -= speed * delta;
-            // Optional: slight horizontal movement for wind effect
-            x += Math.sin(y * 0.01f) * 10f * delta;
+            // Slight horizontal movement for wind effect
+            x += Math.sin(y * 0.01f) * 20f * delta;
         }
 
         public boolean isOffScreen() {
-            return y < -50f; // Remove when off screen
+            return y < -100f; // Remove when further off screen
         }
     }
 
@@ -251,7 +249,6 @@ public class GameMenu extends InputAdapter implements Screen {
         updateSeasonAndWeatherDisplay();
         updateLightingWithSeasons();
 
-
         // Update rain system
         updateRainSystem(delta);
 
@@ -284,6 +281,9 @@ public class GameMenu extends InputAdapter implements Screen {
         batch.setProjectionMatrix(camera.combined);
 
         pixelMapRenderer.render(batch, 0, 0);
+
+        batch.end();
+        batch.begin();
 
         for (Player p : App.getCurrentGame().getPlayers()) {
             ProgressBar bar = energyBars.get(p);
@@ -371,7 +371,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     }
                 }
             }
-            timeForAnimalMove = 0f; // Only reset when a step was done!
+            timeForAnimalMove = 0f;
         }
 
         for (Farm farm : App.getCurrentGame().getFarms()) {
@@ -405,6 +405,7 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
 
+        // Render rain while batch is active
         renderRain(batch);
 
         batch.end();
@@ -414,7 +415,6 @@ public class GameMenu extends InputAdapter implements Screen {
         stage.act(delta);
         stage.draw();
     }
-
     private void updateClockDisplay() {
         org.example.models.Date currentDate = App.getCurrentGame().getDate();
 
@@ -653,6 +653,10 @@ public class GameMenu extends InputAdapter implements Screen {
         }
         if (keycode == Input.Keys.T) {
             showToolsDialog();
+            return true;
+        }
+        if (keycode == Input.Keys.R) {
+            forceRain();
             return true;
         }
         return false;
@@ -1557,12 +1561,12 @@ public class GameMenu extends InputAdapter implements Screen {
         float cameraRight = camera.position.x + camera.viewportWidth * camera.zoom * 0.5f;
         float cameraTop = camera.position.y + camera.viewportHeight * camera.zoom * 0.5f;
 
-        int dropsToSpawn = 3 + (int)(Math.random() * 5); // 3-7 drops
+        int dropsToSpawn = 10 + (int)(Math.random() * 15); // More drops for better visibility
 
         for (int i = 0; i < dropsToSpawn; i++) {
             float x = cameraLeft + (float)Math.random() * (cameraRight - cameraLeft);
             float y = cameraTop + 100f; // Start above screen
-            float speed = 200f + (float)Math.random() * 300f; // Random speed 200-500
+            float speed = 300f + (float)Math.random() * 200f; // Speed 300-500
 
             Texture rainTexture = Math.random() < 0.5f ? rainTexture1 : rainTexture2;
 
@@ -1573,25 +1577,31 @@ public class GameMenu extends InputAdapter implements Screen {
     private void renderRain(SpriteBatch batch) {
         if (!isRaining || rainDrops.isEmpty()) return;
 
-        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        System.out.println("Rendering " + rainDrops.size() + " rain drops");
 
         for (RainDrop drop : rainDrops) {
             Color oldColor = batch.getColor();
             batch.setColor(oldColor.r, oldColor.g, oldColor.b, drop.alpha);
 
-            TextureRegion rainRegion = new TextureRegion(drop.texture);
-
-            batch.draw(rainRegion,
-                drop.x - rainRegion.getRegionWidth() / 2f,
-                drop.y - rainRegion.getRegionHeight() / 2f,
-                rainRegion.getRegionWidth() / 2f,
-                rainRegion.getRegionHeight() / 2f,
-                rainRegion.getRegionWidth(),
-                rainRegion.getRegionHeight(),
-                1f, 1f, // scale
-                drop.rotation);
+            float dropSize = 8f; // Make rain drops more visible
+            batch.draw(drop.texture, drop.x, drop.y, dropSize, dropSize);
 
             batch.setColor(oldColor);
         }
+    }
+
+    public void forceRain() {
+        isRaining = true;
+        System.out.println("Rain forced on!");
+    }
+
+    // Add this method to check rain status
+    public void checkRainStatus() {
+        System.out.println("Rain status:");
+        System.out.println("isRaining: " + isRaining);
+        System.out.println("rainDrops.size(): " + rainDrops.size());
+        System.out.println("Current weather: " + getWeather());
+        System.out.println("rainTexture1: " + (rainTexture1 != null));
+        System.out.println("rainTexture2: " + (rainTexture2 != null));
     }
 }
