@@ -18,6 +18,8 @@ import org.example.models.Fundementals.Player;
 import org.example.models.Place.Farm;
 import org.example.models.Place.Store;
 import org.example.models.enums.Types.TypeOfTile;
+import org.example.views.FarmingMenuView;
+import org.example.views.FishingScreen;
 import org.example.views.FarmView;
 import org.example.views.GameMenu;
 import org.example.views.StoreMenuView;
@@ -174,6 +176,11 @@ public class PlayerController {
                     gameMenu.showAnimalDialog(animals);
                     return;
                 }
+            }
+            if(location.getTypeOfTile() == TypeOfTile.PLOUGHED_LAND){
+                Gdx.app.postRunnable(() ->
+                    Main.getMain().setScreen(new FarmingMenuView(players, playerList)));
+                return;
             }
             if (location.getTypeOfTile() == TypeOfTile.STORE) {
                 Gdx.app.postRunnable(() -> Main.getMain().setScreen(new StoreMenuView(findStore(location), players, playerList)));
