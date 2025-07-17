@@ -1441,7 +1441,7 @@ public class GameMenu extends InputAdapter implements Screen {
         contentTable.top().left();
         contentTable.defaults().pad(10).left().fillX();
 
-        craftingButtons(contentTable, skin);
+//        craftingButtons(contentTable, skin);
 
         ScrollPane scrollPane = new ScrollPane(contentTable);
         scrollPane.setScrollingDisabled(true, false);
