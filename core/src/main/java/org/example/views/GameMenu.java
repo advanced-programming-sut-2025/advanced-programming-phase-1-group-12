@@ -35,10 +35,8 @@ import org.example.models.RelatedToUser.Ability;
 import org.example.models.ToolsPackage.Tools;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.GL20;
@@ -80,6 +78,12 @@ public class GameMenu extends InputAdapter implements Screen {
     private Label goldLabel;
     private ShapeRenderer shapeRenderer;
     private float lightingAlpha = 0f;
+    private Texture[] rainTextures;
+    private List<RainDrop> rainDrops;
+    private float rainAnimationTimer = 0f;
+    private int currentRainFrame = 0;
+    private static final int MAX_RAIN_DROPS = 50;
+    private static final float RAIN_ANIMATION_SPEED = 0.1f;
 
     private Map<Player, ProgressBar> energyBars;
 
@@ -99,6 +103,28 @@ public class GameMenu extends InputAdapter implements Screen {
         errorLabel = new Label("", skin);
     }
 
+    private static class RainDrop {
+        public float x, y;
+        public float speed;
+        public float alpha;
+
+        public RainDrop(float x, float y, float speed) {
+            this.x = x;
+            this.y = y;
+            this.speed = speed;
+            this.alpha = 0.7f + (float)(Math.random() * 0.3f);
+        }
+
+        public void update(float delta) {
+            y -= speed * delta;
+            x += (float)(Math.sin(y * 0.01f) * 10f * delta);
+        }
+
+        public boolean isOffScreen() {
+            return y < -50f;
+        }
+    }
+
     @Override
     public void show() {
         batch = Main.getMain().getBatch();
@@ -109,6 +135,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Initialize lighting system
         initializeLighting();
+        initializeRainAnimation();
 
         float clockSize = 100f;
         clockImage.setSize(clockSize, clockSize);
@@ -215,6 +242,7 @@ public class GameMenu extends InputAdapter implements Screen {
         updateClockDisplay();
         updateSeasonAndWeatherDisplay();
         updateLightingWithSeasons();
+        updateRainAnimation(delta);
 
         if (errorLabel.isVisible()) {
             timeSinceError += delta;
@@ -363,6 +391,10 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
         batch.end();
+        batch.begin();
+        renderRainAnimation();
+        batch.end();
+
         renderLightingOverlay();
 
 
@@ -444,6 +476,15 @@ public class GameMenu extends InputAdapter implements Screen {
         if (shapeRenderer != null) {
             shapeRenderer.dispose();
         }
+
+        if (rainTextures != null) {
+            for (Texture texture : rainTextures) {
+                if (texture != null) {
+                    texture.dispose();
+                }
+            }
+        }
+
         stage.dispose();
         pixelMapRenderer.dispose();
         font.dispose();
@@ -1378,36 +1419,36 @@ public class GameMenu extends InputAdapter implements Screen {
         dialog.show(stage);
     }
 
-    private void craftingsButtons(Table table, Dialog dialog, Skin skin) {
-        table.clear();
-
-        for (CraftingRecipe craftingRecipe : App.getCurrentPlayerLazy().getRecepies().keySet()) {
-            boolean unlocked = App.getCurrentPlayerLazy().getRecepies().get(craftingRecipe);
-
-            TextButton craftButton = new TextButton(craftingRecipe.getName(), skin);
-            if (!unlocked) {
-                craftButton.setDisabled(true);
-                craftButton.getLabel().setColor(0.5f, 0.5f, 0.5f, 1);
-            } else {
-                craftButton.addListener(new ClickListener() {
-                    @Override
-                    public void clicked(InputEvent event, float x, float y) {
-                        Gdx.app.postRunnable(() -> {
-                            Main.getMain().setScreen(new FarmView(
-                                craftingRecipe.getName(),
-                                players, // make sure `players` is accessible
-                                App.getCurrentGame().getPlayers(),
-                                true
-                            ));
-                        });
-                    }
-                });
-            }
-
-            table.row();
-            table.add(craftButton).width(300).height(50).left();
-        }
-    }
+//    private void craftingsButtons(Table table, Dialog dialog, Skin skin) {
+//        table.clear();
+//
+//        for (CraftingRecipe craftingRecipe : App.getCurrentPlayerLazy().getRecepies().keySet()) {
+//            boolean unlocked = App.getCurrentPlayerLazy().getRecepies().get(craftingRecipe);
+//
+//            TextButton craftButton = new TextButton(craftingRecipe.getName(), skin);
+//            if (!unlocked) {
+//                craftButton.setDisabled(true);
+//                craftButton.getLabel().setColor(0.5f, 0.5f, 0.5f, 1);
+//            } else {
+//                craftButton.addListener(new ClickListener() {
+//                    @Override
+//                    public void clicked(InputEvent event, float x, float y) {
+//                        Gdx.app.postRunnable(() -> {
+//                            Main.getMain().setScreen(new FarmView(
+//                                craftingRecipe.getName(),
+//                                players, // make sure `players` is accessible
+//                                App.getCurrentGame().getPlayers(),
+//                                true
+//                            ));
+//                        });
+//                    }
+//                });
+//            }
+//
+//            table.row();
+//            table.add(craftButton).width(300).height(50).left();
+//        }
+//    }
 
     public void craftMenu(Craft craft) {
         ArtisanController artisanController = new ArtisanController();
@@ -1468,5 +1509,72 @@ public class GameMenu extends InputAdapter implements Screen {
     }
     public FarmingController getFarmingController() {
         return farmingController;
+    }
+
+    private void initializeRainAnimation() {
+        rainTextures = new Texture[2];
+        rainTextures[0] = new Texture(Gdx.files.internal("Clock/Rain/rain_0.png"));
+        rainTextures[1] = new Texture(Gdx.files.internal("Clock/Rain/rain_1.png"));
+
+        rainDrops = new ArrayList<>();
+        generateRainDrops();
+    }
+
+    private void generateRainDrops() {
+        rainDrops.clear();
+        for (int i = 0; i < MAX_RAIN_DROPS; i++) {
+            float x = (float)(Math.random() * (stage.getWidth() + 200)) - 100f;
+            float y = (float)(Math.random() * (stage.getHeight() + 200)) + stage.getHeight();
+            float speed = 200f + (float)(Math.random() * 300f);
+            rainDrops.add(new RainDrop(x, y, speed));
+        }
+    }
+
+    private void updateRainAnimation(float delta) {
+//        if (!getWeather().equals("Rainy")) {
+//            return;
+//        }
+
+        rainAnimationTimer += delta;
+        if (rainAnimationTimer >= RAIN_ANIMATION_SPEED) {
+            currentRainFrame = (currentRainFrame + 1) % rainTextures.length;
+            rainAnimationTimer = 0f;
+        }
+
+        Iterator<RainDrop> iterator = rainDrops.iterator();
+        while (iterator.hasNext()) {
+            RainDrop drop = iterator.next();
+            drop.update(delta);
+
+            if (drop.isOffScreen()) {
+                iterator.remove();
+            }
+        }
+
+        while (rainDrops.size() < MAX_RAIN_DROPS) {
+            float x = (float)(Math.random() * (stage.getWidth() + 200)) - 100f;
+            float y = stage.getHeight() + 50f;
+            float speed = 200f + (float)(Math.random() * 300f);
+            rainDrops.add(new RainDrop(x, y, speed));
+        }
+    }
+
+    private void renderRainAnimation() {
+//        if (!getWeather().equals("Rainy") || rainTextures == null) {
+//            return;
+//        }
+
+        batch.setProjectionMatrix(stage.getCamera().combined);
+
+        Texture currentTexture = rainTextures[currentRainFrame];
+
+        for (RainDrop drop : rainDrops) {
+            batch.setColor(1f, 1f, 1f, drop.alpha);
+
+            batch.draw(currentTexture, drop.x, drop.y,
+                currentTexture.getWidth() * 0.5f, currentTexture.getHeight() * 0.5f);
+        }
+
+        batch.setColor(1f, 1f, 1f, 1f);
     }
 }
