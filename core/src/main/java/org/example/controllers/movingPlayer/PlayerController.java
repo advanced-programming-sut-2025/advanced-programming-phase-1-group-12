@@ -11,6 +11,7 @@ import org.example.Main;
 import org.example.controllers.AnimalController;
 import org.example.controllers.MenusController.GameMenuController;
 import org.example.models.Animal.FarmAnimals;
+import org.example.models.Craft;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Player;
@@ -139,6 +140,20 @@ public class PlayerController {
             Main.getMain().setScreen(gameMenu);
             gameMenu.craftingView();
             return;
+        }
+        if(Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
+            Vector3 world = GameMenu.getCamera().unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+            int tileX = (int) (world.x / 100f);
+            int tileY = (int) (world.y / 100f);
+            Location location = App.getCurrentGame().getMainMap().findLocation(tileX, tileY);
+            if (location == null) {
+                return;
+            } if(location.getObjectInTile() instanceof Craft) {
+                GameMenu gameMenu = new GameMenu(players);
+                Main.getMain().setScreen(gameMenu);
+                gameMenu.craftMenu((Craft) location.getObjectInTile());
+                return;
+            }
         }
 
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {

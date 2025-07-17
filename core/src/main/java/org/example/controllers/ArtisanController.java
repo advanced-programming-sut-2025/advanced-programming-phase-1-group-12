@@ -1,6 +1,7 @@
 package org.example.controllers;
 
 import org.example.models.Fundementals.App;
+import org.example.models.Fundementals.Player;
 import org.example.models.Fundementals.Result;
 import org.example.models.Item;
 import org.example.models.ItemBuilder;
@@ -11,6 +12,7 @@ import org.example.models.enums.Types.*;
 import org.example.models.enums.foraging.PlantType;
 import org.example.models.enums.foraging.TypeOfPlant;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -478,14 +480,11 @@ public class ArtisanController {
         }
     }
 
-    //TODO:5 of one type of ore is it ok?
+    //name of an ore should be etered
     public Result makeBar(String itemName) {
         ArtisanTypes type;
 
-        Pattern pattern = Pattern.compile("(?<Ore>.*) Coal");
-        Matcher matcher = pattern.matcher(itemName);
-        if (matcher.find()) {
-            switch (matcher.group("Ore")) {
+            switch (itemName) {
                 case "Copper Ore":
                     type = ArtisanTypes.COPPER_BAR;
                     break;
@@ -499,40 +498,48 @@ public class ArtisanController {
                     type = ArtisanTypes.Gold_BAR;
                     break;
                 default:
-                    return new Result(false, "invalid ore type");
+                    return new Result(false, "invalid ingredients type");
 
             }
-            Item item = App.getItemByName(matcher.group("Ore"));
-            StoreProductsTypes productType = StoreProductsTypes.stringToStoreProduct(matcher.group("Ore"));
+            Item item = App.getCurrentPlayerLazy().getBackPack().getItemByName(itemName);
             if (item == null) {
-                return new Result(false, "invalid ore type");
+                return new Result(false, "you do not have this item");
             }
             if (App.getCurrentPlayerLazy().getBackPack().hasItem("Coal")) {
                 //seasons prices are the same
                 ArtisanItem truffleOil = new ArtisanItem(type.getName(), type, type.getProcessingTime(), 100);
-                truffleOil.setPrice(productType.getWinterPrice());
+                truffleOil.setPrice(50);
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(truffleOil);
                 //ony needs one ore of that type
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, 1);
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Coal"), 1);
                 return new Result(true, "Metal Bar will be produced for you");
             } else {
-                return new Result(true, "you do not have needed ingredient");
+                return new Result(true, "this artisan needs Coal to be produced for you but you do not have it");
             }
-        } else {
-            return new Result(false, "invalid ingredients type");
-        }
+
     }
 
     public Result artisanGet(String itemName) {
         for (ArtisanItem ai : App.getCurrentPlayerLazy().getArtisansGettingProcessed()) {
+            System.out.println(ai.getName() + " aha ");
             if (ai.getName().equalsIgnoreCase(itemName) && ai.getHoursRemained() <= 0) {
-                App.getCurrentPlayerLazy().getArtisansGettingProcessed().remove(ai);
-                ItemBuilder.addToBackPack(ai, 1, Quality.NORMAL);
-                // Remove this line: App.getCurrentPlayerLazy().getBackPack().getItems().remove(ai);
+                Player player = App.getCurrentPlayerLazy();
+                Map<Item, Integer> backpackItems = player.getBackPack().getItems();
+                Map<String, Item> itemNames = player.getBackPack().getItemNames();
+
+                Item existingItem = itemNames.get(itemName);
+                if (existingItem != null) {
+                    backpackItems.put(existingItem, backpackItems.getOrDefault(existingItem, 0) + 1);
+                } else {
+                    backpackItems.put(ai, 1);
+                    itemNames.put(ai.getName(), ai);
+                }
+                player.getArtisansGettingProcessed().remove(ai);
                 return new Result(true, itemName + " has been added to your inventory");
             }
         }
+        System.out.println(itemName);
         return new Result(false, "Artisan item with such name either not found or not ready");
     }
 

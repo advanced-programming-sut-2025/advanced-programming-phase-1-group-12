@@ -28,6 +28,7 @@ import org.example.models.enums.*;
 import org.example.models.Fundementals.Player;
 import org.example.models.ToolsPackage.ToolEnums.BackPackTypes;
 import org.example.models.enums.Types.Cooking;
+import org.example.models.enums.Types.CraftingRecipe;
 import org.example.models.enums.Types.StoreProductsTypes;
 import org.example.models.enums.Types.TypeOfTile;
 import org.example.models.NPC.NPC;
@@ -44,7 +45,14 @@ public class GameMenuController {
         App.getCurrentPlayerLazy().getBackPack().setType(BackPackTypes.DELUXE);
         StoreController storeController = new StoreController();
         for(StoreProductsTypes products : StoreProductsTypes.values()) {
-            storeController.cheatAddItem(products.getName(), 50);
+            for (CraftingRecipe recipe : CraftingRecipe.values()) {
+                if (products.getName().equalsIgnoreCase(recipe.getName())) {
+
+                    App.getCurrentPlayerLazy().getRecepies().put(recipe, true);
+                    break;
+                }
+            }
+            storeController.cheatAddItem(products.getName(), 100);
         }
     }
     public Result startTrade() {
