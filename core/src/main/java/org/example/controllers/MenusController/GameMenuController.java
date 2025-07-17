@@ -45,13 +45,6 @@ public class GameMenuController {
         App.getCurrentPlayerLazy().getBackPack().setType(BackPackTypes.DELUXE);
         StoreController storeController = new StoreController();
         for(StoreProductsTypes products : StoreProductsTypes.values()) {
-            for (CraftingRecipe recipe : CraftingRecipe.values()) {
-                if (products.getName().equalsIgnoreCase(recipe.getName())) {
-
-                    App.getCurrentPlayerLazy().getRecepies().put(recipe, true);
-                    break;
-                }
-            }
             storeController.cheatAddItem(products.getName(), 100);
         }
     }

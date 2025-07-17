@@ -336,10 +336,6 @@ public class GameConsoleCommandHandler {
             System.out.println(controller.sellByShipping(matcher.group("productName"), matcher.group("count")).getMessage());
         } else if ((matcher = GameMenuCommands.SELL_ONE.getMather(input))!= null) {
             System.out.println(controller.sellByShippingWithoutCount(matcher.group("productName")).getMessage() + "sold without count");
-        } else if ((matcher = GameMenuCommands.ARTISAN_GET.getMather(input)) != null) {
-            System.out.println(artisanController.artisanGet(matcher.group("itemName")));
-        } else if ((matcher = GameMenuCommands.ARTISAN_USE.getMather(input)) != null) {
-            System.out.println(artisanController.artisanUse(matcher.group("artisanName"), matcher.group("itemName")));
         } else if ((matcher = GameMenuCommands.GREENHOUSE_BUILD.getMather(input))!=null) {
             System.out.println(controller.buildGreenHouse());
         } else if ((matcher = GameMenuCommands.ABILITIES_SHOW.getMather(input)) != null) {
