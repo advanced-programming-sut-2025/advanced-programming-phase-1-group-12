@@ -53,6 +53,7 @@ public class Player {
     private boolean isSkillBuffEaten = false;
     private PlayerController playerController;
     private Texture portraitFrame;
+    private ArrayList<Craft>crafts = new ArrayList<>();
 
     public Player(User user, Location userLocation, boolean isMarried, Refrigrator refrigrator,
                   ArrayList<RelationShip> relationShips, Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited,
@@ -398,5 +399,13 @@ public class Player {
 
     public void setPortraitFrame(Texture portraitFrame) {
         this.portraitFrame = portraitFrame;
+    }
+
+    public ArrayList<Craft> getCrafts() {
+        return crafts;
+    }
+
+    public void setCrafts(ArrayList<Craft> crafts) {
+        this.crafts = crafts;
     }
 }
