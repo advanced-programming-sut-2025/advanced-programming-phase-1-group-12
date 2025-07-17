@@ -1,9 +1,7 @@
 package org.example.views;
 
 import com.badlogic.gdx.*;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
@@ -41,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.GL20;
 import org.example.models.enums.Types.CraftingRecipe;
 
 public class GameMenu extends InputAdapter implements Screen {
@@ -249,7 +246,6 @@ public class GameMenu extends InputAdapter implements Screen {
         updateSeasonAndWeatherDisplay();
         updateLightingWithSeasons();
 
-        // Update rain system
         updateRainSystem(delta);
 
         if (errorLabel.isVisible()) {
@@ -281,9 +277,6 @@ public class GameMenu extends InputAdapter implements Screen {
         batch.setProjectionMatrix(camera.combined);
 
         pixelMapRenderer.render(batch, 0, 0);
-
-        batch.end();
-        batch.begin();
 
         for (Player p : App.getCurrentGame().getPlayers()) {
             ProgressBar bar = energyBars.get(p);
@@ -405,12 +398,12 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
 
-        // Render rain while batch is active
         renderRain(batch);
 
-        batch.end();
 
         renderLightingOverlay();
+        batch.end();
+
 
         stage.act(delta);
         stage.draw();
@@ -656,7 +649,7 @@ public class GameMenu extends InputAdapter implements Screen {
             return true;
         }
         if (keycode == Input.Keys.R) {
-            forceRain();
+            changeRainStatus();
             return true;
         }
         return false;
@@ -1519,23 +1512,19 @@ public class GameMenu extends InputAdapter implements Screen {
         return farmingController;
     }
 
-    private void initializeRainSystem() {
-        rainDrops = new ArrayList<>();
-        try {
-            rainTexture1 = new Texture(Gdx.files.internal("Clock/Rain/rain_0.png"));
-            rainTexture2 = new Texture(Gdx.files.internal("Clock/Rain/rain_1.png"));
-        } catch (Exception e) {
-            System.err.println("Could not load rain textures: " + e.getMessage());
-        }
-    }
+
     private void updateRainSystem(float delta) {
         String currentWeather = getWeather();
-        boolean shouldRain = currentWeather.equals("Rainy") || currentWeather.equals("Stormy");
+        boolean shouldRain = currentWeather.equalsIgnoreCase("rainy") || currentWeather.equals("stormy");
+//        System.out.println("shouldRain: " + shouldRain);
+//        System.out.println("currentWeather: " + currentWeather);
 
         if (shouldRain && !isRaining) {
             isRaining = true;
+//            System.out.println("Rain started! Weather: " + currentWeather);
         } else if (!shouldRain && isRaining) {
             isRaining = false;
+//            System.out.println("Rain stopped! Weather: " + currentWeather);
         }
 
         if (isRaining && rainTexture1 != null && rainTexture2 != null) {
@@ -1555,17 +1544,16 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
     }
-
     private void spawnRainDrops() {
         float cameraLeft = camera.position.x - camera.viewportWidth * camera.zoom * 0.5f;
         float cameraRight = camera.position.x + camera.viewportWidth * camera.zoom * 0.5f;
         float cameraTop = camera.position.y + camera.viewportHeight * camera.zoom * 0.5f;
 
-        int dropsToSpawn = 10 + (int)(Math.random() * 15); // More drops for better visibility
+        int dropsToSpawn = 10 + (int)(Math.random() * 15);
 
         for (int i = 0; i < dropsToSpawn; i++) {
             float x = cameraLeft + (float)Math.random() * (cameraRight - cameraLeft);
-            float y = cameraTop + 100f; // Start above screen
+            float y = cameraTop + 100f;
             float speed = 300f + (float)Math.random() * 200f; // Speed 300-500
 
             Texture rainTexture = Math.random() < 0.5f ? rainTexture1 : rainTexture2;
@@ -1575,33 +1563,40 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void renderRain(SpriteBatch batch) {
+//
+//        System.out.println("isRaining: " + isRaining);
+//        System.out.println("rainDrops: " + rainDrops.size());
+
         if (!isRaining || rainDrops.isEmpty()) return;
 
-        System.out.println("Rendering " + rainDrops.size() + " rain drops");
+//        System.out.println("Rendering " + rainDrops.size() + " rain drops");
 
         for (RainDrop drop : rainDrops) {
             Color oldColor = batch.getColor();
             batch.setColor(oldColor.r, oldColor.g, oldColor.b, drop.alpha);
 
-            float dropSize = 8f; // Make rain drops more visible
+            float dropSize = 15f;
             batch.draw(drop.texture, drop.x, drop.y, dropSize, dropSize);
 
             batch.setColor(oldColor);
         }
     }
 
-    public void forceRain() {
-        isRaining = true;
-        System.out.println("Rain forced on!");
+    public void changeRainStatus(){
+        isRaining = !isRaining;
     }
 
-    // Add this method to check rain status
-    public void checkRainStatus() {
-        System.out.println("Rain status:");
-        System.out.println("isRaining: " + isRaining);
-        System.out.println("rainDrops.size(): " + rainDrops.size());
-        System.out.println("Current weather: " + getWeather());
-        System.out.println("rainTexture1: " + (rainTexture1 != null));
-        System.out.println("rainTexture2: " + (rainTexture2 != null));
+
+
+    private void initializeRainSystem() {
+        rainDrops = new ArrayList<>();
+        try {
+            rainTexture1 = new Texture(Gdx.files.internal("Clock/Rain/rain_0.png"));
+            rainTexture2 = new Texture(Gdx.files.internal("Clock/Rain/rain_1.png"));
+            System.out.println("Rain textures loaded successfully");
+        } catch (Exception e) {
+            System.err.println("Could not load rain textures: " + e.getMessage());
+        }
     }
+
 }
