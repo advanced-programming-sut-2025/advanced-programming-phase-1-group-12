@@ -31,13 +31,14 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.example.models.Fundementals.Result;
 import org.example.models.Item;
 import org.example.models.Place.Farm;
-import org.example.models.ProductsPackage.ArtisanItem;
 import org.example.models.RelatedToUser.Ability;
 import org.example.models.ToolsPackage.Tools;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.GL20;
@@ -79,15 +80,8 @@ public class GameMenu extends InputAdapter implements Screen {
     private Label goldLabel;
     private ShapeRenderer shapeRenderer;
     private float lightingAlpha = 0f;
-    private Texture[] rainTextures;
-    private List<RainDrop> rainDrops;
-    private float rainAnimationTimer = 0f;
-    private int currentRainFrame = 0;
-    private static final int MAX_RAIN_DROPS = 50;
-    private static final float RAIN_ANIMATION_SPEED = 0.1f;
 
     private Map<Player, ProgressBar> energyBars;
-    private Map<Craft, ProgressBar> craftBars;
 
     private float timeSinceError = 0f;
 
@@ -105,28 +99,6 @@ public class GameMenu extends InputAdapter implements Screen {
         errorLabel = new Label("", skin);
     }
 
-    private static class RainDrop {
-        public float x, y;
-        public float speed;
-        public float alpha;
-
-        public RainDrop(float x, float y, float speed) {
-            this.x = x;
-            this.y = y;
-            this.speed = speed;
-            this.alpha = 0.7f + (float)(Math.random() * 0.3f);
-        }
-
-        public void update(float delta) {
-            y -= speed * delta;
-            x += (float)(Math.sin(y * 0.01f) * 10f * delta);
-        }
-
-        public boolean isOffScreen() {
-            return y < -50f;
-        }
-    }
-
     @Override
     public void show() {
         batch = Main.getMain().getBatch();
@@ -137,7 +109,6 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Initialize lighting system
         initializeLighting();
-        initializeRainAnimation();
 
         float clockSize = 100f;
         clockImage.setSize(clockSize, clockSize);
@@ -170,6 +141,7 @@ public class GameMenu extends InputAdapter implements Screen {
         float clockY = stage.getHeight() - clockSize - 20f;
 
         dayLabel.setPosition(clockX + clockSize / 2 - dayLabel.getWidth() / 2, clockY + clockSize + 5f);
+
         timeLabel.setPosition(clockX + clockSize / 2 - timeLabel.getWidth() / 2, clockY - 25f);
 
         stage.addActor(dayLabel);
@@ -198,7 +170,6 @@ public class GameMenu extends InputAdapter implements Screen {
         pixelMapRenderer = new PixelMapRenderer(App.getCurrentGame().getMainMap());
 
         energyBars = new HashMap<>();
-        craftBars = new HashMap<>();
 
         float barHeight = 20f;
         float yOffset = stage.getHeight() - 40f;
@@ -224,8 +195,6 @@ public class GameMenu extends InputAdapter implements Screen {
 
             stage.addActor(playerTable);
             energyBars.put(p, bar);
-
-
         }
 
         Player player = App.getCurrentPlayerLazy();
@@ -246,7 +215,6 @@ public class GameMenu extends InputAdapter implements Screen {
         updateClockDisplay();
         updateSeasonAndWeatherDisplay();
         updateLightingWithSeasons();
-        updateRainAnimation(delta);
 
         if (errorLabel.isVisible()) {
             timeSinceError += delta;
@@ -287,46 +255,8 @@ public class GameMenu extends InputAdapter implements Screen {
                     break;
                 }
             }
-
-            // **Craft Bars** in Bottom-Right Corner
-            if (p.getCrafts() != null) {
-                float rightMargin = 20f; // Margin from the right side
-                float bottomMargin = 40f; // Margin from the bottom of the screen
-                float barHeight = 20f; // Height of each craft bar
-                float yOffset =  bottomMargin; // Start at bottom-right
-
-                for (Craft c : p.getCrafts()) {
-                    if (c.getArtisanInIt() != null && !craftBars.containsKey(c)) {
-                        ProgressBar craftBar;
-                            craftBar = new ProgressBar(0, c.getArtisanInIt().getType().getProcessingTime()
-                                , 1, false, skin.get("default-horizontal", ProgressBar.ProgressBarStyle.class));
-
-                        craftBars.put(c, craftBar);
-
-                        // Create a table to display the craft bar
-                        Table craftTable = new Table();
-                        craftTable.add(craftBar).width(200).height(barHeight).padRight(10);
-                        craftTable.add(new Label(c.getName(), skin)).left();
-                        craftTable.pack();
-
-                        // Position the bar in the bottom-right corner of the screen
-                        craftTable.setPosition(stage.getWidth() - craftTable.getWidth() - rightMargin, yOffset);
-                        stage.addActor(craftTable); // Add to the stage
-                        yOffset -= (barHeight + 10f); // Adjust next bar position
-                    }
-
-                    // Update Crafting Progress Bars
-                    ProgressBar craftBar = craftBars.get(c);
-                    if (craftBar != null && c.getArtisanInIt() != null) {
-                        float hoursRemained = c.getArtisanInIt().getHoursRemained();
-                        System.out.println("Updating craft bar for " + c.getName() + " with value: " + hoursRemained);
-                        craftBar.setValue(hoursRemained);  // Update the progress bar value
-                    }
-                }
-            }
         }
 
-        // Draw Player Sprite
         batch.draw(frame, scaledX, scaledY, player.getPlayerSprite().getWidth(),
             player.getPlayerSprite().getHeight());
         font.getData().setScale(0.5f);
@@ -433,10 +363,6 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
         batch.end();
-        batch.begin();
-        renderRainAnimation();
-        batch.end();
-
         renderLightingOverlay();
 
 
@@ -518,15 +444,6 @@ public class GameMenu extends InputAdapter implements Screen {
         if (shapeRenderer != null) {
             shapeRenderer.dispose();
         }
-
-        if (rainTextures != null) {
-            for (Texture texture : rainTextures) {
-                if (texture != null) {
-                    texture.dispose();
-                }
-            }
-        }
-
         stage.dispose();
         pixelMapRenderer.dispose();
         font.dispose();
@@ -1461,7 +1378,7 @@ public class GameMenu extends InputAdapter implements Screen {
         dialog.show(stage);
     }
 
-//    private void craftingButtons(Table table, Skin skin) {
+//    private void craftingsButtons(Table table, Dialog dialog, Skin skin) {
 //        table.clear();
 //
 //        for (CraftingRecipe craftingRecipe : App.getCurrentPlayerLazy().getRecepies().keySet()) {
@@ -1524,39 +1441,19 @@ public class GameMenu extends InputAdapter implements Screen {
             scrollContent.add(itemLabel).pad(5).width(400f).row();
         }
 
-        TextButton start = new TextButton("start processing", skin);
-        start.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                showError(artisanController.artisanUse(craft, nameOfDeletingItem.getText()).getMessage());
-            }
-        });
+        TextButton start = new TextButton("start artisan", skin);
+//        start.addListener(new ClickListener() {
+//            @Override
+//            public void clicked(InputEvent event, float x, float y) {
+//                showError(artisanController.artisanUse(craft.getRecipe().getName(), nameOfDeletingItem.getText()).getMessage());
+//            }
+//        });
         ScrollPane scrollPane = new ScrollPane(scrollContent, skin);
         scrollPane.setScrollingDisabled(false, false);
         scrollPane.setFadeScrollBars(false);
 
-        // Creating a table for buttons and adding them vertically
-        Table buttonTable = new Table();
-        buttonTable.add(closeButton).pad(10).width(400f).row();  // Close button
-        buttonTable.add(start).pad(10).width(400f).row();        // Start processing button
-
-        // If artisan item exists, add "get artisan" button
-        ArtisanItem item = craft.getArtisanInIt();
-        if (item != null && item.getHoursRemained() <= 0) {
-            TextButton getProduct = new TextButton("get artisan", skin);
-            getProduct.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    Result result = artisanController.artisanGet(craft);
-                    showError(result.getMessage());
-                }
-            });
-            buttonTable.add(getProduct).pad(10).width(400f).row(); // Get artisan button
-        }
-
-        // Adding scroll pane and button table to the main content
         mainContent.add(scrollPane).pad(5).width(400f).height(300f).row();
-        mainContent.add(buttonTable).expand().fill().pad(5).row();  // Add button table
+        mainContent.add(closeButton).pad(5).width(400f).row();
 
         dialog.getContentTable().add(mainContent).expand().fill().pad(5).row();
         dialog.button(closeButton);
@@ -1571,72 +1468,5 @@ public class GameMenu extends InputAdapter implements Screen {
     }
     public FarmingController getFarmingController() {
         return farmingController;
-    }
-
-    private void initializeRainAnimation() {
-        rainTextures = new Texture[2];
-        rainTextures[0] = new Texture(Gdx.files.internal("Clock/Rain/rain_0.png"));
-        rainTextures[1] = new Texture(Gdx.files.internal("Clock/Rain/rain_1.png"));
-
-        rainDrops = new ArrayList<>();
-        generateRainDrops();
-    }
-
-    private void generateRainDrops() {
-        rainDrops.clear();
-        for (int i = 0; i < MAX_RAIN_DROPS; i++) {
-            float x = (float)(Math.random() * (stage.getWidth() + 200)) - 100f;
-            float y = (float)(Math.random() * (stage.getHeight() + 200)) + stage.getHeight();
-            float speed = 200f + (float)(Math.random() * 300f);
-            rainDrops.add(new RainDrop(x, y, speed));
-        }
-    }
-
-    private void updateRainAnimation(float delta) {
-//        if (!getWeather().equals("Rainy")) {
-//            return;
-//        }
-
-        rainAnimationTimer += delta;
-        if (rainAnimationTimer >= RAIN_ANIMATION_SPEED) {
-            currentRainFrame = (currentRainFrame + 1) % rainTextures.length;
-            rainAnimationTimer = 0f;
-        }
-
-        Iterator<RainDrop> iterator = rainDrops.iterator();
-        while (iterator.hasNext()) {
-            RainDrop drop = iterator.next();
-            drop.update(delta);
-
-            if (drop.isOffScreen()) {
-                iterator.remove();
-            }
-        }
-
-        while (rainDrops.size() < MAX_RAIN_DROPS) {
-            float x = (float)(Math.random() * (stage.getWidth() + 200)) - 100f;
-            float y = stage.getHeight() + 50f;
-            float speed = 200f + (float)(Math.random() * 300f);
-            rainDrops.add(new RainDrop(x, y, speed));
-        }
-    }
-
-    private void renderRainAnimation() {
-//        if (!getWeather().equals("Rainy") || rainTextures == null) {
-//            return;
-//        }
-
-        batch.setProjectionMatrix(stage.getCamera().combined);
-
-        Texture currentTexture = rainTextures[currentRainFrame];
-
-        for (RainDrop drop : rainDrops) {
-            batch.setColor(1f, 1f, 1f, drop.alpha);
-
-            batch.draw(currentTexture, drop.x, drop.y,
-                currentTexture.getWidth() * 0.5f, currentTexture.getHeight() * 0.5f);
-        }
-
-        batch.setColor(1f, 1f, 1f, 1f);
     }
 }
