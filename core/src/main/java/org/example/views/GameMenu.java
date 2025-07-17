@@ -31,7 +31,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.example.models.Fundementals.Result;
 import org.example.models.Item;
 import org.example.models.Place.Farm;
-import org.example.models.ProductsPackage.StoreProducts;
 import org.example.models.RelatedToUser.Ability;
 import org.example.models.ToolsPackage.Tools;
 
@@ -1399,20 +1398,20 @@ public class GameMenu extends InputAdapter implements Screen {
                     @Override
                     public void clicked(InputEvent event, float x, float y) {
                         Gdx.app.postRunnable(() -> {
-                            Main.getMain().setScreen(new FarmView(
-                                craftingRecipe.getName(),
-                                players, // make sure `players` is accessible
-                                App.getCurrentGame().getPlayers(),
-                                true
-                            ));
+//                            Main.getMain().setScreen(new FarmView(craftingRecipe.getName(), players,
+//                                App.getCurrentGame().getPlayers(), true
+//                            ));
                         });
                     }
                 });
             }
 
             table.row();
-            table.add(craftButton).width(300).height(50).left();
+//            table.add(craftButton).width(300).height(50).left();
         }
     }
 
+    public FarmingController getFarmingController() {
+        return farmingController;
+    }
 }

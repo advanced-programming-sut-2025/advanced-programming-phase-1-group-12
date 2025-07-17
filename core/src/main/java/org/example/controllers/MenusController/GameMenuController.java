@@ -20,7 +20,6 @@ import org.example.models.Place.Farm;
 import org.example.models.Place.Store;
 import org.example.models.ProductsPackage.ArtisanItem;
 import org.example.models.ProductsPackage.Quality;
-import org.example.models.ProductsPackage.StoreProducts;
 import org.example.models.RelatedToUser.User;
 import org.example.models.*;
 import org.example.models.RelationShips.RelationShip;
@@ -34,7 +33,6 @@ import org.example.models.enums.Types.TypeOfTile;
 import org.example.models.NPC.NPC;
 import org.example.models.enums.foraging.Plant;
 import org.example.models.enums.foraging.Stone;
-import org.example.models.enums.foraging.Tree;
 import org.example.views.GameMenu;
 
 import java.io.File;
@@ -305,7 +303,6 @@ public class GameMenuController {
             case HOUSE -> "\u001B[47m";
             case QUARRY -> "\u001B[43m";
             case STONE -> "\u001B[103m";
-            case TREE -> "\u001B[102m";
             case LAKE -> "\u001B[46m";
             case STORE -> "\u001B[104m";
             case BARN -> "\u001B[44m";
@@ -1371,8 +1368,6 @@ public class GameMenuController {
             return "Craft";
         } else if (object instanceof Stone) {
             return "Stone";
-        } else if (object instanceof Tree) {
-            return "Tree";
         } else if (object instanceof Plant) {
             return "Plant";
         } else {

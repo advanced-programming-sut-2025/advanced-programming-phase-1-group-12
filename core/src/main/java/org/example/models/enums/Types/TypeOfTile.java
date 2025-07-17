@@ -3,7 +3,6 @@ package org.example.models.enums.Types;
 public enum TypeOfTile {
     LAKE('L'),
     GREENHOUSE('G'),
-    TREE('T'),
     STONE('S'),
     QUARRY('Q'),
     HOUSE('H'),

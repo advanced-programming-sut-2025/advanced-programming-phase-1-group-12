@@ -9,8 +9,6 @@ import org.example.models.Fundementals.Player;
 import org.example.models.MapDetails.*;
 import org.example.models.enums.foraging.GiantPlant;
 import org.example.models.enums.foraging.Plant;
-import org.example.models.enums.foraging.Seed;
-import org.example.models.enums.foraging.Tree;
 
 import java.util.ArrayList;
 
@@ -31,8 +29,6 @@ public class Farm implements Place {
     private ArrayList<FarmAnimals> farmAnimals = new ArrayList<>();
     private ArrayList<AnimalHome> animalHomes = new ArrayList<>();
     private ArrayList<Plant> PlantOfFarm = new ArrayList<>();
-    private ArrayList<Seed> SeedOfFarm = new ArrayList<>();
-    private ArrayList<Tree> trees = new ArrayList<>();
     private ArrayList<GiantPlant> giantPlants = new ArrayList<>();
 
 
@@ -126,14 +122,6 @@ public class Farm implements Place {
                 bottomLeftCornerGreenQuarry2.getyAxis() + sectionSize
         );
         this.quarry2 = new Quarry(new LocationOfRectangle(bottomLeftCornerGreenQuarry2, bottomLeftLakeDownRightQuarry2));
-    }
-
-    public void setSeedOfFarm(ArrayList<Seed> seedOfFarm) {
-        SeedOfFarm = seedOfFarm;
-    }
-
-    public ArrayList<Seed> getSeedOfFarm() {
-        return SeedOfFarm;
     }
 
     public LocationOfRectangle getLocation() {
@@ -244,9 +232,6 @@ public class Farm implements Place {
         PlantOfFarm = plantOfFarm;
     }
 
-    public ArrayList<Tree> getTrees() {
-        return trees;
-    }
 
     public void setGiantPlants(ArrayList<GiantPlant> giantPlants) {
         this.giantPlants = giantPlants;
@@ -254,10 +239,6 @@ public class Farm implements Place {
 
     public ArrayList<GiantPlant> getGiantPlants() {
         return giantPlants;
-    }
-
-    public void setTrees(ArrayList<Tree> trees) {
-        this.trees = trees;
     }
 
     public boolean contains(int newX, int newY) {

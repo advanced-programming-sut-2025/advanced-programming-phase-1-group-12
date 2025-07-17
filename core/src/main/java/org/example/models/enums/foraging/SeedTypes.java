@@ -1,5 +1,5 @@
 
-package org.example.models.enums.Types;
+package org.example.models.enums.foraging;
 
 import org.example.models.enums.Season;
 import java.util.Arrays;
@@ -59,7 +59,41 @@ public enum SeedTypes {
     MixedSeeds("Mixed Seeds", 0, Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)),
 
     // Misc
-    GrassStarter("Grass Starter", 0, Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER));
+    GrassStarter("Grass Starter", 0, Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)),
+
+    //sapling
+
+    ApricotSapling("Apricot Sapling", 0, Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)),
+
+    CherrySapling("Cherry Sapling", 1, Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)),
+
+    AppleSapling("Apple Sapling", 2, Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)),
+
+    OrangeSapling("Orange Sapling", 3, Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)),
+
+    PeachSapling("Peach Sapling", 4, Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)),
+
+    PomegranateSapling("Pomegranate Sapling", 5, Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)),
+
+    Appletree("Apple Tree", 20, Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)),
+
+    BananaSapling("Banana Tree", 1, Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)),
+
+    MangoSapling("Mango Tree", 1, Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)),
+
+    MysticSapling("Mystic Tree", 1, Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)),
+    //foraging seeds
+
+    Acorns("Acorns", 1, Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)),
+
+    MapleSeeds("MapleSeeds", 1, Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)),
+
+    PineCones("PineCones", 1, Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)),
+
+    MahoganySeeds("MahoganySeeds", 1, Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)),
+
+    MushroomTreeSeeds("MushroomTreeSeeds", 1, Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER));
+
 
     private final String name;
     private final int day;

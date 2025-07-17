@@ -80,10 +80,8 @@ public class GameConsoleCommandHandler {
             controller.helpToReadMap();
         } else if ((matcher = GameMenuCommands.SHOW_CURRENT_TYPE.getMather(input)) != null) {
             System.out.println(controller.showCurrentType(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
-        } else if ((matcher = GameMenuCommands.PLACE_ON_GROUND.getMather(input)) != null) {
-            System.out.println(farmingController.plantInGreenHouse(matcher.group("seed"),
-                Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
-        } else if ((matcher = GameMenuCommands.NextTurn.getMather(input)) != null) {
+        }
+        else if ((matcher = GameMenuCommands.NextTurn.getMather(input)) != null) {
             System.out.println(App.getCurrentPlayerLazy().getPlayerController().getGameController().nextTurn());
         } else if ((matcher = GameMenuCommands.PRODUCTION.getMather(input)) != null) {
             System.out.println(farmingController.putScarecrow(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
@@ -132,15 +130,35 @@ public class GameConsoleCommandHandler {
         } else if ((matcher = GameMenuCommands.EQUIP_TOOL.getMather(input)) != null) {
             Result result = toolsController.equipTool(matcher.group("toolName"));
             System.out.println(result.getMessage());
-        } else if ((matcher = GameMenuCommands.Picking_FRUIT.getMather(input)) != null) {
-            System.out.println(farmingController.PickingFruit(Integer.parseInt(matcher.group("X")),
-                Integer.parseInt(matcher.group("Y"))));
-        } else if ((matcher = GameMenuCommands.CUTTING_TREE.getMather(input)) != null) {
-            System.out.println(farmingController.cuttingTrees(Integer.parseInt(matcher.group("X")),
-                Integer.parseInt(matcher.group("Y"))));
-        } else if ((matcher = GameMenuCommands.EXTRACTION.getMather(input)) !=null) {
-            System.out.println(farmingController.extraction(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
-        } else if ((matcher = GameMenuCommands.SHOW_AVAILABLE_TOOL.getMather(input)) != null) {
+        }
+//        else if ((matcher = GameMenuCommands.Picking_FRUIT.getMather(input)) != null) {
+//            System.out.println(farmingController.PickingFruit(Integer.parseInt(matcher.group("X")),
+//                Integer.parseInt(matcher.group("Y"))));
+//        } else if ((matcher = GameMenuCommands.CUTTING_TREE.getMather(input)) != null) {
+//            System.out.println(farmingController.cuttingTrees(Integer.parseInt(matcher.group("X")),
+//                Integer.parseInt(matcher.group("Y"))));
+//        } else if ((matcher = GameMenuCommands.EXTRACTION.getMather(input)) !=null) {
+//            System.out.println(farmingController.extraction(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
+//        } else if ((matcher = GameMenuCommands.PLACE_ON_GROUND.getMather(input)) != null) {
+//            System.out.println(farmingController.plantInGreenHouse(matcher.group("seed"),
+//                Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
+//        } else if ((matcher = GameMenuCommands.PLANT.getMather(input)) != null) {
+//           System.out.println(farmingController.plant(matcher.group("seed"), matcher.group("direction")));
+//        } else if ((matcher = GameMenuCommands.SHOW_PLANT.getMather(input)) != null) {
+//            System.out.println(farmingController.showPlant(matcher.group("X"), matcher.group("Y")));
+//        } else if ((matcher = GameMenuCommands.FERTILIZE.getMather(input)) != null) {
+//            System.out.println(farmingController.fertilize(matcher.group("fertilize"), matcher.group("direction")));
+//        } else if ((matcher = GameMenuCommands.REAPING.getMather(input)) != null) {
+//            System.out.println(farmingController.reaping(matcher.group("direction")));
+//        } else if ((matcher = GameMenuCommands.WATERING.getMather(input)) != null) {
+//            System.out.println(farmingController.watering(Integer.parseInt(matcher.group("X")),
+//                Integer.parseInt(matcher.group("Y"))));
+//        } else if ((matcher = GameMenuCommands.HOW_MUCH_WATER.getMather(input)) != null) {
+//            System.out.println(farmingController.howMuchWater());
+//        }  else if ((matcher = GameMenuCommands.WHICH_FERTILIZING.getMather(input)) != null) {
+//            System.out.println(farmingController.showFertilize());
+//        }
+        else if ((matcher = GameMenuCommands.SHOW_AVAILABLE_TOOL.getMather(input)) != null) {
             Result result = toolsController.showToolsAvailable();
             System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.UPGRADE_TOOL.getMather(input)) != null) {
@@ -278,33 +296,14 @@ public class GameConsoleCommandHandler {
             System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.CRAFT_INFO.getMather(input)) != null) {
             System.out.println(farmingController.showCraftInto(matcher.group("craftName")));
-        } else if ((matcher = GameMenuCommands.FORAGING_TREE_TYPE.getMather(input)) != null) {
-            System.out.println(farmingController.showForagingTreeInfo(matcher.group("type")));
-        } else if ((matcher = GameMenuCommands.TREE_TYPE.getMather(input)) != null) {
-            System.out.println(farmingController.showTreeInfo(matcher.group("type")));
         } else if ((matcher = GameMenuCommands.FORAGING_CROPS.getMather(input)) != null) {
             System.out.println(farmingController.showForagingCropsInfo(matcher.group("type")));
-        } else if ((matcher = GameMenuCommands.PLANT.getMather(input)) != null) {
-            System.out.println(farmingController.plant(matcher.group("seed"), matcher.group("direction")));
-        } else if ((matcher = GameMenuCommands.SHOW_PLANT.getMather(input)) != null) {
-            System.out.println(farmingController.showPlant(matcher.group("X"), matcher.group("Y")));
-        } else if ((matcher = GameMenuCommands.FERTILIZE.getMather(input)) != null) {
-            System.out.println(farmingController.fertilize(matcher.group("fertilize"), matcher.group("direction")));
-        } else if ((matcher = GameMenuCommands.REAPING.getMather(input)) != null) {
-            System.out.println(farmingController.reaping(matcher.group("direction")));
-        } else if ((matcher = GameMenuCommands.WATERING.getMather(input)) != null) {
-            System.out.println(farmingController.watering(Integer.parseInt(matcher.group("X")),
-                Integer.parseInt(matcher.group("Y"))));
-        } else if ((matcher = GameMenuCommands.HOW_MUCH_WATER.getMather(input)) != null) {
-            System.out.println(farmingController.howMuchWater());
         } else if ((matcher = GameMenuCommands.PLACE_ON_GROUND.getMather(input)) != null) {
             System.out.println(craftingController.putItem(matcher.group("itemName"), matcher.group("direction")));
         } else if ((matcher = GameMenuCommands.SHOW_RECIPES_CRAFTING.getMather(input)) != null) {
             System.out.println(craftingController.showRecipesCrafting());
         } else if ((matcher = GameMenuCommands.THOR.getMather(input)) != null) {
             System.out.println(controller.Thor(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
-        } else if ((matcher = GameMenuCommands.WHICH_FERTILIZING.getMather(input)) != null) {
-            System.out.println(farmingController.showFertilize());
         } else if ((matcher = GameMenuCommands.TakeFromGround.getMather(input)) != null) {
             System.out.println(craftingController.TakeFromGround(matcher.group("itemName"), Integer.parseInt(matcher.group("direction"))));
         } else if ((matcher = GameMenuCommands.MEET_NPC.getMather(input)) != null) {

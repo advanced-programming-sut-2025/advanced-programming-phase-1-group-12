@@ -8,11 +8,9 @@ import org.example.models.MapDetails.Lake;
 import org.example.models.MapDetails.Quarry;
 import org.example.models.MapDetails.Shack;
 import org.example.models.Place.Farm;
-import org.example.models.enums.Types.TreeType;
+import org.example.models.ProductsPackage.Quality;
 import org.example.models.enums.Types.TypeOfTile;
-import org.example.models.enums.foraging.MineralTypes;
-import org.example.models.enums.foraging.Stone;
-import org.example.models.enums.foraging.Tree;
+import org.example.models.enums.foraging.*;
 
 import java.util.*;
 
@@ -116,12 +114,18 @@ public class FarmSetUp {
         }
 
         for(Location location : randomTree(newFarm)){
-            List<TreeType> allTree = new ArrayList<>(Arrays.asList(TreeType.values()));
+            List<TypeOfPlant> allTree = new ArrayList<>();
+            for(TypeOfPlant tree : TypeOfPlant.values()) {
+                if(tree.getPlantType().equals(PlantType.ForagingTree))
+                    allTree.add(tree);
+            }
+
             Collections.shuffle(allTree);
-            TreeType treeType = allTree.get(0);
-            Tree tree = new Tree(location, treeType, true, treeType.fruitType);
+            TypeOfPlant treeType = allTree.get(0);
+
+            Plant tree = new Plant(location,true, treeType);
             location.setObjectInTile(tree);
-            location.setTypeOfTile(TypeOfTile.TREE);
+            location.setTypeOfTile(TypeOfTile.PLANT);
         }
         for(Location location : randomStone(newFarm)){
             List<MineralTypes> allMinerals = new ArrayList<>(Arrays.asList(MineralTypes.values()));

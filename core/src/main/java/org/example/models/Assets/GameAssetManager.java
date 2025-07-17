@@ -6,8 +6,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import org.example.models.Craft;
 import org.example.models.Fundementals.Location;
 import org.example.models.enums.Types.CraftingRecipe;
-import org.example.models.enums.Types.TreeType;
-import org.example.models.enums.foraging.Tree;
+import org.example.models.enums.foraging.Plant;
+import org.example.models.enums.foraging.TypeOfPlant;
 
 public class GameAssetManager {
     public static Skin skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
@@ -22,8 +22,6 @@ public class GameAssetManager {
     private final Texture BURNED_GROUND = new Texture("Flooring/Flooring_39.png");
     private final Texture GROUND = new Texture("Flooring/Flooring_53.png");
     private final Texture STORE = new Texture("Flooring/Flooring_02.png");
-    private final Texture TREE = new Texture("Flooring/Flooring_29.png");
-    private final Texture DARK_GREEN_FLOOR = new Texture("Flooring/Flooring_02.png");
     private final Texture HOUSE = new Texture("House_farmer.png");
     private final Texture barn = new Texture("Decor/Weathered_Floor_Tile.png");
     private final Texture coop = new Texture("Decor/Stone_Floor_Tile.png");
@@ -123,21 +121,13 @@ public class GameAssetManager {
         return STORE;
     }
 
-    public Texture getTREE() {
-        return TREE;
-    }
-
-    public Texture getDARK_GREEN_FLOOR() {
-        return DARK_GREEN_FLOOR;
-    }
-
     public Texture getHOUSE() {
         return HOUSE;
     }
 
     public static Texture treeType(Location location) {
-        Tree tree = (Tree) location.getObjectInTile();
-        TreeType type = tree.getType();
+        Plant tree = (Plant) location.getObjectInTile();
+        TypeOfPlant type = tree.getTypeOfPlant();
 
         switch (type) {
             case APRICOT_TREE:
@@ -164,9 +154,9 @@ public class GameAssetManager {
                 return getMANGO_TREE();
             case BANANA_TREE:
                 return getBANANA_TREE();
+            default:
+                return getORANGE_TREE();
         }
-
-        return null;
     }
 
     public static Texture craftType(Location location) {

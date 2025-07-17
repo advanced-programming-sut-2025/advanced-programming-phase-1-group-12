@@ -1,20 +1,10 @@
 package org.example.views;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import org.example.models.Animal.FarmAnimals;
-import org.example.models.Assets.AnimalAssetsManager;
 import org.example.models.Assets.GameAssetManager;
-import org.example.models.Fundementals.App;
-import org.example.models.Fundementals.Game;
 import org.example.models.Fundementals.Location;
-import org.example.models.Fundementals.Player;
-import org.example.models.Place.Farm;
-import org.example.models.enums.Types.TreeType;
 import org.example.models.enums.Types.TypeOfTile;
-import org.example.models.enums.foraging.Tree;
 import org.example.models.map;
 
 import java.util.*;
@@ -53,8 +43,6 @@ public class PixelMapRenderer {
         switch (tileType) {
             case LAKE:
                 return GameAssetManager.getGameAssetManager().getLAKE_TEXTURE();
-            case TREE:
-                return GameAssetManager.treeType(location);
             case QUARRY:
                 return GameAssetManager.getGameAssetManager().getQUARRY();
             case STORE:
@@ -66,7 +54,7 @@ public class PixelMapRenderer {
             case BURNED_GROUND:
                 return GameAssetManager.getGameAssetManager().getBURNED_GROUND();
             case PLANT:
-                return GameAssetManager.getGameAssetManager().getPLANTS();
+                return GameAssetManager.getGameAssetManager().treeType(location);
             case BARN:
                 return GameAssetManager.getGameAssetManager().getBarn();
             case COOP:
@@ -107,16 +95,16 @@ public class PixelMapRenderer {
                 if (!hasLeft && !hasAbove) houseAnchors.add(loc);
             }
 //            for (Farm farm : App.getCurrentGame().getFarms()) {
-////                for (FarmAnimals farmAnimal : farm.getFarmAnimals()) {
-////                    if (farmAnimal.getPosition().equals(loc)) {
-////                        int animalSize = 50;
-////                        float animalX = offsetX + loc.getxAxis() * tileSize + (tileSize - animalSize) / 2f;
-////                        float animalY = offsetY + loc.getyAxis() * tileSize + (tileSize - animalSize) / 2f;
-////
-////                        batch.draw(farmAnimal.getTexture(), animalX, animalY, animalSize, animalSize);
-////                    }
-////                }
-////            }
+//                for (FarmAnimals farmAnimal : farm.getFarmAnimals()) {
+//                    if (farmAnimal.getPosition().equals(loc)) {
+//                        int animalSize = 50;
+//                        float animalX = offsetX + loc.getxAxis() * tileSize + (tileSize - animalSize) / 2f;
+//                        float animalY = offsetY + loc.getyAxis() * tileSize + (tileSize - animalSize) / 2f;
+//
+//                        batch.draw(farmAnimal.getTexture(), animalX, animalY, animalSize, animalSize);
+//                    }
+//                }
+//            }
         }
         for (Location anchor : greenhouseAnchors) {
             float drawX = offsetX + anchor.getxAxis() * tileSize;

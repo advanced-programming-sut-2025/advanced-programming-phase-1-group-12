@@ -265,9 +265,9 @@ class buyView implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 if (quantity > 0) {
                     if (store.getNameOfStore().equalsIgnoreCase("Carpenter's Shop") && (productName.contains("coop") || productName.contains("barn"))) {
-                        Gdx.app.postRunnable(() ->
-                            Main.getMain().setScreen(new FarmView(productName, players, playerList, false))
-                        );
+//                        Gdx.app.postRunnable(() ->
+//                            Main.getMain().setScreen(new FarmView(productName, players, playerList, false))
+//                        );
                     } else if(store.getNameOfStore().equalsIgnoreCase("Marnie's Ranch") &&
                         !(productName.equalsIgnoreCase("hay") || productName.equalsIgnoreCase("Milk Pail")
                             || productName.equalsIgnoreCase("Shears"))) {

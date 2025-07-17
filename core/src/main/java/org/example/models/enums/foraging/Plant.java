@@ -6,8 +6,8 @@ import org.example.models.ProductsPackage.Quality;
 
 public class Plant extends Item {
     private Location location;
-    private Seed seed;
-    private AllCrops allCrops;
+    private PlantType plantType;
+    private TypeOfPlant typeOfPlant;
     private boolean hasBeenFertilized;
     private boolean hasBeenWatering;
     private int totalTimeNeeded;
@@ -19,21 +19,19 @@ public class Plant extends Item {
     private int regrowthTime;
     private boolean isGiantPlant;
 
-    public Plant(Location location, Seed seed, boolean isForaging, AllCrops allCrops){
-        super(seed.getName(), Quality.NORMAL, seed.getPrice());
+    public Plant(Location location, boolean isForaging, TypeOfPlant typeOfPlant) {
+        super(typeOfPlant.getName(), Quality.NORMAL, typeOfPlant.baseSellPrice);
         this.location = location;
-        this.seed = seed;
         this.hasBeenFertilized = false;
         this.dayPast = 2;
         this.currentStage = 0;
         this.age = 0;
         this.isOneTime = true;
         this.isForaging = isForaging;
-        this.totalTimeNeeded = seed.getType().getDay();
-        this.allCrops = allCrops;
+        this.totalTimeNeeded = typeOfPlant.totalHarvestTime;
+        this.typeOfPlant = typeOfPlant;
         this.hasBeenWatering = false;
         this.regrowthTime = 0;
-//        this.quallity = ....;
     }
 
     public boolean isOneTime() {
@@ -88,14 +86,6 @@ public class Plant extends Item {
         this.age = age;
     }
 
-    public AllCrops getAllCrops() {
-        return allCrops;
-    }
-
-    public void setAllCrops(AllCrops allCrops) {
-        this.allCrops = allCrops;
-    }
-
     public Location getLocation() {
         return location;
     }
@@ -108,10 +98,6 @@ public class Plant extends Item {
         return isForaging;
     }
 
-    public Seed getSeed() {
-        return seed;
-    }
-
     public void setForaging(boolean foraging) {
         isForaging = foraging;
     }
@@ -122,10 +108,6 @@ public class Plant extends Item {
 
     public void setHasBeenWatering(boolean hasBeenWatering) {
         this.hasBeenWatering = hasBeenWatering;
-    }
-
-    public void setSeed(Seed seed) {
-        this.seed = seed;
     }
 
     public int getDayPast() {
@@ -144,4 +126,19 @@ public class Plant extends Item {
         dayPast--;
     }
 
+    public void setPlantType(PlantType plantType) {
+        this.plantType = plantType;
+    }
+
+    public PlantType getPlantType() {
+        return plantType;
+    }
+
+    public TypeOfPlant getTypeOfPlant() {
+        return typeOfPlant;
+    }
+
+    public void setTypeOfPlant(TypeOfPlant typeOfPlant) {
+        this.typeOfPlant = typeOfPlant;
+    }
 }

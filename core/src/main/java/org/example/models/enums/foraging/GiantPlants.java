@@ -1,7 +1,6 @@
 package org.example.models.enums.foraging;
 
 import org.example.models.enums.Season;
-import org.example.models.enums.Types.SeedTypes;
 
 import java.util.List;
 

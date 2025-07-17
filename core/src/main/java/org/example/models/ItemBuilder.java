@@ -10,7 +10,6 @@ import org.example.models.enums.FishDetails;
 import org.example.models.ToolsPackage.ToolEnums.Tool;
 import org.example.models.enums.Types.*;
 import org.example.models.enums.foraging.MineralTypes;
-import org.example.models.enums.foraging.Seed;
 import org.example.models.enums.foraging.*;
 
 import java.util.Map;
@@ -18,10 +17,7 @@ import java.util.Map;
 public class ItemBuilder {
 
     public static Item builder(String name, Quality quality, int price) {
-        SeedTypes seedType = SeedTypes.stringToSeed(name);
-        if (seedType != null) {
-            return new Seed(seedType.getName(), Quality.NORMAL, 0, seedType);
-        }
+
         Tool abzar = Tool.stringToTool(name);
         if (abzar != null) {
             return new Tools(abzar);
@@ -48,9 +44,11 @@ public class ItemBuilder {
         if (craftingRecipe != null) {
             return new Craft(craftingRecipe);
         }
-        AllCrops allCrops = AllCrops.nameToCraftType(name);
-        if(allCrops != null) {
-            return new Plant(null, null, false, allCrops);
+        TypeOfPlant typeOfPlant = TypeOfPlant.nameToCraftType(name);
+        if(typeOfPlant != null) {
+            Plant plant = new Plant(null, false, typeOfPlant);
+            plant.setPlantType(typeOfPlant.getPlantType());
+            return plant;
         }
         GiantPlants giantPlants = GiantPlants.nameToCraftType(name);
         if(giantPlants != null) {
