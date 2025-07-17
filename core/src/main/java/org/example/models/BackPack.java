@@ -200,6 +200,9 @@ public class BackPack {
     }
 
     public boolean hasItem(String itemName){
-        return itemNames.containsKey(itemName);
+        return containsKeyIgnoreCase(itemNames, itemName);
+    }
+    public boolean containsKeyIgnoreCase(Map<String, ?> map, String key) {
+        return map.keySet().stream().anyMatch(k -> k.equalsIgnoreCase(key));
     }
 }

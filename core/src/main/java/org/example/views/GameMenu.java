@@ -12,7 +12,6 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -24,6 +23,7 @@ import org.example.models.Animal.FarmAnimals;
 import org.example.models.Assets.GameAssetManager;
 import org.example.models.BackPack;
 import org.example.models.Assets.ToolAssetsManager;
+import org.example.models.Craft;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Player;
@@ -31,7 +31,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.example.models.Fundementals.Result;
 import org.example.models.Item;
 import org.example.models.Place.Farm;
-import org.example.models.ProductsPackage.StoreProducts;
 import org.example.models.RelatedToUser.Ability;
 import org.example.models.ToolsPackage.Tools;
 
@@ -40,7 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.badlogic.gdx.graphics.Pixmap;
+
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.GL20;
 import org.example.models.enums.Types.CraftingRecipe;
@@ -1055,8 +1054,6 @@ public class GameMenu extends InputAdapter implements Screen {
             (Gdx.graphics.getHeight() - dialog.getHeight()) / 2f
         );
         dialog.show(stage);
-
-        dialog.show(stage);
     }
 
 
@@ -1361,15 +1358,12 @@ public class GameMenu extends InputAdapter implements Screen {
         contentTable.top().left();
         contentTable.defaults().pad(10).left().fillX();
 
-        // Add crafting buttons to the table
-        craftingsButtons(contentTable, dialog, skin);
+        craftingButtons(contentTable, skin);
 
-        // Scrollable content
         ScrollPane scrollPane = new ScrollPane(contentTable);
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFadeScrollBars(false);
 
-        // Add scrollPane to dialog
         dialog.getContentTable().add(scrollPane).maxHeight(Gdx.graphics.getHeight() * 0.8f).width(400).expand().fill();
 
         // Back button to close dialog
@@ -1384,7 +1378,7 @@ public class GameMenu extends InputAdapter implements Screen {
         dialog.show(stage);
     }
 
-    private void craftingsButtons(Table table, Dialog dialog, Skin skin) {
+    private void craftingButtons(Table table, Skin skin) {
         table.clear();
 
         for (CraftingRecipe craftingRecipe : App.getCurrentPlayerLazy().getRecepies().keySet()) {
@@ -1415,4 +1409,61 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
+    public void craftMenu(Craft craft) {
+        ArtisanController artisanController = new ArtisanController();
+        Skin skin = GameAssetManager.skin;
+        Dialog dialog = new Dialog("craft (artisan) menu", skin);
+
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        BackPack backPack = player.getBackPack();
+
+        Table mainContent = new Table(); // Main container
+        mainContent.top();
+
+        TextButton closeButton = new TextButton("Close", skin);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+            }
+        });
+
+        TextField nameOfDeletingItem = new TextField("", skin);
+        nameOfDeletingItem.setMessageText("Name of the item to put in the system");
+
+
+        mainContent.add(nameOfDeletingItem).pad(5).width(400f).row();
+
+        Table scrollContent = new Table();
+        scrollContent.top();
+        for (Item item : backPack.getItems().keySet()) {
+            Label itemLabel = new Label(item.getName() + " -> " + backPack.getItems().get(item), skin);
+            scrollContent.add(itemLabel).pad(5).width(400f).row();
+        }
+
+        TextButton start = new TextButton("start artisan", skin);
+        start.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                showError(artisanController.artisanUse(craft.getRecipe().getName(), nameOfDeletingItem.getText()).getMessage());
+            }
+        });
+        ScrollPane scrollPane = new ScrollPane(scrollContent, skin);
+        scrollPane.setScrollingDisabled(false, false);
+        scrollPane.setFadeScrollBars(false);
+
+        mainContent.add(scrollPane).pad(5).width(400f).height(300f).row();
+        mainContent.add(closeButton).pad(5).width(400f).row();
+
+        dialog.getContentTable().add(mainContent).expand().fill().pad(5).row();
+        dialog.button(closeButton);
+        dialog.button(start);
+        dialog.pack();
+        dialog.setPosition(
+            (Gdx.graphics.getWidth() - dialog.getWidth()) / 2f,
+            (Gdx.graphics.getHeight() - dialog.getHeight()) / 2f
+        );
+
+        dialog.show(stage);
+    }
 }

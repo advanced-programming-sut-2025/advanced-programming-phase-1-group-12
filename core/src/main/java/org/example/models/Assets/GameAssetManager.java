@@ -208,8 +208,8 @@ public class GameAssetManager {
                 return Fish_Smoker;
             }
         }
-
-        return null;
+        //TODO :bomb and scarecrow stuff be added?
+        return charcoal;
     }
 
     public static Texture getAPRICOT_TREE() {
