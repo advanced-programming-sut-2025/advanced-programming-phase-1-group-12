@@ -43,7 +43,6 @@ public class ItemBuilder {
         CraftingRecipe craftingRecipe = CraftingRecipe.getByName(name);
         if (craftingRecipe != null) {
             App.getCurrentPlayerLazy().getRecepies().put(craftingRecipe, true);
-            return new Craft(craftingRecipe);
         }
         TypeOfPlant typeOfPlant = TypeOfPlant.nameToCraftType(name);
         if(typeOfPlant != null) {

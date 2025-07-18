@@ -120,7 +120,7 @@ public class CraftingController {
 
                 if(location.getTypeOfTile().equals(TypeOfTile.GROUND) && location.getObjectInTile() == null){
                     location.setTypeOfTile(TypeOfTile.CRAFT);
-                    Craft craft = new Craft(recipe);
+                    Craft craft = new Craft(recipe, location);
                     App.getCurrentPlayerLazy().getCrafts().add(craft);
                     location.setObjectInTile(craft);
                     return new Result(true, "we add " + itemName + " to the back pack" + " it will be shown on map");

@@ -609,4 +609,12 @@ public class ArtisanController {
         }
         return new Result(false, "Artisan item with such name not found");
     }
+    public void cheatFastEnd(Craft craft) {
+        ArtisanItem item = craft.getArtisanInIt();
+
+        item.setHoursRemained(0);
+    }
+    public void cancelProcess(Craft craft){
+        craft.setArtisanInIt(null);
+    }
 }
