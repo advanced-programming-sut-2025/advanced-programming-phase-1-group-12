@@ -41,10 +41,10 @@ public class Date implements Runnable {
         this.hour = 9; // the game starts at 9 AM
         this.dayOfMonth = 1;
         this.dayOfWeek = 1;
-        this.season = Season.SPRING;
+        this.season = Season.AUTUMN;
         this.currentSeason = season.getValue();
         this.year = 2025;
-        this.weather = Weather.SNOWY;
+        this.weather = Weather.SUNNY;
         this.weatherOfSeason = initializeWeatherMap();
         this.tommorowWeather = weatherForecast(season);
     }

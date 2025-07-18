@@ -6,8 +6,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import org.example.models.Craft;
 import org.example.models.Fundementals.Location;
 import org.example.models.enums.Types.CraftingRecipe;
-import org.example.models.enums.foraging.Plant;
-import org.example.models.enums.foraging.TypeOfPlant;
 
 public class GameAssetManager {
     public static Skin skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
@@ -36,7 +34,7 @@ public class GameAssetManager {
     //Season assets
     private final Texture winter = new Texture("Clock/Seasons/Winter.png");
     private final Texture summer = new Texture("Clock/Seasons/Summer.png");
-    private final Texture fall = new Texture("Clock/Seasons/Fall.png");
+    private final Texture autumn = new Texture("Clock/Seasons/Fall.png");
     private final Texture spring = new Texture("Clock/Seasons/Spring.png");
 
     //Weather assets
@@ -193,8 +191,8 @@ public class GameAssetManager {
         return summer;
     }
 
-    public Texture getFall() {
-        return fall;
+    public Texture getAutumn() {
+        return autumn;
     }
 
     public Texture getSpring() {
