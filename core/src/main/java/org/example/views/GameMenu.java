@@ -1,9 +1,7 @@
 package org.example.views;
 
 import com.badlogic.gdx.*;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
@@ -80,6 +78,12 @@ public class GameMenu extends InputAdapter implements Screen {
     private Label goldLabel;
     private ShapeRenderer shapeRenderer;
     private float lightingAlpha = 0f;
+    private List<RainDrop> rainDrops;
+    private Texture rainTexture1;
+    private Texture rainTexture2;
+    private boolean isRaining = false;
+    private float rainSpawnTimer = 0f;
+    private final float RAIN_SPAWN_INTERVAL = 0.05f;
 
     private Map<Player, ProgressBar> energyBars;
 
@@ -99,6 +103,31 @@ public class GameMenu extends InputAdapter implements Screen {
         errorLabel = new Label("", skin);
     }
 
+    public static class RainDrop {
+        public float x, y;
+        public float speed;
+        public float alpha;
+        public Texture texture;
+
+        public RainDrop(float x, float y, float speed, Texture texture) {
+            this.x = x;
+            this.y = y;
+            this.speed = speed;
+            this.texture = texture;
+            this.alpha = 0.8f + (float)Math.random() * 0.2f; // More visible alpha 0.8-1.0
+        }
+
+        public void update(float delta) {
+            y -= speed * delta;
+            // Slight horizontal movement for wind effect
+            x += Math.sin(y * 0.01f) * 20f * delta;
+        }
+
+        public boolean isOffScreen() {
+            return y < -100f; // Remove when further off screen
+        }
+    }
+
     @Override
     public void show() {
         batch = Main.getMain().getBatch();
@@ -109,6 +138,8 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Initialize lighting system
         initializeLighting();
+        initializeRainSystem();
+
 
         float clockSize = 100f;
         clockImage.setSize(clockSize, clockSize);
@@ -216,6 +247,8 @@ public class GameMenu extends InputAdapter implements Screen {
         updateSeasonAndWeatherDisplay();
         updateLightingWithSeasons();
 
+        updateRainSystem(delta);
+
         if (errorLabel.isVisible()) {
             timeSinceError += delta;
 
@@ -243,6 +276,7 @@ public class GameMenu extends InputAdapter implements Screen {
         camera.update();
 
         batch.setProjectionMatrix(camera.combined);
+
         pixelMapRenderer.render(batch, 0, 0);
 
         for (Player p : App.getCurrentGame().getPlayers()) {
@@ -323,6 +357,7 @@ public class GameMenu extends InputAdapter implements Screen {
             font.draw(batch, otherPlayer.getUser().getUserName(), farmCornerX, farmCornerY + otherPlayer.getPlayerSprite().getHeight() + 10);
 
         }
+
         if (showingAllMap) {
             for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
                 Location farmLocation = otherPlayer.getUserLocation();
@@ -333,6 +368,7 @@ public class GameMenu extends InputAdapter implements Screen {
                 batch.draw(portrait, farmCornerX - portrait.getWidth() / 2f, farmCornerY - portrait.getHeight() / 2f, 3000, 3000);
             }
         }
+
         if (timeForAnimalMove >= 0.5f) {
             for (Farm farm : App.getCurrentGame().getFarms()) {
                 for (FarmAnimals animal : farm.getFarmAnimals()) {
@@ -341,7 +377,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     }
                 }
             }
-            timeForAnimalMove = 0f; // Only reset when a step was done!
+            timeForAnimalMove = 0f;
         }
 
         for (Farm farm : App.getCurrentGame().getFarms()) {
@@ -374,14 +410,17 @@ public class GameMenu extends InputAdapter implements Screen {
                 batch.draw(animal.getTexture(), renderX, renderY);
             }
         }
-        batch.end();
+
+        renderRain(batch);
+
+
         renderLightingOverlay();
+        batch.end();
 
 
         stage.act(delta);
         stage.draw();
     }
-
     private void updateClockDisplay() {
         org.example.models.Date currentDate = App.getCurrentGame().getDate();
 
@@ -618,12 +657,16 @@ public class GameMenu extends InputAdapter implements Screen {
             App.getCurrentPlayerLazy().setEnergy(2000);
             return true;
         }
-        if (keycode == Input.Keys.A) {
+        if (keycode == Input.Keys.O) {
             App.getCurrentGame().getDate().changeAdvancedDay(2);
             return true;
         }
         if (keycode == Input.Keys.T) {
             showToolsDialog();
+            return true;
+        }
+        if (keycode == Input.Keys.R) {
+            changeRainStatus();
             return true;
         }
         return false;
@@ -1395,36 +1438,36 @@ public class GameMenu extends InputAdapter implements Screen {
         dialog.show(stage);
     }
 
-    private void craftingsButtons(Table table, Dialog dialog, Skin skin) {
-        table.clear();
-
-        for (CraftingRecipe craftingRecipe : App.getCurrentPlayerLazy().getRecepies().keySet()) {
-            boolean unlocked = App.getCurrentPlayerLazy().getRecepies().get(craftingRecipe);
-
-            TextButton craftButton = new TextButton(craftingRecipe.getName(), skin);
-            if (!unlocked) {
-                craftButton.setDisabled(true);
-                craftButton.getLabel().setColor(0.5f, 0.5f, 0.5f, 1);
-            } else {
-                craftButton.addListener(new ClickListener() {
-                    @Override
-                    public void clicked(InputEvent event, float x, float y) {
-                        Gdx.app.postRunnable(() -> {
-                            Main.getMain().setScreen(new FarmView(
-                                craftingRecipe.getName(),
-                                players,
-                                App.getCurrentGame().getPlayers(),
-                                true
-                            ));
-                        });
-                    }
-                });
-            }
-
-            table.row();
-            table.add(craftButton).width(300).height(50).left();
-        }
-    }
+//    private void craftingsButtons(Table table, Dialog dialog, Skin skin) {
+//        table.clear();
+//
+//        for (CraftingRecipe craftingRecipe : App.getCurrentPlayerLazy().getRecepies().keySet()) {
+//            boolean unlocked = App.getCurrentPlayerLazy().getRecepies().get(craftingRecipe);
+//
+//            TextButton craftButton = new TextButton(craftingRecipe.getName(), skin);
+//            if (!unlocked) {
+//                craftButton.setDisabled(true);
+//                craftButton.getLabel().setColor(0.5f, 0.5f, 0.5f, 1);
+//            } else {
+//                craftButton.addListener(new ClickListener() {
+//                    @Override
+//                    public void clicked(InputEvent event, float x, float y) {
+//                        Gdx.app.postRunnable(() -> {
+//                            Main.getMain().setScreen(new FarmView(
+//                                craftingRecipe.getName(),
+//                                players, // make sure `players` is accessible
+//                                App.getCurrentGame().getPlayers(),
+//                                true
+//                            ));
+//                        });
+//                    }
+//                });
+//            }
+//
+//            table.row();
+//            table.add(craftButton).width(300).height(50).left();
+//        }
+//    }
 
     public void craftMenu(Craft craft) {
         ArtisanController artisanController = new ArtisanController();
@@ -1459,12 +1502,12 @@ public class GameMenu extends InputAdapter implements Screen {
         }
 
         TextButton start = new TextButton("start artisan", skin);
-        start.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                showError(artisanController.artisanUse(craft.getRecipe().getName(), nameOfDeletingItem.getText()).getMessage());
-            }
-        });
+//        start.addListener(new ClickListener() {
+//            @Override
+//            public void clicked(InputEvent event, float x, float y) {
+//                showError(artisanController.artisanUse(craft.getRecipe().getName(), nameOfDeletingItem.getText()).getMessage());
+//            }
+//        });
         ScrollPane scrollPane = new ScrollPane(scrollContent, skin);
         scrollPane.setScrollingDisabled(false, false);
         scrollPane.setFadeScrollBars(false);
@@ -1487,4 +1530,92 @@ public class GameMenu extends InputAdapter implements Screen {
     public FarmingController getFarmingController() {
         return farmingController;
     }
+
+
+    private void updateRainSystem(float delta) {
+        String currentWeather = getWeather();
+        boolean shouldRain = currentWeather.equalsIgnoreCase("rainy") || currentWeather.equals("stormy");
+//        System.out.println("shouldRain: " + shouldRain);
+//        System.out.println("currentWeather: " + currentWeather);
+
+        if (shouldRain && !isRaining) {
+            isRaining = true;
+//            System.out.println("Rain started! Weather: " + currentWeather);
+        } else if (!shouldRain && isRaining) {
+            isRaining = false;
+//            System.out.println("Rain stopped! Weather: " + currentWeather);
+        }
+
+        if (isRaining && rainTexture1 != null && rainTexture2 != null) {
+            rainSpawnTimer += delta;
+            if (rainSpawnTimer >= RAIN_SPAWN_INTERVAL) {
+                spawnRainDrops();
+                rainSpawnTimer = 0f;
+            }
+        }
+
+        for (int i = rainDrops.size() - 1; i >= 0; i--) {
+            RainDrop drop = rainDrops.get(i);
+            drop.update(delta);
+
+            if (drop.isOffScreen()) {
+                rainDrops.remove(i);
+            }
+        }
+    }
+    private void spawnRainDrops() {
+        float cameraLeft = camera.position.x - camera.viewportWidth * camera.zoom * 0.5f;
+        float cameraRight = camera.position.x + camera.viewportWidth * camera.zoom * 0.5f;
+        float cameraTop = camera.position.y + camera.viewportHeight * camera.zoom * 0.5f;
+
+        int dropsToSpawn = 10 + (int)(Math.random() * 15);
+
+        for (int i = 0; i < dropsToSpawn; i++) {
+            float x = cameraLeft + (float)Math.random() * (cameraRight - cameraLeft);
+            float y = cameraTop + 100f;
+            float speed = 300f + (float)Math.random() * 200f; // Speed 300-500
+
+            Texture rainTexture = Math.random() < 0.5f ? rainTexture1 : rainTexture2;
+
+            rainDrops.add(new RainDrop(x, y, speed, rainTexture));
+        }
+    }
+
+    private void renderRain(SpriteBatch batch) {
+//
+//        System.out.println("isRaining: " + isRaining);
+//        System.out.println("rainDrops: " + rainDrops.size());
+
+        if (!isRaining || rainDrops.isEmpty()) return;
+
+//        System.out.println("Rendering " + rainDrops.size() + " rain drops");
+
+        for (RainDrop drop : rainDrops) {
+            Color oldColor = batch.getColor();
+            batch.setColor(oldColor.r, oldColor.g, oldColor.b, drop.alpha);
+
+            float dropSize = 15f;
+            batch.draw(drop.texture, drop.x, drop.y, dropSize, dropSize);
+
+            batch.setColor(oldColor);
+        }
+    }
+
+    public void changeRainStatus(){
+        isRaining = !isRaining;
+    }
+
+
+
+    private void initializeRainSystem() {
+        rainDrops = new ArrayList<>();
+        try {
+            rainTexture1 = new Texture(Gdx.files.internal("Clock/Rain/rain_0.png"));
+            rainTexture2 = new Texture(Gdx.files.internal("Clock/Rain/rain_1.png"));
+            System.out.println("Rain textures loaded successfully");
+        } catch (Exception e) {
+            System.err.println("Could not load rain textures: " + e.getMessage());
+        }
+    }
+
 }

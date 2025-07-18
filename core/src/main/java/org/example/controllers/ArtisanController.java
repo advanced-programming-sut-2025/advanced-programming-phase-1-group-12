@@ -1,5 +1,6 @@
 package org.example.controllers;
 
+import org.example.models.Craft;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Player;
 import org.example.models.Fundementals.Result;
@@ -19,10 +20,13 @@ import java.util.regex.Pattern;
 public class ArtisanController {
     //TODO:decrease items after building
 
-    public Result artisanUse(String artisan, String item) {
+    public Result artisanUse(Craft craft, String item) {
+        if(craft.getArtisanInIt() != null){
+            return new Result(false, "some thing is in the craft it should be empty to be used");
+        }
 
 
-        CraftingRecipe artisanType = CraftingRecipe.getByName(artisan);
+        CraftingRecipe artisanType = CraftingRecipe.getByName(craft.getRecipe().getName());
         if (artisanType == null) {
             return new Result(false, "artisan type is invalid");
         }
@@ -31,49 +35,50 @@ public class ArtisanController {
         }
         switch (artisanType.getName()) {
             case "Bee House":
-                return makeHoney(ArtisanTypes.HONEY);
+                return makeHoney(craft, ArtisanTypes.HONEY);
 
             case ("Cheese Press"):
                 if (item.contains("Goat")) {
-                    return makeCheese(ArtisanTypes.GOAT_CHEESE, item);
+                    return makeCheese(craft, ArtisanTypes.GOAT_CHEESE, item);
                 } else
-                    return makeCheese(ArtisanTypes.CHEESE, item);
+                    return makeCheese(craft, ArtisanTypes.CHEESE, item);
 
             case ("Keg"):
-                return kegProduce(item);
+                return kegProduce(craft, item);
 
             case ("Dehydrator"):
-                return Dehydrate(item);
+                return Dehydrate(craft, item);
 
             case ("Charcoal Kiln"):
-                return CharCoal(item);
+                return CharCoal(craft, item);
             case ("Loom"):
-                return Loom(item);
+                return Loom(craft, item);
             case ("Mayonnaise Machine"):
-                return makeMayonnaise(item);
+                return makeMayonnaise(craft, item);
             case ("Oil Maker"):
-                return makeOil(item);
+                return makeOil(craft, item);
             case ("Preserve Jar"):
-                return preserveJar(item);
+                return preserveJar(craft, item);
             case ("Fish Smoker"):
-                return fishSmoke(item);
+                return fishSmoke(craft, item);
             case ("Furnace"):
-                return makeBar(item);
+                return makeBar(craft, item);
             default:
                 return new Result(false, "artisan type is invalid");
         }
     }
 
     //TODO:two honey with different timing may be added? is it fine?
-    public Result makeHoney(ArtisanTypes type) {
+    public Result makeHoney(Craft craft, ArtisanTypes type) {
         ArtisanItem honey = new ArtisanItem(type.getName(), type, type.getProcessingTime(), type.getEnergy());
         honey.setPrice(type.getSellPrice());
         App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(honey);
+        craft.setArtisanInIt(honey);
 
         return new Result(true, "Honey will be produced for you");
     }
 
-    public Result makeCheese(ArtisanTypes type, String item) {
+    public Result makeCheese(Craft craft, ArtisanTypes type, String item) {
         if (type == ArtisanTypes.GOAT_CHEESE) {
             if (item.equalsIgnoreCase("Goat Milk")) {
                 if (App.getCurrentPlayerLazy().getBackPack().hasItem("Goat Milk")) {
@@ -95,6 +100,7 @@ public class ArtisanController {
                     App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(goatCheese);
 
                     App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Large Goat Milk"), 1);
+                    craft.setArtisanInIt(goatCheese);
 
                     return new Result(true, "goat cheese will be produced for you with Large Goat Milk");
                 } else {
@@ -113,6 +119,7 @@ public class ArtisanController {
                     ArtisanItem goatCheese = new ArtisanItem(type.getName(), type, type.getProcessingTime(), type.getEnergy());
                     goatCheese.setPrice(230);
                     App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(goatCheese);
+                    craft.setArtisanInIt(goatCheese);
                     App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Milk"), 1);
                     return new Result(true, "cheese will be produced for you");
                 } else {
@@ -124,6 +131,7 @@ public class ArtisanController {
                     ArtisanItem Cheese = new ArtisanItem(type.getName(), type, type.getProcessingTime(), type.getEnergy());
                     Cheese.setPrice(345);
                     App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(Cheese);
+                    craft.setArtisanInIt(Cheese);
 
                     App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Large Milk"), 1);
 
@@ -140,7 +148,7 @@ public class ArtisanController {
         }
     }
 
-    public Result kegProduce(String items) {
+    public Result kegProduce(Craft craft, String items) {
         Item item = App.getCurrentPlayerLazy().getBackPack().getItemByName(items);
         ArtisanTypes type;
         if (items.equalsIgnoreCase("Wheat")) {
@@ -149,6 +157,7 @@ public class ArtisanController {
                 ArtisanItem beer = new ArtisanItem(type.getName(), type, type.getProcessingTime(), type.getEnergy());
                 beer.setPrice(type.getSellPrice());
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(beer);
+                craft.setArtisanInIt(beer);
 
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Wheat"), 1);
 
@@ -164,6 +173,7 @@ public class ArtisanController {
                 ArtisanItem vinegar = new ArtisanItem(type.getName(), type, type.getProcessingTime(), type.getEnergy());
                 vinegar.setPrice(type.getSellPrice());
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(vinegar);
+                craft.setArtisanInIt(vinegar);
 
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Rice"), 1);
 
@@ -180,6 +190,7 @@ public class ArtisanController {
                 ArtisanItem vinegar = new ArtisanItem(type.getName(), type, type.getProcessingTime(), type.getEnergy());
                 vinegar.setPrice(type.getSellPrice());
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(vinegar);
+                craft.setArtisanInIt(vinegar);
 
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, 5);
 
@@ -196,6 +207,7 @@ public class ArtisanController {
                 ArtisanItem vinegar = new ArtisanItem(type.getName(), type, type.getProcessingTime(), type.getEnergy());
                 vinegar.setPrice(type.getSellPrice());
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(vinegar);
+                craft.setArtisanInIt(vinegar);
 
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, 1);
 
@@ -212,6 +224,7 @@ public class ArtisanController {
                 ArtisanItem vinegar = new ArtisanItem(type.getName(), type, type.getProcessingTime(), type.getEnergy());
                 vinegar.setPrice(type.getSellPrice());
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(vinegar);
+                craft.setArtisanInIt(vinegar);
 
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, 1);
 
@@ -228,6 +241,7 @@ public class ArtisanController {
             ArtisanItem pickle = new ArtisanItem(type.getName(), type, type.getProcessingTime(), vegetable.energy * 2);
             pickle.setPrice(vegetable.baseSellPrice * 2);
             App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(pickle);
+            craft.setArtisanInIt(pickle);
             App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, 1); // Add this line
             return new Result(true, "Artisan added to your inventory");
         }
@@ -239,6 +253,7 @@ public class ArtisanController {
                 ArtisanItem wine = new ArtisanItem(type.getName(), type, type.getProcessingTime(), treeType.energy * 2);
                 wine.setPrice(treeType.baseSellPrice + 50);
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(wine);
+                craft.setArtisanInIt(wine);
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, 1);
                 return new Result(true, "Artisan added to your inventory");
             }
@@ -246,7 +261,7 @@ public class ArtisanController {
         return new Result(false, "ingredients are invalid");
     }
 
-    public Result Dehydrate(String items) {
+    public Result Dehydrate(Craft craft, String items) {
 
         Item item = App.getCurrentPlayerLazy().getBackPack().getItemByName(items);
         if (item == null) {
@@ -266,8 +281,7 @@ public class ArtisanController {
 
                 // Add to processing queue
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(raisins);
-
-                // Remove ingredients
+                craft.setArtisanInIt(raisins);
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, 5);
 
                 return new Result(true, "Raisins will be produced for you");
@@ -284,6 +298,7 @@ public class ArtisanController {
                 ArtisanItem dried = new ArtisanItem(type.getName(), type, type.getProcessingTime(), treeType.energy * 2);
                 dried.setPrice(treeType.baseSellPrice + 50);
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(dried);
+                craft.setArtisanInIt(dried);
 
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, 1);
                 return new Result(true, "Artisan added to your inventory");
@@ -296,6 +311,7 @@ public class ArtisanController {
             ArtisanItem vinegar = new ArtisanItem(type.getName(), type, type.getProcessingTime(), type.getEnergy());
             vinegar.setPrice(type.getSellPrice());
             App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(vinegar);
+            craft.setArtisanInIt(vinegar);
 
             App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, 1);
             return new Result(true, "Artisan added to your inventory");
@@ -304,7 +320,7 @@ public class ArtisanController {
         }
     }
 
-    public Result Loom(String items) {
+    public Result Loom(Craft craft, String items) {
         if (items.equalsIgnoreCase("Wool")) {
             ArtisanTypes type = ArtisanTypes.CLOTH;
             Item item = App.getCurrentPlayerLazy().getBackPack().getItemByName("Wool");
@@ -312,6 +328,7 @@ public class ArtisanController {
                 ArtisanItem cloth = new ArtisanItem(type.getName(), type, type.getProcessingTime(), type.getEnergy());
                 cloth.setPrice(type.getSellPrice());
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(cloth);
+                craft.setArtisanInIt(cloth);
 
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, 1);
 
@@ -324,7 +341,7 @@ public class ArtisanController {
         }
     }
 
-    public Result CharCoal(String items) {
+    public Result CharCoal(Craft craft, String items) {
         if (items.equalsIgnoreCase("Wood")) {
             ArtisanTypes type = ArtisanTypes.COAL;
             Item item = App.getCurrentPlayerLazy().getBackPack().getItemByName("Wood");
@@ -332,6 +349,7 @@ public class ArtisanController {
                 ArtisanItem cloth = new ArtisanItem(type.getName(), type, type.getProcessingTime(), type.getEnergy());
                 cloth.setPrice(type.getSellPrice());
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(cloth);
+                craft.setArtisanInIt(cloth);
 
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, 1);
 
@@ -344,7 +362,7 @@ public class ArtisanController {
         }
     }
 
-    public Result makeMayonnaise(String item) {
+    public Result makeMayonnaise(Craft craft, String item) {
         ArtisanTypes type;
         if (item.equalsIgnoreCase("Egg")) {
             type = ArtisanTypes.MAYONNAISE;
@@ -352,6 +370,7 @@ public class ArtisanController {
                 ArtisanItem mayonnaise = new ArtisanItem(type.getName(), type, type.getProcessingTime(), type.getEnergy());
                 mayonnaise.setPrice(type.getSellPrice());
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(mayonnaise);
+                craft.setArtisanInIt(mayonnaise);
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Egg"), 1);
                 return new Result(true, "Mayonnaise will be produced for you");
             } else {
@@ -363,6 +382,7 @@ public class ArtisanController {
                 ArtisanItem mayonnaise = new ArtisanItem(type.getName(), type, type.getProcessingTime(), type.getEnergy());
                 mayonnaise.setPrice(type.getSellPrice());
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(mayonnaise);
+                craft.setArtisanInIt(mayonnaise);
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Large Egg"), 1);
                 return new Result(true, "Mayonnaise will be produced for you with Large Egg");
             } else {
@@ -375,6 +395,7 @@ public class ArtisanController {
                 ArtisanItem duckMayonnaise = new ArtisanItem(type.getName(), type, type.getProcessingTime(), type.getEnergy());
                 duckMayonnaise.setPrice(type.getSellPrice());
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(duckMayonnaise);
+                craft.setArtisanInIt(duckMayonnaise);
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Duck Egg"), 1);
                 return new Result(true, "Duck Mayonnaise will be produced for you");
             } else {
@@ -388,6 +409,7 @@ public class ArtisanController {
                 ArtisanItem dinoMayonnaise = new ArtisanItem(type.getName(), type, type.getProcessingTime(), type.getEnergy());
                 dinoMayonnaise.setPrice(type.getSellPrice());
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(dinoMayonnaise);
+                craft.setArtisanInIt(dinoMayonnaise);
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Dinosaur Egg"), 1);
                 return new Result(true, "Dinosaur Mayonnaise will be produced for you");
             } else {
@@ -399,7 +421,7 @@ public class ArtisanController {
         }
     }
 
-    public Result makeOil(String item) {
+    public Result makeOil(Craft craft, String item) {
         ArtisanTypes type;
 
         if (item.equalsIgnoreCase("Corn")) {
@@ -408,6 +430,7 @@ public class ArtisanController {
                 ArtisanItem oil = new ArtisanItem(type.getName(), type, type.getProcessingTime(), type.getEnergy());
                 oil.setPrice(type.getSellPrice());
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(oil);
+                craft.setArtisanInIt(oil);
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Corn"), 1);
                 return new Result(true, "Oil will be produced for you");
             } else {
@@ -419,6 +442,7 @@ public class ArtisanController {
                 ArtisanItem oil = new ArtisanItem(type.getName(), type, type.getProcessingTime(), type.getEnergy());
                 oil.setPrice(type.getSellPrice());
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(oil);
+                craft.setArtisanInIt(oil);
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Sunflower Seeds"), 1);
                 return new Result(true, "Oil will be produced for you with Sunflower Seeds");
             } else {
@@ -430,6 +454,7 @@ public class ArtisanController {
                 ArtisanItem oil = new ArtisanItem(type.getName(), type, type.getProcessingTime(), type.getEnergy());
                 oil.setPrice(type.getSellPrice());
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(oil);
+                craft.setArtisanInIt(oil);
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Sunflower"), 1);
                 return new Result(true, "Oil will be produced for you with Sunflower");
             } else {
@@ -442,6 +467,7 @@ public class ArtisanController {
                 ArtisanItem truffleOil = new ArtisanItem(type.getName(), type, type.getProcessingTime(), type.getEnergy());
                 truffleOil.setPrice(type.getSellPrice());
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(truffleOil);
+                craft.setArtisanInIt(truffleOil);
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Truffle"), 1);
                 return new Result(true, "Truffle Oil will be produced for you");
             } else {
@@ -454,7 +480,7 @@ public class ArtisanController {
 
 
     //TODO:5 of one type of ore is it ok?
-    public Result fishSmoke(String itemName) {
+    public Result fishSmoke(Craft craft, String itemName) {
         Pattern pattern = Pattern.compile("(?<fish>.*) Coal");
         Matcher matcher = pattern.matcher(itemName);
         if (matcher.find()) {
@@ -471,6 +497,7 @@ public class ArtisanController {
             ArtisanItem truffleOil = new ArtisanItem(type.getName(), type, type.getProcessingTime(), 100);
             truffleOil.setPrice(fishDetails.getBasePrice() * 2);
             App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(truffleOil);
+            craft.setArtisanInIt(truffleOil);
             App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName(fishDetails.getName()), 1);
             App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Coal"), 1);
             return new Result(true, "Smoked Fish will be produced for you");
@@ -481,7 +508,7 @@ public class ArtisanController {
     }
 
     //name of an ore should be etered
-    public Result makeBar(String itemName) {
+    public Result makeBar(Craft craft, String itemName) {
         ArtisanTypes type;
 
             switch (itemName) {
@@ -510,6 +537,7 @@ public class ArtisanController {
                 ArtisanItem truffleOil = new ArtisanItem(type.getName(), type, type.getProcessingTime(), 100);
                 truffleOil.setPrice(50);
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(truffleOil);
+                craft.setArtisanInIt(truffleOil);
                 //ony needs one ore of that type
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, 1);
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Coal"), 1);
@@ -520,9 +548,13 @@ public class ArtisanController {
 
     }
 
-    public Result artisanGet(String itemName) {
+    public Result artisanGet(Craft craft) {
+        ArtisanItem item = craft.getArtisanInIt();
+        if(item == null) {
+            return new Result(false, "nothing has been set to process yet");
+        }
+        String itemName = item.getName();
         for (ArtisanItem ai : App.getCurrentPlayerLazy().getArtisansGettingProcessed()) {
-            System.out.println(ai.getName() + " aha ");
             if (ai.getName().equalsIgnoreCase(itemName) && ai.getHoursRemained() <= 0) {
                 Player player = App.getCurrentPlayerLazy();
                 Map<Item, Integer> backpackItems = player.getBackPack().getItems();
@@ -536,14 +568,14 @@ public class ArtisanController {
                     itemNames.put(ai.getName(), ai);
                 }
                 player.getArtisansGettingProcessed().remove(ai);
+                craft.setArtisanInIt(null);
                 return new Result(true, itemName + " has been added to your inventory");
             }
         }
-        System.out.println(itemName);
-        return new Result(false, "Artisan item with such name either not found or not ready");
+        return new Result(false, "Artisan item with such name either is not ready");
     }
 
-    public Result preserveJar(String itemName) {
+    public Result preserveJar(Craft craft, String itemName) {
 
         Item item = App.getCurrentPlayerLazy().getBackPack().getItemByName(itemName);
         if (item == null) {
@@ -558,6 +590,7 @@ public class ArtisanController {
             pickle.setPrice(2 * vegetable.baseSellPrice + 50);
             App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, 1);
             App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(pickle);
+            craft.setArtisanInIt(pickle);
             return new Result(true, "Artisan added to your inventory");
         }
         for (TypeOfPlant typeOfPlant : TypeOfPlant.values()) {
@@ -570,6 +603,7 @@ public class ArtisanController {
 
                 App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, 1);
                 App.getCurrentPlayerLazy().getArtisansGettingProcessed().add(jelly);
+                craft.setArtisanInIt(jelly);
                 return new Result(true, "Artisan added to your inventory");
             }
         }
