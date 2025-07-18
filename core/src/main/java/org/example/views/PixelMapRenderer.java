@@ -6,6 +6,7 @@ import org.example.models.Assets.GameAssetManager;
 import org.example.models.Assets.PlantAssetsManager;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
+import org.example.models.ShippingBin;
 import org.example.models.enums.Types.TypeOfTile;
 import org.example.models.map;
 
@@ -61,6 +62,8 @@ public class PixelMapRenderer {
                 return GameAssetManager.craftType(location);
             case PLOUGHED_LAND:
                 return GameAssetManager.getGameAssetManager().getPloughedLand();
+            case SHIPPINGBIN:
+                return GameAssetManager.getGameAssetManager().getShippingBin();
             default:
                 return GameAssetManager.getGameAssetManager().getGROUND();
         }

@@ -35,7 +35,6 @@ public class Date implements Runnable {
     private Thread timeThread;
 
     public Date() {
-        System.out.println("kaftar");
         timeThread = new Thread(this);
         timeThread.setDaemon(true);
         timeThread.start();
@@ -376,7 +375,6 @@ public class Date implements Runnable {
         changesDayAnimal();
 //        attackingCrow();
         resetNPCStatus();
-        artisansUpdate(day * 13);
         buffUpdates();
         updateRecepies();
         resetDailyLimit();
@@ -561,6 +559,9 @@ public class Date implements Runnable {
             System.out.println(player.getShippingMoney());
             player.increaseMoney(player.getShippingMoney());
             player.setShippingMoney(0);
+            if(player.getShippingBin() != null) {
+                player.getShippingBin().getShippingItemMap().clear();
+            }
         }
     }
 

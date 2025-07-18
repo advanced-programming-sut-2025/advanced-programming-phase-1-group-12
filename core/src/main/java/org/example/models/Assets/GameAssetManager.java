@@ -57,6 +57,8 @@ public class GameAssetManager {
     private static final Texture Dehydrator = new Texture("Crafting/Dehydrator.png");
     private static final Texture Fish_Smoker = new Texture("Crafting/Fish_Smoker.png");
 
+    private static final Texture shippingBin = new Texture("Chest/Chest.png");
+
     //fish
     private final Texture nonLegendFish = new Texture("Fish/Blue_Discus.png");
     private final Texture legendFish = new Texture("Fish/Legend.png");
@@ -225,5 +227,9 @@ public class GameAssetManager {
 
     public Texture getLegendFish() {
         return legendFish;
+    }
+
+    public Texture getShippingBin() {
+        return shippingBin;
     }
 }

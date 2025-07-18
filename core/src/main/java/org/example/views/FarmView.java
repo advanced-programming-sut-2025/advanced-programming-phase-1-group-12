@@ -23,7 +23,9 @@ import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Player;
 import org.example.models.Fundementals.Result;
+import org.example.models.Item;
 import org.example.models.Place.Farm;
+import org.example.models.ShippingBin;
 import org.example.models.enums.Types.TypeOfTile;
 
 import java.util.*;
@@ -39,15 +41,17 @@ public class FarmView implements Screen {
     Label errorLabel;
     private boolean comeFromCraft;
     private boolean locationSelected = false;
+    private boolean shippingBin;
 
     private final int tileSize = 40;  // Tile size
     private final List<Player> playerList;
     private int farmX1, farmY1;
 
-    public FarmView(String productName, List<String> players, List<Player> playerList, Boolean comeFromCraft) {
+    public FarmView(String productName, List<String> players, List<Player> playerList, Boolean comeFromCraft, boolean shippingBin) {
         this.productName = productName;
         this.comeFromCraft = comeFromCraft;
         this.players = players;
+        this.shippingBin = shippingBin;
         this.farm = App.getCurrentPlayerLazy().getOwnedFarm();
         this.playerList = playerList;
         errorLabel = new Label("", skin);
@@ -105,21 +109,36 @@ public class FarmView implements Screen {
 
             Location location = App.getCurrentGame().getMainMap().findLocation(tileX, tileY);
             if (location != null && !locationSelected) {
-                if(!comeFromCraft) {
+                if (!comeFromCraft && !shippingBin) {
                     StoreController storeController = new StoreController();
                     Result success = storeController.buyAnimalBuilding(productName, location);
                     System.out.println("Clicked on tile: (" + tileX + "," + tileY + "), Purchase result: " + success.getMessage());
                     StoreMenuView.showError(success.getMessage(), errorLabel);
-                    if(success.isSuccessful()){
+                    if (success.isSuccessful()) {
                         locationSelected = true;
                     }
-                } else{
+                } else if (comeFromCraft && !shippingBin) {
                     CraftingController craftingController = new CraftingController();
                     Result result = craftingController.makeCraft(productName, App.getCurrentGame().getMainMap().findLocation(tileX, tileY));
                     StoreMenuView.showError(result.getMessage(), errorLabel);
-                    if(result.isSuccessful()){
+                    if (result.isSuccessful()) {
                         locationSelected = true;
                     }
+                } else if (shippingBin) {
+                    Item Wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Wood");
+
+                    if (Wood == null || App.getCurrentPlayerLazy().getBackPack().getItems().get(Wood) < 100) {
+                        StoreMenuView.showError("You do not have enough wood for shipping bin", errorLabel);
+                        return;
+                    }
+                    App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Wood"), 100);
+                    ShippingBin shippingBin = new ShippingBin(location, App.getCurrentPlayerLazy());
+                    shippingBin.getShippingBinLocation().setObjectInTile(shippingBin);
+                    shippingBin.getShippingBinLocation().setTypeOfTile(TypeOfTile.SHIPPINGBIN);
+                    App.getCurrentPlayerLazy().setShippingBin(shippingBin);
+
+                    locationSelected = true;
+                    StoreMenuView.showError("you bought this shipping bin", errorLabel);
                 }
             } else {
                 System.out.println("Invalid tile clicked");

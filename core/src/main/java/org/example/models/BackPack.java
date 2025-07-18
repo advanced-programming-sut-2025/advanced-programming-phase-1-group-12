@@ -5,18 +5,19 @@ import org.example.models.Fundementals.Player;
 import org.example.models.Fundementals.Result;
 import org.example.models.ToolsPackage.Tools;
 import org.example.models.ToolsPackage.ToolEnums.BackPackTypes;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class BackPack {
     private Map<Item, Integer> items;
-    private Map<String, Item> itemNames;
+    private CaseInsensitiveMap<Item> itemNames;
     private BackPackTypes type;
     private int water;
 
     public BackPack(BackPackTypes type) {
         this.items = new HashMap<>();
-        this.itemNames = new HashMap<>();
+        this.itemNames = new CaseInsensitiveMap<>();
         this.type = type;
         this.water = 100;
     }
@@ -38,14 +39,7 @@ public class BackPack {
     }
 
     public void decreaseToolQuantity(String toolName, int amount) {
-        Item toolToUpdate = null;
-        for (Item item : items.keySet()) {
-            if (item.getName().equals(toolName)) {
-                toolToUpdate = item;
-                break;
-            }
-        }
-
+        Item toolToUpdate = findItemIgnoreCase(toolName);
         if (toolToUpdate != null) {
             int currentQuantity = items.get(toolToUpdate);
             if (currentQuantity > amount) {
@@ -53,21 +47,15 @@ public class BackPack {
             } else {
                 items.remove(toolToUpdate);
             }
+            itemNames.remove(toolName);
         } else {
             System.out.println("Tool '" + toolName + "' not found in inventory.");
         }
     }
 
-
     public Result trash(String name, int amount, Tools trashCan) {
         Player player = App.getCurrentPlayerLazy();
-        Item itemToTrash = null;
-        for (Item item : items.keySet()) {
-            if (item.getName().equals(name)) {
-                itemToTrash = item;
-                break;
-            }
-        }
+        Item itemToTrash = findItemIgnoreCase(name);
 
         if (itemToTrash == null) {
             return new Result(false, "Item '" + name + "' not found in inventory.");
@@ -78,17 +66,16 @@ public class BackPack {
             recoveryRate = trashCan.getTrashCanRecoveryRate();
         }
 
-
         decreaseToolQuantity(name, amount);
 
         if (recoveryRate > 0) {
             int putBackAmount = (int) (itemToTrash.getPrice() * amount * recoveryRate);
             player.increaseMoney(putBackAmount);
             return new Result(true, "Trashed " + amount + " " + name + " and recovered " +
-                              (recoveryRate * 100) + "% of its value." +"\nMoney: " + player.getMoney() + "\nTotal recovery rate: " + recoveryRate + "\n put back amount: " + putBackAmount);
+                (recoveryRate * 100) + "% of its value.\nMoney: " + player.getMoney());
         } else {
             player.increaseMoney(itemToTrash.getPrice() * amount);
-            return new Result(true, "Trashed " + amount + " " + name + ". \nMoney: " + player.getMoney());
+            return new Result(true, "Trashed " + amount + " " + name + ".\nMoney: " + player.getMoney());
         }
     }
 
@@ -96,15 +83,9 @@ public class BackPack {
         decreaseToolQuantity(name, amount);
     }
 
-    public Result trashAll(String toolName, Tools trashCan){
+    public Result trashAll(String toolName, Tools trashCan) {
         Player player = App.getCurrentPlayerLazy();
-        Item toolToUpdate = null;
-        for (Item item : items.keySet()) {
-            if (item.getName().equals(toolName)) {
-                toolToUpdate = item;
-                break;
-            }
-        }
+        Item toolToUpdate = findItemIgnoreCase(toolName);
 
         if (toolToUpdate == null) {
             return new Result(false, "Item '" + toolName + "' not found in inventory.");
@@ -114,31 +95,27 @@ public class BackPack {
         if (trashCan != null && trashCan.isTrashCan()) {
             recoveryRate = trashCan.getTrashCanRecoveryRate();
         }
-        int count = getItemCount(toolToUpdate);
+
+        int count = getItemCount(toolName);
         items.remove(toolToUpdate);
+        itemNames.remove(toolName);
 
         if (recoveryRate > 0) {
             int putBackAmount = (int) (toolToUpdate.getPrice() * count * recoveryRate);
             player.increaseMoney(putBackAmount);
             return new Result(true, "Trashed all " + toolName + " and recovered " +
-                              (recoveryRate * 100) + "% of its value.");
+                (recoveryRate * 100) + "% of its value.");
         } else {
-            player.increaseMoney(toolToUpdate.getPrice() * count );
+            player.increaseMoney(toolToUpdate.getPrice() * count);
             return new Result(true, "Trashed all " + toolName + ".");
         }
     }
 
-    public void trashAll(String toolName){
-        Item toolToUpdate = null;
-        for (Item item : items.keySet()) {
-            if (item.getName().equals(toolName)) {
-                toolToUpdate = item;
-                break;
-            }
-        }
-
+    public void trashAll(String toolName) {
+        Item toolToUpdate = findItemIgnoreCase(toolName);
         if (toolToUpdate != null) {
             items.remove(toolToUpdate);
+            itemNames.remove(toolName);
         }
     }
 
@@ -176,33 +153,80 @@ public class BackPack {
     }
 
     public void setItemNames(Map<String, Item> itemNames) {
-        this.itemNames = itemNames;
+        this.itemNames = new CaseInsensitiveMap<>();
+        for (Map.Entry<String, Item> entry : itemNames.entrySet()) {
+            this.itemNames.put(entry.getKey(), entry.getValue());
+        }
     }
 
-    public boolean checkCapacity(int amount){
-        if((items.size() + amount)<this.getType().getBackPackCapacity()){
-            return true;
-        }else{
-            return false;
-        }
+    public boolean checkCapacity(int amount) {
+        return (items.size() + amount) < this.getType().getBackPackCapacity();
     }
 
     public int getItemCount(Item item) {
-        if(item ==null){
+        if (item == null) {
             return 0;
         }
-        for(Map.Entry<Item, Integer> entry : items.entrySet()) {
-            if(entry.getKey().getName().equals(item.getName())) {
+        for (Map.Entry<Item, Integer> entry : items.entrySet()) {
+            if (entry.getKey().getName().equalsIgnoreCase(item.getName())) {
                 return entry.getValue();
             }
         }
         return 0;
     }
 
-    public boolean hasItem(String itemName){
-        return containsKeyIgnoreCase(itemNames, itemName);
+    public int getItemCount(String itemName) {
+        return getItemCount(findItemIgnoreCase(itemName));
     }
-    public boolean containsKeyIgnoreCase(Map<String, ?> map, String key) {
-        return map.keySet().stream().anyMatch(k -> k.equalsIgnoreCase(key));
+
+    public boolean hasItem(String itemName) {
+        return itemNames.containsKey(itemName);
+    }
+
+    private Item findItemIgnoreCase(String name) {
+        for (Item item : items.keySet()) {
+            if (item.getName().equalsIgnoreCase(name)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    private static class CaseInsensitiveMap<V> extends HashMap<String, V> {
+        @Override
+        public V get(Object key) {
+            if (key instanceof String strKey) {
+                for (Entry<String, V> entry : this.entrySet()) {
+                    if (entry.getKey().equalsIgnoreCase(strKey)) {
+                        return entry.getValue();
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public boolean containsKey(Object key) {
+            if (key instanceof String strKey) {
+                for (String existingKey : this.keySet()) {
+                    if (existingKey.equalsIgnoreCase(strKey)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public V remove(Object key) {
+            if (key instanceof String strKey) {
+                for (String existingKey : this.keySet()) {
+                    if (existingKey.equalsIgnoreCase(strKey)) {
+                        return super.remove(existingKey);
+                    }
+                }
+            }
+            return null;
+        }
     }
 }

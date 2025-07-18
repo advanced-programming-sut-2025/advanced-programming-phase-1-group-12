@@ -1069,10 +1069,6 @@ public class GameMenuController {
     public Result sellByShipping(String product, String count) {
         Player player = App.getCurrentGame().getCurrentPlayer();
 
-        if (!isNearShippingBin(player)) {
-            return new Result(false, "You need to be near a shipping bin to sell items.");
-        }
-
         if (!player.getBackPack().hasItem(product)) {
             return new Result(false, "You don't have this product.");
         }

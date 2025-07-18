@@ -19,8 +19,8 @@ public enum TypeOfTile {
     PLANT('p'),
 
     //crafting system
-    CRAFT('c');
-
+    CRAFT('c'),
+    SHIPPINGBIN('i');
     private final char nameOfMap;
 
     TypeOfTile(char name) {

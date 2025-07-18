@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Main;
@@ -31,6 +32,7 @@ import org.example.models.Item;
 import org.example.models.Place.Farm;
 import org.example.models.ProductsPackage.ArtisanItem;
 import org.example.models.RelatedToUser.Ability;
+import org.example.models.ShippingBin;
 import org.example.models.ToolsPackage.Tools;
 
 import java.lang.reflect.Method;
@@ -1461,7 +1463,8 @@ public class GameMenu extends InputAdapter implements Screen {
                                 craftingRecipe.getName(),
                                 players, // make sure `players` is accessible
                                 App.getCurrentGame().getPlayers(),
-                                true
+                                true,
+                                false
                             ));
                         });
                     }
@@ -1699,9 +1702,124 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
-
     private void removeBarIfExists (Craft craft) {
         ProgressBar bar = craftBars.remove(craft);
         if (bar != null) bar.remove();
     }
+
+    public void shippingBinMenu(){
+        Skin skin = GameAssetManager.skin;
+        Dialog dialog = new Dialog("Your inventory items and trash can", skin);
+
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        BackPack backPack = player.getBackPack();
+
+        Table mainContent = new Table(); // Main container
+        mainContent.top();
+
+        TextButton closeButton = new TextButton("Close", skin);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+            }
+        });
+
+        TextField nameOfDeletingItem = new TextField("", skin);
+        nameOfDeletingItem.setMessageText("Name of the item to be sold");
+
+        TextField whatCount = new TextField("", skin);
+        whatCount.setMessageText("Count of the item to be sold");
+        whatCount.setWidth(400);
+
+        TextButton sellButton = new TextButton("sell", skin);
+        sellButton.setWidth(400);
+        sellButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                GameMenuController gameMenuController = new GameMenuController();
+                Result result = gameMenuController.sellByShipping(nameOfDeletingItem.getText(), whatCount.getText());
+                showError(result.getMessage());
+                dialog.hide();
+                shippingBinMenu();
+            }
+        });
+        TextButton showItems = new TextButton("show items", skin);
+        showItems.setWidth(400);
+        showItems.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+                showItemOfShippingBin(App.getCurrentPlayerLazy().getShippingBin());
+            }
+        });
+
+        mainContent.add(nameOfDeletingItem).pad(5).width(400f).row();
+        mainContent.add(whatCount).pad(5).width(400f).row();
+        mainContent.add(sellButton).pad(5).width(400f).row();
+        mainContent.add(showItems).pad(5).width(400f).row();
+
+        Table scrollContent = new Table();
+        scrollContent.top();
+        for (Item item : backPack.getItems().keySet()) {
+            Label itemLabel = new Label(item.getName() + " -> " + backPack.getItems().get(item), skin);
+            scrollContent.add(itemLabel).pad(5).width(400f).row();
+        }
+
+        ScrollPane scrollPane = new ScrollPane(scrollContent, skin);
+        scrollPane.setScrollingDisabled(false, false);
+        scrollPane.setFadeScrollBars(false);
+
+        mainContent.add(scrollPane).pad(5).width(400f).height(300f).row();
+        mainContent.add(closeButton).pad(5).width(400f).row();
+
+        dialog.getContentTable().add(mainContent).expand().fill().pad(5).row();
+        dialog.button(closeButton);
+        dialog.pack();
+        dialog.setPosition(
+            (Gdx.graphics.getWidth() - dialog.getWidth()) / 2f,
+            (Gdx.graphics.getHeight() - dialog.getHeight()) / 2f
+        );
+        dialog.show(stage);
+    }
+
+    public void showItemOfShippingBin(ShippingBin shippingBin) {
+        Skin skin = GameAssetManager.skin;
+        Dialog dialog = new Dialog("items in shipping bin", skin);
+
+        Table content = new Table();
+        content.top();
+        StringBuilder message = new StringBuilder();
+        for (Item item : shippingBin.getShippingItemMap().keySet()) {
+            message.append(item.getName() + " -> " + shippingBin.getShippingItemMap().get(item) + "\n");
+        }
+
+        Label label = new Label(message.toString(), skin);
+        label.setWrap(false);
+        label.setAlignment(Align.topLeft);
+
+        Table innerTable = new Table();
+        innerTable.add(label).left().expandX();
+        innerTable.pack();
+
+        ScrollPane scrollPane = new ScrollPane(innerTable, skin);
+        scrollPane.setScrollingDisabled(false, false);
+
+        TextButton closeButton = new TextButton("Close", skin);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+            }
+        });
+
+        content.add(scrollPane).expand().fill().pad(5).width(400f).height(300f).row();
+        content.add(closeButton).pad(5).width(400f).row();
+
+        dialog.getContentTable().add(content).expand().fill().pad(5).row();
+
+        dialog.button(closeButton);
+        dialog.show(stage);
+    }
+
 }

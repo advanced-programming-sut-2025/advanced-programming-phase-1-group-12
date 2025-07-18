@@ -189,7 +189,13 @@ public class PlayerController {
             if (location.getTypeOfTile() == TypeOfTile.STORE) {
                 Gdx.app.postRunnable(() -> Main.getMain().setScreen(new StoreMenuView(findStore(location), players, playerList)));
                 return;
-            } if(location.getTypeOfTile().equals(TypeOfTile.LAKE)){
+            }if (location.getTypeOfTile() == TypeOfTile.SHIPPINGBIN) {
+                GameMenu gameMenu = new GameMenu(players);
+                Main.getMain().setScreen(gameMenu);
+                gameMenu.shippingBinMenu();
+                return;
+            }
+            if(location.getTypeOfTile().equals(TypeOfTile.LAKE)){
                 GameMenu gameMenu = new GameMenu(players);
                 Main.getMain().setScreen(gameMenu);
                 gameMenu.showFishingPoleDialog();

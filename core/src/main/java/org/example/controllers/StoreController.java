@@ -254,12 +254,7 @@ public class StoreController {
         if(!item.isAvailable()){
             return new Result(false, "Not enough stock in the store today.");
         }
-        int price = switch (App.getCurrentGame().getDate().getSeason()) {
-            case AUTUMN -> item.getType().getFallPrice();
-            case WINTER -> item.getType().getWinterPrice();
-            case SUMMER -> item.getType().getSummerPrice();
-            case SPRING -> item.getType().getSpringPrice();
-        };
+        int price = item.getType().getRealPrice(item.getType());
 
         int totalCost = price * count;
         if (App.getCurrentPlayerLazy().getMoney() < totalCost) {
@@ -300,20 +295,6 @@ public class StoreController {
             }
             return new Result(true, "you bought this Well");
 
-        }
-        if (item.getName().equalsIgnoreCase(StoreProductsTypes.CARPENTER_SHIPPING_BIN.getName())) {
-            Item Wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Wood");
-
-            if (Wood == null || App.getCurrentPlayerLazy().getBackPack().getItems().get(Wood) < 150) {
-                return new Result(false, "You do not have enough Wood or Stone to build this building");
-            }
-            App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Wood"), 100);
-            ShippingBin shippingBin = new ShippingBin(App.getCurrentPlayerLazy().getOwnedFarm().getShack().getLocation().getTopLeftCorner(), App.getCurrentPlayerLazy());
-            shippingBin.getShippingBinLocation().setObjectInTile(shippingBin);
-
-            App.getCurrentPlayerLazy().setShippingBin(shippingBin);
-
-            return new Result(true, "You bought this shipping bin");
         }
 
         // Handle Crafting Recipe
@@ -374,12 +355,7 @@ public class StoreController {
             return new Result(false, "Not enough stock in the store today.");
         }
 
-        int price = switch (App.getCurrentGame().getDate().getSeason()) {
-            case AUTUMN -> item.getType().getFallPrice();
-            case WINTER -> item.getType().getWinterPrice();
-            case SUMMER -> item.getType().getSummerPrice();
-            case SPRING -> item.getType().getSpringPrice();
-        };
+        int price = item.getType().getRealPrice(item.getType());
         if(price == 0){
             return new Result(false, "You can not buy this product in this season");
         }
@@ -417,10 +393,11 @@ public class StoreController {
     public Result cheatAddItem(String productName, int count) {
         Item item = ItemBuilder.builder(productName, Quality.NORMAL, 10);
 
-        if (item.getName().equals(productName) && item.getClass() == Item.class) {
+        if (item.getName().equalsIgnoreCase(productName) && item.getClass() == Item.class) {
             boolean isValidItem = false;
             for (StoreProductsTypes type : StoreProductsTypes.values()) {
                 if (type.getName().equalsIgnoreCase(productName)) {
+                    item.setPrice(type.getRealPrice(type));
                     isValidItem = true;
                     break;
                 }
