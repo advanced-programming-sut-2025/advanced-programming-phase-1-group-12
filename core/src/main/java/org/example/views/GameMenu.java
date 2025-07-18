@@ -430,10 +430,11 @@ public class GameMenu extends InputAdapter implements Screen {
         renderLightingOverlay();
         batch.end();
 
-        renderClockHand();
 
         stage.act(delta);
         stage.draw();
+        renderClockHand();
+
     }
     private void updateClockDisplay() {
         org.example.models.Date currentDate = App.getCurrentGame().getDate();
@@ -1713,7 +1714,7 @@ public class GameMenu extends InputAdapter implements Screen {
     private void updateClockHandRotation() {
         org.example.models.Date currentDate = App.getCurrentGame().getDate();
         int hour = currentDate.getHour();
-        float hourProgress = hour / 24.0f;
+        float hourProgress = hour / 15.0f;
         clockHandRotation = 270f - (hourProgress * 180f); // 270° to 90° over 24 hours
 
         if (clockHandRotation < 0) {
@@ -1722,37 +1723,29 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void renderClockHand() {
-        // Get clock position and size
         float clockSize = 100f;
         float clockX = stage.getWidth() - clockSize - 20f;
         float clockY = stage.getHeight() - clockSize - 20f;
 
-        // Calculate clock center in world coordinates
-        Vector3 clockCenter = stage.getCamera().unproject(new Vector3(
-            clockX + clockSize / 2f,
-            clockY + clockSize / 2f,
-            0
-        ));
+        float clockCenterX = clockX + clockSize / 2f - 17f;
+        float clockCenterY = clockY + clockSize / 2f + 18f;
 
-        // Set up for UI rendering
         batch.setProjectionMatrix(stage.getCamera().combined);
         batch.begin();
 
-        // Clock hand dimensions
-        float handWidth = 4f;  // Adjust based on your flesh.png size
-        float handLength = clockSize * 0.35f; // Hand length relative to clock size
+        float handWidth = 10f;
+        float handLength = clockSize * 0.35f;
 
-        // Draw clock hand from center, rotating around its base
         batch.draw(clockHandRegion,
-            clockCenter.x - handWidth / 2f,           // x position (centered)
-            clockCenter.y,                            // y position (at center)
-            handWidth / 2f,                           // origin x (rotation point)
-            0f,                                       // origin y (rotation point at base)
-            handWidth,                                // width
-            handLength,                               // height
-            1f,                                       // scale x
-            1f,                                       // scale y
-            clockHandRotation                         // rotation angle
+            clockCenterX - handWidth / 2f,        // x position (centered horizontally)
+            clockCenterY,                         // y position (at center)
+            handWidth / 2f,                       // origin x (rotation point)
+            0f,                                   // origin y (rotation point at base)
+            handWidth,                            // width
+            handLength,                           // height
+            1f,                                   // scale x
+            1f,                                   // scale y
+            clockHandRotation                     // rotation angle
         );
 
         batch.end();
