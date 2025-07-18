@@ -1,5 +1,6 @@
 package org.example.models;
 
+import org.example.models.Fundementals.Location;
 import org.example.models.ProductsPackage.ArtisanItem;
 import org.example.models.ProductsPackage.Quality;
 import org.example.models.enums.Types.CraftingRecipe;
@@ -10,9 +11,12 @@ public class Craft extends Item {
 
     private ArtisanItem artisanInIt;
 
-    public Craft(CraftingRecipe recipe) {
+    private Location location;
+
+    public Craft(CraftingRecipe recipe, Location location) {
         super(recipe.getName(), Quality.NORMAL, 0);
         this.recipe = recipe;
+        this.location = location;
     }
 
     public CraftingRecipe getRecipe() {
@@ -29,5 +33,9 @@ public class Craft extends Item {
 
     public void setArtisanInIt(ArtisanItem artisanInIt) {
         this.artisanInIt = artisanInIt;
+    }
+
+    public Location getLocation() {
+        return location;
     }
 }

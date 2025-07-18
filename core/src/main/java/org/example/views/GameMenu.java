@@ -29,14 +29,13 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.example.models.Fundementals.Result;
 import org.example.models.Item;
 import org.example.models.Place.Farm;
+import org.example.models.ProductsPackage.ArtisanItem;
 import org.example.models.RelatedToUser.Ability;
 import org.example.models.ToolsPackage.Tools;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.GL20;
@@ -86,6 +85,7 @@ public class GameMenu extends InputAdapter implements Screen {
     private final float RAIN_SPAWN_INTERVAL = 0.05f;
 
     private Map<Player, ProgressBar> energyBars;
+    private Map<Craft, ProgressBar> craftBars;
 
     private float timeSinceError = 0f;
 
@@ -201,6 +201,7 @@ public class GameMenu extends InputAdapter implements Screen {
         pixelMapRenderer = new PixelMapRenderer(App.getCurrentGame().getMainMap());
 
         energyBars = new HashMap<>();
+        craftBars = new IdentityHashMap<>();
 
         float barHeight = 20f;
         float yOffset = stage.getHeight() - 40f;
@@ -278,6 +279,7 @@ public class GameMenu extends InputAdapter implements Screen {
         batch.setProjectionMatrix(camera.combined);
 
         pixelMapRenderer.render(batch, 0, 0);
+        updateCraftBars();
 
         for (Player p : App.getCurrentGame().getPlayers()) {
             ProgressBar bar = energyBars.get(p);
@@ -289,7 +291,9 @@ public class GameMenu extends InputAdapter implements Screen {
                     break;
                 }
             }
-        }
+
+            }
+
 
         batch.draw(frame, scaledX, scaledY, player.getPlayerSprite().getWidth(),
             player.getPlayerSprite().getHeight());
@@ -1418,7 +1422,7 @@ public class GameMenu extends InputAdapter implements Screen {
         contentTable.top().left();
         contentTable.defaults().pad(10).left().fillX();
 
-//        craftingButtons(contentTable, skin);
+        craftingButtons(contentTable, skin);
 
         ScrollPane scrollPane = new ScrollPane(contentTable);
         scrollPane.setScrollingDisabled(true, false);
@@ -1438,36 +1442,36 @@ public class GameMenu extends InputAdapter implements Screen {
         dialog.show(stage);
     }
 
-//    private void craftingsButtons(Table table, Dialog dialog, Skin skin) {
-//        table.clear();
-//
-//        for (CraftingRecipe craftingRecipe : App.getCurrentPlayerLazy().getRecepies().keySet()) {
-//            boolean unlocked = App.getCurrentPlayerLazy().getRecepies().get(craftingRecipe);
-//
-//            TextButton craftButton = new TextButton(craftingRecipe.getName(), skin);
-//            if (!unlocked) {
-//                craftButton.setDisabled(true);
-//                craftButton.getLabel().setColor(0.5f, 0.5f, 0.5f, 1);
-//            } else {
-//                craftButton.addListener(new ClickListener() {
-//                    @Override
-//                    public void clicked(InputEvent event, float x, float y) {
-//                        Gdx.app.postRunnable(() -> {
-//                            Main.getMain().setScreen(new FarmView(
-//                                craftingRecipe.getName(),
-//                                players, // make sure `players` is accessible
-//                                App.getCurrentGame().getPlayers(),
-//                                true
-//                            ));
-//                        });
-//                    }
-//                });
-//            }
-//
-//            table.row();
-//            table.add(craftButton).width(300).height(50).left();
-//        }
-//    }
+    private void craftingButtons(Table table, Skin skin) {
+        table.clear();
+
+        for (CraftingRecipe craftingRecipe : App.getCurrentPlayerLazy().getRecepies().keySet()) {
+            boolean unlocked = App.getCurrentPlayerLazy().getRecepies().get(craftingRecipe);
+
+            TextButton craftButton = new TextButton(craftingRecipe.getName(), skin);
+            if (!unlocked) {
+                craftButton.setDisabled(true);
+                craftButton.getLabel().setColor(0.5f, 0.5f, 0.5f, 1);
+            } else {
+                craftButton.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        Gdx.app.postRunnable(() -> {
+                            Main.getMain().setScreen(new FarmView(
+                                craftingRecipe.getName(),
+                                players, // make sure `players` is accessible
+                                App.getCurrentGame().getPlayers(),
+                                true
+                            ));
+                        });
+                    }
+                });
+            }
+
+            table.row();
+            table.add(craftButton).width(300).height(50).left();
+        }
+    }
 
     public void craftMenu(Craft craft) {
         ArtisanController artisanController = new ArtisanController();
@@ -1501,19 +1505,58 @@ public class GameMenu extends InputAdapter implements Screen {
             scrollContent.add(itemLabel).pad(5).width(400f).row();
         }
 
-        TextButton start = new TextButton("start artisan", skin);
-//        start.addListener(new ClickListener() {
-//            @Override
-//            public void clicked(InputEvent event, float x, float y) {
-//                showError(artisanController.artisanUse(craft.getRecipe().getName(), nameOfDeletingItem.getText()).getMessage());
-//            }
-//        });
+        TextButton start = new TextButton("start processing", skin);
+        start.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                showError(artisanController.artisanUse(craft, nameOfDeletingItem.getText()).getMessage());
+            }
+        });
         ScrollPane scrollPane = new ScrollPane(scrollContent, skin);
         scrollPane.setScrollingDisabled(false, false);
         scrollPane.setFadeScrollBars(false);
 
+        Table buttonTable = new Table();
+        buttonTable.add(closeButton).pad(10).width(400f).row();
+        buttonTable.add(start).pad(10).width(400f).row();
+
+        ArtisanItem item = craft.getArtisanInIt();
+        if (item != null ) {
+            if(item.getHoursRemained() <= 0) {
+                TextButton getProduct = new TextButton("get artisan", skin);
+                getProduct.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        Result result = artisanController.artisanGet(craft);
+                        showError(result.getMessage());
+                    }
+                });
+                buttonTable.add(getProduct).pad(10).width(400f).row();
+            } else{
+                TextButton cancel = new TextButton("cancel process", skin);
+                cancel.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        artisanController.cancelProcess(craft);
+                        showError("you canceled the process");
+                    }
+                });
+                TextButton cheatFast = new TextButton("cheat fast process", skin);
+                cheatFast.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        artisanController.cheatFastEnd(craft);
+                        showError("product is ready");
+                    }
+                });
+                buttonTable.add(cheatFast).pad(10).width(400f).row();
+                buttonTable.add(cancel).pad(10).width(400f).row();
+            }
+        }
+
+        // Adding scroll pane and button table to the main content
         mainContent.add(scrollPane).pad(5).width(400f).height(300f).row();
-        mainContent.add(closeButton).pad(5).width(400f).row();
+        mainContent.add(buttonTable).expand().fill().pad(5).row();  // Add button table
 
         dialog.getContentTable().add(mainContent).expand().fill().pad(5).row();
         dialog.button(closeButton);
@@ -1618,4 +1661,47 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
+    private void updateCraftBars() {
+        for (Player p : App.getCurrentGame().getPlayers()) {
+            for (Craft craft : p.getCrafts()) {
+
+                // ---- 1️⃣  Skip furnaces with no artisan -----------------
+                if (craft.getArtisanInIt() == null) {
+                    removeBarIfExists(craft);
+                    continue;
+                }
+
+                // ---- 2️⃣  Fetch or create a bar -------------------------
+                ProgressBar bar = craftBars.get(craft);
+                if (bar == null) {
+                    bar = new ProgressBar(
+                        0,
+                        craft.getArtisanInIt().getType().getProcessingTime(),
+                        1, false,
+                        skin.get("default-horizontal", ProgressBar.ProgressBarStyle.class)
+                    );
+                    bar.setWidth(100);
+                    bar.setHeight(8);
+                    stage.addActor(bar);
+                    craftBars.put(craft, bar);
+                }
+                bar.setValue(craft.getArtisanInIt().getHoursRemained());
+
+                Vector3 v = new Vector3(
+                    craft.getLocation().getxAxis() * 100,
+                    craft.getLocation().getyAxis() * 100,
+                    0
+                );
+                camera.project(v);
+                bar.setPosition(v.x - bar.getWidth() / 2f + 50, v.y + 110);
+
+            }
+        }
+    }
+
+
+    private void removeBarIfExists (Craft craft) {
+        ProgressBar bar = craftBars.remove(craft);
+        if (bar != null) bar.remove();
+    }
 }
