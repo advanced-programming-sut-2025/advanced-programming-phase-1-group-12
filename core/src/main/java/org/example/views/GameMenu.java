@@ -84,6 +84,11 @@ public class GameMenu extends InputAdapter implements Screen {
     private float rainSpawnTimer = 0f;
     private final float RAIN_SPAWN_INTERVAL = 0.05f;
 
+    private Texture clockHandTexture;
+    private float clockHandRotation = 0f;
+    private TextureRegion clockHandRegion;
+
+
     private Map<Player, ProgressBar> energyBars;
     private Map<Craft, ProgressBar> craftBars;
 
@@ -135,6 +140,9 @@ public class GameMenu extends InputAdapter implements Screen {
         font = new BitmapFont(Gdx.files.internal("fonts/new.fnt"));
         clockTexture = new Texture(Gdx.files.internal("Clock/clock.png"));
         clockImage = new Image(clockTexture);
+        clockHandTexture = new Texture(Gdx.files.internal("Clock/flesh.png"));
+        clockHandRegion = new TextureRegion(clockHandTexture);
+
 
         // Initialize lighting system
         initializeLighting();
@@ -247,6 +255,7 @@ public class GameMenu extends InputAdapter implements Screen {
         updateClockDisplay();
         updateSeasonAndWeatherDisplay();
         updateLightingWithSeasons();
+        updateClockHandRotation();
 
         updateRainSystem(delta);
 
@@ -421,6 +430,7 @@ public class GameMenu extends InputAdapter implements Screen {
         renderLightingOverlay();
         batch.end();
 
+        renderClockHand();
 
         stage.act(delta);
         stage.draw();
@@ -495,6 +505,9 @@ public class GameMenu extends InputAdapter implements Screen {
     public void dispose() {
         if (clockTexture != null) {
             clockTexture.dispose();
+        }
+        if (clockHandTexture != null) {
+            clockHandTexture.dispose();
         }
         if (shapeRenderer != null) {
             shapeRenderer.dispose();
@@ -1453,19 +1466,19 @@ public class GameMenu extends InputAdapter implements Screen {
                 craftButton.setDisabled(true);
                 craftButton.getLabel().setColor(0.5f, 0.5f, 0.5f, 1);
             } else {
-                craftButton.addListener(new ClickListener() {
-                    @Override
-                    public void clicked(InputEvent event, float x, float y) {
-                        Gdx.app.postRunnable(() -> {
-                            Main.getMain().setScreen(new FarmView(
-                                craftingRecipe.getName(),
-                                players, // make sure `players` is accessible
-                                App.getCurrentGame().getPlayers(),
-                                true
-                            ));
-                        });
-                    }
-                });
+//                craftButton.addListener(new ClickListener() {
+//                    @Override
+//                    public void clicked(InputEvent event, float x, float y) {
+//                        Gdx.app.postRunnable(() -> {
+//                            Main.getMain().setScreen(new FarmView(
+//                                craftingRecipe.getName(),
+//                                players, // make sure `players` is accessible
+//                                App.getCurrentGame().getPlayers(),
+//                                true
+//                            ));
+//                        });
+//                    }
+//                });
             }
 
             table.row();
@@ -1578,15 +1591,11 @@ public class GameMenu extends InputAdapter implements Screen {
     private void updateRainSystem(float delta) {
         String currentWeather = getWeather();
         boolean shouldRain = currentWeather.equalsIgnoreCase("rainy") || currentWeather.equals("stormy");
-//        System.out.println("shouldRain: " + shouldRain);
-//        System.out.println("currentWeather: " + currentWeather);
 
         if (shouldRain && !isRaining) {
             isRaining = true;
-//            System.out.println("Rain started! Weather: " + currentWeather);
         } else if (!shouldRain && isRaining) {
             isRaining = false;
-//            System.out.println("Rain stopped! Weather: " + currentWeather);
         }
 
         if (isRaining && rainTexture1 != null && rainTexture2 != null) {
@@ -1625,13 +1634,9 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void renderRain(SpriteBatch batch) {
-//
-//        System.out.println("isRaining: " + isRaining);
-//        System.out.println("rainDrops: " + rainDrops.size());
 
         if (!isRaining || rainDrops.isEmpty()) return;
 
-//        System.out.println("Rendering " + rainDrops.size() + " rain drops");
 
         for (RainDrop drop : rainDrops) {
             Color oldColor = batch.getColor();
@@ -1703,5 +1708,53 @@ public class GameMenu extends InputAdapter implements Screen {
     private void removeBarIfExists (Craft craft) {
         ProgressBar bar = craftBars.remove(craft);
         if (bar != null) bar.remove();
+    }
+
+    private void updateClockHandRotation() {
+        org.example.models.Date currentDate = App.getCurrentGame().getDate();
+        int hour = currentDate.getHour();
+        float hourProgress = hour / 24.0f;
+        clockHandRotation = 270f - (hourProgress * 180f); // 270° to 90° over 24 hours
+
+        if (clockHandRotation < 0) {
+            clockHandRotation += 360f;
+        }
+    }
+
+    private void renderClockHand() {
+        // Get clock position and size
+        float clockSize = 100f;
+        float clockX = stage.getWidth() - clockSize - 20f;
+        float clockY = stage.getHeight() - clockSize - 20f;
+
+        // Calculate clock center in world coordinates
+        Vector3 clockCenter = stage.getCamera().unproject(new Vector3(
+            clockX + clockSize / 2f,
+            clockY + clockSize / 2f,
+            0
+        ));
+
+        // Set up for UI rendering
+        batch.setProjectionMatrix(stage.getCamera().combined);
+        batch.begin();
+
+        // Clock hand dimensions
+        float handWidth = 4f;  // Adjust based on your flesh.png size
+        float handLength = clockSize * 0.35f; // Hand length relative to clock size
+
+        // Draw clock hand from center, rotating around its base
+        batch.draw(clockHandRegion,
+            clockCenter.x - handWidth / 2f,           // x position (centered)
+            clockCenter.y,                            // y position (at center)
+            handWidth / 2f,                           // origin x (rotation point)
+            0f,                                       // origin y (rotation point at base)
+            handWidth,                                // width
+            handLength,                               // height
+            1f,                                       // scale x
+            1f,                                       // scale y
+            clockHandRotation                         // rotation angle
+        );
+
+        batch.end();
     }
 }
