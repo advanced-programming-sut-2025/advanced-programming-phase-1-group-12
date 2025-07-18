@@ -657,12 +657,12 @@ public class GameMenu extends InputAdapter implements Screen {
             App.getCurrentPlayerLazy().setEnergy(2000);
             return true;
         }
-        if (keycode == Input.Keys.O) {
-            App.getCurrentGame().getDate().changeAdvancedDay(2);
-            return true;
-        }
         if (keycode == Input.Keys.T) {
             showToolsDialog();
+            return true;
+        }
+        if(keycode == Input.Keys.O){
+            App.getCurrentGame().getDate().changeAdvancedDay(1);
             return true;
         }
         if (keycode == Input.Keys.R) {

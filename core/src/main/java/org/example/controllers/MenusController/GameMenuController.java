@@ -317,7 +317,7 @@ public class GameMenuController {
     }
 
     public void Play(List<String> usernames, Map<String, Integer> farmSelections) {
-        Game newGame = new Game();
+        Game newGame = App.getCurrentGame();
         App.setCurrentGame(newGame);
         MapSetUp.initializeFarms();
         MapSetUp.storesSetUp();

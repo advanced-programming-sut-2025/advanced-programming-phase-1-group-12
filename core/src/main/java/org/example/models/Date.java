@@ -35,6 +35,7 @@ public class Date implements Runnable {
     private Thread timeThread;
 
     public Date() {
+        System.out.println("kaftar");
         timeThread = new Thread(this);
         timeThread.setDaemon(true);
         timeThread.start();
@@ -71,9 +72,9 @@ public class Date implements Runnable {
     public void changeAdvancedTime(int hour) {
         artisansUpdate(hour);
         this.hour += hour;
-        if (this.hour > 22) {
-            this.hour -= 13;
+        if (this.hour >= 22) {
             changeAdvancedDay(1);
+            this.hour -= 13;
         }
     }
 
@@ -206,15 +207,18 @@ public class Date implements Runnable {
     }
 
     public void updateAllPlants() {
-        for(Location location : App.getCurrentGame().getMainMap().getTilesOfMap()){
-            if(App.getCurrentGame().getDate().weather.name().equalsIgnoreCase("rainy") &&
-                !location.getTypeOfTile().equals(TypeOfTile.GREENHOUSE)){
-                return;
-            }
-            if(location.getTypeOfTile().equals(TypeOfTile.BURNED_GROUND)){
-                location.setTypeOfTile(TypeOfTile.GROUND);
-            }
-        }
+//        for(Location location : App.getCurrentGame().getMainMap().getTilesOfMap()){
+//            if(App.getCurrentGame().getDate().weather.name().equalsIgnoreCase("rainy") &&
+//                !location.getTypeOfTile().equals(TypeOfTile.GREENHOUSE)){
+//                if(location.getTypeOfTile().equals(TypeOfTile.PLANT)){
+//                    Plant plant = (Plant) location.getObjectInTile();
+//                    plant.setHasBeenWatering(true);
+//                }
+//            }
+//            if(location.getTypeOfTile().equals(TypeOfTile.BURNED_GROUND)){
+//                location.setTypeOfTile(TypeOfTile.GROUND);
+//            }
+//        }
         for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
             for (Plant plant : farm.getPlantOfFarm()) {
                 if (plant.isHasBeenWatering()) {
@@ -224,7 +228,7 @@ public class Date implements Runnable {
 
                 if (!plant.isHasBeenFertilized()) {
                     plant.setDayPast(plant.getDayPast() - 1);
-                    if (plant.getDayPast() <= 0) {
+                    if (plant.getDayPast() < 0) {
                         System.out.println("you lost plant at location: " + plant.getLocation().getxAxis() + ", " + plant.getLocation().getyAxis());
                         Location currentLocation = plant.getLocation();
                         currentLocation.setTypeOfTile(TypeOfTile.BURNED_GROUND);
@@ -241,8 +245,9 @@ public class Date implements Runnable {
                 for (int i = 0; i < currentStage; i++) {
                     dayNeed += plant.getTypeOfPlant().stages[i];
                 }
-                if (plant.getAge() >= dayNeed)
+                if (plant.getAge() >= dayNeed) {
                     plant.setCurrentStage(plant.getCurrentStage() + 1);
+                }
 
                 if (!plant.getTypeOfPlant().oneTime && !plant.isOneTime()) {
                     plant.setRegrowthTime(plant.getRegrowthTime() + 1);
@@ -286,18 +291,6 @@ public class Date implements Runnable {
                 location.setObjectInTile(newStone);
             }
 
-            for (int i = 0; i < count; i++) {
-                Location location = availableLocation.get(i);
-                TypeOfPlant type = foragingTrees.get(i);
-                Plant newTree = new Plant(location, true, type);
-                farm.getPlantOfFarm().add(newTree);
-                System.out.println("new Tree with type: " + newTree.getTypeOfPlant().getName() + " add to location" +
-                    location.getxAxis() + ", " + location.getyAxis());
-
-                location.setTypeOfTile(TypeOfTile.PLANT);
-                location.setObjectInTile(newTree);
-            }
-
             ArrayList<Location> seedPlacing = getLocationForSeeding(farm);
             Collections.shuffle(seedPlacing);
             int seedCount = Math.min(3, seedPlacing.size());
@@ -325,6 +318,7 @@ public class Date implements Runnable {
                 Location location = quarryLocation.get(i);
                 MineralTypes mineral = allMinerals.get(i);
                 Stone newStone = new Stone(mineral);
+                location.setTypeOfTile(TypeOfTile.STONE);
                 location.setObjectInTile(newStone);
             }
         }
@@ -357,8 +351,9 @@ public class Date implements Runnable {
     }
 
     public void changeAdvancedDay(int day) {
+
         if (day == 1) {
-            this.weather = this.tommorowWeather;// the day change
+            this.weather = this.tommorowWeather;
         }
         this.dayOfWeek += day;
         if (this.dayOfWeek > 7) {
@@ -376,7 +371,7 @@ public class Date implements Runnable {
         sellByShippingAllPlayers();
 
         updateAllPlants();
-        ThunderAndLightning();
+//        ThunderAndLightning();
         foragingAdd();
         changesDayAnimal();
 //        attackingCrow();

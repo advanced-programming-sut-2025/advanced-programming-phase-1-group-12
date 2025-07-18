@@ -20,6 +20,7 @@ import org.example.models.Place.Store;
 import org.example.models.enums.Types.TypeOfTile;
 import org.example.views.FarmingMenuView;
 import org.example.views.GameMenu;
+import org.example.views.PlantMenuView;
 import org.example.views.StoreMenuView;
 
 import java.util.ArrayList;
@@ -178,6 +179,11 @@ public class PlayerController {
             if(location.getTypeOfTile() == TypeOfTile.PLOUGHED_LAND){
                 Gdx.app.postRunnable(() ->
                     Main.getMain().setScreen(new FarmingMenuView(players, playerList, location)));
+                return;
+            }
+            if(location.getTypeOfTile() == TypeOfTile.PLANT){
+                Gdx.app.postRunnable(() ->
+                    Main.getMain().setScreen(new PlantMenuView(players, location)));
                 return;
             }
             if (location.getTypeOfTile() == TypeOfTile.STORE) {

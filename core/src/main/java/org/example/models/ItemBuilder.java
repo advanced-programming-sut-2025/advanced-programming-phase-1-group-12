@@ -45,15 +45,15 @@ public class ItemBuilder {
             App.getCurrentPlayerLazy().getRecepies().put(craftingRecipe, true);
             return new Craft(craftingRecipe);
         }
+        SeedTypes seedTypes = SeedTypes.stringToSeed(name);
+        if(seedTypes != null){
+            return new Seed(seedTypes.getName(), Quality.NORMAL, 0 ,seedTypes);
+        }
         TypeOfPlant typeOfPlant = TypeOfPlant.nameToCraftType(name);
         if(typeOfPlant != null) {
             Plant plant = new Plant(null, false, typeOfPlant);
             plant.setPlantType(typeOfPlant.getPlantType());
             return plant;
-        }
-        SeedTypes seedTypes = SeedTypes.stringToSeed(name);
-        if(seedTypes != null){
-            return new Seed(seedTypes.getName(), Quality.NORMAL, 0 ,seedTypes);
         }
         GiantPlants giantPlants = GiantPlants.nameToCraftType(name);
         if(giantPlants != null) {
