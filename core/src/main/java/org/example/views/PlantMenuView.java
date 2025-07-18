@@ -12,8 +12,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Main;
 import org.example.controllers.FarmingController;
+import org.example.controllers.ToolsController;
 import org.example.models.Assets.GameAssetManager;
+import org.example.models.Fundementals.App;
+import org.example.models.Fundementals.Game;
 import org.example.models.Fundementals.Location;
+import org.example.models.ToolsPackage.ToolEnums.Tool;
 import org.example.models.enums.foraging.Plant;
 
 import java.util.List;
@@ -112,12 +116,24 @@ public class PlantMenuView implements Screen {
         }
 
         TextButton backButton = new TextButton("Back", skin);
-        backButton = new TextButton("Back", skin);
         backButton.addListener(event -> {
             Main.getMain().setScreen(new GameMenu(players));
             return true;
         });
         content.add(backButton).width(200).height(50).center().pad(15);
+        content.row().padTop(15);
+
+        TextButton wateringButton = new TextButton("Watering", skin);
+        wateringButton.addListener(event -> {
+            if (App.getCurrentPlayerLazy().getCurrentTool() != null &&
+                App.getCurrentPlayerLazy().getCurrentTool().getToolType().equals(Tool.WATERING_CAN)) {
+                App.getCurrentPlayerLazy().getCurrentTool().use(location,
+                    App.getCurrentPlayerLazy().getAbilityByName("Farming").getLevel());
+            }
+            Main.getMain().setScreen(new GameMenu(players));
+            return true;
+        });
+        content.add(wateringButton).width(200).height(50).center().pad(15);
         content.row().padTop(15);
 
         plantDialog.pack();

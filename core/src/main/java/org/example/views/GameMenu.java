@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Main;
@@ -86,6 +87,8 @@ public class GameMenu extends InputAdapter implements Screen {
 
     private Map<Player, ProgressBar> energyBars;
     private Map<Craft, ProgressBar> craftBars;
+    private ProgressBar wateringCanBar;
+    private Label wateringCanLabel;
 
     private float timeSinceError = 0f;
 
@@ -114,7 +117,7 @@ public class GameMenu extends InputAdapter implements Screen {
             this.y = y;
             this.speed = speed;
             this.texture = texture;
-            this.alpha = 0.8f + (float)Math.random() * 0.2f; // More visible alpha 0.8-1.0
+            this.alpha = 0.8f + (float) Math.random() * 0.2f; // More visible alpha 0.8-1.0
         }
 
         public void update(float delta) {
@@ -292,7 +295,7 @@ public class GameMenu extends InputAdapter implements Screen {
                 }
             }
 
-            }
+        }
 
 
         batch.draw(frame, scaledX, scaledY, player.getPlayerSprite().getWidth(),
@@ -302,6 +305,11 @@ public class GameMenu extends InputAdapter implements Screen {
             scaledY + player.getPlayerSprite().getHeight() + 10);
 
         Tools equipped = App.getCurrentPlayerLazy().getCurrentTool();
+        if (equipped != null)
+            equipped.setToolsController(toolsController);
+
+        updateWateringCanBar(equipped);
+
         if (equipped != null) {
             Texture toolTex = getToolTexture(equipped);
             TextureRegion toolRegion = new TextureRegion(toolTex);
@@ -425,6 +433,7 @@ public class GameMenu extends InputAdapter implements Screen {
         stage.act(delta);
         stage.draw();
     }
+
     private void updateClockDisplay() {
         org.example.models.Date currentDate = App.getCurrentGame().getDate();
 
@@ -665,7 +674,7 @@ public class GameMenu extends InputAdapter implements Screen {
             showToolsDialog();
             return true;
         }
-        if(keycode == Input.Keys.O){
+        if (keycode == Input.Keys.O) {
             App.getCurrentGame().getDate().changeAdvancedDay(1);
             return true;
         }
@@ -1302,7 +1311,7 @@ public class GameMenu extends InputAdapter implements Screen {
         };
     }
 
-    private void showError(String message) {
+    public void showError(String message) {
         errorLabel.setText(message);
         errorLabel.setColor(1, 0, 0, 1);
 
@@ -1521,8 +1530,8 @@ public class GameMenu extends InputAdapter implements Screen {
         buttonTable.add(start).pad(10).width(400f).row();
 
         ArtisanItem item = craft.getArtisanInIt();
-        if (item != null ) {
-            if(item.getHoursRemained() <= 0) {
+        if (item != null) {
+            if (item.getHoursRemained() <= 0) {
                 TextButton getProduct = new TextButton("get artisan", skin);
                 getProduct.addListener(new ClickListener() {
                     @Override
@@ -1532,7 +1541,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     }
                 });
                 buttonTable.add(getProduct).pad(10).width(400f).row();
-            } else{
+            } else {
                 TextButton cancel = new TextButton("cancel process", skin);
                 cancel.addListener(new ClickListener() {
                     @Override
@@ -1606,17 +1615,18 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
     }
+
     private void spawnRainDrops() {
         float cameraLeft = camera.position.x - camera.viewportWidth * camera.zoom * 0.5f;
         float cameraRight = camera.position.x + camera.viewportWidth * camera.zoom * 0.5f;
         float cameraTop = camera.position.y + camera.viewportHeight * camera.zoom * 0.5f;
 
-        int dropsToSpawn = 10 + (int)(Math.random() * 15);
+        int dropsToSpawn = 10 + (int) (Math.random() * 15);
 
         for (int i = 0; i < dropsToSpawn; i++) {
-            float x = cameraLeft + (float)Math.random() * (cameraRight - cameraLeft);
+            float x = cameraLeft + (float) Math.random() * (cameraRight - cameraLeft);
             float y = cameraTop + 100f;
-            float speed = 300f + (float)Math.random() * 200f; // Speed 300-500
+            float speed = 300f + (float) Math.random() * 200f; // Speed 300-500
 
             Texture rainTexture = Math.random() < 0.5f ? rainTexture1 : rainTexture2;
 
@@ -1644,11 +1654,9 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
-    public void changeRainStatus(){
+    public void changeRainStatus() {
         isRaining = !isRaining;
     }
-
-
 
     private void initializeRainSystem() {
         rainDrops = new ArrayList<>();
@@ -1699,8 +1707,55 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
+    private void updateWateringCanBar(Tools equipped) {
 
-    private void removeBarIfExists (Craft craft) {
+        if (equipped == null || !equipped.isWateringCan()) {
+            if (wateringCanBar != null) wateringCanBar.remove();
+            if (wateringCanLabel != null) wateringCanLabel.remove();
+            wateringCanBar = null;
+            wateringCanLabel = null;
+            return;
+        }
+
+        if (wateringCanBar == null) {
+            ProgressBar.ProgressBarStyle style =
+                new ProgressBar.ProgressBarStyle(
+                    skin.get("default-horizontal", ProgressBar.ProgressBarStyle.class));
+
+            Drawable filled = skin.newDrawable("white", Color.valueOf("87CEFA"));
+            filled.setMinHeight(20);
+            style.knobBefore = filled;
+            style.knob = skin.newDrawable("white", 0, 0, 0, 0);
+
+            wateringCanBar = new ProgressBar(0, 100, 1, false, style);
+            wateringCanBar.setAnimateDuration(0.2f);
+            wateringCanBar.setSize(100f, 20f);
+            stage.addActor(wateringCanBar);
+
+            wateringCanLabel = new Label("", skin);
+            wateringCanLabel.setFontScale(0.8f);
+            stage.addActor(wateringCanLabel);
+        }
+
+        int water = MathUtils.clamp(equipped.getCurrentWater(), 0, 100);
+        wateringCanBar.setValue(water);
+        wateringCanLabel.setText(water + " / 100");
+
+        ProgressBar energyBar = energyBars.get(App.getCurrentPlayerLazy());
+        if (energyBar != null) {
+
+            float barX = energyBar.getX();
+            float barY = energyBar.getY() + energyBar.getHeight() + 4f;
+
+            wateringCanBar.setPosition(barX, barY);
+
+            float labelX = barX + wateringCanBar.getWidth() + 6f;
+            float labelY = barY + (wateringCanBar.getHeight() - wateringCanLabel.getHeight()) / 2f;
+            wateringCanLabel.setPosition(labelX, labelY);
+        }
+    }
+
+    private void removeBarIfExists(Craft craft) {
         ProgressBar bar = craftBars.remove(craft);
         if (bar != null) bar.remove();
     }

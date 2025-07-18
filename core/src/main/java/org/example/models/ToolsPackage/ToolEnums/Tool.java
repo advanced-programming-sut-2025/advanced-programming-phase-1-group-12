@@ -1,13 +1,18 @@
 package org.example.models.ToolsPackage.ToolEnums;
 
+import org.example.controllers.StoreController;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Result;
+import org.example.models.Item;
+import org.example.models.ItemBuilder;
+import org.example.models.ProductsPackage.Quality;
 import org.example.models.ToolsPackage.ToolFunction;
 import org.example.models.ToolsPackage.Tools;
 import org.example.models.ToolsPackage.UpgradeFunction;
 import org.example.models.enums.Types.TypeOfTile;
 import org.example.models.Animal.FarmAnimals;
 import org.example.models.enums.Animal;
+import org.example.models.enums.foraging.Plant;
 
 public enum Tool {
     HOE("Hoe", 5) {
@@ -38,6 +43,10 @@ public enum Tool {
                 TypeOfTile tileType = location.getTypeOfTile();
                 if (tileType == TypeOfTile.STONE) {
                     location.setTypeOfTile(TypeOfTile.GROUND);
+
+                    StoreController storeController = new StoreController();
+                    storeController.cheatAddItem("Stone", 1);
+
                     App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - tool.getType().getEnergyDamage());
                     return new Result(true, "You broke the stone");
                 }
@@ -115,23 +124,26 @@ public enum Tool {
         @Override
         public ToolFunction getUseFunction() {
             return (location, skillLevel, tools) -> {
+
                 TypeOfTile tileType = location.getTypeOfTile();
 
                 if (tileType == TypeOfTile.LAKE) {
                     if (tools != null && tools.isWateringCan()) {
-                        Result fillResult = tools.fillWateringCan();
                         App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - tools.getType().getEnergyDamage());
                         return new Result(true, "You filled your watering can to capacity: " + tools.getCapacity());
                     }
                     return new Result(true, "You filled your watering can");
                 }
 
-                if (tools != null && tools.isWateringCan()) {
+                if (tools != null) {
                     if (tools.getCurrentWater() <= 0) {
                         return new Result(false, "Your watering can is empty! Fill it at a water source.");
                     }
 
-                    Result useResult = tools.useWater(1);
+                    Result useResult = tools.useWater(5);
+                    Plant plant = (Plant) location.getObjectInTile();
+                    plant.setHasBeenWatering(true);
+
                     if (!useResult.isSuccessful()) {
                         return useResult;
                     }

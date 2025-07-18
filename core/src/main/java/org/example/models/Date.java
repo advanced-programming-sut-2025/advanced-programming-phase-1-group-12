@@ -35,7 +35,6 @@ public class Date implements Runnable {
     private Thread timeThread;
 
     public Date() {
-        System.out.println("kaftar");
         timeThread = new Thread(this);
         timeThread.setDaemon(true);
         timeThread.start();
@@ -221,22 +220,19 @@ public class Date implements Runnable {
 //        }
         for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
             for (Plant plant : farm.getPlantOfFarm()) {
-                if (plant.isHasBeenWatering()) {
-                    plant.setHasBeenWatering(false);
-                    continue;
-                }
 
-                if (!plant.isHasBeenFertilized()) {
+                if (!plant.isHasBeenFertilized() && !plant.isHasBeenWatering()) {
                     plant.setDayPast(plant.getDayPast() - 1);
                     if (plant.getDayPast() < 0) {
                         System.out.println("you lost plant at location: " + plant.getLocation().getxAxis() + ", " + plant.getLocation().getyAxis());
                         Location currentLocation = plant.getLocation();
-                        currentLocation.setTypeOfTile(TypeOfTile.BURNED_GROUND);
+                        currentLocation.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
                         currentLocation.setObjectInTile(null);
                         continue;
                     }
                 }
 
+                plant.setHasBeenWatering(false);
                 plant.setHasBeenFertilized(false);
                 plant.setAge(plant.getAge() + 1);
 

@@ -2,6 +2,7 @@ package org.example.models.ToolsPackage;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import org.example.controllers.ToolsController;
 import org.example.models.Assets.ToolAssetsManager;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
@@ -20,6 +21,7 @@ public class Tools extends Item {
     private Tool toolType;
     private ToolTypes type;
     private Sprite smgSprite;
+    private ToolsController toolsController;
 
     // watering can
     private int capacity;
@@ -36,7 +38,7 @@ public class Tools extends Item {
 
         if (toolType == Tool.WATERING_CAN) {
             initializeWateringCanCapacity();
-            this.currentWater = 0;
+            this.currentWater = this.capacity;
         } else {
             this.capacity = 0;
             this.currentWater = 0;
@@ -117,16 +119,16 @@ public class Tools extends Item {
         }
 
         switch (level) {
-            case 1: // Copper
+            case 1:
                 return 0.15;
-            case 2: // Iron
+            case 2:
                 return 0.30;
-            case 3: // Gold
+            case 3:
                 return 0.45;
-            case 4: // Iridium
+            case 4:
                 return 0.60;
             default:
-                return 0.0; // Normal trash can doesn't recover any value
+                return 0.0;
         }
     }
 
@@ -165,12 +167,6 @@ public class Tools extends Item {
         return currentWater;
     }
 
-    public void setCurrentWater(int water) {
-        if (toolType == Tool.WATERING_CAN) {
-            this.currentWater = Math.min(water, capacity);
-        }
-    }
-
     public Result fillWateringCan() {
         if (toolType != Tool.WATERING_CAN) {
             return new Result(false, "This is not a watering can!");
@@ -193,12 +189,16 @@ public class Tools extends Item {
         return new Result(true, "Used water from your watering can");
     }
 
-    public void setToolType(Tool toolType) {
-        this.toolType = toolType;
-    }
-
     public ToolTypes getType() {
         return type;
+    }
+
+    public ToolsController getToolsController() {
+        return toolsController;
+    }
+
+    public void setToolsController(ToolsController toolsController) {
+        this.toolsController = toolsController;
     }
 
     public Sprite getSmgSprite() {
@@ -212,5 +212,4 @@ public class Tools extends Item {
     public void setType(ToolTypes type) {
         this.type = type;
     }
-
 }

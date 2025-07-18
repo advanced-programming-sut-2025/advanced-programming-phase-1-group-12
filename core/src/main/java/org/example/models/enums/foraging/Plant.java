@@ -34,6 +34,10 @@ public class Plant extends Item {
         this.regrowthTime = 0;
     }
 
+    public int getTotalTimeNeeded() {
+        return totalTimeNeeded;
+    }
+
     public boolean isOneTime() {
         return isOneTime;
     }

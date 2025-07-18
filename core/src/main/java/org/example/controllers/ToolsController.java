@@ -16,18 +16,6 @@ import java.util.HashMap;
 public class ToolsController {
 
     private Tools currentTool = null;
-    private static final Map<String, String> DIRECTION_MAP = new HashMap<>();
-
-    static {
-        DIRECTION_MAP.put("north", "up");
-        DIRECTION_MAP.put("south", "down");
-        DIRECTION_MAP.put("east", "right");
-        DIRECTION_MAP.put("west", "left");
-        DIRECTION_MAP.put("northeast", "upright");
-        DIRECTION_MAP.put("northwest", "upleft");
-        DIRECTION_MAP.put("southeast", "downright");
-        DIRECTION_MAP.put("southwest", "downleft");
-    }
 
     public Result equipTool(String toolName) {
         BackPack backPack = App.getCurrentPlayerLazy().getBackPack();
@@ -138,9 +126,6 @@ public class ToolsController {
         return true;
     }
 
-    public void updateTools() {
-    }
-
     public Result useTool(Location targetLocation) {
         if (App.getCurrentPlayerLazy().getCurrentTool() == null) {
             return new Result(false, "You don't have any tool equipped");
@@ -154,43 +139,6 @@ public class ToolsController {
         }
         int skillLevel = 0;
         return App.getCurrentPlayerLazy().getCurrentTool().use(targetLocation, skillLevel);
-    }
-
-    private Location getTargetLocation(Location playerLocation, String direction) {
-        int xOffset = 0;
-        int yOffset = 0;
-
-        direction = direction.toLowerCase();
-
-        if (direction.equals("north") || direction.equals("up")) {
-            yOffset = -1;
-        } else if (direction.equals("northeast") || direction.equals("upright")) {
-            yOffset = -1;
-            xOffset = 1;
-        } else if (direction.equals("east") || direction.equals("right")) {
-            xOffset = 1;
-        } else if (direction.equals("southeast") || direction.equals("downright")) {
-            yOffset = 1;
-            xOffset = 1;
-        } else if (direction.equals("south") || direction.equals("down")) {
-            yOffset = 1;
-        } else if (direction.equals("southwest") || direction.equals("downleft")) {
-            yOffset = 1;
-            xOffset = -1;
-        } else if (direction.equals("west") || direction.equals("left")) {
-            xOffset = -1;
-        } else if (direction.equals("northwest") || direction.equals("upleft")) {
-            yOffset = -1;
-            xOffset = -1;
-        } else {
-            return null;
-        }
-        int targetX = playerLocation.getxAxis() + xOffset;
-        int targetY = playerLocation.getyAxis() + yOffset;
-        return App.getCurrentGame().getMainMap().findLocation(targetX, targetY);
-    }
-
-    public void checkMoves() {
     }
 
     public boolean checkEnergy() {
@@ -210,23 +158,6 @@ public class ToolsController {
 
         return currentTool.calculateEnergyCost(skillLevel);
     }
-
-    public Result checkToolUse() {
-        if (currentTool == null) {
-            return new Result(false, "You don't have any tool equipped");
-        }
-
-        if (!checkEnergy()) {
-            return new Result(false, "You don't have enough energy to use this tool");
-        }
-
-        return new Result(true, "You can use your " + currentTool.getName());
-    }
-
-    public boolean isValidUse() {
-        return currentTool != null && checkEnergy();
-    }
-
 
     public void handleToolRotation(int x, int y) {
         Sprite toolSprite = App.getCurrentPlayerLazy().getCurrentTool().getSmgSprite();

@@ -97,7 +97,6 @@ public enum GameMenuCommands implements Commands {
     SHOW_CURRENT_TOOL("^tools show current$"),
     SHOW_AVAILABLE_TOOL("^tools show available$"),
     UPGRADE_TOOL("^tools upgrade (?<toolName>.+)$"),
-    USE_TOOL("^tools use -d (?<direction>.+)$"),
 
     //relationship commands
     TALK("^talk -u (?<username>.+) -m (?<message>.+)$"),
