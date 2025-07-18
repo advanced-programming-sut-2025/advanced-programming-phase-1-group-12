@@ -41,7 +41,7 @@ public class Date implements Runnable {
         this.hour = 9; // the game starts at 9 AM
         this.dayOfMonth = 1;
         this.dayOfWeek = 1;
-        this.season = Season.SPRING;
+        this.season = Season.AUTUMN;
         this.currentSeason = season.getValue();
         this.year = 2025;
         this.weather = Weather.SUNNY;
@@ -71,7 +71,7 @@ public class Date implements Runnable {
     public void changeAdvancedTime(int hour) {
         artisansUpdate(hour);
         this.hour += hour;
-        if (this.hour >= 22) {
+        if (this.hour > 22) {
             changeAdvancedDay(1);
             this.hour -= 13;
         }
@@ -372,7 +372,6 @@ public class Date implements Runnable {
         changesDayAnimal();
 //        attackingCrow();
         resetNPCStatus();
-        artisansUpdate(day * 13);
         buffUpdates();
         updateRecepies();
         resetDailyLimit();
@@ -447,7 +446,7 @@ public class Date implements Runnable {
     }
 
     public Map<Season, List<Weather>> initializeWeatherMap() {
-        weatherOfSeason = Map.of(Season.SPRING, List.of(Weather.SUNNY, Weather.RAINY, Weather.STORM), Season.SUMMER, List.of(Weather.SUNNY, Weather.RAINY, Weather.STORM), Season.AUTUMN, List.of(Weather.SUNNY, Weather.RAINY, Weather.STORM), Season.WINTER, List.of(Weather.SUNNY, Weather.SNOW));
+        weatherOfSeason = Map.of(Season.SPRING, List.of(Weather.SUNNY, Weather.RAINY, Weather.STORMY), Season.SUMMER, List.of(Weather.SUNNY, Weather.RAINY, Weather.STORMY), Season.AUTUMN, List.of(Weather.SUNNY, Weather.RAINY, Weather.STORMY), Season.WINTER, List.of(Weather.SUNNY, Weather.SNOWY));
         return weatherOfSeason;
     }
 
@@ -557,6 +556,9 @@ public class Date implements Runnable {
             System.out.println(player.getShippingMoney());
             player.increaseMoney(player.getShippingMoney());
             player.setShippingMoney(0);
+            if(player.getShippingBin() != null) {
+                player.getShippingBin().getShippingItemMap().clear();
+            }
         }
     }
 

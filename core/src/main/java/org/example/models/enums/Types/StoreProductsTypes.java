@@ -1,5 +1,7 @@
 package org.example.models.enums.Types;
 
+import org.example.models.Fundementals.App;
+
 public enum StoreProductsTypes {
 
     // Blacksmith
@@ -245,5 +247,20 @@ public enum StoreProductsTypes {
             }
         }
         return null;
+    }
+
+    public int getRealPrice(StoreProductsTypes type) {
+        switch (App.getCurrentGame().getDate().getSeason()) {
+            case SUMMER:
+                return type.summerPrice;
+            case WINTER:
+                return type.winterPrice;
+            case AUTUMN:
+                return type.fallPrice;
+            case SPRING:
+                return type.springPrice;
+            default:
+                return type.summerPrice;
+        }
     }
 }

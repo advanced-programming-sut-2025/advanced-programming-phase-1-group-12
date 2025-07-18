@@ -19,10 +19,13 @@ import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Player;
 import org.example.models.Fundementals.Result;
+import org.example.models.Item;
 import org.example.models.Place.Farm;
 import org.example.models.Place.Store;
 import org.example.models.ProductsPackage.StoreProducts;
+import org.example.models.ShippingBin;
 import org.example.models.enums.Animal;
+import org.example.models.enums.Types.StoreProductsTypes;
 import org.example.models.enums.Types.TypeOfTile;
 
 import javax.swing.text.View;
@@ -266,7 +269,7 @@ class buyView implements Screen {
                 if (quantity > 0) {
                     if (store.getNameOfStore().equalsIgnoreCase("Carpenter's Shop") && (productName.contains("coop") || productName.contains("barn"))) {
 //                        Gdx.app.postRunnable(() ->
-//                            Main.getMain().setScreen(new FarmView(productName, players, playerList, false))
+//                            Main.getMain().setScreen(new FarmView(productName, players, playerList, false, false))
 //                        );
                     } else if(store.getNameOfStore().equalsIgnoreCase("Marnie's Ranch") &&
                         !(productName.equalsIgnoreCase("hay") || productName.equalsIgnoreCase("Milk Pail")
@@ -274,6 +277,10 @@ class buyView implements Screen {
                         Gdx.app.postRunnable(() ->
                             Main.getMain().setScreen(new BuyAnimal(players, playerList, productName))
                         );
+                    }if (productName.equalsIgnoreCase(StoreProductsTypes.CARPENTER_SHIPPING_BIN.getName())) {
+//                        Gdx.app.postRunnable(() ->
+//                            Main.getMain().setScreen(new FarmView(productName, players, playerList, false, true))
+//                        );
                     }
                     else {
                         Result result = controller.buyProduct(store, productName, quantity);

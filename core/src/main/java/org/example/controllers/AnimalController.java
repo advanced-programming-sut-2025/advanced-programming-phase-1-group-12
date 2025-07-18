@@ -174,8 +174,8 @@ public class AnimalController {
             return new Result(false, "Type of given destination makes it unavailable");
         }
         if ((App.getCurrentGame().getDate().getWeather().equals(Weather.RAINY) ||
-                App.getCurrentGame().getDate().getWeather().equals(Weather.STORM) ||
-                App.getCurrentGame().getDate().getWeather().equals(Weather.SNOW))) {
+                App.getCurrentGame().getDate().getWeather().equals(Weather.STORMY) ||
+                App.getCurrentGame().getDate().getWeather().equals(Weather.SNOWY))) {
             return new Result(false, "Weather is bad for getting " + animal.getName() + " out");
         } if(!isDestinationNear(destination, animal.getPosition())){
             return new Result(false, "Destination is not near destination(it should be less than 5");
@@ -194,7 +194,7 @@ public class AnimalController {
     public Result fishing(String fishingPole, List<String>players) {
         double M = switch (App.getCurrentGame().getDate().getWeather()) {
             case RAINY -> 1.2;
-            case STORM -> 0.5;
+            case STORMY -> 0.5;
             case SUNNY -> 1.5;
             default -> 1.0;
         };

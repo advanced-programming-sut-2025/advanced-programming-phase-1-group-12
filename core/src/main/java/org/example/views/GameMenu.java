@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Main;
@@ -32,6 +33,7 @@ import org.example.models.Item;
 import org.example.models.Place.Farm;
 import org.example.models.ProductsPackage.ArtisanItem;
 import org.example.models.RelatedToUser.Ability;
+import org.example.models.ShippingBin;
 import org.example.models.ToolsPackage.Tools;
 
 import java.lang.reflect.Method;
@@ -41,6 +43,7 @@ import java.util.List;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.GL20;
 import org.example.models.enums.Types.CraftingRecipe;
+import org.example.models.enums.Weather;
 
 public class GameMenu extends InputAdapter implements Screen {
     private final GameMenuController controller = new GameMenuController();
@@ -84,6 +87,17 @@ public class GameMenu extends InputAdapter implements Screen {
     private boolean isRaining = false;
     private float rainSpawnTimer = 0f;
     private final float RAIN_SPAWN_INTERVAL = 0.05f;
+
+    private List<SnowFlake> snowFlakes;
+    private Texture[] snowTextures;
+    private boolean isSnowing = false;
+    private float snowSpawnTimer = 0f;
+    private final float SNOW_SPAWN_INTERVAL = 0.1f;
+
+    private Texture clockHandTexture;
+    private float clockHandRotation = 0f;
+    private TextureRegion clockHandRegion;
+
 
     private Map<Player, ProgressBar> energyBars;
     private Map<Craft, ProgressBar> craftBars;
@@ -131,6 +145,40 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
+    public static class SnowFlake {
+        public float x, y;
+        public float speedY, speedX;;
+        public float alpha;
+        public Texture texture;
+        public float rotation;
+        public float rotationSpeed;
+        public float scale;
+
+        public SnowFlake(float x, float y, float speedY, Texture texture) {
+            this.x = x;
+            this.y = y;
+            this.speedY = speedY;
+            this.speedX = (float)(Math.random() - 0.5) * 30f;
+            this.texture = texture;
+            this.alpha = 0.7f + (float)Math.random() * 0.3f;
+            this.rotation = (float)Math.random() * 360f;
+            this.rotationSpeed = (float)(Math.random() - 0.5) * 60f;
+            this.scale = 0.8f + (float)Math.random() * 0.4f;
+        }
+
+        public void update(float delta) {
+            y -= speedY * delta;
+            x += speedX * delta;
+            rotation += rotationSpeed * delta;
+
+            x += Math.sin(y * 0.005f) * 10f * delta;
+        }
+
+        public boolean isOffScreen() {
+            return y < -100f; // Remove when off screen
+        }
+    }
+
     @Override
     public void show() {
         batch = Main.getMain().getBatch();
@@ -138,10 +186,12 @@ public class GameMenu extends InputAdapter implements Screen {
         font = new BitmapFont(Gdx.files.internal("fonts/new.fnt"));
         clockTexture = new Texture(Gdx.files.internal("Clock/clock.png"));
         clockImage = new Image(clockTexture);
+        clockHandTexture = new Texture(Gdx.files.internal("Clock/flesh.png"));
+        clockHandRegion = new TextureRegion(clockHandTexture);
 
-        // Initialize lighting system
+
         initializeLighting();
-        initializeRainSystem();
+        initializeWeatherSystem();
 
 
         float clockSize = 100f;
@@ -250,8 +300,9 @@ public class GameMenu extends InputAdapter implements Screen {
         updateClockDisplay();
         updateSeasonAndWeatherDisplay();
         updateLightingWithSeasons();
+        updateClockHandRotation();
 
-        updateRainSystem(delta);
+        updateWeatherSystem(delta);
 
         if (errorLabel.isVisible()) {
             timeSinceError += delta;
@@ -423,7 +474,7 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
 
-        renderRain(batch);
+        renderWeather(batch);
 
 
         renderLightingOverlay();
@@ -432,6 +483,8 @@ public class GameMenu extends InputAdapter implements Screen {
 
         stage.act(delta);
         stage.draw();
+        renderClockHand();
+
     }
 
     private void updateClockDisplay() {
@@ -505,9 +558,21 @@ public class GameMenu extends InputAdapter implements Screen {
         if (clockTexture != null) {
             clockTexture.dispose();
         }
+        if (clockHandTexture != null) {
+            clockHandTexture.dispose();
+        }
         if (shapeRenderer != null) {
             shapeRenderer.dispose();
         }
+
+        if (snowTextures != null) {
+            for (Texture snowTexture : snowTextures) {
+                if (snowTexture != null) {
+                    snowTexture.dispose();
+                }
+            }
+        }
+
         stage.dispose();
         pixelMapRenderer.dispose();
         font.dispose();
@@ -679,7 +744,7 @@ public class GameMenu extends InputAdapter implements Screen {
             return true;
         }
         if (keycode == Input.Keys.R) {
-            changeRainStatus();
+            changeWeatherStatus();
             return true;
         }
         return false;
@@ -1331,7 +1396,8 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     public String getWeather() {
-        return App.getCurrentGame().getDate().getWeather().name();
+        Weather weather =  App.getCurrentGame().getDate().getWeather();
+        return Weather.getName(weather);
     }
 
     public int getGold() {
@@ -1466,12 +1532,13 @@ public class GameMenu extends InputAdapter implements Screen {
                     @Override
                     public void clicked(InputEvent event, float x, float y) {
                         Gdx.app.postRunnable(() -> {
-                            Main.getMain().setScreen(new FarmView(
-                                craftingRecipe.getName(),
-                                players, // make sure `players` is accessible
-                                App.getCurrentGame().getPlayers(),
-                                true
-                            ));
+//                            Main.getMain().setScreen(new FarmView(
+//                                craftingRecipe.getName(),
+//                                players, // make sure `players` is accessible
+//                                App.getCurrentGame().getPlayers(),
+//                                true,
+//                                false
+//                            ));
                         });
                     }
                 });
@@ -1584,19 +1651,23 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
 
-    private void updateRainSystem(float delta) {
+    private void updateWeatherSystem(float delta) {
         String currentWeather = getWeather();
         boolean shouldRain = currentWeather.equalsIgnoreCase("rainy") || currentWeather.equals("stormy");
-//        System.out.println("shouldRain: " + shouldRain);
-//        System.out.println("currentWeather: " + currentWeather);
+        boolean shouldSnow = currentWeather.equalsIgnoreCase("snowy");
 
         if (shouldRain && !isRaining) {
             isRaining = true;
-//            System.out.println("Rain started! Weather: " + currentWeather);
         } else if (!shouldRain && isRaining) {
             isRaining = false;
-//            System.out.println("Rain stopped! Weather: " + currentWeather);
         }
+
+        if (shouldSnow && !isSnowing) {
+            isSnowing = true;
+        } else if (!shouldSnow && isSnowing) {
+            isSnowing = false;
+        }
+
 
         if (isRaining && rainTexture1 != null && rainTexture2 != null) {
             rainSpawnTimer += delta;
@@ -1606,12 +1677,27 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
 
+        if (isSnowing && snowTextures != null) {
+            snowSpawnTimer += delta;
+            if (snowSpawnTimer >= SNOW_SPAWN_INTERVAL) {
+                spawnSnowFlakes();
+                snowSpawnTimer = 0f;
+            }
+        }
+
         for (int i = rainDrops.size() - 1; i >= 0; i--) {
             RainDrop drop = rainDrops.get(i);
             drop.update(delta);
-
             if (drop.isOffScreen()) {
                 rainDrops.remove(i);
+            }
+        }
+
+        for (int i = snowFlakes.size() - 1; i >= 0; i--) {
+            SnowFlake flake = snowFlakes.get(i);
+            flake.update(delta);
+            if (flake.isOffScreen()) {
+                snowFlakes.remove(i);
             }
         }
     }
@@ -1634,38 +1720,87 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
-    private void renderRain(SpriteBatch batch) {
-//
-//        System.out.println("isRaining: " + isRaining);
-//        System.out.println("rainDrops: " + rainDrops.size());
 
-        if (!isRaining || rainDrops.isEmpty()) return;
+    private void spawnSnowFlakes() {
+        float cameraLeft = camera.position.x - camera.viewportWidth * camera.zoom * 0.5f;
+        float cameraRight = camera.position.x + camera.viewportWidth * camera.zoom * 0.5f;
+        float cameraTop = camera.position.y + camera.viewportHeight * camera.zoom * 0.5f;
 
-//        System.out.println("Rendering " + rainDrops.size() + " rain drops");
+        int flakesToSpawn = 5 + (int)(Math.random() * 8);
 
-        for (RainDrop drop : rainDrops) {
-            Color oldColor = batch.getColor();
-            batch.setColor(oldColor.r, oldColor.g, oldColor.b, drop.alpha);
+        for (int i = 0; i < flakesToSpawn; i++) {
+            float x = cameraLeft + (float)Math.random() * (cameraRight - cameraLeft);
+            float y = cameraTop + 100f;
+            float speed = 50f + (float)Math.random() * 100f;
 
-            float dropSize = 15f;
-            batch.draw(drop.texture, drop.x, drop.y, dropSize, dropSize);
+            int textureIndex = (int)(Math.random() * snowTextures.length);
+            Texture snowTexture = snowTextures[textureIndex];
 
-            batch.setColor(oldColor);
+            SnowFlake snowFlake = new SnowFlake(x, y, speed, snowTexture);
+
+            if (textureIndex == 2) {
+                snowFlake.scale *= 1.5f;
+            }
+
+            snowFlakes.add(snowFlake);
         }
     }
 
-    public void changeRainStatus() {
-        isRaining = !isRaining;
+    private void renderWeather(SpriteBatch batch) {
+        if (isRaining && !rainDrops.isEmpty()) {
+            for (RainDrop drop : rainDrops) {
+                Color oldColor = batch.getColor();
+                batch.setColor(oldColor.r, oldColor.g, oldColor.b, drop.alpha);
+
+                float dropSize = 15f;
+                batch.draw(drop.texture, drop.x, drop.y, dropSize, dropSize);
+
+                batch.setColor(oldColor);
+            }
+        }
+
+        if (isSnowing && !snowFlakes.isEmpty()) {
+            for (SnowFlake flake : snowFlakes) {
+                Color oldColor = batch.getColor();
+                batch.setColor(oldColor.r, oldColor.g, oldColor.b, flake.alpha);
+
+                float flakeSize = 20f * flake.scale;
+
+                TextureRegion flakeRegion = new TextureRegion(flake.texture);
+
+                batch.draw(flakeRegion,
+                    flake.x, flake.y,
+                    flakeSize / 2f, flakeSize / 2f,
+                    flakeSize, flakeSize,
+                    1f, 1f,
+                    flake.rotation);
+
+                batch.setColor(oldColor);
+            }
+        }
     }
 
-    private void initializeRainSystem() {
+    public void changeWeatherStatus(){
+        isRaining = !isRaining;
+        isSnowing = !isSnowing;
+    }
+
+    private void initializeWeatherSystem() {
         rainDrops = new ArrayList<>();
+        snowFlakes = new ArrayList<>();
+
         try {
             rainTexture1 = new Texture(Gdx.files.internal("Clock/Rain/rain_0.png"));
             rainTexture2 = new Texture(Gdx.files.internal("Clock/Rain/rain_1.png"));
-            System.out.println("Rain textures loaded successfully");
+
+            snowTextures = new Texture[3];
+            snowTextures[0] = new Texture(Gdx.files.internal("Clock/Snow/Snow_0.png"));
+            snowTextures[1] = new Texture(Gdx.files.internal("Clock/Snow/Snow_1.png"));
+            snowTextures[2] = new Texture(Gdx.files.internal("Clock/Snow/Snow_2.png"));
+
+            System.out.println("Rain and snow textures loaded successfully");
         } catch (Exception e) {
-            System.err.println("Could not load rain textures: " + e.getMessage());
+            System.err.println("Could not load weather textures: " + e.getMessage());
         }
     }
 
@@ -1759,4 +1894,160 @@ public class GameMenu extends InputAdapter implements Screen {
         ProgressBar bar = craftBars.remove(craft);
         if (bar != null) bar.remove();
     }
+
+    private void updateClockHandRotation() {
+        org.example.models.Date currentDate = App.getCurrentGame().getDate();
+        int hour = currentDate.getHour();
+        float hourProgress = hour / 15.0f;
+        clockHandRotation = 270f - (hourProgress * 180f); // 270° to 90° over 24 hours
+
+        if (clockHandRotation < 0) {
+            clockHandRotation += 360f;
+        }
+    }
+
+    private void renderClockHand() {
+        float clockSize = 100f;
+        float clockX = stage.getWidth() - clockSize - 20f;
+        float clockY = stage.getHeight() - clockSize - 20f;
+
+        float clockCenterX = clockX + clockSize / 2f - 17f;
+        float clockCenterY = clockY + clockSize / 2f + 18f;
+
+        batch.setProjectionMatrix(stage.getCamera().combined);
+        batch.begin();
+
+        float handWidth = 10f;
+        float handLength = clockSize * 0.35f;
+
+        batch.draw(clockHandRegion,
+            clockCenterX - handWidth / 2f,        // x position (centered horizontally)
+            clockCenterY,                         // y position (at center)
+            handWidth / 2f,                       // origin x (rotation point)
+            0f,                                   // origin y (rotation point at base)
+            handWidth,                            // width
+            handLength,                           // height
+            1f,                                   // scale x
+            1f,                                   // scale y
+            clockHandRotation                     // rotation angle
+        );
+
+        batch.end();
+    }
+
+    public void shippingBinMenu(){
+        Skin skin = GameAssetManager.skin;
+        Dialog dialog = new Dialog("Your inventory items and trash can", skin);
+
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        BackPack backPack = player.getBackPack();
+
+        Table mainContent = new Table(); // Main container
+        mainContent.top();
+
+        TextButton closeButton = new TextButton("Close", skin);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+            }
+        });
+
+        TextField nameOfDeletingItem = new TextField("", skin);
+        nameOfDeletingItem.setMessageText("Name of the item to be sold");
+
+        TextField whatCount = new TextField("", skin);
+        whatCount.setMessageText("Count of the item to be sold");
+        whatCount.setWidth(400);
+
+        TextButton sellButton = new TextButton("sell", skin);
+        sellButton.setWidth(400);
+        sellButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                GameMenuController gameMenuController = new GameMenuController();
+                Result result = gameMenuController.sellByShipping(nameOfDeletingItem.getText(), whatCount.getText());
+                showError(result.getMessage());
+                dialog.hide();
+                shippingBinMenu();
+            }
+        });
+        TextButton showItems = new TextButton("show items", skin);
+        showItems.setWidth(400);
+        showItems.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+                showItemOfShippingBin(App.getCurrentPlayerLazy().getShippingBin());
+            }
+        });
+
+        mainContent.add(nameOfDeletingItem).pad(5).width(400f).row();
+        mainContent.add(whatCount).pad(5).width(400f).row();
+        mainContent.add(sellButton).pad(5).width(400f).row();
+        mainContent.add(showItems).pad(5).width(400f).row();
+
+        Table scrollContent = new Table();
+        scrollContent.top();
+        for (Item item : backPack.getItems().keySet()) {
+            Label itemLabel = new Label(item.getName() + " -> " + backPack.getItems().get(item), skin);
+            scrollContent.add(itemLabel).pad(5).width(400f).row();
+        }
+
+        ScrollPane scrollPane = new ScrollPane(scrollContent, skin);
+        scrollPane.setScrollingDisabled(false, false);
+        scrollPane.setFadeScrollBars(false);
+
+        mainContent.add(scrollPane).pad(5).width(400f).height(300f).row();
+        mainContent.add(closeButton).pad(5).width(400f).row();
+
+        dialog.getContentTable().add(mainContent).expand().fill().pad(5).row();
+        dialog.button(closeButton);
+        dialog.pack();
+        dialog.setPosition(
+            (Gdx.graphics.getWidth() - dialog.getWidth()) / 2f,
+            (Gdx.graphics.getHeight() - dialog.getHeight()) / 2f
+        );
+        dialog.show(stage);
+    }
+
+    public void showItemOfShippingBin(ShippingBin shippingBin) {
+        Skin skin = GameAssetManager.skin;
+        Dialog dialog = new Dialog("items in shipping bin", skin);
+
+        Table content = new Table();
+        content.top();
+        StringBuilder message = new StringBuilder();
+        for (Item item : shippingBin.getShippingItemMap().keySet()) {
+            message.append(item.getName() + " -> " + shippingBin.getShippingItemMap().get(item) + "\n");
+        }
+
+        Label label = new Label(message.toString(), skin);
+        label.setWrap(false);
+        label.setAlignment(Align.topLeft);
+
+        Table innerTable = new Table();
+        innerTable.add(label).left().expandX();
+        innerTable.pack();
+
+        ScrollPane scrollPane = new ScrollPane(innerTable, skin);
+        scrollPane.setScrollingDisabled(false, false);
+
+        TextButton closeButton = new TextButton("Close", skin);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+            }
+        });
+
+        content.add(scrollPane).expand().fill().pad(5).width(400f).height(300f).row();
+        content.add(closeButton).pad(5).width(400f).row();
+
+        dialog.getContentTable().add(content).expand().fill().pad(5).row();
+
+        dialog.button(closeButton);
+        dialog.show(stage);
+    }
+
 }

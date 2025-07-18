@@ -3,8 +3,8 @@ package org.example.models.enums;
 public enum Weather {
     SUNNY("Sunny"),
     RAINY("Rainy"),
-    STORM("Stormy"),
-    SNOW("Snowy");
+    STORMY("Stormy"),
+    SNOWY("Snowy");
     private final String name;
 
     Weather(String name) {
