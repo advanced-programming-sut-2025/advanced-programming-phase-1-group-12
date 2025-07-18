@@ -32,6 +32,7 @@ import org.example.models.Item;
 import org.example.models.Place.Farm;
 import org.example.models.ProductsPackage.ArtisanItem;
 import org.example.models.RelatedToUser.Ability;
+import org.example.models.ShippingBin;
 import org.example.models.ToolsPackage.Tools;
 
 import java.lang.reflect.Method;
