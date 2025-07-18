@@ -40,7 +40,7 @@ public enum TypeOfPlant {
     BOK_CHOY("Bok Choy", SeedTypes.BokChoySeeds, "1-1-1-1", 4, true, -1, 80, true, 25, 11, List.of(Season.AUTUMN), null, false, false, PlantType.Crop),
     BROCCOLI("Broccoli", SeedTypes.BROCCOLI_SEEDS, "2-2-2-2", 8, false, 4, 70, true, 63, 28, List.of(Season.AUTUMN), null, false, false, PlantType.Crop),
     CRANBERRIES("Cranberries", SeedTypes.CRANBERRYSeeds, "1-2-1-1-2", 7, false, 5, 75, true, 38, 17, List.of(Season.AUTUMN), null, false, false, PlantType.Crop),
-    EGGPLANT("Eggplant", SeedTypes.EggplantSeeds, "1-1-1-1", 5, false, 5, 60, true, 20, 9, List.of(Season.AUTUMN), null, false, false, PlantType.Crop),
+    EGGPLANT("Eggplant", SeedTypes.EggplantSeeds, "1-1-1-1-1", 5, false, 5, 60, true, 20, 9, List.of(Season.AUTUMN), null, false, false, PlantType.Crop),
     FAIRY_ROSE("Fairy Rose", SeedTypes.FairySeeds, "1-4-4-3", 12, true, -1, 290, true, 45, 20, List.of(Season.AUTUMN), null, false, false, PlantType.Crop),
     GRAPE("Grape", SeedTypes.GrapeStarter, "1-1-2-3-3", 10, false, 3, 80, true, 38, 17, List.of(Season.AUTUMN), null, false, false, PlantType.Crop),
     PUMPKIN("Pumpkin", SeedTypes.PumpkinSeeds, "1-2-3-4-3", 13, true, -1, 320, false, -1, -1, List.of(Season.AUTUMN), null, true, false, PlantType.Crop),
@@ -65,7 +65,7 @@ public enum TypeOfPlant {
     MAPLE_TREE("Maple Tree", SeedTypes.MapleSeeds, "7-7-7-7", 28, false, 9, 200, false, -1, -1, List.of(Season.AUTUMN,Season.SPRING, Season.SUMMER, Season.WINTER), FruitType.Maple_Syrup, false, true, PlantType.ForagingTree),
     PINE_TREE("Pine Tree", SeedTypes.PineCones, "7-7-7-7", 28, false, 5, 100, false, -1, -1, List.of(Season.AUTUMN,Season.SPRING, Season.SUMMER, Season.WINTER), FruitType.Pine_Tar, false, true, PlantType.ForagingTree),
     MUSHROOM_TREE("Mushroom Tree", SeedTypes.MushroomTreeSeeds, "7-7-7-7", 28, false, 1, 40, true, 38, 17, List.of(Season.AUTUMN,Season.SPRING, Season.SUMMER, Season.WINTER), FruitType.Common_Mushroom, false, true, PlantType.ForagingTree),
-    MAHOGANY_TREE("mahogany Tree", SeedTypes.MahoganySeeds, "7-7-7-7", 28, false, 1, 40, false, -1, -1, List.of(Season.AUTUMN,Season.SPRING, Season.SUMMER, Season.WINTER), null, false, true, PlantType.ForagingTree);
+    MAHOGANY_TREE("Mahogany Tree", SeedTypes.MahoganySeeds, "7-7-7-7", 28, false, 1, 40, false, -1, -1, List.of(Season.AUTUMN,Season.SPRING, Season.SUMMER, Season.WINTER), null, false, true, PlantType.ForagingTree);
 
     public final String name;
     public final SeedTypes source;
@@ -115,7 +115,7 @@ public enum TypeOfPlant {
 
     public static TypeOfPlant nameToCraftType(String name){
         for(TypeOfPlant p : TypeOfPlant.values()){
-            if(p.name.equals(name)){
+            if(p.getName().equalsIgnoreCase(name)){
                 return p;
             }
         }
@@ -124,11 +124,11 @@ public enum TypeOfPlant {
 
     public static TypeOfPlant sourceTypeToCraftType(SeedTypes seedTypes){
         for(TypeOfPlant ct : TypeOfPlant.values()){
-            if(ct.source.equals(seedTypes)){
+            if(ct.getSource().equals(seedTypes)){
                 return ct;
             }
         }
-        return null;
+        return BROCCOLI;
     }
 
     public PlantType getPlantType() {

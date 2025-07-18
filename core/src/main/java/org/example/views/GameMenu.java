@@ -286,10 +286,22 @@ public class GameMenu extends InputAdapter implements Screen {
 
             float offX = 0, offY = 0;
             switch (player.getPlayerController().getFacing()) {
-                case UP    -> { offX =  6;  offY = 20; }
-                case DOWN  -> { offX = 10;  offY =  4; }
-                case LEFT  -> { offX = -4;  offY = 12; }
-                case RIGHT -> { offX = 18;  offY = 12; }
+                case UP -> {
+                    offX = 6;
+                    offY = 20;
+                }
+                case DOWN -> {
+                    offX = 10;
+                    offY = 4;
+                }
+                case LEFT -> {
+                    offX = -4;
+                    offY = 12;
+                }
+                case RIGHT -> {
+                    offX = 18;
+                    offY = 12;
+                }
             }
 
             float toolW = 44, toolH = 44;
@@ -398,9 +410,9 @@ public class GameMenu extends InputAdapter implements Screen {
         float clockX = stage.getWidth() - clockSize - 20f;
         float clockY = stage.getHeight() - clockSize - 20f;
 
-        dayLabel.setPosition(clockX + clockSize/2 - dayLabel.getWidth()/2 - 3f, clockY + 85f);
-        timeLabel.setPosition(clockX + clockSize/2 - timeLabel.getWidth()/2 -3f, clockY + 45f);
-        goldLabel.setPosition(clockX + clockSize/2 + goldLabel.getWidth()/2 - 20f, clockY + 12f);
+        dayLabel.setPosition(clockX + clockSize / 2 - dayLabel.getWidth() / 2 - 3f, clockY + 85f);
+        timeLabel.setPosition(clockX + clockSize / 2 - timeLabel.getWidth() / 2 - 3f, clockY + 45f);
+        goldLabel.setPosition(clockX + clockSize / 2 + goldLabel.getWidth() / 2 - 20f, clockY + 12f);
     }
 
     private void updateSeasonAndWeatherDisplay() {
@@ -471,7 +483,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
-        if(App.getCurrentPlayerLazy().getCurrentTool() != null) {
+        if (App.getCurrentPlayerLazy().getCurrentTool() != null) {
             toolsController.handleToolRotation(screenX, screenY);
             return false;
         }
@@ -480,7 +492,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        if(App.getCurrentPlayerLazy().getCurrentTool() != null) {
+        if (App.getCurrentPlayerLazy().getCurrentTool() != null) {
             Location targetLocation = getClickedLocation(screenX, screenY);
             if (targetLocation != null) {
                 showToolUseDialog(targetLocation);
@@ -604,6 +616,10 @@ public class GameMenu extends InputAdapter implements Screen {
         }
         if (keycode == Input.Keys.E) {
             App.getCurrentPlayerLazy().setEnergy(2000);
+            return true;
+        }
+        if (keycode == Input.Keys.A) {
+            App.getCurrentGame().getDate().changeAdvancedDay(2);
             return true;
         }
         if (keycode == Input.Keys.T) {
@@ -891,17 +907,17 @@ public class GameMenu extends InputAdapter implements Screen {
         content.add(closeButton).pad(5).width(400f).row();
         content.add(exitGameButton).pad(5).width(400f).row();
 
-        HashMap<TextButton, Player>removePlayers = new HashMap<>();
-        for(Player player : App.getCurrentGame().getPlayers()) {
-            if(!player.equals(App.getCurrentGame().getCurrentPlayer())) {
+        HashMap<TextButton, Player> removePlayers = new HashMap<>();
+        for (Player player : App.getCurrentGame().getPlayers()) {
+            if (!player.equals(App.getCurrentGame().getCurrentPlayer())) {
                 removePlayers.put(new TextButton("Remove " + player.getUser().getUserName(), skin), player);
             }
         }
-        for(TextButton textButton : removePlayers.keySet()) {
+        for (TextButton textButton : removePlayers.keySet()) {
             content.add(textButton).pad(5).width(400f).row();
             dialog.button(textButton);
         }
-        for(TextButton textButton : removePlayers.keySet()) {
+        for (TextButton textButton : removePlayers.keySet()) {
             textButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
@@ -1127,7 +1143,7 @@ public class GameMenu extends InputAdapter implements Screen {
             });
 
             boolean isCurrent = tool.equals(App.getCurrentPlayerLazy().getCurrentTool());
-            if(isCurrent) toolLabel.setColor(Color.GREEN);
+            if (isCurrent) toolLabel.setColor(Color.GREEN);
             content.add(toolLabel).pad(10).left();
             content.add(toolButton).pad(10).width(100f).height(100f);
             if (isCurrent) {
@@ -1229,8 +1245,8 @@ public class GameMenu extends InputAdapter implements Screen {
         };
     }
 
-    private Texture getTrashCanTexture(int level){
-        return switch (level){
+    private Texture getTrashCanTexture(int level) {
+        return switch (level) {
             case 1 -> toolAssets.Trash_Can_Copper;
             case 2 -> toolAssets.Trash_Can_Steel;
             case 3 -> toolAssets.Trash_Can_Gold;
@@ -1349,6 +1365,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
         lightingAlpha = Math.max(-0.2f, Math.min(1f, baseAlpha));
     }
+
     public void craftingView() {
         Skin skin = GameAssetManager.skin;
         Dialog dialog = new Dialog("Crafting Menu", skin);
@@ -1395,7 +1412,7 @@ public class GameMenu extends InputAdapter implements Screen {
                         Gdx.app.postRunnable(() -> {
                             Main.getMain().setScreen(new FarmView(
                                 craftingRecipe.getName(),
-                                players, // make sure `players` is accessible
+                                players,
                                 App.getCurrentGame().getPlayers(),
                                 true
                             ));
@@ -1466,6 +1483,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
         dialog.show(stage);
     }
+
     public FarmingController getFarmingController() {
         return farmingController;
     }

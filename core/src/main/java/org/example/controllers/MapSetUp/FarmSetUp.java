@@ -18,11 +18,6 @@ import java.util.*;
 public class FarmSetUp {
 
     static Random rand = new Random();
-    public ArrayList<Location> randomTree(Farm farm){
-        int numberOfTrees = rand.nextInt(10) + 5;
-
-        return getLocations(farm, numberOfTrees);
-    }
 
     private ArrayList<Location> getLocations(Farm farm, int numberOfTrees) {
         ArrayList<Location> candidates = getAvailableLocationsInsideFarm(farm);
@@ -37,7 +32,6 @@ public class FarmSetUp {
 
     public ArrayList<Location> randomStone(Farm farm){
         int numberOfStones = rand.nextInt(6) + 3;
-
         return getLocations(farm, numberOfStones);
     }
 
@@ -111,21 +105,6 @@ public class FarmSetUp {
             GreenHouse(newFarm.getGreenHouse());
             ShackSetUp(newFarm.getShack());
             ShackSetUp(newFarm.getShack2());
-        }
-
-        for(Location location : randomTree(newFarm)){
-            List<TypeOfPlant> allTree = new ArrayList<>();
-            for(TypeOfPlant tree : TypeOfPlant.values()) {
-                if(tree.getPlantType().equals(PlantType.ForagingTree))
-                    allTree.add(tree);
-            }
-
-            Collections.shuffle(allTree);
-            TypeOfPlant treeType = allTree.get(0);
-
-            Plant tree = new Plant(location,true, treeType);
-            location.setObjectInTile(tree);
-            location.setTypeOfTile(TypeOfTile.PLANT);
         }
         for(Location location : randomStone(newFarm)){
             List<MineralTypes> allMinerals = new ArrayList<>(Arrays.asList(MineralTypes.values()));

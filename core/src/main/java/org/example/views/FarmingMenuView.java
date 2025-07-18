@@ -17,6 +17,7 @@ import org.example.models.Item;
 import org.example.models.enums.Types.TypeOfTile;
 import org.example.models.enums.foraging.Plant;
 import org.example.models.BackPack;
+import org.example.models.enums.foraging.Seed;
 
 import java.util.List;
 import java.util.Map;
@@ -52,10 +53,10 @@ public class FarmingMenuView implements Screen {
 
         for (Map.Entry<Item, Integer> entry : items.entrySet()) {
             Item item = entry.getKey();
-            if (item instanceof Plant plant) {
-                TextButton seedButton = new TextButton(plant.getName(), skin);
+            if (item instanceof Seed seed) {
+                TextButton seedButton = new TextButton(seed.getName(), skin);
                 seedButton.addListener(event -> {
-                    farmingController.plant(plant.getTypeOfPlant().getSource().getName(), location);
+                    farmingController.plant(seed.getType().getName(), location);
                     return true;
                 });
                 table.add(seedButton).pad(10).width(200).height(50);
@@ -68,17 +69,10 @@ public class FarmingMenuView implements Screen {
             Main.getMain().setScreen(new GameMenu(players));
             return true;
         });
-
         table.add(backButton).width(200).height(50).center().pad(10);
         table.row().padTop(20);
 
         stage.addActor(table);
-    }
-
-    private void plantSeed(Plant plant, Location location) {
-        App.getCurrentPlayerLazy().getBackPack().decreaseItem(plant, 1);
-        location.setObjectInTile(plant);
-        location.setTypeOfTile(TypeOfTile.PLANT);
     }
 
     @Override
@@ -93,13 +87,16 @@ public class FarmingMenuView implements Screen {
     }
 
     @Override
-    public void pause() {}
+    public void pause() {
+    }
 
     @Override
-    public void resume() {}
+    public void resume() {
+    }
 
     @Override
-    public void hide() {}
+    public void hide() {
+    }
 
     @Override
     public void dispose() {

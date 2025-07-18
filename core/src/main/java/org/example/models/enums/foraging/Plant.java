@@ -23,7 +23,7 @@ public class Plant extends Item {
         super(typeOfPlant.getName(), Quality.NORMAL, typeOfPlant.baseSellPrice);
         this.location = location;
         this.hasBeenFertilized = false;
-        this.dayPast = 2;
+        this.dayPast = 3;
         this.currentStage = 0;
         this.age = 0;
         this.isOneTime = true;
@@ -60,14 +60,6 @@ public class Plant extends Item {
 
     public boolean isHasBeenFertilized() {
         return hasBeenFertilized;
-    }
-
-    public int getTotalTimeNeeded() {
-        return totalTimeNeeded;
-    }
-
-    public void setTotalTimeNeeded(int totalTimeNeeded) {
-        this.totalTimeNeeded = totalTimeNeeded;
     }
 
     public int getCurrentStage() {

@@ -227,7 +227,7 @@ public class Date implements Runnable {
                     if (plant.getDayPast() <= 0) {
                         System.out.println("you lost plant at location: " + plant.getLocation().getxAxis() + ", " + plant.getLocation().getyAxis());
                         Location currentLocation = plant.getLocation();
-                        currentLocation.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
+                        currentLocation.setTypeOfTile(TypeOfTile.BURNED_GROUND);
                         currentLocation.setObjectInTile(null);
                         continue;
                     }
@@ -252,39 +252,6 @@ public class Date implements Runnable {
                     }
                 }
             }
-
-//            for (Tree tree : farm.getTrees()) {
-//                if (tree.isHasBeenWatering()) {
-//                    tree.setHasBeenWatering(false);
-//                    continue;
-//                }
-//                if (!tree.isHasBeenFertilized()) {
-//                    tree.setDayPast(tree.getDayPast() - 1);
-//                    if (tree.getDayPast() <= 0) {
-//                        System.out.println("you lost plant at location: " + tree.getLocation().getxAxis() + ", " + tree.getLocation().getyAxis());
-//                        Location currentLocation = tree.getLocation();
-//                        currentLocation.setTypeOfTile(TypeOfTile.GROUND);
-//                        currentLocation.setObjectInTile(null);
-//                    }
-//                }
-//                tree.setHasBeenFertilized(false);
-//                tree.setAge(tree.getAge() + 1);
-//                int currentStage = tree.getCurrentStage();
-//                int dayNeed = 0;
-//                for (int i = 0; i < currentStage; i++) {
-//                    dayNeed += tree.getType().stages[i];
-//                }
-//                if (tree.getAge() >= dayNeed) {
-//                    tree.setCurrentStage(tree.getCurrentStage() + 1);
-//                }
-//                if (!tree.getType().oneTime && !tree.isOneTime()) {
-//                    tree.setRegrowthTime(tree.getRegrowthTime() + 1);
-//                    if (tree.getRegrowthTime() >= tree.getType().regrowthTime) {
-//                        tree.setRegrowthTime(0);
-//                        tree.setOneTime(true);
-//                    }
-//                }
-//            }
         }
     }
 
@@ -339,6 +306,7 @@ public class Date implements Runnable {
                 Location location = seedPlacing.get(i);
                 SeedTypes seedSeason = allSeeds.get(i);
                 TypeOfPlant allCrops = TypeOfPlant.sourceTypeToCraftType(seedSeason);
+                assert allCrops != null;
                 Plant newPlant = new Plant(location, true, allCrops);
                 farm.getPlantOfFarm().add(newPlant);
                 if (newPlant.getTypeOfPlant() != null)

@@ -27,19 +27,6 @@ public class GameAssetManager {
     private final Texture coop = new Texture("Decor/Stone_Floor_Tile.png");
     private final Texture ploughedLand = new Texture("Flooring/Flooring_14.png");
 
-    private static final Texture APRICOT_TREE = new Texture("Trees/Apricot_Stage_5_Fruit.png");
-    private static final Texture APPLE_TREE = new Texture("Trees/Apple_Stage_5_Fruit.png");
-    private static final Texture CHERRY_TREE = new Texture("Trees/Cherry_Stage_5_Fruit.png");
-    private static final Texture OAK_TREE = new Texture("Trees/Oak_Stage_1.png");
-    private static final Texture MAPLE_TREE = new Texture("Trees/Maple_Stage_4.png");
-    private static final Texture PINE_TREE = new Texture("Trees/Pine_Stage_4.png");
-    private static final Texture MUSHROOM_TREE = new Texture("Trees/MushroomTree_Stage_5.png");
-    private static final Texture PEACH_TREE = new Texture("Trees/Peach_Stage_5_Fruit.png");
-    private static final Texture MYSTIC_TREE = new Texture("Trees/Mystic_Tree_Stage_5.png");
-    private static final Texture ORANGE_TREE = new Texture("Trees/Orange_Stage_5_Fruit.png");
-    private static final Texture MANGO_TREE = new Texture("Trees/Mango_Stage_5_Fruit.png");
-    private static final Texture BANANA_TREE = new Texture("Trees/Banana_Stage_5_Fruit.png");
-
     private static final Texture LeahPortrait = new Texture("sprites/LeahPortrait.png");
     private static final Texture MarniePortrait = new Texture("sprites/MarniePortrait.png");
     private static final Texture AbigailPortrait = new Texture("sprites/AbigailPortrait.png");
@@ -125,40 +112,6 @@ public class GameAssetManager {
         return HOUSE;
     }
 
-    public static Texture treeType(Location location) {
-        Plant tree = (Plant) location.getObjectInTile();
-        TypeOfPlant type = tree.getTypeOfPlant();
-
-        switch (type) {
-            case APRICOT_TREE:
-                return getAPRICOT_TREE();
-            case APPLE_TREE:
-                return getAPPLE_TREE();
-            case CHERRY_TREE:
-                return getCHERRY_TREE();
-            case OAK_TREE:
-                return getOAK_TREE();
-            case MAPLE_TREE:
-                return getMAPLE_TREE();
-            case PINE_TREE:
-                return getPINE_TREE();
-            case MUSHROOM_TREE:
-                return getMUSHROOM_TREE();
-            case PEACH_TREE:
-                return getPEACH_TREE();
-            case MYSTIC_TREE:
-                return getMYSTIC_TREE();
-            case ORANGE_TREE:
-                return getORANGE_TREE();
-            case MANGO_TREE:
-                return getMANGO_TREE();
-            case BANANA_TREE:
-                return getBANANA_TREE();
-            default:
-                return getORANGE_TREE();
-        }
-    }
-
     public static Texture craftType(Location location) {
         Craft craft = (Craft) location.getObjectInTile();
         CraftingRecipe recipe = craft.getRecipe();
@@ -200,54 +153,6 @@ public class GameAssetManager {
         }
         //TODO :bomb and scarecrow stuff be added?
         return charcoal;
-    }
-
-    public static Texture getAPRICOT_TREE() {
-        return APRICOT_TREE;
-    }
-
-    public static Texture getAPPLE_TREE() {
-        return APPLE_TREE;
-    }
-
-    public static Texture getCHERRY_TREE() {
-        return CHERRY_TREE;
-    }
-
-    public static Texture getOAK_TREE() {
-        return OAK_TREE;
-    }
-
-    public static Texture getMAPLE_TREE() {
-        return MAPLE_TREE;
-    }
-
-    public static Texture getPINE_TREE() {
-        return PINE_TREE;
-    }
-
-    public static Texture getMUSHROOM_TREE() {
-        return MUSHROOM_TREE;
-    }
-
-    public static Texture getPEACH_TREE() {
-        return PEACH_TREE;
-    }
-
-    public static Texture getMYSTIC_TREE() {
-        return MYSTIC_TREE;
-    }
-
-    public static Texture getORANGE_TREE() {
-        return ORANGE_TREE;
-    }
-
-    public static Texture getMANGO_TREE() {
-        return MANGO_TREE;
-    }
-
-    public static Texture getBANANA_TREE() {
-        return BANANA_TREE;
     }
 
     public Texture getBarn() {

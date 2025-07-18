@@ -3,6 +3,8 @@ package org.example.views;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.example.models.Assets.GameAssetManager;
+import org.example.models.Assets.PlantAssetsManager;
+import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.enums.Types.TypeOfTile;
 import org.example.models.map;
@@ -47,14 +49,10 @@ public class PixelMapRenderer {
                 return GameAssetManager.getGameAssetManager().getQUARRY();
             case STORE:
                 return GameAssetManager.getGameAssetManager().getSTORE();
-            case STONE:
-                return GameAssetManager.getGameAssetManager().getSTONE();
             case NPC_VILLAGE:
                 return GameAssetManager.getGameAssetManager().getNPC_VILLAGE();
             case BURNED_GROUND:
                 return GameAssetManager.getGameAssetManager().getBURNED_GROUND();
-            case PLANT:
-                return GameAssetManager.getGameAssetManager().treeType(location);
             case BARN:
                 return GameAssetManager.getGameAssetManager().getBarn();
             case COOP:
@@ -94,17 +92,6 @@ public class PixelMapRenderer {
 
                 if (!hasLeft && !hasAbove) houseAnchors.add(loc);
             }
-//            for (Farm farm : App.getCurrentGame().getFarms()) {
-//                for (FarmAnimals farmAnimal : farm.getFarmAnimals()) {
-//                    if (farmAnimal.getPosition().equals(loc)) {
-//                        int animalSize = 50;
-//                        float animalX = offsetX + loc.getxAxis() * tileSize + (tileSize - animalSize) / 2f;
-//                        float animalY = offsetY + loc.getyAxis() * tileSize + (tileSize - animalSize) / 2f;
-//
-//                        batch.draw(farmAnimal.getTexture(), animalX, animalY, animalSize, animalSize);
-//                    }
-//                }
-//            }
         }
         for (Location anchor : greenhouseAnchors) {
             float drawX = offsetX + anchor.getxAxis() * tileSize;
@@ -116,8 +103,16 @@ public class PixelMapRenderer {
             float drawY = offsetY + anchor.getyAxis() * tileSize;
             batch.draw(GameAssetManager.getGameAssetManager().getHOUSE(), drawX, drawY, tileSize * TILES_W, tileSize * TILES_H);
         }
+        for (Location loc : App.getCurrentGame().getMainMap().getTilesOfMap()) {
+            float drawX = offsetX + loc.getxAxis() * tileSize;
+            float drawY = offsetY + loc.getyAxis() * tileSize;
+            if (loc.getTypeOfTile() == TypeOfTile.PLANT) {
+                batch.draw(PlantAssetsManager.treeType(loc), drawX, drawY, tileSize, tileSize);
+            } else if(loc.getTypeOfTile() == TypeOfTile.STONE){
+                batch.draw(GameAssetManager.getGameAssetManager().getSTONE(), drawX, drawY, 50, 50);
+            }
+        }
     }
-
 
     public void dispose() {
         GameAssetManager.dispose();
