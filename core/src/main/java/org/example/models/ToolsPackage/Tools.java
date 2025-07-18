@@ -138,7 +138,7 @@ public class Tools extends Item {
         if(App.getCurrentGame().getDate().getWeather().equals(Weather.RAINY)){
             energyCost *= 1.5;
         }
-        if(App.getCurrentGame().getDate().getWeather().equals(Weather.SNOW)){
+        if(App.getCurrentGame().getDate().getWeather().equals(Weather.SNOWY)){
             energyCost *= 2;
         }
         App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - energyCost);

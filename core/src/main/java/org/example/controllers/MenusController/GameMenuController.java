@@ -28,7 +28,6 @@ import org.example.models.enums.*;
 import org.example.models.Fundementals.Player;
 import org.example.models.ToolsPackage.ToolEnums.BackPackTypes;
 import org.example.models.enums.Types.Cooking;
-import org.example.models.enums.Types.CraftingRecipe;
 import org.example.models.enums.Types.StoreProductsTypes;
 import org.example.models.enums.Types.TypeOfTile;
 import org.example.models.NPC.NPC;
@@ -182,7 +181,7 @@ public class GameMenuController {
         }
         App.getCurrentGame().getDate().changeAdvancedDay(days);
         App.getCurrentGame().getDate().setHour(9);
-        if (App.getCurrentGame().getDate().getWeather().equals(Weather.STORM)) {
+        if (App.getCurrentGame().getDate().getWeather().equals(Weather.STORMY)) {
             Random random = new Random();
             int x = random.nextInt(200) + 1;
             int y = random.nextInt(200) + 1;

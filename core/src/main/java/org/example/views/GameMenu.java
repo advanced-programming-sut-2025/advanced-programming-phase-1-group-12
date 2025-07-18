@@ -42,6 +42,7 @@ import java.util.List;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.GL20;
 import org.example.models.enums.Types.CraftingRecipe;
+import org.example.models.enums.Weather;
 
 public class GameMenu extends InputAdapter implements Screen {
     private final GameMenuController controller = new GameMenuController();
@@ -85,6 +86,12 @@ public class GameMenu extends InputAdapter implements Screen {
     private boolean isRaining = false;
     private float rainSpawnTimer = 0f;
     private final float RAIN_SPAWN_INTERVAL = 0.05f;
+
+    private List<SnowFlake> snowFlakes;
+    private Texture[] snowTextures;
+    private boolean isSnowing = false;
+    private float snowSpawnTimer = 0f;
+    private final float SNOW_SPAWN_INTERVAL = 0.1f;
 
     private Texture clockHandTexture;
     private float clockHandRotation = 0f;
@@ -135,6 +142,40 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
+    public static class SnowFlake {
+        public float x, y;
+        public float speedY, speedX;;
+        public float alpha;
+        public Texture texture;
+        public float rotation;
+        public float rotationSpeed;
+        public float scale;
+
+        public SnowFlake(float x, float y, float speedY, Texture texture) {
+            this.x = x;
+            this.y = y;
+            this.speedY = speedY;
+            this.speedX = (float)(Math.random() - 0.5) * 30f;
+            this.texture = texture;
+            this.alpha = 0.7f + (float)Math.random() * 0.3f;
+            this.rotation = (float)Math.random() * 360f;
+            this.rotationSpeed = (float)(Math.random() - 0.5) * 60f;
+            this.scale = 0.8f + (float)Math.random() * 0.4f;
+        }
+
+        public void update(float delta) {
+            y -= speedY * delta;
+            x += speedX * delta;
+            rotation += rotationSpeed * delta;
+
+            x += Math.sin(y * 0.005f) * 10f * delta;
+        }
+
+        public boolean isOffScreen() {
+            return y < -100f; // Remove when off screen
+        }
+    }
+
     @Override
     public void show() {
         batch = Main.getMain().getBatch();
@@ -146,9 +187,8 @@ public class GameMenu extends InputAdapter implements Screen {
         clockHandRegion = new TextureRegion(clockHandTexture);
 
 
-        // Initialize lighting system
         initializeLighting();
-        initializeRainSystem();
+        initializeWeatherSystem();
 
 
         float clockSize = 100f;
@@ -259,7 +299,7 @@ public class GameMenu extends InputAdapter implements Screen {
         updateLightingWithSeasons();
         updateClockHandRotation();
 
-        updateRainSystem(delta);
+        updateWeatherSystem(delta);
 
         if (errorLabel.isVisible()) {
             timeSinceError += delta;
@@ -426,7 +466,7 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
 
-        renderRain(batch);
+        renderWeather(batch);
 
 
         renderLightingOverlay();
@@ -515,6 +555,15 @@ public class GameMenu extends InputAdapter implements Screen {
         if (shapeRenderer != null) {
             shapeRenderer.dispose();
         }
+
+        if (snowTextures != null) {
+            for (Texture snowTexture : snowTextures) {
+                if (snowTexture != null) {
+                    snowTexture.dispose();
+                }
+            }
+        }
+
         stage.dispose();
         pixelMapRenderer.dispose();
         font.dispose();
@@ -686,7 +735,7 @@ public class GameMenu extends InputAdapter implements Screen {
             return true;
         }
         if (keycode == Input.Keys.R) {
-            changeRainStatus();
+            changeWeatherStatus();
             return true;
         }
         return false;
@@ -1338,7 +1387,8 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     public String getWeather() {
-        return App.getCurrentGame().getDate().getWeather().name();
+        Weather weather =  App.getCurrentGame().getDate().getWeather();
+        return Weather.getName(weather);
     }
 
     public int getGold() {
@@ -1473,13 +1523,13 @@ public class GameMenu extends InputAdapter implements Screen {
                     @Override
                     public void clicked(InputEvent event, float x, float y) {
                         Gdx.app.postRunnable(() -> {
-                            Main.getMain().setScreen(new FarmView(
-                                craftingRecipe.getName(),
-                                players, // make sure `players` is accessible
-                                App.getCurrentGame().getPlayers(),
-                                true,
-                                false
-                            ));
+//                            Main.getMain().setScreen(new FarmView(
+//                                craftingRecipe.getName(),
+//                                players, // make sure `players` is accessible
+//                                App.getCurrentGame().getPlayers(),
+//                                true,
+//                                false
+//                            ));
                         });
                     }
                 });
@@ -1592,15 +1642,23 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
 
-    private void updateRainSystem(float delta) {
+    private void updateWeatherSystem(float delta) {
         String currentWeather = getWeather();
         boolean shouldRain = currentWeather.equalsIgnoreCase("rainy") || currentWeather.equals("stormy");
+        boolean shouldSnow = currentWeather.equalsIgnoreCase("snowy");
 
         if (shouldRain && !isRaining) {
             isRaining = true;
         } else if (!shouldRain && isRaining) {
             isRaining = false;
         }
+
+        if (shouldSnow && !isSnowing) {
+            isSnowing = true;
+        } else if (!shouldSnow && isSnowing) {
+            isSnowing = false;
+        }
+
 
         if (isRaining && rainTexture1 != null && rainTexture2 != null) {
             rainSpawnTimer += delta;
@@ -1610,12 +1668,27 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
 
+        if (isSnowing && snowTextures != null) {
+            snowSpawnTimer += delta;
+            if (snowSpawnTimer >= SNOW_SPAWN_INTERVAL) {
+                spawnSnowFlakes();
+                snowSpawnTimer = 0f;
+            }
+        }
+
         for (int i = rainDrops.size() - 1; i >= 0; i--) {
             RainDrop drop = rainDrops.get(i);
             drop.update(delta);
-
             if (drop.isOffScreen()) {
                 rainDrops.remove(i);
+            }
+        }
+
+        for (int i = snowFlakes.size() - 1; i >= 0; i--) {
+            SnowFlake flake = snowFlakes.get(i);
+            flake.update(delta);
+            if (flake.isOffScreen()) {
+                snowFlakes.remove(i);
             }
         }
     }
@@ -1637,36 +1710,81 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
-    private void renderRain(SpriteBatch batch) {
+    private void spawnSnowFlakes() {
+        float cameraLeft = camera.position.x - camera.viewportWidth * camera.zoom * 0.5f;
+        float cameraRight = camera.position.x + camera.viewportWidth * camera.zoom * 0.5f;
+        float cameraTop = camera.position.y + camera.viewportHeight * camera.zoom * 0.5f;
 
-        if (!isRaining || rainDrops.isEmpty()) return;
+        int flakesToSpawn = 5 + (int)(Math.random() * 8);
 
+        for (int i = 0; i < flakesToSpawn; i++) {
+            float x = cameraLeft + (float)Math.random() * (cameraRight - cameraLeft);
+            float y = cameraTop + 100f;
+            float speed = 50f + (float)Math.random() * 100f;
 
-        for (RainDrop drop : rainDrops) {
-            Color oldColor = batch.getColor();
-            batch.setColor(oldColor.r, oldColor.g, oldColor.b, drop.alpha);
+            Texture snowTexture = snowTextures[(int)(Math.random() * snowTextures.length)];
 
-            float dropSize = 15f;
-            batch.draw(drop.texture, drop.x, drop.y, dropSize, dropSize);
-
-            batch.setColor(oldColor);
+            snowFlakes.add(new SnowFlake(x, y, speed, snowTexture));
         }
     }
 
-    public void changeRainStatus(){
+    private void renderWeather(SpriteBatch batch) {
+        if (isRaining && !rainDrops.isEmpty()) {
+            for (RainDrop drop : rainDrops) {
+                Color oldColor = batch.getColor();
+                batch.setColor(oldColor.r, oldColor.g, oldColor.b, drop.alpha);
+
+                float dropSize = 15f;
+                batch.draw(drop.texture, drop.x, drop.y, dropSize, dropSize);
+
+                batch.setColor(oldColor);
+            }
+        }
+
+        if (isSnowing && !snowFlakes.isEmpty()) {
+            for (SnowFlake flake : snowFlakes) {
+                Color oldColor = batch.getColor();
+                batch.setColor(oldColor.r, oldColor.g, oldColor.b, flake.alpha);
+
+                float flakeSize = 20f * flake.scale;
+
+                TextureRegion flakeRegion = new TextureRegion(flake.texture);
+
+                batch.draw(flakeRegion,
+                    flake.x, flake.y,
+                    flakeSize / 2f, flakeSize / 2f,
+                    flakeSize, flakeSize,
+                    1f, 1f,
+                    flake.rotation);
+
+                batch.setColor(oldColor);
+            }
+        }
+    }
+
+    public void changeWeatherStatus(){
         isRaining = !isRaining;
+        isSnowing = !isSnowing;
     }
 
 
 
-    private void initializeRainSystem() {
+    private void initializeWeatherSystem() {
         rainDrops = new ArrayList<>();
+        snowFlakes = new ArrayList<>();
+
         try {
             rainTexture1 = new Texture(Gdx.files.internal("Clock/Rain/rain_0.png"));
             rainTexture2 = new Texture(Gdx.files.internal("Clock/Rain/rain_1.png"));
-            System.out.println("Rain textures loaded successfully");
+
+            snowTextures = new Texture[3];
+            snowTextures[0] = new Texture(Gdx.files.internal("Clock/Snow/Snow_0.png"));
+            snowTextures[1] = new Texture(Gdx.files.internal("Clock/Snow/Snow_1.png"));
+            snowTextures[2] = new Texture(Gdx.files.internal("Clock/Snow/Snow_2.png"));
+
+            System.out.println("Rain and snow textures loaded successfully");
         } catch (Exception e) {
-            System.err.println("Could not load rain textures: " + e.getMessage());
+            System.err.println("Could not load weather textures: " + e.getMessage());
         }
     }
 

@@ -44,7 +44,7 @@ public class Date implements Runnable {
         this.season = Season.SPRING;
         this.currentSeason = season.getValue();
         this.year = 2025;
-        this.weather = Weather.SUNNY;
+        this.weather = Weather.SNOWY;
         this.weatherOfSeason = initializeWeatherMap();
         this.tommorowWeather = weatherForecast(season);
     }
@@ -449,7 +449,7 @@ public class Date implements Runnable {
     }
 
     public Map<Season, List<Weather>> initializeWeatherMap() {
-        weatherOfSeason = Map.of(Season.SPRING, List.of(Weather.SUNNY, Weather.RAINY, Weather.STORM), Season.SUMMER, List.of(Weather.SUNNY, Weather.RAINY, Weather.STORM), Season.AUTUMN, List.of(Weather.SUNNY, Weather.RAINY, Weather.STORM), Season.WINTER, List.of(Weather.SUNNY, Weather.SNOW));
+        weatherOfSeason = Map.of(Season.SPRING, List.of(Weather.SUNNY, Weather.RAINY, Weather.STORMY), Season.SUMMER, List.of(Weather.SUNNY, Weather.RAINY, Weather.STORMY), Season.AUTUMN, List.of(Weather.SUNNY, Weather.RAINY, Weather.STORMY), Season.WINTER, List.of(Weather.SUNNY, Weather.SNOWY));
         return weatherOfSeason;
     }
 
