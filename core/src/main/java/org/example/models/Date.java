@@ -71,7 +71,7 @@ public class Date implements Runnable {
     public void changeAdvancedTime(int hour) {
         artisansUpdate(hour);
         this.hour += hour;
-        if (this.hour >= 22) {
+        if (this.hour > 22) {
             changeAdvancedDay(1);
             this.hour -= 13;
         }

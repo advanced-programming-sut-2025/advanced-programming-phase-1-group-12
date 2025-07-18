@@ -32,7 +32,6 @@ import org.example.models.Item;
 import org.example.models.Place.Farm;
 import org.example.models.ProductsPackage.ArtisanItem;
 import org.example.models.RelatedToUser.Ability;
-import org.example.models.ShippingBin;
 import org.example.models.ToolsPackage.Tools;
 
 import java.lang.reflect.Method;
@@ -86,6 +85,11 @@ public class GameMenu extends InputAdapter implements Screen {
     private float rainSpawnTimer = 0f;
     private final float RAIN_SPAWN_INTERVAL = 0.05f;
 
+    private Texture clockHandTexture;
+    private float clockHandRotation = 0f;
+    private TextureRegion clockHandRegion;
+
+
     private Map<Player, ProgressBar> energyBars;
     private Map<Craft, ProgressBar> craftBars;
 
@@ -137,6 +141,9 @@ public class GameMenu extends InputAdapter implements Screen {
         font = new BitmapFont(Gdx.files.internal("fonts/new.fnt"));
         clockTexture = new Texture(Gdx.files.internal("Clock/clock.png"));
         clockImage = new Image(clockTexture);
+        clockHandTexture = new Texture(Gdx.files.internal("Clock/flesh.png"));
+        clockHandRegion = new TextureRegion(clockHandTexture);
+
 
         // Initialize lighting system
         initializeLighting();
@@ -249,6 +256,7 @@ public class GameMenu extends InputAdapter implements Screen {
         updateClockDisplay();
         updateSeasonAndWeatherDisplay();
         updateLightingWithSeasons();
+        updateClockHandRotation();
 
         updateRainSystem(delta);
 
@@ -426,6 +434,8 @@ public class GameMenu extends InputAdapter implements Screen {
 
         stage.act(delta);
         stage.draw();
+        renderClockHand();
+
     }
     private void updateClockDisplay() {
         org.example.models.Date currentDate = App.getCurrentGame().getDate();
@@ -497,6 +507,9 @@ public class GameMenu extends InputAdapter implements Screen {
     public void dispose() {
         if (clockTexture != null) {
             clockTexture.dispose();
+        }
+        if (clockHandTexture != null) {
+            clockHandTexture.dispose();
         }
         if (shapeRenderer != null) {
             shapeRenderer.dispose();
@@ -1581,15 +1594,11 @@ public class GameMenu extends InputAdapter implements Screen {
     private void updateRainSystem(float delta) {
         String currentWeather = getWeather();
         boolean shouldRain = currentWeather.equalsIgnoreCase("rainy") || currentWeather.equals("stormy");
-//        System.out.println("shouldRain: " + shouldRain);
-//        System.out.println("currentWeather: " + currentWeather);
 
         if (shouldRain && !isRaining) {
             isRaining = true;
-//            System.out.println("Rain started! Weather: " + currentWeather);
         } else if (!shouldRain && isRaining) {
             isRaining = false;
-//            System.out.println("Rain stopped! Weather: " + currentWeather);
         }
 
         if (isRaining && rainTexture1 != null && rainTexture2 != null) {
@@ -1628,13 +1637,9 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void renderRain(SpriteBatch batch) {
-//
-//        System.out.println("isRaining: " + isRaining);
-//        System.out.println("rainDrops: " + rainDrops.size());
 
         if (!isRaining || rainDrops.isEmpty()) return;
 
-//        System.out.println("Rendering " + rainDrops.size() + " rain drops");
 
         for (RainDrop drop : rainDrops) {
             Color oldColor = batch.getColor();
@@ -1702,9 +1707,50 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
+
     private void removeBarIfExists (Craft craft) {
         ProgressBar bar = craftBars.remove(craft);
         if (bar != null) bar.remove();
+    }
+
+    private void updateClockHandRotation() {
+        org.example.models.Date currentDate = App.getCurrentGame().getDate();
+        int hour = currentDate.getHour();
+        float hourProgress = hour / 15.0f;
+        clockHandRotation = 270f - (hourProgress * 180f); // 270° to 90° over 24 hours
+
+        if (clockHandRotation < 0) {
+            clockHandRotation += 360f;
+        }
+    }
+
+    private void renderClockHand() {
+        float clockSize = 100f;
+        float clockX = stage.getWidth() - clockSize - 20f;
+        float clockY = stage.getHeight() - clockSize - 20f;
+
+        float clockCenterX = clockX + clockSize / 2f - 17f;
+        float clockCenterY = clockY + clockSize / 2f + 18f;
+
+        batch.setProjectionMatrix(stage.getCamera().combined);
+        batch.begin();
+
+        float handWidth = 10f;
+        float handLength = clockSize * 0.35f;
+
+        batch.draw(clockHandRegion,
+            clockCenterX - handWidth / 2f,        // x position (centered horizontally)
+            clockCenterY,                         // y position (at center)
+            handWidth / 2f,                       // origin x (rotation point)
+            0f,                                   // origin y (rotation point at base)
+            handWidth,                            // width
+            handLength,                           // height
+            1f,                                   // scale x
+            1f,                                   // scale y
+            clockHandRotation                     // rotation angle
+        );
+
+        batch.end();
     }
 
     public void shippingBinMenu(){
