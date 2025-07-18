@@ -1710,6 +1710,7 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
+
     private void spawnSnowFlakes() {
         float cameraLeft = camera.position.x - camera.viewportWidth * camera.zoom * 0.5f;
         float cameraRight = camera.position.x + camera.viewportWidth * camera.zoom * 0.5f;
@@ -1722,9 +1723,16 @@ public class GameMenu extends InputAdapter implements Screen {
             float y = cameraTop + 100f;
             float speed = 50f + (float)Math.random() * 100f;
 
-            Texture snowTexture = snowTextures[(int)(Math.random() * snowTextures.length)];
+            int textureIndex = (int)(Math.random() * snowTextures.length);
+            Texture snowTexture = snowTextures[textureIndex];
 
-            snowFlakes.add(new SnowFlake(x, y, speed, snowTexture));
+            SnowFlake snowFlake = new SnowFlake(x, y, speed, snowTexture);
+
+            if (textureIndex == 2) {
+                snowFlake.scale *= 1.5f;
+            }
+
+            snowFlakes.add(snowFlake);
         }
     }
 
