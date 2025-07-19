@@ -11,6 +11,8 @@ public class GameAssetManager {
     public static Skin skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
     private static GameAssetManager gameAssetManager;
 
+    private final Texture fridge = new Texture("Mini-Fridge.png");
+
     private final Texture LAKE_TEXTURE = new Texture("Flooring/Flooring_26.png");
     private final Texture PLANTS = new Texture("Flooring/Flooring_50.png");
     private final Texture STONE = new Texture("Rock/Farm_Boulder.png");
@@ -56,6 +58,20 @@ public class GameAssetManager {
     private static final Texture Fish_Smoker = new Texture("Crafting/Fish_Smoker.png");
 
     private static final Texture shippingBin = new Texture("Chest/Chest.png");
+
+    //foods
+    private final Texture Fried_Egg = new Texture("Recipe/Fried_Egg.png");
+    private final Texture BakedFish = new Texture("Recipe/Baked_Fish.png");
+    private final Texture Salad = new Texture("Recipe/Salad.png");
+    private final Texture Omelet = new Texture("Recipe/Omelet.png");
+    private final Texture PumpkinPie = new Texture("Recipe/Pumpkin_Pie.png");
+    private final Texture spaghetti = new Texture("Recipe/Spaghetti.png");
+    private final Texture pizza = new Texture("Recipe/Pizza.png");
+    private final Texture tortilla = new Texture("Recipe/Tortilla.png");
+    private final Texture makiRoll = new Texture("Recipe/Maki_Roll.png");
+    private final Texture espressso = new Texture("Recipe/Triple_Shot_Espresso.png");
+    private final Texture cookie = new Texture("Recipe/Cookie.png");
+    private final Texture farmerLunch = new Texture("Recipe/Farmer%27s_Lunch.png");
 
     //fish
     private final Texture nonLegendFish = new Texture("Fish/Blue_Discus.png");
@@ -229,5 +245,57 @@ public class GameAssetManager {
 
     public Texture getShippingBin() {
         return shippingBin;
+    }
+
+    public Texture getFried_Egg() {
+        return Fried_Egg;
+    }
+
+    public Texture getBakedFish() {
+        return BakedFish;
+    }
+
+    public Texture getSalad() {
+        return Salad;
+    }
+
+    public Texture getOmelet() {
+        return Omelet;
+    }
+
+    public Texture getPumpkinPie() {
+        return PumpkinPie;
+    }
+
+    public Texture getSpaghetti() {
+        return spaghetti;
+    }
+
+    public Texture getPizza() {
+        return pizza;
+    }
+
+    public Texture getTortilla() {
+        return tortilla;
+    }
+
+    public Texture getMakiRoll() {
+        return makiRoll;
+    }
+
+    public Texture getEspressso() {
+        return espressso;
+    }
+
+    public Texture getCookie() {
+        return cookie;
+    }
+
+    public Texture getFarmerLunch() {
+        return farmerLunch;
+    }
+
+    public Texture getFridge() {
+        return fridge;
     }
 }

@@ -1,10 +1,23 @@
 package org.example.models;
 
+import org.example.models.Fundementals.Location;
+
+import java.util.HashMap;
 import java.util.Map;
 
 public class Refrigrator {
     private Map<Item, Integer> products;
     private int maxProduction;
+    private Location location;
+
+    public Refrigrator() {
+        products = new HashMap<>();
+    }
+
+    public Refrigrator(Location location) {
+        this.location = location;
+        products = new HashMap<>();
+    }
 
     public Map<Item, Integer> getProducts() {
         return products;
@@ -16,7 +29,13 @@ public class Refrigrator {
 
 
     public void addItem(Item item, int amount) {
-        products.put(item, amount);
+        for(Item item1 : products.keySet()){
+            if(item1.getName().equalsIgnoreCase(item.getName())){
+                products.put(item1, products.get(item1) + amount);
+                return;
+            }
+        }
+        products.put(item,  amount);
     }
 
     public void decreaseItem(Item item, int amount) {
@@ -28,5 +47,18 @@ public class Refrigrator {
                 products.put(item, currentAmount - amount);
             }
         }
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public Item getItemByName(String itemName) {
+        for(Item item : products.keySet()){
+            if(item.getName().equalsIgnoreCase(itemName)){
+                return item;
+            }
+        }
+        return null;
     }
 }

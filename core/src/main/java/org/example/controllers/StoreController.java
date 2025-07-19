@@ -412,6 +412,23 @@ public class StoreController {
         if (!backpack.checkCapacity(1)) {
             return new Result(false, "Not enough space in your inventory to add " + count + " of this item.");
         }
+        for (Cooking cooking : Cooking.values()) {
+            if (productName.equalsIgnoreCase(cooking.getName())) {
+                App.getCurrentPlayerLazy().getCookingRecepies().put(cooking, true);
+                return new Result(true, "You bought this recipe");
+            }
+        }
+        for (CraftingRecipe recipe : CraftingRecipe.values()) {
+            if (productName.equalsIgnoreCase(recipe.getName())) {
+                Item Wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Wood");
+                if( Wood == null || App.getCurrentPlayerLazy().getBackPack().getItems().get(Wood) < 30){
+                    return new Result(false, "you do not have enough Wood or Stone to buy this recipe");
+                }
+                App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Wood"), 30);
+                App.getCurrentPlayerLazy().getRecepies().put(recipe, true);
+                return new Result(true, "You bought this craft recipe");
+            }
+        }
 
         ItemBuilder.addToBackPack(item, count, Quality.NORMAL);
         return new Result(true, "Successfully added " + count + " " + productName + " to your inventory.");

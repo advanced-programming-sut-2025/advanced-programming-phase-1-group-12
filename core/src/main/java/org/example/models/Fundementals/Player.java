@@ -41,7 +41,7 @@ public class Player {
     private int money;
     private Player partner;
     private Map<CraftingRecipe, Boolean> recepies;
-    private Map<Cooking, Boolean> cookingRecepies = new HashMap<>();
+    private Map<Cooking, Boolean> cookingRecepies ;
     private ArrayList<Trade> trades = new ArrayList<>();
     private Tools currentTool;
     private Map<NPC, Date> metDates;
@@ -71,6 +71,7 @@ public class Player {
         this.money = 1_000_000;
         this.partner = null;
         this.recepies = new HashMap<>();
+        this.cookingRecepies = new HashMap<>();
         this.trades = new ArrayList<>();
         this.currentTool = null;
         this.isEnergyUnlimited = false;
@@ -213,7 +214,11 @@ public class Player {
         }
         cookingRecepies = new HashMap<>();
         for (Cooking cooking : Cooking.values()) {
-            cookingRecepies.put(cooking, false);
+            if(cooking.getSource().isEmpty()){
+                cookingRecepies.put(cooking, true);
+            } else{
+                cookingRecepies.put(cooking, false);
+            }
         }
     }
 

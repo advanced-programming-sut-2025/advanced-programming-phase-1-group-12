@@ -17,6 +17,7 @@ import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Player;
 import org.example.models.Place.Farm;
 import org.example.models.Place.Store;
+import org.example.models.Refrigrator;
 import org.example.models.enums.Types.TypeOfTile;
 import org.example.views.FarmingMenuView;
 import org.example.views.GameMenu;
@@ -142,6 +143,12 @@ public class PlayerController {
             gameMenu.craftingView();
             return;
         }
+        if(Gdx.input.isKeyPressed(Input.Keys.C)) {
+            GameMenu gameMenu = new GameMenu(players);
+            Main.getMain().setScreen(gameMenu);
+            gameMenu.cookingMenu();
+            return;
+        }
         if(Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             Vector3 world = GameMenu.getCamera().unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
             int tileX = (int) (world.x / 100f);
@@ -167,6 +174,12 @@ public class PlayerController {
                 return;
             }
             System.out.println(location.getTypeOfTile() + " " + location.getxAxis() + " " + location.getyAxis());
+
+            if(location.equals(App.getCurrentPlayerLazy().getRefrigrator().getLocation())) {
+                GameMenu gameMenu = new GameMenu(players);
+                Main.getMain().setScreen(gameMenu);
+                gameMenu.refrigratorMenu();
+            }
 
             for(FarmAnimals animals: App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()) {
                 if(animals.getPosition().equals(location)) {

@@ -355,7 +355,8 @@ public class GameMenuController {
                     portraitFrame = GameAssetManager.getMarniePortrait();
                 }
             }
-            Player newPlayer = new Player(user, null, false, null, new ArrayList<>(),
+            Player newPlayer = new
+                Player(user, null, false, null, new ArrayList<>(),
                 null, new BackPack(BackPackTypes.PRIMARY), false, false,
                 new ArrayList<>());
             newPlayer.setPlayerTexture(playerTexture);
@@ -372,6 +373,8 @@ public class GameMenuController {
             farm.setOwner(newPlayer);
             farm.setFarmID(farmId);
             newPlayer.setOwnedFarm(farm);
+            newPlayer.setRefrigrator(new Refrigrator(App.getCurrentGame().getMainMap().findLocation(newPlayer.getOwnedFarm().getShack().getLocation().getTopLeftCorner().getxAxis(),
+                newPlayer.getOwnedFarm().getShack().getLocation().getTopLeftCorner().getyAxis() + 4)));
             Location loc = farm.getLocation().getTopLeftCorner();
             newPlayer.setUserLocation(App.getCurrentGame().getMainMap().findLocation(loc.getxAxis(), loc.getyAxis()));
             PlayerController playerController = new PlayerController(newPlayer, this, usernames);
@@ -920,13 +923,19 @@ public class GameMenuController {
 
     public Result refrigerator(String command, String item){
         Player player = App.getCurrentGame().getCurrentPlayer();
-        if (command.equals("put")) {
-            Item getItem = App.getItemByName(item);
+        if (command.equalsIgnoreCase("put")) {
+            Item getItem = App.getCurrentPlayerLazy().getBackPack().getItemByName(item);
+            if(getItem == null){
+                return new Result(false, "Item not found in inventory");
+            }
             player.getRefrigrator().addItem(getItem, 1);
             player.getBackPack().decreaseItem(getItem, 1);
         }
-        if (command.equals("pick")) {
-            Item getItem = App.getItemByName(item);
+        if (command.equalsIgnoreCase("pick")) {
+            Item getItem = App.getCurrentPlayerLazy().getRefrigrator().getItemByName(item);
+            if(getItem == null){
+                return new Result(false, "Item not found in fridge");
+            }
             player.getBackPack().addItem(getItem, 1);
             player.getRefrigrator().decreaseItem(getItem, 1);
         }
