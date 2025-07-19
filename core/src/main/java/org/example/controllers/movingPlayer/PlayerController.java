@@ -149,6 +149,12 @@ public class PlayerController {
             gameMenu.cookingMenu();
             return;
         }
+        if(Gdx.input.isKeyPressed(Input.Keys.G)) {
+            GameMenu gameMenu = new GameMenu(players);
+            Main.getMain().setScreen(gameMenu);
+            gameMenu.eatMenu();
+            return;
+        }
         if(Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             Vector3 world = GameMenu.getCamera().unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
             int tileX = (int) (world.x / 100f);

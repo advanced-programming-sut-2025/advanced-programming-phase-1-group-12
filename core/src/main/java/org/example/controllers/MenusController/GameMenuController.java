@@ -1,6 +1,7 @@
 package org.example.controllers.MenusController;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.Main;
@@ -9,8 +10,10 @@ import org.example.controllers.NPCcontroller;
 import org.example.controllers.StoreController;
 import org.example.controllers.TradeController;
 import org.example.controllers.movingPlayer.PlayerController;
+import org.example.models.Animal.Fish;
 import org.example.models.Assets.GameAssetManager;
 import org.example.models.Eating.Food;
+import org.example.models.Eating.Fruits;
 import org.example.models.Fundementals.*;
 import org.example.models.MapDetails.GreenHouse;
 import org.example.models.MapDetails.Lake;
@@ -928,6 +931,10 @@ public class GameMenuController {
             if(getItem == null){
                 return new Result(false, "Item not found in inventory");
             }
+            //TODO:there are other edible things too!add them
+            if(!(getItem instanceof Food) && !(getItem instanceof Fish) && !(getItem instanceof Fruits) ){
+                return new Result(false, "Item is not edible");
+            }
             player.getRefrigrator().addItem(getItem, 1);
             player.getBackPack().decreaseItem(getItem, 1);
         }
@@ -951,7 +958,7 @@ public class GameMenuController {
         }
 
         if (!player.getCookingRecepies().get(cooking)) {  // Use the enum as key
-            return new Result(false, "you do not know this recepie");
+            return new Result(false, "you do not know this recipe");
         }
 
         if(!player.getBackPack().checkCapacity(1)){
@@ -962,7 +969,7 @@ public class GameMenuController {
         if (!checkIngredients(cooking)) {
             return new Result(false, "ingredient not enough!");
         }
-        Food newFood = new Food(recipe, cooking);
+        Food newFood = new Food(cooking.getFoodType().getName(), cooking);
         player.getBackPack().addItem(newFood, 1);
         return new Result(true, "processed food!");
 
@@ -1007,13 +1014,16 @@ public class GameMenuController {
                 App.getCurrentGame().getCurrentPlayer().increaseEnergy(10000);
             } else {
                 App.getCurrentPlayerLazy().setSkillBuffEaten(true);
-                App.getCurrentGame().getCurrentPlayer().getAbilityByName("Farming").setLevel(App.getCurrentGame().getCurrentPlayer().getAbilityByName("Farming").getLevel() + 1);
+                App.getCurrentGame().getCurrentPlayer().getAbilityByName("Farming").setLevel(
+                    App.getCurrentGame().getCurrentPlayer().getAbilityByName("Farming").getLevel() + 1
+                );
             }
-
-            return new Result(true, "eaten food!");
+            GameMenu.foodEaten = true;
+            return new Result(true, "eaten food!" + foodToEat.getFoodType().getName()+ " buffer: "+ foodToEat.getFoodType().getBuffer());
         } else if (artisanItem != null && foodToEat == null) {
             player.getBackPack().decreaseItem(artisanItem, 1);
             player.increaseEnergy(artisanItem.getEnergy());
+            GameMenu.foodEaten = true;
             return new Result(true, "eaten artisan food!");
         }
         return new Result(false, "food not found!");

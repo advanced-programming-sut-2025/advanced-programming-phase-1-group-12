@@ -104,6 +104,9 @@ public class GameMenu extends InputAdapter implements Screen {
 
     private float timeSinceError = 0f;
 
+    private float foodEffect = 0f;
+    public static boolean foodEaten = false;
+
     GameConsoleCommandHandler cmdHandler =
         new GameConsoleCommandHandler(controller,
             farmingController,
@@ -352,6 +355,17 @@ public class GameMenu extends InputAdapter implements Screen {
         font.getData().setScale(0.5f);
         font.draw(batch, player.getUser().getUserName(), scaledX,
             scaledY + player.getPlayerSprite().getHeight() + 10);
+        if(foodEaten){
+            foodEffect += delta;
+            if (foodEffect >= 2.0f){
+                foodEaten = false;
+            } else {
+                BitmapFont font1 = new BitmapFont();
+                font1.setColor(Color.GREEN);
+                font1.draw(batch, "**", scaledX + 80,
+                    scaledY + player.getPlayerSprite().getHeight() + 10);
+            }
+        }
 
         Tools equipped = App.getCurrentPlayerLazy().getCurrentTool();
         if (equipped != null)
@@ -471,9 +485,7 @@ public class GameMenu extends InputAdapter implements Screen {
                 batch.draw(animal.getTexture(), renderX, renderY);
             }
         }
-
         renderWeather(batch);
-
 
         renderLightingOverlay();
         batch.end();
@@ -550,6 +562,7 @@ public class GameMenu extends InputAdapter implements Screen {
             e.printStackTrace();
         }
     }
+
 
     @Override
     public void dispose() {
@@ -2087,16 +2100,15 @@ public class GameMenu extends InputAdapter implements Screen {
 
             TextButton cook = new TextButton(cooking.getName(), skin);
             if (!unlocked) {
-                cook.setDisabled(true);
-                cook.getLabel().setColor(0.5f, 0.5f, 0.5f, 1);
-            } else {
+                cook.getLabel().setColor(Color.GRAY);
+            }
                 cook.addListener(new ClickListener() {
                     @Override
                     public void clicked(InputEvent event, float x, float y) {
+                        System.out.println(cook.getLabel().toString());
                         showError(controller.prepare(cook.getText().toString()).getMessage());
                     }
                 });
-            }
 
             table.row();
             table.add(textureImage).width(48).height(48).padRight(10);
@@ -2179,4 +2191,54 @@ public class GameMenu extends InputAdapter implements Screen {
         );
         dialog.show(stage);
     }
+    public void eatMenu(){
+        Skin skin = GameAssetManager.skin;
+        Dialog dialog = new Dialog("Eat!", skin);
+
+        Table mainContent = new Table();
+        mainContent.top();
+
+        TextButton closeButton = new TextButton("Close", skin);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+            }
+        });
+
+        TextField nameOfDeletingItem = new TextField("", skin);
+        nameOfDeletingItem.setMessageText("Name of what you wanna eat");
+
+        TextButton eat = new TextButton("eat", skin);
+        eat.setWidth(400);
+        eat.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                GameMenuController gameMenuController = new GameMenuController();
+                Result result = gameMenuController.eat(nameOfDeletingItem.getText());
+                showError(result.getMessage());
+                dialog.hide();
+            }
+        });
+
+        mainContent.add(nameOfDeletingItem).pad(5).width(400f).row();
+        mainContent.add(eat).pad(5).width(400f).row();
+
+        Table scrollContent = new Table();
+        scrollContent.top();
+
+
+        mainContent.add(closeButton).pad(5).width(400f).row();
+
+        dialog.getContentTable().add(mainContent).expand().fill().pad(5).row();
+        dialog.button(closeButton);
+        dialog.pack();
+        dialog.setPosition(
+            (Gdx.graphics.getWidth() - dialog.getWidth()) / 2f,
+            (Gdx.graphics.getHeight() - dialog.getHeight()) / 2f
+        );
+        dialog.show(stage);
+    }
+
+
 }

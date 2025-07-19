@@ -2,10 +2,12 @@ package org.example.models.Fundementals;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import org.example.controllers.movingPlayer.PlayerController;
 import org.example.models.*;
+import org.example.models.Assets.GameAssetManager;
 import org.example.models.NPC.NPC;
 import org.example.models.Place.Farm;
 import org.example.models.ProductsPackage.ArtisanItem;
@@ -17,6 +19,7 @@ import org.example.models.RelationShips.Trade;
 import org.example.models.ToolsPackage.Tools;
 import org.example.models.enums.Types.Cooking;
 import org.example.models.enums.Types.CraftingRecipe;
+import org.example.views.GameMenu;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -413,4 +416,5 @@ public class Player {
     public void setCrafts(ArrayList<Craft> crafts) {
         this.crafts = crafts;
     }
+
 }
