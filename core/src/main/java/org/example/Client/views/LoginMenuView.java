@@ -18,7 +18,7 @@ import org.example.Common.models.Fundementals.Result;
 import org.example.Common.models.Assets.GameAssetManager;
 
 public class LoginMenuView implements Screen {
-    private Skin skin = GameAssetManager.skin;
+    private Skin skin = GameAssetManager.getSkin();
     private Image backgroundImage;
     private Stage stage;
     private final Label menuLabel;
@@ -176,7 +176,7 @@ public class LoginMenuView implements Screen {
     }
 }
 class forgetPass implements Screen {
-    private Skin skin = GameAssetManager.skin;
+    private Skin skin = GameAssetManager.getSkin();
     private Image backgroundImage;
     private Stage stage;
     private final Label menuLabel;

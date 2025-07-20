@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import org.example.Common.models.*;
 import org.example.Server.controllers.movingPlayer.PlayerController;
-import org.example.models.*;
 import org.example.Common.models.NPC.NPC;
 import org.example.Common.models.Place.Farm;
 import org.example.Common.models.ProductsPackage.ArtisanItem;

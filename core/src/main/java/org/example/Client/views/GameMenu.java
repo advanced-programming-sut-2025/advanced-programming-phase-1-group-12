@@ -500,7 +500,7 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void updateClockDisplay() {
-        org.example.models.Date currentDate = App.getCurrentGame().getDate();
+        org.example.Common.models.Date currentDate = App.getCurrentGame().getDate();
 
         String dayName = currentDate.getDayName(currentDate.getDayOfWeek());
         String dayInfo = dayName + " " + currentDate.getDayOfMonth();
@@ -1444,7 +1444,7 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void updateLightingWithSeasons() {
-        org.example.models.Date currentDate = App.getCurrentGame().getDate();
+        org.example.Common.models.Date currentDate = App.getCurrentGame().getDate();
         int hour = currentDate.getHour();
         String season = currentDate.getSeason().name();
 
@@ -1908,7 +1908,7 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void updateClockHandRotation() {
-        org.example.models.Date currentDate = App.getCurrentGame().getDate();
+        org.example.Common.models.Date currentDate = App.getCurrentGame().getDate();
         int hour = currentDate.getHour();
         float hourProgress = hour / 15.0f;
         clockHandRotation = 270f - (hourProgress * 180f); // 270° to 90° over 24 hours

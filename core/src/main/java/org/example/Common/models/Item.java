@@ -2,12 +2,11 @@ package org.example.Common.models;
 
 import org.example.Common.models.ProductsPackage.Quality;
 import com.badlogic.gdx.graphics.Texture;
-import org.example.models.Fundementals.App;
-import org.example.models.ProductsPackage.Quality;
-import org.example.models.enums.Types.Cooking;
-import org.example.models.enums.foraging.MineralTypes;
-import org.example.models.enums.foraging.Plant;
-import org.example.models.enums.foraging.TypeOfPlant;
+import org.example.Common.models.Fundementals.App;
+import org.example.Common.models.enums.Types.Cooking;
+import org.example.Common.models.enums.foraging.MineralTypes;
+import org.example.Common.models.enums.foraging.Plant;
+import org.example.Common.models.enums.foraging.TypeOfPlant;
 
 import java.util.Objects;
 

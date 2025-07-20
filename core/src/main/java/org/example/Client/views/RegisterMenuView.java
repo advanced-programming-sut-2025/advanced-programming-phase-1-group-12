@@ -19,7 +19,7 @@ import org.example.Common.models.Assets.GameAssetManager;
 
 public class RegisterMenuView implements Screen {
 
-    private Skin skin = GameAssetManager.skin;
+    private Skin skin = GameAssetManager.getSkin();
     private Image backgroundImage;
     private Stage stage;
     private final Label menuLabel;

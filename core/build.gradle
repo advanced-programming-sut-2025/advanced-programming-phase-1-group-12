@@ -19,10 +19,38 @@ dependencies {
   implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
   runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
   runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+  
+  // Javalin server framework (includes WebSocket support)
+  implementation 'io.javalin:javalin:5.6.1'
+  
+  // HTTP client for client-side networking
+  implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+  
+  // SLF4J logging (required by Javalin)
+  implementation 'org.slf4j:slf4j-simple:2.0.7'
+  
+  // Additional JSON processing
+  implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
 }
 
 compileJava {
   sourceCompatibility = JavaVersion.VERSION_17
   targetCompatibility = JavaVersion.VERSION_17
   options.encoding = 'UTF-8'
+}
+
+// Add a task to run the server
+task runServer(type: JavaExec) {
+    group = 'application'
+    mainClass = 'org.example.Server.SimpleNetworkServer'
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+}
+
+// Add a task to run the test client
+task runTestClient(type: JavaExec) {
+    group = 'application'
+    mainClass = 'org.example.TestClient'
+    classpath = sourceSets.main.runtimeClasspath
+    dependsOn build
 }

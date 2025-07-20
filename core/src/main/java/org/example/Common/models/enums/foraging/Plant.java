@@ -4,13 +4,10 @@ import org.example.Common.models.Fundementals.Location;
 import org.example.Common.models.Item;
 import org.example.Common.models.ProductsPackage.Quality;
 import com.badlogic.gdx.graphics.Texture;
-import org.example.models.Assets.PlantAssetsManager;
-import org.example.models.Fundementals.App;
-import org.example.models.Fundementals.Location;
-import org.example.models.Item;
-import org.example.models.ProductsPackage.Quality;
+import org.example.Common.models.Assets.PlantAssetsManager;
+import org.example.Common.models.Fundementals.App;
 
-import static org.example.models.Assets.PlantAssetsManager.buildTextureMap;
+import static org.example.Common.models.Assets.PlantAssetsManager.buildTextureMap;
 
 public class Plant extends Item {
     private Location location;

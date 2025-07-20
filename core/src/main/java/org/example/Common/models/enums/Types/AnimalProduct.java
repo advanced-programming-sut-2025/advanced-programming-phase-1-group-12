@@ -2,9 +2,8 @@ package org.example.Common.models.enums.Types;
 
 import org.example.Common.models.enums.Animal;
 import com.badlogic.gdx.graphics.Texture;
-import org.example.models.Assets.AnimalAssetsManager;
-import org.example.models.Assets.GameAssetManager;
-import org.example.models.enums.Animal;
+import org.example.Common.models.Assets.AnimalAssetsManager;
+import org.example.Common.models.Assets.GameAssetManager;
 
 import java.util.ArrayList;
 import java.util.List;

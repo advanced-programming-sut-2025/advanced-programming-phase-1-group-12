@@ -4,9 +4,6 @@ import org.example.Common.models.Item;
 import org.example.Common.models.ProductsPackage.Quality;
 import org.example.Common.models.enums.Types.Cooking;
 import com.badlogic.gdx.graphics.Texture;
-import org.example.models.Item;
-import org.example.models.ProductsPackage.Quality;
-import org.example.models.enums.Types.Cooking;
 
 public class Food extends Item {
     private Cooking foodType;

@@ -1,5 +1,6 @@
 package org.example.Common.models.ToolsPackage;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import org.example.Server.controllers.ToolsController;
 import org.example.Common.models.Fundementals.App;
@@ -10,6 +11,8 @@ import org.example.Common.models.ProductsPackage.Quality;
 import org.example.Common.models.ToolsPackage.ToolEnums.Tool;
 import org.example.Common.models.ToolsPackage.ToolEnums.ToolTypes;
 import org.example.Common.models.enums.Weather;
+import org.example.Common.models.Assets.ToolAssetsManager;
+import java.util.ArrayList;
 
 public class Tools extends Item {
     private int level;
@@ -213,8 +216,9 @@ public class Tools extends Item {
     }
 
     public Texture getTexture() {
-        GameMenu gameMenu = new GameMenu(new ArrayList<>());
-        return gameMenu.getToolTexture(this);
+        // Return a default texture or null for now
+        // This should be implemented properly with asset management
+        return null;
     }
 
 }

@@ -5,13 +5,8 @@ import org.example.Common.models.ProductsPackage.ArtisanItem;
 import org.example.Common.models.ProductsPackage.Quality;
 import org.example.Common.models.enums.Types.CraftingRecipe;
 import com.badlogic.gdx.graphics.Texture;
-import org.example.models.Assets.GameAssetManager;
-import org.example.models.Fundementals.App;
-import org.example.models.Fundementals.Location;
-import org.example.models.ProductsPackage.ArtisanItem;
-import org.example.models.ProductsPackage.Quality;
-import org.example.models.enums.Types.CraftingRecipe;
-import org.example.views.PixelMapRenderer;
+import org.example.Common.models.Assets.GameAssetManager;
+import org.example.Common.models.Fundementals.App;
 
 public class Craft extends Item {
 

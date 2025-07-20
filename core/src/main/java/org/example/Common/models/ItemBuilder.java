@@ -10,8 +10,6 @@ import org.example.Common.models.enums.FishDetails;
 import org.example.Common.models.ToolsPackage.ToolEnums.Tool;
 import org.example.Common.models.enums.Types.*;
 import org.example.Common.models.enums.foraging.*;
-import org.example.models.enums.Types.*;
-import org.example.models.enums.foraging.*;
 
 import java.util.Map;
 

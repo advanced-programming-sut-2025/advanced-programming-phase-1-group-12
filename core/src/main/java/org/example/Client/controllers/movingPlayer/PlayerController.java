@@ -60,7 +60,8 @@ public class PlayerController {
         this.player = player;
         this.gameController = gameController;
 
-        player.setPlayerController(this);
+        // TODO: Fix PlayerController type mismatch - need to create a common interface
+        // player.setPlayerController(this);
         Texture sheet = player.getPlayerTexture();
         TextureRegion[][] grid = TextureRegion.split(sheet, FRAME_W, FRAME_H);
 
