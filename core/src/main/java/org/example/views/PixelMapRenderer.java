@@ -10,6 +10,7 @@ import org.example.models.Fundementals.Player;
 import org.example.models.ShippingBin;
 import org.example.models.enums.Types.TypeOfTile;
 import org.example.models.enums.foraging.GiantPlant;
+import org.example.models.enums.foraging.GiantPlants;
 import org.example.models.enums.foraging.Stone;
 import org.example.models.map;
 
@@ -22,11 +23,13 @@ public class PixelMapRenderer {
     private final map gameMap;
     private final Set<String> greenhouseTiles = new HashSet<>();
     private final Set<String> houseTiles = new HashSet<>();
+    private final Set<String> giantPlantTiles = new HashSet<>();
 
     public PixelMapRenderer(map gameMap) {
         this.gameMap = gameMap;
         cacheGreenhouseTiles();
         cacheHouseTiles();
+        cacheGiantPlantTiles();
     }
 
     private void cacheGreenhouseTiles() {
@@ -41,6 +44,14 @@ public class PixelMapRenderer {
         for (Location l : gameMap.getTilesOfMap()) {
             if (l.getTypeOfTile() == TypeOfTile.HOUSE) {
                 houseTiles.add(l.getxAxis() + "," + l.getyAxis());
+            }
+        }
+    }
+
+    private void cacheGiantPlantTiles() {
+        for (Location l : gameMap.getTilesOfMap()) {
+            if (l.getTypeOfTile() == TypeOfTile.GIANT_PLANT) {
+                giantPlantTiles.add(l.getxAxis() + "," + l.getyAxis());
             }
         }
     }
@@ -78,6 +89,7 @@ public class PixelMapRenderer {
 
         List<Location> greenhouseAnchors = new ArrayList<>();
         List<Location> houseAnchors = new ArrayList<>();
+        List<Location> giantPlantAnchors = new ArrayList<>();
 
         for (Location loc : gameMap.getTilesOfMap()) {
             Texture base = getTextureForTile(loc.getTypeOfTile(), loc);
@@ -97,27 +109,34 @@ public class PixelMapRenderer {
                 boolean hasAbove = houseTiles.contains(loc.getxAxis() + "," + (loc.getyAxis() + 1));
 
                 if (!hasLeft && !hasAbove) houseAnchors.add(loc);
+            } else if (loc.getTypeOfTile() == TypeOfTile.GIANT_PLANT) {
+                boolean hasLeft = giantPlantTiles.contains((loc.getxAxis() - 1) + "," + loc.getyAxis());
+                boolean hasAbove = giantPlantTiles.contains(loc.getxAxis() + "," + (loc.getyAxis() + 1));
+
+                if (!hasLeft && !hasAbove) giantPlantAnchors.add(loc);
             }
         }
         for (Location anchor : greenhouseAnchors) {
             float drawX = offsetX + anchor.getxAxis() * tileSize;
-            float drawY = offsetY + anchor.getyAxis() * tileSize - tileSize * (TILES_H - 1);
+            float drawY = offsetY + anchor.getyAxis() * tileSize;
             batch.draw(GameAssetManager.getGameAssetManager().getGREEN_HOUSE(), drawX, drawY, tileSize * TILES_W, tileSize * TILES_H);
         }
         for (Location anchor : houseAnchors) {
             float drawX = offsetX + anchor.getxAxis() * tileSize;
-            float drawY = offsetY + anchor.getyAxis() * tileSize;
+            float drawY = offsetY + anchor.getyAxis() * tileSize - tileSize * (TILES_H - 1);
             batch.draw(GameAssetManager.getGameAssetManager().getHOUSE(), drawX, drawY, tileSize * TILES_W, tileSize * TILES_H);
+        }
+        for(Location anchor : giantPlantAnchors) {
+            float drawX = offsetX + anchor.getxAxis() * tileSize;
+            float drawY = offsetY + anchor.getyAxis() * tileSize - tileSize;
+            GiantPlant giantPlant = (GiantPlant) anchor.getObjectInTile();
+            batch.draw(PlantAssetsManager.getGiantPlant(giantPlant.getGiantPlants()), drawX, drawY, tileSize * 2, tileSize * 2);
         }
         for (Location loc : App.getCurrentGame().getMainMap().getTilesOfMap()) {
             float drawX = offsetX + loc.getxAxis() * tileSize;
             float drawY = offsetY + loc.getyAxis() * tileSize;
 
-            if (loc.getObjectInTile() instanceof GiantPlant) {
-                GiantPlant giantPlant = (GiantPlant) loc.getObjectInTile();
-                batch.draw(PlantAssetsManager.getGiantPlant(giantPlant.getGiantPlants()),
-                    drawX, drawY, tileSize, tileSize);
-            } else if (loc.getTypeOfTile() == TypeOfTile.PLANT) {
+            if (loc.getTypeOfTile() == TypeOfTile.PLANT) {
                 batch.draw(PlantAssetsManager.treeType(loc), drawX, drawY, tileSize, tileSize);
             } else if (loc.getObjectInTile() instanceof Stone) {
                 batch.draw(GameAssetManager.getGameAssetManager().getSTONE(), drawX, drawY, 50, 50);

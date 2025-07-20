@@ -13,6 +13,7 @@ import org.example.models.enums.Types.TypeOfTile;
 import org.example.models.Animal.FarmAnimals;
 import org.example.models.enums.Animal;
 import org.example.models.enums.foraging.Plant;
+import org.example.models.enums.foraging.Stone;
 
 public enum Tool {
     HOE("Hoe", 5) {
@@ -41,8 +42,8 @@ public enum Tool {
         public ToolFunction getUseFunction() {
             return (location, skillLevel, tool) -> {
                 TypeOfTile tileType = location.getTypeOfTile();
-                if (tileType == TypeOfTile.STONE) {
-                    location.setTypeOfTile(TypeOfTile.GROUND);
+                if (location.getObjectInTile() instanceof Stone) {
+                    location.setObjectInTile(null);
 
                     StoreController storeController = new StoreController();
                     storeController.cheatAddItem("Stone", 1);

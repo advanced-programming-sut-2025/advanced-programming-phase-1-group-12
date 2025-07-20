@@ -19,6 +19,7 @@ import org.example.models.Place.Farm;
 import org.example.models.Place.Store;
 import org.example.models.Refrigrator;
 import org.example.models.enums.Types.TypeOfTile;
+import org.example.models.enums.foraging.Stone;
 import org.example.views.FarmingMenuView;
 import org.example.views.GameMenu;
 import org.example.views.PlantMenuView;
@@ -308,6 +309,8 @@ public class PlayerController {
             badLocations.addAll(farm.getLocation().getLocationsInRectangle());
         }
         if(badLocations.contains(location)) return false;
+        if(location.getObjectInTile() instanceof Stone)
+            return false;
 
         return (location.getTypeOfTile() == TypeOfTile.GROUND || location.getTypeOfTile() == TypeOfTile.BARN
         || location.getTypeOfTile() == TypeOfTile.COOP || location.getTypeOfTile() == TypeOfTile.STORE);

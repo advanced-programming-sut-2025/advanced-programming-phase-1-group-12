@@ -271,7 +271,7 @@ public class GameMenuController {
 
                 if(location.getObjectInTile() instanceof Stone){
                     contentChar = 'S';
-                    bgColor = getBackgroundColorForTile(TypeOfTile.STONE);
+                    bgColor = getBackgroundColorForTile(TypeOfTile.QUARRY);
                 }
                 if(location.getObjectInTile() instanceof Plant){
                     contentChar = 'P';
@@ -305,7 +305,7 @@ public class GameMenuController {
             case GROUND -> "\u001B[48;5;180m";
             case HOUSE -> "\u001B[47m";
             case QUARRY -> "\u001B[43m";
-            case STONE -> "\u001B[103m";
+//            case STONE -> "\u001B[103m";
             case LAKE -> "\u001B[46m";
             case STORE -> "\u001B[104m";
             case BARN -> "\u001B[44m";

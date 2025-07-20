@@ -112,7 +112,6 @@ public class FarmSetUp {
             MineralTypes mineralTypes = allMinerals.get(0);
             Stone stone = new Stone(mineralTypes);
             location.setObjectInTile(stone);
-            location.setTypeOfTile(TypeOfTile.STONE);
         }
     }
 

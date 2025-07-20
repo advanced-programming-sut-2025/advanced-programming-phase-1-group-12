@@ -265,7 +265,6 @@ public class Date implements Runnable {
                 MineralTypes mineral = allMinerals.get(i);
                 Stone newStone = new Stone(mineral);
 
-                location.setTypeOfTile(TypeOfTile.STONE);
                 location.setObjectInTile(newStone);
             }
 
@@ -294,7 +293,6 @@ public class Date implements Runnable {
                 Location location = quarryLocation.get(i);
                 MineralTypes mineral = allMinerals.get(i);
                 Stone newStone = new Stone(mineral);
-                location.setTypeOfTile(TypeOfTile.STONE);
                 location.setObjectInTile(newStone);
             }
         }
@@ -458,18 +456,6 @@ public class Date implements Runnable {
 
     public void setHour(int newHour) {
         this.hour = newHour;
-    }
-
-    public ArrayList<Location> getLocations() {
-        ArrayList<Location> availableLocations = new ArrayList<>();
-        for (Location location : App.getCurrentGame().getMainMap().getTilesOfMap()) {
-            if (location.getTypeOfTile() != TypeOfTile.BARN || location.getTypeOfTile() != TypeOfTile.LAKE ||
-                location.getTypeOfTile() != TypeOfTile.COOP || location.getTypeOfTile() != TypeOfTile.QUARRY ||
-                location.getTypeOfTile() != TypeOfTile.STONE || location.getTypeOfTile() != TypeOfTile.NPC_VILLAGE) {
-                availableLocations.add(location);
-            }
-        }
-        return availableLocations;
     }
 
     public ArrayList<Location> getGroundLocation(Farm farm) {

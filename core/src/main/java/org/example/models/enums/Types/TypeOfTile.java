@@ -3,7 +3,6 @@ package org.example.models.enums.Types;
 public enum TypeOfTile {
     LAKE('L'),
     GREENHOUSE('G'),
-    STONE('S'),
     QUARRY('Q'),
     HOUSE('H'),
     GROUND('.'),
@@ -11,6 +10,7 @@ public enum TypeOfTile {
     BURNED_GROUND('b'),
     STORE('s'),
     GIANT_PLANT('G'),
+
     //this is used for seeing if we can buy an animal
     COOP('C'),
     BARN('B'),
