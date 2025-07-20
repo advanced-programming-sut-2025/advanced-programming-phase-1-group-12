@@ -1,8 +1,10 @@
 package org.example.models.Eating;
 
+import org.example.models.Item;
+import org.example.models.ProductsPackage.Quality;
 import org.example.models.enums.Season;
 
-public class Fruits {
+public class Fruits extends Item {
     private String fruitName;
     private String type;
     private String origin;
@@ -20,6 +22,7 @@ public class Fruits {
                   int fullGrowthtime, boolean canCollect, boolean isCollected,
                   int collectDay, double price, boolean isEdible, int energyGain,
                   Season season, boolean giganticGrowth) {
+        super(fruitName, Quality.NORMAL, (int) price);
         this.fruitName = fruitName;
         this.type = type;
         this.origin = origin;
@@ -99,8 +102,8 @@ public class Fruits {
         this.collectDay = collectDay;
     }
 
-    public double getPrice() {
-        return price;
+    public int getPrice() {
+        return (int) price;
     }
 
     public void setPrice(double price) {

@@ -1,32 +1,24 @@
 package org.example.models.enums.Types;
 
+import com.badlogic.gdx.graphics.Texture;
+import org.example.models.Assets.GameAssetManager;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public enum FoodType {
-    FRIED_EGG("Fried Egg", 50, "Starter", 35, true),
-    BAKED_FISH("Baked Fish", 75, "Starter", 100, true),
-    SALAD("Salad", 113, "Starter", 110, true),
-    OLMELET("Omelet", 100, "Stardrop Saloon", 125, true),
-    PUMPKIN_PIE("Pumpkin Pie", 255, "Stardrop Saloon", 385, true),
-    SPAGHETTI("Spaghetti", 75, "Stardrop Saloon", 120, true),
-    PIZZA("Pizza", 150, "Stardrop Saloon", 300, true),
-    TORTILLA("Tortilla", 50, "Stardrop Saloon", 50, false),
-    MAKI_ROLL("Maki Roll", 100, "Stardrop Saloon", 220, false),
-    TRIPLE_SHOT_ESPRESSO("Triple Shot Espresso", 200, "Stardrop Saloon", 450, false),
-    COOKIE("Cookie", 90, "Stardrop Saloon", 140, false),
-    HASH_BROWN("Hash Browns", 90, "Stardrop Saloon", 120, false),
-    PANCAKES("Pancakes", 90, "Stardrop Saloon", 80, false),
-    FRUIT_SALAD("Fruit Salad", 263, "Stardrop Saloon", 450, false),
-    RED_PLATE("Red Plate", 240, "Stardrop Saloon", 400, false),
-    BREAD("Bread", 50, "Stardrop Saloon", 60, false),
-    SALMON_DINNER("Salmon Dinner", 125, "Leah reward", 300, false),
-    VEGETABLE_MEDLEY("Vegetable Medley", 165, "Foraging Level 2", 120, false),
-    FARMER_LUNCH("Farmer's Lunch", 200, "Farming level 1", 150, false),
-    SURVIVAL_BURGER("Survival Burger", 125, "Foraging level 3", 180, false),
-    DISH_O_THE_SEA("Dish o' the Sea", 150, "Fishing level 2", 220, false),
-    SEAFORM_PUDDING("Seafoam Pudding", 175, "Fishing level 3", 300, false),
-    MINER_TREAT("Miner’s Treat", 125, "Mining level 1", 200, true);
+    FRIED_EGG("Fried Egg", 50, "Starter", 35, true, GameAssetManager.getGameAssetManager().getFried_Egg()),
+    BAKED_FISH("Baked Fish", 75, "Starter", 100, true, GameAssetManager.getGameAssetManager().getBakedFish()),
+    SALAD("Salad", 113, "Starter", 110, true, GameAssetManager.getGameAssetManager().getSalad()),
+    OLMELET("Omelet", 100, "Stardrop Saloon", 125, true, GameAssetManager.getGameAssetManager().getOmelet()),
+    PUMPKIN_PIE("Pumpkin Pie", 255, "Stardrop Saloon", 385, true, GameAssetManager.getGameAssetManager().getPumpkinPie()),
+    SPAGHETTI("Spaghetti", 75, "Stardrop Saloon", 120, true, GameAssetManager.getGameAssetManager().getSpaghetti()),
+    PIZZA("Pizza", 150, "Stardrop Saloon", 300, true, GameAssetManager.getGameAssetManager().getPizza()),
+    TORTILLA("Tortilla", 50, "Stardrop Saloon", 50, false, GameAssetManager.getGameAssetManager().getTortilla()),
+    MAKI_ROLL("Maki Roll", 100, "Stardrop Saloon", 220, false, GameAssetManager.getGameAssetManager().getMakiRoll()),
+    Cookie("Cookie", 90, "Stardrop Saloon", 140, false, GameAssetManager.getGameAssetManager().getCookie()),
+    FarmersLunch("Farmer's Lunch Recipe", 200, "Farming level 1", 200, true, GameAssetManager.getGameAssetManager().getFarmerLunch()),
+    TRIPLE_SHOT_ESPRESSO("Triple Shot Espresso", 200, "Stardrop Saloon", 450, false, GameAssetManager.getGameAssetManager().getEspressso());
 
     private final String name;
     private final int Energy;
@@ -34,13 +26,15 @@ public enum FoodType {
     private final int sellPrice;
     private final boolean isEnergyBuff;
     private Map<IngredientsType, Integer> ingredients;
+    private final Texture texture;
 
-    FoodType(String name, int Energy, String source, int sellPrice, boolean isEnergyBuff) {
+    FoodType(String name, int Energy, String source, int sellPrice, boolean isEnergyBuff, Texture texture) {
         this.name = name;
         this.Energy = Energy;
         this.source = source;
         this.sellPrice = sellPrice;
         this.isEnergyBuff = isEnergyBuff;
+        this.texture = texture;
     }
 
     public String getName() {
@@ -125,73 +119,6 @@ public enum FoodType {
         i = new HashMap<>();
         i.put(IngredientsType.COFFEE, 3);
         TRIPLE_SHOT_ESPRESSO.setIngredients(i);
-
-        i = new HashMap<>();
-        i.put(IngredientsType.WHEAT_FLOUR, 1);
-        i.put(IngredientsType.SUGAR, 1);
-        i.put(IngredientsType.EGG, 1);
-        COOKIE.setIngredients(i);
-
-        i = new HashMap<>();
-        i.put(IngredientsType.POTATO, 1);
-        i.put(IngredientsType.OIL, 1);
-        HASH_BROWN.setIngredients(i);
-
-        i = new HashMap<>();
-        i.put(IngredientsType.WHEAT_FLOUR, 1);
-        i.put(IngredientsType.EGG, 1);
-        PANCAKES.setIngredients(i);
-
-        i = new HashMap<>();
-        i.put(IngredientsType.BLUEBERRY, 1);
-        i.put(IngredientsType.MELON, 1);
-        i.put(IngredientsType.APRICOT, 1);
-        FRUIT_SALAD.setIngredients(i);
-
-        i = new HashMap<>();
-        i.put(IngredientsType.RED_CABBAGE, 1);
-        i.put(IngredientsType.RADISH, 1);
-        RED_PLATE.setIngredients(i);
-
-        i = new HashMap<>();
-        i.put(IngredientsType.WHEAT_FLOUR, 1);
-        BREAD.setIngredients(i);
-
-        i = new HashMap<>();
-        i.put(IngredientsType.SALMON, 1);
-        i.put(IngredientsType.AMARANTH, 1);
-        i.put(IngredientsType.KALE, 1);
-        SALMON_DINNER.setIngredients(i);
-
-        i = new HashMap<>();
-        i.put(IngredientsType.TOMATO, 1);
-        VEGETABLE_MEDLEY.setIngredients(i);
-
-        i = new HashMap<>();
-        i.put(IngredientsType.PARSNIP, 1);
-        FARMER_LUNCH.setIngredients(i);
-
-        i = new HashMap<>();
-        i.put(IngredientsType.BREAD, 1);
-        i.put(IngredientsType.CARROT, 1);
-        i.put(IngredientsType.EGGPLANT, 1);
-        SURVIVAL_BURGER.setIngredients(i);
-
-        i = new HashMap<>();
-        i.put(IngredientsType.SARDINE, 2);
-        i.put(IngredientsType.HASH_BROWNS, 1);
-        DISH_O_THE_SEA.setIngredients(i);
-
-        i = new HashMap<>();
-        i.put(IngredientsType.FLOUNDER, 1);
-        i.put(IngredientsType.MIDNIGHT_CARP, 1);
-        SEAFORM_PUDDING.setIngredients(i);
-
-        i = new HashMap<>();
-        i.put(IngredientsType.CARROT, 2);
-        i.put(IngredientsType.SUGAR, 1);
-        i.put(IngredientsType.MILK, 1);
-        MINER_TREAT.setIngredients(i);
     }
 
     public static FoodType stringToFood(String name) {
@@ -201,5 +128,9 @@ public enum FoodType {
             }
         }
         return null;
+    }
+
+    public Texture getTexture() {
+        return texture;
     }
 }

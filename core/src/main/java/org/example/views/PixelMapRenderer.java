@@ -6,6 +6,7 @@ import org.example.models.Assets.GameAssetManager;
 import org.example.models.Assets.PlantAssetsManager;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
+import org.example.models.Fundementals.Player;
 import org.example.models.ShippingBin;
 import org.example.models.enums.Types.TypeOfTile;
 import org.example.models.enums.foraging.GiantPlant;
@@ -120,6 +121,10 @@ public class PixelMapRenderer {
                 batch.draw(PlantAssetsManager.treeType(loc), drawX, drawY, tileSize, tileSize);
             } else if (loc.getObjectInTile() instanceof Stone) {
                 batch.draw(GameAssetManager.getGameAssetManager().getSTONE(), drawX, drawY, 50, 50);
+            }for(Player player : App.getCurrentGame().getPlayers()) {
+                if(player.getRefrigrator().getLocation().equals(loc)) {
+                    batch.draw(GameAssetManager.getGameAssetManager().getFridge(), drawX, drawY, 50, 50);
+                }
             }
         }
     }

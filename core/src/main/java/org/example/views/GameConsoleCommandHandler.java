@@ -242,8 +242,6 @@ public class GameConsoleCommandHandler {
             System.out.println(controller.refrigerator(matcher.group(0), matcher.group("item")));
         } else if ((matcher = GameMenuCommands.COOKING_PREPARE.getMather(input)) != null) {
             System.out.println(controller.prepare(matcher.group("recipeName")));
-        } else if ((matcher = GameMenuCommands.EAT_FOOD.getMather(input)) != null) {
-            System.out.println(controller.eat(matcher.group("foodName")));
         } else if ((matcher = GameMenuCommands.TALK.getMather(input)) != null) {
             Result result = controller.talk(matcher.group("username"), matcher.group("message"));
             System.out.println(result.getMessage());

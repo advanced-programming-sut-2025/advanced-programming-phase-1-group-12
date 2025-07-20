@@ -19,21 +19,18 @@ import org.example.Main;
 import org.example.controllers.*;
 import org.example.controllers.MenusController.GameMenuController;
 import org.example.controllers.movingPlayer.PlayerController;
+import org.example.models.*;
 import org.example.models.Animal.FarmAnimals;
 import org.example.models.Assets.GameAssetManager;
-import org.example.models.BackPack;
 import org.example.models.Assets.ToolAssetsManager;
-import org.example.models.Craft;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Player;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.example.models.Fundementals.Result;
-import org.example.models.Item;
 import org.example.models.Place.Farm;
 import org.example.models.ProductsPackage.ArtisanItem;
 import org.example.models.RelatedToUser.Ability;
-import org.example.models.ShippingBin;
 import org.example.models.ToolsPackage.Tools;
 
 import java.lang.reflect.Method;
@@ -42,6 +39,7 @@ import java.util.List;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.GL20;
+import org.example.models.enums.Types.Cooking;
 import org.example.models.enums.Types.CraftingRecipe;
 import org.example.models.enums.Weather;
 
@@ -105,6 +103,9 @@ public class GameMenu extends InputAdapter implements Screen {
     private Label wateringCanLabel;
 
     private float timeSinceError = 0f;
+
+    private float foodEffect = 0f;
+    public static boolean foodEaten = false;
 
     GameConsoleCommandHandler cmdHandler =
         new GameConsoleCommandHandler(controller,
@@ -354,6 +355,17 @@ public class GameMenu extends InputAdapter implements Screen {
         font.getData().setScale(0.5f);
         font.draw(batch, player.getUser().getUserName(), scaledX,
             scaledY + player.getPlayerSprite().getHeight() + 10);
+        if(foodEaten){
+            foodEffect += delta;
+            if (foodEffect >= 2.0f){
+                foodEaten = false;
+            } else {
+                BitmapFont font1 = new BitmapFont();
+                font1.setColor(Color.GREEN);
+                font1.draw(batch, "**", scaledX + 80,
+                    scaledY + player.getPlayerSprite().getHeight() + 10);
+            }
+        }
 
         Tools equipped = App.getCurrentPlayerLazy().getCurrentTool();
         if (equipped != null)
@@ -473,9 +485,7 @@ public class GameMenu extends InputAdapter implements Screen {
                 batch.draw(animal.getTexture(), renderX, renderY);
             }
         }
-
         renderWeather(batch);
-
 
         renderLightingOverlay();
         batch.end();
@@ -552,6 +562,7 @@ public class GameMenu extends InputAdapter implements Screen {
             e.printStackTrace();
         }
     }
+
 
     @Override
     public void dispose() {
@@ -1102,7 +1113,6 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         });
         content.add(closeButton).pad(5).width(400f).row();
-
         skillsDialog.show(stage);
     }
 
@@ -1532,13 +1542,13 @@ public class GameMenu extends InputAdapter implements Screen {
                     @Override
                     public void clicked(InputEvent event, float x, float y) {
                         Gdx.app.postRunnable(() -> {
-//                            Main.getMain().setScreen(new FarmView(
-//                                craftingRecipe.getName(),
-//                                players, // make sure `players` is accessible
-//                                App.getCurrentGame().getPlayers(),
-//                                true,
-//                                false
-//                            ));
+                            Main.getMain().setScreen(new FarmView(
+                                craftingRecipe.getName(),
+                                players, // make sure `players` is accessible
+                                App.getCurrentGame().getPlayers(),
+                                true,
+                                false
+                            ));
                         });
                     }
                 });
@@ -2049,5 +2059,186 @@ public class GameMenu extends InputAdapter implements Screen {
         dialog.button(closeButton);
         dialog.show(stage);
     }
+
+    public void cookingMenu() {
+        Skin skin = GameAssetManager.skin;
+        Dialog dialog = new Dialog("cooking Menu", skin);
+        TextButton back = new TextButton("Back", skin);
+
+        Table contentTable = new Table();
+        contentTable.top().left();
+        contentTable.defaults().pad(10).left().fillX();
+
+        cookingMenuButtons(contentTable, skin);
+
+        ScrollPane scrollPane = new ScrollPane(contentTable);
+        scrollPane.setScrollingDisabled(true, false);
+        scrollPane.setFadeScrollBars(false);
+
+        dialog.getContentTable().add(scrollPane).maxHeight(Gdx.graphics.getHeight() * 0.8f).width(400).expand().fill();
+
+        // Back button to close dialog
+        back.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+            }
+        });
+
+        dialog.button(back);
+        dialog.show(stage);
+    }
+
+    private void cookingMenuButtons(Table table, Skin skin) {
+        table.clear();
+
+        for (Cooking cooking : App.getCurrentPlayerLazy().getCookingRecepies().keySet()) {
+            boolean unlocked = App.getCurrentPlayerLazy().getCookingRecepies().getOrDefault(cooking, false);
+
+            Image textureImage = new Image(cooking.getTexture());
+            textureImage.setSize(48, 48);
+
+            TextButton cook = new TextButton(cooking.getName(), skin);
+            if (!unlocked) {
+                cook.getLabel().setColor(Color.GRAY);
+            }
+                cook.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        System.out.println(cook.getLabel().toString());
+                        showError(controller.prepare(cook.getText().toString()).getMessage());
+                    }
+                });
+
+            table.row();
+            table.add(textureImage).width(48).height(48).padRight(10);
+            table.add(cook).width(300).height(50).left();
+        }
+    }
+
+    public void refrigratorMenu() {
+        Skin skin = GameAssetManager.skin;
+        Dialog dialog = new Dialog("Your inventory items and trash can", skin);
+
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        Refrigrator fridge = player.getRefrigrator();
+
+        Table mainContent = new Table(); // Main container
+        mainContent.top();
+
+        TextButton closeButton = new TextButton("Close", skin);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+            }
+        });
+
+        TextField nameOfDeletingItem = new TextField("", skin);
+        nameOfDeletingItem.setMessageText("Name of the item");
+
+        TextButton put = new TextButton("put", skin);
+        put.setWidth(400);
+        put.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                GameMenuController gameMenuController = new GameMenuController();
+                Result result = gameMenuController.refrigerator("put" ,nameOfDeletingItem.getText());
+                showError(result.getMessage());
+                dialog.hide(); // Instead of recursively calling menu, close and reopen
+                refrigratorMenu();
+            }
+        });
+        TextButton pick = new TextButton("pick(move to inventory)", skin);
+        pick.setWidth(800);
+        pick.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                GameMenuController gameMenuController = new GameMenuController();
+                Result result = gameMenuController.refrigerator("pick" ,nameOfDeletingItem.getText());
+                showError(result.getMessage());
+                dialog.hide(); // Instead of recursively calling menu, close and reopen
+                refrigratorMenu();
+            }
+        });
+
+        mainContent.add(nameOfDeletingItem).pad(5).width(400f).row();
+        mainContent.add(put).pad(5).width(400f).row();
+        mainContent.add(pick).pad(5).width(400f).row();
+
+        Table scrollContent = new Table();
+        scrollContent.top();
+        for (Item item : fridge.getProducts().keySet()) {
+            if(item != null) {
+                Label itemLabel = new Label(item.getName() + " -> " + fridge.getProducts().get(item), skin);
+                scrollContent.add(itemLabel).pad(5).width(400f).row();
+            }
+        }
+
+        ScrollPane scrollPane = new ScrollPane(scrollContent, skin);
+        scrollPane.setScrollingDisabled(false, false);
+        scrollPane.setFadeScrollBars(false);
+
+        mainContent.add(scrollPane).pad(5).width(400f).height(300f).row();
+        mainContent.add(closeButton).pad(5).width(400f).row();
+
+        dialog.getContentTable().add(mainContent).expand().fill().pad(5).row();
+        dialog.button(closeButton);
+        dialog.pack();
+        dialog.setPosition(
+            (Gdx.graphics.getWidth() - dialog.getWidth()) / 2f,
+            (Gdx.graphics.getHeight() - dialog.getHeight()) / 2f
+        );
+        dialog.show(stage);
+    }
+    public void eatMenu(){
+        Skin skin = GameAssetManager.skin;
+        Dialog dialog = new Dialog("Eat!", skin);
+
+        Table mainContent = new Table();
+        mainContent.top();
+
+        TextButton closeButton = new TextButton("Close", skin);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+            }
+        });
+
+        TextField nameOfDeletingItem = new TextField("", skin);
+        nameOfDeletingItem.setMessageText("Name of what you wanna eat");
+
+        TextButton eat = new TextButton("eat", skin);
+        eat.setWidth(400);
+        eat.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                GameMenuController gameMenuController = new GameMenuController();
+                Result result = gameMenuController.eat(nameOfDeletingItem.getText());
+                showError(result.getMessage());
+                dialog.hide();
+            }
+        });
+
+        mainContent.add(nameOfDeletingItem).pad(5).width(400f).row();
+        mainContent.add(eat).pad(5).width(400f).row();
+
+        Table scrollContent = new Table();
+        scrollContent.top();
+
+
+        mainContent.add(closeButton).pad(5).width(400f).row();
+
+        dialog.getContentTable().add(mainContent).expand().fill().pad(5).row();
+        dialog.button(closeButton);
+        dialog.pack();
+        dialog.setPosition(
+            (Gdx.graphics.getWidth() - dialog.getWidth()) / 2f,
+            (Gdx.graphics.getHeight() - dialog.getHeight()) / 2f
+        );
+        dialog.show(stage);
+    }
+
 
 }

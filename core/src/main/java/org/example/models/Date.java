@@ -365,13 +365,13 @@ public class Date implements Runnable {
         }
     }
 
-    public void buffUpdates() {
-        if (App.getCurrentPlayerLazy().isMaxEnergyBuffEaten()) {
-            App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - 10000);
+    public void buffUpdates(){
+        if(App.getCurrentPlayerLazy().isMaxEnergyBuffEaten()){
+            App.getCurrentPlayerLazy().setEnergy(200);
             App.getCurrentPlayerLazy().setMaxEnergyBuffEaten(false);
         }
-        if (App.getCurrentPlayerLazy().isSkillBuffEaten()) {
-            App.getCurrentPlayerLazy().getAbilityByName("Farming").setLevel(App.getCurrentGame().getCurrentPlayer().getAbilityByName("Farming").getLevel() - 1);
+        if(App.getCurrentPlayerLazy().isSkillBuffEaten()){
+            App.getCurrentPlayerLazy().getAbilityByName("Farming").increaseAmount(10);
             App.getCurrentPlayerLazy().setSkillBuffEaten(false);
         }
     }
