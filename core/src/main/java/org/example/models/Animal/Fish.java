@@ -1,5 +1,6 @@
 package org.example.models.Animal;
 
+import com.badlogic.gdx.graphics.Texture;
 import org.example.models.Item;
 import org.example.models.ProductsPackage.Quality;
 import org.example.models.enums.FishDetails;
@@ -25,5 +26,9 @@ public class Fish extends Item {
 
     public String getName(){
         return fishtype.getName();
+    }
+
+    public Texture getTexture() {
+        return fishtype.getTexture();
     }
 }

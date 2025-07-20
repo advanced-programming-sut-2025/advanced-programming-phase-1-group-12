@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -20,6 +21,7 @@ import org.example.controllers.*;
 import org.example.controllers.MenusController.GameMenuController;
 import org.example.controllers.movingPlayer.PlayerController;
 import org.example.models.*;
+import org.example.models.Animal.AnimalHome;
 import org.example.models.Animal.FarmAnimals;
 import org.example.models.Assets.GameAssetManager;
 import org.example.models.Assets.ToolAssetsManager;
@@ -39,9 +41,12 @@ import java.util.List;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.GL20;
+import org.example.models.enums.Animal;
 import org.example.models.enums.Types.Cooking;
 import org.example.models.enums.Types.CraftingRecipe;
 import org.example.models.enums.Weather;
+import org.example.models.enums.foraging.Plant;
+import org.example.models.enums.foraging.TypeOfPlant;
 
 public class GameMenu extends InputAdapter implements Screen {
     private final GameMenuController controller = new GameMenuController();
@@ -1182,9 +1187,24 @@ public class GameMenu extends InputAdapter implements Screen {
         Table scrollContent = new Table();
         scrollContent.top();
         for (Item item : backPack.getItems().keySet()) {
+            Table itemRow = new Table();
+
+            // Assuming item has a method getTexture() returning a Texture or Drawable
+            Texture tex = item.getTexture();
+            if(tex == null) {
+                tex = findingMissingTexture(item.getName());
+            }
+            TextureRegionDrawable itemDrawable = new TextureRegionDrawable(new TextureRegion(tex));
+            Image itemImage = new Image(itemDrawable);
+
             Label itemLabel = new Label(item.getName() + " -> " + backPack.getItems().get(item), skin);
-            scrollContent.add(itemLabel).pad(5).width(400f).row();
+
+            itemRow.add(itemImage).size(32, 32).padRight(10); // Adjust size and padding as needed
+            itemRow.add(itemLabel).expandX().left();
+
+            scrollContent.add(itemRow).pad(5).width(400f).row();
         }
+
 
         ScrollPane scrollPane = new ScrollPane(scrollContent, skin);
         scrollPane.setScrollingDisabled(false, false);
@@ -1201,6 +1221,41 @@ public class GameMenu extends InputAdapter implements Screen {
             (Gdx.graphics.getHeight() - dialog.getHeight()) / 2f
         );
         dialog.show(stage);
+    }
+
+    public Texture findingMissingTexture(String name) {
+        String name1 = name.toLowerCase();
+        if(name1.contains("soil")) {
+            return GameAssetManager.BASIC_RETAINING_SOIL;
+        }
+        if(name1.contains("sapling")) {
+            return GameAssetManager.TEA_SAPLING;
+        }
+        if (name1.equalsIgnoreCase("sugar")){
+            return GameAssetManager.SUGAR;
+        } if(name1.equalsIgnoreCase("rice")){
+            return GameAssetManager.RICE;
+        } if(name1.contains("wheat")){
+            return GameAssetManager.WHEAT_FLOUR;
+        }
+        for(Animal animal: Animal.values()){
+            if(name1.equalsIgnoreCase(animal.name())){
+                return animal.getAnimalTexture();
+            }
+        } if(name1.contains("coop") || name1.contains("barn")){
+            return GameAssetManager.getGameAssetManager().getAnimalHome();
+        }if(name1.contains("seed")) {
+            Plant plant = new Plant(App.getCurrentGame().getMainMap().findLocation(0, 0), false, TypeOfPlant.AMARANTH);
+            return plant.getTexture();
+        } if(name1.contains("starter")){
+            Plant plant = new Plant(App.getCurrentGame().getMainMap().findLocation(0, 0), false, TypeOfPlant.HOPS);
+            return plant.getTexture();
+        } if(name1.contains("wood")) {
+            return GameAssetManager.WOOD;
+        } if(name1.contains("stone")) {
+            return GameAssetManager.getGameAssetManager().getSTONE();
+        }
+        return GameAssetManager.checkMark;
     }
 
 
@@ -1311,7 +1366,7 @@ public class GameMenu extends InputAdapter implements Screen {
         return toolButton;
     }
 
-    private Texture getToolTexture(Tools tool) {
+    public Texture getToolTexture(Tools tool) {
 
         return switch (tool.getToolType()) {
             case HOE -> getHoeTexture(tool.getLevel());

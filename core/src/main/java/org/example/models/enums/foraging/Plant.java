@@ -1,8 +1,13 @@
 package org.example.models.enums.foraging;
 
+import com.badlogic.gdx.graphics.Texture;
+import org.example.models.Assets.PlantAssetsManager;
+import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.Item;
 import org.example.models.ProductsPackage.Quality;
+
+import static org.example.models.Assets.PlantAssetsManager.buildTextureMap;
 
 public class Plant extends Item {
     private Location location;
@@ -137,4 +142,26 @@ public class Plant extends Item {
     public void setTypeOfPlant(TypeOfPlant typeOfPlant) {
         this.typeOfPlant = typeOfPlant;
     }
+
+    public Texture getTexture() {
+        if (PlantAssetsManager.PLANT_TEXTURES.isEmpty()) {
+            System.out.println("PLANT_TEXTURES is empty!");
+            buildTextureMap();
+        }
+
+        Texture[] textures = PlantAssetsManager.PLANT_TEXTURES.get(typeOfPlant);
+
+        if (textures != null && textures.length > 0) {
+            return textures[0];
+        }
+        if(typeOfPlant.getName().contains("Seeds")){
+            Plant plant = new Plant(App.getCurrentGame().getMainMap().findLocation(0, 0), false, TypeOfPlant.AMARANTH);
+            return plant.getTexture();
+        } if(typeOfPlant.getName().contains("Starter")){
+            Plant plant = new Plant(App.getCurrentGame().getMainMap().findLocation(0, 0), false, TypeOfPlant.HOPS);
+            return plant.getTexture();
+        }
+        return null;
+    }
+
 }

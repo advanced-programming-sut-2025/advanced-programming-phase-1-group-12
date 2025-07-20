@@ -35,7 +35,7 @@ public enum NPCdetails {
     ABIGAIL("Abigail", "Adventurer", "Curious and adventurous",
         Arrays.asList("Stone", "Iron Ore", "Coffee"),
         Arrays.asList(
-            new QuestInfo("Deliver a Gold Bar", "Gold Bar", 1, new Item("Gold", Quality.NORMAL, ArtisanTypes.Gold_BAR.getSellPrice()), 5000, 0),
+            new QuestInfo("Deliver a Gold Bar", "Gold Bar", 1, new Item("Gold", Quality.NORMAL, ArtisanTypes.GOLD_BAR.getSellPrice()), 5000, 0),
             new QuestInfo("Deliver a Pumpkin", "Pumpkin", 1, new Item("Automatic Watering Can", Quality.NORMAL, 0), 1, 1),
             new QuestInfo("Deliver 50 Wheat", "Wheat", 50, new Item("Gold", Quality.NORMAL, 0), 750, 2)
         ),

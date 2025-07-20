@@ -1,9 +1,13 @@
 package org.example.models;
 
+import com.badlogic.gdx.graphics.Texture;
+import org.example.models.Assets.GameAssetManager;
+import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.ProductsPackage.ArtisanItem;
 import org.example.models.ProductsPackage.Quality;
 import org.example.models.enums.Types.CraftingRecipe;
+import org.example.views.PixelMapRenderer;
 
 public class Craft extends Item {
 
@@ -37,5 +41,8 @@ public class Craft extends Item {
 
     public Location getLocation() {
         return location;
+    }
+    public  Texture getTexture() {
+        return  GameAssetManager.craftType(location);
     }
 }

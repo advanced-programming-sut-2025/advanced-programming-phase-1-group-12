@@ -2,7 +2,9 @@ package org.example.models.ToolsPackage;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import org.example.Main;
 import org.example.controllers.ToolsController;
+import org.example.models.Assets.GameAssetManager;
 import org.example.models.Assets.ToolAssetsManager;
 import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
@@ -12,6 +14,10 @@ import org.example.models.ProductsPackage.Quality;
 import org.example.models.ToolsPackage.ToolEnums.Tool;
 import org.example.models.ToolsPackage.ToolEnums.ToolTypes;
 import org.example.models.enums.Weather;
+import org.example.views.GameMenu;
+import org.example.views.PixelMapRenderer;
+
+import java.util.ArrayList;
 
 public class Tools extends Item {
     private int level;
@@ -22,6 +28,7 @@ public class Tools extends Item {
     private ToolTypes type;
     private Sprite smgSprite;
     private ToolsController toolsController;
+    ToolAssetsManager toolAssets = ToolAssetsManager.toolAssetsManager();
 
     // watering can
     private int capacity;
@@ -212,4 +219,10 @@ public class Tools extends Item {
     public void setType(ToolTypes type) {
         this.type = type;
     }
+
+    public Texture getTexture() {
+        GameMenu gameMenu = new GameMenu(new ArrayList<>());
+        return gameMenu.getToolTexture(this);
+    }
+
 }

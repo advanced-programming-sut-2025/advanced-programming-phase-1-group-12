@@ -519,10 +519,10 @@ public class ArtisanController {
                     type = ArtisanTypes.IRIDIUM_BAR;
                     break;
                 case "Iron Ore":
-                    type = ArtisanTypes.Iron_BAR;
+                    type = ArtisanTypes.IRON_BAR;
                     break;
                 case "Gold Ore":
-                    type = ArtisanTypes.Gold_BAR;
+                    type = ArtisanTypes.GOLD_BAR;
                     break;
                 default:
                     return new Result(false, "invalid ingredients type");

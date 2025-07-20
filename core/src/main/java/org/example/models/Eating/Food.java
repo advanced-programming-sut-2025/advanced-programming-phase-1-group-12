@@ -1,5 +1,6 @@
 package org.example.models.Eating;
 
+import com.badlogic.gdx.graphics.Texture;
 import org.example.models.Item;
 import org.example.models.ProductsPackage.Quality;
 import org.example.models.enums.Types.Cooking;
@@ -20,4 +21,7 @@ public class Food extends Item {
         this.foodType = foodType;
     }
 
+    public Texture getTexture() {
+        return foodType.getTexture();
+    }
 }

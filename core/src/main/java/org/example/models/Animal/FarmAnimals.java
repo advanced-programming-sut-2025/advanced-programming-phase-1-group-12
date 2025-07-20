@@ -9,7 +9,6 @@ import org.example.models.enums.Animal;
 public class FarmAnimals extends Item {
     //Animal enum with its information:
     private Animal animal;
-    private Texture texture;
 
     private int friendShip;
 
@@ -78,7 +77,6 @@ public class FarmAnimals extends Item {
         //produce first day
         this.daysLeftToProduce = 0;
         this.hasCollectedProductToday = false;
-        this.texture = animal.getAnimalTexture();
     }
 
     public boolean isWillProduceToday() {
@@ -122,7 +120,7 @@ public class FarmAnimals extends Item {
     }
 
     public Texture getTexture() {
-        return texture;
+        return animal.getAnimalTexture();
     }
 
     public Location getPreviousPosition() {

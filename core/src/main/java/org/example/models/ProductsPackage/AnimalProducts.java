@@ -1,6 +1,7 @@
 package org.example.models.ProductsPackage;
 
 
+import com.badlogic.gdx.graphics.Texture;
 import org.example.models.Item;
 import org.example.models.enums.Types.AnimalProduct;
 
@@ -17,5 +18,9 @@ public class AnimalProducts extends Item {
         this.animalProduct = animalProduct;
         this.quality = quality;
         this.price = animalProduct.getPrice();
+    }
+
+    public Texture getTexture() {
+        return animalProduct.getTexture();
     }
 }

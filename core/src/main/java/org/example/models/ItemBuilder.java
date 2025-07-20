@@ -31,10 +31,13 @@ public class ItemBuilder {
             return new AnimalProducts(animalProduct.getName(), animalProduct, quality);
         }
         FoodType foodType = FoodType.stringToFood(name);
-        Cooking cooking = Cooking.fromName(name);
-        if (foodType != null || cooking != null) {
-            //TODO:cooking?
-            return new Food(name, cooking);
+        if (foodType != null ) {
+            for(Cooking cooking : Cooking.values()){
+                String cookingName = cooking.name().toLowerCase();
+                if (cookingName.contains(foodType.name().toLowerCase()) || foodType.getName().toLowerCase().contains(cookingName)){
+                    return new Food(foodType.getName(), cooking);
+                }
+            }
         }
         IngredientsType ingredientsType = IngredientsType.stringToIngredient(name);
         if (ingredientsType != null) {

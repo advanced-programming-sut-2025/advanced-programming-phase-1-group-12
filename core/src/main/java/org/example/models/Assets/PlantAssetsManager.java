@@ -416,7 +416,7 @@ public class PlantAssetsManager {
     public Texture Mahogany_Stage_3 = new Texture("Trees/Mahogany_Stage_4.png");
     public Texture Mahogany_Stage_4 = new Texture("Trees/Mahogany_Stage_4.png");
 
-    private static final Map<TypeOfPlant, Texture[]> PLANT_TEXTURES = new EnumMap<>(TypeOfPlant.class);
+    public static final Map<TypeOfPlant, Texture[]> PLANT_TEXTURES = new EnumMap<>(TypeOfPlant.class);
 
     public static Texture treeType(Location location) {
 
@@ -433,7 +433,7 @@ public class PlantAssetsManager {
         return textures[stage];
     }
 
-    private static void buildTextureMap() {
+    public static void buildTextureMap() {
 
         PLANT_TEXTURES.put(TypeOfPlant.BLUE_JAZZ,
             new Texture[]{INSTANCE.Blue_jazz_stage_0, INSTANCE.Blue_Jazz_Stage_1,

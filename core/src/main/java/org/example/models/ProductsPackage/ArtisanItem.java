@@ -1,5 +1,7 @@
 package org.example.models.ProductsPackage;
 
+import com.badlogic.gdx.graphics.Texture;
+import org.example.models.Assets.GameAssetManager;
 import org.example.models.Item;
 import org.example.models.enums.Types.ArtisanTypes;
 
@@ -40,5 +42,10 @@ public class ArtisanItem extends Item {
 
     public void setEnergy(int energy) {
         this.energy = energy;
+    }
+
+
+    public Texture getTexture() {
+        return GameAssetManager.getGameAssetManager().getCraftingTexture(type);
     }
 }

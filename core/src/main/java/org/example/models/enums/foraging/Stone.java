@@ -1,5 +1,6 @@
 package org.example.models.enums.foraging;
 
+import com.badlogic.gdx.graphics.Texture;
 import org.example.models.Item;
 import org.example.models.ProductsPackage.Quality;
 
@@ -18,5 +19,9 @@ public class Stone extends Item {
 
     public void setMineralTypes(MineralTypes mineralTypes) {
         this.mineralTypes = mineralTypes;
+    }
+
+    public Texture getTexture() {
+        return mineralTypes.getTexture();
     }
 }

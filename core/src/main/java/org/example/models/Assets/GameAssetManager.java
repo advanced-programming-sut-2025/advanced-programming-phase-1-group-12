@@ -5,13 +5,18 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import org.example.models.Craft;
 import org.example.models.Fundementals.Location;
+import org.example.models.enums.Types.ArtisanTypes;
 import org.example.models.enums.Types.CraftingRecipe;
+
+import java.util.EnumMap;
 
 public class GameAssetManager {
     public static Skin skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
     private static GameAssetManager gameAssetManager;
 
     private final Texture fridge = new Texture("Mini-Fridge.png");
+    private static EnumMap<ArtisanTypes, Texture> craftingTextures;
+
 
     private final Texture LAKE_TEXTURE = new Texture("Flooring/Flooring_26.png");
     private final Texture PLANTS = new Texture("Flooring/Flooring_50.png");
@@ -77,12 +82,58 @@ public class GameAssetManager {
     private final Texture nonLegendFish = new Texture("Fish/Blue_Discus.png");
     private final Texture legendFish = new Texture("Fish/Legend.png");
 
+    //some things for inventory
+    public static final Texture GOLD = new Texture("Crafting/Gold.png");
+    public static final Texture COAL = new Texture("Crafting/Coal.png");
+    public static final Texture IRIDIUM_ORE = new Texture("Crafting/Iridium_Ore.png");
+    public static final Texture IRON_ORE = new Texture("Crafting/Iron_Ore.png");
+    public static final Texture COPPER_ORE = new Texture("Crafting/Copper_Ore.png");
+    public static final Texture PRISMATIC_SHARD = new Texture("Crafting/Prismatic_Shard.png");
+    public static final Texture AMETHYST = new Texture("Gem/Amethyst.png");
+    public static final Texture EMERALD = new Texture("Gem/Emerald.png");
+    public static final Texture JADE = new Texture("Gem/Jade.png");
+    public static final Texture RUBY = new Texture("Gem/Ruby.png");
+    public static final Texture TOPAZ = new Texture("Gem/Topaz.png");
+    public static final Texture AQUAMARINE = new Texture("Crafting/Aquamarine.png");
+    public static final Texture FIRE_QUARTZ = new Texture("Crafting/Fire_Quartz.png");
+    public static final Texture FROZEN_TEAR = new Texture("Crafting/Frozen_Tear.png");
+    public static final Texture EARTH_CRYSTAL = new Texture("Crafting/Earth_Crystal.png");
+    public static final Texture QUARTZ = new Texture("Mineral/Quartz.png");
+    public static final Texture DIAMOND = new Texture("Crafting/Diamond.png");
+    public static final Texture checkMark = new Texture("Emoji/Emojis139.png");
+    //soil
+    public static final Texture BASIC_RETAINING_SOIL = new Texture("Crafting/Basic_Retaining_Soil.png");
+    public static final Texture TEA_SAPLING = new Texture("Crafting/Tea_Sapling.png");
+    public static final Texture SUGAR = new Texture("Crops/Sugar.png");
+    public static final Texture RICE = new Texture("Crops/Rice.png");
+    public static final Texture WHEAT_FLOUR = new Texture("Crops/Wheat_Flour.png");
+    public static final Texture WOOD = new Texture("Crafting/Wood.png");
+
+    public Texture getAnimalHome() {
+        return animalHome;
+    }
+
+    //for inventory
+    private final Texture animalHome = new Texture("Barn.png");
+
     public static GameAssetManager getGameAssetManager() {
         if (gameAssetManager == null) {
             gameAssetManager = new GameAssetManager();
+            craftingTextures = new EnumMap<ArtisanTypes, Texture>(ArtisanTypes.class);
+            loadCraftingTextures();
         }
         return gameAssetManager;
     }
+
+    private static void loadCraftingTextures() {
+        for (ArtisanTypes recipe : ArtisanTypes.values()) {
+            craftingTextures.put(recipe, new Texture(recipe.getTexturePath()));
+        }
+    }
+    public Texture getCraftingTexture(ArtisanTypes recipe) {
+        return craftingTextures.get(recipe);
+    }
+
 
     public static void dispose() {
         skin.dispose();

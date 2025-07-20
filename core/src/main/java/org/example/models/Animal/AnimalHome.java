@@ -1,5 +1,7 @@
 package org.example.models.Animal;
 
+import com.badlogic.gdx.graphics.Texture;
+import org.example.models.Assets.GameAssetManager;
 import org.example.models.Fundementals.LocationOfRectangle;
 import org.example.models.Item;
 import org.example.models.ProductsPackage.Quality;
@@ -41,5 +43,9 @@ public class AnimalHome extends Item {
 
     public void setLocation(LocationOfRectangle location) {
         this.location = location;
+    }
+
+    public Texture getTexture() {
+        return GameAssetManager.getGameAssetManager().getAnimalHome();
     }
 }
