@@ -49,8 +49,8 @@ public class Date implements Runnable {
         this.tommorowWeather = weatherForecast(season);
     }
 
-    public void run(){
-        while(threadRunning){
+    public void run() {
+        while (threadRunning) {
             try {
                 Thread.sleep(6000); //every 6 seconds 1 hour passes
                 changeAdvancedTime(1);
@@ -61,7 +61,7 @@ public class Date implements Runnable {
         }
     }
 
-    public void stop(){
+    public void stop() {
         threadRunning = false;
         if (timeThread != null) {
             timeThread.interrupt();
@@ -188,42 +188,26 @@ public class Date implements Runnable {
         }
     }
 
-    public void ThunderAndLightning() {
-        ArrayList<Location> availableLocation = getLocations();
-
-        List<Location> shuffled = new ArrayList<>(availableLocation);
-        Collections.shuffle(shuffled);
-
-        for (int i = 0; i < 3; i++) {
-            Location location = shuffled.get(i);
-            location.setTypeOfTile(TypeOfTile.BURNED_GROUND);
-
-            Gdx.app.postRunnable(() -> {
-                ItemBuilder.addToBackPack(ItemBuilder.builder("Coal", Quality.NORMAL, 0), 1, Quality.NORMAL);
-                System.out.println("you take a coal and it add to your back pack!!");
-            });
-        }
-    }
-
     public void updateAllPlants() {
-//        for(Location location : App.getCurrentGame().getMainMap().getTilesOfMap()){
-//            if(App.getCurrentGame().getDate().weather.name().equalsIgnoreCase("rainy") &&
-//                !location.getTypeOfTile().equals(TypeOfTile.GREENHOUSE)){
-//                if(location.getTypeOfTile().equals(TypeOfTile.PLANT)){
-//                    Plant plant = (Plant) location.getObjectInTile();
-//                    plant.setHasBeenWatering(true);
-//                }
-//            }
-//            if(location.getTypeOfTile().equals(TypeOfTile.BURNED_GROUND)){
-//                location.setTypeOfTile(TypeOfTile.GROUND);
-//            }
-//        }
+
+        for (Location location : App.getCurrentGame().getMainMap().getTilesOfMap()) {
+            if (App.getCurrentGame().getDate().weather.name().equalsIgnoreCase("rainy") &&
+                !location.getTypeOfTile().equals(TypeOfTile.GREENHOUSE)) {
+                if (location.getTypeOfTile().equals(TypeOfTile.PLANT)) {
+                    Plant plant = (Plant) location.getObjectInTile();
+                    plant.setHasBeenWatering(true);
+                }
+            }
+            if (location.getTypeOfTile().equals(TypeOfTile.BURNED_GROUND)) {
+                location.setTypeOfTile(TypeOfTile.GROUND);
+            }
+        }
         for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {
             for (Plant plant : farm.getPlantOfFarm()) {
 
                 if (!plant.isHasBeenFertilized() && !plant.isHasBeenWatering()) {
                     plant.setDayPast(plant.getDayPast() - 1);
-                    if (plant.getDayPast() < 0) {
+                    if (plant.getDayPast() <= 0) {
                         System.out.println("you lost plant at location: " + plant.getLocation().getxAxis() + ", " + plant.getLocation().getyAxis());
                         Location currentLocation = plant.getLocation();
                         currentLocation.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
@@ -237,8 +221,11 @@ public class Date implements Runnable {
                 plant.setAge(plant.getAge() + 1);
 
                 int currentStage = plant.getCurrentStage();
+                if(currentStage == plant.getTypeOfPlant().stages.length){
+                    continue;
+                }
                 int dayNeed = 0;
-                for (int i = 0; i < currentStage; i++) {
+                for (int i = 0; i <= currentStage; i++) {
                     dayNeed += plant.getTypeOfPlant().stages[i];
                 }
                 if (plant.getAge() >= dayNeed) {
@@ -262,18 +249,13 @@ public class Date implements Runnable {
             if (availableLocation.size() < 3) continue;
 
             Collections.shuffle(availableLocation);
-
             List<MineralTypes> allMinerals = new ArrayList<>(Arrays.asList(MineralTypes.values()));
+            List<SeedTypes> allSeeds = new ArrayList<>();
 
-            List<TypeOfPlant> foragingTrees = new ArrayList<>();
-            for(TypeOfPlant typeOfPlant : TypeOfPlant.values()){
-                if(typeOfPlant.getPlantType() == PlantType.ForagingTree)
-                    foragingTrees.add(typeOfPlant);
+            for (SeedTypes seedTypes : SeedTypes.values()) {
+                if (seedTypes.isForaging()) allSeeds.add(seedTypes);
             }
-
-            List<SeedTypes> allSeeds = new ArrayList<>(Arrays.asList(SeedTypes.values()));
             Collections.shuffle(allMinerals);
-            Collections.shuffle(foragingTrees);
             Collections.shuffle(allSeeds);
 
             int count = Math.min(3, availableLocation.size());
@@ -298,12 +280,10 @@ public class Date implements Runnable {
                 assert allCrops != null;
                 Plant newPlant = new Plant(location, true, allCrops);
                 farm.getPlantOfFarm().add(newPlant);
-                if (newPlant.getTypeOfPlant() != null)
-                    System.out.println("new Plant with type: " + newPlant.getTypeOfPlant().getName() + " add to location" +
-                        location.getxAxis() + ", " + location.getyAxis());
-                else
-                    System.out.println("new Plant with type: " + newPlant.getTypeOfPlant().getSource().getName().toLowerCase() + " add to location" +
-                        location.getxAxis() + ", " + location.getyAxis());
+
+                System.out.println("new Plant with type: " + newPlant.getTypeOfPlant().getName() + " add to location" +
+                    location.getxAxis() + ", " + location.getyAxis());
+
                 location.setTypeOfTile(TypeOfTile.PLANT);
                 location.setObjectInTile(newPlant);
             }
@@ -378,19 +358,19 @@ public class Date implements Runnable {
     }
 
     public void resetDailyLimit() {
-        for(Store store: App.getCurrentGame().getMainMap().getStores()){
-            for(StoreProducts products : store.getStoreProducts()){
+        for (Store store : App.getCurrentGame().getMainMap().getStores()) {
+            for (StoreProducts products : store.getStoreProducts()) {
                 products.setCurrentDailyLimit(products.getType().getDailyLimit());
             }
         }
     }
 
-    public void buffUpdates(){
-        if(App.getCurrentPlayerLazy().isMaxEnergyBuffEaten()){
+    public void buffUpdates() {
+        if (App.getCurrentPlayerLazy().isMaxEnergyBuffEaten()) {
             App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - 10000);
             App.getCurrentPlayerLazy().setMaxEnergyBuffEaten(false);
         }
-        if(App.getCurrentPlayerLazy().isSkillBuffEaten()){
+        if (App.getCurrentPlayerLazy().isSkillBuffEaten()) {
             App.getCurrentPlayerLazy().getAbilityByName("Farming").setLevel(App.getCurrentGame().getCurrentPlayer().getAbilityByName("Farming").getLevel() - 1);
             App.getCurrentPlayerLazy().setSkillBuffEaten(false);
         }
@@ -496,7 +476,7 @@ public class Date implements Runnable {
         ArrayList<Location> availableLocations = new ArrayList<>();
         ArrayList<Location> allLocationOfFarm = getLocationsOfRectangle(farm.getFarmLocation());
         for (Location location : allLocationOfFarm) {
-            if (location.getTypeOfTile().equals(TypeOfTile.PLOUGHED_LAND) || location.getTypeOfTile().equals(TypeOfTile.GROUND)) {
+            if (location.getTypeOfTile().equals(TypeOfTile.GROUND)) {
                 availableLocations.add(location);
             }
         }
@@ -556,16 +536,16 @@ public class Date implements Runnable {
             System.out.println(player.getShippingMoney());
             player.increaseMoney(player.getShippingMoney());
             player.setShippingMoney(0);
-            if(player.getShippingBin() != null) {
+            if (player.getShippingBin() != null) {
                 player.getShippingBin().getShippingItemMap().clear();
             }
         }
     }
 
-    public void updateRecepies(){
-        if(App.getCurrentPlayerLazy().getAbilityByName("Mining").getLevel() >= 2 && App.getCurrentPlayerLazy().getAbilityByName("Farming").getLevel() >= 2){
-            for(CraftingRecipe recipe : CraftingRecipe.values()){
-                if(!recipe.getName().equalsIgnoreCase("Fish Smoker") && !recipe.getName().equalsIgnoreCase("Dehydrator")){
+    public void updateRecepies() {
+        if (App.getCurrentPlayerLazy().getAbilityByName("Mining").getLevel() >= 2 && App.getCurrentPlayerLazy().getAbilityByName("Farming").getLevel() >= 2) {
+            for (CraftingRecipe recipe : CraftingRecipe.values()) {
+                if (!recipe.getName().equalsIgnoreCase("Fish Smoker") && !recipe.getName().equalsIgnoreCase("Dehydrator")) {
                     App.getCurrentPlayerLazy().getRecepies().put(recipe, true);
                 }
             }

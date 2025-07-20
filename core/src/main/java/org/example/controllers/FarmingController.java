@@ -151,14 +151,8 @@ public class FarmingController {
 
                     GiantPlants giantPlants = GiantPlants.sourceTypeToCraftType(seedTypes);
                     GiantPlant giantPlant = new GiantPlant(
-                            giantPlants,
-                            locations,
-                            isFertilized,
-                            isWatered,
-                            typeOfPlant.totalHarvestTime,
-                            0, // dayPast
-                            0, // currentStage
-                            maxGrowth
+                            giantPlants, locations, isFertilized, isWatered, typeOfPlant.totalHarvestTime,
+                        0, 0, maxGrowth
                     );
 
                     locations.get(0).setObjectInTile(giantPlant);

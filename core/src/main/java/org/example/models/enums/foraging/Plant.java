@@ -23,7 +23,7 @@ public class Plant extends Item {
         super(typeOfPlant.getName(), Quality.NORMAL, typeOfPlant.baseSellPrice);
         this.location = location;
         this.hasBeenFertilized = false;
-        this.dayPast = 3;
+        this.dayPast = 30;
         this.currentStage = 0;
         this.age = 0;
         this.isOneTime = true;

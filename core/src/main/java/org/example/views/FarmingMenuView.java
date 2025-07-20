@@ -14,8 +14,6 @@ import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.Fundementals.Player;
 import org.example.models.Item;
-import org.example.models.enums.Types.TypeOfTile;
-import org.example.models.enums.foraging.Plant;
 import org.example.models.BackPack;
 import org.example.models.enums.foraging.Seed;
 
@@ -57,6 +55,7 @@ public class FarmingMenuView implements Screen {
                 TextButton seedButton = new TextButton(seed.getName(), skin);
                 seedButton.addListener(event -> {
                     farmingController.plant(seed.getType().getName(), location);
+                    Main.getMain().setScreen(new GameMenu(players));
                     return true;
                 });
                 table.add(seedButton).pad(10).width(200).height(50);

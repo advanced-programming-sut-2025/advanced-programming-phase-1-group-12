@@ -8,6 +8,8 @@ import org.example.models.Fundementals.App;
 import org.example.models.Fundementals.Location;
 import org.example.models.ShippingBin;
 import org.example.models.enums.Types.TypeOfTile;
+import org.example.models.enums.foraging.GiantPlant;
+import org.example.models.enums.foraging.Stone;
 import org.example.models.map;
 
 import java.util.*;
@@ -109,9 +111,14 @@ public class PixelMapRenderer {
         for (Location loc : App.getCurrentGame().getMainMap().getTilesOfMap()) {
             float drawX = offsetX + loc.getxAxis() * tileSize;
             float drawY = offsetY + loc.getyAxis() * tileSize;
-            if (loc.getTypeOfTile() == TypeOfTile.PLANT) {
+
+            if (loc.getObjectInTile() instanceof GiantPlant) {
+                GiantPlant giantPlant = (GiantPlant) loc.getObjectInTile();
+                batch.draw(PlantAssetsManager.getGiantPlant(giantPlant.getGiantPlants()),
+                    drawX, drawY, tileSize, tileSize);
+            } else if (loc.getTypeOfTile() == TypeOfTile.PLANT) {
                 batch.draw(PlantAssetsManager.treeType(loc), drawX, drawY, tileSize, tileSize);
-            } else if(loc.getTypeOfTile() == TypeOfTile.STONE){
+            } else if (loc.getObjectInTile() instanceof Stone) {
                 batch.draw(GameAssetManager.getGameAssetManager().getSTONE(), drawX, drawY, 50, 50);
             }
         }

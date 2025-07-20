@@ -2,6 +2,7 @@ package org.example.models.Assets;
 
 import com.badlogic.gdx.graphics.Texture;
 import org.example.models.Fundementals.Location;
+import org.example.models.enums.foraging.GiantPlants;
 import org.example.models.enums.foraging.Plant;
 import org.example.models.enums.foraging.TypeOfPlant;
 
@@ -711,4 +712,21 @@ public class PlantAssetsManager {
 
     private static final PlantAssetsManager INSTANCE = new PlantAssetsManager();
 
+    public static Texture getGiantPlant(GiantPlants giantPlants) {
+
+        switch (giantPlants){
+            case CAULIFLOWER -> {
+                return new Texture("Crops/Giant_Cauliflower.png");
+            }
+            case PUMPKIN -> {
+                return new Texture("Crops/Giant_Pumpkin.png");
+            }
+            case POWDERMELON -> {
+                return new Texture("Crops/Giant_Powdermelon.png");
+            }
+            default -> {
+                return new Texture("Crops/Giant_Melon.png");
+            }
+        }
+    }
 }
