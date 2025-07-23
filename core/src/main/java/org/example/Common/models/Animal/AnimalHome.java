@@ -1,10 +1,10 @@
 package org.example.Common.models.Animal;
 
 import com.badlogic.gdx.graphics.Texture;
-import org.example.models.Assets.GameAssetManager;
-import org.example.models.Fundementals.LocationOfRectangle;
-import org.example.models.Item;
-import org.example.models.ProductsPackage.Quality;
+import org.example.Common.models.Assets.GameAssetManager;
+import org.example.Common.models.Fundementals.LocationOfRectangle;
+import org.example.Common.models.Item;
+import org.example.Common.models.ProductsPackage.Quality;
 
 public class AnimalHome extends Item {
     private int CapacityRemained;

@@ -154,7 +154,7 @@ public class GameMenuController {
         int currentYear = App.getCurrentGame().getDate().getYear();
         int currentHour = App.getCurrentGame().getDate().getHour();
         return new Result(true, String.format("%d/%d - Time: %d", currentYear,
-                currentDay, currentHour));
+            currentDay, currentHour));
     }
 
     public Result showDayOfTheWeek() {
@@ -250,9 +250,9 @@ public class GameMenuController {
                 for (Store store : App.getCurrentGame().getMainMap().getStores()) {
                     LocationOfRectangle loc = store.getLocation();
                     if (mapX >= loc.getTopLeftCorner().getxAxis() &&
-                            mapX <= loc.getDownRightCorner().getxAxis() &&
-                            mapY >= loc.getTopLeftCorner().getyAxis() &&
-                            mapY <= loc.getDownRightCorner().getyAxis()) {
+                        mapX <= loc.getDownRightCorner().getxAxis() &&
+                        mapY >= loc.getTopLeftCorner().getyAxis() &&
+                        mapY <= loc.getDownRightCorner().getyAxis()) {
 
                         contentChar = store.getNameOfStore().charAt(0); // Store’s first character
                         bgColor = "\u001B[46m"; // Light cyan background for store
@@ -442,7 +442,7 @@ public class GameMenuController {
 
     public Result showLocation() {
         return new Result(true, App.getCurrentGame().getCurrentPlayer().getUserLocation().getxAxis() +
-                " " + App.getCurrentGame().getCurrentPlayer().getUserLocation().getyAxis());
+            " " + App.getCurrentGame().getCurrentPlayer().getUserLocation().getyAxis());
     }
 
 
@@ -534,11 +534,11 @@ public class GameMenuController {
             player1.addRelationShip(newRelationShip);
             newRelationShip.talk(message);
             return new Result(true, "message sent!" + "\nRelationShip XP: " + newRelationShip.getXP() +
-                    "\nFriendship Level: " + newRelationShip.getFriendshipLevel());
+                "\nFriendship Level: " + newRelationShip.getFriendshipLevel());
         }
         relationShip.talk(message);
         return new Result(true, "message sent!" + "\nRelationShip XP: " + relationShip.getXP() +
-                "\nFriendship Level: " + relationShip.getFriendshipLevel());
+            "\nFriendship Level: " + relationShip.getFriendshipLevel());
     }
 
     public Result talkHistory(String username) {
@@ -583,8 +583,8 @@ public class GameMenuController {
 
             if (relationShip.gift(gift, inAmount)) {
                 return new Result(true, "Gift sent successfully! " + player2.getUser().getUserName() + " can rate it now."
-                        + "\nRelationShip XP: " + relationShip.getXP() +
-                        "\nFriendship Level: " + relationShip.getFriendshipLevel());
+                    + "\nRelationShip XP: " + relationShip.getXP() +
+                    "\nFriendship Level: " + relationShip.getFriendshipLevel());
             } else {
                 return new Result(false, "Error sending gift!");
             }
@@ -673,14 +673,14 @@ public class GameMenuController {
             }
             relationShip.hug();
             return new Result(true, "hugged successfully!" + "\nFriendShip XP: " +
-                    relationShip.getXP() + " Friendship level: " + relationShip.getFriendshipLevel());
+                relationShip.getXP() + " Friendship level: " + relationShip.getFriendshipLevel());
         } else {
             if (!relationShip2.arePlayersAdjacent()) {
                 return new Result(false, "Players are not adjacent!");
             }
             relationShip2.hug();
             return new Result(true, "hugged successfully!" + "\nFriendShip XP: " +
-                    relationShip2.getXP() + " Friendship level: " + relationShip2.getFriendshipLevel());
+                relationShip2.getXP() + " Friendship level: " + relationShip2.getFriendshipLevel());
         }
     }
 
@@ -698,11 +698,11 @@ public class GameMenuController {
         if (relationShip != null) {
             relationShip.flower();
             return new Result(true, "flowered successfully!" + "\nFriendShip XP: " +
-                    relationShip.getXP() + " Friendship level: " + relationShip.getFriendshipLevel());
+                relationShip.getXP() + " Friendship level: " + relationShip.getFriendshipLevel());
         } else {
             relationShip2.flower();
             return new Result(true, "flowered successfully!" + "\nFriendShip XP: " +
-                    relationShip2.getXP() + " Friendship level: " + relationShip2.getFriendshipLevel());
+                relationShip2.getXP() + " Friendship level: " + relationShip2.getFriendshipLevel());
         }
     }
 
@@ -729,8 +729,8 @@ public class GameMenuController {
             }
             relationShip.askMarriage(ring);
             return new Result(true, "marriage asked successfully by "
-                    + relationShip.getPlayer1().getUser().getUserName() + "\nFriendShip XP: " + relationShip.getXP()
-                    + "\nFriendShip Level: " + relationShip.getFriendshipLevel());
+                + relationShip.getPlayer1().getUser().getUserName() + "\nFriendShip XP: " + relationShip.getXP()
+                + "\nFriendShip Level: " + relationShip.getFriendshipLevel());
         } else {
             if (!(relationShip2.getFriendshipLevel() == 3)) {
                 return new Result(false, "You need to be at level 3 to ask for a marriage!");
@@ -740,8 +740,8 @@ public class GameMenuController {
             }
             relationShip2.askMarriage(ring);
             return new Result(true, "marriage asked successfully by " + relationShip2.getPlayer1().getUser().getUserName()
-                    + "\nFriendShip XP: " + relationShip2.getXP()
-                    + "\nFriendShip Level: " + relationShip2.getFriendshipLevel());
+                + "\nFriendShip XP: " + relationShip2.getXP()
+                + "\nFriendShip Level: " + relationShip2.getFriendshipLevel());
         }
     }
 
@@ -765,13 +765,13 @@ public class GameMenuController {
         if (answer.equals("accept")) {
             relationShip.marriage(relationShip.getAskedRing());
             return new Result(true, "marriage accepted by "
-                    + relationShip.getPlayer1().getUser().getUserName()
-                    + "\nFriendShip XP: " + relationShip.getXP() + "\nFriendShip Level: " + relationShip.getFriendshipLevel());
+                + relationShip.getPlayer1().getUser().getUserName()
+                + "\nFriendShip XP: " + relationShip.getXP() + "\nFriendShip Level: " + relationShip.getFriendshipLevel());
         } else {
             relationShip.reject();
             return new Result(false, "marriage accepted by "
-                    + relationShip.getPlayer1().getUser().getUserName()
-                    + "\nFriendShip XP: " + relationShip.getXP() + "\nFriendShip Level: " + relationShip.getFriendshipLevel());
+                + relationShip.getPlayer1().getUser().getUserName()
+                + "\nFriendShip XP: " + relationShip.getXP() + "\nFriendShip Level: " + relationShip.getFriendshipLevel());
         }
     }
 
@@ -826,8 +826,8 @@ public class GameMenuController {
             }
 
             result.append("- ").append(otherPlayer.getUser().getUserName())
-                    .append(": Level ").append(relationship.getFriendshipLevel())
-                    .append(" (XP: ").append(relationship.getXP()).append("/").append(relationship.calculateLevelXP()).append(")\n");
+                .append(": Level ").append(relationship.getFriendshipLevel())
+                .append(" (XP: ").append(relationship.getXP()).append("/").append(relationship.calculateLevelXP()).append(")\n");
         }
 
         return new Result(true, result.toString());
@@ -864,11 +864,11 @@ public class GameMenuController {
         for (NPC npc : App.getCurrentGame().getNPCvillage().getAllNPCs()) {
             Location location = npc.getUserLocation();
             response.append(npc.getName())
-                    .append(": (")
-                    .append(location.getxAxis())
-                    .append(", ")
-                    .append(location.getyAxis())
-                    .append(")\n");
+                .append(": (")
+                .append(location.getxAxis())
+                .append(", ")
+                .append(location.getyAxis())
+                .append(")\n");
         }
 
         return new Result(true, response.toString());
@@ -881,20 +881,20 @@ public class GameMenuController {
 
         // Add favorite items for each NPC
         String[] favoriteItems = {
-        "Wool", "Pumpkin Pie", "Pizza",      // Sebastian
-        "Stone", "Iron Ore", "Coffee",       // Abigail
-        "Coffee", "Pickles", "Wine",         // Harvey
-        "Salad", "Grape", "Wine",            // Leah
-        "Spaghetti", "Wood", "Iron Bar"      // Robin
+            "Wool", "Pumpkin Pie", "Pizza",      // Sebastian
+            "Stone", "Iron Ore", "Coffee",       // Abigail
+            "Coffee", "Pickles", "Wine",         // Harvey
+            "Salad", "Grape", "Wine",            // Leah
+            "Spaghetti", "Wood", "Iron Bar"      // Robin
         };
 
         // Add quest items
         String[] questItems = {
-        "Iron", "Pumpkin Pie", "Stone",      // Sebastian quests
-        "Gold Bar", "Pumpkin", "Wheat",      // Abigail quests
-        "Crop", "Wine", "Hardwood",          // Harvey quests
-        "Salmon", "Wood", "Iron Bar",        // Leah quests
-        "Wood"                               // Robin quests
+            "Iron", "Pumpkin Pie", "Stone",      // Sebastian quests
+            "Gold Bar", "Pumpkin", "Wheat",      // Abigail quests
+            "Crop", "Wine", "Hardwood",          // Harvey quests
+            "Salmon", "Wood", "Iron Bar",        // Leah quests
+            "Wood"                               // Robin quests
         };
 
         // Add all items to player's inventory
@@ -1073,7 +1073,7 @@ public class GameMenuController {
         Location binLocation = player.getShippingBin().getShippingBinLocation();
 
         int distance = Math.abs(playerLocation.getxAxis() - binLocation.getxAxis()) +
-                Math.abs(playerLocation.getyAxis() - binLocation.getyAxis());
+            Math.abs(playerLocation.getyAxis() - binLocation.getyAxis());
         return distance <= 1;
     }
 
@@ -1169,7 +1169,7 @@ public class GameMenuController {
         player.decreaseMoney(1000);
         player.getBackPack().decreaseItem(player.getBackPack().getItemByName("Wood"), 500);
         String message = "You built a green house!, Money (-1000) / Wood (-500)\n" + "Money: " + player.getMoney() +
-                "\nWood: " + player.getBackPack().getItemCount(player.getBackPack().getItemByName("Wood")) + "\n";
+            "\nWood: " + player.getBackPack().getItemCount(player.getBackPack().getItemByName("Wood")) + "\n";
         return new Result(true, message);
     }
 
@@ -1179,7 +1179,7 @@ public class GameMenuController {
         //build greenhouse
         player.decreaseMoney(1000);
         String message = "You built a green house!, Money (-1000) / Wood (-500)\n" + "Money: " + player.getMoney() +
-                "\nWood: " + player.getBackPack().getItemCount(player.getBackPack().getItemByName("Wood")) + "\n";
+            "\nWood: " + player.getBackPack().getItemCount(player.getBackPack().getItemByName("Wood")) + "\n";
         return new Result(true, message);
     }
 
@@ -1189,8 +1189,8 @@ public class GameMenuController {
             return new Result(false, "no shipping bin found!");
         }
         return new Result(true,
-                player.getShippingBin().getShippingBinLocation().getxAxis()
-                        + ", " + player.getShippingBin().getShippingBinLocation().getyAxis());
+            player.getShippingBin().getShippingBinLocation().getxAxis()
+                + ", " + player.getShippingBin().getShippingBinLocation().getyAxis());
     }
 
     public Result EXIT() {
@@ -1361,8 +1361,8 @@ public class GameMenuController {
         Map<String, Integer> topLeft = (Map<String, Integer>) map.get("topLeft");
         Map<String, Integer> bottomRight = (Map<String, Integer>) map.get("bottomRight");
         return new LocationOfRectangle(
-                new Location(topLeft.get("x"), topLeft.get("y")),
-                new Location(bottomRight.get("x"), bottomRight.get("y"))
+            new Location(topLeft.get("x"), topLeft.get("y")),
+            new Location(bottomRight.get("x"), bottomRight.get("y"))
         );
     }
 
@@ -1409,13 +1409,13 @@ public class GameMenuController {
         if (relationShip != null) {
             relationShip.setFriendshipLevel(intAmount);
             return new Result(true, "Friendship level set to " + intAmount + " by "
-                    + relationShip.getPlayer1().getUser().getUserName()
-                    + "\nFriendShip XP: " + relationShip.getXP() + "\nFriendShip Level: " + relationShip.getFriendshipLevel());
+                + relationShip.getPlayer1().getUser().getUserName()
+                + "\nFriendShip XP: " + relationShip.getXP() + "\nFriendShip Level: " + relationShip.getFriendshipLevel());
         } else {
             relationShip2.setFriendshipLevel(intAmount);
             return new Result(true, "Friendship level set to " + intAmount + " by "
-                    + relationShip2.getPlayer1().getUser().getUserName()
-                    + "\nFriendShip XP: " + relationShip2.getXP() + "\nFriendShip Level: " + relationShip2.getFriendshipLevel());
+                + relationShip2.getPlayer1().getUser().getUserName()
+                + "\nFriendShip XP: " + relationShip2.getXP() + "\nFriendShip Level: " + relationShip2.getFriendshipLevel());
         }
 
     }

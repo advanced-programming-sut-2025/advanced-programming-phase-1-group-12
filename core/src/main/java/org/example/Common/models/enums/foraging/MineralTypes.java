@@ -1,8 +1,7 @@
 package org.example.Common.models.enums.foraging;
 
 import com.badlogic.gdx.graphics.Texture;
-import org.example.models.Assets.GameAssetManager;
-import org.example.views.GameMenu;
+import org.example.Common.models.Assets.GameAssetManager;
 
 public enum MineralTypes {
     QUARTZ("Quartz", "A clear crystal commonly found in caves and mines.", 25, GameAssetManager.QUARTZ),

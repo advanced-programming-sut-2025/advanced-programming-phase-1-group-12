@@ -1313,7 +1313,7 @@ public class GameMenu extends InputAdapter implements Screen {
         return toolButton;
     }
 
-    private Texture getToolTexture(Tools tool) {
+    public Texture getToolTexture(Tools tool) {
 
         return switch (tool.getToolType()) {
             case HOE -> getHoeTexture(tool.getLevel());

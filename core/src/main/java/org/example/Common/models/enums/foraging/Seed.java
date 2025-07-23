@@ -1,11 +1,10 @@
 package org.example.Common.models.enums.foraging;
 
+import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Item;
 import org.example.Common.models.ProductsPackage.Quality;
 import com.badlogic.gdx.graphics.Texture;
-import org.example.models.Fundementals.App;
-import org.example.models.Item;
-import org.example.models.ProductsPackage.Quality;
+
 
 public class Seed extends Item {
 

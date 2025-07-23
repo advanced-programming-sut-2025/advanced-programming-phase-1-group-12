@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import org.example.Common.models.Craft;
 import org.example.Common.models.Fundementals.Location;
+import org.example.Common.models.enums.Types.ArtisanTypes;
 import org.example.Common.models.enums.Types.CraftingRecipe;
 
 import java.util.EnumMap;

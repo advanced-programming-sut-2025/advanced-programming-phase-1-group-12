@@ -10,7 +10,6 @@ import org.example.Common.models.MapDetails.GreenHouse;
 import org.example.Common.models.MapDetails.Lake;
 import org.example.Common.models.MapDetails.Quarry;
 import org.example.Common.models.MapDetails.Shack;
-import org.example.models.MapDetails.*;
 import org.example.Common.models.enums.foraging.GiantPlant;
 import org.example.Common.models.enums.foraging.Plant;
 
