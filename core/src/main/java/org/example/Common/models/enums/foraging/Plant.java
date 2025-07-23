@@ -6,6 +6,8 @@ import org.example.Common.models.Fundementals.Location;
 import org.example.Common.models.Item;
 import org.example.Common.models.ProductsPackage.Quality;
 import com.badlogic.gdx.graphics.Texture;
+import org.example.Common.models.Assets.PlantAssetsManager;
+import org.example.Common.models.Fundementals.App;
 
 import static org.example.Common.models.Assets.PlantAssetsManager.buildTextureMap;
 

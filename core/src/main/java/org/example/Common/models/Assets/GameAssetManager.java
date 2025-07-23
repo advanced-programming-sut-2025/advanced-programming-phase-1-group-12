@@ -7,11 +7,19 @@ import org.example.Common.models.Craft;
 import org.example.Common.models.Fundementals.Location;
 import org.example.Common.models.enums.Types.ArtisanTypes;
 import org.example.Common.models.enums.Types.CraftingRecipe;
+import org.example.Common.models.enums.Types.ArtisanTypes;
 
 import java.util.EnumMap;
 
 public class GameAssetManager {
-    public static Skin skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
+    public static Skin skin;
+    
+    public static Skin getSkin() {
+        if (skin == null) {
+            skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
+        }
+        return skin;
+    }
     private static GameAssetManager gameAssetManager;
 
     private final Texture fridge = new Texture("Mini-Fridge.png");
@@ -110,11 +118,15 @@ public class GameAssetManager {
     public static final Texture WOOD = new Texture("Crafting/Wood.png");
 
     public Texture getAnimalHome() {
+        if (animalHome == null) {
+            animalHome = new Texture("Flooring/Flooring_53.png"); // Using ground texture as placeholder
+        }
         return animalHome;
     }
 
     //for inventory
-    private final Texture animalHome = new Texture("Barn.png");
+    // TODO: Fix missing Barn.png asset - using placeholder for now
+    private Texture animalHome;
 
     public static GameAssetManager getGameAssetManager() {
         if (gameAssetManager == null) {

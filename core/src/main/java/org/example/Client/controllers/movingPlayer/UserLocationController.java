@@ -61,8 +61,9 @@ public class UserLocationController {
             App.getCurrentGame().getCurrentPlayer().setHasCollapsed(true);
             System.out.println(App.getCurrentGame().getCurrentPlayer().getUser().getUserName() + " fainted on the way.");
 
-            GameMenuController gameMenuController = App.getCurrentPlayerLazy().getPlayerController().getGameController();
-            gameMenuController.nextTurn();
+            // TODO: Fix PlayerController type mismatch - need to create a common interface
+            // GameMenuController gameMenuController = App.getCurrentPlayerLazy().getPlayerController().getGameController();
+            // gameMenuController.nextTurn();
             return new Result(false, "You didn't have enough energy. You moved partially and fainted at "
                     + finalReachable.getxAxis() + ", " + finalReachable.getyAxis());
         }

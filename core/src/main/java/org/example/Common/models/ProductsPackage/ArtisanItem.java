@@ -4,6 +4,7 @@ import org.example.Common.models.Assets.GameAssetManager;
 import org.example.Common.models.Item;
 import org.example.Common.models.enums.Types.ArtisanTypes;
 import com.badlogic.gdx.graphics.Texture;
+import org.example.Common.models.Assets.GameAssetManager;
 
 public class ArtisanItem extends Item {
     private ArtisanTypes type;

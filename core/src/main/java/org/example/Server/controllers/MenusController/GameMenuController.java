@@ -932,7 +932,7 @@ public class GameMenuController {
                 return new Result(false, "Item not found in inventory");
             }
             //TODO:there are other edible things too!add them
-            if(!(getItem instanceof Food) && !(getItem instanceof Fish) && !(getItem instanceof Fruits) ){
+            if(!(getItem instanceof Food) && !(getItem instanceof Fruits) ){
                 return new Result(false, "Item is not edible");
             }
             player.getRefrigrator().addItem(getItem, 1);

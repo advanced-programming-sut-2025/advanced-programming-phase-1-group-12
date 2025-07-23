@@ -380,8 +380,9 @@ public class GameMenuController {
                 newPlayer.getOwnedFarm().getShack().getLocation().getTopLeftCorner().getyAxis() + 4)));
             Location loc = farm.getLocation().getTopLeftCorner();
             newPlayer.setUserLocation(App.getCurrentGame().getMainMap().findLocation(loc.getxAxis(), loc.getyAxis()));
-            PlayerController playerController = new PlayerController(newPlayer, this, usernames);
-            newPlayer.setPlayerController(playerController);
+            // TODO: Fix PlayerController type mismatch - need to create a common interface
+            // PlayerController playerController = new PlayerController(newPlayer, this, usernames);
+            // newPlayer.setPlayerController(playerController);
             farms.add(farm);
         }
 
