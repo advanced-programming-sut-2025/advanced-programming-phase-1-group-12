@@ -19,7 +19,7 @@ import java.util.List;
 
 public class PreGameMenu implements Screen {
 
-    private Skin skin = GameAssetManager.skin;
+    private Skin skin = GameAssetManager.getSkin();
     private Stage stage;
     private Image backgroundImage;
     private final Label menuLabel;

@@ -5,6 +5,7 @@ import okhttp3.*;
 import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.LoginRequest;
 import org.example.Common.network.responses.LoginResponse;
+import org.example.Common.network.responses.OnlinePlayersResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +47,7 @@ public class SimpleNetworkClient {
             );
             
             Request request = new Request.Builder()
-                .url(serverBaseUrl + "/api/login")
+                .url(serverBaseUrl + "/auth/login")
                 .post(requestBody)
                 .build();
             
@@ -136,6 +137,100 @@ public class SimpleNetworkClient {
         } catch (Exception e) {
             logger.error("Echo error", e);
             return NetworkResult.error("Echo failed: " + e.getMessage());
+        }
+    }
+    
+    public NetworkResult<OnlinePlayersResponse> getOnlinePlayers() {
+        try {
+            Request request = new Request.Builder()
+                .url(serverBaseUrl + "/api/players/online")
+                .get()
+                .build();
+            
+            try (Response response = httpClient.newCall(request).execute()) {
+                String responseBody = response.body() != null ? response.body().string() : "";
+                
+                if (response.isSuccessful()) {
+                    NetworkResult<OnlinePlayersResponse> result = objectMapper.readValue(
+                        responseBody, 
+                        objectMapper.getTypeFactory().constructParametricType(
+                            NetworkResult.class, OnlinePlayersResponse.class
+                        )
+                    );
+                    
+                    logger.info("Online players retrieved successfully");
+                    return result;
+                } else {
+                    logger.warn("Get online players failed with status: {}", response.code());
+                    return NetworkResult.error("Get online players failed with status: " + response.code());
+                }
+            }
+            
+        } catch (Exception e) {
+            logger.error("Get online players error", e);
+            return NetworkResult.error("Get online players failed: " + e.getMessage());
+        }
+    }
+    
+    public NetworkResult<String> connectPlayer(String username) {
+        try {
+            String requestJson = objectMapper.writeValueAsString(Map.of("username", username));
+            
+            RequestBody requestBody = RequestBody.create(
+                requestJson, MediaType.get("application/json")
+            );
+            
+            Request request = new Request.Builder()
+                .url(serverBaseUrl + "/api/players/connect")
+                .post(requestBody)
+                .build();
+            
+            try (Response response = httpClient.newCall(request).execute()) {
+                String responseBody = response.body() != null ? response.body().string() : "";
+                
+                if (response.isSuccessful()) {
+                    logger.info("Player connected successfully");
+                    return NetworkResult.success("Player connected successfully", responseBody);
+                } else {
+                    logger.warn("Player connect failed with status: {}", response.code());
+                    return NetworkResult.error("Player connect failed with status: " + response.code());
+                }
+            }
+            
+        } catch (Exception e) {
+            logger.error("Player connect error", e);
+            return NetworkResult.error("Player connect failed: " + e.getMessage());
+        }
+    }
+    
+    public NetworkResult<String> disconnectPlayer(String username) {
+        try {
+            String requestJson = objectMapper.writeValueAsString(Map.of("username", username));
+            
+            RequestBody requestBody = RequestBody.create(
+                requestJson, MediaType.get("application/json")
+            );
+            
+            Request request = new Request.Builder()
+                .url(serverBaseUrl + "/api/players/disconnect")
+                .post(requestBody)
+                .build();
+            
+            try (Response response = httpClient.newCall(request).execute()) {
+                String responseBody = response.body() != null ? response.body().string() : "";
+                
+                if (response.isSuccessful()) {
+                    logger.info("Player disconnected successfully");
+                    return NetworkResult.success("Player disconnected successfully", responseBody);
+                } else {
+                    logger.warn("Player disconnect failed with status: {}", response.code());
+                    return NetworkResult.error("Player disconnect failed with status: " + response.code());
+                }
+            }
+            
+        } catch (Exception e) {
+            logger.error("Player disconnect error", e);
+            return NetworkResult.error("Player disconnect failed: " + e.getMessage());
         }
     }
     

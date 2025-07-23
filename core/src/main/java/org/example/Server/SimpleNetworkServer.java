@@ -6,10 +6,13 @@ import io.javalin.http.Context;
 import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.LoginRequest;
 import org.example.Common.network.responses.LoginResponse;
+import org.example.Common.network.responses.OnlinePlayersResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SimpleNetworkServer {
@@ -18,6 +21,7 @@ public class SimpleNetworkServer {
     private final int port;
     private Javalin app;
     private final Map<String, String> users = new ConcurrentHashMap<>();
+    private final PlayerManager playerManager;
     private boolean isRunning;
     
     public SimpleNetworkServer() {
@@ -26,6 +30,7 @@ public class SimpleNetworkServer {
     
     public SimpleNetworkServer(int port) {
         this.port = port;
+        this.playerManager = PlayerManager.getInstance();
         // Add some test users
         users.put("testuser", "password123");
         users.put("admin", "admin123");
@@ -62,6 +67,11 @@ public class SimpleNetworkServer {
         // Authentication routes
         app.post("/auth/login", this::handleLogin);
         app.post("/auth/register", this::handleRegister);
+        
+        // Player management routes
+        app.get("/api/players/online", this::handleGetOnlinePlayers);
+        app.post("/api/players/connect", this::handlePlayerConnect);
+        app.post("/api/players/disconnect", this::handlePlayerDisconnect);
         
         // Test routes
         app.get("/api/test", this::handleTest);
@@ -135,12 +145,74 @@ public class SimpleNetworkServer {
             loginResponse.setToken("test-token-" + System.currentTimeMillis());
             loginResponse.setMessage("Login successful");
             
+            // Track player connection
+            String sessionId = "session-" + System.currentTimeMillis();
+            playerManager.playerConnected(username, sessionId);
+            
             logger.info("Login successful for user: {}", username);
             return NetworkResult.success("Login successful", loginResponse);
             
         } catch (Exception e) {
             logger.error("Error processing login request", e);
             return NetworkResult.error("Internal server error", 500);
+        }
+    }
+    
+    private void handleGetOnlinePlayers(Context ctx) {
+        try {
+            Set<String> onlineUsernames = playerManager.getOnlineUsernames();
+            OnlinePlayersResponse response = new OnlinePlayersResponse(new ArrayList<>(onlineUsernames));
+            ctx.json(NetworkResult.success("Online players retrieved", response));
+        } catch (Exception e) {
+            logger.error("Error getting online players", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
+        }
+    }
+    
+    private void handlePlayerConnect(Context ctx) {
+        try {
+            Map<String, String> request = ctx.bodyAsClass(Map.class);
+            String username = request.get("username");
+            String sessionId = request.get("sessionId");
+            
+            if (username == null || username.trim().isEmpty()) {
+                ctx.status(400).json(NetworkResult.error("Username is required"));
+                return;
+            }
+            
+            if (sessionId == null || sessionId.trim().isEmpty()) {
+                sessionId = "session-" + System.currentTimeMillis();
+            }
+            
+            playerManager.playerConnected(username, sessionId);
+            ctx.json(NetworkResult.success("Player connected successfully"));
+            
+        } catch (Exception e) {
+            logger.error("Error handling player connect", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
+        }
+    }
+    
+    private void handlePlayerDisconnect(Context ctx) {
+        try {
+            Map<String, String> request = ctx.bodyAsClass(Map.class);
+            String sessionId = request.get("sessionId");
+            String username = request.get("username");
+            
+            if (sessionId != null && !sessionId.trim().isEmpty()) {
+                playerManager.playerDisconnected(sessionId);
+            } else if (username != null && !username.trim().isEmpty()) {
+                playerManager.playerDisconnectedByUsername(username);
+            } else {
+                ctx.status(400).json(NetworkResult.error("Session ID or username is required"));
+                return;
+            }
+            
+            ctx.json(NetworkResult.success("Player disconnected successfully"));
+            
+        } catch (Exception e) {
+            logger.error("Error handling player disconnect", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
     }
     

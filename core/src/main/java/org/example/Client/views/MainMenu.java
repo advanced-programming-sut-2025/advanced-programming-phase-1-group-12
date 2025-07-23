@@ -13,7 +13,7 @@ import org.example.Client.Main;
 import org.example.Common.models.Assets.GameAssetManager;
 
 public class MainMenu implements Screen {
-    private Skin skin = GameAssetManager.skin;
+    private Skin skin = GameAssetManager.getSkin();
     private Image backgroundImage;
     private Stage stage;
     private final Label menuLabel;
@@ -21,6 +21,7 @@ public class MainMenu implements Screen {
     private final TextButton exitButton;
     private final TextButton profileButton;
     private final TextButton preGameButton;
+    private final TextButton multiplayerButton;
     public Table table = new Table();
 
     public MainMenu() {
@@ -30,6 +31,7 @@ public class MainMenu implements Screen {
         this.exitButton = new TextButton("Exit", skin);
         this.profileButton = new TextButton("Profile Menu", skin);
         this.preGameButton = new TextButton("Pre-Game Menu", skin);
+        this.multiplayerButton = new TextButton("Multiplayer", skin);
         setScale();
     }
 
@@ -49,6 +51,8 @@ public class MainMenu implements Screen {
         table.add(profileButton).width(200).height(50);
         table.row().pad(40, 0, 40, 0);
         table.add(preGameButton).width(200).height(50);
+        table.row().pad(40, 0, 40, 0);
+        table.add(multiplayerButton).width(200).height(50);
         table.row().pad(40, 0, 40, 0);
         table.add(LogOut).width(200).height(50);
         table.row().pad(40, 0, 40, 0);
@@ -72,6 +76,15 @@ public class MainMenu implements Screen {
                 Main.getMain().getScreen().dispose();
                 Main.getMain().setScreen(new PreGameMenu());
                 System.out.println("Pre-Game Menu selected");
+            }
+        });
+
+        multiplayerButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Main.getMain().getScreen().dispose();
+                Main.getMain().setScreen(new MultiplayerMenu());
+                System.out.println("Multiplayer Menu selected");
             }
         });
 
@@ -129,5 +142,6 @@ public class MainMenu implements Screen {
         LogOut.getLabel().setFontScale(2f);
         profileButton.getLabel().setFontScale(2f);
         preGameButton.getLabel().setFontScale(2f);
+        multiplayerButton.getLabel().setFontScale(2f);
     }
 }

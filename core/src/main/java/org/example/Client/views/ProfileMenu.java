@@ -15,7 +15,7 @@ import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Assets.GameAssetManager;
 public class ProfileMenu implements Screen {
 
-    private Skin skin = GameAssetManager.skin;
+    private Skin skin = GameAssetManager.getSkin();
     private Stage stage;
     private final Label menuLabel;
     private final TextField newPass;

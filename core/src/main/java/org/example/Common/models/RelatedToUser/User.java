@@ -5,7 +5,7 @@ import org.example.Common.models.Fundementals.Game;
 import java.util.ArrayList;
 
 public class User {
-    private ArrayList<Game> games;
+    private transient ArrayList<Game> games;
     private String userName;
 
     private String avatarPath;
