@@ -22,6 +22,7 @@ public class MainMenu implements Screen {
     private final TextButton profileButton;
     private final TextButton preGameButton;
     private final TextButton multiplayerButton;
+    private final TextButton serverManagementButton;
     public Table table = new Table();
 
     public MainMenu() {
@@ -32,6 +33,7 @@ public class MainMenu implements Screen {
         this.profileButton = new TextButton("Profile Menu", skin);
         this.preGameButton = new TextButton("Pre-Game Menu", skin);
         this.multiplayerButton = new TextButton("Multiplayer", skin);
+        this.serverManagementButton = new TextButton("Server Management", skin);
         setScale();
     }
 
@@ -55,6 +57,8 @@ public class MainMenu implements Screen {
         table.add(multiplayerButton).width(200).height(50);
         table.row().pad(40, 0, 40, 0);
         table.add(LogOut).width(200).height(50);
+        table.row().pad(40, 0, 40, 0);
+        table.add(serverManagementButton).width(200).height(50);
         table.row().pad(40, 0, 40, 0);
         table.add(exitButton).width(200).height(50);
 
@@ -95,6 +99,14 @@ public class MainMenu implements Screen {
                 // Handle logout logic
                 Main.getMain().getScreen().dispose();
                 Main.getMain().setScreen(new RegisterMenuView());
+            }
+        });
+
+        serverManagementButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                ServerManagementDialog dialog = new ServerManagementDialog(skin);
+                dialog.show(stage);
             }
         });
 
@@ -143,5 +155,6 @@ public class MainMenu implements Screen {
         profileButton.getLabel().setFontScale(2f);
         preGameButton.getLabel().setFontScale(2f);
         multiplayerButton.getLabel().setFontScale(2f);
+        serverManagementButton.getLabel().setFontScale(2f);
     }
 }

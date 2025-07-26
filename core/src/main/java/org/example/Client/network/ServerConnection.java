@@ -56,55 +56,74 @@ public class ServerConnection {
     }
     
     public NetworkResult<LoginResponse> login(String username, String password) {
-        try {
-            LoginRequest loginRequest = new LoginRequest(username, password);
-            String requestJson = objectMapper.writeValueAsString(loginRequest);
-            
-            RequestBody requestBody = RequestBody.create(
-                requestJson, MediaType.get("application/json")
-            );
-            
-            Request request = new Request.Builder()
-                .url(serverBaseUrl + GameProtocol.LOGIN_ENDPOINT)
-                .post(requestBody)
-                .build();
-            
-            try (Response response = httpClient.newCall(request).execute()) {
-                String responseBody = response.body() != null ? response.body().string() : "";
+        return loginWithRetry(username, password, 3);
+    }
+    
+    private NetworkResult<LoginResponse> loginWithRetry(String username, String password, int maxRetries) {
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                LoginRequest loginRequest = new LoginRequest(username, password);
+                String requestJson = objectMapper.writeValueAsString(loginRequest);
                 
-                if (response.isSuccessful()) {
-                    NetworkResult<LoginResponse> result = objectMapper.readValue(
-                        responseBody, 
-                        objectMapper.getTypeFactory().constructParametricType(
-                            NetworkResult.class, LoginResponse.class
-                        )
-                    );
+                RequestBody requestBody = RequestBody.create(
+                    requestJson, MediaType.get("application/json")
+                );
+                
+                Request request = new Request.Builder()
+                    .url(serverBaseUrl + GameProtocol.LOGIN_ENDPOINT)
+                    .post(requestBody)
+                    .build();
+                
+                try (Response response = httpClient.newCall(request).execute()) {
+                    String responseBody = response.body() != null ? response.body().string() : "";
                     
-                    if (result.isSuccess()) {
-                        LoginResponse loginResponse = result.getData();
-                        this.authToken = loginResponse.getToken();
-                        // TODO: Convert UserDto back to User or handle differently
-                        // this.currentUser = loginResponse.getUser();
-                        this.isConnected = true;
+                    if (response.isSuccessful()) {
+                        NetworkResult<LoginResponse> result = objectMapper.readValue(
+                            responseBody, 
+                            objectMapper.getTypeFactory().constructParametricType(
+                                NetworkResult.class, LoginResponse.class
+                            )
+                        );
                         
-                        // Update App state
-                        App.setLoggedInUser(currentUser);
+                        if (result.isSuccess()) {
+                            LoginResponse loginResponse = result.getData();
+                            this.authToken = loginResponse.getToken();
+                            // TODO: Convert UserDto back to User or handle differently
+                            // this.currentUser = loginResponse.getUser();
+                            this.isConnected = true;
+                            
+                            // Update App state
+                            App.setLoggedInUser(currentUser);
+                            
+                            logger.info("Login successful for user: {}", username);
+                            return result;
+                        }
                         
-                        logger.info("Login successful for user: {}", username);
                         return result;
+                    } else {
+                        logger.warn("Login failed with status: {} for user: {}", response.code(), username);
+                        return NetworkResult.error("Login failed: " + responseBody, response.code());
                     }
-                    
-                    return result;
+                }
+                
+            } catch (Exception e) {
+                logger.warn("Login attempt {} failed for user {}: {}", attempt, username, e.getMessage());
+                
+                if (attempt < maxRetries) {
+                    try {
+                        Thread.sleep(1000 * attempt); // Exponential backoff
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        return NetworkResult.error("Login interrupted");
+                    }
                 } else {
-                    logger.warn("Login failed with status: {} for user: {}", response.code(), username);
-                    return NetworkResult.error("Login failed: " + responseBody, response.code());
+                    logger.error("Login failed after {} attempts for user: {}", maxRetries, username, e);
+                    return NetworkResult.error("Login failed after " + maxRetries + " attempts: " + e.getMessage());
                 }
             }
-            
-        } catch (Exception e) {
-            logger.error("Login error for user: {}", username, e);
-            return NetworkResult.error("Login failed: " + e.getMessage());
         }
+        
+        return NetworkResult.error("Login failed after " + maxRetries + " attempts");
     }
     
     public <T> NetworkResult<T> sendRequest(String endpoint, String method, Object requestData, Class<T> responseType) {
@@ -307,6 +326,27 @@ public class ServerConnection {
         } catch (Exception e) {
             logger.debug("Connection test failed", e);
             return false;
+        }
+    }
+    
+    public NetworkResult<String> testConnectionWithDetails() {
+        try {
+            Request request = new Request.Builder()
+                .url(serverBaseUrl + "/health")
+                .get()
+                .build();
+                
+            try (Response response = httpClient.newCall(request).execute()) {
+                String responseBody = response.body() != null ? response.body().string() : "";
+                if (response.isSuccessful()) {
+                    return NetworkResult.success("Connection successful", responseBody);
+                } else {
+                    return NetworkResult.error("Connection failed with status: " + response.code());
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Connection test failed: {}", e.getMessage());
+            return NetworkResult.error("Connection failed: " + e.getMessage());
         }
     }
     

@@ -10,6 +10,7 @@ import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.RelatedToUser.User;
 import org.example.Client.views.MainMenu;
 import org.example.Client.views.RegisterMenuView;
+import org.example.Client.network.ServerConnection;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -23,6 +24,7 @@ public class Main extends Game {
     private Sprite backgroundSprite;
     private float timeElapsed;
     private boolean backgroundVisible;
+    private ServerConnection serverConnection;
 
     public static Main getMain() {
         return main;
@@ -34,6 +36,17 @@ public class Main extends Game {
         batch = new SpriteBatch();
         backgroundTexture = new Texture("background.png");
         backgroundSprite = new Sprite(backgroundTexture);
+
+        // Initialize server connection
+        serverConnection = ServerConnection.getInstance();
+        
+        // Add shutdown hook to properly close server connection
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("Shutting down game...");
+            if (serverConnection != null) {
+                serverConnection.shutdown();
+            }
+        }));
 
         autoLoginIfPossible();
         timeElapsed = 0;
@@ -61,6 +74,11 @@ public class Main extends Game {
 
     @Override
     public void dispose() {
+        // Properly shutdown server connection before disposing
+        if (serverConnection != null) {
+            serverConnection.shutdown();
+        }
+        
         batch.dispose();
         backgroundTexture.dispose();
     }
@@ -89,5 +107,9 @@ public class Main extends Game {
 
     public static void setMain(Main main) {
         Main.main = main;
+    }
+    
+    public ServerConnection getServerConnection() {
+        return serverConnection;
     }
 }
