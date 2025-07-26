@@ -51,6 +51,8 @@ public class OnlinePlayersResponse {
         private String username;
         private String status;
         private long connectedAt;
+        private String lobbyName;
+        private String lobbyId;
         
         public PlayerInfo() {}
         
@@ -58,12 +60,24 @@ public class OnlinePlayersResponse {
             this.username = username;
             this.status = "Online";
             this.connectedAt = System.currentTimeMillis();
+            this.lobbyName = null;
+            this.lobbyId = null;
         }
         
         public PlayerInfo(String username, String status, long connectedAt) {
             this.username = username;
             this.status = status;
             this.connectedAt = connectedAt;
+            this.lobbyName = null;
+            this.lobbyId = null;
+        }
+        
+        public PlayerInfo(String username, String status, long connectedAt, String lobbyName, String lobbyId) {
+            this.username = username;
+            this.status = status;
+            this.connectedAt = connectedAt;
+            this.lobbyName = lobbyName;
+            this.lobbyId = lobbyId;
         }
         
         public String getUsername() {
@@ -88,6 +102,22 @@ public class OnlinePlayersResponse {
         
         public void setConnectedAt(long connectedAt) {
             this.connectedAt = connectedAt;
+        }
+        
+        public String getLobbyName() {
+            return lobbyName;
+        }
+        
+        public void setLobbyName(String lobbyName) {
+            this.lobbyName = lobbyName;
+        }
+        
+        public String getLobbyId() {
+            return lobbyId;
+        }
+        
+        public void setLobbyId(String lobbyId) {
+            this.lobbyId = lobbyId;
         }
     }
 }

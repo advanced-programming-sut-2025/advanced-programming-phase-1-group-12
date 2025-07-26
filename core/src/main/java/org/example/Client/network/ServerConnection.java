@@ -184,6 +184,10 @@ public class ServerConnection {
         return sendRequest(endpoint, "GET", null, String.class);
     }
     
+    public <T> NetworkResult<T> sendGetRequest(String endpoint, Class<T> responseType) {
+        return sendRequest(endpoint, "GET", null, responseType);
+    }
+    
     public <T> NetworkResult<T> sendPostRequest(String endpoint, Object requestData, Class<T> responseType) {
         return sendRequest(endpoint, "POST", requestData, responseType);
     }

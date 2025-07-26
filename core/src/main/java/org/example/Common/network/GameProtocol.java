@@ -12,6 +12,15 @@ public class GameProtocol {
     public static final String REGISTER_ENDPOINT = AUTH_BASE + "/register";
     public static final String REFRESH_TOKEN_ENDPOINT = AUTH_BASE + "/refresh";
     
+    // Lobby Management Endpoints
+    public static final String LOBBY_BASE = "/lobby";
+    public static final String CREATE_LOBBY_ENDPOINT = LOBBY_BASE + "/create";
+    public static final String JOIN_LOBBY_ENDPOINT = LOBBY_BASE + "/join";
+    public static final String LEAVE_LOBBY_ENDPOINT = LOBBY_BASE + "/leave";
+    public static final String GET_LOBBY_LIST_ENDPOINT = LOBBY_BASE + "/list";
+    public static final String GET_LOBBY_INFO_ENDPOINT = LOBBY_BASE + "/{lobbyId}/info";
+    public static final String START_GAME_ENDPOINT = LOBBY_BASE + "/start";
+    
     // Game Management Endpoints
     public static final String CREATE_GAME_ENDPOINT = GAME_BASE + "/create";
     public static final String JOIN_GAME_ENDPOINT = GAME_BASE + "/{gameId}/join";
@@ -47,6 +56,11 @@ public class GameProtocol {
     public static final String WS_ENERGY_UPDATE = "energy_update";
     public static final String WS_TIME_UPDATE = "time_update";
     public static final String WS_WEATHER_UPDATE = "weather_update";
+    public static final String WS_LOBBY_CREATED = "lobby_created";
+    public static final String WS_LOBBY_JOINED = "lobby_joined";
+    public static final String WS_LOBBY_LEFT = "lobby_left";
+    public static final String WS_LOBBY_UPDATED = "lobby_updated";
+    public static final String WS_GAME_STARTED = "game_started";
     public static final String WS_ERROR = "error";
     
     // Network Configuration

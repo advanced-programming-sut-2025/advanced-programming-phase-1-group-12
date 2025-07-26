@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Client.Main;
+import org.example.Client.ServerManager;
 import org.example.Client.SimpleNetworkClient;
 import org.example.Common.models.Assets.GameAssetManager;
 import org.example.Common.network.NetworkResult;
@@ -30,6 +31,8 @@ public class MultiplayerMenu implements Screen {
     private final TextButton connectButton;
     private final TextButton backButton;
     private final TextButton refreshButton;
+    private final TextButton lobbyButton;
+    private final TextButton restartServerButton;
     private final TextField serverHostField;
     private final TextField serverPortField;
     private final TextField usernameField;
@@ -41,7 +44,7 @@ public class MultiplayerMenu implements Screen {
     private SimpleNetworkClient networkClient;
     private boolean isConnected = false;
     private Timer refreshTimer;
-    private List<String> onlinePlayers = new ArrayList<>();
+    private List<OnlinePlayersResponse.PlayerInfo> onlinePlayers = new ArrayList<>();
     
     public MultiplayerMenu() {
         this.titleLabel = new Label("Multiplayer Menu", skin);
@@ -49,6 +52,8 @@ public class MultiplayerMenu implements Screen {
         this.connectButton = new TextButton("Connect to Server", skin);
         this.backButton = new TextButton("Back to Main Menu", skin);
         this.refreshButton = new TextButton("Refresh Players", skin);
+        this.lobbyButton = new TextButton("Lobby System", skin);
+        this.restartServerButton = new TextButton("Restart Server", skin);
         this.serverHostField = new TextField("localhost", skin);
         this.serverPortField = new TextField("8080", skin);
         this.usernameField = new TextField("", skin);
@@ -71,15 +76,22 @@ public class MultiplayerMenu implements Screen {
     
     private void setupOnlinePlayersTable() {
         onlinePlayersTable.clear();
-        onlinePlayersTable.add(new Label("Online Players:", skin)).colspan(2).pad(10);
+        onlinePlayersTable.add(new Label("Online Players:", skin)).colspan(3).pad(10);
         onlinePlayersTable.row();
         
         if (onlinePlayers.isEmpty()) {
-            onlinePlayersTable.add(new Label("No players online", skin)).colspan(2).pad(10);
+            onlinePlayersTable.add(new Label("No players online", skin)).colspan(3).pad(10);
         } else {
-            for (String player : onlinePlayers) {
-                onlinePlayersTable.add(new Label("• " + player, skin)).left().pad(5);
-                onlinePlayersTable.add(new Label("Online", skin)).right().pad(5);
+            for (OnlinePlayersResponse.PlayerInfo player : onlinePlayers) {
+                onlinePlayersTable.add(new Label("• " + player.getUsername(), skin)).left().pad(5);
+                
+                String status = player.getStatus();
+                if (player.getLobbyName() != null) {
+                    status += " (Lobby: " + player.getLobbyName() + ")";
+                }
+                onlinePlayersTable.add(new Label(status, skin)).pad(5);
+                
+                onlinePlayersTable.add(new Label("", skin)).pad(5); // Empty column for spacing
                 onlinePlayersTable.row();
             }
         }
@@ -141,6 +153,14 @@ public class MultiplayerMenu implements Screen {
         mainTable.add(refreshButton).colspan(2).width(200).height(50).pad(10);
         mainTable.row();
         
+        // Lobby button
+        mainTable.add(lobbyButton).colspan(2).width(200).height(50).pad(10);
+        mainTable.row();
+        
+        // Restart server button
+        mainTable.add(restartServerButton).colspan(2).width(200).height(50).pad(10);
+        mainTable.row();
+        
         // Back button
         mainTable.add(backButton).colspan(2).width(200).height(50).pad(20);
         
@@ -148,6 +168,7 @@ public class MultiplayerMenu implements Screen {
         stage.addActor(mainTable);
         
         setupEventListeners();
+        updateServerStatus();
     }
     
     private void setupEventListeners() {
@@ -177,6 +198,24 @@ public class MultiplayerMenu implements Screen {
                 if (isConnected) {
                     refreshOnlinePlayers();
                 }
+            }
+        });
+        
+        lobbyButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (isConnected) {
+                    Main.getMain().setScreen(new LobbyMenu());
+                } else {
+                    updateStatus("Please connect to server first", false);
+                }
+            }
+        });
+        
+        restartServerButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                restartServer();
             }
         });
     }
@@ -271,6 +310,43 @@ public class MultiplayerMenu implements Screen {
         }
     }
     
+    private void updateServerStatus() {
+        ServerManager serverManager = Main.getMain().getServerManager();
+        if (serverManager != null && serverManager.isServerRunning()) {
+            updateStatus("Server is running on port " + serverManager.getServerPort(), true);
+        } else {
+            updateStatus("Server is not running", false);
+        }
+    }
+    
+    private void restartServer() {
+        updateStatus("Restarting server...", true);
+        
+        // Disconnect from current server if connected
+        if (isConnected) {
+            disconnectFromServer();
+        }
+        
+        // Get server manager and restart server
+        ServerManager serverManager = Main.getMain().getServerManager();
+        if (serverManager != null) {
+            serverManager.stopServer();
+            
+            // Start server again
+            serverManager.startServerIfNeeded().thenAccept(success -> {
+                Gdx.app.postRunnable(() -> {
+                    if (success) {
+                        updateStatus("Server restarted successfully", true);
+                    } else {
+                        updateStatus("Failed to restart server", false);
+                    }
+                });
+            });
+        } else {
+            updateStatus("Server manager not available", false);
+        }
+    }
+    
     private void startPlayerRefreshTimer() {
         if (refreshTimer != null) {
             refreshTimer.cancel();
@@ -299,7 +375,7 @@ public class MultiplayerMenu implements Screen {
                 onlinePlayers.clear();
                 
                 for (OnlinePlayersResponse.PlayerInfo player : response.getPlayers()) {
-                    onlinePlayers.add(player.getUsername());
+                    onlinePlayers.add(player);
                 }
                 
                 setupOnlinePlayersTable();

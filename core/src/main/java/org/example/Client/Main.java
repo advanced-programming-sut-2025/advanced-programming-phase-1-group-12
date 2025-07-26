@@ -11,6 +11,7 @@ import org.example.Common.models.RelatedToUser.User;
 import org.example.Client.views.MainMenu;
 import org.example.Client.views.RegisterMenuView;
 import org.example.Client.network.ServerConnection;
+import org.example.Client.ServerManager;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -25,6 +26,7 @@ public class Main extends Game {
     private float timeElapsed;
     private boolean backgroundVisible;
     private ServerConnection serverConnection;
+    private ServerManager serverManager;
 
     public static Main getMain() {
         return main;
@@ -37,14 +39,27 @@ public class Main extends Game {
         backgroundTexture = new Texture("background.png");
         backgroundSprite = new Sprite(backgroundTexture);
 
+        // Initialize server manager and start server automatically
+        serverManager = ServerManager.getInstance();
+        serverManager.startServerIfNeeded().thenAccept(success -> {
+            if (success) {
+                System.out.println("✅ Server started successfully!");
+            } else {
+                System.out.println("❌ Failed to start server automatically");
+            }
+        });
+
         // Initialize server connection
         serverConnection = ServerConnection.getInstance();
         
-        // Add shutdown hook to properly close server connection
+        // Add shutdown hook to properly close server connection and stop server
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutting down game...");
             if (serverConnection != null) {
                 serverConnection.shutdown();
+            }
+            if (serverManager != null) {
+                serverManager.stopServer();
             }
         }));
 
@@ -74,9 +89,12 @@ public class Main extends Game {
 
     @Override
     public void dispose() {
-        // Properly shutdown server connection before disposing
+        // Properly shutdown server connection and server before disposing
         if (serverConnection != null) {
             serverConnection.shutdown();
+        }
+        if (serverManager != null) {
+            serverManager.stopServer();
         }
         
         batch.dispose();
@@ -111,5 +129,9 @@ public class Main extends Game {
     
     public ServerConnection getServerConnection() {
         return serverConnection;
+    }
+    
+    public ServerManager getServerManager() {
+        return serverManager;
     }
 }
