@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.Client.Main;
 import org.example.Client.network.ServerConnection;
 import org.example.Common.models.Assets.GameAssetManager;
+import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.LobbyInfo;
 import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.CreateLobbyRequest;
@@ -295,7 +296,8 @@ public class LobbyMenu implements Screen {
         
         updateStatus("Creating lobby...", true);
         
-        CreateLobbyRequest request = new CreateLobbyRequest(name, isPrivate, password, isVisible);
+        String username = App.getLoggedInUser() != null ? App.getLoggedInUser().getUserName() : "anonymous";
+        CreateLobbyRequest request = new CreateLobbyRequest(username, name, isPrivate, password, isVisible);
         
         CompletableFuture.supplyAsync(() -> {
             try {
@@ -336,7 +338,8 @@ public class LobbyMenu implements Screen {
         
         updateStatus("Joining lobby...", true);
         
-        JoinLobbyRequest request = new JoinLobbyRequest(lobbyId, password);
+        String username = App.getLoggedInUser() != null ? App.getLoggedInUser().getUserName() : "anonymous";
+        JoinLobbyRequest request = new JoinLobbyRequest(username, lobbyId, password);
         
         CompletableFuture.supplyAsync(() -> {
             try {
@@ -373,7 +376,8 @@ public class LobbyMenu implements Screen {
         
         updateStatus("Leaving lobby...", true);
         
-        LeaveLobbyRequest request = new LeaveLobbyRequest(currentLobby.getId());
+        String username = App.getLoggedInUser() != null ? App.getLoggedInUser().getUserName() : "anonymous";
+        LeaveLobbyRequest request = new LeaveLobbyRequest(username, currentLobby.getId());
         
         CompletableFuture.supplyAsync(() -> {
             try {
@@ -415,7 +419,8 @@ public class LobbyMenu implements Screen {
         
         updateStatus("Starting game...", true);
         
-        StartGameRequest request = new StartGameRequest(currentLobby.getId());
+        String username = App.getLoggedInUser() != null ? App.getLoggedInUser().getUserName() : "anonymous";
+        StartGameRequest request = new StartGameRequest(username, currentLobby.getId());
         
         CompletableFuture.supplyAsync(() -> {
             try {

@@ -36,9 +36,7 @@ public class SimpleNetworkServer {
         this.port = port;
         this.playerManager = PlayerManager.getInstance();
         this.lobbyManager = LobbyManager.getInstance();
-        // Add some test users
-        users.put("testuser", "password123");
-        users.put("admin", "admin123");
+        // No hardcoded users - users will register themselves
     }
     
     public void start() {
@@ -106,7 +104,9 @@ public class SimpleNetworkServer {
     
     private void handleRegister(Context ctx) {
         try {
-            ctx.json(NetworkResult.error("Registration not implemented yet"));
+            RegisterRequest request = ctx.bodyAsClass(RegisterRequest.class);
+            NetworkResult<String> result = handleRegisterRequest(request);
+            ctx.status(result.getStatusCode()).json(result);
         } catch (Exception e) {
             logger.error("Registration error", e);
             ctx.status(500).json(NetworkResult.error("Internal server error"));
@@ -167,6 +167,42 @@ public class SimpleNetworkServer {
             
         } catch (Exception e) {
             logger.error("Error processing login request", e);
+            return NetworkResult.error("Internal server error", 500);
+        }
+    }
+    
+    private NetworkResult<String> handleRegisterRequest(RegisterRequest request) {
+        try {
+            if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+                return NetworkResult.error("Username is required", 400);
+            }
+            
+            if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
+                return NetworkResult.error("Password is required", 400);
+            }
+            
+            if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+                return NetworkResult.error("Email is required", 400);
+            }
+            
+            String username = request.getUsername().trim();
+            String password = request.getPassword();
+            String email = request.getEmail().trim();
+            
+            // Check if username already exists
+            if (users.containsKey(username)) {
+                logger.warn("Registration attempt failed - username already exists: {}", username);
+                return NetworkResult.error("Username already exists", 409);
+            }
+            
+            // Add new user
+            users.put(username, password);
+            
+            logger.info("User registered successfully: {}", username);
+            return NetworkResult.success("User registered successfully");
+            
+        } catch (Exception e) {
+            logger.error("Error processing registration request", e);
             return NetworkResult.error("Internal server error", 500);
         }
     }
@@ -259,8 +295,12 @@ public class SimpleNetworkServer {
         try {
             CreateLobbyRequest request = ctx.bodyAsClass(CreateLobbyRequest.class);
             
-            // Extract username from request (in a real app, this would come from authentication)
-            String username = request.getName() != null ? "testuser" : "testuser"; // For demo purposes
+            // Extract username from request
+            String username = request.getUsername();
+            if (username == null || username.trim().isEmpty()) {
+                ctx.status(400).json(NetworkResult.error("Username is required"));
+                return;
+            }
             
             if (request.getName() == null || request.getName().trim().isEmpty()) {
                 ctx.status(400).json(NetworkResult.error("Lobby name is required"));
@@ -301,8 +341,12 @@ public class SimpleNetworkServer {
         try {
             JoinLobbyRequest request = ctx.bodyAsClass(JoinLobbyRequest.class);
             
-            // Extract username from request (in a real app, this would come from authentication)
-            String username = "testuser"; // For demo purposes
+            // Extract username from request
+            String username = request.getUsername();
+            if (username == null || username.trim().isEmpty()) {
+                ctx.status(400).json(NetworkResult.error("Username is required"));
+                return;
+            }
             
             if (request.getLobbyId() == null || request.getLobbyId().trim().isEmpty()) {
                 ctx.status(400).json(NetworkResult.error("Lobby ID is required"));
@@ -338,8 +382,12 @@ public class SimpleNetworkServer {
         try {
             LeaveLobbyRequest request = ctx.bodyAsClass(LeaveLobbyRequest.class);
             
-            // Extract username from request (in a real app, this would come from authentication)
-            String username = "testuser"; // For demo purposes
+            // Extract username from request
+            String username = request.getUsername();
+            if (username == null || username.trim().isEmpty()) {
+                ctx.status(400).json(NetworkResult.error("Username is required"));
+                return;
+            }
             
             if (request.getLobbyId() == null || request.getLobbyId().trim().isEmpty()) {
                 ctx.status(400).json(NetworkResult.error("Lobby ID is required"));
@@ -398,8 +446,12 @@ public class SimpleNetworkServer {
         try {
             StartGameRequest request = ctx.bodyAsClass(StartGameRequest.class);
             
-            // Extract username from request (in a real app, this would come from authentication)
-            String username = "testuser"; // For demo purposes
+            // Extract username from request
+            String username = request.getUsername();
+            if (username == null || username.trim().isEmpty()) {
+                ctx.status(400).json(NetworkResult.error("Username is required"));
+                return;
+            }
             
             if (request.getLobbyId() == null || request.getLobbyId().trim().isEmpty()) {
                 ctx.status(400).json(NetworkResult.error("Lobby ID is required"));

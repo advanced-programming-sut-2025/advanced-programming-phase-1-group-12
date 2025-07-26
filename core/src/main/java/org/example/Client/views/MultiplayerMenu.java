@@ -13,7 +13,12 @@ import org.example.Client.Main;
 import org.example.Client.ServerManager;
 import org.example.Client.SimpleNetworkClient;
 import org.example.Common.models.Assets.GameAssetManager;
+import org.example.Common.models.Fundementals.App;
+import org.example.Common.models.RelatedToUser.User;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.*;
 import org.example.Common.network.NetworkResult;
+import org.example.Common.network.requests.RegisterRequest;
 import org.example.Common.network.responses.LoginResponse;
 import org.example.Common.network.responses.OnlinePlayersResponse;
 
@@ -49,7 +54,7 @@ public class MultiplayerMenu implements Screen {
     public MultiplayerMenu() {
         this.titleLabel = new Label("Multiplayer Menu", skin);
         this.statusLabel = new Label("Not connected to server", skin);
-        this.connectButton = new TextButton("Connect to Server", skin);
+        this.connectButton = new TextButton("Connect with Logged-in Account", skin);
         this.backButton = new TextButton("Back to Main Menu", skin);
         this.refreshButton = new TextButton("Refresh Players", skin);
         this.lobbyButton = new TextButton("Lobby System", skin);
@@ -58,6 +63,16 @@ public class MultiplayerMenu implements Screen {
         this.serverPortField = new TextField("8080", skin);
         this.usernameField = new TextField("", skin);
         this.passwordField = new TextField("", skin);
+        
+        // Auto-fill username with logged-in user and show status
+        if (App.getLoggedInUser() != null) {
+            this.usernameField.setText(App.getLoggedInUser().getUserName());
+            this.usernameField.setDisabled(true); // Disable editing since we use logged-in user
+            this.passwordField.setDisabled(true); // Disable editing since we use logged-in user
+            this.statusLabel.setText("Logged in as: " + App.getLoggedInUser().getUserName());
+        } else {
+            this.statusLabel.setText("No user logged in. Please login to the game first.");
+        }
         this.onlinePlayersTable = new Table();
         this.onlinePlayersPane = new ScrollPane(onlinePlayersTable, skin);
         this.mainTable = new Table();
@@ -66,9 +81,9 @@ public class MultiplayerMenu implements Screen {
         passwordField.setPasswordMode(true);
         passwordField.setPasswordCharacter('*');
         
-        // Set default values
-        usernameField.setText("testuser");
-        passwordField.setText("password123");
+        // Set default values - let users enter their own credentials
+        usernameField.setText("");
+        passwordField.setText("");
         
         setScale();
         setupOnlinePlayersTable();
@@ -130,12 +145,12 @@ public class MultiplayerMenu implements Screen {
         mainTable.add(serverPortField).width(200).height(30).pad(5);
         mainTable.row();
         
-        mainTable.add(new Label("Username:", skin)).left().pad(5);
+        mainTable.add(new Label("Logged-in User:", skin)).left().pad(5);
         mainTable.add(usernameField).width(200).height(30).pad(5);
         mainTable.row();
         
-        mainTable.add(new Label("Password:", skin)).left().pad(5);
-        mainTable.add(passwordField).width(200).height(30).pad(5);
+        mainTable.add(new Label("(Auto-connect with logged-in account)", skin)).left().pad(5);
+        mainTable.add(new Label("", skin)).width(200).height(30).pad(5);
         mainTable.row();
         
         // Connect button
@@ -224,11 +239,19 @@ public class MultiplayerMenu implements Screen {
         try {
             String host = serverHostField.getText().trim();
             int port = Integer.parseInt(serverPortField.getText().trim());
-            String username = usernameField.getText().trim();
-            String password = passwordField.getText().trim();
             
-            if (host.isEmpty() || username.isEmpty() || password.isEmpty()) {
-                updateStatus("Please fill in all fields", false);
+            // Get logged-in user credentials automatically
+            User loggedInUser = App.getLoggedInUser();
+            if (loggedInUser == null) {
+                updateStatus("No user logged in. Please login to the game first.", false);
+                return;
+            }
+            
+            String username = loggedInUser.getUserName();
+            String password = loggedInUser.getPassword();
+            
+            if (host.isEmpty()) {
+                updateStatus("Please enter server host", false);
                 return;
             }
             
@@ -256,19 +279,47 @@ public class MultiplayerMenu implements Screen {
                 return;
             }
             
-            // Attempt login
+            // First, try to register the user if they don't exist on the server
+            updateStatus("Checking user registration on server...", false);
+            
+            // Create registration request for the logged-in user
+            RegisterRequest registerRequest = new RegisterRequest(username, password, loggedInUser.getEmail());
+            
+            // Send registration request (this will fail if user already exists, which is fine)
+            String requestJson = new ObjectMapper().writeValueAsString(registerRequest);
+            RequestBody requestBody = RequestBody.create(requestJson, MediaType.get("application/json"));
+            
+            Request registerRequestHttp = new Request.Builder()
+                .url("http://" + host + ":" + port + "/auth/register")
+                .post(requestBody)
+                .build();
+            
+            OkHttpClient httpClient = new OkHttpClient();
+            try (Response response = httpClient.newCall(registerRequestHttp).execute()) {
+                // We don't care if registration fails (user might already exist)
+                // We just want to ensure the user exists on the server
+            }
+            
+            // Now attempt login
+            updateStatus("Logging in to server...", false);
             NetworkResult<LoginResponse> loginResult = networkClient.login(username, password);
             if (loginResult.isSuccess()) {
-                isConnected = true;
-                updateStatus("Connected as " + username, true);
-                connectButton.setText("Disconnect");
-                
-                // Start periodic refresh of online players
-                startPlayerRefreshTimer();
-                
-                // Initial refresh
-                refreshOnlinePlayers();
-                
+                // Connect player to server after successful login
+                updateStatus("Connecting player to server...", false);
+                NetworkResult<String> connectResult = networkClient.connectPlayer(username);
+                if (connectResult.isSuccess()) {
+                    isConnected = true;
+                    updateStatus("Connected as " + username, true);
+                    connectButton.setText("Disconnect");
+                    
+                    // Start periodic refresh of online players
+                    startPlayerRefreshTimer();
+                    
+                    // Initial refresh
+                    refreshOnlinePlayers();
+                } else {
+                    updateStatus("Failed to connect player: " + connectResult.getMessage(), false);
+                }
             } else {
                 updateStatus("Login failed: " + loginResult.getMessage(), false);
             }
@@ -280,14 +331,21 @@ public class MultiplayerMenu implements Screen {
         }
     }
     
+
+    
     private void disconnectFromServer() {
         if (networkClient != null) {
+            // Disconnect player from server before logout
+            String username = usernameField.getText().trim();
+            if (!username.isEmpty()) {
+                networkClient.disconnectPlayer(username);
+            }
             networkClient.logout();
             networkClient = null;
         }
         
         isConnected = false;
-        connectButton.setText("Connect to Server");
+        connectButton.setText("Connect with Logged-in Account");
         updateStatus("Disconnected from server", false);
         
         // Stop refresh timer
