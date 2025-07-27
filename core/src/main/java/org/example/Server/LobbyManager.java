@@ -42,21 +42,30 @@ public class LobbyManager {
     public Lobby createLobby(String name, String adminUsername, boolean isPrivate, String password, boolean isVisible) {
         // Check if player is already in a lobby
         if (playerLobbyMap.containsKey(adminUsername)) {
-            logger.warn("Player {} is already in a lobby", adminUsername);
             return null;
         }
         
-        String lobbyId = generateLobbyId();
-        Lobby lobby = new Lobby(lobbyId, name, adminUsername);
-        lobby.setPrivate(isPrivate);
-        lobby.setPassword(password);
-        lobby.setVisible(isVisible);
-        
-        lobbies.put(lobbyId, lobby);
-        playerLobbyMap.put(adminUsername, lobbyId);
-        
-        logger.info("Created lobby: {} by {}", lobbyId, adminUsername);
-        return lobby;
+        try {
+            String lobbyId = generateLobbyId();
+            
+            Lobby lobby = new Lobby(lobbyId, name, adminUsername);
+            lobby.setPrivate(isPrivate);
+            lobby.setPassword(password);
+            lobby.setVisible(isVisible);
+            
+            // Add admin to lobby
+            lobby.addPlayer(adminUsername);
+            
+            // Store lobby
+            lobbies.put(lobbyId, lobby);
+            playerLobbyMap.put(adminUsername, lobbyId);
+            
+            logger.info("Created lobby: {} (ID: {}) by admin: {}", name, lobbyId, adminUsername);
+            return lobby;
+        } catch (Exception e) {
+            logger.error("Error creating lobby", e);
+            return null;
+        }
     }
     
     public boolean joinLobby(String lobbyId, String username, String password) {

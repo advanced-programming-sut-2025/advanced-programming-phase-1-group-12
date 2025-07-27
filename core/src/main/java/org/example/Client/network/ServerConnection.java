@@ -129,16 +129,25 @@ public class ServerConnection {
     public <T> NetworkResult<T> sendRequest(String endpoint, String method, Object requestData, Class<T> responseType) {
         try {
             String url = serverBaseUrl + endpoint;
+            System.out.println("DEBUG: Sending request to URL: " + url);
+            System.out.println("DEBUG: Method: " + method);
+            System.out.println("DEBUG: Request data: " + requestData);
+            System.out.println("DEBUG: Response type: " + responseType);
+            
             Request.Builder requestBuilder = new Request.Builder().url(url);
             
             // Add authorization header if token is available
             if (authToken != null) {
                 requestBuilder.addHeader(GameProtocol.AUTH_HEADER, GameProtocol.BEARER_PREFIX + authToken);
+                System.out.println("DEBUG: Added auth header");
+            } else {
+                System.out.println("DEBUG: No auth token available");
             }
             
             // Add request body for POST/PUT requests
             if (requestData != null && ("POST".equals(method) || "PUT".equals(method))) {
                 String requestJson = objectMapper.writeValueAsString(requestData);
+                System.out.println("DEBUG: Request JSON: " + requestJson);
                 RequestBody requestBody = RequestBody.create(
                     requestJson, MediaType.get("application/json")
                 );
@@ -153,28 +162,38 @@ public class ServerConnection {
             }
             
             Request request = requestBuilder.build();
+            System.out.println("DEBUG: Built request: " + request);
             
             try (Response response = httpClient.newCall(request).execute()) {
                 String responseBody = response.body() != null ? response.body().string() : "";
+                System.out.println("DEBUG: Response code: " + response.code());
+                System.out.println("DEBUG: Response body: " + responseBody);
                 
                 if (response.isSuccessful()) {
+                    System.out.println("DEBUG: Response was successful");
                     if (responseType == String.class) {
+                        System.out.println("DEBUG: Returning String response");
                         return (NetworkResult<T>) NetworkResult.success("Request successful", responseBody);
                     } else {
+                        System.out.println("DEBUG: Parsing JSON response");
                         NetworkResult<T> result = objectMapper.readValue(
                             responseBody,
                             objectMapper.getTypeFactory().constructParametricType(
                                 NetworkResult.class, responseType
                             )
                         );
+                        System.out.println("DEBUG: Parsed result: " + result);
                         return result;
                     }
                 } else {
+                    System.out.println("DEBUG: Response was not successful");
                     return NetworkResult.error("Request failed: " + responseBody, response.code());
                 }
             }
             
         } catch (Exception e) {
+            System.out.println("DEBUG: Exception in sendRequest: " + e.getMessage());
+            e.printStackTrace();
             logger.error("Request error for {}: {}", endpoint, e.getMessage(), e);
             return NetworkResult.error("Request failed: " + e.getMessage());
         }

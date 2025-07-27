@@ -1,10 +1,19 @@
 package org.example.Common.network.requests;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CreateLobbyRequest {
     private String username;
     private String name;
+    
+    @JsonProperty("isPrivate")
     private boolean isPrivate;
+    
     private String password;
+    
+    @JsonProperty("isVisible")
     private boolean isVisible;
     
     public CreateLobbyRequest() {}
@@ -37,6 +46,7 @@ public class CreateLobbyRequest {
                 "username='" + username + '\'' +
                 ", name='" + name + '\'' +
                 ", isPrivate=" + isPrivate +
+                ", password='" + password + '\'' +
                 ", isVisible=" + isVisible +
                 '}';
     }

@@ -3,15 +3,18 @@ package org.example.Common.models;
 import java.util.Set;
 
 public class LobbyInfo {
-    private final String id;
-    private final String name;
-    private final String adminUsername;
-    private final Set<String> players;
-    private final int playerCount;
-    private final boolean isPrivate;
-    private final boolean isVisible;
-    private final boolean isGameStarted;
-    private final long createdAt;
+    private String id;
+    private String name;
+    private String adminUsername;
+    private Set<String> players;
+    private int playerCount;
+    private boolean isPrivate;
+    private boolean isVisible;
+    private boolean isGameStarted;
+    private long createdAt;
+    
+    // Default constructor for Jackson deserialization
+    public LobbyInfo() {}
     
     public LobbyInfo(Lobby lobby) {
         this.id = lobby.getId();
@@ -35,6 +38,17 @@ public class LobbyInfo {
     public boolean isVisible() { return isVisible; }
     public boolean isGameStarted() { return isGameStarted; }
     public long getCreatedAt() { return createdAt; }
+    
+    // Setters for Jackson deserialization
+    public void setId(String id) { this.id = id; }
+    public void setName(String name) { this.name = name; }
+    public void setAdminUsername(String adminUsername) { this.adminUsername = adminUsername; }
+    public void setPlayers(Set<String> players) { this.players = players; }
+    public void setPlayerCount(int playerCount) { this.playerCount = playerCount; }
+    public void setPrivate(boolean isPrivate) { this.isPrivate = isPrivate; }
+    public void setVisible(boolean isVisible) { this.isVisible = isVisible; }
+    public void setGameStarted(boolean isGameStarted) { this.isGameStarted = isGameStarted; }
+    public void setCreatedAt(long createdAt) { this.createdAt = createdAt; }
     
     @Override
     public String toString() {

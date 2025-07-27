@@ -47,6 +47,12 @@ public class SimpleNetworkServer {
         
         app = Javalin.create(config -> {
             config.showJavalinBanner = false;
+            // Configure Jackson to ignore unknown properties
+            config.jsonMapper(new io.javalin.json.JavalinJackson()
+                .updateMapper(mapper -> {
+                    mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                })
+            );
         }).start(port);
         
         setupRoutes();
@@ -307,11 +313,6 @@ public class SimpleNetworkServer {
                 return;
             }
             
-            if (lobbyManager.isPlayerInLobby(username)) {
-                ctx.status(400).json(NetworkResult.error("Player is already in a lobby"));
-                return;
-            }
-            
             Lobby lobby = lobbyManager.createLobby(
                 request.getName().trim(),
                 username,
@@ -321,8 +322,9 @@ public class SimpleNetworkServer {
             );
             
             if (lobby != null) {
+                LobbyInfo lobbyInfo = new LobbyInfo(lobby);
                 LobbyResponse response = new LobbyResponse(
-                    new LobbyInfo(lobby),
+                    lobbyInfo,
                     true, // creator is admin
                     false // can't start game with only one player
                 );
@@ -330,7 +332,6 @@ public class SimpleNetworkServer {
             } else {
                 ctx.status(400).json(NetworkResult.error("Failed to create lobby"));
             }
-            
         } catch (Exception e) {
             logger.error("Error creating lobby", e);
             ctx.status(500).json(NetworkResult.error("Internal server error"));
