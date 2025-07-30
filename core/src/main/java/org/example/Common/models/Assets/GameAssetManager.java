@@ -36,6 +36,14 @@ public class GameAssetManager {
     private final Texture GROUND = new Texture("Flooring/Flooring_53.png");
     private final Texture STORE = new Texture("Flooring/Flooring_02.png");
     private final Texture HOUSE = new Texture("House_farmer.png");
+    
+    // NPC House textures
+    private final Texture NPC_HOUSE_1 = new Texture("NPC/House/npcHouse_1.PNG");
+    private final Texture NPC_HOUSE_2 = new Texture("NPC/House/npcHouse_2.PNG");
+    private final Texture NPC_HOUSE_3 = new Texture("NPC/House/npcHouse_3.PNG");
+    private final Texture NPC_HOUSE_4 = new Texture("NPC/House/npcHouse_4.PNG");
+    private final Texture NPC_HOUSE_5 = new Texture("NPC/House/npcHouse_5.PNG");
+    
     private final Texture barn = new Texture("Decor/Weathered_Floor_Tile.png");
     private final Texture coop = new Texture("Decor/Stone_Floor_Tile.png");
     private final Texture ploughedLand = new Texture("Flooring/Flooring_14.png");
@@ -189,6 +197,27 @@ public class GameAssetManager {
 
     public Texture getHOUSE() {
         return HOUSE;
+    }
+
+    // NPC House getters
+    public Texture getNPC_HOUSE_1() {
+        return NPC_HOUSE_1;
+    }
+
+    public Texture getNPC_HOUSE_2() {
+        return NPC_HOUSE_2;
+    }
+
+    public Texture getNPC_HOUSE_3() {
+        return NPC_HOUSE_3;
+    }
+
+    public Texture getNPC_HOUSE_4() {
+        return NPC_HOUSE_4;
+    }
+
+    public Texture getNPC_HOUSE_5() {
+        return NPC_HOUSE_5;
     }
 
     public static Texture craftType(Location location) {

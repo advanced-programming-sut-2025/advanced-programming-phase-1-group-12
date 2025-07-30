@@ -7,6 +7,7 @@ import org.example.Common.models.MapDetails.Shack;
 import org.example.Common.models.ProductsPackage.Quality;
 import org.example.Common.models.Refrigrator;
 import org.example.Common.models.enums.NPCdetails;
+import org.example.Common.models.Assets.NPCAnimationManager.AnimationType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,6 +44,13 @@ public class NPC {
     private Map<Player, Boolean> talkedToday = new HashMap<>();
     private Map<Player, Boolean> giftedToday = new HashMap<>();
     private Random random = new Random();
+    
+    // Animation state
+    private AnimationType currentAnimation = AnimationType.IDLE;
+    private float animationTime = 0f;
+    private boolean isMoving = false;
+    private float moveTimer = 0f;
+    private static final float MOVE_INTERVAL = 3f; // Change animation every 3 seconds
 
     public NPC(String name, String job, String personality, Location location, Shack shack) {
         this.name = name;
@@ -309,6 +317,53 @@ public class NPC {
             talkedToday.put(player, false);
             giftedToday.put(player, false);
         }
+    }
+    
+    // Animation methods
+    public void updateAnimation(float deltaTime) {
+        animationTime += deltaTime;
+        moveTimer += deltaTime;
+        
+        // Change animation state periodically
+        if (moveTimer >= MOVE_INTERVAL) {
+            moveTimer = 0f;
+            isMoving = !isMoving;
+            
+            if (isMoving) {
+                // Randomly choose a movement animation based on NPC type
+                switch (name) {
+                    case "Jojo":
+                        currentAnimation = AnimationType.WORK;
+                        break;
+                    case "Leah":
+                        currentAnimation = AnimationType.SHOOT;
+                        break;
+                    case "Willy":
+                        currentAnimation = AnimationType.TOOL;
+                        break;
+                    case "Abigail":
+                        currentAnimation = AnimationType.FLY;
+                        break;
+                    default:
+                        currentAnimation = AnimationType.WALK;
+                        break;
+                }
+            } else {
+                currentAnimation = AnimationType.IDLE;
+            }
+        }
+    }
+    
+    public AnimationType getCurrentAnimation() {
+        return currentAnimation;
+    }
+    
+    public float getAnimationTime() {
+        return animationTime;
+    }
+    
+    public boolean isMoving() {
+        return isMoving;
     }
 
     public Item getRandomGiftToGive() {

@@ -311,7 +311,8 @@ public class PlayerController {
             return false;
 
         return (location.getTypeOfTile() == TypeOfTile.GROUND || location.getTypeOfTile() == TypeOfTile.BARN
-        || location.getTypeOfTile() == TypeOfTile.COOP || location.getTypeOfTile() == TypeOfTile.STORE);
+        || location.getTypeOfTile() == TypeOfTile.COOP || location.getTypeOfTile() == TypeOfTile.STORE
+        || location.getTypeOfTile() == TypeOfTile.NPC_VILLAGE || location.getTypeOfTile() == TypeOfTile.NPC_HOUSE);
     }
 
     public GameMenuController getGameController() {

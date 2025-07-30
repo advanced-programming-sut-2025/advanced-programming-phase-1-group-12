@@ -324,6 +324,11 @@ public class GameMenuController {
         MapSetUp.initializeFarms();
         MapSetUp.storesSetUp();
         MapSetUp.NPCsetUp();
+        
+        // Initialize NPC village for animations
+        if (App.getCurrentGame().getNPCvillage() == null) {
+            App.getCurrentGame().initializeNPCvillage();
+        }
         ArrayList<Farm> farms = new ArrayList<>();
 
         App.loadAllUsersFromFiles();

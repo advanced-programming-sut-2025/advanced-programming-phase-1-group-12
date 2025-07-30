@@ -1,8 +1,10 @@
 package org.example.Common.models.NPC;
 
+import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Fundementals.Location;
 import org.example.Common.models.Fundementals.LocationOfRectangle;
 import org.example.Common.models.Fundementals.Player;
+import org.example.Common.models.enums.Types.TypeOfTile;
 import org.example.Common.models.Item;
 import org.example.Common.models.MapDetails.Shack;
 import org.example.Common.models.Place.Place;
@@ -22,11 +24,41 @@ public class NPCvillage implements Place {
 
     public NPCvillage(LocationOfRectangle location) {
         this.locationOfRectangle = location;
+        setupNPCHouses();
         initializeNPCs();
     }
 
     private void initializeNPCs() {
         createNPCsFromEnum();
+    }
+
+    private void setupNPCHouses() {
+        // Place 5 NPC houses in the village area
+        int houseSize = 4; // 4x4 tiles for each house
+        int spacing = 6; // Space between houses
+        int startX = locationOfRectangle.getTopLeftCorner().getxAxis() + 2;
+        int startY = locationOfRectangle.getTopLeftCorner().getyAxis() + 2;
+        
+        for (int i = 0; i < 5; i++) {
+            // Set the house area to NPC_HOUSE tile type
+            for (int x = startX; x < startX + houseSize; x++) {
+                for (int y = startY; y < startY + houseSize; y++) {
+                    Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
+                    if (location != null) {
+                        location.setTypeOfTile(TypeOfTile.NPC_HOUSE);
+                    }
+                }
+            }
+            
+            // Move to next house position
+            startX += houseSize + spacing;
+            
+            // If we've reached the end of the row, move to next row
+            if (startX + houseSize > locationOfRectangle.getTopLeftCorner().getxAxis() + locationOfRectangle.getWidth() - 2) {
+                startX = locationOfRectangle.getTopLeftCorner().getxAxis() + 2;
+                startY += houseSize + spacing;
+            }
+        }
     }
 
     private void createNPCsFromEnum() {

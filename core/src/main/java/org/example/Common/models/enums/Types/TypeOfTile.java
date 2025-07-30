@@ -5,6 +5,7 @@ public enum TypeOfTile {
     GREENHOUSE('G'),
     QUARRY('Q'),
     HOUSE('H'),
+    NPC_HOUSE('n'),
     GROUND('.'),
     PLOUGHED_LAND('P'),
     BURNED_GROUND('b'),
