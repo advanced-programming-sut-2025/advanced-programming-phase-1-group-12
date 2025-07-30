@@ -57,9 +57,11 @@ public class NPCAnimationManager {
     
     private void loadAllNPCAnimations() {
         loadNPCAnimations("Abigail");
+        loadNPCAnimations("Harvey");
         loadNPCAnimations("Jojo");
         loadNPCAnimations("Leah");
         loadNPCAnimations("Pierre");
+        loadNPCAnimations("Robin");
         loadNPCAnimations("Sebastian");
         loadNPCAnimations("Willy");
     }
@@ -204,6 +206,20 @@ public class NPCAnimationManager {
             case "Abigail":
                 switch (animationType) {
                     case "fly": return 4; // fly_0 to fly_3
+                }
+                break;
+            case "Harvey":
+                switch (animationType) {
+                    case "idle": return 4;
+                    case "walk": return 4;
+                    case "back": return 4;
+                }
+                break;
+            case "Robin":
+                switch (animationType) {
+                    case "idle": return 4;
+                    case "walk": return 4;
+                    case "back": return 4;
                 }
                 break;
         }

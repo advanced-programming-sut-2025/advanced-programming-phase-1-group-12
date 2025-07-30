@@ -322,36 +322,10 @@ public class NPC {
     // Animation methods
     public void updateAnimation(float deltaTime) {
         animationTime += deltaTime;
-        moveTimer += deltaTime;
         
-        // Change animation state periodically
-        if (moveTimer >= MOVE_INTERVAL) {
-            moveTimer = 0f;
-            isMoving = !isMoving;
-            
-            if (isMoving) {
-                // Randomly choose a movement animation based on NPC type
-                switch (name) {
-                    case "Jojo":
-                        currentAnimation = AnimationType.WORK;
-                        break;
-                    case "Leah":
-                        currentAnimation = AnimationType.SHOOT;
-                        break;
-                    case "Willy":
-                        currentAnimation = AnimationType.TOOL;
-                        break;
-                    case "Abigail":
-                        currentAnimation = AnimationType.FLY;
-                        break;
-                    default:
-                        currentAnimation = AnimationType.WALK;
-                        break;
-                }
-            } else {
-                currentAnimation = AnimationType.IDLE;
-            }
-        }
+        // Keep all NPCs in idle animation for now
+        currentAnimation = AnimationType.IDLE;
+        isMoving = false;
     }
     
     public AnimationType getCurrentAnimation() {

@@ -62,29 +62,55 @@ public class NPCvillage implements Place {
     }
 
     private void createNPCsFromEnum() {
-        int spacing = 4;
-        int startX = locationOfRectangle.getTopLeftCorner().getxAxis() + 2;
-        int startY = locationOfRectangle.getTopLeftCorner().getyAxis() + 2;
-
+        // Calculate house positions first
+        ArrayList<Location> housePositions = calculateHousePositions();
+        
+        // Create NPCs and position them next to houses
+        int npcIndex = 0;
         for (NPCdetails npcDetail : NPCdetails.values()) {
-            Location topLeft = new Location(startX, startY);
-            Location bottomRight = new Location(topLeft.getxAxis() + 2, topLeft.getyAxis() + 2);
-            LocationOfRectangle shackLocation = new LocationOfRectangle(topLeft, bottomRight);
-
-            Shack npcShack = new Shack(shackLocation);
-            Location npcLocation = new Location(topLeft.getxAxis(), topLeft.getyAxis() + 1);
-
-            NPC npc = new NPC(npcDetail, npcLocation, npcShack);
-
-            addNPC(npc);
-
-            startX += spacing;
-
-            if (startX > locationOfRectangle.getTopLeftCorner().getxAxis() + locationOfRectangle.getWidth() - 4) {
-                startX = locationOfRectangle.getTopLeftCorner().getxAxis() + 2;
-                startY += spacing;
+            if (npcIndex < housePositions.size()) {
+                Location housePos = housePositions.get(npcIndex);
+                
+                // Position NPC next to the house (to the right of the house)
+                Location npcLocation = new Location(housePos.getxAxis() + 4, housePos.getyAxis() + 2);
+                
+                // Create a small shack area for the NPC
+                Location topLeft = new Location(npcLocation.getxAxis() - 1, npcLocation.getyAxis() - 1);
+                Location bottomRight = new Location(npcLocation.getxAxis() + 1, npcLocation.getyAxis() + 1);
+                LocationOfRectangle shackLocation = new LocationOfRectangle(topLeft, bottomRight);
+                
+                Shack npcShack = new Shack(shackLocation);
+                NPC npc = new NPC(npcDetail, npcLocation, npcShack);
+                
+                addNPC(npc);
+                npcIndex++;
             }
         }
+    }
+    
+    private ArrayList<Location> calculateHousePositions() {
+        ArrayList<Location> housePositions = new ArrayList<>();
+        
+        int houseSize = 4; // 4x4 tiles for each house
+        int spacing = 6; // Space between houses
+        int startX = locationOfRectangle.getTopLeftCorner().getxAxis() + 2;
+        int startY = locationOfRectangle.getTopLeftCorner().getyAxis() + 2;
+        
+        for (int i = 0; i < 5; i++) {
+            // Add the top-left corner of each house
+            housePositions.add(new Location(startX, startY));
+            
+            // Move to next house position
+            startX += houseSize + spacing;
+            
+            // If we've reached the end of the row, move to next row
+            if (startX + houseSize > locationOfRectangle.getTopLeftCorner().getxAxis() + locationOfRectangle.getWidth() - 2) {
+                startX = locationOfRectangle.getTopLeftCorner().getxAxis() + 2;
+                startY += houseSize + spacing;
+            }
+        }
+        
+        return housePositions;
     }
 
 
