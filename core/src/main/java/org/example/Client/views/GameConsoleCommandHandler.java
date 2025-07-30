@@ -215,20 +215,80 @@ public class GameConsoleCommandHandler {
         } else if ((matcher = GameMenuCommands.TRADE_HISTORY.getMather(input)) != null) {
             Result result = controller.tradeHistory();
             System.out.println(result.getMessage());
-        } else if ((matcher = GameMenuCommands.SELL_ANIMAL.getMather(input)) != null) {
-            System.out.println(animalController.sellAnimal(matcher.group("name")).getMessage());
-        } else if ((matcher = GameMenuCommands.ANIMALS_LIST.getMather(input)) != null) {
-            animalController.animalsList();
-        } else if ((matcher = GameMenuCommands.CHEAT_SET_FRIENDSHIP.getMather(input)) != null) {
-            System.out.println(animalController.cheatFriendship(matcher).getMessage());
-        } else if ((matcher = GameMenuCommands.MILK.getMather(input)) != null) {
-            System.out.println(animalController.milking(matcher.group("name")).getMessage());
-        } else if ((matcher = GameMenuCommands.SHEAR.getMather(input)) != null) {
-            System.out.println(animalController.shear(matcher.group("name")).getMessage());
-        } else if ((matcher = GameMenuCommands.PET.getMather(input)) != null) {
-            System.out.println(animalController.pet(matcher.group("name")).getMessage());
-        } else if ((matcher = GameMenuCommands.FEED_HAY.getMather(input)) != null) {
-            System.out.println(animalController.feedHay(matcher.group("animalName")).getMessage());
+        } else if ((matcher = GameMenuCommands.CRAFT_INFO.getMather(input)) != null) {
+            System.out.println(farmingController.showCraftInto(matcher.group("craftName")));
+        } else if ((matcher = GameMenuCommands.FORAGING_CROPS.getMather(input)) != null) {
+            System.out.println(farmingController.showForagingCropsInfo(matcher.group("type")));
+        } else if ((matcher = GameMenuCommands.PLACE_ON_GROUND.getMather(input)) != null) {
+            System.out.println(craftingController.putItem(matcher.group("itemName"), matcher.group("direction")));
+        } else if ((matcher = GameMenuCommands.SHOW_RECIPES_CRAFTING.getMather(input)) != null) {
+            System.out.println(craftingController.showRecipesCrafting());
+        } else if ((matcher = GameMenuCommands.THOR.getMather(input)) != null) {
+            System.out.println(controller.Thor(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
+        } else if ((matcher = GameMenuCommands.TakeFromGround.getMather(input)) != null) {
+            System.out.println(craftingController.TakeFromGround(matcher.group("itemName"), Integer.parseInt(matcher.group("direction"))));
+        } else if ((matcher = GameMenuCommands.MEET_NPC.getMather(input)) != null) {
+            Result result = controller.meetNPC(matcher.group("npcName"));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.GIFT_NPC.getMather(input)) != null) {
+            Result result = controller.giftNPC(matcher.group("npcName"), matcher.group("item"));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.FRIENDSHIP_NPC_LIST.getMather(input)) != null) {
+            Result result = controller.friendshipNPCList();
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.FRIENDSHIP_LIST.getMather(input)) != null) {
+            Result result = controller.friendshipList();
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.QUESTS_LIST.getMather(input)) != null) {
+            Result result = controller.questsList();
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.QUESTS_FINISH.getMather(input)) != null) {
+            Result result = controller.questsFinish(Integer.parseInt(matcher.group("index")));
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.CHEAT_NPC_LOCATIONS.getMather(input)) != null) {
+            Result result = controller.cheatNPCLocations();
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.CHEAT_NPC_TEST_ITEMS.getMather(input)) != null) {
+            Result result = controller.cheatNPCTestItems();
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.SHOW_MONEY.getMather(input)) != null) {
+            System.out.println(App.getCurrentPlayerLazy().getMoney());
+        } else if ((matcher = GameMenuCommands.SELL.getMather(input))!= null) {
+            System.out.println(controller.sellByShipping(matcher.group("productName"), matcher.group("count")).getMessage());
+        } else if ((matcher = GameMenuCommands.SELL_ONE.getMather(input))!= null) {
+            System.out.println(controller.sellByShippingWithoutCount(matcher.group("productName")).getMessage() + "sold without count");
+        } else if ((matcher = GameMenuCommands.GREENHOUSE_BUILD.getMather(input))!=null) {
+            System.out.println(controller.buildGreenHouse());
+        } else if ((matcher = GameMenuCommands.ABILITIES_SHOW.getMather(input)) != null) {
+            for(Ability ability: App.getCurrentPlayerLazy().getAbilitis()){
+                System.out.println(ability.getName() +" "+ ability.getLevel()+" "+ability.getAmount());
+            }
+        } else if ((matcher = GameMenuCommands.CHEAT_PLAYER_MONEY.getMather(input))!= null) {
+            System.out.println(App.getCurrentPlayerLazy().getMoney());
+        } else if ((matcher = GameMenuCommands.SHOW_SHIPPING_BIN_LOCATION.getMather(input))!= null) {
+            System.out.println(controller.showShippingBinLocation().getMessage());
+        } else if ((matcher = GameMenuCommands.CHEAT_BUY_ITEM.getMather(input)) != null) {
+            System.out.println(storeController.cheatBuyItem(matcher.group("productName"), Integer.parseInt(matcher.group("count"))));
+        }  else if ((matcher = GameMenuCommands.CHEAT_ADD_ITEM.getMather(input)) != null) {
+            System.out.println(storeController.cheatAddItem(matcher.group("productName"), Integer.parseInt(matcher.group("count"))));
+        } else if ((matcher = GameMenuCommands.CHEAT_FRIENDSHIP_LEVEL.getMather(input))!= null) {
+            System.out.println(controller.cheatFriendShipLevel(matcher.group("name"), matcher.group("amount")));
+        } else if ((matcher = GameMenuCommands.CHEAT_FRIENDSHIP_XP.getMather(input))!= null) {
+            System.out.println(controller.cheatAddXP(matcher.group("username")));
+        } else if ((matcher = GameMenuCommands.CHEAT_MAXIMIZE_ABILITY_LEVEL.getMather(input))!= null) {
+            App.getCurrentPlayerLazy().getAbilityByName(matcher.group("ability")).setLevel(4);
+        } else if ((matcher = GameMenuCommands.PRODUCES.getMather(input))!= null) {
+            for(FarmAnimals farmAnimals: App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()){
+                if(!farmAnimals.isHasCollectedProductToday()){
+                    System.out.println(farmAnimals.getName() + " " + animalController.whatWillProduceToday(farmAnimals.getAnimal(), farmAnimals));
+                }
+            }
+        } else if ((matcher = GameMenuCommands.CHEAT_GREENHOUSE_BUILD.getMather(input)) != null) {
+            Result result = controller.cheatGreenHouse();
+            System.out.println(result.getMessage());
+        } else if ((matcher = GameMenuCommands.CHEAT_MAKE_ADJACENT.getMather(input)) != null) {
+            Result result = controller.cheatMakeAdjacent(matcher.group("username1"), matcher.group("username2"));
+            System.out.println(result.getMessage());
         } else if ((matcher = GameMenuCommands.SHOW_PRODUCTS.getMather(input)) != null) {
             storeController.ShowProducts();
         } else if ((matcher = GameMenuCommands.BUILD_BUILDING.getMather(input)) != null) {

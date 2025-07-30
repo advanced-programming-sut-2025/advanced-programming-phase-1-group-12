@@ -140,6 +140,7 @@ public enum GameMenuCommands implements Commands {
     CHEAT_SET_BOUQUET("^set bouquet -n (?<username>.*)$"),
     CHEAT_DECREASE_MONEY("^decrease money -a (?<username>.*)$"),
     CHEAT_GREENHOUSE_BUILD("^cheat greenhouse build$"),
+    CHEAT_MAKE_ADJACENT("^cheat make adjacent -u (?<username1>.*) -u (?<username2>.*)$"),
 
     //store commands
     SHOW_PRODUCTS("show all products"),

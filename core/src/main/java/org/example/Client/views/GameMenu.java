@@ -44,6 +44,8 @@ import com.badlogic.gdx.graphics.GL20;
 import org.example.Common.models.enums.Types.Cooking;
 import org.example.Common.models.enums.Types.CraftingRecipe;
 import org.example.Common.models.enums.Weather;
+import org.example.Common.models.RelationShips.RelationShip;
+import org.example.Common.models.RelationShips.Gift;
 
 public class GameMenu extends InputAdapter implements Screen {
     private final GameMenuController controller = new GameMenuController();
@@ -98,6 +100,11 @@ public class GameMenu extends InputAdapter implements Screen {
     private float clockHandRotation = 0f;
     private TextureRegion clockHandRegion;
 
+    // Friends window components
+    private TextButton friendsButton;
+    private Dialog friendsDialog;
+    private Table friendsTable;
+    private ScrollPane friendsScrollPane;
 
     private Map<Player, ProgressBar> energyBars;
     private Map<Craft, ProgressBar> craftBars;
@@ -108,6 +115,9 @@ public class GameMenu extends InputAdapter implements Screen {
 
     private float foodEffect = 0f;
     public static boolean foodEaten = false;
+    
+    private float giftCheckTimer = 0f;
+    private final float GIFT_CHECK_INTERVAL = 10f; // Check every 10 seconds
 
     GameConsoleCommandHandler cmdHandler =
         new GameConsoleCommandHandler(controller,
@@ -234,6 +244,9 @@ public class GameMenu extends InputAdapter implements Screen {
         stage.addActor(dayLabel);
         stage.addActor(timeLabel);
         stage.addActor(goldLabel);
+
+        // Initialize friends button
+        initializeFriendsButton();
 
         InputMultiplexer mux = new InputMultiplexer();
         mux.addProcessor(this);
@@ -497,6 +510,18 @@ public class GameMenu extends InputAdapter implements Screen {
         stage.draw();
         renderClockHand();
 
+        checkForNewGifts();
+        
+        // Render nearby player indicators
+        renderNearbyPlayerIndicators();
+        
+        // Periodic gift checking
+        giftCheckTimer += delta;
+        if (giftCheckTimer >= GIFT_CHECK_INTERVAL) {
+            checkForNewGifts();
+            checkForMarriageProposals();
+            giftCheckTimer = 0f;
+        }
     }
 
     private void updateClockDisplay() {
@@ -758,6 +783,10 @@ public class GameMenu extends InputAdapter implements Screen {
         }
         if (keycode == Input.Keys.R) {
             changeWeatherStatus();
+            return true;
+        }
+        if (keycode == Input.Keys.F) {
+            showFriendsWindow();
             return true;
         }
         return false;
@@ -2242,5 +2271,768 @@ public class GameMenu extends InputAdapter implements Screen {
         dialog.show(stage);
     }
 
+
+
+    public void showFriendsWindow() {
+        Skin skin = GameAssetManager.skin;
+        friendsDialog = new Dialog("Friends Status", skin);
+        friendsDialog.setModal(true);
+        friendsDialog.setMovable(true);
+        friendsDialog.setResizable(true);
+        friendsDialog.setSize(600, 500);
+
+        // Create main content table
+        Table mainTable = new Table();
+        mainTable.pad(10);
+
+        // Title
+        Label titleLabel = new Label("Your Friends", skin);
+        titleLabel.setFontScale(1.5f);
+        mainTable.add(titleLabel).colspan(3).pad(10).row();
+
+        // Friends list
+        friendsTable = new Table();
+        friendsTable.pad(5);
+        
+        // Header
+        friendsTable.add(new Label("Friend", skin)).width(150).pad(5);
+        friendsTable.add(new Label("Level", skin)).width(80).pad(5);
+        friendsTable.add(new Label("XP Progress", skin)).width(120).pad(5);
+        friendsTable.add(new Label("Actions", skin)).width(200).pad(5);
+        friendsTable.row();
+
+        // Get current player's relationships
+        Player currentPlayer = App.getCurrentPlayerLazy();
+        GameMenuController controller = new GameMenuController();
+        
+        boolean hasFriends = false;
+        int friendCount = 0;
+        for (RelationShip relationship : currentPlayer.getRelationShips()) {
+            Player otherPlayer;
+            if (relationship.getPlayer1().equals(currentPlayer)) {
+                otherPlayer = relationship.getPlayer2();
+            } else {
+                otherPlayer = relationship.getPlayer1();
+            }
+
+            if (!otherPlayer.equals(currentPlayer)) {
+                hasFriends = true;
+                friendCount++;
+                
+                // Friend name
+                Label nameLabel = new Label(otherPlayer.getUser().getUserName(), skin);
+                friendsTable.add(nameLabel).width(150).pad(5);
+                
+                // Friendship level
+                Label levelLabel = new Label("Level " + relationship.getFriendshipLevel(), skin);
+                friendsTable.add(levelLabel).width(80).pad(5);
+                
+                // XP Progress
+                int currentXP = relationship.getXP();
+                int requiredXP = relationship.calculateLevelXP();
+                String xpText = currentXP + "/" + requiredXP + " XP";
+                Label xpLabel = new Label(xpText, skin);
+                friendsTable.add(xpLabel).width(120).pad(5);
+                
+                // Gift button
+                TextButton giftButton = new TextButton("Gift", skin);
+                giftButton.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        showGiftMenu(otherPlayer.getUser().getUserName());
+                    }
+                });
+                friendsTable.add(giftButton).width(100).pad(5);
+                
+                friendsTable.row();
+            }
+        }
+
+        // Update dialog title with friend count
+        // friendsDialog.setTitle("Friends Status (" + friendCount + " friends)");
+
+        if (!hasFriends) {
+            friendsTable.add(new Label("No friends yet. Start talking to other players!", skin)).colspan(4).pad(10);
+        }
+
+        // Create scroll pane for friends list
+        friendsScrollPane = new ScrollPane(friendsTable, skin);
+        friendsScrollPane.setScrollingDisabled(true, false);
+        mainTable.add(friendsScrollPane).expand().fill().pad(10).row();
+
+        // Close button
+        TextButton closeButton = new TextButton("Close", skin);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                friendsDialog.hide();
+            }
+        });
+        mainTable.add(closeButton).pad(10);
+
+        // Refresh button
+        TextButton refreshButton = new TextButton("Refresh", skin);
+        refreshButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                friendsDialog.hide();
+                showFriendsWindow();
+            }
+        });
+        mainTable.add(refreshButton).pad(10);
+
+        friendsDialog.getContentTable().add(mainTable);
+        friendsDialog.show(stage);
+    }
+
+    private void showGiftMenu(String friendUsername) {
+        Skin skin = GameAssetManager.skin;
+        Dialog giftDialog = new Dialog("Gift Options for " + friendUsername, skin);
+        giftDialog.setModal(true);
+        giftDialog.setSize(500, 400);
+
+        Table content = new Table();
+        content.pad(10);
+
+        // Send gift button
+        TextButton sendGiftButton = new TextButton("Send Gift", skin);
+        sendGiftButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                giftDialog.hide();
+                showSendGiftDialog(friendUsername);
+            }
+        });
+
+        // View gift history button
+        TextButton giftHistoryButton = new TextButton("View Gift History", skin);
+        giftHistoryButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                giftDialog.hide();
+                showGiftHistory(friendUsername);
+            }
+        });
+
+        // Rate received gifts button
+        TextButton rateGiftsButton = new TextButton("Rate Received Gifts", skin);
+        rateGiftsButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                giftDialog.hide();
+                showRateGiftsDialog(friendUsername);
+            }
+        });
+
+        // Cancel button
+        TextButton cancelButton = new TextButton("Cancel", skin);
+        cancelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                giftDialog.hide();
+            }
+        });
+
+        content.add(sendGiftButton).width(200).height(50).pad(10).row();
+        content.add(giftHistoryButton).width(200).height(50).pad(10).row();
+        content.add(rateGiftsButton).width(200).height(50).pad(10).row();
+        content.add(cancelButton).width(200).height(50).pad(10);
+
+        giftDialog.getContentTable().add(content);
+        giftDialog.show(stage);
+    }
+
+    private void showSendGiftDialog(String friendUsername) {
+        Skin skin = GameAssetManager.skin;
+        Dialog sendGiftDialog = new Dialog("Send Gift to " + friendUsername, skin);
+        sendGiftDialog.setModal(true);
+        sendGiftDialog.setSize(600, 500);
+
+        Table content = new Table();
+        content.pad(10);
+
+        // Item selection
+        Label itemLabel = new Label("Select Item:", skin);
+        content.add(itemLabel).pad(5).row();
+
+        // Get player's inventory
+        Player currentPlayer = App.getCurrentPlayerLazy();
+        Map<Item, Integer> inventory = currentPlayer.getBackPack().getItems();
+
+        // Create item selection dropdown
+        SelectBox<String> itemSelectBox = new SelectBox<>(skin);
+        List<String> itemNames = new ArrayList<>();
+        itemNames.add("Select an item...");
+        
+        for (Map.Entry<Item, Integer> entry : inventory.entrySet()) {
+            Item item = entry.getKey();
+            Integer count = entry.getValue();
+            itemNames.add(item.getName() + " (x" + count + ")");
+        }
+        
+        itemSelectBox.setItems(itemNames.toArray(new String[0]));
+        content.add(itemSelectBox).width(300).pad(5).row();
+
+        // Amount input
+        Label amountLabel = new Label("Amount:", skin);
+        content.add(amountLabel).pad(5).row();
+
+        TextField amountField = new TextField("1", skin);
+        amountField.setTextFieldFilter(new TextField.TextFieldFilter.DigitsOnlyFilter());
+        content.add(amountField).width(100).pad(5).row();
+
+        // Send button
+        TextButton sendButton = new TextButton("Send Gift", skin);
+        sendButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                String selectedItem = itemSelectBox.getSelected();
+                if (selectedItem != null && !selectedItem.equals("Select an item...")) {
+                    String itemName = selectedItem.split(" \\(x")[0];
+                    int amount = Integer.parseInt(amountField.getText());
+                    
+                    // Send the gift
+                    GameMenuController controller = new GameMenuController();
+                    Result result = controller.gift(friendUsername, itemName, String.valueOf(amount));
+                    
+                    showNotification(result.getMessage(), result.isSuccessful());
+                    sendGiftDialog.hide();
+                } else {
+                    showNotification("Please select an item!", false);
+                }
+            }
+        });
+
+        // Cancel button
+        TextButton cancelButton = new TextButton("Cancel", skin);
+        cancelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                sendGiftDialog.hide();
+            }
+        });
+
+        content.add(sendButton).width(150).height(40).pad(10);
+        content.add(cancelButton).width(150).height(40).pad(10);
+
+        sendGiftDialog.getContentTable().add(content);
+        sendGiftDialog.show(stage);
+    }
+
+    private void showGiftHistory(String friendUsername) {
+        Skin skin = GameAssetManager.skin;
+        Dialog historyDialog = new Dialog("Gift History with " + friendUsername, skin);
+        historyDialog.setModal(true);
+        historyDialog.setSize(500, 400);
+
+        Table content = new Table();
+        content.pad(10);
+
+        // Get gift history
+        Player currentPlayer = App.getCurrentPlayerLazy();
+        GameMenuController controller = new GameMenuController();
+        Result giftHistoryResult = controller.giftHistory(friendUsername);
+        
+        if (!giftHistoryResult.isSuccessful()) {
+            content.add(new Label("Error loading gift history: " + giftHistoryResult.getMessage(), skin)).pad(10);
+        } else {
+            // Parse the gift history from the result message
+            String[] giftLines = giftHistoryResult.getMessage().split("\n");
+            boolean hasGifts = false;
+            
+            for (String line : giftLines) {
+                if (line.contains(" -> ")) {
+                    hasGifts = true;
+                    String[] parts = line.split(" -> ");
+                    if (parts.length >= 2) {
+                        content.add(new Label(parts[0], skin)).width(150).pad(5);
+                        content.add(new Label(parts[1], skin)).width(150).pad(5);
+                        content.add(new Label("Not rated", skin)).width(100).pad(5);
+                        content.row();
+                    }
+                }
+            }
+            
+            if (!hasGifts) {
+                content.add(new Label("No gift history with " + friendUsername, skin)).pad(10);
+            }
+        }
+
+        // Close button
+        TextButton closeButton = new TextButton("Close", skin);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                historyDialog.hide();
+            }
+        });
+        content.add(closeButton).width(100).height(40).pad(15);
+
+        historyDialog.getContentTable().add(content);
+        historyDialog.show(stage);
+    }
+
+    private void showRateGiftsDialog(String friendUsername) {
+        Skin skin = GameAssetManager.skin;
+        Dialog rateDialog = new Dialog("Rate Received Gifts from " + friendUsername, skin);
+        rateDialog.setModal(true);
+        rateDialog.setSize(500, 400);
+
+        Table content = new Table();
+        content.pad(10);
+
+        // Get unrated gifts
+        Player currentPlayer = App.getCurrentPlayerLazy();
+        GameMenuController controller = new GameMenuController();
+        Result unratedGiftsResult = controller.giftList();
+
+        if (unratedGiftsResult.isSuccessful()) {
+            String giftListMessage = unratedGiftsResult.getMessage();
+            if (giftListMessage.contains("haven't received any gifts")) {
+                content.add(new Label("No unrated gifts from " + friendUsername, skin)).pad(10);
+            } else {
+                // Parse the gift list from the result message
+                String[] giftLines = giftListMessage.split("\n");
+                for (String line : giftLines) {
+                    if (line.matches("\\d+\\..*") && !line.contains("(Rated:")) {
+                        Table giftRow = new Table();
+                        
+                        Label giftLabel = new Label(line, skin);
+                        giftRow.add(giftLabel).width(200).pad(5);
+                        
+                        // Rating buttons
+                        for (int i = 1; i <= 5; i++) {
+                            final int rating = i;
+                            final String giftNumber = line.split("\\.")[0];
+                            TextButton starButton = new TextButton("★", skin);
+                            starButton.addListener(new ClickListener() {
+                                @Override
+                                public void clicked(InputEvent event, float x, float y) {
+                                    // Rate the gift
+                                    Result result = controller.giftRate(giftNumber, String.valueOf(rating));
+                                    showNotification(result.getMessage(), result.isSuccessful());
+                                    rateDialog.hide();
+                                }
+                            });
+                            giftRow.add(starButton).width(30).pad(2);
+                        }
+                        
+                        content.add(giftRow).row();
+                    }
+                }
+            }
+        } else {
+            content.add(new Label("Error loading unrated gifts: " + unratedGiftsResult.getMessage(), skin)).pad(10);
+        }
+
+        // Close button
+        TextButton closeButton = new TextButton("Close", skin);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                rateDialog.hide();
+            }
+        });
+        content.add(closeButton).width(100).height(40).pad(15);
+
+        rateDialog.getContentTable().add(content);
+        rateDialog.show(stage);
+    }
+
+    private void showNotification(String message, boolean isSuccess) {
+        Skin skin = GameAssetManager.skin;
+        Dialog notificationDialog = new Dialog("Notification", skin);
+        notificationDialog.setModal(true);
+        notificationDialog.setSize(400, 200);
+
+        Table content = new Table();
+        content.pad(15);
+
+        Label messageLabel = new Label(message, skin);
+        messageLabel.setColor(isSuccess ? Color.GREEN : Color.RED);
+        content.add(messageLabel).pad(10).row();
+
+        TextButton okButton = new TextButton("OK", skin);
+        okButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                notificationDialog.hide();
+            }
+        });
+        content.add(okButton).width(100).height(40).pad(15);
+
+        notificationDialog.getContentTable().add(content);
+        notificationDialog.show(stage);
+    }
+
+    private void checkForNewGifts() {
+        giftCheckTimer += Gdx.graphics.getDeltaTime();
+        
+        if (giftCheckTimer >= GIFT_CHECK_INTERVAL) {
+            giftCheckTimer = 0f;
+            
+            Player currentPlayer = App.getCurrentPlayerLazy();
+            GameMenuController controller = new GameMenuController();
+            
+            int unratedGifts = 0;
+            for (RelationShip relationship : currentPlayer.getRelationShips()) {
+                Player otherPlayer = relationship.getPlayer1().equals(currentPlayer) ? 
+                    relationship.getPlayer2() : relationship.getPlayer1();
+                
+                if (!otherPlayer.equals(currentPlayer)) {
+                    Result giftsResult = controller.giftList();
+                    if (giftsResult.isSuccessful()) {
+                        String giftListMessage = giftsResult.getMessage();
+                        if (!giftListMessage.contains("haven't received any gifts")) {
+                            String[] giftLines = giftListMessage.split("\n");
+                            for (String line : giftLines) {
+                                if (line.matches("\\d+\\..*") && !line.contains("(Rated:")) {
+                                    unratedGifts++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (friendsButton != null) {
+                if (unratedGifts > 0) {
+                    // Update friends button to show notification
+                    friendsButton.setText("Friends (" + unratedGifts + ")");
+                    friendsButton.setColor(Color.YELLOW);
+                } else {
+                    friendsButton.setText("Friends");
+                    friendsButton.setColor(Color.WHITE);
+                }
+            } else {
+                friendsButton.setText("Friends");
+                friendsButton.setColor(Color.WHITE);
+            }
+        }
+    }
+
+    public void showNearbyPlayerInteractionMenu(Player targetPlayer) {
+        Skin skin = GameAssetManager.skin;
+        Dialog interactionDialog = new Dialog("Interact with " + targetPlayer.getUser().getUserName(), skin);
+        interactionDialog.setModal(true);
+        interactionDialog.setSize(400, 300);
+
+        Table content = new Table();
+        content.pad(15);
+
+        // Hug button
+        TextButton hugButton = new TextButton("🤗 Hug", skin);
+        hugButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                interactionDialog.hide();
+                performHug(targetPlayer.getUser().getUserName());
+            }
+        });
+
+        // Give flower button
+        TextButton flowerButton = new TextButton("🌹 Give Flower", skin);
+        flowerButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                interactionDialog.hide();
+                performFlower(targetPlayer.getUser().getUserName());
+            }
+        });
+
+        // Propose marriage button
+        TextButton proposeButton = new TextButton("💍 Propose Marriage", skin);
+        proposeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                interactionDialog.hide();
+                showMarriageProposalDialog(targetPlayer.getUser().getUserName());
+            }
+        });
+
+        // Cancel button
+        TextButton cancelButton = new TextButton("Cancel", skin);
+        cancelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                interactionDialog.hide();
+            }
+        });
+
+        content.add(hugButton).width(200).height(50).pad(10).row();
+        content.add(flowerButton).width(200).height(50).pad(10).row();
+        content.add(proposeButton).width(200).height(50).pad(10).row();
+        content.add(cancelButton).width(200).height(50).pad(10);
+
+        interactionDialog.getContentTable().add(content);
+        interactionDialog.show(stage);
+    }
+
+    private void performHug(String targetUsername) {
+        Player currentPlayer = App.getCurrentPlayerLazy();
+        GameMenuController controller = new GameMenuController();
+        Result result = controller.hug(targetUsername);
+        showNotification(result.getMessage(), result.isSuccessful());
+    }
+
+    private void performFlower(String targetUsername) {
+        Player currentPlayer = App.getCurrentPlayerLazy();
+        GameMenuController controller = new GameMenuController();
+        Result result = controller.flower(targetUsername);
+        showNotification(result.getMessage(), result.isSuccessful());
+    }
+
+    private void showMarriageProposalDialog(String targetUsername) {
+        Skin skin = GameAssetManager.skin;
+        Dialog proposalDialog = new Dialog("Propose Marriage to " + targetUsername, skin);
+        proposalDialog.setModal(true);
+        proposalDialog.setSize(500, 400);
+
+        Table content = new Table();
+        content.pad(15);
+
+        Label instructionLabel = new Label("Select a ring from your inventory to propose with:", skin);
+        content.add(instructionLabel).pad(10).row();
+
+        // Get player's inventory for rings
+        Player currentPlayer = App.getCurrentPlayerLazy();
+        Map<Item, Integer> inventory = currentPlayer.getBackPack().getItems();
+        List<Item> rings = new ArrayList<>();
+        
+        for (Map.Entry<Item, Integer> entry : inventory.entrySet()) {
+            Item item = entry.getKey();
+            if (item.getName().toLowerCase().contains("ring")) {
+                rings.add(item);
+            }
+        }
+
+        if (rings.isEmpty()) {
+            content.add(new Label("You don't have any rings in your inventory!", skin)).pad(10).row();
+            content.add(new Label("You need a ring to propose marriage.", skin)).pad(10).row();
+        } else {
+            for (Item ring : rings) {
+                Integer count = inventory.get(ring);
+                TextButton ringButton = new TextButton(ring.getName() + " (x" + count + ")", skin);
+                ringButton.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        // Propose marriage with this ring
+                        GameMenuController controller = new GameMenuController();
+                        Result result = controller.askMarriage(targetUsername, ring.getName());
+                        showNotification(result.getMessage(), result.isSuccessful());
+                        proposalDialog.hide();
+                    }
+                });
+                content.add(ringButton).width(300).height(40).pad(5).row();
+            }
+        }
+
+        // Cancel button
+        TextButton cancelButton = new TextButton("Cancel", skin);
+        cancelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                proposalDialog.hide();
+            }
+        });
+        content.add(cancelButton).width(150).height(40).pad(15);
+
+        proposalDialog.getContentTable().add(content);
+        proposalDialog.show(stage);
+    }
+
+    private void showMarriageProposalToTarget(String proposerUsername, String ringName) {
+        Skin skin = GameAssetManager.skin;
+        Dialog proposalDialog = new Dialog("💍 Marriage Proposal", skin);
+        proposalDialog.setModal(true);
+        proposalDialog.setSize(500, 400);
+
+        Table content = new Table();
+        content.pad(20);
+
+        Label proposalLabel = new Label("💍 " + proposerUsername + " wants to marry you!", skin);
+        proposalLabel.setFontScale(1.3f);
+        proposalLabel.setColor(Color.PINK);
+        content.add(proposalLabel).pad(10).row();
+
+        Label ringLabel = new Label("💎 They're offering: " + ringName, skin);
+        ringLabel.setFontScale(1.1f);
+        content.add(ringLabel).pad(10).row();
+
+        Label questionLabel = new Label("Will you accept their proposal?", skin);
+        questionLabel.setFontScale(1.2f);
+        content.add(questionLabel).pad(15).row();
+
+        // Accept button
+        TextButton acceptButton = new TextButton("💖 Accept", skin);
+        acceptButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                respondToMarriageProposal(proposerUsername, "accept");
+                proposalDialog.hide();
+            }
+        });
+
+        // Reject button
+        TextButton rejectButton = new TextButton("💔 Reject", skin);
+        rejectButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                respondToMarriageProposal(proposerUsername, "reject");
+                proposalDialog.hide();
+            }
+        });
+
+        content.add(acceptButton).width(150).height(50).pad(10);
+        content.add(rejectButton).width(150).height(50).pad(10);
+
+        proposalDialog.getContentTable().add(content);
+        proposalDialog.show(stage);
+    }
+
+    private void respondToMarriageProposal(String proposerUsername, String response) {
+        Player currentPlayer = App.getCurrentPlayerLazy();
+        GameMenuController controller = new GameMenuController();
+        Result result = controller.respond(response, proposerUsername);
+        
+        if (response.equals("accept")) {
+            showMarriageSuccessDialog(proposerUsername);
+        } else {
+            showMarriageRejectionDialog(proposerUsername);
+        }
+        
+        showNotification(result.getMessage(), result.isSuccessful());
+    }
+
+    public void showIncomingMarriageProposal(String proposerUsername, String ringName) {
+        showMarriageProposalToTarget(proposerUsername, ringName);
+    }
+
+    private void showMarriageSuccessDialog(String partnerName) {
+        Skin skin = GameAssetManager.skin;
+        Dialog successDialog = new Dialog("💖 Marriage Successful!", skin);
+        successDialog.setModal(true);
+        successDialog.setSize(500, 400);
+
+        Table content = new Table();
+        content.pad(20);
+
+        Label successLabel = new Label("💖 Congratulations!", skin);
+        successLabel.setFontScale(1.5f);
+        successLabel.setColor(Color.PINK);
+        content.add(successLabel).pad(10).row();
+
+        Label partnerLabel = new Label("💑 You are now married to " + partnerName + "!", skin);
+        partnerLabel.setFontScale(1.2f);
+        content.add(partnerLabel).pad(10).row();
+
+        Label moneyLabel = new Label("💰 Your money has been merged! 💰", skin);
+        content.add(moneyLabel).pad(10).row();
+
+        TextButton okButton = new TextButton("💖 I Do!", skin);
+        okButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                successDialog.hide();
+            }
+        });
+        content.add(okButton).width(150).height(50).pad(15);
+
+        successDialog.getContentTable().add(content);
+        successDialog.show(stage);
+    }
+
+    private void showMarriageRejectionDialog(String proposerName) {
+        Skin skin = GameAssetManager.skin;
+        Dialog rejectionDialog = new Dialog("💔 Proposal Rejected", skin);
+        rejectionDialog.setModal(true);
+        rejectionDialog.setSize(400, 250);
+
+        Table content = new Table();
+        content.pad(15);
+
+        Label rejectionLabel = new Label("💔 You rejected " + proposerName + "'s proposal", skin);
+        rejectionLabel.setFontScale(1.2f);
+        rejectionLabel.setColor(Color.RED);
+        content.add(rejectionLabel).pad(10).row();
+
+        Label effectLabel = new Label("⚠️ This will affect your friendship level", skin);
+        content.add(effectLabel).pad(10).row();
+
+        TextButton okButton = new TextButton("OK", skin);
+        okButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                rejectionDialog.hide();
+            }
+        });
+        content.add(okButton).width(100).height(40).pad(15);
+
+        rejectionDialog.getContentTable().add(content);
+        rejectionDialog.show(stage);
+    }
+
+    private void checkForMarriageProposals() {
+        Player currentPlayer = App.getCurrentPlayerLazy();
+        
+        // Check if current player has any pending marriage proposals
+        for (RelationShip relationship : currentPlayer.getRelationShips()) {
+            if (relationship.hasAskedToMarry() && relationship.getAskedRing() != null) {
+                // Find the proposer
+                Player proposer = relationship.getPlayer1().equals(currentPlayer) ? 
+                    relationship.getPlayer2() : relationship.getPlayer1();
+                
+                // Show marriage proposal dialog
+                showIncomingMarriageProposal(proposer.getUser().getUserName(), relationship.getAskedRing());
+                
+                // Clear the proposal to prevent showing it again
+                relationship.askToMarry(); // This should be modified to clear the proposal
+                break;
+            }
+        }
+    }
+
+    private void renderNearbyPlayerIndicators() {
+        Player currentPlayer = App.getCurrentPlayerLazy();
+        
+        // Draw indicators for nearby players
+        for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
+            if (!otherPlayer.equals(currentPlayer)) {
+                int distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - otherPlayer.getUserLocation().getxAxis()) + 
+                             Math.abs(currentPlayer.getUserLocation().getyAxis() - otherPlayer.getUserLocation().getyAxis());
+                
+                if (distance <= 2) {
+                    // Draw a subtle indicator around nearby players
+                    float playerX = otherPlayer.getUserLocation().getxAxis() * 100f;
+                    float playerY = otherPlayer.getUserLocation().getyAxis() * 100f;
+                    
+                    // Use shape renderer to draw a circle instead of texture
+                    if (shapeRenderer != null) {
+                        shapeRenderer.setProjectionMatrix(camera.combined);
+                        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+                        shapeRenderer.setColor(1, 1, 0, 0.3f); // Yellow glow
+                        shapeRenderer.circle(playerX + 50, playerY + 50, 60); // 50 is half tile size
+                        shapeRenderer.end();
+                    }
+                }
+            }
+        }
+    }
+
+    private void initializeFriendsButton() {
+        friendsButton = new TextButton("Friends", skin);
+        friendsButton.setSize(120, 40);
+        friendsButton.setPosition(20, stage.getHeight() - 120);
+        friendsButton.getLabel().setFontScale(1.2f);
+        
+        friendsButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                showFriendsWindow();
+            }
+        });
+        
+        stage.addActor(friendsButton);
+    }
 
 }

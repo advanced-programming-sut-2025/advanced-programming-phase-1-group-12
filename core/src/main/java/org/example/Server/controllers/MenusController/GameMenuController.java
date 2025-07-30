@@ -1439,4 +1439,50 @@ public class GameMenuController {
         relationShip.setHasBouquet();
         return new Result(true, "Bouquet added to " + username + "!");
     }
+
+    public Result cheatMakeAdjacent(String username1, String username2) {
+        Player player1 = App.getCurrentGame().getPlayerByName(username1);
+        Player player2 = App.getCurrentGame().getPlayerByName(username2);
+        
+        if (player1 == null) {
+            return new Result(false, "Player " + username1 + " not found!");
+        }
+        if (player2 == null) {
+            return new Result(false, "Player " + username2 + " not found!");
+        }
+        
+        // Move player2 to be adjacent to player1 (1 tile away)
+        int player1X = player1.getUserLocation().getxAxis();
+        int player1Y = player1.getUserLocation().getyAxis();
+        
+        // Place player2 one tile to the right of player1
+        Location adjacentLocation = App.getCurrentGame().getMainMap().findLocation(player1X + 1, player1Y);
+        if (adjacentLocation != null) {
+            player2.setUserLocation(adjacentLocation);
+            return new Result(true, "Players " + username1 + " and " + username2 + " are now adjacent!");
+        } else {
+            // Try placing to the left if right is not available
+            adjacentLocation = App.getCurrentGame().getMainMap().findLocation(player1X - 1, player1Y);
+            if (adjacentLocation != null) {
+                player2.setUserLocation(adjacentLocation);
+                return new Result(true, "Players " + username1 + " and " + username2 + " are now adjacent!");
+            } else {
+                // Try placing above if left/right are not available
+                adjacentLocation = App.getCurrentGame().getMainMap().findLocation(player1X, player1Y + 1);
+                if (adjacentLocation != null) {
+                    player2.setUserLocation(adjacentLocation);
+                    return new Result(true, "Players " + username1 + " and " + username2 + " are now adjacent!");
+                } else {
+                    // Try placing below as last resort
+                    adjacentLocation = App.getCurrentGame().getMainMap().findLocation(player1X, player1Y - 1);
+                    if (adjacentLocation != null) {
+                        player2.setUserLocation(adjacentLocation);
+                        return new Result(true, "Players " + username1 + " and " + username2 + " are now adjacent!");
+                    } else {
+                        return new Result(false, "No adjacent location available for " + username2);
+                    }
+                }
+            }
+        }
+    }
 }
