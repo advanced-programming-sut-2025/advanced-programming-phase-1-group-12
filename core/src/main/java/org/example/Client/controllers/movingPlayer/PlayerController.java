@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import org.example.Client.Main;
 import org.example.Client.controllers.MenusController.GameMenuController;
+import org.example.Client.network.NetworkCommandSender;
 import org.example.Client.views.FarmingMenuView;
 import org.example.Client.views.GameMenu;
 import org.example.Client.views.PlantMenuView;
@@ -22,18 +23,22 @@ import org.example.Common.models.Place.Farm;
 import org.example.Common.models.Place.Store;
 import org.example.Common.models.enums.Types.TypeOfTile;
 import org.example.Common.models.enums.foraging.Stone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class PlayerController {
 
+    private static final Logger logger = LoggerFactory.getLogger(PlayerController.class);
     private static final int FRAME_W = 16;
     private static final int FRAME_H = 32;
     private static final float FRAME_DURATION = 0.15f;
 
     private final Player player;
     private final GameMenuController gameController;
+    private NetworkCommandSender networkCommandSender;
 
     private final Animation<TextureRegion> walkDown;
     private final Animation<TextureRegion> walkLeft;
@@ -59,6 +64,11 @@ public class PlayerController {
         this.players = players;
         this.player = player;
         this.gameController = gameController;
+        
+        // Initialize network command sender for multiplayer movement updates
+        if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
+            this.networkCommandSender = new NetworkCommandSender(Main.getMain().getServerConnection());
+        }
 
         // TODO: Fix PlayerController type mismatch - need to create a common interface
         // player.setPlayerController(this);
@@ -310,6 +320,17 @@ public class PlayerController {
         }
 
         player.updatePosition(newX, newY);
+
+        // Send movement update to server in multiplayer mode
+        if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer() && networkCommandSender != null) {
+            try {
+                // Send WebSocket movement update for real-time synchronization
+                networkCommandSender.sendPlayerMovementWebSocket(newX, newY);
+                logger.debug("Sent movement update to server: ({}, {})", newX, newY);
+            } catch (Exception e) {
+                logger.error("Failed to send movement update to server", e);
+            }
+        }
 
         switch (facing) {
             case UP -> currentAnim = walkUp;

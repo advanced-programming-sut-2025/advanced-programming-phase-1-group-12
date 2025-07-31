@@ -304,6 +304,7 @@ public class NetworkCommandSender {
     public void sendPlayerMovementWebSocket(int x, int y) {
         try {
             if (currentGameId == null) {
+                logger.warn("Cannot send movement update: not in a game");
                 return;
             }
             
@@ -315,6 +316,7 @@ public class NetworkCommandSender {
             wsMessage.put("timestamp", System.currentTimeMillis());
             
             serverConnection.sendWebSocketMessage(wsMessage);
+            logger.debug("Sent player movement WebSocket message: ({}, {}) for game {}", x, y, currentGameId);
         } catch (Exception e) {
             logger.error("Error sending movement WebSocket message", e);
         }

@@ -171,7 +171,7 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
     }
-    
+
     // Real-time map update handler
     public void handleGameStateUpdate(String updateType, Map<String, Object> data) {
         try {
@@ -205,38 +205,48 @@ public class GameMenu extends InputAdapter implements Screen {
             logger.error("Error handling game state update: {}", updateType, e);
         }
     }
-    
+
     private void handlePlayerPositionUpdate(Map<String, Object> data) {
         String playerId = (String) data.get("playerId");
         Integer x = (Integer) data.get("x");
         Integer y = (Integer) data.get("y");
-        
+
+        logger.debug("Handling player position update: playerId={}, x={}, y={}", playerId, x, y);
+
         if (playerId != null && x != null && y != null) {
             // Find the player and update their position
+            boolean playerFound = false;
             for (Player player : App.getCurrentGame().getPlayers()) {
                 if (player.getUser().getUserName().equals(playerId)) {
                     Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
                     player.setUserLocation(newLocation);
                     logger.debug("Updated player {} position to ({}, {})", playerId, x, y);
+                    playerFound = true;
                     break;
                 }
             }
+
+            if (!playerFound) {
+                logger.warn("Player {} not found in current game", playerId);
+            }
+        } else {
+            logger.warn("Invalid player position data: playerId={}, x={}, y={}", playerId, x, y);
         }
     }
-    
+
     private void handleNPCUpdate(Map<String, Object> data) {
         String npcId = (String) data.get("npcId");
         Integer x = (Integer) data.get("x");
         Integer y = (Integer) data.get("y");
         String state = (String) data.get("state");
-        
+
         if (npcId != null && x != null && y != null) {
             // Update NPC position and state
             // This would need to be implemented based on your NPC system
             logger.debug("NPC {} moved to ({}, {}) with state: {}", npcId, x, y, state);
         }
     }
-    
+
     private void handleWeatherChange(Map<String, Object> data) {
         String weather = (String) data.get("weather");
         if (weather != null) {
@@ -245,12 +255,12 @@ public class GameMenu extends InputAdapter implements Screen {
             logger.debug("Weather changed to: {}", weather);
         }
     }
-    
+
     private void handleTimeChange(Map<String, Object> data) {
         Integer hour = (Integer) data.get("hour");
         Integer day = (Integer) data.get("day");
         String season = (String) data.get("season");
-        
+
         if (hour != null && day != null && season != null) {
             // Update time and date
             App.getCurrentGame().getDate().setHour(hour);
@@ -259,34 +269,34 @@ public class GameMenu extends InputAdapter implements Screen {
             logger.debug("Time changed to: Day {} Hour {} Season {}", day, hour, season);
         }
     }
-    
+
     private void handleMissionUpdate(Map<String, Object> data) {
         String missionId = (String) data.get("missionId");
         String status = (String) data.get("status");
         String description = (String) data.get("description");
-        
+
         if (missionId != null && status != null) {
             // Update mission state
             logger.debug("Mission {} updated: {} - {}", missionId, status, description);
         }
     }
-    
+
     private void handleBuildingStateChange(Map<String, Object> data) {
         String buildingId = (String) data.get("buildingId");
         String state = (String) data.get("state");
         Map<String, Object> properties = (Map<String, Object>) data.get("properties");
-        
+
         if (buildingId != null && state != null) {
             // Update building state
             logger.debug("Building {} state changed to: {} with properties: {}", buildingId, state, properties);
         }
     }
-    
+
     private void handleObjectInteraction(Map<String, Object> data) {
         String objectId = (String) data.get("objectId");
         String interactionType = (String) data.get("interactionType");
         String playerId = (String) data.get("playerId");
-        
+
         if (objectId != null && interactionType != null) {
             // Handle object interaction
             logger.debug("Object {} interacted with by {}: {}", objectId, playerId, interactionType);
@@ -365,7 +375,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
         initializeLighting();
         initializeWeatherSystem();
-        
+
         // Initialize WebSocket client for real-time updates
         initializeWebSocketClient();
 
@@ -448,7 +458,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
             Label nameLabel = new Label(p.getUser().getUserName(), skin);
             nameLabel.setFontScale(1.5f);
-            
+
             // Add turn indicator for multiplayer
             String turnIndicator = "";
             if (App.getCurrentGame().isMultiplayer() && App.getCurrentGame().getCurrentPlayer() != null) {
@@ -511,17 +521,17 @@ public class GameMenu extends InputAdapter implements Screen {
         }
 
         Player player = getCurrentPlayerCharacter();
-        
+
         // Safety check: if no current player found, use the default current player
         if (player == null) {
             player = App.getCurrentPlayerLazy();
         }
-        
+
         // Additional safety check: if still no player, skip rendering
         if (player == null) {
             return;
         }
-        
+
         playerController = player.getPlayerController();
         TextureRegion frame = playerController.getCurrentFrame();
         playerController.update(delta);
@@ -541,7 +551,7 @@ public class GameMenu extends InputAdapter implements Screen {
         camera.update();
 
         batch.setProjectionMatrix(camera.combined);
-        
+
         // Safety check: ensure batch is not already begun
         if (!batch.isDrawing()) {
             batch.begin();
@@ -747,7 +757,7 @@ public class GameMenu extends InputAdapter implements Screen {
             checkForMarriageProposals();
             giftCheckTimer = 0f;
         }
-        
+
         // End the batch at the very end of rendering
         if (batch.isDrawing()) {
             batch.end();
@@ -844,17 +854,17 @@ public class GameMenu extends InputAdapter implements Screen {
         stage.dispose();
         pixelMapRenderer.dispose();
         font.dispose();
-        
+
         // Clean up WebSocket client
         if (webSocketClient != null) {
             webSocketClient.disconnect();
         }
-        
+
         // Disconnect player from lobby if they're in multiplayer mode
         if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer() && App.getLoggedInUser() != null) {
             String username = App.getLoggedInUser().getUserName();
             System.out.println("Disconnecting player " + username + " from lobby due to game exit...");
-            
+
             try {
                 // TODO: Fix ServerConnection import
                 // ServerConnection connection = Main.getMain().getServerConnection();
@@ -1046,17 +1056,17 @@ public class GameMenu extends InputAdapter implements Screen {
     private void updateCameraToPlayer() {
         // In multiplayer mode, each player's camera should follow their own character
         Player currentPlayer = getCurrentPlayerCharacter();
-        
+
         // Safety check: if no current player found, use the default current player
         if (currentPlayer == null) {
             currentPlayer = App.getCurrentPlayerLazy();
         }
-        
+
         // Additional safety check: if still no player, don't update camera
         if (currentPlayer == null) {
             return;
         }
-        
+
         homeX = currentPlayer.getUserLocation().getxAxis() * 100 + currentPlayer.getPlayerSprite().getWidth() / 2f;
         homeY = currentPlayer.getUserLocation().getyAxis() * 100 + currentPlayer.getPlayerSprite().getHeight() / 2f;
 
@@ -1075,22 +1085,22 @@ public class GameMenu extends InputAdapter implements Screen {
         if (App.getCurrentGame() == null) {
             return null;
         }
-        
+
         // Safety check: if there's no logged-in user, fall back to current player
         if (App.getLoggedInUser() == null) {
             return App.getCurrentPlayerLazy();
         }
-        
+
         if (App.getCurrentGame().isMultiplayer()) {
             // Safety check: if there are no players, fall back to current player
             if (App.getCurrentGame().getPlayers() == null || App.getCurrentGame().getPlayers().isEmpty()) {
                 return App.getCurrentPlayerLazy();
             }
-            
+
             // Find the player that corresponds to the logged-in user
             String currentUsername = App.getLoggedInUser().getUserName();
             for (Player player : App.getCurrentGame().getPlayers()) {
-                if (player != null && player.getUser() != null && 
+                if (player != null && player.getUser() != null &&
                     player.getUser().getUserName().equals(currentUsername)) {
                     return player;
                 }
@@ -1348,7 +1358,6 @@ public class GameMenu extends InputAdapter implements Screen {
         exitGameButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                //TODO:does it mean this?
                 System.exit(0);
             }
         });
@@ -2139,7 +2148,7 @@ public class GameMenu extends InputAdapter implements Screen {
             System.err.println("Could not load weather textures: " + e.getMessage());
         }
     }
-    
+
     private void initializeWebSocketClient() {
         try {
             if (App.getLoggedInUser() != null && App.getCurrentGame() != null) {
@@ -2147,7 +2156,7 @@ public class GameMenu extends InputAdapter implements Screen {
                 // For now, use a simple game ID - you may need to implement getGameId() in Game class
                 String gameId = "game_" + System.currentTimeMillis(); // Placeholder
                 String serverUrl = "http://localhost:8080"; // Configure based on your server
-                
+
                 webSocketClient = new GameWebSocketClient(serverUrl, userId, gameId, this);
                 webSocketClient.connect().thenAccept(success -> {
                     if (success) {

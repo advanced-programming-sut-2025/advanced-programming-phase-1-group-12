@@ -244,7 +244,7 @@ public class GameWebSocketHandler {
             PlayerMovedEvent moveEvent = new PlayerMovedEvent(gameId, userId, userId, x, y, direction);
             broadcastToGame(gameId, moveEvent);
             
-            logger.debug("Player movement from {} in game {}: ({}, {})", userId, gameId, x, y);
+            logger.debug("Player movement from {} in game {}: ({}, {}) - broadcasted to all players", userId, gameId, x, y);
             
         } catch (Exception e) {
             logger.error("Error handling player movement", e);
