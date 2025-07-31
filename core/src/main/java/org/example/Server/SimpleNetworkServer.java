@@ -7,6 +7,8 @@ import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.*;
 import org.example.Common.network.responses.*;
 import org.example.Server.LobbyManager;
+import org.example.Server.network.GameStartManager;
+import org.example.Server.network.GameSessionManager;
 import org.example.Common.models.Lobby;
 import org.example.Common.models.LobbyInfo;
 import org.slf4j.Logger;
@@ -26,6 +28,8 @@ public class SimpleNetworkServer {
     private final Map<String, String> users = new ConcurrentHashMap<>();
     private final PlayerManager playerManager;
     private final LobbyManager lobbyManager;
+    private final GameSessionManager gameSessionManager;
+    private final GameStartManager gameStartManager;
     private boolean isRunning;
     
     public SimpleNetworkServer() {
@@ -36,6 +40,8 @@ public class SimpleNetworkServer {
         this.port = port;
         this.playerManager = PlayerManager.getInstance();
         this.lobbyManager = LobbyManager.getInstance();
+        this.gameSessionManager = new GameSessionManager();
+        this.gameStartManager = new GameStartManager(gameSessionManager);
         // No hardcoded users - users will register themselves
     }
     
@@ -89,6 +95,11 @@ public class SimpleNetworkServer {
         app.get("/lobby/list", this::handleGetLobbyList);
         app.get("/lobby/{lobbyId}/info", this::handleGetLobbyInfo);
         app.post("/lobby/start", this::handleStartGame);
+        
+        // Farm selection routes
+        app.post("/lobby/select-farm", this::handleSelectFarm);
+        app.get("/lobby/farm-selection-status", this::handleGetFarmSelectionStatus);
+        app.post("/lobby/start-game-session", this::handleStartGameSession);
         
         // Test routes
         app.get("/api/test", this::handleTest);
@@ -462,7 +473,21 @@ public class SimpleNetworkServer {
             boolean started = lobbyManager.startGame(request.getLobbyId(), username);
             
             if (started) {
-                ctx.json(NetworkResult.success("Game started successfully"));
+                // Get lobby info to create farm selection session
+                Lobby lobby = lobbyManager.getLobby(request.getLobbyId());
+                if (lobby != null) {
+                    List<String> playerNames = new ArrayList<>(lobby.getPlayers());
+                    NetworkResult<String> sessionResult = gameStartManager.createFarmSelectionSession(
+                        request.getLobbyId(), playerNames);
+                    
+                    if (sessionResult.isSuccess()) {
+                        ctx.json(NetworkResult.success("Game started successfully - proceed to farm selection"));
+                    } else {
+                        ctx.json(NetworkResult.error("Failed to create farm selection session: " + sessionResult.getMessage()));
+                    }
+                } else {
+                    ctx.json(NetworkResult.error("Lobby not found"));
+                }
             } else {
                 ctx.status(400).json(NetworkResult.error("Failed to start game"));
             }
@@ -479,6 +504,83 @@ public class SimpleNetworkServer {
     
     public int getPort() { 
         return port; 
+    }
+    
+    private void handleSelectFarm(Context ctx) {
+        try {
+            SelectFarmRequest request = ctx.bodyAsClass(SelectFarmRequest.class);
+            
+            // Validate request
+            if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+                ctx.status(400).json(NetworkResult.error("Username is required"));
+                return;
+            }
+            
+            if (request.getLobbyId() == null || request.getLobbyId().trim().isEmpty()) {
+                ctx.status(400).json(NetworkResult.error("Lobby ID is required"));
+                return;
+            }
+            
+            NetworkResult<String> result = gameStartManager.selectFarm(request);
+            
+            if (result.isSuccess()) {
+                ctx.json(result);
+            } else {
+                ctx.status(400).json(result);
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error selecting farm", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
+        }
+    }
+    
+    private void handleGetFarmSelectionStatus(Context ctx) {
+        try {
+            String lobbyId = ctx.queryParam("lobbyId");
+            
+            if (lobbyId == null || lobbyId.trim().isEmpty()) {
+                ctx.status(400).json(NetworkResult.error("Lobby ID is required"));
+                return;
+            }
+            
+            NetworkResult<FarmSelectionStatusResponse> result = gameStartManager.getFarmSelectionStatus(lobbyId);
+            
+            if (result.isSuccess()) {
+                ctx.json(result);
+            } else {
+                ctx.status(400).json(result);
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error getting farm selection status", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
+        }
+    }
+    
+    private void handleStartGameSession(Context ctx) {
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, String> request = ctx.bodyAsClass(Map.class);
+            String lobbyId = request.get("lobbyId");
+            
+            if (lobbyId == null || lobbyId.trim().isEmpty()) {
+                ctx.status(400).json(NetworkResult.error("Lobby ID is required"));
+                return;
+            }
+            
+            NetworkResult<String> result = gameStartManager.startGameFromSession(lobbyId);
+            
+            if (result.isSuccess()) {
+                ctx.json(result);
+            } else {
+                ctx.status(400).json(result);
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error starting game session", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
+        }
     }
     
     public static void main(String[] args) {

@@ -46,8 +46,11 @@ import org.example.Common.models.enums.Types.CraftingRecipe;
 import org.example.Common.models.enums.Weather;
 import org.example.Common.models.RelationShips.RelationShip;
 import org.example.Common.models.RelationShips.Gift;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GameMenu extends InputAdapter implements Screen {
+    private static final Logger logger = LoggerFactory.getLogger(GameMenu.class);
     private final GameMenuController controller = new GameMenuController();
     private final FarmingController farmingController = new FarmingController();
     private final ToolsController toolsController = new ToolsController();
@@ -130,7 +133,40 @@ public class GameMenu extends InputAdapter implements Screen {
 
     public GameMenu(List<String> players) {
         this.players = players;
+        
+        // Set current player to the logged-in user for individual farm view
+        setCurrentPlayerToLoggedInUser();
         errorLabel = new Label("", skin);
+    }
+    
+    /**
+     * Sets the current player to the logged-in user for individual farm views
+     */
+    private void setCurrentPlayerToLoggedInUser() {
+        if (App.getLoggedInUser() != null) {
+            String loggedInUsername = App.getLoggedInUser().getUserName();
+            
+            // Find the player object for the logged-in user
+            for (Player player : App.getCurrentGame().getPlayers()) {
+                if (player.getUser().getUserName().equals(loggedInUsername)) {
+                    App.getCurrentGame().setCurrentPlayer(player);
+                    logger.debug("Set current player to logged-in user: {}", loggedInUsername);
+                    return;
+                }
+            }
+            
+            // If logged-in user not found, fall back to first player
+            if (!App.getCurrentGame().getPlayers().isEmpty()) {
+                App.getCurrentGame().setCurrentPlayer(App.getCurrentGame().getPlayers().get(0));
+                logger.warn("Logged-in user {} not found in game, using first player", loggedInUsername);
+            }
+        } else {
+            // No logged-in user, use first player
+            if (!App.getCurrentGame().getPlayers().isEmpty()) {
+                App.getCurrentGame().setCurrentPlayer(App.getCurrentGame().getPlayers().get(0));
+                logger.debug("No logged-in user, using first player");
+            }
+        }
     }
 
     public static class RainDrop {

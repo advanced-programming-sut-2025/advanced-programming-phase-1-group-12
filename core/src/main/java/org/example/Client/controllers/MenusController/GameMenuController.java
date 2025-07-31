@@ -9,6 +9,7 @@ import org.example.Client.controllers.NPCcontroller;
 import org.example.Client.controllers.StoreController;
 import org.example.Client.controllers.TradeController;
 import org.example.Client.controllers.movingPlayer.PlayerController;
+import org.example.Client.controllers.movingPlayer.ClientPlayerController;
 import org.example.Client.views.GameMenu;
 import org.example.Common.models.Animal.Fish;
 import org.example.Common.models.Assets.GameAssetManager;
@@ -321,6 +322,11 @@ public class GameMenuController {
     public void Play(List<String> usernames, Map<String, Integer> farmSelections) {
         Game newGame = App.getCurrentGame();
         App.setCurrentGame(newGame);
+        
+        // Initialize singleton date manager for multiplayer synchronization
+        DateManager.getInstance().reset(); // Reset any previous date
+        DateManager.getInstance().initializeGameDate();
+        
         MapSetUp.initializeFarms();
         MapSetUp.storesSetUp();
         MapSetUp.NPCsetUp();
@@ -385,9 +391,12 @@ public class GameMenuController {
                 newPlayer.getOwnedFarm().getShack().getLocation().getTopLeftCorner().getyAxis() + 4)));
             Location loc = farm.getLocation().getTopLeftCorner();
             newPlayer.setUserLocation(App.getCurrentGame().getMainMap().findLocation(loc.getxAxis(), loc.getyAxis()));
-            // TODO: Fix PlayerController type mismatch - need to create a common interface
-            // PlayerController playerController = new PlayerController(newPlayer, this, usernames);
-            // newPlayer.setPlayerController(playerController);
+            
+            // Create a simple client-side player controller that provides getCurrentFrame()
+            // This avoids the server-side PlayerController which tries to render on server
+            ClientPlayerController clientPlayerController = new ClientPlayerController(newPlayer, usernames);
+            newPlayer.setPlayerController(clientPlayerController);
+            
             farms.add(farm);
         }
 

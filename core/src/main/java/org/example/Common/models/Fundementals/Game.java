@@ -1,6 +1,7 @@
 package org.example.Common.models.Fundementals;
 
 import org.example.Common.models.Date;
+import org.example.Common.models.DateManager;
 import org.example.Common.models.NPC.NPCvillage;
 import org.example.Common.models.Place.Farm;
 import org.example.Common.models.RelatedToUser.User;
@@ -12,7 +13,6 @@ import java.util.Map;
 
 public class Game {
     private Player currentPlayer = null;
-    private Date date = new Date();
     private Map<User, Integer> score = new HashMap<>();
     private int gameId;
     private map mainMap = new map();
@@ -52,11 +52,12 @@ public class Game {
     public Location[] getTilesOfMap() {return null;}
 
     public Date getDate(){
-        return this.date;
+        return DateManager.getInstance().getGameDate();
     }
 
     public void setDate(Date date) {
-        this.date = date;
+        // Date is now managed by singleton - this method is deprecated
+        // Use DateManager.getInstance().initializeGameDate() instead
     }
 
     public Map<User, Integer> getScore() {

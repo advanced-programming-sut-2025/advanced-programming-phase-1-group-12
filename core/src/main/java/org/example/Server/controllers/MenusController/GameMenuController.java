@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.Common.models.*;
+import org.example.Common.models.DateManager;
 import org.example.Common.models.Fundementals.*;
 import org.example.Common.models.enums.Animal;
 import org.example.Common.models.enums.Season;
@@ -321,6 +322,11 @@ public class GameMenuController {
     public void Play(List<String> usernames, Map<String, Integer> farmSelections) {
         Game newGame = App.getCurrentGame();
         App.setCurrentGame(newGame);
+        
+        // Initialize singleton date manager for multiplayer synchronization
+        DateManager.getInstance().reset(); // Reset any previous date
+        DateManager.getInstance().initializeGameDate();
+        
         MapSetUp.initializeFarms();
         MapSetUp.storesSetUp();
         MapSetUp.NPCsetUp();

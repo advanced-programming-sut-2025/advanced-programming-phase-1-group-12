@@ -26,8 +26,12 @@ import org.example.Common.network.responses.LobbyResponse;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import org.example.Client.views.MultiplayerFarmSelectionMenu;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LobbyMenu implements Screen {
+    private static final Logger logger = LoggerFactory.getLogger(LobbyMenu.class);
     private Skin skin = GameAssetManager.getSkin();
     private Image backgroundImage;
     private Stage stage;
@@ -453,9 +457,9 @@ public class LobbyMenu implements Screen {
         }).thenAccept(result -> {
             Gdx.app.postRunnable(() -> {
                 if (result.isSuccess()) {
-                    updateStatus("Game started! Redirecting to game...", true);
-                    // TODO: Navigate to game screen
-                    // Main.getMain().setScreen(new GameScreen());
+                    updateStatus("Game started! Redirecting to farm selection...", true);
+                    // Navigate to multiplayer farm selection screen
+                    Main.getMain().setScreen(new MultiplayerFarmSelectionMenu(currentLobby.getId()));
                 } else {
                     updateStatus("Failed to start game: " + result.getMessage(), false);
                 }
@@ -484,6 +488,60 @@ public class LobbyMenu implements Screen {
                     updateStatus("Lobby list refreshed", true);
                 } else {
                     updateStatus("Failed to refresh lobby list: " + result.getMessage(), false);
+                }
+            });
+        });
+    }
+    
+    private void refreshCurrentLobby() {
+        if (currentLobby == null) return;
+        
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                ServerConnection connection = Main.getMain().getServerConnection();
+                NetworkResult<LobbyInfo> result = connection.sendGetRequest(
+                    "/lobby/" + currentLobby.getId() + "/info", LobbyInfo.class
+                );
+                return result;
+            } catch (Exception e) {
+                return NetworkResult.error("Failed to refresh current lobby: " + e.getMessage());
+            }
+        }).thenAccept(result -> {
+            Gdx.app.postRunnable(() -> {
+                if (result.isSuccess()) {
+                    @SuppressWarnings("unchecked")
+                    LobbyInfo updatedLobbyInfo = (LobbyInfo) result.getData();
+                    
+                    // Update current lobby with fresh information
+                    currentLobby = updatedLobbyInfo;
+                    
+                    // Check if we're still in the lobby (in case we were removed)
+                    String currentUsername = App.getLoggedInUser() != null ? 
+                        App.getLoggedInUser().getUserName() : "anonymous";
+                    
+                    if (!currentLobby.getPlayers().contains(currentUsername)) {
+                        // We've been removed from the lobby
+                        isInLobby = false;
+                        isAdmin = false;
+                        currentLobby = null;
+                        updateStatus("You have been removed from the lobby", false);
+                    } else {
+                        // Update admin status
+                        isAdmin = currentLobby.getAdminUsername().equals(currentUsername);
+                    }
+                    
+                    // Check if game has started and navigate to farm selection if needed
+                    if (currentLobby.isGameStarted()) {
+                        updateStatus("Game started! Redirecting to farm selection...", true);
+                        Main.getMain().setScreen(new MultiplayerFarmSelectionMenu(currentLobby.getId()));
+                        return; // Exit early since we're navigating away
+                    }
+                    
+                    // Update the display
+                    updateCurrentLobbyDisplay();
+                } else {
+                    // If we can't get lobby info, the lobby might have been deleted
+                    logger.warn("Failed to refresh current lobby: {}", result.getMessage());
                 }
             });
         });
@@ -572,12 +630,12 @@ public class LobbyMenu implements Screen {
             @Override
             public void run() {
                 refreshLobbyList();
-                if (isInLobby) {
-                    updateCurrentLobbyDisplay();
+                if (isInLobby && currentLobby != null) {
+                    refreshCurrentLobby();
                 }
             }
         };
-        Timer.schedule(refreshTask, 5, 5); // Refresh every 5 seconds
+        Timer.schedule(refreshTask, 2, 2); // Refresh every 2 seconds for better responsiveness
     }
     
     @Override

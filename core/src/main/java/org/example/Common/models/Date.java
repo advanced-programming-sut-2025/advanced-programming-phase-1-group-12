@@ -439,6 +439,10 @@ public class Date implements Runnable {
         this.tommorowWeather = weather;
     }
 
+    public Weather getTommorowWeather() {
+        return tommorowWeather;
+    }
+
     public void setDayOfMonth(int dayOfMonth) {
         this.dayOfMonth = dayOfMonth;
     }

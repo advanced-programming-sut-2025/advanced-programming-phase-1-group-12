@@ -53,50 +53,43 @@ public class GameSessionManager {
                     GameProtocol.MIN_PLAYERS_PER_GAME + " and " + GameProtocol.MAX_PLAYERS_PER_GAME);
             }
             
-            // Check if creator is already in another game
-            if (playerToGameMapping.containsKey(creatorId)) {
-                return NetworkResult.error("You are already in a game");
+            // Check if any players are already in a game
+            for (String username : request.getUsernames()) {
+                if (playerToGameMapping.containsKey(username)) {
+                    return NetworkResult.error("Player " + username + " is already in a game");
+                }
             }
             
             // Generate unique game ID
             String gameId = UUID.randomUUID().toString();
             
-            // Create game instance using existing controller logic
-            GameMenuController gameController = new GameMenuController();
-            
             // Use synchronized block to ensure thread-safe game creation
             synchronized (this) {
-                // Create the game using existing logic
-                gameController.Play(request.getUsernames(), request.getFarmSelections());
-                Game newGame = App.getCurrentGame();
+                // Create a basic game instance without graphics initialization
+                // The actual game initialization will happen on the client side
+                Game newGame = new Game();
+                App.setCurrentGame(newGame);
                 
                 // Create game instance wrapper
-                GameInstance gameInstance = new GameInstance(gameId, newGame, gameController);
+                GameInstance gameInstance = new GameInstance(gameId, newGame, null);
                 
-                // Add all players to the game instance
-                for (String username : request.getUsernames()) {
-                    Player player = newGame.getPlayerByName(username);
-                    if (player != null) {
-                        String playerId = player.getUser().getUserName(); // Using username as player ID
-                        gameInstance.addPlayer(playerId, player);
-                        playerToGameMapping.put(playerId, gameId);
-                    }
-                }
-                
+                // Add game to active games first
                 activeGames.put(gameId, gameInstance);
+                
+                // Then add players to mapping
+                for (String username : request.getUsernames()) {
+                    playerToGameMapping.put(username, gameId);
+                }
                 
                 logger.info("Game created with ID: {} for {} players", gameId, request.getUsernames().size());
             }
             
-            // Return game state
-            GameInstance instance = activeGames.get(gameId);
-            List<String> connectedPlayers = instance.getConnectedPlayers();
-            Player currentPlayer = instance.getGame().getCurrentPlayer();
+            // Return basic game session info
+            // The actual game state will be created on the client side
+            GameStateResponse response = new GameStateResponse(gameId, null, 
+                request.getUsernames(), null);
             
-            GameStateResponse response = new GameStateResponse(gameId, instance.getGame(), 
-                connectedPlayers, currentPlayer);
-            
-            return NetworkResult.success("Game created successfully", response);
+            return NetworkResult.success("Game session created successfully", response);
             
         } catch (Exception e) {
             logger.error("Error creating game", e);
@@ -246,6 +239,16 @@ public class GameSessionManager {
     
     public List<String> getActiveGameIds() {
         return activeGames.keySet().stream().collect(Collectors.toList());
+    }
+    
+    /**
+     * Clears player mappings for specific players
+     */
+    public void clearPlayerMappings(List<String> playerNames) {
+        for (String playerName : playerNames) {
+            playerToGameMapping.remove(playerName);
+        }
+        logger.info("Cleared player mappings for {} players", playerNames.size());
     }
     
     private void cleanupInactiveGames() {
