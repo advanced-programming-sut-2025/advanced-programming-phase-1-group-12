@@ -95,8 +95,7 @@ public class PixelMapRenderer {
     }
 
     public void render(SpriteBatch batch, int offsetX, int offsetY) {
-        batch.end();
-        batch.begin();
+        // Don't manage batch lifecycle here - let the caller handle it
 
         List<Location> greenhouseAnchors = new ArrayList<>();
         List<Location> houseAnchors = new ArrayList<>();

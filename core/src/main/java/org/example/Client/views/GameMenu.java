@@ -510,7 +510,18 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
 
-        Player player = App.getCurrentPlayerLazy();
+        Player player = getCurrentPlayerCharacter();
+        
+        // Safety check: if no current player found, use the default current player
+        if (player == null) {
+            player = App.getCurrentPlayerLazy();
+        }
+        
+        // Additional safety check: if still no player, skip rendering
+        if (player == null) {
+            return;
+        }
+        
         playerController = player.getPlayerController();
         TextureRegion frame = playerController.getCurrentFrame();
         playerController.update(delta);
@@ -521,12 +532,20 @@ public class GameMenu extends InputAdapter implements Screen {
         float scaledX = px * 100;
         float scaledY = py * 100;
 
-        if (!showingAllMap) camera.position.set(scaledX, scaledY, 0);
+        if (!showingAllMap) {
+            // Update camera to follow the current player's character
+            updateCameraToPlayer();
+        }
 
         clampCameraToMap();
         camera.update();
 
         batch.setProjectionMatrix(camera.combined);
+        
+        // Safety check: ensure batch is not already begun
+        if (!batch.isDrawing()) {
+            batch.begin();
+        }
 
         pixelMapRenderer.render(batch, 0, 0);
         updateCraftBars();
@@ -559,9 +578,13 @@ public class GameMenu extends InputAdapter implements Screen {
                     }
                 }
 
-                if (p.getEnergy() <= 0 && App.getCurrentPlayerLazy().equals(p)) {
-                    controller.nextTurn();
-                    break;
+                if (p.getEnergy() <= 0) {
+                    // In multiplayer, any player with 0 energy should trigger turn change
+                    // Check if this is the current player's turn
+                    if (App.getCurrentGame().getCurrentPlayer() != null && App.getCurrentGame().getCurrentPlayer().equals(p)) {
+                        controller.nextTurn();
+                        break;
+                    }
                 }
             }
 
@@ -585,7 +608,7 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
 
-        Tools equipped = App.getCurrentPlayerLazy().getCurrentTool();
+        Tools equipped = getCurrentPlayerCharacter() != null ? getCurrentPlayerCharacter().getCurrentTool() : null;
         if (equipped != null)
             equipped.setToolsController(toolsController);
 
@@ -638,7 +661,7 @@ public class GameMenu extends InputAdapter implements Screen {
         }
 
         for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
-            if (App.getCurrentPlayerLazy() == otherPlayer) {
+            if (getCurrentPlayerCharacter() != null && getCurrentPlayerCharacter() == otherPlayer) {
                 continue;
             }
             Location farmLocation = otherPlayer.getUserLocation();
@@ -706,7 +729,6 @@ public class GameMenu extends InputAdapter implements Screen {
         renderWeather(batch);
 
         renderLightingOverlay();
-        batch.end();
 
 
         stage.act(delta);
@@ -724,6 +746,11 @@ public class GameMenu extends InputAdapter implements Screen {
             checkForNewGifts();
             checkForMarriageProposals();
             giftCheckTimer = 0f;
+        }
+        
+        // End the batch at the very end of rendering
+        if (batch.isDrawing()) {
+            batch.end();
         }
     }
 
@@ -821,6 +848,25 @@ public class GameMenu extends InputAdapter implements Screen {
         // Clean up WebSocket client
         if (webSocketClient != null) {
             webSocketClient.disconnect();
+        }
+        
+        // Disconnect player from lobby if they're in multiplayer mode
+        if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer() && App.getLoggedInUser() != null) {
+            String username = App.getLoggedInUser().getUserName();
+            System.out.println("Disconnecting player " + username + " from lobby due to game exit...");
+            
+            try {
+                // TODO: Fix ServerConnection import
+                // ServerConnection connection = Main.getMain().getServerConnection();
+                // if (connection != null) {
+                //     // Send disconnect request to server
+                //     Map<String, String> disconnectRequest = new HashMap<>();
+                //     disconnectRequest.put("username", username);
+                //     connection.sendPostRequest("/api/players/disconnect", disconnectRequest, String.class);
+                // }
+            } catch (Exception e) {
+                System.out.println("Error disconnecting player from lobby: " + e.getMessage());
+            }
         }
     }
 
@@ -998,10 +1044,21 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void updateCameraToPlayer() {
-        Player p = App.getCurrentPlayerLazy();
-
-        homeX = p.getUserLocation().getxAxis() * 100 + p.getPlayerSprite().getWidth() / 2f;
-        homeY = p.getUserLocation().getyAxis() * 100 + p.getPlayerSprite().getHeight() / 2f;
+        // In multiplayer mode, each player's camera should follow their own character
+        Player currentPlayer = getCurrentPlayerCharacter();
+        
+        // Safety check: if no current player found, use the default current player
+        if (currentPlayer == null) {
+            currentPlayer = App.getCurrentPlayerLazy();
+        }
+        
+        // Additional safety check: if still no player, don't update camera
+        if (currentPlayer == null) {
+            return;
+        }
+        
+        homeX = currentPlayer.getUserLocation().getxAxis() * 100 + currentPlayer.getPlayerSprite().getWidth() / 2f;
+        homeY = currentPlayer.getUserLocation().getyAxis() * 100 + currentPlayer.getPlayerSprite().getHeight() / 2f;
 
         camera.position.set(homeX, homeY, 0);
         camera.zoom = homeZoom;
@@ -1009,6 +1066,39 @@ public class GameMenu extends InputAdapter implements Screen {
         camera.update();
     }
 
+    /**
+     * Get the current player's character in multiplayer mode
+     * This ensures each player's view follows their own character
+     */
+    private Player getCurrentPlayerCharacter() {
+        // Safety check: if there's no current game, return null
+        if (App.getCurrentGame() == null) {
+            return null;
+        }
+        
+        // Safety check: if there's no logged-in user, fall back to current player
+        if (App.getLoggedInUser() == null) {
+            return App.getCurrentPlayerLazy();
+        }
+        
+        if (App.getCurrentGame().isMultiplayer()) {
+            // Safety check: if there are no players, fall back to current player
+            if (App.getCurrentGame().getPlayers() == null || App.getCurrentGame().getPlayers().isEmpty()) {
+                return App.getCurrentPlayerLazy();
+            }
+            
+            // Find the player that corresponds to the logged-in user
+            String currentUsername = App.getLoggedInUser().getUserName();
+            for (Player player : App.getCurrentGame().getPlayers()) {
+                if (player != null && player.getUser() != null && 
+                    player.getUser().getUserName().equals(currentUsername)) {
+                    return player;
+                }
+            }
+        }
+        // Fallback to the current game player (for single player or if not found)
+        return App.getCurrentPlayerLazy();
+    }
 
     private void showAllMap() {
         if (!showingAllMap) {
@@ -2185,8 +2275,9 @@ public class GameMenu extends InputAdapter implements Screen {
         float clockCenterX = clockX + clockSize / 2f - 17f;
         float clockCenterY = clockY + clockSize / 2f + 18f;
 
-        batch.setProjectionMatrix(stage.getCamera().combined);
-        batch.begin();
+        // Don't manage batch lifecycle here - let the main render method handle it
+        // batch.setProjectionMatrix(stage.getCamera().combined);
+        // batch.begin();
 
         float handWidth = 10f;
         float handLength = clockSize * 0.35f;
@@ -2203,7 +2294,8 @@ public class GameMenu extends InputAdapter implements Screen {
             clockHandRotation                     // rotation angle
         );
 
-        batch.end();
+        // Don't end the batch here - let the main render method handle it
+        // batch.end();
     }
 
     public void shippingBinMenu(){

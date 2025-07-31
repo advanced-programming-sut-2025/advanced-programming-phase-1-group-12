@@ -1,6 +1,7 @@
 package org.example.Client;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -17,6 +18,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main extends Game {
     private static Main main;
@@ -55,6 +58,25 @@ public class Main extends Game {
         // Add shutdown hook to properly close server connection and stop server
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutting down game...");
+            
+            // Disconnect player from lobby if they're in one
+            if (App.getLoggedInUser() != null) {
+                String username = App.getLoggedInUser().getUserName();
+                System.out.println("Disconnecting player " + username + " from lobby...");
+                
+                            try {
+                if (serverConnection != null) {
+                    // Send disconnect request to server
+                    // TODO: Fix disconnect request
+                    // Map<String, String> disconnectRequest = new HashMap<>();
+                    // disconnectRequest.put("username", username);
+                    // serverConnection.sendPostRequest("/api/players/disconnect", disconnectRequest, String.class);
+                }
+            } catch (Exception e) {
+                System.out.println("Error disconnecting player from lobby: " + e.getMessage());
+            }
+            }
+            
             if (serverConnection != null) {
                 serverConnection.shutdown();
             }
@@ -89,6 +111,24 @@ public class Main extends Game {
 
     @Override
     public void dispose() {
+        // Disconnect player from lobby if they're in one
+        if (App.getLoggedInUser() != null) {
+            String username = App.getLoggedInUser().getUserName();
+            System.out.println("Disconnecting player " + username + " from lobby...");
+            
+            try {
+                if (serverConnection != null) {
+                    // Send disconnect request to server
+                    // TODO: Fix disconnect request
+                    // Map<String, String> disconnectRequest = new HashMap<>();
+                    // disconnectRequest.put("username", username);
+                    // serverConnection.sendPostRequest("/api/players/disconnect", disconnectRequest, String.class);
+                }
+            } catch (Exception e) {
+                System.out.println("Error disconnecting player from lobby: " + e.getMessage());
+            }
+        }
+        
         // Properly shutdown server connection and server before disposing
         if (serverConnection != null) {
             serverConnection.shutdown();

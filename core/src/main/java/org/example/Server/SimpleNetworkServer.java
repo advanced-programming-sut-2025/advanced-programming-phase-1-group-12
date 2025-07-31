@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import io.javalin.websocket.WsContext;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class SimpleNetworkServer {
     private static final Logger logger = LoggerFactory.getLogger(SimpleNetworkServer.class);
@@ -48,25 +50,51 @@ public class SimpleNetworkServer {
     }
     
     public void start() {
-        if (isRunning) {
-            logger.warn("Server is already running");
-            return;
+        try {
+            app = Javalin.create(config -> {
+                config.plugins.enableDevLogging();
+                // Configure Jackson to ignore unknown properties
+                config.jsonMapper(new io.javalin.json.JavalinJackson()
+                    .updateMapper(mapper -> {
+                        mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                    })
+                );
+            });
+            
+            setupRoutes();
+            
+            app.start(port);
+            isRunning = true;
+            logger.info("SimpleNetworkServer started on port " + port);
+            
+            // Start periodic cleanup task
+            startCleanupTask();
+            
+        } catch (Exception e) {
+            logger.error("Failed to start server", e);
+            throw new RuntimeException("Failed to start server", e);
         }
-        
-        app = Javalin.create(config -> {
-            config.showJavalinBanner = false;
-            // Configure Jackson to ignore unknown properties
-            config.jsonMapper(new io.javalin.json.JavalinJackson()
-                .updateMapper(mapper -> {
-                    mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                })
-            );
-        }).start(port);
-        
-        setupRoutes();
-        
-        isRunning = true;
-        logger.info("SimpleNetworkServer started on port " + port);
+    }
+    
+    private void startCleanupTask() {
+        // Run cleanup every 30 seconds
+        Timer cleanupTimer = new Timer();
+        cleanupTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    // Get connected players
+                    Set<String> connectedPlayers = playerManager.getOnlineUsernames();
+                    
+                    // Clean up disconnected players from lobbies
+                    lobbyManager.cleanupDisconnectedPlayers(connectedPlayers);
+                    
+                    logger.debug("Cleanup task completed - {} connected players", connectedPlayers.size());
+                } catch (Exception e) {
+                    logger.error("Error in cleanup task", e);
+                }
+            }
+        }, 30000, 30000); // Start after 30 seconds, repeat every 30 seconds
     }
     
     public void stop() {
@@ -106,6 +134,8 @@ public class SimpleNetworkServer {
         // Test routes
         app.get("/api/test", this::handleTest);
         app.post("/api/echo", this::handleEcho);
+        app.post("/api/debug/clear-lobbies", this::handleClearLobbies);
+        app.post("/api/debug/cleanup-lobbies", this::handleCleanupLobbies);
         
         // Setup WebSocket
         setupWebSocket();
@@ -157,7 +187,21 @@ public class SimpleNetworkServer {
     
     private void onWebSocketClose(WsContext ctx) throws Exception {
         String connectionId = ctx.getSessionId();
+        String userId = ctx.queryParam("userId");
+        
         logger.info("WebSocket connection closed: {}", connectionId);
+        
+        // Clean up lobby state if user was in a lobby
+        if (userId != null && !userId.trim().isEmpty()) {
+            // Remove player from lobby if they were in one
+            if (lobbyManager.isPlayerInLobby(userId)) {
+                logger.info("Removing player {} from lobby due to WebSocket disconnect", userId);
+                lobbyManager.removePlayerFromLobby(userId);
+            }
+            
+            // Also disconnect from player manager
+            playerManager.playerDisconnectedByUsername(userId);
+        }
     }
     
     private void onWebSocketError(WsContext ctx) throws Exception {
@@ -198,12 +242,31 @@ public class SimpleNetworkServer {
     private void handleEcho(Context ctx) {
         try {
             Map<String, Object> request = ctx.bodyAsClass(Map.class);
-            ctx.json(Map.of(
-                "echo", request,
-                "timestamp", System.currentTimeMillis()
-            ));
+            ctx.json(NetworkResult.success("Echo response", request));
         } catch (Exception e) {
-            ctx.status(400).json(Map.of("error", "Invalid JSON"));
+            logger.error("Echo error", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
+        }
+    }
+    
+    private void handleClearLobbies(Context ctx) {
+        try {
+            lobbyManager.clearAllLobbies();
+            ctx.json(NetworkResult.success("All lobbies cleared"));
+        } catch (Exception e) {
+            logger.error("Error clearing lobbies", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
+        }
+    }
+    
+    private void handleCleanupLobbies(Context ctx) {
+        try {
+            Set<String> connectedPlayers = playerManager.getOnlineUsernames();
+            lobbyManager.cleanupDisconnectedPlayers(connectedPlayers);
+            ctx.json(NetworkResult.success("Lobby cleanup completed"));
+        } catch (Exception e) {
+            logger.error("Error cleaning up lobbies", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
     }
     
@@ -369,17 +432,31 @@ public class SimpleNetworkServer {
         try {
             CreateLobbyRequest request = ctx.bodyAsClass(CreateLobbyRequest.class);
             
+            logger.info("Received lobby creation request: {}", request);
+            
             // Extract username from request
             String username = request.getUsername();
             if (username == null || username.trim().isEmpty()) {
+                logger.warn("Username is null or empty");
                 ctx.status(400).json(NetworkResult.error("Username is required"));
                 return;
             }
             
             if (request.getName() == null || request.getName().trim().isEmpty()) {
+                logger.warn("Lobby name is null or empty");
                 ctx.status(400).json(NetworkResult.error("Lobby name is required"));
                 return;
             }
+            
+            // Check if player is already in a lobby
+            if (lobbyManager.isPlayerInLobby(username)) {
+                logger.warn("Player {} is already in a lobby", username);
+                ctx.status(400).json(NetworkResult.error("Player is already in a lobby"));
+                return;
+            }
+            
+            logger.info("Creating lobby with name: {}, admin: {}, private: {}, visible: {}", 
+                request.getName().trim(), username, request.isPrivate(), request.isVisible());
             
             Lobby lobby = lobbyManager.createLobby(
                 request.getName().trim(),
@@ -396,8 +473,10 @@ public class SimpleNetworkServer {
                     true, // creator is admin
                     false // can't start game with only one player
                 );
+                logger.info("Successfully created lobby: {} (ID: {})", lobby.getName(), lobby.getId());
                 ctx.json(NetworkResult.success("Lobby created successfully", response));
             } else {
+                logger.error("Failed to create lobby for user: {}", username);
                 ctx.status(400).json(NetworkResult.error("Failed to create lobby"));
             }
         } catch (Exception e) {

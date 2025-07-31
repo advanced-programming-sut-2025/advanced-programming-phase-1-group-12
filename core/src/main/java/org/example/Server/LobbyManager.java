@@ -40,21 +40,30 @@ public class LobbyManager {
     }
     
     public Lobby createLobby(String name, String adminUsername, boolean isPrivate, String password, boolean isVisible) {
+        logger.info("Attempting to create lobby: name={}, admin={}, private={}, visible={}", 
+            name, adminUsername, isPrivate, isVisible);
+        
         // Check if player is already in a lobby
         if (playerLobbyMap.containsKey(adminUsername)) {
+            logger.warn("Player {} is already in a lobby", adminUsername);
             return null;
         }
         
         try {
             String lobbyId = generateLobbyId();
+            logger.info("Generated lobby ID: {}", lobbyId);
             
             Lobby lobby = new Lobby(lobbyId, name, adminUsername);
             lobby.setPrivate(isPrivate);
             lobby.setPassword(password);
             lobby.setVisible(isVisible);
             
-            // Add admin to lobby
-            lobby.addPlayer(adminUsername);
+            // Admin is already added in the Lobby constructor, so we don't need to add again
+            // Just verify the admin is in the lobby
+            if (!lobby.isPlayerInLobby(adminUsername)) {
+                logger.error("Admin {} not found in lobby after creation", adminUsername);
+                return null;
+            }
             
             // Store lobby
             lobbies.put(lobbyId, lobby);
@@ -191,6 +200,27 @@ public class LobbyManager {
     
     public boolean isPlayerInLobby(String username) {
         return playerLobbyMap.containsKey(username);
+    }
+    
+    public void cleanupDisconnectedPlayers(Set<String> connectedUsernames) {
+        logger.info("Cleaning up disconnected players from lobbies");
+        
+        // Get all players currently in lobbies
+        Set<String> playersInLobbies = new HashSet<>(playerLobbyMap.keySet());
+        
+        // Find players who are in lobbies but not connected
+        for (String username : playersInLobbies) {
+            if (!connectedUsernames.contains(username)) {
+                logger.info("Removing disconnected player {} from lobby", username);
+                removePlayerFromLobby(username);
+            }
+        }
+    }
+    
+    public void clearAllLobbies() {
+        logger.info("Clearing all lobbies and player mappings");
+        lobbies.clear();
+        playerLobbyMap.clear();
     }
     
     public void removePlayerFromLobby(String username) {

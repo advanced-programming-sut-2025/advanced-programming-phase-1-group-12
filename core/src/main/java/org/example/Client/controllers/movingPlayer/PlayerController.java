@@ -126,6 +126,15 @@ public class PlayerController {
     }
 
     private void handleInput(float delta) {
+        // In multiplayer mode, only allow the logged-in user to control their own character
+        if (App.getCurrentGame().isMultiplayer()) {
+            String currentUsername = App.getLoggedInUser().getUserName();
+            if (!player.getUser().getUserName().equals(currentUsername)) {
+                // This is not the current player's character, don't process input
+                return;
+            }
+        }
+
         int newX = App.getCurrentGame().getCurrentPlayer().getUserLocation().getxAxis();
         int newY = App.getCurrentGame().getCurrentPlayer().getUserLocation().getyAxis();
 
