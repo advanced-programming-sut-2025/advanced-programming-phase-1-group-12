@@ -118,7 +118,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
     private float foodEffect = 0f;
     public static boolean foodEaten = false;
-    
+
     private float giftCheckTimer = 0f;
     private final float GIFT_CHECK_INTERVAL = 10f; // Check every 10 seconds
 
@@ -133,19 +133,19 @@ public class GameMenu extends InputAdapter implements Screen {
 
     public GameMenu(List<String> players) {
         this.players = players;
-        
+
         // Set current player to the logged-in user for individual farm view
         setCurrentPlayerToLoggedInUser();
         errorLabel = new Label("", skin);
     }
-    
+
     /**
      * Sets the current player to the logged-in user for individual farm views
      */
     private void setCurrentPlayerToLoggedInUser() {
         if (App.getLoggedInUser() != null) {
             String loggedInUsername = App.getLoggedInUser().getUserName();
-            
+
             // Find the player object for the logged-in user
             for (Player player : App.getCurrentGame().getPlayers()) {
                 if (player.getUser().getUserName().equals(loggedInUsername)) {
@@ -154,7 +154,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     return;
                 }
             }
-            
+
             // If logged-in user not found, fall back to first player
             if (!App.getCurrentGame().getPlayers().isEmpty()) {
                 App.getCurrentGame().setCurrentPlayer(App.getCurrentGame().getPlayers().get(0));
@@ -547,10 +547,10 @@ public class GameMenu extends InputAdapter implements Screen {
         renderClockHand();
 
         checkForNewGifts();
-        
+
         // Render nearby player indicators
         renderNearbyPlayerIndicators();
-        
+
         // Periodic gift checking
         giftCheckTimer += delta;
         if (giftCheckTimer >= GIFT_CHECK_INTERVAL) {
@@ -821,10 +821,7 @@ public class GameMenu extends InputAdapter implements Screen {
             changeWeatherStatus();
             return true;
         }
-        if (keycode == Input.Keys.F) {
-            showFriendsWindow();
-            return true;
-        }
+
         return false;
     }
 
@@ -2329,7 +2326,7 @@ public class GameMenu extends InputAdapter implements Screen {
         // Friends list
         friendsTable = new Table();
         friendsTable.pad(5);
-        
+
         // Header
         friendsTable.add(new Label("Friend", skin)).width(150).pad(5);
         friendsTable.add(new Label("Level", skin)).width(80).pad(5);
@@ -2340,7 +2337,7 @@ public class GameMenu extends InputAdapter implements Screen {
         // Get current player's relationships
         Player currentPlayer = App.getCurrentPlayerLazy();
         GameMenuController controller = new GameMenuController();
-        
+
         boolean hasFriends = false;
         int friendCount = 0;
         for (RelationShip relationship : currentPlayer.getRelationShips()) {
@@ -2354,22 +2351,22 @@ public class GameMenu extends InputAdapter implements Screen {
             if (!otherPlayer.equals(currentPlayer)) {
                 hasFriends = true;
                 friendCount++;
-                
+
                 // Friend name
                 Label nameLabel = new Label(otherPlayer.getUser().getUserName(), skin);
                 friendsTable.add(nameLabel).width(150).pad(5);
-                
+
                 // Friendship level
                 Label levelLabel = new Label("Level " + relationship.getFriendshipLevel(), skin);
                 friendsTable.add(levelLabel).width(80).pad(5);
-                
+
                 // XP Progress
                 int currentXP = relationship.getXP();
                 int requiredXP = relationship.calculateLevelXP();
                 String xpText = currentXP + "/" + requiredXP + " XP";
                 Label xpLabel = new Label(xpText, skin);
                 friendsTable.add(xpLabel).width(120).pad(5);
-                
+
                 // Gift button
                 TextButton giftButton = new TextButton("Gift", skin);
                 giftButton.addListener(new ClickListener() {
@@ -2379,7 +2376,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     }
                 });
                 friendsTable.add(giftButton).width(100).pad(5);
-                
+
                 friendsTable.row();
             }
         }
@@ -2499,13 +2496,13 @@ public class GameMenu extends InputAdapter implements Screen {
         SelectBox<String> itemSelectBox = new SelectBox<>(skin);
         List<String> itemNames = new ArrayList<>();
         itemNames.add("Select an item...");
-        
+
         for (Map.Entry<Item, Integer> entry : inventory.entrySet()) {
             Item item = entry.getKey();
             Integer count = entry.getValue();
             itemNames.add(item.getName() + " (x" + count + ")");
         }
-        
+
         itemSelectBox.setItems(itemNames.toArray(new String[0]));
         content.add(itemSelectBox).width(300).pad(5).row();
 
@@ -2526,11 +2523,11 @@ public class GameMenu extends InputAdapter implements Screen {
                 if (selectedItem != null && !selectedItem.equals("Select an item...")) {
                     String itemName = selectedItem.split(" \\(x")[0];
                     int amount = Integer.parseInt(amountField.getText());
-                    
+
                     // Send the gift
                     GameMenuController controller = new GameMenuController();
                     Result result = controller.gift(friendUsername, itemName, String.valueOf(amount));
-                    
+
                     showNotification(result.getMessage(), result.isSuccessful());
                     sendGiftDialog.hide();
                 } else {
@@ -2568,14 +2565,14 @@ public class GameMenu extends InputAdapter implements Screen {
         Player currentPlayer = App.getCurrentPlayerLazy();
         GameMenuController controller = new GameMenuController();
         Result giftHistoryResult = controller.giftHistory(friendUsername);
-        
+
         if (!giftHistoryResult.isSuccessful()) {
             content.add(new Label("Error loading gift history: " + giftHistoryResult.getMessage(), skin)).pad(10);
         } else {
             // Parse the gift history from the result message
             String[] giftLines = giftHistoryResult.getMessage().split("\n");
             boolean hasGifts = false;
-            
+
             for (String line : giftLines) {
                 if (line.contains(" -> ")) {
                     hasGifts = true;
@@ -2588,7 +2585,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     }
                 }
             }
-            
+
             if (!hasGifts) {
                 content.add(new Label("No gift history with " + friendUsername, skin)).pad(10);
             }
@@ -2632,10 +2629,10 @@ public class GameMenu extends InputAdapter implements Screen {
                 for (String line : giftLines) {
                     if (line.matches("\\d+\\..*") && !line.contains("(Rated:")) {
                         Table giftRow = new Table();
-                        
+
                         Label giftLabel = new Label(line, skin);
                         giftRow.add(giftLabel).width(200).pad(5);
-                        
+
                         // Rating buttons
                         for (int i = 1; i <= 5; i++) {
                             final int rating = i;
@@ -2652,7 +2649,7 @@ public class GameMenu extends InputAdapter implements Screen {
                             });
                             giftRow.add(starButton).width(30).pad(2);
                         }
-                        
+
                         content.add(giftRow).row();
                     }
                 }
@@ -2703,18 +2700,18 @@ public class GameMenu extends InputAdapter implements Screen {
 
     private void checkForNewGifts() {
         giftCheckTimer += Gdx.graphics.getDeltaTime();
-        
+
         if (giftCheckTimer >= GIFT_CHECK_INTERVAL) {
             giftCheckTimer = 0f;
-            
+
             Player currentPlayer = App.getCurrentPlayerLazy();
             GameMenuController controller = new GameMenuController();
-            
+
             int unratedGifts = 0;
             for (RelationShip relationship : currentPlayer.getRelationShips()) {
-                Player otherPlayer = relationship.getPlayer1().equals(currentPlayer) ? 
+                Player otherPlayer = relationship.getPlayer1().equals(currentPlayer) ?
                     relationship.getPlayer2() : relationship.getPlayer1();
-                
+
                 if (!otherPlayer.equals(currentPlayer)) {
                     Result giftsResult = controller.giftList();
                     if (giftsResult.isSuccessful()) {
@@ -2730,7 +2727,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     }
                 }
             }
-            
+
             if (friendsButton != null) {
                 if (unratedGifts > 0) {
                     // Update friends button to show notification
@@ -2834,7 +2831,7 @@ public class GameMenu extends InputAdapter implements Screen {
         Player currentPlayer = App.getCurrentPlayerLazy();
         Map<Item, Integer> inventory = currentPlayer.getBackPack().getItems();
         List<Item> rings = new ArrayList<>();
-        
+
         for (Map.Entry<Item, Integer> entry : inventory.entrySet()) {
             Item item = entry.getKey();
             if (item.getName().toLowerCase().contains("ring")) {
@@ -2930,13 +2927,13 @@ public class GameMenu extends InputAdapter implements Screen {
         Player currentPlayer = App.getCurrentPlayerLazy();
         GameMenuController controller = new GameMenuController();
         Result result = controller.respond(response, proposerUsername);
-        
+
         if (response.equals("accept")) {
             showMarriageSuccessDialog(proposerUsername);
         } else {
             showMarriageRejectionDialog(proposerUsername);
         }
-        
+
         showNotification(result.getMessage(), result.isSuccessful());
     }
 
@@ -3010,17 +3007,17 @@ public class GameMenu extends InputAdapter implements Screen {
 
     private void checkForMarriageProposals() {
         Player currentPlayer = App.getCurrentPlayerLazy();
-        
+
         // Check if current player has any pending marriage proposals
         for (RelationShip relationship : currentPlayer.getRelationShips()) {
             if (relationship.hasAskedToMarry() && relationship.getAskedRing() != null) {
                 // Find the proposer
-                Player proposer = relationship.getPlayer1().equals(currentPlayer) ? 
+                Player proposer = relationship.getPlayer1().equals(currentPlayer) ?
                     relationship.getPlayer2() : relationship.getPlayer1();
-                
+
                 // Show marriage proposal dialog
                 showIncomingMarriageProposal(proposer.getUser().getUserName(), relationship.getAskedRing());
-                
+
                 // Clear the proposal to prevent showing it again
                 relationship.askToMarry(); // This should be modified to clear the proposal
                 break;
@@ -3030,18 +3027,18 @@ public class GameMenu extends InputAdapter implements Screen {
 
     private void renderNearbyPlayerIndicators() {
         Player currentPlayer = App.getCurrentPlayerLazy();
-        
+
         // Draw indicators for nearby players
         for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
             if (!otherPlayer.equals(currentPlayer)) {
-                int distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - otherPlayer.getUserLocation().getxAxis()) + 
+                int distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - otherPlayer.getUserLocation().getxAxis()) +
                              Math.abs(currentPlayer.getUserLocation().getyAxis() - otherPlayer.getUserLocation().getyAxis());
-                
+
                 if (distance <= 2) {
                     // Draw a subtle indicator around nearby players
                     float playerX = otherPlayer.getUserLocation().getxAxis() * 100f;
                     float playerY = otherPlayer.getUserLocation().getyAxis() * 100f;
-                    
+
                     // Use shape renderer to draw a circle instead of texture
                     if (shapeRenderer != null) {
                         shapeRenderer.setProjectionMatrix(camera.combined);
@@ -3060,14 +3057,14 @@ public class GameMenu extends InputAdapter implements Screen {
         friendsButton.setSize(120, 40);
         friendsButton.setPosition(20, stage.getHeight() - 120);
         friendsButton.getLabel().setFontScale(1.2f);
-        
+
         friendsButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 showFriendsWindow();
             }
         });
-        
+
         stage.addActor(friendsButton);
     }
 
