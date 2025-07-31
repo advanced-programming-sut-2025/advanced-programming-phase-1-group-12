@@ -19,6 +19,8 @@ import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+import io.javalin.websocket.WsContext;
+import java.util.HashMap;
 
 public class SimpleNetworkServer {
     private static final Logger logger = LoggerFactory.getLogger(SimpleNetworkServer.class);
@@ -105,7 +107,62 @@ public class SimpleNetworkServer {
         app.get("/api/test", this::handleTest);
         app.post("/api/echo", this::handleEcho);
         
+        // Setup WebSocket
+        setupWebSocket();
+        
         logger.info("API routes configured");
+    }
+    
+    private void setupWebSocket() {
+        app.ws("/ws", ws -> {
+            ws.onConnect(this::onWebSocketConnect);
+            ws.onMessage(this::onWebSocketMessage);
+            ws.onClose(this::onWebSocketClose);
+            ws.onError(this::onWebSocketError);
+        });
+        logger.info("WebSocket handler configured at /ws");
+    }
+    
+    private void onWebSocketConnect(WsContext ctx) throws Exception {
+        String connectionId = ctx.getSessionId();
+        String userId = ctx.queryParam("userId");
+        String token = ctx.queryParam("token");
+        String gameId = ctx.queryParam("gameId");
+        
+        logger.info("WebSocket connection established for user: {} (connection: {})", userId, connectionId);
+        
+        // Send connection confirmation
+        Map<String, Object> confirmMsg = new HashMap<>();
+        confirmMsg.put("type", "connection_established");
+        confirmMsg.put("message", "Connected successfully");
+        confirmMsg.put("userId", userId != null ? userId : "unknown");
+        confirmMsg.put("timestamp", System.currentTimeMillis());
+        
+        ctx.send(confirmMsg);
+    }
+    
+    private void onWebSocketMessage(WsContext ctx) throws Exception {
+        String connectionId = ctx.getSessionId();
+        
+        logger.debug("WebSocket message received from connection: {}", connectionId);
+        
+        // For now, just send a simple response
+        Map<String, Object> response = Map.of(
+            "type", "echo",
+            "message", "Message received",
+            "timestamp", System.currentTimeMillis()
+        );
+        ctx.send(response);
+    }
+    
+    private void onWebSocketClose(WsContext ctx) throws Exception {
+        String connectionId = ctx.getSessionId();
+        logger.info("WebSocket connection closed: {}", connectionId);
+    }
+    
+    private void onWebSocketError(WsContext ctx) throws Exception {
+        String connectionId = ctx.getSessionId();
+        logger.error("WebSocket error for connection: {}", connectionId);
     }
     
     private void handleLogin(Context ctx) {

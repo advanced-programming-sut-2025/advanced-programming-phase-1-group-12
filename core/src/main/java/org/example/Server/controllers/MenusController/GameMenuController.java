@@ -365,32 +365,33 @@ public class GameMenuController {
                     portraitFrame = GameAssetManager.getLeahPortrait();
                 }
                 default -> {
-                    playerTexture = new Texture("sprites/Marnie.png");
-                    portraitFrame = GameAssetManager.getMarniePortrait();
+                    playerTexture = new Texture("sprites/Robin.png");
+                    portraitFrame = GameAssetManager.getRobinPortrait();
                 }
             }
-            Player newPlayer = new
-                Player(user, null, false, null, new ArrayList<>(),
-                null, new BackPack(BackPackTypes.PRIMARY), false, false,
-                new ArrayList<>());
+
+            Player newPlayer = new Player(user, new Location(0, 0), false, new Refrigrator(), new ArrayList<>(), null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
             newPlayer.setPlayerTexture(playerTexture);
             newPlayer.setPortraitFrame(portraitFrame);
+
             players.add(newPlayer);
-            newPlayer.getBackPack().addItem(ItemBuilder.builder("Hoe", Quality.NORMAL, 0), 1);
-            newPlayer.getBackPack().addItem(ItemBuilder.builder("PickAxe", Quality.NORMAL, 0), 1);
-            newPlayer.getBackPack().addItem(ItemBuilder.builder("Axe", Quality.NORMAL, 0), 1);
-            newPlayer.getBackPack().addItem(ItemBuilder.builder("Watering can", Quality.NORMAL, 0), 1);
-            newPlayer.getBackPack().addItem(ItemBuilder.builder("Scythe", Quality.NORMAL, 0), 1);
-            newPlayer.getBackPack().addItem(ItemBuilder.builder("Trash Can", Quality.NORMAL, 0), 1);
 
             Farm farm = App.getCurrentGame().getMainMap().getFarms().get(farmId);
             farm.setOwner(newPlayer);
-            farm.setFarmID(farmId);
             newPlayer.setOwnedFarm(farm);
-            newPlayer.setRefrigrator(new Refrigrator(App.getCurrentGame().getMainMap().findLocation(newPlayer.getOwnedFarm().getShack().getLocation().getTopLeftCorner().getxAxis(),
-                newPlayer.getOwnedFarm().getShack().getLocation().getTopLeftCorner().getyAxis() + 4)));
-            Location loc = farm.getLocation().getTopLeftCorner();
-            newPlayer.setUserLocation(App.getCurrentGame().getMainMap().findLocation(loc.getxAxis(), loc.getyAxis()));
+            
+            // Set player's initial location to their farm
+            Location farmLocation = farm.getLocation().getTopLeftCorner();
+            newPlayer.setUserLocation(App.getCurrentGame().getMainMap().findLocation(farmLocation.getxAxis(), farmLocation.getyAxis()));
+            
+            // Initialize Refrigrator with proper location
+            Location shackLocation = farm.getShack().getLocation().getTopLeftCorner();
+            Location refrigratorLocation = App.getCurrentGame().getMainMap().findLocation(
+                shackLocation.getxAxis(), 
+                shackLocation.getyAxis() + 4
+            );
+            newPlayer.setRefrigrator(new Refrigrator(refrigratorLocation));
+
             PlayerController playerController = new PlayerController(newPlayer, this, usernames);
             newPlayer.setPlayerController(playerController);
             farms.add(farm);
@@ -400,6 +401,12 @@ public class GameMenuController {
         App.getCurrentGame().setCurrentPlayer(players.get(0));
         App.getCurrentGame().setGameId(App.getGameId());
         App.getCurrentGame().setFarms(farms);
+
+        // Set multiplayer flag if there are multiple players
+        if (usernames.size() > 1) {
+            App.getCurrentGame().setMultiplayer(true);
+            System.out.println("Multiplayer game started with " + usernames.size() + " players");
+        }
 
         MapSetUp.showMapWithFarms(App.getCurrentGame().getMainMap());
         System.out.println("All farms have been assigned!");

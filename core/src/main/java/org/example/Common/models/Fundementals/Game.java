@@ -20,6 +20,11 @@ public class Game {
     private ArrayList<Player> players = new ArrayList<>();
     private ArrayList<Farm> farms = new ArrayList<>();
     private NPCvillage npcVillage;
+    
+    // Multiplayer turn-based system fields
+    private boolean isMultiplayer = false;
+    private int currentPlayerIndex = 0;
+    private boolean isTurnBasedMode = false;
 
     public Player getCurrentPlayer() {
         return currentPlayer;
@@ -111,6 +116,61 @@ public class Game {
 
     public void setNPCvillage(NPCvillage npcVillage) {
         this.npcVillage = npcVillage;
+    }
+
+    // Multiplayer turn-based system methods
+    public boolean isMultiplayer() {
+        return isMultiplayer;
+    }
+
+    public void setMultiplayer(boolean multiplayer) {
+        this.isMultiplayer = multiplayer;
+        if (multiplayer) {
+            this.isTurnBasedMode = true;
+            this.currentPlayerIndex = 0;
+            if (!players.isEmpty()) {
+                this.currentPlayer = players.get(0);
+            }
+        }
+    }
+
+    public boolean isTurnBasedMode() {
+        return isTurnBasedMode;
+    }
+
+    public void setTurnBasedMode(boolean turnBasedMode) {
+        this.isTurnBasedMode = turnBasedMode;
+    }
+
+    public int getCurrentPlayerIndex() {
+        return currentPlayerIndex;
+    }
+
+    public void setCurrentPlayerIndex(int currentPlayerIndex) {
+        this.currentPlayerIndex = currentPlayerIndex;
+    }
+
+    public void nextTurn() {
+        if (!isTurnBasedMode || players.isEmpty()) {
+            return;
+        }
+        
+        // Move to next player
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+        currentPlayer = players.get(currentPlayerIndex);
+        
+        // Reset energy for the new player
+        if (currentPlayer != null) {
+            currentPlayer.setEnergy(200);
+            currentPlayer.setHasCollapsed(false);
+        }
+    }
+
+    public boolean isCurrentPlayerTurn(String playerName) {
+        if (!isTurnBasedMode || currentPlayer == null) {
+            return true; // In non-turn-based mode, all players can move
+        }
+        return currentPlayer.getUser().getUserName().equals(playerName);
     }
 
 }

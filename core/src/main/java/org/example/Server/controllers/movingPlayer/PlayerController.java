@@ -136,6 +136,13 @@ public class PlayerController {
                 return;
             }
         }
+        
+        // Check if it's this player's turn in multiplayer mode
+        if (App.getCurrentGame().isMultiplayer() && !App.getCurrentGame().isCurrentPlayerTurn(player.getUser().getUserName())) {
+            // Not this player's turn, don't process movement
+            return;
+        }
+        
         if(Gdx.input.isKeyPressed(Input.Keys.B)) {
             GameMenu gameMenu = new GameMenu(players);
             Main.getMain().setScreen(gameMenu);
@@ -227,6 +234,12 @@ public class PlayerController {
                 facing = Dir.UP;
                 int newEnergy = player.getEnergy() - 1;
                 player.setEnergy(newEnergy);
+                
+                // Check if energy reached zero in multiplayer
+                if (App.getCurrentGame().isMultiplayer() && newEnergy <= 0) {
+                    player.setHasCollapsed(true);
+                    App.getCurrentGame().nextTurn();
+                }
             } else {
                 newY -= player.getSpeed();
             }
@@ -237,6 +250,12 @@ public class PlayerController {
                 facing = Dir.DOWN;
                 int newEnergy = player.getEnergy() - 1;
                 player.setEnergy(newEnergy);
+                
+                // Check if energy reached zero in multiplayer
+                if (App.getCurrentGame().isMultiplayer() && newEnergy <= 0) {
+                    player.setHasCollapsed(true);
+                    App.getCurrentGame().nextTurn();
+                }
             } else {
                 newY += player.getSpeed();
             }
@@ -247,6 +266,12 @@ public class PlayerController {
                 facing = Dir.LEFT;
                 int newEnergy = player.getEnergy() - 1;
                 player.setEnergy(newEnergy);
+                
+                // Check if energy reached zero in multiplayer
+                if (App.getCurrentGame().isMultiplayer() && newEnergy <= 0) {
+                    player.setHasCollapsed(true);
+                    App.getCurrentGame().nextTurn();
+                }
             } else {
                 newX += player.getSpeed();
             }
@@ -257,6 +282,12 @@ public class PlayerController {
                 facing = Dir.RIGHT;
                 int newEnergy = player.getEnergy() - 1;
                 player.setEnergy(newEnergy);
+                
+                // Check if energy reached zero in multiplayer
+                if (App.getCurrentGame().isMultiplayer() && newEnergy <= 0) {
+                    player.setHasCollapsed(true);
+                    App.getCurrentGame().nextTurn();
+                }
             } else {
                 newX -= player.getSpeed();
             }

@@ -5,6 +5,7 @@ import org.example.Common.models.Fundementals.Player;
 import org.example.Common.models.Fundementals.Result;
 import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.WalkRequest;
+import org.example.Common.network.events.GameStateUpdateEvent;
 import org.example.Server.controllers.MenusController.GameMenuController;
 import org.example.Server.controllers.movingPlayer.UserLocationController;
 import org.slf4j.Logger;
@@ -477,6 +478,85 @@ public class GameInstance {
         movementUpdate.put("timestamp", System.currentTimeMillis());
         
         broadcastToAllPlayers(movementUpdate);
+    }
+    
+    // New method to broadcast turn changes in multiplayer
+    private void broadcastTurnChange(String newPlayerId, String newPlayerName) {
+        Map<String, Object> turnUpdate = new HashMap<>();
+        turnUpdate.put("type", "turn_changed");
+        turnUpdate.put("gameId", gameId);
+        turnUpdate.put("newPlayerId", newPlayerId);
+        turnUpdate.put("newPlayerName", newPlayerName);
+        turnUpdate.put("timestamp", System.currentTimeMillis());
+        
+        broadcastToAllPlayers(turnUpdate);
+    }
+    
+    // New method to broadcast current player update
+    private void broadcastCurrentPlayerUpdate(String currentPlayerId, String currentPlayerName) {
+        Map<String, Object> currentPlayerUpdate = new HashMap<>();
+        currentPlayerUpdate.put("type", "current_player_update");
+        currentPlayerUpdate.put("gameId", gameId);
+        currentPlayerUpdate.put("currentPlayerId", currentPlayerId);
+        currentPlayerUpdate.put("currentPlayerName", currentPlayerName);
+        currentPlayerUpdate.put("timestamp", System.currentTimeMillis());
+        
+        broadcastToAllPlayers(currentPlayerUpdate);
+    }
+    
+    // Method to handle turn-based multiplayer logic
+    public void handleMultiplayerTurnChange() {
+        if (game.isMultiplayer()) {
+            game.nextTurn();
+            Player newCurrentPlayer = game.getCurrentPlayer();
+            if (newCurrentPlayer != null) {
+                broadcastTurnChange(newCurrentPlayer.getUser().getUserName(), newCurrentPlayer.getUser().getUserName());
+                broadcastCurrentPlayerUpdate(newCurrentPlayer.getUser().getUserName(), newCurrentPlayer.getUser().getUserName());
+            }
+        }
+    }
+    
+    // Real-time map update methods
+    public void broadcastMapUpdate(String updateType, Map<String, Object> data) {
+        GameStateUpdateEvent event = new GameStateUpdateEvent(
+            gameId, null, updateType, data
+        );
+        broadcastToAllPlayers(event);
+    }
+    
+    public void broadcastPlayerPosition(String playerId, int x, int y) {
+        Map<String, Object> data = Map.of("playerId", playerId, "x", x, "y", y);
+        broadcastMapUpdate("player_moved", data);
+    }
+    
+    public void broadcastNPCUpdate(String npcId, int x, int y, String state) {
+        Map<String, Object> data = Map.of("npcId", npcId, "x", x, "y", y, "state", state);
+        broadcastMapUpdate("npc_updated", data);
+    }
+    
+    public void broadcastWeatherChange(String weather) {
+        Map<String, Object> data = Map.of("weather", weather);
+        broadcastMapUpdate("weather_changed", data);
+    }
+    
+    public void broadcastTimeChange(int hour, int day, String season) {
+        Map<String, Object> data = Map.of("hour", hour, "day", day, "season", season);
+        broadcastMapUpdate("time_changed", data);
+    }
+    
+    public void broadcastMissionUpdate(String missionId, String status, String description) {
+        Map<String, Object> data = Map.of("missionId", missionId, "status", status, "description", description);
+        broadcastMapUpdate("mission_updated", data);
+    }
+    
+    public void broadcastBuildingStateChange(String buildingId, String state, Map<String, Object> properties) {
+        Map<String, Object> data = Map.of("buildingId", buildingId, "state", state, "properties", properties);
+        broadcastMapUpdate("building_state_changed", data);
+    }
+    
+    public void broadcastObjectInteraction(String objectId, String interactionType, String playerId) {
+        Map<String, Object> data = Map.of("objectId", objectId, "interactionType", interactionType, "playerId", playerId);
+        broadcastMapUpdate("object_interaction", data);
     }
     
     public void updateActivity() {

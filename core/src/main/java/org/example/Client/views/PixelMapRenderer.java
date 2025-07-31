@@ -191,7 +191,7 @@ public class PixelMapRenderer {
             } else if (loc.getObjectInTile() instanceof Stone) {
                 batch.draw(GameAssetManager.getGameAssetManager().getSTONE(), drawX, drawY, 50, 50);
             }for(Player player : App.getCurrentGame().getPlayers()) {
-                if(player.getRefrigrator().getLocation().equals(loc)) {
+                if(player.getRefrigrator() != null && player.getRefrigrator().getLocation() != null && player.getRefrigrator().getLocation().equals(loc)) {
                     batch.draw(GameAssetManager.getGameAssetManager().getFridge(), drawX, drawY, 50, 50);
                 }
             }

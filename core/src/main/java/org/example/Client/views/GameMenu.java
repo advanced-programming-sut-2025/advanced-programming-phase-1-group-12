@@ -46,8 +46,10 @@ import org.example.Common.models.enums.Types.CraftingRecipe;
 import org.example.Common.models.enums.Weather;
 import org.example.Common.models.RelationShips.RelationShip;
 import org.example.Common.models.RelationShips.Gift;
+import org.example.Client.network.GameWebSocketClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.badlogic.gdx.input.GestureDetector;
 
 public class GameMenu extends InputAdapter implements Screen {
     private static final Logger logger = LoggerFactory.getLogger(GameMenu.class);
@@ -68,6 +70,7 @@ public class GameMenu extends InputAdapter implements Screen {
     private Stage stage;
     private final List<String> players;
     private boolean showingAllMap = false;
+    private GameWebSocketClient webSocketClient;
     private float homeZoom, mapZoom;
     private float homeX, homeY, mapCenterX, mapCenterY;
     private float savedX, savedY, savedZoom;
@@ -168,6 +171,127 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
     }
+    
+    // Real-time map update handler
+    public void handleGameStateUpdate(String updateType, Map<String, Object> data) {
+        try {
+            switch (updateType) {
+                case "player_moved":
+                    handlePlayerPositionUpdate(data);
+                    break;
+                case "npc_updated":
+                    handleNPCUpdate(data);
+                    break;
+                case "weather_changed":
+                    handleWeatherChange(data);
+                    break;
+                case "time_changed":
+                    handleTimeChange(data);
+                    break;
+                case "mission_updated":
+                    handleMissionUpdate(data);
+                    break;
+                case "building_state_changed":
+                    handleBuildingStateChange(data);
+                    break;
+                case "object_interaction":
+                    handleObjectInteraction(data);
+                    break;
+                default:
+                    logger.debug("Unknown game state update type: {}", updateType);
+                    break;
+            }
+        } catch (Exception e) {
+            logger.error("Error handling game state update: {}", updateType, e);
+        }
+    }
+    
+    private void handlePlayerPositionUpdate(Map<String, Object> data) {
+        String playerId = (String) data.get("playerId");
+        Integer x = (Integer) data.get("x");
+        Integer y = (Integer) data.get("y");
+        
+        if (playerId != null && x != null && y != null) {
+            // Find the player and update their position
+            for (Player player : App.getCurrentGame().getPlayers()) {
+                if (player.getUser().getUserName().equals(playerId)) {
+                    Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
+                    player.setUserLocation(newLocation);
+                    logger.debug("Updated player {} position to ({}, {})", playerId, x, y);
+                    break;
+                }
+            }
+        }
+    }
+    
+    private void handleNPCUpdate(Map<String, Object> data) {
+        String npcId = (String) data.get("npcId");
+        Integer x = (Integer) data.get("x");
+        Integer y = (Integer) data.get("y");
+        String state = (String) data.get("state");
+        
+        if (npcId != null && x != null && y != null) {
+            // Update NPC position and state
+            // This would need to be implemented based on your NPC system
+            logger.debug("NPC {} moved to ({}, {}) with state: {}", npcId, x, y, state);
+        }
+    }
+    
+    private void handleWeatherChange(Map<String, Object> data) {
+        String weather = (String) data.get("weather");
+        if (weather != null) {
+            // Update weather state
+            App.getCurrentGame().getDate().setWeather(Weather.valueOf(weather.toUpperCase()));
+            logger.debug("Weather changed to: {}", weather);
+        }
+    }
+    
+    private void handleTimeChange(Map<String, Object> data) {
+        Integer hour = (Integer) data.get("hour");
+        Integer day = (Integer) data.get("day");
+        String season = (String) data.get("season");
+        
+        if (hour != null && day != null && season != null) {
+            // Update time and date
+            App.getCurrentGame().getDate().setHour(hour);
+            App.getCurrentGame().getDate().setDayOfMonth(day);
+            App.getCurrentGame().getDate().setSeason(org.example.Common.models.enums.Season.valueOf(season.toUpperCase()));
+            logger.debug("Time changed to: Day {} Hour {} Season {}", day, hour, season);
+        }
+    }
+    
+    private void handleMissionUpdate(Map<String, Object> data) {
+        String missionId = (String) data.get("missionId");
+        String status = (String) data.get("status");
+        String description = (String) data.get("description");
+        
+        if (missionId != null && status != null) {
+            // Update mission state
+            logger.debug("Mission {} updated: {} - {}", missionId, status, description);
+        }
+    }
+    
+    private void handleBuildingStateChange(Map<String, Object> data) {
+        String buildingId = (String) data.get("buildingId");
+        String state = (String) data.get("state");
+        Map<String, Object> properties = (Map<String, Object>) data.get("properties");
+        
+        if (buildingId != null && state != null) {
+            // Update building state
+            logger.debug("Building {} state changed to: {} with properties: {}", buildingId, state, properties);
+        }
+    }
+    
+    private void handleObjectInteraction(Map<String, Object> data) {
+        String objectId = (String) data.get("objectId");
+        String interactionType = (String) data.get("interactionType");
+        String playerId = (String) data.get("playerId");
+        
+        if (objectId != null && interactionType != null) {
+            // Handle object interaction
+            logger.debug("Object {} interacted with by {}: {}", objectId, playerId, interactionType);
+        }
+    }
 
     public static class RainDrop {
         public float x, y;
@@ -241,6 +365,9 @@ public class GameMenu extends InputAdapter implements Screen {
 
         initializeLighting();
         initializeWeatherSystem();
+        
+        // Initialize WebSocket client for real-time updates
+        initializeWebSocketClient();
 
 
         float clockSize = 100f;
@@ -321,10 +448,27 @@ public class GameMenu extends InputAdapter implements Screen {
 
             Label nameLabel = new Label(p.getUser().getUserName(), skin);
             nameLabel.setFontScale(1.5f);
+            
+            // Add turn indicator for multiplayer
+            String turnIndicator = "";
+            if (App.getCurrentGame().isMultiplayer() && App.getCurrentGame().getCurrentPlayer() != null) {
+                if (p.equals(App.getCurrentGame().getCurrentPlayer())) {
+                    turnIndicator = " (Current Turn)";
+                    nameLabel.setColor(Color.YELLOW); // Highlight current player
+                } else {
+                    nameLabel.setColor(Color.WHITE);
+                }
+            }
 
             Table playerTable = new Table();
             playerTable.add(bar).width(200).height(barHeight).padRight(10);
             playerTable.add(nameLabel).left();
+            if (!turnIndicator.isEmpty()) {
+                Label turnLabel = new Label(turnIndicator, skin);
+                turnLabel.setColor(Color.YELLOW);
+                turnLabel.setFontScale(1.0f);
+                playerTable.add(turnLabel).left();
+            }
             playerTable.pack();
 
             playerTable.setPosition(leftMargin, yOffset);
@@ -391,6 +535,29 @@ public class GameMenu extends InputAdapter implements Screen {
             ProgressBar bar = energyBars.get(p);
             if (bar != null) {
                 bar.setValue(p.getEnergy());
+
+                // Update turn indicator for multiplayer
+                if (App.getCurrentGame().isMultiplayer() && App.getCurrentGame().getCurrentPlayer() != null) {
+                    // Find the name label for this player and update its color
+                    for (Actor actor : stage.getActors()) {
+                        if (actor instanceof Table) {
+                            Table table = (Table) actor;
+                            for (Actor tableActor : table.getChildren()) {
+                                if (tableActor instanceof Label) {
+                                    Label label = (Label) tableActor;
+                                    if (label.getText().toString().contains(p.getUser().getUserName())) {
+                                        if (p.equals(App.getCurrentGame().getCurrentPlayer())) {
+                                            label.setColor(Color.YELLOW);
+                                        } else {
+                                            label.setColor(Color.WHITE);
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
 
                 if (p.getEnergy() <= 0 && App.getCurrentPlayerLazy().equals(p)) {
                     controller.nextTurn();
@@ -650,6 +817,11 @@ public class GameMenu extends InputAdapter implements Screen {
         stage.dispose();
         pixelMapRenderer.dispose();
         font.dispose();
+        
+        // Clean up WebSocket client
+        if (webSocketClient != null) {
+            webSocketClient.disconnect();
+        }
     }
 
     @Override
@@ -1875,6 +2047,31 @@ public class GameMenu extends InputAdapter implements Screen {
             System.out.println("Rain and snow textures loaded successfully");
         } catch (Exception e) {
             System.err.println("Could not load weather textures: " + e.getMessage());
+        }
+    }
+    
+    private void initializeWebSocketClient() {
+        try {
+            if (App.getLoggedInUser() != null && App.getCurrentGame() != null) {
+                String userId = App.getLoggedInUser().getUserName();
+                // For now, use a simple game ID - you may need to implement getGameId() in Game class
+                String gameId = "game_" + System.currentTimeMillis(); // Placeholder
+                String serverUrl = "http://localhost:8080"; // Configure based on your server
+                
+                webSocketClient = new GameWebSocketClient(serverUrl, userId, gameId, this);
+                webSocketClient.connect().thenAccept(success -> {
+                    if (success) {
+                        logger.info("WebSocket client connected successfully");
+                    } else {
+                        logger.warn("WebSocket client connection failed");
+                    }
+                }).exceptionally(throwable -> {
+                    logger.error("WebSocket client connection error", throwable);
+                    return null;
+                });
+            }
+        } catch (Exception e) {
+            logger.error("Failed to initialize WebSocket client", e);
         }
     }
 

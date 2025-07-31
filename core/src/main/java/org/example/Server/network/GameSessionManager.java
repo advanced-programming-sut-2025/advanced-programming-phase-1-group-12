@@ -19,6 +19,9 @@ import java.util.stream.Collectors;
 public class GameSessionManager {
     private static final Logger logger = LoggerFactory.getLogger(GameSessionManager.class);
     
+    // Static instance for global access
+    private static GameSessionManager instance;
+    
     private final ConcurrentHashMap<String, GameInstance> activeGames;
     private final ConcurrentHashMap<String, String> playerToGameMapping; // playerId -> gameId
     private final ExecutorService gameProcessorPool;
@@ -38,6 +41,35 @@ public class GameSessionManager {
         cleanupScheduler.scheduleAtFixedRate(this::cleanupInactiveGames, 5, 5, TimeUnit.MINUTES);
         
         logger.info("GameSessionManager initialized");
+    }
+    
+    // Static method to get the singleton instance
+    public static GameSessionManager getInstance() {
+        if (instance == null) {
+            synchronized (GameSessionManager.class) {
+                if (instance == null) {
+                    instance = new GameSessionManager();
+                }
+            }
+        }
+        return instance;
+    }
+    
+    // Method to get GameInstance for a specific player
+    public GameInstance getGameInstanceForPlayer(String playerId) {
+        String gameId = playerToGameMapping.get(playerId);
+        if (gameId != null) {
+            return activeGames.get(gameId);
+        }
+        return null;
+    }
+    
+    // Method to get GameInstance for current player
+    public GameInstance getCurrentGameInstance() {
+        if (App.getLoggedInUser() != null) {
+            return getGameInstanceForPlayer(App.getLoggedInUser().getUserName());
+        }
+        return null;
     }
     
     public NetworkResult<GameStateResponse> createGame(String creatorId, CreateGameRequest request) {

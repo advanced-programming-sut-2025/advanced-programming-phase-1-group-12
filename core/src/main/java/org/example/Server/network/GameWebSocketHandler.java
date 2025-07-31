@@ -116,6 +116,10 @@ public class GameWebSocketHandler {
                     handleJoinGameWebSocket(ctx, userId, messageData);
                     break;
                     
+                case GameProtocol.WS_GAME_STATE_UPDATE:
+                    handleGameStateUpdate(ctx, userId, messageData);
+                    break;
+                    
                 default:
                     logger.warn("Unknown WebSocket message type: {} from user: {}", messageType, userId);
                     sendError(ctx, "Unknown message type: " + messageType);
@@ -290,6 +294,42 @@ public class GameWebSocketHandler {
         } catch (Exception e) {
             logger.error("Error joining game via WebSocket", e);
             sendError(ctx, "Failed to join game");
+        }
+    }
+    
+    private void handleGameStateUpdate(WsContext ctx, String userId, Map<String, Object> messageData) {
+        try {
+            String gameId = (String) messageData.get("gameId");
+            String updateType = (String) messageData.get("updateType");
+            Map<String, Object> data = (Map<String, Object>) messageData.get("data");
+            
+            if (gameId == null || updateType == null || data == null) {
+                sendError(ctx, "gameId, updateType, and data are required for game state update");
+                return;
+            }
+            
+            GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            if (gameInstance == null) {
+                sendError(ctx, "Game not found");
+                return;
+            }
+            
+            if (!gameInstance.isPlayerConnected(userId)) {
+                sendError(ctx, "You are not connected to this game");
+                return;
+            }
+            
+            // Broadcast the game state update to all players in the game
+            GameStateUpdateEvent updateEvent = new GameStateUpdateEvent(
+                gameId, userId, updateType, data
+            );
+            broadcastToGame(gameId, updateEvent);
+            
+            logger.debug("Game state update broadcasted: {} - {} from user: {}", updateType, data, userId);
+            
+        } catch (Exception e) {
+            logger.error("Error handling game state update", e);
+            sendError(ctx, "Failed to process game state update");
         }
     }
     

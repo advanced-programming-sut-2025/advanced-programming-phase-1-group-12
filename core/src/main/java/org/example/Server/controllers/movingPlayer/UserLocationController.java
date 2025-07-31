@@ -1,6 +1,7 @@
 package org.example.Server.controllers.movingPlayer;
 
 import org.example.Server.controllers.MenusController.GameMenuController;
+import org.example.Server.network.GameSessionManager;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Fundementals.Location;
 import org.example.Common.models.Fundementals.Result;
@@ -60,10 +61,30 @@ public class UserLocationController {
             App.getCurrentGame().getCurrentPlayer().setHasCollapsed(true);
             System.out.println(App.getCurrentGame().getCurrentPlayer().getUser().getUserName() + " fainted on the way.");
 
-            GameMenuController gameMenuController = App.getCurrentPlayerLazy().getPlayerController().getGameController();
-            gameMenuController.nextTurn();
-            return new Result(false, "You didn't have enough energy. You moved partially and fainted at "
-                    + finalReachable.getxAxis() + ", " + finalReachable.getyAxis());
+            // Handle turn-based multiplayer
+            if (App.getCurrentGame().isMultiplayer()) {
+                // Get GameInstance and handle turn change
+                GameSessionManager sessionManager = GameSessionManager.getInstance();
+                if (sessionManager != null) {
+                    var gameInstance = sessionManager.getCurrentGameInstance();
+                    if (gameInstance != null) {
+                        gameInstance.handleMultiplayerTurnChange();
+                    } else {
+                        // Fallback to direct game nextTurn
+                        App.getCurrentGame().nextTurn();
+                    }
+                } else {
+                    App.getCurrentGame().nextTurn();
+                }
+                return new Result(false, "You didn't have enough energy. You moved partially and fainted at "
+                        + finalReachable.getxAxis() + ", " + finalReachable.getyAxis() + ". Turn passed to next player.");
+            } else {
+                // Single player behavior (unchanged)
+                GameMenuController gameMenuController = App.getCurrentPlayerLazy().getPlayerController().getGameController();
+                gameMenuController.nextTurn();
+                return new Result(false, "You didn't have enough energy. You moved partially and fainted at "
+                        + finalReachable.getxAxis() + ", " + finalReachable.getyAxis());
+            }
         }
 
         App.getCurrentGame().getMainMap().findLocation(
@@ -75,6 +96,33 @@ public class UserLocationController {
                 targetX, targetY
         ).setObjectInTile(App.getCurrentGame().getCurrentPlayer());
         App.getCurrentGame().getCurrentPlayer().setEnergy(currentEnergy - energyNeeded);
+        
+        // Check if energy reached zero after movement (for multiplayer turn-based system)
+        if (App.getCurrentGame().isMultiplayer() && App.getCurrentGame().getCurrentPlayer().getEnergy() <= 0) {
+            App.getCurrentGame().getCurrentPlayer().setHasCollapsed(true);
+            
+            // Get GameInstance and handle turn change
+            GameSessionManager sessionManager = GameSessionManager.getInstance();
+            if (sessionManager != null) {
+                var gameInstance = sessionManager.getCurrentGameInstance();
+                if (gameInstance != null) {
+                    gameInstance.handleMultiplayerTurnChange();
+                } else {
+                    // Fallback to direct game nextTurn
+                    App.getCurrentGame().nextTurn();
+                }
+            } else {
+                App.getCurrentGame().nextTurn();
+            }
+            
+            return new Result(true,
+                    App.getCurrentGame().getCurrentPlayer().getUser().getUserName()
+                            + " moved to new location " + x + " " + y
+                            + " (distance = " + distance + ", turns = " + turns + ", energy cost = " + energyNeeded + ")"
+                            + " and energy reached zero. Turn passed to next player."
+            );
+        }
+        
         if(App.isLocationInPlace(newLocation, App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getShack().getLocation())){
             houseMenu();
         }
