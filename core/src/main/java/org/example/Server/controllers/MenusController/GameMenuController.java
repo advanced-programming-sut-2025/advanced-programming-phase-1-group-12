@@ -322,11 +322,11 @@ public class GameMenuController {
     public void Play(List<String> usernames, Map<String, Integer> farmSelections) {
         Game newGame = App.getCurrentGame();
         App.setCurrentGame(newGame);
-        
+
         // Initialize singleton date manager for multiplayer synchronization
         DateManager.getInstance().reset(); // Reset any previous date
         DateManager.getInstance().initializeGameDate();
-        
+
         MapSetUp.initializeFarms();
         MapSetUp.storesSetUp();
         MapSetUp.NPCsetUp();
@@ -379,15 +379,15 @@ public class GameMenuController {
             Farm farm = App.getCurrentGame().getMainMap().getFarms().get(farmId);
             farm.setOwner(newPlayer);
             newPlayer.setOwnedFarm(farm);
-            
+
             // Set player's initial location to their farm
             Location farmLocation = farm.getLocation().getTopLeftCorner();
             newPlayer.setUserLocation(App.getCurrentGame().getMainMap().findLocation(farmLocation.getxAxis(), farmLocation.getyAxis()));
-            
+
             // Initialize Refrigrator with proper location
             Location shackLocation = farm.getShack().getLocation().getTopLeftCorner();
             Location refrigratorLocation = App.getCurrentGame().getMainMap().findLocation(
-                shackLocation.getxAxis(), 
+                shackLocation.getxAxis(),
                 shackLocation.getyAxis() + 4
             );
             newPlayer.setRefrigrator(new Refrigrator(refrigratorLocation));
@@ -402,15 +402,23 @@ public class GameMenuController {
         App.getCurrentGame().setGameId(App.getGameId());
         App.getCurrentGame().setFarms(farms);
 
-        // Set multiplayer flag if there are multiple players
-        if (usernames.size() > 1) {
-            App.getCurrentGame().setMultiplayer(true);
-            System.out.println("Multiplayer game started with " + usernames.size() + " players");
-        }
+        // Set multiplayer flag only for true network multiplayer games
+        // For single-player games, always set to false regardless of number of players
+        App.getCurrentGame().setMultiplayer(false);
+        System.out.println("Single-player game started with " + usernames.size() + " characters");
 
         MapSetUp.showMapWithFarms(App.getCurrentGame().getMainMap());
         System.out.println("All farms have been assigned!");
         Main.getMain().setScreen(new GameMenu(usernames));
+    }
+
+    public void PlayNetworkMultiplayer(List<String> usernames, Map<String, Integer> farmSelections) {
+        // Call the regular Play method first
+        Play(usernames, farmSelections);
+
+        // Then override the multiplayer flag for network multiplayer
+        App.getCurrentGame().setMultiplayer(true);
+        System.out.println("Network multiplayer game started with " + usernames.size() + " players");
     }
 
     public Result nextTurn() {
@@ -1456,18 +1464,18 @@ public class GameMenuController {
     public Result cheatMakeAdjacent(String username1, String username2) {
         Player player1 = App.getCurrentGame().getPlayerByName(username1);
         Player player2 = App.getCurrentGame().getPlayerByName(username2);
-        
+
         if (player1 == null) {
             return new Result(false, "Player " + username1 + " not found!");
         }
         if (player2 == null) {
             return new Result(false, "Player " + username2 + " not found!");
         }
-        
+
         // Move player2 to be adjacent to player1 (1 tile away)
         int player1X = player1.getUserLocation().getxAxis();
         int player1Y = player1.getUserLocation().getyAxis();
-        
+
         // Place player2 one tile to the right of player1
         Location adjacentLocation = App.getCurrentGame().getMainMap().findLocation(player1X + 1, player1Y);
         if (adjacentLocation != null) {
@@ -1498,4 +1506,6 @@ public class GameMenuController {
             }
         }
     }
+
+
 }

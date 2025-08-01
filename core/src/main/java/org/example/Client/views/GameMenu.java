@@ -587,11 +587,20 @@ public class GameMenu extends InputAdapter implements Screen {
                 }
 
                 if (p.getEnergy() <= 0) {
-                    // In multiplayer, any player with 0 energy should trigger turn change
-                    // Check if this is the current player's turn
-                    if (App.getCurrentGame().getCurrentPlayer() != null && App.getCurrentGame().getCurrentPlayer().equals(p)) {
-                        controller.nextTurn();
-                        break;
+                    // Check if this is multiplayer or single-player mode
+                    if (App.getCurrentGame().isMultiplayer()) {
+                        // In multiplayer, any player with 0 energy should trigger turn change
+                        // Check if this is the current player's turn
+                        if (App.getCurrentGame().getCurrentPlayer() != null && App.getCurrentGame().getCurrentPlayer().equals(p)) {
+                            controller.nextTurn();
+                            break;
+                        }
+                    } else {
+                        // In single-player mode, cycle through players with full energy
+                        if (App.getCurrentGame().getCurrentPlayer() != null && App.getCurrentGame().getCurrentPlayer().equals(p)) {
+                            cycleToNextPlayerWithFullEnergy();
+                            break;
+                        }
                     }
                 }
             }
@@ -1046,6 +1055,10 @@ public class GameMenu extends InputAdapter implements Screen {
         }
         if (keycode == Input.Keys.R) {
             changeWeatherStatus();
+            return true;
+        }
+        if (keycode == Input.Keys.F) {
+            showTeleportCheatDialog();
             return true;
         }
 
@@ -3440,6 +3453,111 @@ public class GameMenu extends InputAdapter implements Screen {
         });
 
         stage.addActor(friendsButton);
+    }
+
+    private void cycleToNextPlayerWithFullEnergy() {
+        List<Player> players = App.getCurrentGame().getPlayers();
+        Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
+
+        // Reset current player's energy to 200
+        currentPlayer.setEnergy(200);
+
+        int currentIndex = players.indexOf(currentPlayer);
+        int nextIndex = (currentIndex + 1) % players.size();
+        int startIndex = nextIndex; // Remember where we started to detect full cycle
+
+        // Find the next player with full energy (200)
+        Player nextPlayer = null;
+        do {
+            Player candidatePlayer = players.get(nextIndex);
+
+            // If this player has full energy, select them
+            if (candidatePlayer.getEnergy() >= 200) {
+                nextPlayer = candidatePlayer;
+                break;
+            }
+
+            // Move to next player
+            nextIndex = (nextIndex + 1) % players.size();
+
+            // If we've checked all players and none have full energy,
+            // reset all players to full energy and select the next one
+            if (nextIndex == startIndex) {
+                for (Player player : players) {
+                    player.setEnergy(200);
+                }
+                nextPlayer = players.get((currentIndex + 1) % players.size());
+                break;
+            }
+        } while (nextIndex != startIndex);
+
+        // Set the new current player
+        if (nextPlayer != null) {
+            App.getCurrentGame().setCurrentPlayer(nextPlayer);
+            System.out.println("Switched to player: " + nextPlayer.getUser().getUserName() + " with energy: " + nextPlayer.getEnergy());
+        }
+    }
+
+    public void cheatChangeApproximation(String username){
+        Player nextPlayer  = App.getCurrentGame().getPlayerByName(username);
+        Location nextPlayerLocation = nextPlayer.getUserLocation();
+        Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
+        Location newLoc = new Location(nextPlayerLocation.getxAxis()-1, nextPlayerLocation.getyAxis());
+        currentPlayer.setUserLocation(newLoc);
+    }
+
+    private void showTeleportCheatDialog() {
+        Dialog teleportDialog = new Dialog("Teleport to Player", skin);
+        
+        // Create text field for username input
+        TextField usernameField = new TextField("", skin);
+        usernameField.setMessageText("Enter player username");
+        
+        // Add the text field to the dialog
+        teleportDialog.getContentTable().add(new Label("Enter player username to teleport to:", skin)).pad(10);
+        teleportDialog.getContentTable().row();
+        teleportDialog.getContentTable().add(usernameField).width(300).pad(10);
+        teleportDialog.getContentTable().row();
+        
+        // Create buttons
+        TextButton teleportButton = new TextButton("Teleport", skin);
+        TextButton cancelButton = new TextButton("Cancel", skin);
+        
+        // Add click listeners
+        teleportButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                String username = usernameField.getText().trim();
+                if (!username.isEmpty()) {
+                    try {
+                        cheatChangeApproximation(username);
+                        showNotification("Successfully teleported to " + username + "!", true);
+                    } catch (Exception e) {
+                        showNotification("Player '" + username + "' not found!", false);
+                    }
+                } else {
+                    showNotification("Please enter a valid username!", false);
+                }
+                teleportDialog.hide();
+            }
+        });
+        
+        cancelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                teleportDialog.hide();
+            }
+        });
+        
+        // Add buttons to dialog
+        teleportDialog.getButtonTable().add(teleportButton).pad(5);
+        teleportDialog.getButtonTable().add(cancelButton).pad(5);
+        
+        // Show the dialog
+        teleportDialog.show(stage);
+        
+        // Focus on the text field for immediate typing
+        stage.setKeyboardFocus(usernameField);
     }
 
 }
