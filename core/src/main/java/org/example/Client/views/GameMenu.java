@@ -142,9 +142,7 @@ public class GameMenu extends InputAdapter implements Screen {
         errorLabel = new Label("", skin);
     }
 
-    /**
-     * Sets the current player to the logged-in user for individual farm views
-     */
+
     private void setCurrentPlayerToLoggedInUser() {
         if (App.getLoggedInUser() != null) {
             String loggedInUsername = App.getLoggedInUser().getUserName();
@@ -737,6 +735,7 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
         renderWeather(batch);
+        renderReconnectionStatus(batch);
 
         renderLightingOverlay();
 
@@ -1076,10 +1075,6 @@ public class GameMenu extends InputAdapter implements Screen {
         camera.update();
     }
 
-    /**
-     * Get the current player's character in multiplayer mode
-     * This ensures each player's view follows their own character
-     */
     private Player getCurrentPlayerCharacter() {
         // Safety check: if there's no current game, return null
         if (App.getCurrentGame() == null) {
@@ -1736,6 +1731,30 @@ public class GameMenu extends InputAdapter implements Screen {
         timeSinceError = 0f;
     }
 
+    // Reconnection notification methods
+    public void showReconnectionNotification() {
+        showNotification("Server connection lost. Attempting to reconnect... (2 minutes remaining)", false);
+    }
+
+    public void showReconnectionSuccessNotification() {
+        showNotification("Reconnection successful!", true);
+    }
+
+    public void showReconnectionTimeoutNotification() {
+        showNotification("Reconnection timeout reached. Game will be terminated.", false);
+
+        // Schedule game termination after showing the notification
+        Gdx.app.postRunnable(() -> {
+            try {
+                Thread.sleep(3000); // Wait 3 seconds for user to see the message
+                Gdx.app.exit(); // Exit the game
+            } catch (InterruptedException e) {
+                logger.error("Error waiting before game exit", e);
+                Gdx.app.exit();
+            }
+        });
+    }
+
     public String getSeason() {
         return App.getCurrentGame().getDate().getSeason().name();
     }
@@ -2122,6 +2141,63 @@ public class GameMenu extends InputAdapter implements Screen {
 
                 batch.setColor(oldColor);
             }
+        }
+    }
+
+    private void renderReconnectionStatus(SpriteBatch batch) {
+        if (webSocketClient != null && webSocketClient.isReconnecting()) {
+            // End the current batch to switch to ShapeRenderer
+            if (batch.isDrawing()) {
+                batch.end();
+            }
+
+            // Use ShapeRenderer for the overlay
+            if (shapeRenderer == null) {
+                shapeRenderer = new ShapeRenderer();
+            }
+
+            // Enable blending for transparency
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+            // Set projection matrix for screen coordinates
+            shapeRenderer.setProjectionMatrix(stage.getCamera().combined);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            shapeRenderer.setColor(0, 0, 0, 0.7f);
+            shapeRenderer.rect(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            shapeRenderer.end();
+
+            Gdx.gl.glDisable(GL20.GL_BLEND);
+
+            // Restart the batch for text rendering
+            batch.begin();
+            batch.setProjectionMatrix(stage.getCamera().combined);
+
+            // Render reconnection status text
+            if (font == null) {
+                font = new BitmapFont();
+                font.getData().setScale(2f);
+            }
+
+            String statusText = "Server connection lost";
+            String timeText = String.format("Remaining time: %d seconds", webSocketClient.getRemainingReconnectionTime() / 1000);
+
+            // Calculate text positions
+            float statusX = Gdx.graphics.getWidth() / 2f - font.draw(batch, statusText, 0, 0, 0, statusText.length(), true).width / 2f;
+            float timeX = Gdx.graphics.getWidth() / 2f - font.draw(batch, timeText, 0, 0, 0, timeText.length(), true).width / 2f;
+            float statusY = Gdx.graphics.getHeight() / 2f + 50;
+            float timeY = Gdx.graphics.getHeight() / 2f;
+
+            // Draw status text in red
+            font.setColor(Color.RED);
+            font.draw(batch, statusText, statusX, statusY);
+
+            // Draw time text in yellow
+            font.setColor(Color.YELLOW);
+            font.draw(batch, timeText, timeX, timeY);
+
+            // Reset color
+            font.setColor(Color.WHITE);
         }
     }
 
