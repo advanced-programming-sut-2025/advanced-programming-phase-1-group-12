@@ -749,6 +749,12 @@ public class GameMenu extends InputAdapter implements Screen {
         renderLightingOverlay();
 
 
+        // Render full-screen player interaction menu if active
+        if (showingFullScreenMenu) {
+            renderFullScreenMenu();
+            return; // Don't render the normal game screen when showing full-screen menu
+        }
+
         stage.act(delta);
         stage.draw();
         renderClockHand();
@@ -919,6 +925,29 @@ public class GameMenu extends InputAdapter implements Screen {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        // Convert screen coordinates to world coordinates
+        Vector3 world = camera.unproject(new Vector3(screenX, screenY, 0));
+        int tileX = (int) (world.x / 100f);
+        int tileY = (int) (world.y / 100f);
+        Location clickedLocation = App.getCurrentGame().getMainMap().findLocation(tileX, tileY);
+        
+        if (clickedLocation == null) {
+            return false;
+        }
+        
+        // Check if clicked on another player
+        if (clickedLocation.getObjectInTile() instanceof Player) {
+            Player clickedPlayer = (Player) clickedLocation.getObjectInTile();
+            Player currentPlayer = App.getCurrentPlayerLazy();
+            
+            // Don't interact with yourself
+            if (!clickedPlayer.equals(currentPlayer)) {
+                showFullScreenPlayerInteractionMenu(clickedPlayer);
+                return true;
+            }
+        }
+        
+        // Handle tool usage if player has a tool equipped
         if (App.getCurrentPlayerLazy().getCurrentTool() != null) {
             Location targetLocation = getClickedLocation(screenX, screenY);
             if (targetLocation != null) {
@@ -926,6 +955,7 @@ public class GameMenu extends InputAdapter implements Screen {
                 return true;
             }
         }
+        
         return false;
     }
 
@@ -3558,6 +3588,126 @@ public class GameMenu extends InputAdapter implements Screen {
         
         // Focus on the text field for immediate typing
         stage.setKeyboardFocus(usernameField);
+    }
+
+    private boolean showingFullScreenMenu = false;
+    private Player targetPlayerForMenu = null;
+    private Texture backgroundTexture = null;
+    
+    public void showFullScreenPlayerInteractionMenu(Player targetPlayer) {
+        targetPlayerForMenu = targetPlayer;
+        showingFullScreenMenu = true;
+        
+        // Load the background texture if not already loaded
+        if (backgroundTexture == null) {
+            backgroundTexture = new Texture("assets/NPC/RelationShip/backFriendship.png");
+        }
+    }
+    
+    private void renderFullScreenMenu() {
+        if (!showingFullScreenMenu || targetPlayerForMenu == null) return;
+        
+        // Clear the screen
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        
+        // Draw background
+        batch.begin();
+        batch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.end();
+        
+        // Create a temporary stage for the menu
+        Stage menuStage = new Stage(new ScreenViewport());
+        Gdx.input.setInputProcessor(menuStage);
+        
+        // Create main table for content
+        Table mainTable = new Table();
+        mainTable.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        mainTable.setPosition(0, 0);
+        
+        // Title
+        Label titleLabel = new Label("دوست حضوری", skin);
+        titleLabel.setFontScale(2.0f);
+        titleLabel.setAlignment(Align.center);
+        titleLabel.setColor(Color.WHITE);
+        mainTable.add(titleLabel).colspan(3).pad(50).row();
+        
+        // Subtitle with player name
+        Label subtitleLabel = new Label("Interaction with " + targetPlayerForMenu.getUser().getUserName(), skin);
+        subtitleLabel.setFontScale(1.5f);
+        subtitleLabel.setAlignment(Align.center);
+        subtitleLabel.setColor(Color.WHITE);
+        mainTable.add(subtitleLabel).colspan(3).pad(20).row();
+        
+        // Create buttons for the three interactions
+        TextButton hugButton = new TextButton("🤗 بغلکردن", skin);
+        TextButton flowerButton = new TextButton("🌹 گلخریدن", skin);
+        TextButton marriageButton = new TextButton("💍 ازدواجکردن", skin);
+        TextButton cancelButton = new TextButton("Cancel", skin);
+        
+        // Style the buttons
+        float buttonWidth = 300f;
+        float buttonHeight = 80f;
+        float buttonSpacing = 30f;
+        
+        hugButton.setSize(buttonWidth, buttonHeight);
+        flowerButton.setSize(buttonWidth, buttonHeight);
+        marriageButton.setSize(buttonWidth, buttonHeight);
+        cancelButton.setSize(buttonWidth, buttonHeight);
+        
+        hugButton.getLabel().setFontScale(1.5f);
+        flowerButton.getLabel().setFontScale(1.5f);
+        marriageButton.getLabel().setFontScale(1.5f);
+        cancelButton.getLabel().setFontScale(1.2f);
+        
+        // Add click listeners
+        hugButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                performHug(targetPlayerForMenu.getUser().getUserName());
+                closeFullScreenMenu();
+            }
+        });
+        
+        flowerButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                performFlower(targetPlayerForMenu.getUser().getUserName());
+                closeFullScreenMenu();
+            }
+        });
+        
+        marriageButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                showMarriageProposalDialog(targetPlayerForMenu.getUser().getUserName());
+                closeFullScreenMenu();
+            }
+        });
+        
+        cancelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                closeFullScreenMenu();
+            }
+        });
+        
+        // Add buttons to the table
+        mainTable.add(hugButton).pad(buttonSpacing).row();
+        mainTable.add(flowerButton).pad(buttonSpacing).row();
+        mainTable.add(marriageButton).pad(buttonSpacing).row();
+        mainTable.add(cancelButton).pad(buttonSpacing).row();
+        
+        menuStage.addActor(mainTable);
+        
+        // Render the menu stage
+        menuStage.act();
+        menuStage.draw();
+    }
+    
+    private void closeFullScreenMenu() {
+        showingFullScreenMenu = false;
+        targetPlayerForMenu = null;
+        Gdx.input.setInputProcessor(stage);
     }
 
 }
