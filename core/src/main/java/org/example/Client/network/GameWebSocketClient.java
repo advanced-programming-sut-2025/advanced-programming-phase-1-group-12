@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.Common.network.GameProtocol;
 import org.example.Common.network.events.GameStateUpdateEvent;
 import org.example.Client.views.GameMenu;
+import org.example.Common.models.Fundementals.App;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import okhttp3.*;
@@ -51,7 +52,9 @@ public class GameWebSocketClient {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
         
         try {
-            String wsUrl = serverUrl.replace("http", "ws") + "/ws?userId=" + userId + "&gameId=" + gameId;
+            // Get auth token from the current user session
+            String authToken = App.getLoggedInUser() != null ? App.getLoggedInUser().getToken() : "dummy_token";
+            String wsUrl = serverUrl.replace("http", "ws") + "/ws?userId=" + userId + "&token=" + authToken + "&gameId=" + gameId;
             Request request = new Request.Builder()
                 .url(wsUrl)
                 .build();

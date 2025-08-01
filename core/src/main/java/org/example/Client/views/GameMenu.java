@@ -2272,23 +2272,26 @@ public class GameMenu extends InputAdapter implements Screen {
 
     private void initializeWebSocketClient() {
         try {
-            if (App.getLoggedInUser() != null && App.getCurrentGame() != null) {
+            if (App.getLoggedInUser() != null && App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
                 String userId = App.getLoggedInUser().getUserName();
-                // For now, use a simple game ID - you may need to implement getGameId() in Game class
-                String gameId = "game_" + System.currentTimeMillis(); // Placeholder
+                String gameId = String.valueOf(App.getCurrentGame().getGameId()); // Convert int to String
                 String serverUrl = "http://localhost:8080"; // Configure based on your server
 
+                logger.info("Initializing WebSocket client for multiplayer game: userId={}, gameId={}", userId, gameId);
+                
                 webSocketClient = new GameWebSocketClient(serverUrl, userId, gameId, this);
                 webSocketClient.connect().thenAccept(success -> {
                     if (success) {
-                        logger.info("WebSocket client connected successfully");
+                        logger.info("WebSocket client connected successfully for multiplayer game");
                     } else {
-                        logger.warn("WebSocket client connection failed");
+                        logger.warn("WebSocket client connection failed for multiplayer game");
                     }
                 }).exceptionally(throwable -> {
-                    logger.error("WebSocket client connection error", throwable);
+                    logger.error("WebSocket client connection error for multiplayer game", throwable);
                     return null;
                 });
+            } else {
+                logger.debug("Skipping WebSocket client initialization - not in multiplayer mode or missing user/game");
             }
         } catch (Exception e) {
             logger.error("Failed to initialize WebSocket client", e);

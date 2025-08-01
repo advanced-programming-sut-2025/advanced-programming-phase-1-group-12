@@ -325,8 +325,11 @@ public class PlayerController {
         if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer() && networkCommandSender != null) {
             try {
                 // Send WebSocket movement update for real-time synchronization
-                networkCommandSender.sendPlayerMovementWebSocket(newX, newY);
-                logger.debug("Sent movement update to server: ({}, {})", newX, newY);
+                // Convert from scaled coordinates (100x) to original coordinates
+                int originalX = (int) (newX / 100f);
+                int originalY = (int) (newY / 100f);
+                networkCommandSender.sendPlayerMovementWebSocket(originalX, originalY);
+                logger.debug("Sent movement update to server: ({}, {})", originalX, originalY);
             } catch (Exception e) {
                 logger.error("Failed to send movement update to server", e);
             }

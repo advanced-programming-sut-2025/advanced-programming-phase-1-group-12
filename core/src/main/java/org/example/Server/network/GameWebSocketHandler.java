@@ -81,13 +81,12 @@ public class GameWebSocketHandler {
         }
     }
     
-    public void onMessage(WsContext ctx) throws Exception {
+    public void onMessage(WsMessageContext ctx) throws Exception {
         String connectionId = ctx.getSessionId();
         String userId = connectionToUser.get(connectionId);
         
         try {
-            // TODO: Fix WebSocket message handling - ctx.message() method not available
-            String message = "{}"; // Placeholder - need to implement proper message handling
+            String message = ctx.message();
             logger.debug("WebSocket message received from {}: {}", userId, message);
             
             // Parse message as JSON
