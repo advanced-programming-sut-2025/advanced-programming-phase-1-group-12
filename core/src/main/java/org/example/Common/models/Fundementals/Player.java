@@ -14,6 +14,9 @@ import org.example.Common.models.RelationShips.Trade;
 import org.example.Common.models.ToolsPackage.Tools;
 import org.example.Common.models.enums.Types.Cooking;
 import org.example.Common.models.enums.Types.CraftingRecipe;
+import org.example.Common.network.events.EnergyUpdateEvent;
+import org.example.Server.network.GameSessionManager;
+import org.example.Client.network.NetworkCommandSender;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -117,23 +120,78 @@ public class Player {
 
 
     public void setEnergy(int energy) {
+        System.out.println("DEBUG: setEnergy called for player " + this.getUser().getUserName() + " with energy: " + energy);
+        setEnergyInternal(energy);
+        
+        // Broadcast energy update to all players in multiplayer mode
+        if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
+            System.out.println("DEBUG: Game is multiplayer, attempting to broadcast energy update");
+            try {
+                // Send energy update via WebSocket client
+                // This will be handled by the NetworkCommandSender
+                if (App.getCurrentGame().getNetworkCommandSender() != null) {
+                    System.out.println("DEBUG: NetworkCommandSender exists, sending energy update WebSocket");
+                    App.getCurrentGame().getNetworkCommandSender().sendEnergyUpdateWebSocket(
+                        this.getUser().getUserName(), 
+                        this.energy, 
+                        200 // max energy
+                    );
+                    System.out.println("DEBUG: Energy update WebSocket sent successfully");
+                } else {
+                    System.out.println("DEBUG: NetworkCommandSender is null! Trying to get from PlayerController");
+                    // Fallback: try to get NetworkCommandSender from PlayerController
+                    if (this.playerController != null && this.playerController instanceof org.example.Client.controllers.movingPlayer.ClientPlayerController) {
+                        org.example.Client.controllers.movingPlayer.ClientPlayerController clientController = 
+                            (org.example.Client.controllers.movingPlayer.ClientPlayerController) this.playerController;
+                        NetworkCommandSender sender = clientController.getNetworkCommandSender();
+                        if (sender != null) {
+                            System.out.println("DEBUG: Got NetworkCommandSender from PlayerController, sending energy update");
+                            sender.sendEnergyUpdateWebSocket(
+                                this.getUser().getUserName(), 
+                                this.energy, 
+                                200 // max energy
+                            );
+                            System.out.println("DEBUG: Energy update WebSocket sent successfully via PlayerController");
+                        } else {
+                            System.out.println("DEBUG: NetworkCommandSender is null even from PlayerController");
+                        }
+                    } else {
+                        System.out.println("DEBUG: PlayerController is null or not ClientPlayerController");
+                    }
+                }
+            } catch (Exception e) {
+                // Log error but don't break the game
+                System.err.println("Failed to broadcast energy update: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("DEBUG: Game is not multiplayer or App.getCurrentGame() is null");
+        }
+    }
+
+    /**
+     * Internal method to set energy without broadcasting (used for receiving updates)
+     */
+    public void setEnergyInternal(int energy) {
         this.energy = energy;
     }
 
     public void increaseEnergy(int amount) {
+        int newEnergy;
         if (App.getCurrentGame().getDate().getDaysPassed(getRejectDate()) <= 7) {
             if (energy + amount > 200 && !isEnergyUnlimited) {
-                energy = 200;
+                newEnergy = 200;
             } else {
-                energy += amount / 2;
+                newEnergy = energy + (amount / 2);
             }
         } else {
             if (energy + amount > 200 && !isEnergyUnlimited) {
-                energy = 200;
+                newEnergy = 200;
             } else {
-                energy += amount;
+                newEnergy = energy + amount;
             }
         }
+        setEnergy(newEnergy);
     }
 
     public int getEnergy() {
@@ -232,11 +290,13 @@ public class Player {
         if (isEnergyUnlimited) {
             return;
         }
+        int newEnergy;
         if (energy - amount < 0) {
-            energy = 0;
+            newEnergy = 0;
         } else {
-            energy -= amount;
+            newEnergy = energy - amount;
         }
+        setEnergy(newEnergy);
     }
 
     public boolean isEnergyUnlimited() {
@@ -324,10 +384,12 @@ public class Player {
     }
 
     public PlayerController getPlayerController() {
+        System.out.println("DEBUG: getPlayerController called for player " + this.getUser().getUserName() + " returning: " + (playerController != null ? playerController.getClass().getSimpleName() : "null"));
         return playerController;
     }
 
     public void setPlayerController(PlayerController playerController) {
+        System.out.println("DEBUG: setPlayerController called for player " + this.getUser().getUserName() + " with controller type: " + (playerController != null ? playerController.getClass().getSimpleName() : "null"));
         this.playerController = playerController;
     }
 

@@ -231,6 +231,8 @@ public class GameWebSocketClient {
             Map<String, Object> messageData = objectMapper.readValue(message, Map.class);
             String messageType = (String) messageData.get("type");
             
+            System.out.println("DEBUG: Client received message type: " + messageType + " with data: " + messageData);
+            
             if (messageType == null) {
                 logger.warn("Received message without type: {}", message);
                 return;
@@ -238,15 +240,23 @@ public class GameWebSocketClient {
             
             switch (messageType) {
                 case GameProtocol.WS_GAME_STATE_UPDATE:
+                    System.out.println("DEBUG: Handling game state update");
                     handleGameStateUpdate(messageData);
                     break;
                 case GameProtocol.WS_PLAYER_MOVED:
+                    System.out.println("DEBUG: Handling player movement");
                     handlePlayerMovement(messageData);
                     break;
+                case GameProtocol.WS_ENERGY_UPDATE:
+                    System.out.println("DEBUG: Handling energy update");
+                    handleEnergyUpdate(messageData);
+                    break;
                 case GameProtocol.WS_CHAT_MESSAGE:
+                    System.out.println("DEBUG: Handling chat message");
                     handleChatMessage(messageData);
                     break;
                 default:
+                    System.out.println("DEBUG: Unknown message type: " + messageType);
                     logger.debug("Received unknown message type: {}", messageType);
                     break;
             }
@@ -300,6 +310,47 @@ public class GameWebSocketClient {
     private void handleChatMessage(Map<String, Object> messageData) {
         // Handle chat messages if needed
         logger.debug("Received chat message: {}", messageData);
+    }
+
+    private void handleEnergyUpdate(Map<String, Object> messageData) {
+        try {
+            System.out.println("DEBUG: Client received energy update message: " + messageData);
+            String playerId = (String) messageData.get("playerId");
+            if (playerId == null) {
+                // Fallback to username if playerId is not available
+                playerId = (String) messageData.get("username");
+            }
+            Integer currentEnergy = (Integer) messageData.get("currentEnergy");
+            Integer maxEnergy = (Integer) messageData.get("maxEnergy");
+            String energyStatus = (String) messageData.get("energyStatus");
+            
+            System.out.println("DEBUG: Parsed energy update - playerId: " + playerId + ", currentEnergy: " + currentEnergy + ", maxEnergy: " + maxEnergy + ", status: " + energyStatus);
+            
+            logger.debug("Received energy update: playerId={}, currentEnergy={}, maxEnergy={}, status={}", 
+                       playerId, currentEnergy, maxEnergy, energyStatus);
+            
+            if (playerId != null && currentEnergy != null && maxEnergy != null) {
+                Map<String, Object> data = Map.of(
+                    "playerId", playerId, 
+                    "currentEnergy", currentEnergy, 
+                    "maxEnergy", maxEnergy,
+                    "energyStatus", energyStatus != null ? energyStatus : "normal"
+                );
+                System.out.println("DEBUG: Calling gameMenu.handleGameStateUpdate with energy_updated and data: " + data);
+                gameMenu.handleGameStateUpdate("energy_updated", data);
+                System.out.println("DEBUG: Energy update processed successfully for player: " + playerId);
+                logger.debug("Processed energy update for player: {}", playerId);
+            } else {
+                System.out.println("DEBUG: Invalid energy update data - playerId: " + playerId + ", currentEnergy: " + currentEnergy + ", maxEnergy: " + maxEnergy);
+                logger.warn("Invalid energy update data: playerId={}, currentEnergy={}, maxEnergy={}", 
+                           playerId, currentEnergy, maxEnergy);
+            }
+            
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error handling energy update: " + e.getMessage());
+            logger.error("Error handling energy update", e);
+            e.printStackTrace();
+        }
     }
     
     public void sendGameStateUpdate(String updateType, Map<String, Object> data) {

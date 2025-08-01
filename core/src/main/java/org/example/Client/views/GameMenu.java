@@ -177,6 +177,9 @@ public class GameMenu extends InputAdapter implements Screen {
                 case "player_moved":
                     handlePlayerPositionUpdate(data);
                     break;
+                case "energy_updated":
+                    handleEnergyUpdate(data);
+                    break;
                 case "npc_updated":
                     handleNPCUpdate(data);
                     break;
@@ -229,6 +232,50 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         } else {
             logger.warn("Invalid player position data: playerId={}, x={}, y={}", playerId, x, y);
+        }
+    }
+
+    private void handleEnergyUpdate(Map<String, Object> data) {
+        System.out.println("DEBUG: GameMenu.handleEnergyUpdate called with data: " + data);
+        String playerId = (String) data.get("playerId");
+        Integer currentEnergy = (Integer) data.get("currentEnergy");
+        Integer maxEnergy = (Integer) data.get("maxEnergy");
+        String energyStatus = (String) data.get("energyStatus");
+
+        System.out.println("DEBUG: Parsed energy update data - playerId: " + playerId + ", currentEnergy: " + currentEnergy + ", maxEnergy: " + maxEnergy + ", status: " + energyStatus);
+
+        logger.debug("Handling energy update: playerId={}, currentEnergy={}, maxEnergy={}, status={}", 
+                   playerId, currentEnergy, maxEnergy, energyStatus);
+
+        if (playerId != null && currentEnergy != null && maxEnergy != null) {
+            // Find the player and update their energy
+            boolean playerFound = false;
+            System.out.println("DEBUG: Looking for player with username: " + playerId);
+            System.out.println("DEBUG: Available players in game: " + App.getCurrentGame().getPlayers().size());
+            
+            for (Player player : App.getCurrentGame().getPlayers()) {
+                System.out.println("DEBUG: Checking player: " + player.getUser().getUserName());
+                if (player.getUser().getUserName().equals(playerId)) {
+                    // Update the player's energy (without triggering another broadcast)
+                    System.out.println("DEBUG: Found player, updating energy from " + player.getEnergy() + " to " + currentEnergy);
+                    player.setEnergyInternal(currentEnergy);
+                    System.out.println("DEBUG: Player energy updated successfully");
+                    logger.debug("Updated player {} energy to {}/{}", playerId, currentEnergy, maxEnergy);
+                    playerFound = true;
+                    break;
+                }
+            }
+
+            if (!playerFound) {
+                System.out.println("DEBUG: Player " + playerId + " not found in current game");
+                logger.warn("Player {} not found in current game", playerId);
+            } else {
+                System.out.println("DEBUG: Player energy updated successfully for: " + playerId);
+            }
+        } else {
+            System.out.println("DEBUG: Invalid energy update data - playerId: " + playerId + ", currentEnergy: " + currentEnergy + ", maxEnergy: " + maxEnergy);
+            logger.warn("Invalid energy update data: playerId={}, currentEnergy={}, maxEnergy={}", 
+                       playerId, currentEnergy, maxEnergy);
         }
     }
 
@@ -561,6 +608,7 @@ public class GameMenu extends InputAdapter implements Screen {
         for (Player p : App.getCurrentGame().getPlayers()) {
             ProgressBar bar = energyBars.get(p);
             if (bar != null) {
+                System.out.println("DEBUG: Updating energy bar for player " + p.getUser().getUserName() + " from " + bar.getValue() + " to " + p.getEnergy());
                 bar.setValue(p.getEnergy());
 
                 // Update turn indicator for multiplayer

@@ -25,6 +25,9 @@ public class Game {
     private boolean isMultiplayer = false;
     private int currentPlayerIndex = 0;
     private boolean isTurnBasedMode = false;
+    
+    // Network communication
+    private org.example.Client.network.NetworkCommandSender networkCommandSender;
 
     public Player getCurrentPlayer() {
         return currentPlayer;
@@ -171,6 +174,14 @@ public class Game {
             return true; // In non-turn-based mode, all players can move
         }
         return currentPlayer.getUser().getUserName().equals(playerName);
+    }
+    
+    public org.example.Client.network.NetworkCommandSender getNetworkCommandSender() {
+        return networkCommandSender;
+    }
+    
+    public void setNetworkCommandSender(org.example.Client.network.NetworkCommandSender networkCommandSender) {
+        this.networkCommandSender = networkCommandSender;
     }
 
 }

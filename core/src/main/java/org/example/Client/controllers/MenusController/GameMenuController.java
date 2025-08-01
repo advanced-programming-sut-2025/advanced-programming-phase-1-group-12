@@ -409,6 +409,14 @@ public class GameMenuController {
         if (usernames.size() > 1) {
             App.getCurrentGame().setMultiplayer(true);
             System.out.println("Multiplayer game started with " + usernames.size() + " players");
+            
+            // Initialize NetworkCommandSender for multiplayer communication
+            if (Main.getMain() != null && Main.getMain().getServerConnection() != null) {
+                org.example.Client.network.NetworkCommandSender networkSender = 
+                    new org.example.Client.network.NetworkCommandSender(Main.getMain().getServerConnection());
+                App.getCurrentGame().setNetworkCommandSender(networkSender);
+                System.out.println("NetworkCommandSender initialized for multiplayer game");
+            }
         }
 
         MapSetUp.showMapWithFarms(App.getCurrentGame().getMainMap());

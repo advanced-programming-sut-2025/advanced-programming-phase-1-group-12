@@ -67,7 +67,11 @@ public class PlayerController {
         
         // Initialize network command sender for multiplayer movement updates
         if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
+            System.out.println("DEBUG: Initializing NetworkCommandSender for multiplayer game");
             this.networkCommandSender = new NetworkCommandSender(Main.getMain().getServerConnection());
+            System.out.println("DEBUG: NetworkCommandSender created: " + (this.networkCommandSender != null));
+        } else {
+            System.out.println("DEBUG: Not initializing NetworkCommandSender - game is null or not multiplayer");
         }
 
         // TODO: Fix PlayerController type mismatch - need to create a common interface
@@ -253,6 +257,7 @@ public class PlayerController {
             if (isWalkable(newX, newY)) {
                 facing = Dir.UP;
                 int newEnergy = player.getEnergy() - 1;
+                System.out.println("DEBUG: Player " + player.getUser().getUserName() + " moving UP, reducing energy from " + player.getEnergy() + " to " + newEnergy);
                 player.setEnergy(newEnergy);
                 
                 // Check if energy reached zero in multiplayer
@@ -269,6 +274,7 @@ public class PlayerController {
             if (isWalkable(newX, newY)) {
                 facing = Dir.DOWN;
                 int newEnergy = player.getEnergy() - 1;
+                System.out.println("DEBUG: Player " + player.getUser().getUserName() + " moving DOWN, reducing energy from " + player.getEnergy() + " to " + newEnergy);
                 player.setEnergy(newEnergy);
                 
                 // Check if energy reached zero in multiplayer
@@ -285,6 +291,7 @@ public class PlayerController {
             if (isWalkable(newX, newY)) {
                 facing = Dir.LEFT;
                 int newEnergy = player.getEnergy() - 1;
+                System.out.println("DEBUG: Player " + player.getUser().getUserName() + " moving LEFT, reducing energy from " + player.getEnergy() + " to " + newEnergy);
                 player.setEnergy(newEnergy);
                 
                 // Check if energy reached zero in multiplayer
@@ -301,6 +308,7 @@ public class PlayerController {
             if (isWalkable(newX, newY)) {
                 facing = Dir.RIGHT;
                 int newEnergy = player.getEnergy() - 1;
+                System.out.println("DEBUG: Player " + player.getUser().getUserName() + " moving RIGHT, reducing energy from " + player.getEnergy() + " to " + newEnergy);
                 player.setEnergy(newEnergy);
                 
                 // Check if energy reached zero in multiplayer

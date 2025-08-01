@@ -6,6 +6,10 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 import org.example.Common.models.Fundementals.Player;
 import org.example.Server.controllers.movingPlayer.PlayerController;
+import org.example.Client.controllers.MenusController.GameMenuController;
+import org.example.Client.network.NetworkCommandSender;
+import org.example.Client.Main;
+import org.example.Common.models.Fundementals.App;
 
 import java.util.List;
 
@@ -14,6 +18,8 @@ import java.util.List;
  * without trying to render on the server side
  */
 public class ClientPlayerController extends PlayerController {
+    
+    private NetworkCommandSender networkCommandSender;
     
     private final Animation<TextureRegion> walkDown;
     private final Animation<TextureRegion> walkLeft;
@@ -30,6 +36,15 @@ public class ClientPlayerController extends PlayerController {
     
     public ClientPlayerController(Player player, List<String> players) {
         super(player, null, players);
+        System.out.println("DEBUG: ClientPlayerController constructor called for player: " + player.getUser().getUserName());
+        
+        // Initialize network command sender for multiplayer movement updates
+        System.out.println("DEBUG: Checking multiplayer conditions - App.getCurrentGame(): " + (App.getCurrentGame() != null));
+        if (App.getCurrentGame() != null) {
+            System.out.println("DEBUG: isMultiplayer(): " + App.getCurrentGame().isMultiplayer());
+        }
+        // Don't initialize NetworkCommandSender here - it will be initialized lazily when needed
+        System.out.println("DEBUG: NetworkCommandSender will be initialized lazily when needed");
         
         // Initialize animations
         Texture sheet = player.getPlayerTexture();
@@ -54,5 +69,19 @@ public class ClientPlayerController extends PlayerController {
     public TextureRegion getCurrentFrame() {
         stateTime += 0.016f; // Approximate delta time
         return currentAnim.getKeyFrame(stateTime, true);
+    }
+    
+    // Initialize NetworkCommandSender lazily when needed
+    private void initializeNetworkCommandSender() {
+        if (networkCommandSender == null && App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
+            System.out.println("DEBUG: Lazy initializing NetworkCommandSender for multiplayer game");
+            this.networkCommandSender = new NetworkCommandSender(Main.getMain().getServerConnection());
+            System.out.println("DEBUG: NetworkCommandSender created: " + (this.networkCommandSender != null));
+        }
+    }
+    
+    public NetworkCommandSender getNetworkCommandSender() {
+        initializeNetworkCommandSender();
+        return networkCommandSender;
     }
 } 

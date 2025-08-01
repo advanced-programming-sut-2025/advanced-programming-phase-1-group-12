@@ -98,28 +98,40 @@ public class GameWebSocketHandler {
                 return;
             }
             
+            System.out.println("DEBUG: Server received message type: " + messageType + " from user: " + userId);
             switch (messageType) {
                 case GameProtocol.WS_CHAT_MESSAGE:
+                    System.out.println("DEBUG: Handling chat message");
                     handleChatMessage(ctx, userId, messageData);
                     break;
                     
                 case GameProtocol.WS_PLAYER_MOVED:
+                    System.out.println("DEBUG: Handling player movement");
                     handlePlayerMovement(ctx, userId, messageData);
                     break;
                     
+                case GameProtocol.WS_ENERGY_UPDATE:
+                    System.out.println("DEBUG: Handling energy update");
+                    handleEnergyUpdate(ctx, userId, messageData);
+                    break;
+                    
                 case "ping":
+                    System.out.println("DEBUG: Handling ping");
                     handlePing(ctx, userId);
                     break;
                     
                 case "join_game":
+                    System.out.println("DEBUG: Handling join game");
                     handleJoinGameWebSocket(ctx, userId, messageData);
                     break;
                     
                 case GameProtocol.WS_GAME_STATE_UPDATE:
+                    System.out.println("DEBUG: Handling game state update");
                     handleGameStateUpdate(ctx, userId, messageData);
                     break;
                     
                 default:
+                    System.out.println("DEBUG: Unknown message type: " + messageType);
                     logger.warn("Unknown WebSocket message type: {} from user: {}", messageType, userId);
                     sendError(ctx, "Unknown message type: " + messageType);
                     break;
@@ -248,6 +260,53 @@ public class GameWebSocketHandler {
         } catch (Exception e) {
             logger.error("Error handling player movement", e);
             sendError(ctx, "Failed to process movement");
+        }
+    }
+    
+    private void handleEnergyUpdate(WsContext ctx, String userId, Map<String, Object> messageData) {
+        try {
+            System.out.println("DEBUG: Server received energy update message from userId: " + userId);
+            System.out.println("DEBUG: Message data: " + messageData);
+            
+            String gameId = (String) messageData.get("gameId");
+            String playerId = (String) messageData.get("playerId");
+            Integer currentEnergy = (Integer) messageData.get("currentEnergy");
+            Integer maxEnergy = (Integer) messageData.get("maxEnergy");
+            
+            System.out.println("DEBUG: Parsed data - gameId: " + gameId + ", playerId: " + playerId + ", currentEnergy: " + currentEnergy + ", maxEnergy: " + maxEnergy);
+            
+            if (gameId == null || playerId == null || currentEnergy == null || maxEnergy == null) {
+                System.out.println("DEBUG: Missing required fields for energy update");
+                sendError(ctx, "gameId, playerId, currentEnergy, and maxEnergy are required for energy update");
+                return;
+            }
+            
+            GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            if (gameInstance == null) {
+                System.out.println("DEBUG: Game instance not found for gameId: " + gameId);
+                sendError(ctx, "Game not found");
+                return;
+            }
+            
+            if (!gameInstance.isPlayerConnected(userId)) {
+                System.out.println("DEBUG: User " + userId + " is not connected to game " + gameId);
+                sendError(ctx, "You are not connected to this game");
+                return;
+            }
+            
+            // Create and broadcast energy update event
+            System.out.println("DEBUG: Creating EnergyUpdateEvent and broadcasting to game: " + gameId);
+            EnergyUpdateEvent energyEvent = new EnergyUpdateEvent(gameId, playerId, playerId, currentEnergy, maxEnergy);
+            broadcastToGame(gameId, energyEvent);
+            System.out.println("DEBUG: Energy update broadcasted successfully");
+            
+            logger.debug("Energy update from {} in game {}: {}/{}", playerId, gameId, currentEnergy, maxEnergy);
+            
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error handling energy update: " + e.getMessage());
+            logger.error("Error handling energy update", e);
+            sendError(ctx, "Failed to process energy update");
+            e.printStackTrace();
         }
     }
     

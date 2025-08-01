@@ -321,6 +321,48 @@ public class NetworkCommandSender {
             logger.error("Error sending movement WebSocket message", e);
         }
     }
+
+    public void sendEnergyUpdateWebSocket(String playerId, int currentEnergy, int maxEnergy) {
+        try {
+            System.out.println("DEBUG: sendEnergyUpdateWebSocket called with playerId=" + playerId + ", currentEnergy=" + currentEnergy + ", maxEnergy=" + maxEnergy);
+            if (currentGameId == null) {
+                System.out.println("DEBUG: Cannot send energy update: not in a game");
+                logger.warn("Cannot send energy update: not in a game");
+                return;
+            }
+            
+            Map<String, Object> wsMessage = new HashMap<>();
+            wsMessage.put("type", GameProtocol.WS_ENERGY_UPDATE);
+            wsMessage.put("gameId", currentGameId);
+            wsMessage.put("playerId", playerId);
+            wsMessage.put("currentEnergy", currentEnergy);
+            wsMessage.put("maxEnergy", maxEnergy);
+            wsMessage.put("energyStatus", getEnergyStatus(currentEnergy, maxEnergy));
+            wsMessage.put("timestamp", System.currentTimeMillis());
+            
+            System.out.println("DEBUG: Sending WebSocket energy update message: " + wsMessage);
+            serverConnection.sendWebSocketMessage(wsMessage);
+            System.out.println("DEBUG: Energy update WebSocket message sent successfully");
+            logger.debug("Sent energy update WebSocket message: playerId={}, energy={}/{} for game {}", 
+                       playerId, currentEnergy, maxEnergy, currentGameId);
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error sending energy update WebSocket message: " + e.getMessage());
+            logger.error("Error sending energy update WebSocket message", e);
+            e.printStackTrace();
+        }
+    }
+
+    private String getEnergyStatus(int currentEnergy, int maxEnergy) {
+        if (currentEnergy <= 0) {
+            return "depleted";
+        } else if (currentEnergy < maxEnergy * 0.2) {
+            return "low";
+        } else if (currentEnergy > maxEnergy) {
+            return "buffed";
+        } else {
+            return "normal";
+        }
+    }
     
     public void connectToGameWebSocket(String gameId) {
         try {
