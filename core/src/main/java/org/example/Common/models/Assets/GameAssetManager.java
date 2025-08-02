@@ -125,7 +125,7 @@ public class GameAssetManager {
     public static final Texture WHEAT_FLOUR = new Texture("Crops/Wheat_Flour.png");
     public static final Texture WOOD = new Texture("Crafting/Wood.png");
 
-    public final Texture heartTexture = new Texture("NPC/RelationShip/Heart_1.png");
+    public final Texture heartTexture = new Texture("NPC/RelationShip/Heart.png");
 
     public Texture getHeartTexture() {
         return heartTexture;
