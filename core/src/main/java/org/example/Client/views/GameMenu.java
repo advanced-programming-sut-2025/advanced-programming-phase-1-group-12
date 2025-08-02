@@ -479,6 +479,7 @@ public class GameMenu extends InputAdapter implements Screen {
                         smileTextures[i].setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest); // Use nearest neighbor filtering
                     }
                 }
+                smileTexturesLoaded = true; // Mark textures as loaded
                 System.out.println("DEBUG: Smile textures loaded successfully - frame 0: " + (smileTextures[0] != null) + ", width: " + (smileTextures[0] != null ? smileTextures[0].getWidth() : "null"));
             } catch (Exception e) {
                 System.out.println("DEBUG: Error loading smile textures: " + e.getMessage());
@@ -493,6 +494,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     for (int i = 0; i < smileTextures.length; i++) {
                         smileTextures[i] = emergencyTexture;
                     }
+                    smileTexturesLoaded = true; // Mark textures as loaded even with emergency texture
                     System.out.println("DEBUG: Using emergency yellow texture for smile frames in show()");
                 } catch (Exception emergencyException) {
                     System.out.println("DEBUG: Emergency texture creation failed in show(): " + emergencyException.getMessage());
@@ -3741,6 +3743,9 @@ public class GameMenu extends InputAdapter implements Screen {
     private int currentSmileFrame = 0;
     private float smileAnimationTimer = 0f;
     private final float SMILE_FRAME_DURATION = 0.2f; // Time per smile frame - reduced for faster animation
+    private boolean smileTexturesLoaded = false; // Flag to track if textures are ready
+    private float textureLoadingDelay = 0f; // Small delay to ensure textures are ready
+    private final float TEXTURE_LOADING_DELAY = 0.1f; // 100ms delay
 
     // Heart animation variables
     private Texture heartTexture = null;
@@ -3934,24 +3939,50 @@ public class GameMenu extends InputAdapter implements Screen {
         }
 
         // Initialize smile textures if not already done
-        if (smileTextures[0] == null) {
+        if (!smileTexturesLoaded) {
             try {
                 smileTextures[0] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_1.png"));
                 smileTextures[1] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_2.png"));
                 smileTextures[2] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_3.png"));
                 smileTextures[3] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_4.png"));
+                
+                // Set texture filtering for better quality
+                for (int i = 0; i < smileTextures.length; i++) {
+                    if (smileTextures[i] != null) {
+                        smileTextures[i].setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+                    }
+                }
+                
+                smileTexturesLoaded = true; // Mark textures as loaded
                 System.out.println("DEBUG: Successfully loaded all smile textures for hugging animation");
             } catch (Exception e) {
                 System.out.println("DEBUG: Failed to load smile textures: " + e.getMessage());
                 // Create a fallback texture to prevent null rendering
                 try {
                     Texture fallbackTexture = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_1.png"));
+                    fallbackTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
                     for (int i = 0; i < smileTextures.length; i++) {
                         smileTextures[i] = fallbackTexture;
                     }
-                    System.out.println("DEBUG: Using fallback texture for all smile frames");
+                    smileTexturesLoaded = true; // Mark textures as loaded
+                    System.out.println("DEBUG: Using fallback texture for all smile frames in hugging animation");
                 } catch (Exception fallbackException) {
-                    System.out.println("DEBUG: Even fallback texture failed: " + fallbackException.getMessage());
+                    System.out.println("DEBUG: Even fallback texture failed for hugging animation: " + fallbackException.getMessage());
+                    // Create emergency texture as last resort
+                    try {
+                        Pixmap pixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
+                        pixmap.setColor(Color.YELLOW);
+                        pixmap.fill();
+                        Texture emergencyTexture = new Texture(pixmap);
+                        pixmap.dispose();
+                        for (int i = 0; i < smileTextures.length; i++) {
+                            smileTextures[i] = emergencyTexture;
+                        }
+                        smileTexturesLoaded = true; // Mark textures as loaded
+                        System.out.println("DEBUG: Using emergency yellow texture for hugging animation");
+                    } catch (Exception emergencyException) {
+                        System.out.println("DEBUG: Emergency texture creation failed for hugging: " + emergencyException.getMessage());
+                    }
                 }
             }
         }
@@ -3996,14 +4027,36 @@ public class GameMenu extends InputAdapter implements Screen {
         flowerNotificationCloseTimer = 0f;
         floweringPlayer1 = currentPlayer;
         floweringPlayer2 = targetPlayer;
+        
+        // Reset texture loading delay for this animation
+        textureLoadingDelay = 0f;
 
         // Initialize flower animation setup (but don't start yet)
         if (flowerTexture == null) {
-            flowerTexture = new Texture(Gdx.files.internal("NPC/RelationShip/Bouquet.png"));
+            try {
+                flowerTexture = new Texture(Gdx.files.internal("NPC/RelationShip/Bouquet.png"));
+                flowerTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+                System.out.println("DEBUG: Flower texture loaded successfully");
+            } catch (Exception e) {
+                System.out.println("DEBUG: Failed to load flower texture: " + e.getMessage());
+                // Create emergency flower texture
+                try {
+                    Pixmap pixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
+                    pixmap.setColor(Color.PINK);
+                    pixmap.fill();
+                    flowerTexture = new Texture(pixmap);
+                    pixmap.dispose();
+                    System.out.println("DEBUG: Using emergency pink texture for flower");
+                } catch (Exception emergencyException) {
+                    System.out.println("DEBUG: Emergency flower texture creation failed: " + emergencyException.getMessage());
+                    return; // Don't start animation if we can't load any texture
+                }
+            }
         }
         
-        // Initialize smile textures if not already done (for flower animation)
-        if (smileTextures[0] == null) {
+        // Ensure smile textures are loaded before starting any animation
+        if (!smileTexturesLoaded) {
+            System.out.println("DEBUG: Loading smile textures for flower animation...");
             try {
                 smileTextures[0] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_1.png"));
                 smileTextures[1] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_2.png"));
@@ -4017,6 +4070,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     }
                 }
                 
+                smileTexturesLoaded = true; // Mark textures as loaded
                 System.out.println("DEBUG: Successfully loaded all smile textures for flower animation");
             } catch (Exception e) {
                 System.out.println("DEBUG: Failed to load smile textures for flower animation: " + e.getMessage());
@@ -4027,6 +4081,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     for (int i = 0; i < smileTextures.length; i++) {
                         smileTextures[i] = fallbackTexture;
                     }
+                    smileTexturesLoaded = true; // Mark textures as loaded
                     System.out.println("DEBUG: Using fallback texture for all smile frames in flower animation");
                 } catch (Exception fallbackException) {
                     System.out.println("DEBUG: Even fallback texture failed for flower animation: " + fallbackException.getMessage());
@@ -4040,12 +4095,15 @@ public class GameMenu extends InputAdapter implements Screen {
                         for (int i = 0; i < smileTextures.length; i++) {
                             smileTextures[i] = emergencyTexture;
                         }
-                        System.out.println("DEBUG: Using emergency yellow texture for smile frames");
+                        smileTexturesLoaded = true; // Mark textures as loaded
+                        System.out.println("DEBUG: Using emergency yellow texture for flower animation");
                     } catch (Exception emergencyException) {
-                        System.out.println("DEBUG: Emergency texture creation failed: " + emergencyException.getMessage());
+                        System.out.println("DEBUG: Emergency texture creation failed for flower: " + emergencyException.getMessage());
                     }
                 }
             }
+        } else {
+            System.out.println("DEBUG: Smile textures already loaded, skipping loading for flower animation");
         }
 
         // Calculate flower animation positions
@@ -4120,6 +4178,15 @@ public class GameMenu extends InputAdapter implements Screen {
         if (!isHugging) {
             return;
         }
+        
+        // Add a small delay to ensure textures are fully loaded
+        if (!smileTexturesLoaded) {
+            textureLoadingDelay += delta;
+            if (textureLoadingDelay >= TEXTURE_LOADING_DELAY) {
+                System.out.println("DEBUG: Texture loading delay completed, textures should be ready");
+            }
+            return;
+        }
 
         huggingTimer += delta;
         smileAnimationTimer += delta;
@@ -4177,6 +4244,15 @@ public class GameMenu extends InputAdapter implements Screen {
         if (!isFlowering) {
             return;
         }
+        
+        // Add a small delay to ensure textures are fully loaded
+        if (!smileTexturesLoaded) {
+            textureLoadingDelay += delta;
+            if (textureLoadingDelay >= TEXTURE_LOADING_DELAY) {
+                System.out.println("DEBUG: Texture loading delay completed for flower animation, textures should be ready");
+            }
+            return;
+        }
 
         floweringTimer += delta;
         smileAnimationTimer += delta;
@@ -4222,7 +4298,7 @@ public class GameMenu extends InputAdapter implements Screen {
         }
         
         // Safety check: ensure smile textures are loaded
-        if (smileTextures == null || smileTextures[0] == null) {
+        if (!smileTexturesLoaded) {
             System.out.println("DEBUG: Smile textures not ready for hug animation, skipping render");
             return;
         }
@@ -4275,9 +4351,14 @@ public class GameMenu extends InputAdapter implements Screen {
             return;
         }
         
-        // Safety check: ensure smile textures are loaded
-        if (smileTextures == null || smileTextures[0] == null) {
+        // Safety check: ensure smile textures and flower texture are loaded
+        if (!smileTexturesLoaded) {
             System.out.println("DEBUG: Smile textures not ready for flower animation, skipping render");
+            return;
+        }
+        
+        if (flowerTexture == null) {
+            System.out.println("DEBUG: Flower texture not ready for flower animation, skipping render");
             return;
         }
 
@@ -4301,21 +4382,25 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Render flower animation
         if (flowerAnimationActive && flowerTexture != null) {
-            // Convert world coordinates to screen coordinates
-            Vector3 flowerScreenPos = camera.project(new Vector3(flowerX, flowerY, 0));
+            try {
+                // Convert world coordinates to screen coordinates
+                Vector3 flowerScreenPos = camera.project(new Vector3(flowerX, flowerY, 0));
 
-            float flowerSize = 32f; // Size of the flower
-            float alpha = 1.0f;
+                float flowerSize = 32f; // Size of the flower
+                float alpha = 1.0f;
 
-            // Fade out the flower as it reaches the destination
-            if (flowerAnimationProgress > 0.8f) {
-                alpha = 1.0f - (flowerAnimationProgress - 0.8f) / 0.2f;
+                // Fade out the flower as it reaches the destination
+                if (flowerAnimationProgress > 0.8f) {
+                    alpha = 1.0f - (flowerAnimationProgress - 0.8f) / 0.2f;
+                }
+
+                // Set color with alpha for fading effect
+                batch.setColor(1.0f, 1.0f, 1.0f, alpha);
+                batch.draw(flowerTexture, flowerScreenPos.x - flowerSize/2, flowerScreenPos.y - flowerSize/2, flowerSize, flowerSize);
+                batch.setColor(1.0f, 1.0f, 1.0f, 1.0f); // Reset color
+            } catch (Exception e) {
+                System.out.println("DEBUG: Error rendering flower texture: " + e.getMessage());
             }
-
-            // Set color with alpha for fading effect
-            batch.setColor(1.0f, 1.0f, 1.0f, alpha);
-            batch.draw(flowerTexture, flowerScreenPos.x - flowerSize/2, flowerScreenPos.y - flowerSize/2, flowerSize, flowerSize);
-            batch.setColor(1.0f, 1.0f, 1.0f, 1.0f); // Reset color
         }
     }
 
