@@ -244,7 +244,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
         System.out.println("DEBUG: Parsed energy update data - playerId: " + playerId + ", currentEnergy: " + currentEnergy + ", maxEnergy: " + maxEnergy + ", status: " + energyStatus);
 
-        logger.debug("Handling energy update: playerId={}, currentEnergy={}, maxEnergy={}, status={}", 
+        logger.debug("Handling energy update: playerId={}, currentEnergy={}, maxEnergy={}, status={}",
                    playerId, currentEnergy, maxEnergy, energyStatus);
 
         if (playerId != null && currentEnergy != null && maxEnergy != null) {
@@ -252,7 +252,7 @@ public class GameMenu extends InputAdapter implements Screen {
             boolean playerFound = false;
             System.out.println("DEBUG: Looking for player with username: " + playerId);
             System.out.println("DEBUG: Available players in game: " + App.getCurrentGame().getPlayers().size());
-            
+
             for (Player player : App.getCurrentGame().getPlayers()) {
                 System.out.println("DEBUG: Checking player: " + player.getUser().getUserName());
                 if (player.getUser().getUserName().equals(playerId)) {
@@ -274,7 +274,7 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         } else {
             System.out.println("DEBUG: Invalid energy update data - playerId: " + playerId + ", currentEnergy: " + currentEnergy + ", maxEnergy: " + maxEnergy);
-            logger.warn("Invalid energy update data: playerId={}, currentEnergy={}, maxEnergy={}", 
+            logger.warn("Invalid energy update data: playerId={}, currentEnergy={}, maxEnergy={}",
                        playerId, currentEnergy, maxEnergy);
         }
     }
@@ -463,8 +463,35 @@ public class GameMenu extends InputAdapter implements Screen {
         stage.addActor(timeLabel);
         stage.addActor(goldLabel);
 
-        // Initialize friends button
         initializeFriendsButton();
+
+        if (heartTexture == null) {
+            try {
+                heartTexture = new Texture(Gdx.files.internal("NPC/RelationShip/Heart_1.png"));
+                System.out.println("DEBUG: Heart texture loaded successfully - width: " + heartTexture.getWidth() + ", height: " + heartTexture.getHeight());
+            } catch (Exception e) {
+                System.out.println("DEBUG: Error loading heart texture: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        if (smileTextures[0] == null) {
+            try {
+                smileTextures[0] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_1.png"));
+                smileTextures[1] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_2.png"));
+                smileTextures[2] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_3.png"));
+                smileTextures[3] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_4.png"));
+
+                for (int i = 0; i < 4; i++) {
+                    if (smileTextures[i] != null) {
+                        smileTextures[i].setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest); // Use nearest neighbor filtering
+                    }
+                }
+                System.out.println("DEBUG: Smile textures loaded successfully - frame 0: " + (smileTextures[0] != null) + ", width: " + (smileTextures[0] != null ? smileTextures[0].getWidth() : "null"));
+            } catch (Exception e) {
+                System.out.println("DEBUG: Error loading smile textures: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
 
         InputMultiplexer mux = new InputMultiplexer();
         mux.addProcessor(this);
@@ -554,6 +581,7 @@ public class GameMenu extends InputAdapter implements Screen {
         updateClockHandRotation();
 
         updateWeatherSystem(delta);
+        updateHugAnimation(delta);
 
         if (errorLabel.isVisible()) {
             timeSinceError += delta;
@@ -796,6 +824,9 @@ public class GameMenu extends InputAdapter implements Screen {
 
         renderLightingOverlay();
 
+        // Render hug animation after lighting overlay to ensure it's visible
+        renderHugAnimation(batch);
+
 
         // Render full-screen player interaction menu if active
         if (showingFullScreenMenu) {
@@ -913,6 +944,18 @@ public class GameMenu extends InputAdapter implements Screen {
             for (Texture snowTexture : snowTextures) {
                 if (snowTexture != null) {
                     snowTexture.dispose();
+                }
+            }
+        }
+
+        // Dispose hugging animation textures
+        if (heartTexture != null) {
+            heartTexture.dispose();
+        }
+        if (smileTextures != null) {
+            for (Texture smileTexture : smileTextures) {
+                if (smileTexture != null) {
+                    smileTexture.dispose();
                 }
             }
         }
@@ -2326,7 +2369,7 @@ public class GameMenu extends InputAdapter implements Screen {
                 String serverUrl = "http://localhost:8080"; // Configure based on your server
 
                 logger.info("Initializing WebSocket client for multiplayer game: userId={}, gameId={}", userId, gameId);
-                
+
                 webSocketClient = new GameWebSocketClient(serverUrl, userId, gameId, this);
                 webSocketClient.connect().thenAccept(success -> {
                     if (success) {
@@ -3228,8 +3271,9 @@ public class GameMenu extends InputAdapter implements Screen {
         hugButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                System.out.println("DEBUG: Hug button clicked in nearby player menu!");
                 interactionDialog.hide();
-                performHug(targetPlayer.getUser().getUserName());
+                startHugAnimation(targetPlayer);
             }
         });
 
@@ -3648,6 +3692,18 @@ public class GameMenu extends InputAdapter implements Screen {
     private Texture backgroundTexture = null;
     private Stage menuStage = null;
 
+    // Hugging animation variables
+    private boolean isHugging = false;
+    private float huggingTimer = 0f;
+    private final float HUG_DURATION = 3.0f; // Total duration of hug animation
+    private Player huggingPlayer1 = null;
+    private Player huggingPlayer2 = null;
+    private Texture heartTexture = null;
+    private Texture[] smileTextures = new Texture[4];
+    private int currentSmileFrame = 0;
+    private float smileAnimationTimer = 0f;
+    private final float SMILE_FRAME_DURATION = 0.2f; // Time per smile frame - reduced for faster animation
+
     public void showFullScreenPlayerInteractionMenu(Player targetPlayer) {
         targetPlayerForMenu = targetPlayer;
         showingFullScreenMenu = true;
@@ -3707,7 +3763,7 @@ public class GameMenu extends InputAdapter implements Screen {
         hugButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // TODO: Implement hug functionality
+                startHugAnimation(targetPlayerForMenu);
                 closeFullScreenMenu();
             }
         });
@@ -3772,6 +3828,123 @@ public class GameMenu extends InputAdapter implements Screen {
         targetPlayerForMenu = null;
         // Restore input processor to the main game stage
         Gdx.input.setInputProcessor(stage);
+    }
+
+    private void startHugAnimation(Player targetPlayer) {
+        Player currentPlayer = App.getCurrentPlayerLazy();
+        if (currentPlayer == null || targetPlayer == null) {
+            System.out.println("DEBUG: One of the players is null - currentPlayer: " + (currentPlayer != null) + ", targetPlayer: " + (targetPlayer != null));
+            return;
+        }
+
+        float distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - targetPlayer.getUserLocation().getxAxis()) +
+                        Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
+
+        if (distance > 2) {
+            showNotification("Players must be adjacent to hug!", false);
+            return;
+        }
+
+        isHugging = true;
+        huggingTimer = 0f;
+        huggingPlayer1 = currentPlayer;
+        huggingPlayer2 = targetPlayer;
+        currentSmileFrame = 0;
+        smileAnimationTimer = 0f;
+
+        System.out.println("DEBUG: Hug animation started - isHugging: " + isHugging + ", player1: " + currentPlayer.getUser().getUserName() + ", player2: " + targetPlayer.getUser().getUserName());
+
+        makePlayersFaceEachOther(currentPlayer, targetPlayer);
+
+        GameMenuController controller = new GameMenuController();
+        Result result = controller.hug(targetPlayer.getUser().getUserName());
+        showNotification(result.getMessage(), result.isSuccessful());
+    }
+
+    private void makePlayersFaceEachOther(Player player1, Player player2) {
+        float dx = player2.getUserLocation().getxAxis() - player1.getUserLocation().getxAxis();
+        float dy = player2.getUserLocation().getyAxis() - player1.getUserLocation().getyAxis();
+
+        if (Math.abs(dx) > Math.abs(dy)) {
+            if (dx > 0) {
+                player1.getPlayerController().setFacing(PlayerController.Dir.RIGHT);
+            } else {
+                player1.getPlayerController().setFacing(PlayerController.Dir.LEFT);
+            }
+        } else {
+            if (dy > 0) {
+                player1.getPlayerController().setFacing(PlayerController.Dir.UP);
+            } else {
+                player1.getPlayerController().setFacing(PlayerController.Dir.DOWN);
+            }
+        }
+
+        if (Math.abs(dx) > Math.abs(dy)) {
+            if (dx > 0) {
+                player2.getPlayerController().setFacing(PlayerController.Dir.LEFT);
+            } else {
+                player2.getPlayerController().setFacing(PlayerController.Dir.RIGHT);
+            }
+        } else {
+            if (dy > 0) {
+                player2.getPlayerController().setFacing(PlayerController.Dir.DOWN);
+            } else {
+                player2.getPlayerController().setFacing(PlayerController.Dir.UP);
+            }
+        }
+    }
+
+    private void updateHugAnimation(float delta) {
+        if (!isHugging) return;
+
+        huggingTimer += delta;
+        smileAnimationTimer += delta;
+
+        if (smileAnimationTimer >= SMILE_FRAME_DURATION) {
+            currentSmileFrame = (currentSmileFrame + 1) % 4;
+            smileAnimationTimer = 0f;
+            System.out.println("DEBUG: Smile animation frame changed to: " + currentSmileFrame + " (timer: " + smileAnimationTimer + ", delta: " + delta + ")");
+        } else {
+            System.out.println("DEBUG: Smile animation timer: " + smileAnimationTimer + " / " + SMILE_FRAME_DURATION + " (delta: " + delta + ")");
+        }
+
+        if (huggingTimer >= HUG_DURATION) {
+            System.out.println("DEBUG: Hug animation ended after " + huggingTimer + " seconds");
+            isHugging = false;
+            huggingPlayer1 = null;
+            huggingPlayer2 = null;
+        }
+    }
+
+    private void renderHugAnimation(SpriteBatch batch) {
+        if (!isHugging || huggingPlayer1 == null || huggingPlayer2 == null) {
+            return;
+        }
+
+        float screenWidth = Gdx.graphics.getWidth();
+        float screenHeight = Gdx.graphics.getHeight();
+
+        float centerX = screenWidth / 2f;
+        float centerY = screenHeight / 2f;
+
+        System.out.println("DEBUG: Rendering hug animation - isHugging: " + isHugging);
+        System.out.println("DEBUG: Screen dimensions - width: " + screenWidth + ", height: " + screenHeight);
+        System.out.println("DEBUG: Animation center: (" + centerX + "," + centerY + ")");
+
+        batch.setColor(1f, 0f, 0f, 1f); // Red color for heart
+        float heartSize = 50f;
+        batch.draw(heartTexture, centerX - heartSize/2, centerY - heartSize/2, heartSize, heartSize);
+        batch.setColor(1f, 1f, 1f, 1f); // Reset to white
+        System.out.println("DEBUG: Drew red heart square at screen center - size: " + heartSize + "x" + heartSize);
+
+        if (smileTextures[currentSmileFrame] != null) {
+            float smileWidth = smileTextures[currentSmileFrame].getWidth() * 3f; // Scale up 3x for visibility
+            float smileHeight = smileTextures[currentSmileFrame].getHeight() * 3f;
+            batch.draw(smileTextures[currentSmileFrame], centerX - smileWidth/2, centerY + 60f, smileWidth, smileHeight);
+            System.out.println("DEBUG: Drew smile texture frame " + currentSmileFrame + " above heart - original size: " + smileTextures[currentSmileFrame].getWidth() + "x" + smileTextures[currentSmileFrame].getHeight() + ", scaled to: " + smileWidth + "x" + smileHeight);
+        } else {
+            System.out.println("DEBUG: Smile texture is null! currentSmileFrame: " + currentSmileFrame);
+        }
     }
 
 }

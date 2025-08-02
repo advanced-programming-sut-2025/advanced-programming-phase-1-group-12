@@ -396,5 +396,16 @@ public class PlayerController {
         return facing;
     }
 
+    public void setFacing(Dir direction) {
+        this.facing = direction;
+        // Update the current animation based on the new facing direction
+        switch (facing) {
+            case UP -> currentAnim = walkUp;
+            case DOWN -> currentAnim = walkDown;
+            case LEFT -> currentAnim = walkLeft;
+            case RIGHT -> currentAnim = walkRight;
+        }
+    }
+
 }
 

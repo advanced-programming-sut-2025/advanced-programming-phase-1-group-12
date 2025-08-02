@@ -691,26 +691,30 @@ public class GameMenuController {
         if (player2 == null) {
             return new Result(false, "Player with username " + username + " not found!");
         }
+        
+        // Check if players are adjacent
+        float distance = Math.abs(player1.getUserLocation().getxAxis() - player2.getUserLocation().getxAxis()) +
+                        Math.abs(player1.getUserLocation().getyAxis() - player2.getUserLocation().getyAxis());
+        if (distance > 2) {
+            return new Result(false, "Players are not adjacent!");
+        }
+        
         RelationShip relationShip = player1.findRelationShip(player2);
         RelationShip relationShip2 = player2.findRelationShip(player1);
+        
+        // If no relationship exists, create one
         if (relationShip == null && relationShip2 == null) {
-            return new Result(false, "No relationship found with " + username + ". You need to establish a relationship first.");
+            relationShip = new RelationShip(player1, player2);
+            player1.addRelationShip(relationShip);
+            player2.addRelationShip(relationShip);
         }
-        if (relationShip != null) {
-            if (!relationShip.arePlayersAdjacent()) {
-                return new Result(false, "Players are not adjacent!");
-            }
-            relationShip.hug();
-            return new Result(true, "hugged successfully!" + "\nFriendShip XP: " +
-                relationShip.getXP() + " Friendship level: " + relationShip.getFriendshipLevel());
-        } else {
-            if (!relationShip2.arePlayersAdjacent()) {
-                return new Result(false, "Players are not adjacent!");
-            }
-            relationShip2.hug();
-            return new Result(true, "hugged successfully!" + "\nFriendShip XP: " +
-                relationShip2.getXP() + " Friendship level: " + relationShip2.getFriendshipLevel());
-        }
+        
+        // Use the existing relationship or the newly created one
+        RelationShip activeRelationShip = (relationShip != null) ? relationShip : relationShip2;
+        
+        activeRelationShip.hug();
+        return new Result(true, "hugged successfully!" + "\nFriendShip XP: " +
+                activeRelationShip.getXP() + " Friendship level: " + activeRelationShip.getFriendshipLevel());
     }
 
     public Result flower(String username){
