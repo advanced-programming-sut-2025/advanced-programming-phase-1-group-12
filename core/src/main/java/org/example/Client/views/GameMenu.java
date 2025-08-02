@@ -942,13 +942,14 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Dispose hugging animation textures
         if (smileTextures != null) {
-            for (Texture smileTexture : smileTextures) {
-                if (smileTexture != null) {
-                    smileTexture.dispose();
+            for (int i = 0; i < smileTextures.length; i++) {
+                if (smileTextures[i] != null) {
+                    smileTextures[i].dispose();
+                    smileTextures[i] = null;
                 }
             }
         }
-        
+
         // Dispose heart texture
         if (heartTexture != null) {
             heartTexture.dispose();
@@ -1026,7 +1027,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Check if clicked on another player's location
         Player currentPlayer = App.getCurrentPlayerLazy();
-        
+
         for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
             if (!otherPlayer.equals(currentPlayer) &&
                 otherPlayer.getUserLocation().equals(clickedLocation)) {
@@ -3697,7 +3698,7 @@ public class GameMenu extends InputAdapter implements Screen {
     private int currentSmileFrame = 0;
     private float smileAnimationTimer = 0f;
     private final float SMILE_FRAME_DURATION = 0.2f; // Time per smile frame - reduced for faster animation
-    
+
     // Heart animation variables
     private Texture heartTexture = null;
     private float heartX = 0f;
@@ -3709,7 +3710,7 @@ public class GameMenu extends InputAdapter implements Screen {
     private float heartAnimationProgress = 0f;
     private boolean heartAnimationActive = false;
     private final float HEART_ANIMATION_DURATION = 1.5f; // Duration of heart travel animation
-    
+
     // Animation delay variables
     private boolean waitingForNotificationClose = false;
     private float notificationCloseTimer = 0f;
@@ -3862,18 +3863,41 @@ public class GameMenu extends InputAdapter implements Screen {
         notificationCloseTimer = 0f;
         huggingPlayer1 = currentPlayer;
         huggingPlayer2 = targetPlayer;
-        
+
         // Initialize heart animation setup (but don't start yet)
         if (heartTexture == null) {
             heartTexture = new Texture("NPC/RelationShip/Heart.png");
         }
-        
+
+        // Initialize smile textures if not already done
+        if (smileTextures[0] == null) {
+            try {
+                smileTextures[0] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_1.png"));
+                smileTextures[1] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_2.png"));
+                smileTextures[2] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_3.png"));
+                smileTextures[3] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_4.png"));
+                System.out.println("DEBUG: Successfully loaded all smile textures for hugging animation");
+            } catch (Exception e) {
+                System.out.println("DEBUG: Failed to load smile textures: " + e.getMessage());
+                // Create a fallback texture to prevent null rendering
+                try {
+                    Texture fallbackTexture = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_1.png"));
+                    for (int i = 0; i < smileTextures.length; i++) {
+                        smileTextures[i] = fallbackTexture;
+                    }
+                    System.out.println("DEBUG: Using fallback texture for all smile frames");
+                } catch (Exception fallbackException) {
+                    System.out.println("DEBUG: Even fallback texture failed: " + fallbackException.getMessage());
+                }
+            }
+        }
+
         // Calculate heart animation positions
         heartStartX = currentPlayer.getUserLocation().getxAxis() * 100f + 16f; // Center of player 1
         heartStartY = currentPlayer.getUserLocation().getyAxis() * 100f + 16f;
         heartEndX = targetPlayer.getUserLocation().getxAxis() * 100f + 16f; // Center of player 2
         heartEndY = targetPlayer.getUserLocation().getyAxis() * 100f + 16f;
-        
+
         heartX = heartStartX;
         heartY = heartStartY;
         heartAnimationProgress = 0f;
@@ -3925,7 +3949,7 @@ public class GameMenu extends InputAdapter implements Screen {
         // Handle waiting for notification to close
         if (waitingForNotificationClose) {
             notificationCloseTimer += delta;
-            
+
             if (notificationCloseTimer >= NOTIFICATION_DISPLAY_TIME) {
                 // Start the animations after notification closes
                 waitingForNotificationClose = false;
@@ -3935,12 +3959,12 @@ public class GameMenu extends InputAdapter implements Screen {
                 smileAnimationTimer = 0f;
                 heartAnimationActive = true;
                 heartAnimationProgress = 0f;
-                
+
                 System.out.println("DEBUG: Starting hug animations after notification closed");
             }
             return;
         }
-        
+
         if (!isHugging) {
             return;
         }
@@ -3956,12 +3980,12 @@ public class GameMenu extends InputAdapter implements Screen {
         // Update heart animation
         if (heartAnimationActive) {
             heartAnimationProgress += delta / HEART_ANIMATION_DURATION;
-            
+
             if (heartAnimationProgress >= 1.0f) {
                 heartAnimationActive = false;
                 heartAnimationProgress = 1.0f;
             }
-            
+
             // Calculate heart position using smooth interpolation
             float t = heartAnimationProgress;
             float smoothT = t * t * (3.0f - 2.0f * t); // Smoothstep interpolation
@@ -3983,7 +4007,7 @@ public class GameMenu extends InputAdapter implements Screen {
         if (waitingForNotificationClose) {
             return;
         }
-        
+
         if (!isHugging || huggingPlayer1 == null || huggingPlayer2 == null) {
             return;
         }
@@ -3994,25 +4018,31 @@ public class GameMenu extends InputAdapter implements Screen {
         float centerX = screenWidth / 2f;
         float centerY = screenHeight / 2f;
 
-        if (smileTextures[currentSmileFrame] != null) {
-            float smileWidth = smileTextures[currentSmileFrame].getWidth() * 3f; // Scale up 3x for visibility
-            float smileHeight = smileTextures[currentSmileFrame].getHeight() * 3f;
+        if (smileTextures != null && currentSmileFrame >= 0 && currentSmileFrame < smileTextures.length &&
+            smileTextures[currentSmileFrame] != null) {
+            float smileWidth = smileTextures[currentSmileFrame].getWidth() * 5f; // Scale up 5x for bigger visibility
+            float smileHeight = smileTextures[currentSmileFrame].getHeight() * 5f;
             batch.draw(smileTextures[currentSmileFrame], centerX - smileWidth/2, centerY + 100f, smileWidth, smileHeight);
+        } else {
+            System.out.println("DEBUG: Cannot render smile texture - smileTextures: " + (smileTextures != null) + 
+                             ", currentSmileFrame: " + currentSmileFrame + 
+                             ", texture at frame: " + (smileTextures != null && currentSmileFrame >= 0 && currentSmileFrame < smileTextures.length ? 
+                                 (smileTextures[currentSmileFrame] != null ? "not null" : "null") : "invalid index"));
         }
-        
+
         // Render heart animation
         if (heartAnimationActive && heartTexture != null) {
             // Convert world coordinates to screen coordinates
             Vector3 heartScreenPos = camera.project(new Vector3(heartX, heartY, 0));
-            
+
             float heartSize = 32f; // Size of the heart
             float alpha = 1.0f;
-            
+
             // Fade out the heart as it reaches the destination
             if (heartAnimationProgress > 0.8f) {
                 alpha = 1.0f - (heartAnimationProgress - 0.8f) / 0.2f;
             }
-            
+
             // Set color with alpha for fading effect
             batch.setColor(1.0f, 1.0f, 1.0f, alpha);
             batch.draw(heartTexture, heartScreenPos.x - heartSize/2, heartScreenPos.y - heartSize/2, heartSize, heartSize);
