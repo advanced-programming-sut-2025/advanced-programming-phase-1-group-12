@@ -3736,6 +3736,7 @@ public class GameMenu extends InputAdapter implements Screen {
     private Player targetPlayerForMenu = null;
     private Texture backgroundTexture = null;
     private Stage menuStage = null;
+    private InputProcessor originalInputProcessor = null; // Store the original input processor
 
     // Hugging animation variables
     private boolean isHugging = false;
@@ -3831,6 +3832,8 @@ public class GameMenu extends InputAdapter implements Screen {
             createMenuUI();
         }
 
+        // Store the original input processor before changing it
+        originalInputProcessor = Gdx.input.getInputProcessor();
         Gdx.input.setInputProcessor(menuStage);
     }
 
@@ -3940,8 +3943,14 @@ public class GameMenu extends InputAdapter implements Screen {
     private void closeFullScreenMenu() {
         showingFullScreenMenu = false;
         targetPlayerForMenu = null;
-        // Restore input processor to the main game stage
-        Gdx.input.setInputProcessor(stage);
+        // Restore the original input processor
+        if (originalInputProcessor != null) {
+            Gdx.input.setInputProcessor(originalInputProcessor);
+            originalInputProcessor = null;
+        } else {
+            // Fallback to the main game stage if original processor is not available
+            Gdx.input.setInputProcessor(stage);
+        }
     }
 
     private void startHugAnimation(Player targetPlayer) {
