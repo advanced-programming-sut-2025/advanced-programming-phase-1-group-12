@@ -3812,6 +3812,12 @@ public class GameMenu extends InputAdapter implements Screen {
     private float ringNotificationCloseTimer = 0f;
     private final float RING_NOTIFICATION_DISPLAY_TIME = 3.0f; // Time to wait for ring notification to close
 
+    // Heart emoji animation variables (for ring animation only)
+    private Texture[] heartEmojiTextures = new Texture[4];
+    private int currentHeartEmojiFrame = 0;
+    private float heartEmojiAnimationTimer = 0f;
+    private boolean heartEmojiTexturesLoaded = false;
+
     public void showFullScreenPlayerInteractionMenu(Player targetPlayer) {
         targetPlayerForMenu = targetPlayer;
         showingFullScreenMenu = true;
@@ -4074,45 +4080,45 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
 
-        if (!smileTexturesLoaded) {
-            System.out.println("DEBUG: Loading smile textures for ring animation...");
+        if (!heartEmojiTexturesLoaded) {
+            System.out.println("DEBUG: Loading heart emoji textures for ring animation...");
             try {
-                smileTextures[0] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_1.png"));
-                smileTextures[1] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_2.png"));
-                smileTextures[2] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_3.png"));
-                smileTextures[3] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_4.png"));
+                heartEmojiTextures[0] = new Texture(Gdx.files.internal("NPC/RelationShip/HeartQ_1.png"));
+                heartEmojiTextures[1] = new Texture(Gdx.files.internal("NPC/RelationShip/HeartQ_2.png"));
+                heartEmojiTextures[2] = new Texture(Gdx.files.internal("NPC/RelationShip/HeartQ_3.png"));
+                heartEmojiTextures[3] = new Texture(Gdx.files.internal("NPC/RelationShip/HeartQ_4.png"));
 
-                for (int i = 0; i < smileTextures.length; i++) {
-                    if (smileTextures[i] != null) {
-                        smileTextures[i].setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+                for (int i = 0; i < heartEmojiTextures.length; i++) {
+                    if (heartEmojiTextures[i] != null) {
+                        heartEmojiTextures[i].setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
                     }
                 }
 
-                smileTexturesLoaded = true;
-                System.out.println("DEBUG: Successfully loaded all smile textures for ring animation");
+                heartEmojiTexturesLoaded = true;
+                System.out.println("DEBUG: Successfully loaded all heart emoji textures for ring animation");
             } catch (Exception e) {
-                System.out.println("DEBUG: Failed to load smile textures for ring animation: " + e.getMessage());
+                System.out.println("DEBUG: Failed to load heart emoji textures for ring animation: " + e.getMessage());
                 try {
-                    Texture fallbackTexture = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_1.png"));
+                    Texture fallbackTexture = new Texture(Gdx.files.internal("NPC/RelationShip/HeartQ_1.png"));
                     fallbackTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-                    for (int i = 0; i < smileTextures.length; i++) {
-                        smileTextures[i] = fallbackTexture;
+                    for (int i = 0; i < heartEmojiTextures.length; i++) {
+                        heartEmojiTextures[i] = fallbackTexture;
                     }
-                    smileTexturesLoaded = true;
-                    System.out.println("DEBUG: Using fallback texture for all smile frames in ring animation");
+                    heartEmojiTexturesLoaded = true;
+                    System.out.println("DEBUG: Using fallback texture for all heart emoji frames in ring animation");
                 } catch (Exception fallbackException) {
                     System.out.println("DEBUG: Even fallback texture failed for ring animation: " + fallbackException.getMessage());
                     try {
                         Pixmap pixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
-                        pixmap.setColor(Color.YELLOW);
+                        pixmap.setColor(Color.RED);
                         pixmap.fill();
                         Texture emergencyTexture = new Texture(pixmap);
                         pixmap.dispose();
-                        for (int i = 0; i < smileTextures.length; i++) {
-                            smileTextures[i] = emergencyTexture;
+                        for (int i = 0; i < heartEmojiTextures.length; i++) {
+                            heartEmojiTextures[i] = emergencyTexture;
                         }
-                        smileTexturesLoaded = true;
-                        System.out.println("DEBUG: Using emergency yellow texture for ring animation");
+                        heartEmojiTexturesLoaded = true;
+                        System.out.println("DEBUG: Using emergency red texture for ring animation");
                     } catch (Exception emergencyException) {
                         System.out.println("DEBUG: Emergency texture creation failed for ring: " + emergencyException.getMessage());
                     }
@@ -4440,7 +4446,7 @@ public class GameMenu extends InputAdapter implements Screen {
         }
 
         // Add a small delay to ensure textures are fully loaded
-        if (!smileTexturesLoaded) {
+        if (!heartEmojiTexturesLoaded) {
             textureLoadingDelay += delta;
             if (textureLoadingDelay >= TEXTURE_LOADING_DELAY) {
                 System.out.println("DEBUG: Texture loading delay completed for ring animation, textures should be ready");
@@ -4449,11 +4455,11 @@ public class GameMenu extends InputAdapter implements Screen {
         }
 
         ringingTimer += delta;
-        smileAnimationTimer += delta;
+        heartEmojiAnimationTimer += delta;
 
-        if (smileAnimationTimer >= SMILE_FRAME_DURATION) {
-            currentSmileFrame = (currentSmileFrame + 1) % 4;
-            smileAnimationTimer = 0f;
+        if (heartEmojiAnimationTimer >= SMILE_FRAME_DURATION) {
+            currentHeartEmojiFrame = (currentHeartEmojiFrame + 1) % 4;
+            heartEmojiAnimationTimer = 0f;
         }
 
         // Update ring animation
@@ -4599,8 +4605,8 @@ public class GameMenu extends InputAdapter implements Screen {
             return;
         }
 
-        if (!smileTexturesLoaded) {
-            System.out.println("DEBUG: Smile textures not ready for ring animation, skipping render");
+        if (!heartEmojiTexturesLoaded) {
+            System.out.println("DEBUG: Heart emoji textures not ready for ring animation, skipping render");
             return;
         }
 
@@ -4615,16 +4621,16 @@ public class GameMenu extends InputAdapter implements Screen {
         float centerX = screenWidth / 2f;
         float centerY = screenHeight / 2f;
 
-        if (smileTextures != null && currentSmileFrame >= 0 && currentSmileFrame < smileTextures.length &&
-            smileTextures[currentSmileFrame] != null) {
-            float smileWidth = smileTextures[currentSmileFrame].getWidth() * 5f; // Scale up 5x for bigger visibility
-            float smileHeight = smileTextures[currentSmileFrame].getHeight() * 5f;
-            batch.draw(smileTextures[currentSmileFrame], centerX - smileWidth/2, centerY + 100f, smileWidth, smileHeight);
+        if (heartEmojiTextures != null && currentHeartEmojiFrame >= 0 && currentHeartEmojiFrame < heartEmojiTextures.length &&
+            heartEmojiTextures[currentHeartEmojiFrame] != null) {
+            float heartEmojiWidth = heartEmojiTextures[currentHeartEmojiFrame].getWidth() * 5f; // Scale up 5x for bigger visibility
+            float heartEmojiHeight = heartEmojiTextures[currentHeartEmojiFrame].getHeight() * 5f;
+            batch.draw(heartEmojiTextures[currentHeartEmojiFrame], centerX - heartEmojiWidth/2, centerY + 100f, heartEmojiWidth, heartEmojiHeight);
         } else {
-            System.out.println("DEBUG: Cannot render smile texture for ring animation - smileTextures: " + (smileTextures != null) +
-                             ", currentSmileFrame: " + currentSmileFrame +
-                             ", texture at frame: " + (smileTextures != null && currentSmileFrame >= 0 && currentSmileFrame < smileTextures.length ?
-                                 (smileTextures[currentSmileFrame] != null ? "not null" : "null") : "invalid index"));
+            System.out.println("DEBUG: Cannot render heart emoji texture for ring animation - heartEmojiTextures: " + (heartEmojiTextures != null) +
+                             ", currentHeartEmojiFrame: " + currentHeartEmojiFrame +
+                             ", texture at frame: " + (heartEmojiTextures != null && currentHeartEmojiFrame >= 0 && currentHeartEmojiFrame < heartEmojiTextures.length ?
+                                 (heartEmojiTextures[currentHeartEmojiFrame] != null ? "not null" : "null") : "invalid index"));
         }
 
         if (ringAnimationActive && ringTexture != null) {
