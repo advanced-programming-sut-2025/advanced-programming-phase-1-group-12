@@ -405,4 +405,18 @@ public class GameWebSocketClient {
         long elapsed = System.currentTimeMillis() - disconnectionTime;
         return Math.max(0, RECONNECTION_TIMEOUT_MS - elapsed);
     }
+
+    public void send(Map<String, Object> data) {
+        if (!isConnected || webSocket == null) {
+            logger.warn("Cannot send data: WebSocket not connected");
+            return;
+        }
+        
+        try {
+            String messageJson = objectMapper.writeValueAsString(data);
+            webSocket.send(messageJson);
+        } catch (Exception e) {
+            logger.error("Error sending data through WebSocket", e);
+        }
+    }
 } 

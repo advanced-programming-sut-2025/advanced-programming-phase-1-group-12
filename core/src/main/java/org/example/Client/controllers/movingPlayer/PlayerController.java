@@ -27,7 +27,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PlayerController {
 
@@ -59,7 +61,7 @@ public class PlayerController {
     private boolean isCollapsing = false;
     private float collapseTimer = 0f;
     private static final float COLLAPSE_TIME = 5f;
-    
+
     //for movement cooldown:
     private float movementTimer = 0f;
     private static final float MOVEMENT_COOLDOWN = 0.03f; // Ultra smooth movement - 30ms between moves
@@ -68,7 +70,7 @@ public class PlayerController {
         this.players = players;
         this.player = player;
         this.gameController = gameController;
-        
+
         // Initialize network command sender for multiplayer movement updates
         if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
             System.out.println("DEBUG: Initializing NetworkCommandSender for multiplayer game");
@@ -146,7 +148,7 @@ public class PlayerController {
     private void handleInput(float delta) {
         // Update movement timer
         movementTimer += delta;
-        
+
         // In multiplayer mode, only allow the logged-in user to control their own character
         if (App.getCurrentGame().isMultiplayer()) {
             String currentUsername = App.getLoggedInUser().getUserName();
@@ -167,13 +169,13 @@ public class PlayerController {
                 return;
             }
         }
-        
+
         // Check if it's this player's turn in multiplayer mode
         if (App.getCurrentGame().isMultiplayer() && !App.getCurrentGame().isCurrentPlayerTurn(player.getUser().getUserName())) {
             // Not this player's turn, don't process movement
             return;
         }
-        
+
         if(Gdx.input.isKeyPressed(Input.Keys.B)) {
             GameMenu gameMenu = new GameMenu(players);
             Main.getMain().setScreen(gameMenu);
@@ -271,11 +273,30 @@ public class PlayerController {
                 int newEnergy = player.getEnergy() - 1;
                 System.out.println("DEBUG: Player " + player.getUser().getUserName() + " moving UP, reducing energy from " + player.getEnergy() + " to " + newEnergy);
                 player.setEnergy(newEnergy);
-                
-                // Reset movement timer for cooldown
+
+                // Send movement and energy updates to server in multiplayer
+                if (App.getCurrentGame().isMultiplayer()) {
+                    // Send movement update
+                    Map<String, Object> movementData = new HashMap<>();
+                    movementData.put("type", "player_movement");
+                    movementData.put("gameId", App.getCurrentGame().getGameId());
+                    movementData.put("x", newX);
+                    movementData.put("y", newY);
+                    movementData.put("direction", "UP");
+                    App.getWebSocketClient().send(movementData);
+
+                    // Send energy update
+                    Map<String, Object> energyData = new HashMap<>();
+                    energyData.put("type", "energy_update");
+                    energyData.put("gameId", App.getCurrentGame().getGameId());
+                    energyData.put("playerId", player.getUser().getUserName());
+                    energyData.put("currentEnergy", newEnergy);
+                    energyData.put("maxEnergy", 200);
+                    App.getWebSocketClient().send(energyData);
+                }
+
                 movementTimer = 0f;
-                
-                // Check if energy reached zero in multiplayer
+
                 if (App.getCurrentGame().isMultiplayer() && newEnergy <= 0) {
                     player.setHasCollapsed(true);
                     App.getCurrentGame().nextTurn();
@@ -291,11 +312,29 @@ public class PlayerController {
                 int newEnergy = player.getEnergy() - 1;
                 System.out.println("DEBUG: Player " + player.getUser().getUserName() + " moving DOWN, reducing energy from " + player.getEnergy() + " to " + newEnergy);
                 player.setEnergy(newEnergy);
-                
-                // Reset movement timer for cooldown
+
+                if (App.getCurrentGame().isMultiplayer()) {
+                    // Send movement update
+                    Map<String, Object> movementData = new HashMap<>();
+                    movementData.put("type", "player_movement");
+                    movementData.put("gameId", App.getCurrentGame().getGameId());
+                    movementData.put("x", newX);
+                    movementData.put("y", newY);
+                    movementData.put("direction", "DOWN");
+                    App.getWebSocketClient().send(movementData);
+
+                    // Send energy update
+                    Map<String, Object> energyData = new HashMap<>();
+                    energyData.put("type", "energy_update");
+                    energyData.put("gameId", App.getCurrentGame().getGameId());
+                    energyData.put("playerId", player.getUser().getUserName());
+                    energyData.put("currentEnergy", newEnergy);
+                    energyData.put("maxEnergy", 200);
+                    App.getWebSocketClient().send(energyData);
+                }
+
                 movementTimer = 0f;
-                
-                // Check if energy reached zero in multiplayer
+
                 if (App.getCurrentGame().isMultiplayer() && newEnergy <= 0) {
                     player.setHasCollapsed(true);
                     App.getCurrentGame().nextTurn();
@@ -311,10 +350,31 @@ public class PlayerController {
                 int newEnergy = player.getEnergy() - 1;
                 System.out.println("DEBUG: Player " + player.getUser().getUserName() + " moving LEFT, reducing energy from " + player.getEnergy() + " to " + newEnergy);
                 player.setEnergy(newEnergy);
-                
+
+                // Send movement and energy updates to server in multiplayer
+                if (App.getCurrentGame().isMultiplayer()) {
+                    // Send movement update
+                    Map<String, Object> movementData = new HashMap<>();
+                    movementData.put("type", "player_movement");
+                    movementData.put("gameId", App.getCurrentGame().getGameId());
+                    movementData.put("x", newX);
+                    movementData.put("y", newY);
+                    movementData.put("direction", "LEFT");
+                    App.getWebSocketClient().send(movementData);
+
+                    // Send energy update
+                    Map<String, Object> energyData = new HashMap<>();
+                    energyData.put("type", "energy_update");
+                    energyData.put("gameId", App.getCurrentGame().getGameId());
+                    energyData.put("playerId", player.getUser().getUserName());
+                    energyData.put("currentEnergy", newEnergy);
+                    energyData.put("maxEnergy", 200);
+                    App.getWebSocketClient().send(energyData);
+                }
+
                 // Reset movement timer for cooldown
                 movementTimer = 0f;
-                
+
                 // Check if energy reached zero in multiplayer
                 if (App.getCurrentGame().isMultiplayer() && newEnergy <= 0) {
                     player.setHasCollapsed(true);
@@ -331,10 +391,31 @@ public class PlayerController {
                 int newEnergy = player.getEnergy() - 1;
                 System.out.println("DEBUG: Player " + player.getUser().getUserName() + " moving RIGHT, reducing energy from " + player.getEnergy() + " to " + newEnergy);
                 player.setEnergy(newEnergy);
-                
+
+                // Send movement and energy updates to server in multiplayer
+                if (App.getCurrentGame().isMultiplayer()) {
+                    // Send movement update
+                    Map<String, Object> movementData = new HashMap<>();
+                    movementData.put("type", "player_movement");
+                    movementData.put("gameId", App.getCurrentGame().getGameId());
+                    movementData.put("x", newX);
+                    movementData.put("y", newY);
+                    movementData.put("direction", "RIGHT");
+                    App.getWebSocketClient().send(movementData);
+
+                    // Send energy update
+                    Map<String, Object> energyData = new HashMap<>();
+                    energyData.put("type", "energy_update");
+                    energyData.put("gameId", App.getCurrentGame().getGameId());
+                    energyData.put("playerId", player.getUser().getUserName());
+                    energyData.put("currentEnergy", newEnergy);
+                    energyData.put("maxEnergy", 200);
+                    App.getWebSocketClient().send(energyData);
+                }
+
                 // Reset movement timer for cooldown
                 movementTimer = 0f;
-                
+
                 // Check if energy reached zero in multiplayer
                 if (App.getCurrentGame().isMultiplayer() && newEnergy <= 0) {
                     player.setHasCollapsed(true);

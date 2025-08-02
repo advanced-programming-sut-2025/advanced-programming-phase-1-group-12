@@ -127,37 +127,20 @@ public class Player {
         if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
             System.out.println("DEBUG: Game is multiplayer, attempting to broadcast energy update");
             try {
-                // Send energy update via WebSocket client
-                // This will be handled by the NetworkCommandSender
-                if (App.getCurrentGame().getNetworkCommandSender() != null) {
-                    System.out.println("DEBUG: NetworkCommandSender exists, sending energy update WebSocket");
-                    App.getCurrentGame().getNetworkCommandSender().sendEnergyUpdateWebSocket(
-                        this.getUser().getUserName(), 
-                        this.energy, 
-                        200 // max energy
-                    );
-                    System.out.println("DEBUG: Energy update WebSocket sent successfully");
+                // Send energy update via WebSocket
+                Map<String, Object> energyData = new HashMap<>();
+                energyData.put("type", "energy_update");
+                energyData.put("gameId", App.getCurrentGame().getGameId());
+                energyData.put("playerId", this.getUser().getUserName());
+                energyData.put("currentEnergy", this.energy);
+                energyData.put("maxEnergy", 200);
+                
+                if (App.getWebSocketClient() != null) {
+                    System.out.println("DEBUG: WebSocket client exists, sending energy update");
+                    App.getWebSocketClient().send(energyData);
+                    System.out.println("DEBUG: Energy update sent successfully via WebSocket");
                 } else {
-                    System.out.println("DEBUG: NetworkCommandSender is null! Trying to get from PlayerController");
-                    // Fallback: try to get NetworkCommandSender from PlayerController
-                    if (this.playerController != null && this.playerController instanceof org.example.Client.controllers.movingPlayer.ClientPlayerController) {
-                        org.example.Client.controllers.movingPlayer.ClientPlayerController clientController = 
-                            (org.example.Client.controllers.movingPlayer.ClientPlayerController) this.playerController;
-                        NetworkCommandSender sender = clientController.getNetworkCommandSender();
-                        if (sender != null) {
-                            System.out.println("DEBUG: Got NetworkCommandSender from PlayerController, sending energy update");
-                            sender.sendEnergyUpdateWebSocket(
-                                this.getUser().getUserName(), 
-                                this.energy, 
-                                200 // max energy
-                            );
-                            System.out.println("DEBUG: Energy update WebSocket sent successfully via PlayerController");
-                        } else {
-                            System.out.println("DEBUG: NetworkCommandSender is null even from PlayerController");
-                        }
-                    } else {
-                        System.out.println("DEBUG: PlayerController is null or not ClientPlayerController");
-                    }
+                    System.out.println("DEBUG: WebSocket client is null, cannot send energy update");
                 }
             } catch (Exception e) {
                 // Log error but don't break the game

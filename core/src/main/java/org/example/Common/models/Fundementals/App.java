@@ -5,6 +5,7 @@ import org.example.Common.models.Date;
 import org.example.Common.models.Item;
 import org.example.Common.models.Place.Store;
 import org.example.Common.models.RelatedToUser.User;
+import org.example.Client.network.GameWebSocketClient;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -23,6 +24,7 @@ public class App {
     private static int gameId = 1;
     private static Game currentGame = new Game();
     private static Date fullTime;
+    private static GameWebSocketClient webSocketClient;
     private static ArrayList<String> securityQuestions = new ArrayList<>(
             Arrays.asList("what is your favorite color?", "what is your favorite country?")
     );
@@ -153,6 +155,13 @@ public class App {
                 e.printStackTrace();
             }
         }
+    }
 
+    public static GameWebSocketClient getWebSocketClient() {
+        return webSocketClient;
+    }
+
+    public static void setWebSocketClient(GameWebSocketClient client) {
+        webSocketClient = client;
     }
 }

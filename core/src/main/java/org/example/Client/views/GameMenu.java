@@ -222,8 +222,14 @@ public class GameMenu extends InputAdapter implements Screen {
                 if (player.getUser().getUserName().equals(playerId)) {
                     Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
                     player.setUserLocation(newLocation);
+                    player.updatePosition(x, y); // Update sprite position
                     logger.debug("Updated player {} position to ({}, {})", playerId, x, y);
                     playerFound = true;
+                    
+                    // If we're showing the full map, update camera position for smooth following
+                    if (showingAllMap) {
+                        updateCameraToPlayer();
+                    }
                     break;
                 }
             }
@@ -2397,6 +2403,7 @@ public class GameMenu extends InputAdapter implements Screen {
                 logger.info("Initializing WebSocket client for multiplayer game: userId={}, gameId={}", userId, gameId);
 
                 webSocketClient = new GameWebSocketClient(serverUrl, userId, gameId, this);
+                App.setWebSocketClient(webSocketClient);
                 webSocketClient.connect().thenAccept(success -> {
                     if (success) {
                         logger.info("WebSocket client connected successfully for multiplayer game");
