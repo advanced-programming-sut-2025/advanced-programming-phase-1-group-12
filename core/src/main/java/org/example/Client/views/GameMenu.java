@@ -3751,6 +3751,11 @@ public class GameMenu extends InputAdapter implements Screen {
     private boolean smileTexturesLoaded = false; // Flag to track if textures are ready
     private float textureLoadingDelay = 0f; // Small delay to ensure textures are ready
     private final float TEXTURE_LOADING_DELAY = 0.1f; // 100ms delay
+    
+    // Separate delay variables for each animation type
+    private float hugTextureLoadingDelay = 0f;
+    private float flowerTextureLoadingDelay = 0f;
+    private float ringTextureLoadingDelay = 0f;
 
     // Heart animation variables
     private Texture heartTexture = null;
@@ -3818,6 +3823,7 @@ public class GameMenu extends InputAdapter implements Screen {
     private int currentHeartEmojiFrame = 0;
     private float heartEmojiAnimationTimer = 0f;
     private boolean heartEmojiTexturesLoaded = false;
+    private final float HEART_EMOJI_FRAME_DURATION = 0.2f; // Time per heart emoji frame
 
     public void showFullScreenPlayerInteractionMenu(Player targetPlayer) {
         targetPlayerForMenu = targetPlayer;
@@ -4145,6 +4151,11 @@ public class GameMenu extends InputAdapter implements Screen {
         ringAnimationProgress = 0f;
         ringAnimationActive = false;
 
+        // Only reset texture loading delay if textures are not ready
+        if (!heartEmojiTexturesLoaded || ringTexture == null) {
+            ringTextureLoadingDelay = 0f;
+        }
+
         System.out.println("DEBUG: Ring animation started - isRinging: " + isRinging + ", player1: " + currentPlayer.getUser().getUserName() + ", player2: " + targetPlayer.getUser().getUserName());
 
         makePlayersFaceEachOther(currentPlayer, targetPlayer);
@@ -4324,9 +4335,9 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Add a small delay to ensure textures are fully loaded
         if (!smileTexturesLoaded) {
-            textureLoadingDelay += delta;
-            if (textureLoadingDelay >= TEXTURE_LOADING_DELAY) {
-                System.out.println("DEBUG: Texture loading delay completed, textures should be ready");
+            hugTextureLoadingDelay += delta;
+            if (hugTextureLoadingDelay >= TEXTURE_LOADING_DELAY) {
+                System.out.println("DEBUG: Hug texture loading delay completed, textures should be ready");
             }
             return;
         }
@@ -4390,9 +4401,9 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Add a small delay to ensure textures are fully loaded
         if (!smileTexturesLoaded) {
-            textureLoadingDelay += delta;
-            if (textureLoadingDelay >= TEXTURE_LOADING_DELAY) {
-                System.out.println("DEBUG: Texture loading delay completed for flower animation, textures should be ready");
+            flowerTextureLoadingDelay += delta;
+            if (flowerTextureLoadingDelay >= TEXTURE_LOADING_DELAY) {
+                System.out.println("DEBUG: Flower texture loading delay completed, textures should be ready");
             }
             return;
         }
@@ -4440,8 +4451,8 @@ public class GameMenu extends InputAdapter implements Screen {
                 waitingForRingNotificationClose = false;
                 isRinging = true;
                 ringingTimer = 0f;
-                currentSmileFrame = 0;
-                smileAnimationTimer = 0f;
+                currentHeartEmojiFrame = 0;
+                heartEmojiAnimationTimer = 0f;
                 ringAnimationActive = true;
                 ringAnimationProgress = 0f;
 
@@ -4454,19 +4465,24 @@ public class GameMenu extends InputAdapter implements Screen {
             return;
         }
 
-        // Add a small delay to ensure textures are fully loaded
-        if (!heartEmojiTexturesLoaded) {
-            textureLoadingDelay += delta;
-            if (textureLoadingDelay >= TEXTURE_LOADING_DELAY) {
-                System.out.println("DEBUG: Texture loading delay completed for ring animation, textures should be ready");
+        // Only apply texture loading delay if textures are not ready
+        if (!heartEmojiTexturesLoaded || ringTexture == null) {
+            ringTextureLoadingDelay += delta;
+            if (ringTextureLoadingDelay >= TEXTURE_LOADING_DELAY) {
+                System.out.println("DEBUG: Ring texture loading delay completed, textures should be ready");
+                // If textures are still not ready after delay, skip this frame
+                if (!heartEmojiTexturesLoaded || ringTexture == null) {
+                    return;
+                }
+            } else {
+                return; // Still waiting for delay
             }
-            return;
         }
 
         ringingTimer += delta;
         heartEmojiAnimationTimer += delta;
 
-        if (heartEmojiAnimationTimer >= SMILE_FRAME_DURATION) {
+        if (heartEmojiAnimationTimer >= HEART_EMOJI_FRAME_DURATION) {
             currentHeartEmojiFrame = (currentHeartEmojiFrame + 1) % 4;
             heartEmojiAnimationTimer = 0f;
         }
