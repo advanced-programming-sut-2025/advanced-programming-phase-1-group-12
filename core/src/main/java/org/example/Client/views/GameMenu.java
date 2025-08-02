@@ -592,6 +592,7 @@ public class GameMenu extends InputAdapter implements Screen {
         updateWeatherSystem(delta);
         updateHugAnimation(delta);
         updateFlowerAnimation(delta);
+        updateRingAnimation(delta);
 
         if (errorLabel.isVisible()) {
             timeSinceError += delta;
@@ -839,6 +840,9 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Render flower animation after lighting overlay to ensure it's visible
         renderFlowerAnimation(batch);
+
+        // Render ring animation after lighting overlay to ensure it's visible
+        renderRingAnimation(batch);
 
 
         // Render full-screen player interaction menu if active
@@ -3347,12 +3351,12 @@ public class GameMenu extends InputAdapter implements Screen {
         private void performFlower(String targetUsername) {
         Player currentPlayer = App.getCurrentPlayerLazy();
         Player targetPlayer = App.getCurrentGame().getPlayerByName(targetUsername);
- 
+
         if (targetPlayer == null) {
             showNotification("Player not found!", false);
             return;
         }
- 
+
         // Check if players are adjacent
         float distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - targetPlayer.getUserLocation().getxAxis()) +
                         Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
@@ -3360,12 +3364,12 @@ public class GameMenu extends InputAdapter implements Screen {
             showNotification("Players must be adjacent to give flowers!", false);
             return;
         }
- 
+
         // Show notification first
         GameMenuController controller = new GameMenuController();
         Result result = controller.flower(targetUsername);
         showNotification(result.getMessage(), result.isSuccessful());
-        
+
         // Start flower animation after showing notification
         startFlowerAnimation(targetPlayer);
     }
@@ -3786,6 +3790,28 @@ public class GameMenu extends InputAdapter implements Screen {
     private float flowerNotificationCloseTimer = 0f;
     private final float FLOWER_NOTIFICATION_DISPLAY_TIME = 3.0f; // Time to wait for flower notification to close
 
+    // Ring animation variables
+    private boolean isRinging = false;
+    private float ringingTimer = 0f;
+    private final float RING_DURATION = 3.0f; // Total duration of ring animation
+    private Player ringingPlayer1 = null;
+    private Player ringingPlayer2 = null;
+    private Texture ringTexture = null;
+    private float ringX = 0f;
+    private float ringY = 0f;
+    private float ringStartX = 0f;
+    private float ringStartY = 0f;
+    private float ringEndX = 0f;
+    private float ringEndY = 0f;
+    private float ringAnimationProgress = 0f;
+    private boolean ringAnimationActive = false;
+    private final float RING_ANIMATION_DURATION = 1.5f; // Duration of ring travel animation
+
+    // Ring animation delay variables
+    private boolean waitingForRingNotificationClose = false;
+    private float ringNotificationCloseTimer = 0f;
+    private final float RING_NOTIFICATION_DISPLAY_TIME = 3.0f; // Time to wait for ring notification to close
+
     public void showFullScreenPlayerInteractionMenu(Player targetPlayer) {
         targetPlayerForMenu = targetPlayer;
         showingFullScreenMenu = true;
@@ -3861,7 +3887,7 @@ public class GameMenu extends InputAdapter implements Screen {
         marriageButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // TODO: Implement marriage functionality
+                startRingAnimation(targetPlayerForMenu);
                 closeFullScreenMenu();
             }
         });
@@ -3945,14 +3971,14 @@ public class GameMenu extends InputAdapter implements Screen {
                 smileTextures[1] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_2.png"));
                 smileTextures[2] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_3.png"));
                 smileTextures[3] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_4.png"));
-                
+
                 // Set texture filtering for better quality
                 for (int i = 0; i < smileTextures.length; i++) {
                     if (smileTextures[i] != null) {
                         smileTextures[i].setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
                     }
                 }
-                
+
                 smileTexturesLoaded = true; // Mark textures as loaded
                 System.out.println("DEBUG: Successfully loaded all smile textures for hugging animation");
             } catch (Exception e) {
@@ -4007,6 +4033,108 @@ public class GameMenu extends InputAdapter implements Screen {
         showNotification(result.getMessage(), result.isSuccessful());
     }
 
+    private void startRingAnimation(Player targetPlayer) {
+        Player currentPlayer = App.getCurrentPlayerLazy();
+        if (currentPlayer == null || targetPlayer == null) {
+            System.out.println("DEBUG: One of the players is null - currentPlayer: " + (currentPlayer != null) + ", targetPlayer: " + (targetPlayer != null));
+            return;
+        }
+
+        float distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - targetPlayer.getUserLocation().getxAxis()) +
+                        Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
+
+        if (distance > 2) {
+            showNotification("Players must be adjacent to propose marriage!", false);
+            return;
+        }
+
+        waitingForRingNotificationClose = true;
+        ringNotificationCloseTimer = 0f;
+        ringingPlayer1 = currentPlayer;
+        ringingPlayer2 = targetPlayer;
+
+        if (ringTexture == null) {
+            try {
+                ringTexture = new Texture(Gdx.files.internal("NPC/RelationShip/Wedding_Ring.png"));
+                ringTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+                System.out.println("DEBUG: Ring texture loaded successfully");
+            } catch (Exception e) {
+                System.out.println("DEBUG: Failed to load ring texture: " + e.getMessage());
+                try {
+                    Pixmap pixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
+                    pixmap.setColor(Color.GOLD);
+                    pixmap.fill();
+                    ringTexture = new Texture(pixmap);
+                    pixmap.dispose();
+                    System.out.println("DEBUG: Using emergency gold texture for ring");
+                } catch (Exception emergencyException) {
+                    System.out.println("DEBUG: Emergency ring texture creation failed: " + emergencyException.getMessage());
+                    return; // Don't start animation if we can't load any texture
+                }
+            }
+        }
+
+        if (!smileTexturesLoaded) {
+            System.out.println("DEBUG: Loading smile textures for ring animation...");
+            try {
+                smileTextures[0] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_1.png"));
+                smileTextures[1] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_2.png"));
+                smileTextures[2] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_3.png"));
+                smileTextures[3] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_4.png"));
+
+                for (int i = 0; i < smileTextures.length; i++) {
+                    if (smileTextures[i] != null) {
+                        smileTextures[i].setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+                    }
+                }
+
+                smileTexturesLoaded = true;
+                System.out.println("DEBUG: Successfully loaded all smile textures for ring animation");
+            } catch (Exception e) {
+                System.out.println("DEBUG: Failed to load smile textures for ring animation: " + e.getMessage());
+                try {
+                    Texture fallbackTexture = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_1.png"));
+                    fallbackTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+                    for (int i = 0; i < smileTextures.length; i++) {
+                        smileTextures[i] = fallbackTexture;
+                    }
+                    smileTexturesLoaded = true;
+                    System.out.println("DEBUG: Using fallback texture for all smile frames in ring animation");
+                } catch (Exception fallbackException) {
+                    System.out.println("DEBUG: Even fallback texture failed for ring animation: " + fallbackException.getMessage());
+                    try {
+                        Pixmap pixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
+                        pixmap.setColor(Color.YELLOW);
+                        pixmap.fill();
+                        Texture emergencyTexture = new Texture(pixmap);
+                        pixmap.dispose();
+                        for (int i = 0; i < smileTextures.length; i++) {
+                            smileTextures[i] = emergencyTexture;
+                        }
+                        smileTexturesLoaded = true;
+                        System.out.println("DEBUG: Using emergency yellow texture for ring animation");
+                    } catch (Exception emergencyException) {
+                        System.out.println("DEBUG: Emergency texture creation failed for ring: " + emergencyException.getMessage());
+                    }
+                }
+            }
+        }
+
+        ringStartX = currentPlayer.getUserLocation().getxAxis() * 100f + 16f;
+        ringStartY = currentPlayer.getUserLocation().getyAxis() * 100f + 16f;
+        ringEndX = targetPlayer.getUserLocation().getxAxis() * 100f + 16f;
+        ringEndY = targetPlayer.getUserLocation().getyAxis() * 100f + 16f;
+
+        ringX = ringStartX;
+        ringY = ringStartY;
+        ringAnimationProgress = 0f;
+        ringAnimationActive = false;
+
+        System.out.println("DEBUG: Ring animation started - isRinging: " + isRinging + ", player1: " + currentPlayer.getUser().getUserName() + ", player2: " + targetPlayer.getUser().getUserName());
+
+        makePlayersFaceEachOther(currentPlayer, targetPlayer);
+    }
+
     private void startFlowerAnimation(Player targetPlayer) {
         Player currentPlayer = App.getCurrentPlayerLazy();
         if (currentPlayer == null || targetPlayer == null) {
@@ -4027,7 +4155,7 @@ public class GameMenu extends InputAdapter implements Screen {
         flowerNotificationCloseTimer = 0f;
         floweringPlayer1 = currentPlayer;
         floweringPlayer2 = targetPlayer;
-        
+
         // Reset texture loading delay for this animation
         textureLoadingDelay = 0f;
 
@@ -4053,7 +4181,7 @@ public class GameMenu extends InputAdapter implements Screen {
                 }
             }
         }
-        
+
         // Ensure smile textures are loaded before starting any animation
         if (!smileTexturesLoaded) {
             System.out.println("DEBUG: Loading smile textures for flower animation...");
@@ -4062,14 +4190,14 @@ public class GameMenu extends InputAdapter implements Screen {
                 smileTextures[1] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_2.png"));
                 smileTextures[2] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_3.png"));
                 smileTextures[3] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_4.png"));
-                
+
                 // Set texture filtering for better quality
                 for (int i = 0; i < smileTextures.length; i++) {
                     if (smileTextures[i] != null) {
                         smileTextures[i].setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
                     }
                 }
-                
+
                 smileTexturesLoaded = true; // Mark textures as loaded
                 System.out.println("DEBUG: Successfully loaded all smile textures for flower animation");
             } catch (Exception e) {
@@ -4178,7 +4306,7 @@ public class GameMenu extends InputAdapter implements Screen {
         if (!isHugging) {
             return;
         }
-        
+
         // Add a small delay to ensure textures are fully loaded
         if (!smileTexturesLoaded) {
             textureLoadingDelay += delta;
@@ -4244,7 +4372,7 @@ public class GameMenu extends InputAdapter implements Screen {
         if (!isFlowering) {
             return;
         }
-        
+
         // Add a small delay to ensure textures are fully loaded
         if (!smileTexturesLoaded) {
             textureLoadingDelay += delta;
@@ -4287,17 +4415,81 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
+    private void updateRingAnimation(float delta) {
+        // Handle waiting for notification to close
+        if (waitingForRingNotificationClose) {
+            ringNotificationCloseTimer += delta;
+
+            if (ringNotificationCloseTimer >= RING_NOTIFICATION_DISPLAY_TIME) {
+                // Start the animations after notification closes
+                waitingForRingNotificationClose = false;
+                isRinging = true;
+                ringingTimer = 0f;
+                currentSmileFrame = 0;
+                smileAnimationTimer = 0f;
+                ringAnimationActive = true;
+                ringAnimationProgress = 0f;
+
+                System.out.println("DEBUG: Starting ring animations after notification closed");
+            }
+            return;
+        }
+
+        if (!isRinging) {
+            return;
+        }
+
+        // Add a small delay to ensure textures are fully loaded
+        if (!smileTexturesLoaded) {
+            textureLoadingDelay += delta;
+            if (textureLoadingDelay >= TEXTURE_LOADING_DELAY) {
+                System.out.println("DEBUG: Texture loading delay completed for ring animation, textures should be ready");
+            }
+            return;
+        }
+
+        ringingTimer += delta;
+        smileAnimationTimer += delta;
+
+        if (smileAnimationTimer >= SMILE_FRAME_DURATION) {
+            currentSmileFrame = (currentSmileFrame + 1) % 4;
+            smileAnimationTimer = 0f;
+        }
+
+        // Update ring animation
+        if (ringAnimationActive) {
+            ringAnimationProgress += delta / RING_ANIMATION_DURATION;
+
+            if (ringAnimationProgress >= 1.0f) {
+                ringAnimationActive = false;
+                ringAnimationProgress = 1.0f;
+            }
+
+            // Calculate ring position using smooth interpolation
+            float t = ringAnimationProgress;
+            float smoothT = t * t * (3.0f - 2.0f * t); // Smoothstep interpolation
+            ringX = ringStartX + (ringEndX - ringStartX) * smoothT;
+            ringY = ringStartY + (ringEndY - ringStartY) * smoothT;
+        }
+
+        if (ringingTimer >= RING_DURATION) {
+            isRinging = false;
+            ringingPlayer1 = null;
+            ringingPlayer2 = null;
+            ringAnimationActive = false;
+            waitingForRingNotificationClose = false;
+        }
+    }
+
         private void renderHugAnimation(SpriteBatch batch) {
-        // Don't render anything while waiting for notification to close
         if (waitingForNotificationClose) {
             return;
         }
-        
+
         if (!isHugging || huggingPlayer1 == null || huggingPlayer2 == null) {
             return;
         }
-        
-        // Safety check: ensure smile textures are loaded
+
         if (!smileTexturesLoaded) {
             System.out.println("DEBUG: Smile textures not ready for hug animation, skipping render");
             return;
@@ -4342,21 +4534,19 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
         private void renderFlowerAnimation(SpriteBatch batch) {
-        // Don't render anything while waiting for notification to close
         if (waitingForFlowerNotificationClose) {
             return;
         }
-        
+
         if (!isFlowering || floweringPlayer1 == null || floweringPlayer2 == null) {
             return;
         }
-        
-        // Safety check: ensure smile textures and flower texture are loaded
+
         if (!smileTexturesLoaded) {
             System.out.println("DEBUG: Smile textures not ready for flower animation, skipping render");
             return;
         }
-        
+
         if (flowerTexture == null) {
             System.out.println("DEBUG: Flower texture not ready for flower animation, skipping render");
             return;
@@ -4380,26 +4570,79 @@ public class GameMenu extends InputAdapter implements Screen {
                                  (smileTextures[currentSmileFrame] != null ? "not null" : "null") : "invalid index"));
         }
 
-        // Render flower animation
         if (flowerAnimationActive && flowerTexture != null) {
             try {
-                // Convert world coordinates to screen coordinates
                 Vector3 flowerScreenPos = camera.project(new Vector3(flowerX, flowerY, 0));
 
                 float flowerSize = 32f; // Size of the flower
                 float alpha = 1.0f;
 
-                // Fade out the flower as it reaches the destination
                 if (flowerAnimationProgress > 0.8f) {
                     alpha = 1.0f - (flowerAnimationProgress - 0.8f) / 0.2f;
                 }
 
-                // Set color with alpha for fading effect
                 batch.setColor(1.0f, 1.0f, 1.0f, alpha);
                 batch.draw(flowerTexture, flowerScreenPos.x - flowerSize/2, flowerScreenPos.y - flowerSize/2, flowerSize, flowerSize);
                 batch.setColor(1.0f, 1.0f, 1.0f, 1.0f); // Reset color
             } catch (Exception e) {
                 System.out.println("DEBUG: Error rendering flower texture: " + e.getMessage());
+            }
+        }
+    }
+
+    private void renderRingAnimation(SpriteBatch batch) {
+        if (waitingForRingNotificationClose) {
+            return;
+        }
+
+        if (!isRinging || ringingPlayer1 == null || ringingPlayer2 == null) {
+            return;
+        }
+
+        if (!smileTexturesLoaded) {
+            System.out.println("DEBUG: Smile textures not ready for ring animation, skipping render");
+            return;
+        }
+
+        if (ringTexture == null) {
+            System.out.println("DEBUG: Ring texture not ready for ring animation, skipping render");
+            return;
+        }
+
+        float screenWidth = Gdx.graphics.getWidth();
+        float screenHeight = Gdx.graphics.getHeight();
+
+        float centerX = screenWidth / 2f;
+        float centerY = screenHeight / 2f;
+
+        if (smileTextures != null && currentSmileFrame >= 0 && currentSmileFrame < smileTextures.length &&
+            smileTextures[currentSmileFrame] != null) {
+            float smileWidth = smileTextures[currentSmileFrame].getWidth() * 5f; // Scale up 5x for bigger visibility
+            float smileHeight = smileTextures[currentSmileFrame].getHeight() * 5f;
+            batch.draw(smileTextures[currentSmileFrame], centerX - smileWidth/2, centerY + 100f, smileWidth, smileHeight);
+        } else {
+            System.out.println("DEBUG: Cannot render smile texture for ring animation - smileTextures: " + (smileTextures != null) +
+                             ", currentSmileFrame: " + currentSmileFrame +
+                             ", texture at frame: " + (smileTextures != null && currentSmileFrame >= 0 && currentSmileFrame < smileTextures.length ?
+                                 (smileTextures[currentSmileFrame] != null ? "not null" : "null") : "invalid index"));
+        }
+
+        if (ringAnimationActive && ringTexture != null) {
+            try {
+                Vector3 ringScreenPos = camera.project(new Vector3(ringX, ringY, 0));
+
+                float ringSize = 32f; // Size of the ring
+                float alpha = 1.0f;
+
+                if (ringAnimationProgress > 0.8f) {
+                    alpha = 1.0f - (ringAnimationProgress - 0.8f) / 0.2f;
+                }
+
+                batch.setColor(1.0f, 1.0f, 1.0f, alpha);
+                batch.draw(ringTexture, ringScreenPos.x - ringSize/2, ringScreenPos.y - ringSize/2, ringSize, ringSize);
+                batch.setColor(1.0f, 1.0f, 1.0f, 1.0f); // Reset color
+            } catch (Exception e) {
+                System.out.println("DEBUG: Error rendering ring texture: " + e.getMessage());
             }
         }
     }
