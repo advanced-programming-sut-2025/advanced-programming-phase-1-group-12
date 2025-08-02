@@ -3,6 +3,7 @@ package org.example.Client.views;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -482,6 +483,20 @@ public class GameMenu extends InputAdapter implements Screen {
             } catch (Exception e) {
                 System.out.println("DEBUG: Error loading smile textures: " + e.getMessage());
                 e.printStackTrace();
+                // Create emergency textures if loading fails
+                try {
+                    Pixmap pixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
+                    pixmap.setColor(Color.YELLOW);
+                    pixmap.fill();
+                    Texture emergencyTexture = new Texture(pixmap);
+                    pixmap.dispose();
+                    for (int i = 0; i < smileTextures.length; i++) {
+                        smileTextures[i] = emergencyTexture;
+                    }
+                    System.out.println("DEBUG: Using emergency yellow texture for smile frames in show()");
+                } catch (Exception emergencyException) {
+                    System.out.println("DEBUG: Emergency texture creation failed in show(): " + emergencyException.getMessage());
+                }
             }
         }
 
@@ -574,6 +589,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
         updateWeatherSystem(delta);
         updateHugAnimation(delta);
+        updateFlowerAnimation(delta);
 
         if (errorLabel.isVisible()) {
             timeSinceError += delta;
@@ -819,6 +835,9 @@ public class GameMenu extends InputAdapter implements Screen {
         // Render hug animation after lighting overlay to ensure it's visible
         renderHugAnimation(batch);
 
+        // Render flower animation after lighting overlay to ensure it's visible
+        renderFlowerAnimation(batch);
+
 
         // Render full-screen player interaction menu if active
         if (showingFullScreenMenu) {
@@ -953,6 +972,11 @@ public class GameMenu extends InputAdapter implements Screen {
         // Dispose heart texture
         if (heartTexture != null) {
             heartTexture.dispose();
+        }
+
+        // Dispose flower texture
+        if (flowerTexture != null) {
+            flowerTexture.dispose();
         }
 
         stage.dispose();
@@ -3318,11 +3342,30 @@ public class GameMenu extends InputAdapter implements Screen {
         showNotification(result.getMessage(), result.isSuccessful());
     }
 
-    private void performFlower(String targetUsername) {
+        private void performFlower(String targetUsername) {
         Player currentPlayer = App.getCurrentPlayerLazy();
+        Player targetPlayer = App.getCurrentGame().getPlayerByName(targetUsername);
+ 
+        if (targetPlayer == null) {
+            showNotification("Player not found!", false);
+            return;
+        }
+ 
+        // Check if players are adjacent
+        float distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - targetPlayer.getUserLocation().getxAxis()) +
+                        Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
+        if (distance > 2) {
+            showNotification("Players must be adjacent to give flowers!", false);
+            return;
+        }
+ 
+        // Show notification first
         GameMenuController controller = new GameMenuController();
         Result result = controller.flower(targetUsername);
         showNotification(result.getMessage(), result.isSuccessful());
+        
+        // Start flower animation after showing notification
+        startFlowerAnimation(targetPlayer);
     }
 
     private void showMarriageProposalDialog(String targetUsername) {
@@ -3716,6 +3759,28 @@ public class GameMenu extends InputAdapter implements Screen {
     private float notificationCloseTimer = 0f;
     private final float NOTIFICATION_DISPLAY_TIME = 3.0f; // Time to wait for notification to close
 
+    // Flower animation variables
+    private boolean isFlowering = false;
+    private float floweringTimer = 0f;
+    private final float FLOWER_DURATION = 3.0f; // Total duration of flower animation
+    private Player floweringPlayer1 = null;
+    private Player floweringPlayer2 = null;
+    private Texture flowerTexture = null;
+    private float flowerX = 0f;
+    private float flowerY = 0f;
+    private float flowerStartX = 0f;
+    private float flowerStartY = 0f;
+    private float flowerEndX = 0f;
+    private float flowerEndY = 0f;
+    private float flowerAnimationProgress = 0f;
+    private boolean flowerAnimationActive = false;
+    private final float FLOWER_ANIMATION_DURATION = 1.5f; // Duration of flower travel animation
+
+    // Flower animation delay variables
+    private boolean waitingForFlowerNotificationClose = false;
+    private float flowerNotificationCloseTimer = 0f;
+    private final float FLOWER_NOTIFICATION_DISPLAY_TIME = 3.0f; // Time to wait for flower notification to close
+
     public void showFullScreenPlayerInteractionMenu(Player targetPlayer) {
         targetPlayerForMenu = targetPlayer;
         showingFullScreenMenu = true;
@@ -3775,7 +3840,6 @@ public class GameMenu extends InputAdapter implements Screen {
         hugButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                System.out.println("DEBUG: Hug button clicked in full-screen menu!");
                 startHugAnimation(targetPlayerForMenu);
                 closeFullScreenMenu();
             }
@@ -3784,7 +3848,7 @@ public class GameMenu extends InputAdapter implements Screen {
         flowerButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // TODO: Implement flower functionality
+                startFlowerAnimation(targetPlayerForMenu);
                 closeFullScreenMenu();
             }
         });
@@ -3912,6 +3976,94 @@ public class GameMenu extends InputAdapter implements Screen {
         showNotification(result.getMessage(), result.isSuccessful());
     }
 
+    private void startFlowerAnimation(Player targetPlayer) {
+        Player currentPlayer = App.getCurrentPlayerLazy();
+        if (currentPlayer == null || targetPlayer == null) {
+            System.out.println("DEBUG: One of the players is null - currentPlayer: " + (currentPlayer != null) + ", targetPlayer: " + (targetPlayer != null));
+            return;
+        }
+
+        float distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - targetPlayer.getUserLocation().getxAxis()) +
+                        Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
+
+        if (distance > 2) {
+            showNotification("Players must be adjacent to give flowers!", false);
+            return;
+        }
+
+        // Set up waiting for notification to close before starting animations
+        waitingForFlowerNotificationClose = true;
+        flowerNotificationCloseTimer = 0f;
+        floweringPlayer1 = currentPlayer;
+        floweringPlayer2 = targetPlayer;
+
+        // Initialize flower animation setup (but don't start yet)
+        if (flowerTexture == null) {
+            flowerTexture = new Texture(Gdx.files.internal("NPC/RelationShip/Bouquet.png"));
+        }
+        
+        // Initialize smile textures if not already done (for flower animation)
+        if (smileTextures[0] == null) {
+            try {
+                smileTextures[0] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_1.png"));
+                smileTextures[1] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_2.png"));
+                smileTextures[2] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_3.png"));
+                smileTextures[3] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_4.png"));
+                
+                // Set texture filtering for better quality
+                for (int i = 0; i < smileTextures.length; i++) {
+                    if (smileTextures[i] != null) {
+                        smileTextures[i].setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+                    }
+                }
+                
+                System.out.println("DEBUG: Successfully loaded all smile textures for flower animation");
+            } catch (Exception e) {
+                System.out.println("DEBUG: Failed to load smile textures for flower animation: " + e.getMessage());
+                // Create a fallback texture to prevent null rendering
+                try {
+                    Texture fallbackTexture = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_1.png"));
+                    fallbackTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+                    for (int i = 0; i < smileTextures.length; i++) {
+                        smileTextures[i] = fallbackTexture;
+                    }
+                    System.out.println("DEBUG: Using fallback texture for all smile frames in flower animation");
+                } catch (Exception fallbackException) {
+                    System.out.println("DEBUG: Even fallback texture failed for flower animation: " + fallbackException.getMessage());
+                    // Create a simple colored rectangle as last resort
+                    try {
+                        Pixmap pixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
+                        pixmap.setColor(Color.YELLOW);
+                        pixmap.fill();
+                        Texture emergencyTexture = new Texture(pixmap);
+                        pixmap.dispose();
+                        for (int i = 0; i < smileTextures.length; i++) {
+                            smileTextures[i] = emergencyTexture;
+                        }
+                        System.out.println("DEBUG: Using emergency yellow texture for smile frames");
+                    } catch (Exception emergencyException) {
+                        System.out.println("DEBUG: Emergency texture creation failed: " + emergencyException.getMessage());
+                    }
+                }
+            }
+        }
+
+        // Calculate flower animation positions
+        flowerStartX = currentPlayer.getUserLocation().getxAxis() * 100f + 16f; // Center of player 1
+        flowerStartY = currentPlayer.getUserLocation().getyAxis() * 100f + 16f;
+        flowerEndX = targetPlayer.getUserLocation().getxAxis() * 100f + 16f; // Center of player 2
+        flowerEndY = targetPlayer.getUserLocation().getyAxis() * 100f + 16f;
+
+        flowerX = flowerStartX;
+        flowerY = flowerStartY;
+        flowerAnimationProgress = 0f;
+        flowerAnimationActive = false; // Don't start yet
+
+        System.out.println("DEBUG: Flower animation started - isFlowering: " + isFlowering + ", player1: " + currentPlayer.getUser().getUserName() + ", player2: " + targetPlayer.getUser().getUserName());
+
+        makePlayersFaceEachOther(currentPlayer, targetPlayer);
+    }
+
     private void makePlayersFaceEachOther(Player player1, Player player2) {
         float dx = player2.getUserLocation().getxAxis() - player1.getUserLocation().getxAxis();
         float dy = player2.getUserLocation().getyAxis() - player1.getUserLocation().getyAxis();
@@ -4002,13 +4154,76 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
-    private void renderHugAnimation(SpriteBatch batch) {
+    private void updateFlowerAnimation(float delta) {
+        // Handle waiting for notification to close
+        if (waitingForFlowerNotificationClose) {
+            flowerNotificationCloseTimer += delta;
+
+            if (flowerNotificationCloseTimer >= FLOWER_NOTIFICATION_DISPLAY_TIME) {
+                // Start the animations after notification closes
+                waitingForFlowerNotificationClose = false;
+                isFlowering = true;
+                floweringTimer = 0f;
+                currentSmileFrame = 0;
+                smileAnimationTimer = 0f;
+                flowerAnimationActive = true;
+                flowerAnimationProgress = 0f;
+
+                System.out.println("DEBUG: Starting flower animations after notification closed");
+            }
+            return;
+        }
+
+        if (!isFlowering) {
+            return;
+        }
+
+        floweringTimer += delta;
+        smileAnimationTimer += delta;
+
+        if (smileAnimationTimer >= SMILE_FRAME_DURATION) {
+            currentSmileFrame = (currentSmileFrame + 1) % 4;
+            smileAnimationTimer = 0f;
+        }
+
+        // Update flower animation
+        if (flowerAnimationActive) {
+            flowerAnimationProgress += delta / FLOWER_ANIMATION_DURATION;
+
+            if (flowerAnimationProgress >= 1.0f) {
+                flowerAnimationActive = false;
+                flowerAnimationProgress = 1.0f;
+            }
+
+            // Calculate flower position using smooth interpolation
+            float t = flowerAnimationProgress;
+            float smoothT = t * t * (3.0f - 2.0f * t); // Smoothstep interpolation
+            flowerX = flowerStartX + (flowerEndX - flowerStartX) * smoothT;
+            flowerY = flowerStartY + (flowerEndY - flowerStartY) * smoothT;
+        }
+
+        if (floweringTimer >= FLOWER_DURATION) {
+            isFlowering = false;
+            floweringPlayer1 = null;
+            floweringPlayer2 = null;
+            flowerAnimationActive = false;
+            waitingForFlowerNotificationClose = false;
+        }
+    }
+
+        private void renderHugAnimation(SpriteBatch batch) {
         // Don't render anything while waiting for notification to close
         if (waitingForNotificationClose) {
             return;
         }
-
+        
         if (!isHugging || huggingPlayer1 == null || huggingPlayer2 == null) {
+            return;
+        }
+        
+        // Safety check: ensure smile textures are loaded
+        if (smileTextures == null || smileTextures[0] == null) {
+            System.out.println("DEBUG: Smile textures not ready for hug animation, skipping render");
             return;
         }
 
@@ -4024,9 +4239,9 @@ public class GameMenu extends InputAdapter implements Screen {
             float smileHeight = smileTextures[currentSmileFrame].getHeight() * 5f;
             batch.draw(smileTextures[currentSmileFrame], centerX - smileWidth/2, centerY + 100f, smileWidth, smileHeight);
         } else {
-            System.out.println("DEBUG: Cannot render smile texture - smileTextures: " + (smileTextures != null) + 
-                             ", currentSmileFrame: " + currentSmileFrame + 
-                             ", texture at frame: " + (smileTextures != null && currentSmileFrame >= 0 && currentSmileFrame < smileTextures.length ? 
+            System.out.println("DEBUG: Cannot render smile texture - smileTextures: " + (smileTextures != null) +
+                             ", currentSmileFrame: " + currentSmileFrame +
+                             ", texture at frame: " + (smileTextures != null && currentSmileFrame >= 0 && currentSmileFrame < smileTextures.length ?
                                  (smileTextures[currentSmileFrame] != null ? "not null" : "null") : "invalid index"));
         }
 
@@ -4046,6 +4261,60 @@ public class GameMenu extends InputAdapter implements Screen {
             // Set color with alpha for fading effect
             batch.setColor(1.0f, 1.0f, 1.0f, alpha);
             batch.draw(heartTexture, heartScreenPos.x - heartSize/2, heartScreenPos.y - heartSize/2, heartSize, heartSize);
+            batch.setColor(1.0f, 1.0f, 1.0f, 1.0f); // Reset color
+        }
+    }
+
+        private void renderFlowerAnimation(SpriteBatch batch) {
+        // Don't render anything while waiting for notification to close
+        if (waitingForFlowerNotificationClose) {
+            return;
+        }
+        
+        if (!isFlowering || floweringPlayer1 == null || floweringPlayer2 == null) {
+            return;
+        }
+        
+        // Safety check: ensure smile textures are loaded
+        if (smileTextures == null || smileTextures[0] == null) {
+            System.out.println("DEBUG: Smile textures not ready for flower animation, skipping render");
+            return;
+        }
+
+        float screenWidth = Gdx.graphics.getWidth();
+        float screenHeight = Gdx.graphics.getHeight();
+
+        float centerX = screenWidth / 2f;
+        float centerY = screenHeight / 2f;
+
+        if (smileTextures != null && currentSmileFrame >= 0 && currentSmileFrame < smileTextures.length &&
+            smileTextures[currentSmileFrame] != null) {
+            float smileWidth = smileTextures[currentSmileFrame].getWidth() * 5f; // Scale up 5x for bigger visibility
+            float smileHeight = smileTextures[currentSmileFrame].getHeight() * 5f;
+            batch.draw(smileTextures[currentSmileFrame], centerX - smileWidth/2, centerY + 100f, smileWidth, smileHeight);
+        } else {
+            System.out.println("DEBUG: Cannot render smile texture for flower animation - smileTextures: " + (smileTextures != null) +
+                             ", currentSmileFrame: " + currentSmileFrame +
+                             ", texture at frame: " + (smileTextures != null && currentSmileFrame >= 0 && currentSmileFrame < smileTextures.length ?
+                                 (smileTextures[currentSmileFrame] != null ? "not null" : "null") : "invalid index"));
+        }
+
+        // Render flower animation
+        if (flowerAnimationActive && flowerTexture != null) {
+            // Convert world coordinates to screen coordinates
+            Vector3 flowerScreenPos = camera.project(new Vector3(flowerX, flowerY, 0));
+
+            float flowerSize = 32f; // Size of the flower
+            float alpha = 1.0f;
+
+            // Fade out the flower as it reaches the destination
+            if (flowerAnimationProgress > 0.8f) {
+                alpha = 1.0f - (flowerAnimationProgress - 0.8f) / 0.2f;
+            }
+
+            // Set color with alpha for fading effect
+            batch.setColor(1.0f, 1.0f, 1.0f, alpha);
+            batch.draw(flowerTexture, flowerScreenPos.x - flowerSize/2, flowerScreenPos.y - flowerSize/2, flowerSize, flowerSize);
             batch.setColor(1.0f, 1.0f, 1.0f, 1.0f); // Reset color
         }
     }
