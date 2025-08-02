@@ -384,7 +384,7 @@ public class Player {
     }
 
     public PlayerController getPlayerController() {
-        System.out.println("DEBUG: getPlayerController called for player " + this.getUser().getUserName() + " returning: " + (playerController != null ? playerController.getClass().getSimpleName() : "null"));
+
         return playerController;
     }
 

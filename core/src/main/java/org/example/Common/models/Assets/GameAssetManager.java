@@ -13,7 +13,7 @@ import java.util.EnumMap;
 
 public class GameAssetManager {
     public static Skin skin;
-    
+
     public static Skin getSkin() {
         if (skin == null) {
             skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
@@ -36,14 +36,14 @@ public class GameAssetManager {
     private final Texture GROUND = new Texture("Flooring/Flooring_53.png");
     private final Texture STORE = new Texture("Flooring/Flooring_02.png");
     private final Texture HOUSE = new Texture("House_farmer.png");
-    
+
     // NPC House textures
     private final Texture NPC_HOUSE_1 = new Texture("NPC/House/npcHouse_1.PNG");
     private final Texture NPC_HOUSE_2 = new Texture("NPC/House/npcHouse_2.PNG");
     private final Texture NPC_HOUSE_3 = new Texture("NPC/House/npcHouse_3.PNG");
     private final Texture NPC_HOUSE_4 = new Texture("NPC/House/npcHouse_4.PNG");
     private final Texture NPC_HOUSE_5 = new Texture("NPC/House/npcHouse_5.PNG");
-    
+
     private final Texture barn = new Texture("Decor/Weathered_Floor_Tile.png");
     private final Texture coop = new Texture("Decor/Stone_Floor_Tile.png");
     private final Texture ploughedLand = new Texture("Flooring/Flooring_14.png");
@@ -124,6 +124,12 @@ public class GameAssetManager {
     public static final Texture RICE = new Texture("Crops/Rice.png");
     public static final Texture WHEAT_FLOUR = new Texture("Crops/Wheat_Flour.png");
     public static final Texture WOOD = new Texture("Crafting/Wood.png");
+
+    public final Texture heartTexture = new Texture("NPC/RelationShip/Heart_1.png");
+
+    public Texture getHeartTexture() {
+        return heartTexture;
+    }
 
     public Texture getAnimalHome() {
         if (animalHome == null) {
