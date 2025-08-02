@@ -34,7 +34,7 @@ public class PlayerController {
     private static final Logger logger = LoggerFactory.getLogger(PlayerController.class);
     private static final int FRAME_W = 16;
     private static final int FRAME_H = 32;
-    private static final float FRAME_DURATION = 0.15f;
+    private static final float FRAME_DURATION = 0.12f; // Slower animation for more natural walking
 
     private final Player player;
     private final GameMenuController gameController;
@@ -62,7 +62,7 @@ public class PlayerController {
     
     //for movement cooldown:
     private float movementTimer = 0f;
-    private static final float MOVEMENT_COOLDOWN = 0.2f; // Slower movement - 200ms between moves
+    private static final float MOVEMENT_COOLDOWN = 0.03f; // Ultra smooth movement - 30ms between moves
 
     public PlayerController(Player player, GameMenuController gameController, List<String> players) {
         this.players = players;
