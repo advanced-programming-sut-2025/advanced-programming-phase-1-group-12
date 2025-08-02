@@ -20,6 +20,9 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Common.models.*;
 import org.example.Common.models.Date;
 import org.example.Client.Main;
+import org.example.Common.models.enums.Animal;
+import org.example.Common.models.enums.foraging.Plant;
+import org.example.Common.models.enums.foraging.TypeOfPlant;
 import org.example.Server.controllers.*;
 import org.example.Server.controllers.MenusController.GameMenuController;
 import org.example.Server.controllers.movingPlayer.PlayerController;
@@ -225,7 +228,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     player.updatePosition(x, y); // Update sprite position
                     logger.debug("Updated player {} position to ({}, {})", playerId, x, y);
                     playerFound = true;
-                    
+
                     // If we're showing the full map, update camera position for smooth following
                     if (showingAllMap) {
                         updateCameraToPlayer();
@@ -1633,72 +1636,6 @@ public class GameMenu extends InputAdapter implements Screen {
                 actor.remove();
             }
         }
-    }
-
-    public void inventoryItemsMenu() {
-        Skin skin = GameAssetManager.skin;
-        Dialog dialog = new Dialog("Your inventory items and trash can", skin);
-
-        Player player = App.getCurrentGame().getCurrentPlayer();
-        BackPack backPack = player.getBackPack();
-
-        Table mainContent = new Table(); // Main container
-        mainContent.top();
-
-        TextButton closeButton = new TextButton("Close", skin);
-        closeButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                dialog.hide();
-            }
-        });
-
-        TextField nameOfDeletingItem = new TextField("", skin);
-        nameOfDeletingItem.setMessageText("Name of the item to be deleted");
-
-        TextField whatCount = new TextField("", skin);
-        whatCount.setMessageText("Count of the item to be deleted");
-        whatCount.setWidth(400);
-
-        TextButton trashButton = new TextButton("Trash", skin);
-        trashButton.setWidth(400);
-        trashButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                GameMenuController gameMenuController = new GameMenuController();
-                Result result = gameMenuController.trashItem(nameOfDeletingItem.getText(), whatCount.getText());
-                showError(result.getMessage());
-                dialog.hide(); // Instead of recursively calling menu, close and reopen
-                inventoryItemsMenu();
-            }
-        });
-
-        mainContent.add(nameOfDeletingItem).pad(5).width(400f).row();
-        mainContent.add(whatCount).pad(5).width(400f).row();
-        mainContent.add(trashButton).pad(5).width(400f).row();
-
-        Table scrollContent = new Table();
-        scrollContent.top();
-        for (Item item : backPack.getItems().keySet()) {
-            Label itemLabel = new Label(item.getName() + " -> " + backPack.getItems().get(item), skin);
-            scrollContent.add(itemLabel).pad(5).width(400f).row();
-        }
-
-        ScrollPane scrollPane = new ScrollPane(scrollContent, skin);
-        scrollPane.setScrollingDisabled(false, false);
-        scrollPane.setFadeScrollBars(false);
-
-        mainContent.add(scrollPane).pad(5).width(400f).height(300f).row();
-        mainContent.add(closeButton).pad(5).width(400f).row();
-
-        dialog.getContentTable().add(mainContent).expand().fill().pad(5).row();
-        dialog.button(closeButton);
-        dialog.pack();
-        dialog.setPosition(
-            (Gdx.graphics.getWidth() - dialog.getWidth()) / 2f,
-            (Gdx.graphics.getHeight() - dialog.getHeight()) / 2f
-        );
-        dialog.show(stage);
     }
 
 
@@ -3758,7 +3695,7 @@ public class GameMenu extends InputAdapter implements Screen {
     private boolean smileTexturesLoaded = false; // Flag to track if textures are ready
     private float textureLoadingDelay = 0f; // Small delay to ensure textures are ready
     private final float TEXTURE_LOADING_DELAY = 0.1f; // 100ms delay
-    
+
     // Separate delay variables for each animation type
     private float hugTextureLoadingDelay = 0f;
     private float flowerTextureLoadingDelay = 0f;
@@ -4685,4 +4622,119 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
+    public Texture findingMissingTexture(String name) {
+        String name1 = name.toLowerCase();
+        if(name1.contains("soil")) {
+            return GameAssetManager.BASIC_RETAINING_SOIL;
+        }
+        if(name1.contains("sapling")) {
+            return GameAssetManager.TEA_SAPLING;
+        }
+        if (name1.equalsIgnoreCase("sugar")){
+            return GameAssetManager.SUGAR;
+        } if(name1.equalsIgnoreCase("rice")){
+            return GameAssetManager.RICE;
+        } if(name1.contains("wheat")){
+            return GameAssetManager.WHEAT_FLOUR;
+        }
+        for(Animal animal: Animal.values()){
+            if(name1.equalsIgnoreCase(animal.name())){
+                return animal.getAnimalTexture();
+            }
+        } if(name1.contains("coop") || name1.contains("barn")){
+            return GameAssetManager.getGameAssetManager().getAnimalHome();
+        }if(name1.contains("seed")) {
+            Plant plant = new Plant(App.getCurrentGame().getMainMap().findLocation(0, 0), false, TypeOfPlant.AMARANTH);
+            return plant.getTexture();
+        } if(name1.contains("starter")){
+            Plant plant = new Plant(App.getCurrentGame().getMainMap().findLocation(0, 0), false, TypeOfPlant.HOPS);
+            return plant.getTexture();
+        } if(name1.contains("wood")) {
+            return GameAssetManager.WOOD;
+        } if(name1.contains("stone")) {
+            return GameAssetManager.getGameAssetManager().getSTONE();
+        }
+        return GameAssetManager.checkMark;
+    }
+
+    public void inventoryItemsMenu() {
+        Skin skin = GameAssetManager.skin;
+        Dialog dialog = new Dialog("Your inventory items and trash can", skin);
+
+        Player player = App.getCurrentGame().getCurrentPlayer();
+        BackPack backPack = player.getBackPack();
+
+        Table mainContent = new Table(); // Main container
+        mainContent.top();
+
+        TextButton closeButton = new TextButton("Close", skin);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+            }
+        });
+
+        TextField nameOfDeletingItem = new TextField("", skin);
+        nameOfDeletingItem.setMessageText("Name of the item to be deleted");
+
+        TextField whatCount = new TextField("", skin);
+        whatCount.setMessageText("Count of the item to be deleted");
+        whatCount.setWidth(400);
+
+        TextButton trashButton = new TextButton("Trash", skin);
+        trashButton.setWidth(400);
+        trashButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                GameMenuController gameMenuController = new GameMenuController();
+                Result result = gameMenuController.trashItem(nameOfDeletingItem.getText(), whatCount.getText());
+                showError(result.getMessage());
+                dialog.hide(); // Instead of recursively calling menu, close and reopen
+                inventoryItemsMenu();
+            }
+        });
+
+        mainContent.add(nameOfDeletingItem).pad(5).width(400f).row();
+        mainContent.add(whatCount).pad(5).width(400f).row();
+        mainContent.add(trashButton).pad(5).width(400f).row();
+
+        Table scrollContent = new Table();
+        scrollContent.top();
+        for (Item item : backPack.getItems().keySet()) {
+            Table itemRow = new Table();
+
+            // Assuming item has a method getTexture() returning a Texture or Drawable
+            Texture tex = item.getTexture();
+            if(tex == null) {
+                tex = findingMissingTexture(item.getName());
+            }
+            TextureRegionDrawable itemDrawable = new TextureRegionDrawable(new TextureRegion(tex));
+            Image itemImage = new Image(itemDrawable);
+
+            Label itemLabel = new Label(item.getName() + " -> " + backPack.getItems().get(item), skin);
+
+            itemRow.add(itemImage).size(32, 32).padRight(10); // Adjust size and padding as needed
+            itemRow.add(itemLabel).expandX().left();
+
+            scrollContent.add(itemRow).pad(5).width(400f).row();
+        }
+
+
+        ScrollPane scrollPane = new ScrollPane(scrollContent, skin);
+        scrollPane.setScrollingDisabled(false, false);
+        scrollPane.setFadeScrollBars(false);
+
+        mainContent.add(scrollPane).pad(5).width(400f).height(300f).row();
+        mainContent.add(closeButton).pad(5).width(400f).row();
+
+        dialog.getContentTable().add(mainContent).expand().fill().pad(5).row();
+        dialog.button(closeButton);
+        dialog.pack();
+        dialog.setPosition(
+            (Gdx.graphics.getWidth() - dialog.getWidth()) / 2f,
+            (Gdx.graphics.getHeight() - dialog.getHeight()) / 2f
+        );
+        dialog.show(stage);
+    }
 }

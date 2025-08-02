@@ -1,18 +1,23 @@
 package org.example.Client.views;
 
+import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.example.Common.models.Assets.GameAssetManager;
 import org.example.Common.models.Assets.PlantAssetsManager;
 import org.example.Common.models.Assets.NPCAnimationManager;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Fundementals.Location;
+import org.example.Common.models.Fundementals.LocationOfRectangle;
 import org.example.Common.models.Fundementals.Player;
+import org.example.Common.models.Place.Store;
 import org.example.Common.models.enums.Types.TypeOfTile;
 import org.example.Common.models.enums.foraging.GiantPlant;
 import org.example.Common.models.enums.foraging.Stone;
 import org.example.Common.models.map;
 
+import java.awt.image.BufferedImage;
 import java.util.*;
 
 public class PixelMapRenderer {
@@ -142,13 +147,13 @@ public class PixelMapRenderer {
             float drawY = offsetY + anchor.getyAxis() * tileSize - tileSize * (TILES_H - 1);
             batch.draw(GameAssetManager.getGameAssetManager().getHOUSE(), drawX, drawY, tileSize * TILES_W, tileSize * TILES_H);
         }
-        
+
         // Render NPC houses
         int npcHouseIndex = 0;
         for (Location anchor : npcHouseAnchors) {
             float drawX = offsetX + anchor.getxAxis() * tileSize;
             float drawY = offsetY + anchor.getyAxis() * tileSize - tileSize * (TILES_H - 1);
-            
+
             Texture npcHouseTexture;
             switch (npcHouseIndex % 5) {
                 case 0:
@@ -170,11 +175,11 @@ public class PixelMapRenderer {
                     npcHouseTexture = GameAssetManager.getGameAssetManager().getNPC_HOUSE_1();
                     break;
             }
-            
+
             batch.draw(npcHouseTexture, drawX, drawY, tileSize * TILES_W, tileSize * TILES_H);
             npcHouseIndex++;
         }
-        
+
         for(Location anchor : giantPlantAnchors) {
             float drawX = offsetX + anchor.getxAxis() * tileSize;
             float drawY = offsetY + anchor.getyAxis() * tileSize - tileSize;
@@ -195,34 +200,53 @@ public class PixelMapRenderer {
                 }
             }
         }
-        
+
         // Render NPCs with animations
+        drawStore(batch);
         renderNPCs(batch, offsetX, offsetY);
     }
+
+    public void drawStore(SpriteBatch spriteBatch) {
+        for(Store store: App.getCurrentGame().getMainMap().getStores()) {
+            Texture storeTexture = store.getStoreTexture();
+
+            LocationOfRectangle rect = store.getLocationOfRectangle();
+            int tileSize = 100;
+
+            int x = rect.getTopLeftCorner().getxAxis() * tileSize;
+            int y = rect.getTopLeftCorner().getyAxis() * tileSize;
+            int width = rect.getLength() * tileSize;
+            int height = rect.getWidth() * tileSize;
+
+            spriteBatch.draw(storeTexture, x, y, width, height);
+            }
+        }
+
+
 
     private void renderNPCs(SpriteBatch batch, int offsetX, int offsetY) {
         if (App.getCurrentGame().getNPCvillage() == null) {
             return;
         }
-        
+
         NPCAnimationManager animationManager = NPCAnimationManager.getInstance();
-        
+
         for (org.example.Common.models.NPC.NPC npc : App.getCurrentGame().getNPCvillage().getAllNPCs()) {
             // Update NPC animation
             npc.updateAnimation(0.016f); // Assuming 60 FPS
-            
+
             // Get current animation frame
-            com.badlogic.gdx.graphics.g2d.Animation<com.badlogic.gdx.graphics.g2d.TextureRegion> animation = 
+            com.badlogic.gdx.graphics.g2d.Animation<com.badlogic.gdx.graphics.g2d.TextureRegion> animation =
                 animationManager.getAnimation(npc.getName(), npc.getCurrentAnimation());
-            
+
             if (animation != null) {
-                com.badlogic.gdx.graphics.g2d.TextureRegion frame = 
+                com.badlogic.gdx.graphics.g2d.TextureRegion frame =
                     animation.getKeyFrame(npc.getAnimationTime(), true);
-                
+
                 if (frame != null) {
                     float drawX = offsetX + npc.getUserLocation().getxAxis() * tileSize;
                     float drawY = offsetY + npc.getUserLocation().getyAxis() * tileSize;
-                    
+
                     // Draw NPC at their location
                     batch.draw(frame, drawX, drawY, tileSize, tileSize);
                 }
@@ -230,13 +254,13 @@ public class PixelMapRenderer {
                 // Fallback: draw a simple colored rectangle for NPCs without animations
                 float drawX = offsetX + npc.getUserLocation().getxAxis() * tileSize;
                 float drawY = offsetY + npc.getUserLocation().getyAxis() * tileSize;
-                
+
                 // Use a simple texture as fallback
                 batch.draw(GameAssetManager.getGameAssetManager().getGROUND(), drawX, drawY, tileSize, tileSize);
             }
         }
     }
-    
+
     public void dispose() {
         GameAssetManager.dispose();
         NPCAnimationManager.getInstance().dispose();

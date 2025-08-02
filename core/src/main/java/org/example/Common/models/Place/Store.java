@@ -1,5 +1,7 @@
 package org.example.Common.models.Place;
 
+import com.badlogic.gdx.graphics.Texture;
+import org.example.Common.models.Assets.GameAssetManager;
 import org.example.Common.models.Fundementals.LocationOfRectangle;
 import org.example.Common.models.ProductsPackage.StoreProducts;
 
@@ -19,6 +21,8 @@ public class Store implements Place {
 
     private ArrayList<StoreProducts> storeProducts;
 
+    private Texture storeTexture;
+
     public Store(LocationOfRectangle locationOfRectangle, String owner, String nameOfStore, int startHour, int closeHour, ArrayList<StoreProducts> storeProducts) {
 
         this.locationOfRectangle = locationOfRectangle;
@@ -27,6 +31,29 @@ public class Store implements Place {
         StartHour = startHour;
         CloseHour = closeHour;
         this.storeProducts = storeProducts;
+
+        switch (nameOfStore) {
+            case "Blacksmith":
+                storeTexture = GameAssetManager.blackSmith;
+                break;
+            case "JojaMart":
+                storeTexture = GameAssetManager.jojaMArt;
+                break;
+            case "Pierre's General Store":
+                storeTexture = GameAssetManager.PierresGeneral;
+                break;
+            case "Carpenter's Shop":
+                storeTexture = GameAssetManager.Carpenter;
+                break;
+            case "Fish Shop":
+                storeTexture = GameAssetManager.fishShop;
+                break;
+            case "Marnie's Ranch":
+                storeTexture = GameAssetManager.Marnie;
+                break;
+            default:
+                storeTexture = GameAssetManager.StardropSaloon;
+        }
     }
 
     public LocationOfRectangle getLocationOfRectangle() {
@@ -81,5 +108,9 @@ public class Store implements Place {
     @Override
     public LocationOfRectangle getLocation() {
         return this.locationOfRectangle;
+    }
+
+    public Texture getStoreTexture() {
+        return storeTexture;
     }
 }

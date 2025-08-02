@@ -37,6 +37,15 @@ public class GameAssetManager {
     private final Texture STORE = new Texture("Flooring/Flooring_02.png");
     private final Texture HOUSE = new Texture("House_farmer.png");
 
+    //shops
+    public final static Texture blackSmith = new Texture("Shop/BlackSmith.png");
+    public final static Texture Carpenter = new Texture("Shop/Carpenter.png");
+    public final static Texture fishShop = new Texture("Shop/Fish.png");
+    public final static Texture jojaMArt = new Texture("Shop/Jojamart.png");
+    public final static Texture Marnie = new Texture("Shop/Marnie.png");
+    public final static Texture PierresGeneral = new Texture("Shop/PierresGeneral.png");
+    public final static Texture StardropSaloon = new Texture("Shop/StardropSaloon.png");
+
     // NPC House textures
     private final Texture NPC_HOUSE_1 = new Texture("NPC/House/npcHouse_1.PNG");
     private final Texture NPC_HOUSE_2 = new Texture("NPC/House/npcHouse_2.PNG");
