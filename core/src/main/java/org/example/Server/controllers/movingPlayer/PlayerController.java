@@ -54,6 +54,10 @@ public class PlayerController {
     private boolean isCollapsing = false;
     private float collapseTimer = 0f;
     private static final float COLLAPSE_TIME = 5f;
+    
+    //for movement cooldown:
+    private float movementTimer = 0f;
+    private static final float MOVEMENT_COOLDOWN = 0.2f; // Slower movement - 200ms between moves
 
     public PlayerController(Player player, GameMenuController gameController, List<String> players) {
         this.players = players;
@@ -125,6 +129,9 @@ public class PlayerController {
     }
 
     private void handleInput(float delta) {
+        // Update movement timer
+        movementTimer += delta;
+        
         // In multiplayer mode, only allow the logged-in user to control their own character
         if (App.getCurrentGame().isMultiplayer()) {
             String currentUsername = App.getLoggedInUser().getUserName();
@@ -237,12 +244,20 @@ public class PlayerController {
             }
         }
 
+        // Movement cooldown check - only allow movement if enough time has passed
+        if (movementTimer < MOVEMENT_COOLDOWN) {
+            return; // Don't process movement input yet
+        }
+
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             newY += player.getSpeed();
             if (isWalkable(newX, newY)) {
                 facing = Dir.UP;
                 int newEnergy = player.getEnergy() - 1;
                 player.setEnergy(newEnergy);
+                
+                // Reset movement timer for cooldown
+                movementTimer = 0f;
 
                 // Check if energy reached zero in multiplayer
                 if (App.getCurrentGame().isMultiplayer() && newEnergy <= 0) {
@@ -259,6 +274,9 @@ public class PlayerController {
                 facing = Dir.DOWN;
                 int newEnergy = player.getEnergy() - 1;
                 player.setEnergy(newEnergy);
+                
+                // Reset movement timer for cooldown
+                movementTimer = 0f;
 
                 // Check if energy reached zero in multiplayer
                 if (App.getCurrentGame().isMultiplayer() && newEnergy <= 0) {
@@ -275,6 +293,9 @@ public class PlayerController {
                 facing = Dir.LEFT;
                 int newEnergy = player.getEnergy() - 1;
                 player.setEnergy(newEnergy);
+                
+                // Reset movement timer for cooldown
+                movementTimer = 0f;
 
                 // Check if energy reached zero in multiplayer
                 if (App.getCurrentGame().isMultiplayer() && newEnergy <= 0) {
@@ -291,6 +312,9 @@ public class PlayerController {
                 facing = Dir.RIGHT;
                 int newEnergy = player.getEnergy() - 1;
                 player.setEnergy(newEnergy);
+                
+                // Reset movement timer for cooldown
+                movementTimer = 0f;
 
                 // Check if energy reached zero in multiplayer
                 if (App.getCurrentGame().isMultiplayer() && newEnergy <= 0) {

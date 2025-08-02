@@ -25,7 +25,7 @@ import java.util.Map;
 public class Player {
     private Texture playerTexture;
     private Sprite playerSprite;
-    private float Speed = 1f;
+    private float Speed = 1f; // Keep at 1f since movement system uses integer coordinates
     private CollisionRect rect;
     private User user;
     private Location userLocation;
@@ -395,6 +395,10 @@ public class Player {
 
     public float getSpeed(){
         return this.Speed;
+    }
+
+    public void setSpeed(float speed) {
+        this.Speed = speed;
     }
 
     public Tools getCurrentTool() {
