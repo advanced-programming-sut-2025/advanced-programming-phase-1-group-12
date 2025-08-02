@@ -34,29 +34,36 @@ public class NPCvillage implements Place {
 
     private void setupNPCHouses() {
         // Place 5 NPC houses in the village area
+        // One in the center, four in the corners
         int houseSize = 4; // 4x4 tiles for each house
-        int spacing = 6; // Space between houses
-        int startX = locationOfRectangle.getTopLeftCorner().getxAxis() + 2;
-        int startY = locationOfRectangle.getTopLeftCorner().getyAxis() + 2;
+        int villageWidth = locationOfRectangle.getWidth();
+        int villageHeight = locationOfRectangle.getLength();
+        int startX = locationOfRectangle.getTopLeftCorner().getxAxis();
+        int startY = locationOfRectangle.getTopLeftCorner().getyAxis();
+        
+        // Calculate positions for 5 houses
+        int[][] housePositions = {
+            // Center house
+            {startX + villageWidth/2 - houseSize/2, startY + villageHeight/2 - houseSize/2},
+            // Corner houses
+            {startX + 2, startY + 2}, // Top-left corner
+            {startX + villageWidth - houseSize - 2, startY + 2}, // Top-right corner
+            {startX + 2, startY + villageHeight - houseSize - 2}, // Bottom-left corner
+            {startX + villageWidth - houseSize - 2, startY + villageHeight - houseSize - 2} // Bottom-right corner
+        };
         
         for (int i = 0; i < 5; i++) {
+            int houseX = housePositions[i][0];
+            int houseY = housePositions[i][1];
+            
             // Set the house area to NPC_HOUSE tile type
-            for (int x = startX; x < startX + houseSize; x++) {
-                for (int y = startY; y < startY + houseSize; y++) {
+            for (int x = houseX; x < houseX + houseSize; x++) {
+                for (int y = houseY; y < houseY + houseSize; y++) {
                     Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
                     if (location != null) {
                         location.setTypeOfTile(TypeOfTile.NPC_HOUSE);
                     }
                 }
-            }
-            
-            // Move to next house position
-            startX += houseSize + spacing;
-            
-            // If we've reached the end of the row, move to next row
-            if (startX + houseSize > locationOfRectangle.getTopLeftCorner().getxAxis() + locationOfRectangle.getWidth() - 2) {
-                startX = locationOfRectangle.getTopLeftCorner().getxAxis() + 2;
-                startY += houseSize + spacing;
             }
         }
     }
@@ -92,22 +99,25 @@ public class NPCvillage implements Place {
         ArrayList<Location> housePositions = new ArrayList<>();
         
         int houseSize = 4; // 4x4 tiles for each house
-        int spacing = 6; // Space between houses
-        int startX = locationOfRectangle.getTopLeftCorner().getxAxis() + 2;
-        int startY = locationOfRectangle.getTopLeftCorner().getyAxis() + 2;
+        int villageWidth = locationOfRectangle.getWidth();
+        int villageHeight = locationOfRectangle.getLength();
+        int startX = locationOfRectangle.getTopLeftCorner().getxAxis();
+        int startY = locationOfRectangle.getTopLeftCorner().getyAxis();
+        
+        // Calculate positions for 5 houses
+        int[][] positions = {
+            // Center house
+            {startX + villageWidth/2 - houseSize/2, startY + villageHeight/2 - houseSize/2},
+            // Corner houses
+            {startX + 2, startY + 2}, // Top-left corner
+            {startX + villageWidth - houseSize - 2, startY + 2}, // Top-right corner
+            {startX + 2, startY + villageHeight - houseSize - 2}, // Bottom-left corner
+            {startX + villageWidth - houseSize - 2, startY + villageHeight - houseSize - 2} // Bottom-right corner
+        };
         
         for (int i = 0; i < 5; i++) {
             // Add the top-left corner of each house
-            housePositions.add(new Location(startX, startY));
-            
-            // Move to next house position
-            startX += houseSize + spacing;
-            
-            // If we've reached the end of the row, move to next row
-            if (startX + houseSize > locationOfRectangle.getTopLeftCorner().getxAxis() + locationOfRectangle.getWidth() - 2) {
-                startX = locationOfRectangle.getTopLeftCorner().getxAxis() + 2;
-                startY += houseSize + spacing;
-            }
+            housePositions.add(new Location(positions[i][0], positions[i][1]));
         }
         
         return housePositions;
