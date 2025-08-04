@@ -12,7 +12,6 @@ public class map {
 
     private ArrayList<Farm> farms = new ArrayList<>();
     private ArrayList<Location> tilesOfMap = new ArrayList<>();
-    @JsonIgnore
     private ArrayList<Store> stores = new ArrayList<>();
     public ArrayList<Farm> getFarms() {
         return farms;

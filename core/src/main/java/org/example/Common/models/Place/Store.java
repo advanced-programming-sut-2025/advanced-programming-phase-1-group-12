@@ -113,6 +113,30 @@ public class Store implements Place {
 
     @JsonIgnore
     public Texture getStoreTexture() {
+        if(storeTexture == null) {
+            switch (nameOfStore) {
+                case "Blacksmith":
+                    storeTexture = GameAssetManager.blackSmith;
+                    break;
+                case "JojaMart":
+                    storeTexture = GameAssetManager.jojaMArt;
+                    break;
+                case "Pierre's General Store":
+                    storeTexture = GameAssetManager.PierresGeneral;
+                    break;
+                case "Carpenter's Shop":
+                    storeTexture = GameAssetManager.Carpenter;
+                    break;
+                case "Fish Shop":
+                    storeTexture = GameAssetManager.fishShop;
+                    break;
+                case "Marnie's Ranch":
+                    storeTexture = GameAssetManager.Marnie;
+                    break;
+                default:
+                    storeTexture = GameAssetManager.StardropSaloon;
+            }
+        }
         return storeTexture;
     }
 }

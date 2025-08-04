@@ -419,9 +419,7 @@ public class GameMenuController {
         if (App.getCurrentGame().getNPCvillage() == null) {
             App.getCurrentGame().initializeNPCvillage();
         }
-        ArrayList<Farm> farms = newGame.getFarms();
-
-        App.loadAllUsersFromFiles();
+        MapSetUp.NPCsetUp();
 
         for (int i = 0; i < usernames.size(); i++) {
 
@@ -452,14 +450,18 @@ public class GameMenuController {
             }
 
             Player player = newGame.getPlayerByName(usernames.get(i));
-            Farm farm = App.getCurrentGame().getMainMap().getFarms().get(i);
-            farm.setOwner(player);
-            player.setOwnedFarm(farm);
             player.setPlayerTexture(playerTexture);
             player.setPortraitFrame(portraitFrame);
             player.setPlayerSprite(new Sprite(playerTexture));
+            player.getPlayerSprite().setSize(50, 60);
             player.setRect(new CollisionRect(player.getPlayerSprite().getX(), player.getPlayerSprite().getY(),
                 player.getPlayerSprite().getWidth(), player.getPlayerSprite().getHeight()));
+
+            for(Farm farm : App.getCurrentGame().getFarms()) {
+                if(player.getOwnedFarm().getFarmId() == farm.getFarmId()) {
+                    farm.setOwner(player);
+                }
+            }
         }
 
         // Set multiplayer flag only for true network multiplayer games
