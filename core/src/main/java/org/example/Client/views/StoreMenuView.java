@@ -263,7 +263,7 @@ class buyView implements Screen {
                         Gdx.app.postRunnable(() ->
                             Main.getMain().setScreen(new BuyAnimal(players, playerList, productName))
                         );
-                    }if (productName.equalsIgnoreCase(StoreProductsTypes.CARPENTER_SHIPPING_BIN.getName())) {
+                    }else if (productName.equalsIgnoreCase(StoreProductsTypes.CARPENTER_SHIPPING_BIN.getName())) {
                         Gdx.app.postRunnable(() ->
                             Main.getMain().setScreen(new FarmView(productName, players, playerList, false, true))
                         );

@@ -794,7 +794,6 @@ public class GameMenu extends InputAdapter implements Screen {
             font.draw(batch, otherPlayer.getUser().getUserName(), farmCornerX, farmCornerY + otherPlayer.getPlayerSprite().getHeight() + 10);
 
         }
-
         if (showingAllMap) {
             for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
                 Location farmLocation = otherPlayer.getUserLocation();
@@ -806,6 +805,16 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
 
+
+        // Render full-screen player interaction menu if active
+        if (showingFullScreenMenu) {
+            // End the batch if it's drawing to prevent conflicts
+            if (batch.isDrawing()) {
+                batch.end();
+            }
+            renderFullScreenMenu();
+            return; // Don't render the normal game screen when showing full-screen menu
+        }
         if (timeForAnimalMove >= 0.5f) {
             for (Farm farm : App.getCurrentGame().getFarms()) {
                 for (FarmAnimals animal : farm.getFarmAnimals()) {
@@ -814,14 +823,15 @@ public class GameMenu extends InputAdapter implements Screen {
                     }
                 }
             }
-            timeForAnimalMove = 0f;
+            timeForAnimalMove = 0f; // Only reset when a step was done!
         }
 
+// Render logic
         for (Farm farm : App.getCurrentGame().getFarms()) {
             for (FarmAnimals animal : farm.getFarmAnimals()) {
                 float renderX;
                 float renderY;
-                if (animal.isMoving()) {
+                if(animal.isMoving()) {
                     Location current = animal.getPosition();
                     Location previous = animal.getPreviousPosition();
 
@@ -847,6 +857,13 @@ public class GameMenu extends InputAdapter implements Screen {
                 batch.draw(animal.getTexture(), renderX, renderY);
             }
         }
+        renderClockHand();
+
+        checkForNewGifts();
+
+        // Render nearby player indicators
+        renderNearbyPlayerIndicators();
+
         renderWeather(batch);
         renderReconnectionStatus(batch);
 
@@ -861,26 +878,6 @@ public class GameMenu extends InputAdapter implements Screen {
         // Render ring animation after lighting overlay to ensure it's visible
         renderRingAnimation(batch);
 
-
-        // Render full-screen player interaction menu if active
-        if (showingFullScreenMenu) {
-            // End the batch if it's drawing to prevent conflicts
-            if (batch.isDrawing()) {
-                batch.end();
-            }
-            renderFullScreenMenu();
-            return; // Don't render the normal game screen when showing full-screen menu
-        }
-
-        stage.act(delta);
-        stage.draw();
-        renderClockHand();
-
-        checkForNewGifts();
-
-        // Render nearby player indicators
-        renderNearbyPlayerIndicators();
-
         // Periodic gift checking
         giftCheckTimer += delta;
         if (giftCheckTimer >= GIFT_CHECK_INTERVAL) {
@@ -889,10 +886,10 @@ public class GameMenu extends InputAdapter implements Screen {
             giftCheckTimer = 0f;
         }
 
-        // End the batch at the very end of rendering
-        if (batch.isDrawing()) {
-            batch.end();
-        }
+        batch.end();
+        stage.act(delta);
+        stage.draw();
+
     }
 
     private void updateClockDisplay() {
