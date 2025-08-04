@@ -5,6 +5,8 @@ public class Buff {
     private int hour;
     private String skill;
 
+    public Buff() {}
+
     public int getHour() {
         return hour;
     }

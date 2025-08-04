@@ -3,12 +3,13 @@ package org.example.Common.models;
 import org.example.Common.models.Fundementals.Location;
 import org.example.Common.models.Fundementals.Player;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ShippingBin{
+public class ShippingBin  {
     private Location shippingBinLocation;
     Map<Item, Integer> shippingItem;
     Player owner;
@@ -16,6 +17,9 @@ public class ShippingBin{
         this.shippingBinLocation = shippingBinLocation;
         this.owner = owner;
         this.shippingItem = new HashMap<>();
+    }
+
+    public ShippingBin() {
     }
 
     public void addShippingItem(Item item, int quantity){

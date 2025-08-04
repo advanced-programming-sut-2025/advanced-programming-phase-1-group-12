@@ -2,6 +2,7 @@ package org.example.Common.models;
 
 import org.example.Common.models.Fundementals.Location;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 

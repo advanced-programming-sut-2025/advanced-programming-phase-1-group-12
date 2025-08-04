@@ -3,6 +3,7 @@ package org.example.Common.models.RelationShips;
 import org.example.Common.models.Fundementals.Player;
 import org.example.Common.models.Item;
 
+import java.io.Serializable;
 import java.util.Date;
 
 public class Gift {
@@ -22,6 +23,9 @@ public class Gift {
         this.rating = 0; // Not rated yet
         this.isRated = false;
         this.giftDate = new Date(); // Current date/time
+    }
+
+    public Gift() {
     }
 
     public Player getSender() {

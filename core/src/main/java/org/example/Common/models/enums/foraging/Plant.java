@@ -27,6 +27,8 @@ public class Plant extends Item {
     private int regrowthTime;
     private boolean isGiantPlant;
 
+    public Plant(){}
+
     public Plant(Location location, boolean isForaging, TypeOfPlant typeOfPlant) {
         super(typeOfPlant.getName(), Quality.NORMAL, typeOfPlant.baseSellPrice);
         this.location = location;

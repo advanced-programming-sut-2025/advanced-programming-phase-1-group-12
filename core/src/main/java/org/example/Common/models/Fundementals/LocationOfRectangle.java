@@ -1,5 +1,6 @@
 package org.example.Common.models.Fundementals;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 public class LocationOfRectangle {
@@ -28,6 +29,9 @@ public class LocationOfRectangle {
 
     public void setDownRightCorner(Location topRightCorner) {
         this.downRightCorner = topRightCorner;
+    }
+
+    public LocationOfRectangle() {
     }
 
     public LocationOfRectangle(Location topLeftCorner, Location downRightCorner) {

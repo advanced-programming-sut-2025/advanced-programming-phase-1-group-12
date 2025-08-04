@@ -2,6 +2,8 @@ package org.example.Common.models.Fundementals;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.example.Common.models.*;
 import org.example.Server.controllers.movingPlayer.PlayerController;
 import org.example.Common.models.NPC.NPC;
@@ -18,13 +20,16 @@ import org.example.Common.network.events.EnergyUpdateEvent;
 import org.example.Server.network.GameSessionManager;
 import org.example.Client.network.NetworkCommandSender;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Player {
-    private Texture playerTexture;
-    private Sprite playerSprite;
+    @JsonIgnore
+    private transient Texture playerTexture;
+    @JsonIgnore
+    private transient Sprite playerSprite;
     private float Speed = 1f; // Keep at 1f since movement system uses integer coordinates
     private CollisionRect rect;
     private User user;
@@ -34,6 +39,7 @@ public class Player {
     public Refrigrator Refrigrator;
     private ArrayList<Ability> abilitis = new ArrayList<Ability>();
     private ArrayList<RelationShip> relationShips;
+    @JsonManagedReference
     private Farm ownedFarm;
     private BackPack backPack;
     private boolean isEnergyUnlimited;
@@ -44,6 +50,7 @@ public class Player {
     private Map<Cooking, Boolean> cookingRecepies ;
     private ArrayList<Trade> trades = new ArrayList<>();
     private Tools currentTool;
+    @JsonIgnore
     private Map<NPC, Date> metDates;
     private ShippingBin shippingBin;
     private ArrayList<ArtisanItem> artisansGettingProcessed = new ArrayList<>();
@@ -51,9 +58,15 @@ public class Player {
     private int shippingMoney;
     private boolean isMaxEnergyBuffEaten = false;
     private boolean isSkillBuffEaten = false;
+    @JsonIgnore
     private PlayerController playerController;
-    private Texture portraitFrame;
+    @JsonIgnore
+    private transient Texture portraitFrame;
     private ArrayList<Craft>crafts = new ArrayList<>();
+
+    protected Player() {
+        // For Jackson deserialization only
+    }
 
     public Player(User user, Location userLocation, boolean isMarried, Refrigrator refrigrator,
                   ArrayList<RelationShip> relationShips, Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited,
@@ -122,7 +135,7 @@ public class Player {
     public void setEnergy(int energy) {
         System.out.println("DEBUG: setEnergy called for player " + this.getUser().getUserName() + " with energy: " + energy);
         setEnergyInternal(energy);
-        
+
         // Broadcast energy update to all players in multiplayer mode
         if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
             System.out.println("DEBUG: Game is multiplayer, attempting to broadcast energy update");
@@ -134,7 +147,7 @@ public class Player {
                 energyData.put("playerId", this.getUser().getUserName());
                 energyData.put("currentEnergy", this.energy);
                 energyData.put("maxEnergy", 200);
-                
+
                 if (App.getWebSocketClient() != null) {
                     System.out.println("DEBUG: WebSocket client exists, sending energy update");
                     App.getWebSocketClient().send(energyData);
@@ -432,6 +445,7 @@ public class Player {
         isSkillBuffEaten = skillBuffEaten;
     }
 
+    @JsonIgnore
     public Sprite getPlayerSprite() {
         return playerSprite;
     }
@@ -440,10 +454,12 @@ public class Player {
         this.playerTexture = playerTexture;
     }
 
+    @JsonIgnore
     public Texture getPlayerTexture() {
         return playerTexture;
     }
 
+    @JsonIgnore
     public Texture getPortraitFrame() {
         return this.portraitFrame;
     }
@@ -460,4 +476,12 @@ public class Player {
         this.crafts = crafts;
     }
 
+
+    public void setPlayerSprite(Sprite playerSprite) {
+        this.playerSprite = playerSprite;
+    }
+
+    public void setRect(CollisionRect rect) {
+        this.rect = rect;
+    }
 }

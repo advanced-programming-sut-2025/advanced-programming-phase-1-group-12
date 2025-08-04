@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.Texture;
 import org.example.Common.models.Assets.GameAssetManager;
 import org.example.Common.models.Fundementals.App;
 
+import java.io.Serializable;
+
 public class Craft extends Item {
 
     private CraftingRecipe recipe;
@@ -21,6 +23,9 @@ public class Craft extends Item {
         super(recipe.getName(), Quality.NORMAL, 0);
         this.recipe = recipe;
         this.location = location;
+    }
+
+    public Craft() {
     }
 
     public CraftingRecipe getRecipe() {

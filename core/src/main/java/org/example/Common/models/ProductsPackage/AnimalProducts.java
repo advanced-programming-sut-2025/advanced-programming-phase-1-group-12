@@ -19,6 +19,7 @@ public class AnimalProducts extends Item {
         this.quality = quality;
         this.price = animalProduct.getPrice();
     }
+    public AnimalProducts() {}
 
     public Texture getTexture() {
         return animalProduct.getTexture();

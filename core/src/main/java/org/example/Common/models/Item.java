@@ -1,5 +1,7 @@
 package org.example.Common.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.ProductsPackage.Quality;
 import com.badlogic.gdx.graphics.Texture;
@@ -9,13 +11,16 @@ import org.example.Common.models.enums.foraging.MineralTypes;
 import org.example.Common.models.enums.foraging.Plant;
 import org.example.Common.models.enums.foraging.TypeOfPlant;
 
+import java.io.Serializable;
 import java.util.Objects;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Item {
     private String name;
     private Quality quality;
     private int price;
-    private Texture texture;
+    @JsonIgnore
+    private transient Texture texture;
 
     public Item(String name, Quality quality, int price) {
         this.name = name;
@@ -23,6 +28,9 @@ public class Item {
         this.price = price;
     }
 
+    public Item() {
+        // No-arg constructor for Jackson
+    }
 
     public String getName() {
         return name;
@@ -60,6 +68,7 @@ public class Item {
         return Objects.hash(name, quality);
     }
 
+    @JsonIgnore
     public Texture getTexture() {
         if(texture == null){
             for(Cooking cooking : Cooking.values()){
@@ -85,4 +94,7 @@ public class Item {
         return texture;
     }
 
+    public void setTexture(Texture texture) {
+        this.texture = texture;
+    }
 }

@@ -21,6 +21,9 @@ public class ArtisanItem extends Item {
         this.energy = energy;
     }
 
+    public ArtisanItem() {
+    }
+
     public ArtisanTypes getType() {
         return type;
     }

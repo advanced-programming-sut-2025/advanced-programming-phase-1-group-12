@@ -48,7 +48,7 @@ public enum Animal {
     private final String description;
     private final ArrayList<String> placesCanStay;
     private final int producingCycle;
-    private final Texture animalTexture;
+    private transient final Texture animalTexture;
 
     Animal(int purchaseCost, AnimalProduct defaultProduct, Set<AnimalProduct> nonDefaultProducts, boolean isCoop,
            String description, ArrayList<String> placesCanStay, int producingCycle, Texture animalTexture) {

@@ -11,6 +11,8 @@ public class Fruit extends Item {
         this.fruitType = fruitType;
     }
 
+    public Fruit(){}
+
     public FruitType getFruitType() {
         return fruitType;
     }

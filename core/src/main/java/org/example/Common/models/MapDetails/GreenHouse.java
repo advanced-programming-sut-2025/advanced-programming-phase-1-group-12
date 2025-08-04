@@ -3,23 +3,28 @@ package org.example.Common.models.MapDetails;
 import org.example.Common.models.Fundementals.LocationOfRectangle;
 import org.example.Common.models.Place.Place;
 
-public class GreenHouse implements Place {
-    LocationOfRectangle greenHouseLocation;
+import java.io.Serializable;
+
+public class GreenHouse implements Place, Serializable {
+    LocationOfRectangle location;
 
     public GreenHouse(LocationOfRectangle GreenHouseLocation) {
-        this.greenHouseLocation = GreenHouseLocation;
+        this.location = GreenHouseLocation;
     }
 
     public LocationOfRectangle getGreenHouseLocation() {
-        return greenHouseLocation;
+        return location;
     }
 
     public void setGreenHouseLocation(LocationOfRectangle greenHouseLocation) {
-        this.greenHouseLocation = greenHouseLocation;
+        this.location = greenHouseLocation;
+    }
+
+    public GreenHouse() {
     }
 
     @Override
     public LocationOfRectangle getLocation() {
-        return this.greenHouseLocation;
+        return this.location;
     }
 }

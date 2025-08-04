@@ -1,5 +1,7 @@
 package org.example.Common.models.Place;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.example.Common.models.Animal.AnimalHome;
 import org.example.Common.models.Animal.FarmAnimals;
 import org.example.Common.models.Fundementals.App;
@@ -15,12 +17,15 @@ import org.example.Common.models.enums.foraging.Plant;
 
 import java.util.ArrayList;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Farm implements Place {
 
-    private LocationOfRectangle farmLocation;
+    private LocationOfRectangle location;
 
+
+    @JsonBackReference
     private Player owner;
-    private int farmID;
+    private int farmId;
     private Lake lake1;
     private Lake lake2;
     private GreenHouse greenHouse;
@@ -34,9 +39,12 @@ public class Farm implements Place {
     private ArrayList<Plant> PlantOfFarm = new ArrayList<>();
     private ArrayList<GiantPlant> giantPlants = new ArrayList<>();
 
+    public Farm() {
+    }
 
-    public Farm(LocationOfRectangle farmLocation) {
-        this.farmLocation = farmLocation;
+    public Farm(LocationOfRectangle farmLocation, int farmID) {
+        this.farmId = farmID;
+        this.location = farmLocation;
         int sectionSize = 4;
 
         // Top-Left Lake
@@ -128,7 +136,7 @@ public class Farm implements Place {
     }
 
     public LocationOfRectangle getLocation() {
-        return farmLocation;
+        return location;
     }
 
     public GreenHouse getGreenHouse() {
@@ -183,10 +191,6 @@ public class Farm implements Place {
         this.farmAnimals = farmAnimals;
     }
 
-    public LocationOfRectangle getFarmLocation() {
-        return farmLocation;
-    }
-
     public GreenHouse getGreenHouse2() {
         return greenHouse2;
     }
@@ -195,8 +199,8 @@ public class Farm implements Place {
         return quarry2;
     }
 
-    public void setFarmLocation(LocationOfRectangle farmLocation) {
-        this.farmLocation = farmLocation;
+    public void setLocation(LocationOfRectangle location) {
+        this.location = location;
     }
 
     public Shack getShack2() {
@@ -244,17 +248,11 @@ public class Farm implements Place {
         return giantPlants;
     }
 
-    public boolean contains(int newX, int newY) {
-        Location newLocation = App.getCurrentGame().getMainMap().findLocation(newX, newY);
-        ArrayList<Location> farmLocations = getFarmLocation().getLocationsInRectangle();
-        return !farmLocations.contains(newLocation);
-    }
-
     public void setFarmID(int farmID) {
-        this.farmID = farmID;
+        this.farmId = farmID;
     }
 
     public int getFarmId() {
-        return this.farmID;
+        return this.farmId;
     }
 }

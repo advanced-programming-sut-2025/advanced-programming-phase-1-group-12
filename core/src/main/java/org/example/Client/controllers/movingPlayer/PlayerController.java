@@ -42,11 +42,11 @@ public class PlayerController {
     private final GameMenuController gameController;
     private NetworkCommandSender networkCommandSender;
 
-    private final Animation<TextureRegion> walkDown;
-    private final Animation<TextureRegion> walkLeft;
-    private final Animation<TextureRegion> walkRight;
-    private final Animation<TextureRegion> walkUp;
-    private final Animation<TextureRegion> collapse;
+    private transient final Animation<TextureRegion> walkDown;
+    private transient final Animation<TextureRegion> walkLeft;
+    private transient final Animation<TextureRegion> walkRight;
+    private transient final Animation<TextureRegion> walkUp;
+    private transient final Animation<TextureRegion> collapse;
 
     private Animation<TextureRegion> currentAnim;
     private float stateTime = 0f;

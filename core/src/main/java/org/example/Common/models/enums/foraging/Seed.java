@@ -15,6 +15,8 @@ public class Seed extends Item {
         this.type = type;
     }
 
+    public Seed(){}
+
     public void setType(SeedTypes type) {
         this.type = type;
     }

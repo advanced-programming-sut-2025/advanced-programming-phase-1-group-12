@@ -214,7 +214,7 @@ public class StoreController {
         Store store = null;
 
         for (Store store1 : App.getCurrentGame().getMainMap().getStores()) {
-            if (App.isLocationInPlace(App.getCurrentPlayerLazy().getUserLocation(), store1.getLocationOfRectangle())) {
+            if (App.isLocationInPlace(App.getCurrentPlayerLazy().getUserLocation(), store1.getLocation())) {
                 store = store1;
             }
         }

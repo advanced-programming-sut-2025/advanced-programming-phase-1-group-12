@@ -1,6 +1,5 @@
 package org.example.Client.controllers.movingPlayer;
 
-import org.example.Client.controllers.MenusController.GameMenuController;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Fundementals.Location;
 import org.example.Common.models.Fundementals.Result;
@@ -24,7 +23,7 @@ public class UserLocationController {
                 continue;
             }
             else{
-                if(farm.getFarmLocation().getLocationsInRectangle().contains(newLocation)){
+                if(farm.getLocation().getLocationsInRectangle().contains(newLocation)){
                     return new Result(false, "you can't move to others farm.");
                 }
             }
@@ -119,7 +118,7 @@ public class UserLocationController {
 
             Location loc = App.getCurrentGame().getMainMap().findLocation(x, y);
             if (loc.getTypeOfTile() != TypeOfTile.GROUND && loc.getTypeOfTile() != TypeOfTile.PLOUGHED_LAND &&
-                    loc.getTypeOfTile() != TypeOfTile.STORE && loc.getTypeOfTile() != TypeOfTile.HOUSE && 
+                    loc.getTypeOfTile() != TypeOfTile.STORE && loc.getTypeOfTile() != TypeOfTile.HOUSE &&
                     loc.getTypeOfTile() != TypeOfTile.NPC_VILLAGE && loc.getTypeOfTile() != TypeOfTile.NPC_HOUSE) continue;
 
             visited[x][y] = true;
@@ -156,7 +155,7 @@ public class UserLocationController {
 
             Location loc = App.getCurrentGame().getMainMap().findLocation(x, y);
             if (loc.getTypeOfTile() != TypeOfTile.GROUND && loc.getTypeOfTile() != TypeOfTile.PLOUGHED_LAND &&
-                    loc.getTypeOfTile() != TypeOfTile.STORE && loc.getTypeOfTile() != TypeOfTile.HOUSE && 
+                    loc.getTypeOfTile() != TypeOfTile.STORE && loc.getTypeOfTile() != TypeOfTile.HOUSE &&
                     loc.getTypeOfTile() != TypeOfTile.NPC_VILLAGE && loc.getTypeOfTile() != TypeOfTile.NPC_HOUSE) continue;
 
             int energyNeeded = (dist + 10 * turns) / 20;

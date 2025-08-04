@@ -158,7 +158,7 @@ public enum Cooking {
     private final String source;
     private final int baseSellPrice;
     private final boolean isEnergyBuff;
-    private final Texture texture;
+    private transient final Texture texture;
     private final FoodType foodType;
 
     Cooking(String name, Map<String, Integer> ingredient, String buffer, String source, int baseSellPrice, int energy,

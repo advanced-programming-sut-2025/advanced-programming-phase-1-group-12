@@ -17,6 +17,8 @@ public class GiantPlant extends Item {
     private int currentStage ;
     private int age;
 
+    public GiantPlant(){}
+
     public GiantPlant(GiantPlants giantPlants, ArrayList<Location> location, boolean hasBeenFertilized,
                       boolean hasBeenWatering, int totalTimeNeeded, int dayPast, int currentStage, int age){
         super(giantPlants.name(), Quality.NORMAL, giantPlants.baseSellPrice);

@@ -13,6 +13,11 @@ public class Location {
 
     private Object objectInTile;
 
+    public Location() {
+        //for jackson
+    }
+
+
     public Location(int xAxis, int yAxis) {
         this.xAxis = xAxis;
         this.yAxis = yAxis;

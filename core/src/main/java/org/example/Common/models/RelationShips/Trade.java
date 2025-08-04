@@ -3,6 +3,7 @@ package org.example.Common.models.RelationShips;
 import org.example.Common.models.Fundementals.Player;
 import org.example.Common.models.Item;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 public class Trade {
@@ -17,6 +18,9 @@ public class Trade {
     private int targetAmount;
     private String status; // pending, accepted, rejected
     private boolean isNew;
+
+    public Trade() {
+    }
 
     public Trade(Player requester, Player target, String type, Item item, int amount, int price) {
         this.id = UUID.randomUUID().toString().substring(0, 8);

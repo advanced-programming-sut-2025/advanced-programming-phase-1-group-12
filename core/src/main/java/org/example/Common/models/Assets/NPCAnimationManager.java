@@ -12,24 +12,24 @@ import java.util.Map;
 public class NPCAnimationManager {
     private static NPCAnimationManager instance;
     private final Map<String, NPCAnimations> npcAnimations = new HashMap<>();
-    
+
     private static final float FRAME_DURATION = 0.2f;
-    
+
     public enum AnimationType {
         IDLE, WALK, BACK, FACE, WORK, SHOOT, TOOL, FLY
     }
-    
+
     public static class NPCAnimations {
-        public final Animation<TextureRegion> idle;
-        public final Animation<TextureRegion> walk;
-        public final Animation<TextureRegion> back;
-        public final Animation<TextureRegion> face;
-        public final Animation<TextureRegion> work;
-        public final Animation<TextureRegion> shoot;
-        public final Animation<TextureRegion> tool;
-        public final Animation<TextureRegion> fly;
-        
-        public NPCAnimations(Animation<TextureRegion> idle, Animation<TextureRegion> walk, 
+        public transient final Animation<TextureRegion> idle;
+        public transient final Animation<TextureRegion> walk;
+        public transient final Animation<TextureRegion> back;
+        public transient final Animation<TextureRegion> face;
+        public transient final Animation<TextureRegion> work;
+        public transient final Animation<TextureRegion> shoot;
+        public transient final Animation<TextureRegion> tool;
+        public transient final Animation<TextureRegion> fly;
+
+        public NPCAnimations(Animation<TextureRegion> idle, Animation<TextureRegion> walk,
                            Animation<TextureRegion> back, Animation<TextureRegion> face,
                            Animation<TextureRegion> work, Animation<TextureRegion> shoot,
                            Animation<TextureRegion> tool, Animation<TextureRegion> fly) {
@@ -43,18 +43,18 @@ public class NPCAnimationManager {
             this.fly = fly;
         }
     }
-    
+
     private NPCAnimationManager() {
         loadAllNPCAnimations();
     }
-    
+
     public static NPCAnimationManager getInstance() {
         if (instance == null) {
             instance = new NPCAnimationManager();
         }
         return instance;
     }
-    
+
     private void loadAllNPCAnimations() {
         loadNPCAnimations("Abigail");
         loadNPCAnimations("Harvey");
@@ -65,20 +65,20 @@ public class NPCAnimationManager {
         loadNPCAnimations("Sebastian");
         loadNPCAnimations("Willy");
     }
-    
+
     private void loadNPCAnimations(String npcName) {
         try {
             Animation<TextureRegion> idle = loadAnimation(npcName, "idle", getActualFrameCount(npcName, "idle"));
             Animation<TextureRegion> walk = loadAnimation(npcName, "walk", getActualFrameCount(npcName, "walk"));
             Animation<TextureRegion> back = loadAnimation(npcName, "back", getActualFrameCount(npcName, "back"));
             Animation<TextureRegion> face = loadAnimation(npcName, "face", getActualFrameCount(npcName, "face"));
-            
+
             // Load special animations based on NPC
             Animation<TextureRegion> work = null;
             Animation<TextureRegion> shoot = null;
             Animation<TextureRegion> tool = null;
             Animation<TextureRegion> fly = null;
-            
+
             switch (npcName) {
                 case "Jojo":
                     work = loadAnimation(npcName, "work", getActualFrameCount(npcName, "work"));
@@ -93,26 +93,26 @@ public class NPCAnimationManager {
                     fly = loadAnimation(npcName, "fly", getActualFrameCount(npcName, "fly"));
                     break;
             }
-            
+
             // Create default animations for missing ones
             if (work == null) work = idle;
             if (shoot == null) shoot = idle;
             if (tool == null) tool = idle;
             if (fly == null) fly = idle;
-            
+
             NPCAnimations animations = new NPCAnimations(idle, walk, back, face, work, shoot, tool, fly);
             npcAnimations.put(npcName, animations);
-            
+
         } catch (Exception e) {
             System.err.println("Failed to load animations for " + npcName + ": " + e.getMessage());
             // Create default animations with a placeholder texture
             createDefaultAnimations(npcName);
         }
     }
-    
+
     private Animation<TextureRegion> loadAnimation(String npcName, String animationType, int frameCount) {
         Array<TextureRegion> frames = new Array<>();
-        
+
         for (int i = 0; i < frameCount; i++) {
             String fileName = getAnimationFileName(npcName, animationType, i);
             try {
@@ -124,16 +124,16 @@ public class NPCAnimationManager {
                 frames.add(new TextureRegion(fallbackTexture));
             }
         }
-        
+
         // If no frames were loaded, create a default animation
         if (frames.size == 0) {
             Texture defaultTexture = new Texture("sprites/" + npcName + ".png");
             frames.add(new TextureRegion(defaultTexture));
         }
-        
+
         return new Animation<>(FRAME_DURATION, frames, Animation.PlayMode.LOOP);
     }
-    
+
     private Texture getFallbackTexture(String npcName, String animationType, int frameIndex) {
         // Try different fallback strategies
         String[] fallbackPaths = {
@@ -141,7 +141,7 @@ public class NPCAnimationManager {
             "sprites/Abigail.png", // Use Abigail as universal fallback
             "sprites/Robin.png"    // Use Robin as final fallback
         };
-        
+
         for (String path : fallbackPaths) {
             try {
                 return new Texture(path);
@@ -149,11 +149,11 @@ public class NPCAnimationManager {
                 // Continue to next fallback
             }
         }
-        
+
         // If all fallbacks fail, create a simple colored texture
         return createDefaultTexture();
     }
-    
+
     private Texture createDefaultTexture() {
         // Create a simple 32x32 colored texture as ultimate fallback
         // This is a simplified version - in a real implementation you'd create a proper texture
@@ -164,7 +164,7 @@ public class NPCAnimationManager {
             return null;
         }
     }
-    
+
     private String getAnimationFileName(String npcName, String animationType, int frameIndex) {
         switch (npcName) {
             case "Willy":
@@ -177,10 +177,10 @@ public class NPCAnimationManager {
                 }
                 break;
         }
-        
+
         return animationType + "_" + frameIndex + ".png";
     }
-    
+
     private int getActualFrameCount(String npcName, String animationType) {
         // Return the actual number of frames available for each NPC and animation type
         switch (npcName) {
@@ -223,7 +223,7 @@ public class NPCAnimationManager {
                 }
                 break;
         }
-        
+
         // Default frame counts
         switch (animationType) {
             case "idle": return 4;
@@ -233,32 +233,32 @@ public class NPCAnimationManager {
             default: return 4;
         }
     }
-    
+
     private void createDefaultAnimations(String npcName) {
         // Create a simple placeholder animation
         Texture placeholder = new Texture("sprites/" + npcName + ".png");
         TextureRegion region = new TextureRegion(placeholder);
-        
+
         Array<TextureRegion> frames = new Array<>();
         frames.add(region);
-        
+
         Animation<TextureRegion> defaultAnim = new Animation<>(FRAME_DURATION, frames, Animation.PlayMode.LOOP);
-        
+
         NPCAnimations animations = new NPCAnimations(defaultAnim, defaultAnim, defaultAnim, defaultAnim,
                                                    defaultAnim, defaultAnim, defaultAnim, defaultAnim);
         npcAnimations.put(npcName, animations);
     }
-    
+
     public NPCAnimations getNPCAnimations(String npcName) {
         return npcAnimations.get(npcName);
     }
-    
+
     public Animation<TextureRegion> getAnimation(String npcName, AnimationType type) {
         NPCAnimations animations = npcAnimations.get(npcName);
         if (animations == null) {
             return null;
         }
-        
+
         switch (type) {
             case IDLE: return animations.idle;
             case WALK: return animations.walk;
@@ -271,7 +271,7 @@ public class NPCAnimationManager {
             default: return animations.idle;
         }
     }
-    
+
     public void dispose() {
         // Dispose of all loaded textures
         for (NPCAnimations animations : npcAnimations.values()) {
@@ -280,4 +280,4 @@ public class NPCAnimationManager {
         }
         npcAnimations.clear();
     }
-} 
+}

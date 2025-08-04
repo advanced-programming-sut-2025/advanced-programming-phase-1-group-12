@@ -25,7 +25,7 @@ public class Tools extends Item {
     private UpgradeFunction upgradeFunction;
     private Tool toolType;
     private ToolTypes type;
-    private Sprite smgSprite;
+    private transient Sprite smgSprite;
     private ToolsController toolsController;
     ToolAssetsManager toolAssets = ToolAssetsManager.toolAssetsManager();
 
@@ -49,6 +49,9 @@ public class Tools extends Item {
             this.capacity = 0;
             this.currentWater = 0;
         }
+    }
+
+    public Tools() {
     }
 
     private void initializeWateringCanCapacity() {

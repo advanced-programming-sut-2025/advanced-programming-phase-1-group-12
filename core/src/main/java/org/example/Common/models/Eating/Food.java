@@ -13,6 +13,8 @@ public class Food extends Item {
         this.foodType = foodType;
     }
 
+    public Food(){}
+
     public Cooking getFoodType() {
         return foodType;
     }

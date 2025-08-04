@@ -26,7 +26,7 @@ public enum FoodType {
     private final int sellPrice;
     private final boolean isEnergyBuff;
     private Map<IngredientsType, Integer> ingredients;
-    private final Texture texture;
+    private transient final Texture texture;
 
     FoodType(String name, int Energy, String source, int sellPrice, boolean isEnergyBuff, Texture texture) {
         this.name = name;

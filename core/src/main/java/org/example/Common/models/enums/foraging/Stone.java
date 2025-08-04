@@ -12,6 +12,8 @@ public class Stone extends Item {
         this.mineralTypes = mineralTypes;
     }
 
+    public Stone() {}
+
     public MineralTypes getMineralTypes() {
         return mineralTypes;
     }

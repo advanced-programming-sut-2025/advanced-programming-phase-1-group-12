@@ -1,15 +1,17 @@
 package org.example.Common.models;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Fundementals.Player;
 import org.example.Common.models.Fundementals.Result;
 import org.example.Common.models.ToolsPackage.Tools;
 import org.example.Common.models.ToolsPackage.ToolEnums.BackPackTypes;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BackPack {
+public class BackPack  {
     private Map<Item, Integer> items;
     private CaseInsensitiveMap<Item> itemNames;
     private BackPackTypes type;
@@ -20,6 +22,9 @@ public class BackPack {
         this.itemNames = new CaseInsensitiveMap<>();
         this.type = type;
         this.water = 100;
+    }
+
+    public BackPack() {
     }
 
     public void setItems(Map<Item, Integer> items) {
@@ -228,5 +233,10 @@ public class BackPack {
             }
             return null;
         }
+    }
+
+    @JsonSetter("itemNames")
+    public void setItemNames(CaseInsensitiveMap<Item> itemNames) {
+        this.itemNames = itemNames;
     }
 }

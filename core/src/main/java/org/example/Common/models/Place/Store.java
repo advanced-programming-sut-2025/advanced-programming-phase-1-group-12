@@ -1,6 +1,7 @@
 package org.example.Common.models.Place;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.example.Common.models.Assets.GameAssetManager;
 import org.example.Common.models.Fundementals.LocationOfRectangle;
 import org.example.Common.models.ProductsPackage.StoreProducts;
@@ -9,7 +10,7 @@ import java.util.ArrayList;
 
 public class Store implements Place {
 
-    private LocationOfRectangle locationOfRectangle;
+    private LocationOfRectangle location;
 
     private String owner;
 
@@ -21,11 +22,15 @@ public class Store implements Place {
 
     private ArrayList<StoreProducts> storeProducts;
 
-    private Texture storeTexture;
+    @JsonIgnore
+    private transient Texture storeTexture;
+
+    public Store() {
+    }
 
     public Store(LocationOfRectangle locationOfRectangle, String owner, String nameOfStore, int startHour, int closeHour, ArrayList<StoreProducts> storeProducts) {
 
-        this.locationOfRectangle = locationOfRectangle;
+        this.location = locationOfRectangle;
         this.owner = owner;
         this.nameOfStore = nameOfStore;
         StartHour = startHour;
@@ -56,12 +61,8 @@ public class Store implements Place {
         }
     }
 
-    public LocationOfRectangle getLocationOfRectangle() {
-        return locationOfRectangle;
-    }
-
-    public void setLocationOfRectangle(LocationOfRectangle locationOfRectangle) {
-        this.locationOfRectangle = locationOfRectangle;
+    public void setLocation(LocationOfRectangle location) {
+        this.location = location;
     }
 
     public String getOwner() {
@@ -107,9 +108,10 @@ public class Store implements Place {
 
     @Override
     public LocationOfRectangle getLocation() {
-        return this.locationOfRectangle;
+        return this.location;
     }
 
+    @JsonIgnore
     public Texture getStoreTexture() {
         return storeTexture;
     }

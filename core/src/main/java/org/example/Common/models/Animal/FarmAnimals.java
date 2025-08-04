@@ -6,6 +6,8 @@ import org.example.Common.models.Item;
 import org.example.Common.models.ProductsPackage.Quality;
 import org.example.Common.models.enums.Animal;
 
+import java.io.Serializable;
+
 public class FarmAnimals extends Item {
     //Animal enum with its information:
     private Animal animal;
@@ -27,6 +29,8 @@ public class FarmAnimals extends Item {
     private boolean isMoving;
     private Location target;
     private Location previousPosition;
+
+    public FarmAnimals() {}
 
     public Animal getAnimal() {
         return animal;

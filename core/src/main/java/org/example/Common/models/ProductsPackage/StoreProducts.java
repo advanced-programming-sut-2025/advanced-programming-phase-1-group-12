@@ -1,9 +1,11 @@
 package org.example.Common.models.ProductsPackage;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Item;
 import org.example.Common.models.enums.Types.StoreProductsTypes;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class StoreProducts extends Item {
     private StoreProductsTypes type;
 
@@ -22,6 +24,7 @@ public class StoreProducts extends Item {
         this.type = type;
         this.currentDailyLimit = type.getDailyLimit();
     }
+    public StoreProducts() {}
 
     public String getName(){
         return type.getName();

@@ -114,7 +114,7 @@ public class ToolsController {
     }
 
     public boolean checkIsInSmithing() {
-        return App.getCurrentGame().getMainMap().getStores().get(0).getLocationOfRectangle().getLocationsInRectangle().contains(App.getCurrentPlayerLazy().getUserLocation());
+        return App.getCurrentGame().getMainMap().getStores().get(0).getLocation().getLocationsInRectangle().contains(App.getCurrentPlayerLazy().getUserLocation());
     }
 
 

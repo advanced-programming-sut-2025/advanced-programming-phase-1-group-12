@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import org.example.Client.Main;
+import org.example.Common.saveGame.GameSaveManager;
 import org.example.Server.controllers.MenusController.GameMenuController;
 import org.example.Common.models.Animal.FarmAnimals;
 import org.example.Common.models.Craft;
@@ -35,11 +36,11 @@ public class PlayerController {
     private final Player player;
     private final GameMenuController gameController;
 
-    private final Animation<TextureRegion> walkDown;
-    private final Animation<TextureRegion> walkLeft;
-    private final Animation<TextureRegion> walkRight;
-    private final Animation<TextureRegion> walkUp;
-    private final Animation<TextureRegion> collapse;
+    private transient final Animation<TextureRegion> walkDown;
+    private transient final Animation<TextureRegion> walkLeft;
+    private transient final Animation<TextureRegion> walkRight;
+    private transient final Animation<TextureRegion> walkUp;
+    private transient final Animation<TextureRegion> collapse;
 
     private Animation<TextureRegion> currentAnim;
     private float stateTime = 0f;
@@ -54,7 +55,7 @@ public class PlayerController {
     private boolean isCollapsing = false;
     private float collapseTimer = 0f;
     private static final float COLLAPSE_TIME = 5f;
-    
+
     //for movement cooldown:
     private float movementTimer = 0f;
     private static final float MOVEMENT_COOLDOWN = 0.03f; // Ultra smooth movement - 30ms between moves
@@ -131,7 +132,7 @@ public class PlayerController {
     private void handleInput(float delta) {
         // Update movement timer
         movementTimer += delta;
-        
+
         // In multiplayer mode, only allow the logged-in user to control their own character
         if (App.getCurrentGame().isMultiplayer()) {
             String currentUsername = App.getLoggedInUser().getUserName();
@@ -160,10 +161,11 @@ public class PlayerController {
         }
 
         if(Gdx.input.isKeyPressed(Input.Keys.B)) {
-            GameMenu gameMenu = new GameMenu(players);
-            Main.getMain().setScreen(gameMenu);
-            gameMenu.craftingView();
-            return;
+//            GameMenu gameMenu = new GameMenu(players);
+//            Main.getMain().setScreen(gameMenu);
+//            gameMenu.craftingView();
+//            return;
+            GameSaveManager.saveGameCompressed(App.getCurrentGame(), "saves/"+App.getCurrentGame().getGameId());
         }
         if(Gdx.input.isKeyPressed(Input.Keys.C)) {
             GameMenu gameMenu = new GameMenu(players);
@@ -255,7 +257,7 @@ public class PlayerController {
                 facing = Dir.UP;
                 int newEnergy = player.getEnergy() - 1;
                 player.setEnergy(newEnergy);
-                
+
                 // Reset movement timer for cooldown
                 movementTimer = 0f;
 
@@ -274,7 +276,7 @@ public class PlayerController {
                 facing = Dir.DOWN;
                 int newEnergy = player.getEnergy() - 1;
                 player.setEnergy(newEnergy);
-                
+
                 // Reset movement timer for cooldown
                 movementTimer = 0f;
 
@@ -293,7 +295,7 @@ public class PlayerController {
                 facing = Dir.LEFT;
                 int newEnergy = player.getEnergy() - 1;
                 player.setEnergy(newEnergy);
-                
+
                 // Reset movement timer for cooldown
                 movementTimer = 0f;
 
@@ -312,7 +314,7 @@ public class PlayerController {
                 facing = Dir.RIGHT;
                 int newEnergy = player.getEnergy() - 1;
                 player.setEnergy(newEnergy);
-                
+
                 // Reset movement timer for cooldown
                 movementTimer = 0f;
 

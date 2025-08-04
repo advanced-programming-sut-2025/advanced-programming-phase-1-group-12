@@ -3,17 +3,24 @@ package org.example.Common.models.MapDetails;
 import org.example.Common.models.Fundementals.LocationOfRectangle;
 import org.example.Common.models.Place.Place;
 
-public class Lake implements Place {
-     private final LocationOfRectangle lakeLocation;
+import java.io.Serializable;
+
+public class Lake implements Place, Serializable {
+    LocationOfRectangle location;
 
      public Lake(LocationOfRectangle lakeLocation) {
-          this.lakeLocation = lakeLocation;
+          this.location = lakeLocation;
      }
 
+    public Lake() {
+    }
 
+    public void setLocation(LocationOfRectangle location) {
+        this.location = location;
+    }
 
-     @Override
+    @Override
      public LocationOfRectangle getLocation() {
-          return this.lakeLocation;
+          return this.location;
      }
 }

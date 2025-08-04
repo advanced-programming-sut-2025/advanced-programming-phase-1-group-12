@@ -83,7 +83,7 @@ public class GameMenu extends InputAdapter implements Screen {
     private Skin skin = GameAssetManager.skin;
     private BitmapFont font;
     private float timeForAnimalMove = 0;
-    private Texture clockTexture;
+    private transient Texture clockTexture;
     private Image clockImage;
     private Image seasonImage;
     private Image weatherImage;
@@ -94,21 +94,21 @@ public class GameMenu extends InputAdapter implements Screen {
     private ShapeRenderer shapeRenderer;
     private float lightingAlpha = 0f;
     private List<RainDrop> rainDrops;
-    private Texture rainTexture1;
-    private Texture rainTexture2;
+    private transient Texture rainTexture1;
+    private transient Texture rainTexture2;
     private boolean isRaining = false;
     private float rainSpawnTimer = 0f;
     private final float RAIN_SPAWN_INTERVAL = 0.05f;
 
     private List<SnowFlake> snowFlakes;
-    private Texture[] snowTextures;
+    private transient Texture[] snowTextures;
     private boolean isSnowing = false;
     private float snowSpawnTimer = 0f;
     private final float SNOW_SPAWN_INTERVAL = 0.1f;
 
-    private Texture clockHandTexture;
+    private transient Texture clockHandTexture;
     private float clockHandRotation = 0f;
-    private TextureRegion clockHandRegion;
+    private transient TextureRegion clockHandRegion;
 
     // Friends window components
     private TextButton friendsButton;
@@ -586,6 +586,10 @@ public class GameMenu extends InputAdapter implements Screen {
         );
 
         playerController = player.getPlayerController();
+        if(playerController == null){
+            playerController = new PlayerController(player, controller, players);
+            player.setPlayerController(playerController);
+        }
     }
 
     @Override
@@ -780,6 +784,10 @@ public class GameMenu extends InputAdapter implements Screen {
             Location farmLocation = otherPlayer.getUserLocation();
             float farmCornerX = farmLocation.getxAxis() * 100;
             float farmCornerY = farmLocation.getyAxis() * 100;
+
+            if(otherPlayer.getPlayerController() == null){
+                otherPlayer.setPlayerController(new PlayerController(otherPlayer, controller, players));
+            }
 
             batch.draw(otherPlayer.getPlayerController().getCurrentFrame(), farmCornerX, farmCornerY, otherPlayer.getPlayerSprite().getWidth(),
                 otherPlayer.getPlayerSprite().getHeight());

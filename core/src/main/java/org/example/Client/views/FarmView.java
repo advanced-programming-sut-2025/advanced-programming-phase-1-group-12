@@ -58,13 +58,13 @@ public class FarmView implements Screen {
         errorLabel.setColor(1, 0, 0, 1);
         errorLabel.setVisible(false);
 
-        this.farmX1 = App.getCurrentPlayerLazy().getOwnedFarm().getFarmLocation().getTopLeftCorner().getxAxis();  // Farm starting X coordinate
-        this.farmY1 = App.getCurrentPlayerLazy().getOwnedFarm().getFarmLocation().getTopLeftCorner().getyAxis();  // Farm starting Y coordinate// Farm ending Y coordinate
+        this.farmX1 = App.getCurrentPlayerLazy().getOwnedFarm().getLocation().getTopLeftCorner().getxAxis();  // Farm starting X coordinate
+        this.farmY1 = App.getCurrentPlayerLazy().getOwnedFarm().getLocation().getTopLeftCorner().getyAxis();  // Farm starting Y coordinate// Farm ending Y coordinate
 
         this.pixelMapRenderer = new PixelMapRenderer(App.getCurrentGame().getMainMap());
         this.farm = App.getCurrentPlayerLazy().getOwnedFarm();
-        this.farmX1 = farm.getFarmLocation().getDownRightCorner().getxAxis() - 30;
-        this.farmY1 = farm.getFarmLocation().getDownRightCorner().getyAxis() - 30;
+        this.farmX1 = farm.getLocation().getDownRightCorner().getxAxis() - 30;
+        this.farmY1 = farm.getLocation().getDownRightCorner().getyAxis() - 30;
         this.pixelMapRenderer = new PixelMapRenderer(App.getCurrentGame().getMainMap());
     }
 

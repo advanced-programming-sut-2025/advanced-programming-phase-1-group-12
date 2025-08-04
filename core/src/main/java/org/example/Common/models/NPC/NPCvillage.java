@@ -1,5 +1,6 @@
 package org.example.Common.models.NPC;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Fundementals.Location;
 import org.example.Common.models.Fundementals.LocationOfRectangle;
@@ -17,17 +18,18 @@ import java.util.Random;
 
 public class NPCvillage implements Place {
     private ArrayList<NPC> NPCs = new ArrayList<>();
-    private LocationOfRectangle locationOfRectangle;
+    private LocationOfRectangle location;
     private Map<String, NPC> npcsByName = new HashMap<>();
     private Map<Shack, NPC> npcsByShack = new HashMap<>();
     private Random random = new Random();
 
     public NPCvillage(LocationOfRectangle location) {
-        this.locationOfRectangle = location;
+        this.location = location;
         setupNPCHouses();
         initializeNPCs();
     }
 
+    public NPCvillage(){}
     private void initializeNPCs() {
         createNPCsFromEnum();
     }
@@ -36,11 +38,11 @@ public class NPCvillage implements Place {
         // Place 5 NPC houses in the village area
         // One in the center, four in the corners
         int houseSize = 4; // 4x4 tiles for each house
-        int villageWidth = locationOfRectangle.getWidth();
-        int villageHeight = locationOfRectangle.getLength();
-        int startX = locationOfRectangle.getTopLeftCorner().getxAxis();
-        int startY = locationOfRectangle.getTopLeftCorner().getyAxis();
-        
+        int villageWidth = location.getWidth();
+        int villageHeight = location.getLength();
+        int startX = location.getTopLeftCorner().getxAxis();
+        int startY = location.getTopLeftCorner().getyAxis();
+
         // Calculate positions for 5 houses
         int[][] housePositions = {
             // Center house
@@ -51,11 +53,11 @@ public class NPCvillage implements Place {
             {startX + 2, startY + villageHeight - houseSize - 2}, // Bottom-left corner
             {startX + villageWidth - houseSize - 2, startY + villageHeight - houseSize - 2} // Bottom-right corner
         };
-        
+
         for (int i = 0; i < 5; i++) {
             int houseX = housePositions[i][0];
             int houseY = housePositions[i][1];
-            
+
             // Set the house area to NPC_HOUSE tile type
             for (int x = houseX; x < houseX + houseSize; x++) {
                 for (int y = houseY; y < houseY + houseSize; y++) {
@@ -71,39 +73,39 @@ public class NPCvillage implements Place {
     private void createNPCsFromEnum() {
         // Calculate house positions first
         ArrayList<Location> housePositions = calculateHousePositions();
-        
+
         // Create NPCs and position them next to houses
         int npcIndex = 0;
         for (NPCdetails npcDetail : NPCdetails.values()) {
             if (npcIndex < housePositions.size()) {
                 Location housePos = housePositions.get(npcIndex);
-                
+
                 // Position NPC next to the house (to the right of the house)
                 Location npcLocation = new Location(housePos.getxAxis() + 4, housePos.getyAxis() + 2);
-                
+
                 // Create a small shack area for the NPC
                 Location topLeft = new Location(npcLocation.getxAxis() - 1, npcLocation.getyAxis() - 1);
                 Location bottomRight = new Location(npcLocation.getxAxis() + 1, npcLocation.getyAxis() + 1);
                 LocationOfRectangle shackLocation = new LocationOfRectangle(topLeft, bottomRight);
-                
+
                 Shack npcShack = new Shack(shackLocation);
                 NPC npc = new NPC(npcDetail, npcLocation, npcShack);
-                
+
                 addNPC(npc);
                 npcIndex++;
             }
         }
     }
-    
+
     private ArrayList<Location> calculateHousePositions() {
         ArrayList<Location> housePositions = new ArrayList<>();
-        
+
         int houseSize = 4; // 4x4 tiles for each house
-        int villageWidth = locationOfRectangle.getWidth();
-        int villageHeight = locationOfRectangle.getLength();
-        int startX = locationOfRectangle.getTopLeftCorner().getxAxis();
-        int startY = locationOfRectangle.getTopLeftCorner().getyAxis();
-        
+        int villageWidth = location.getWidth();
+        int villageHeight = location.getLength();
+        int startX = location.getTopLeftCorner().getxAxis();
+        int startY = location.getTopLeftCorner().getyAxis();
+
         // Calculate positions for 5 houses
         int[][] positions = {
             // Center house
@@ -114,12 +116,12 @@ public class NPCvillage implements Place {
             {startX + 2, startY + villageHeight - houseSize - 2}, // Bottom-left corner
             {startX + villageWidth - houseSize - 2, startY + villageHeight - houseSize - 2} // Bottom-right corner
         };
-        
+
         for (int i = 0; i < 5; i++) {
             // Add the top-left corner of each house
             housePositions.add(new Location(positions[i][0], positions[i][1]));
         }
-        
+
         return housePositions;
     }
 
@@ -138,6 +140,7 @@ public class NPCvillage implements Place {
         return npcsByShack.get(shack);
     }
 
+    @JsonIgnore
     public ArrayList<NPC> getAllNPCs() {
         return NPCs;
     }
@@ -171,6 +174,6 @@ public class NPCvillage implements Place {
 
     @Override
     public LocationOfRectangle getLocation() {
-        return this.locationOfRectangle;
+        return this.location;
     }
 }

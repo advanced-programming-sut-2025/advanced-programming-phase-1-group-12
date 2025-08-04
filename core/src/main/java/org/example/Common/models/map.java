@@ -1,5 +1,6 @@
 package org.example.Common.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Fundementals.Location;
 import org.example.Common.models.Place.Farm;
@@ -11,6 +12,7 @@ public class map {
 
     private ArrayList<Farm> farms = new ArrayList<>();
     private ArrayList<Location> tilesOfMap = new ArrayList<>();
+    @JsonIgnore
     private ArrayList<Store> stores = new ArrayList<>();
     public ArrayList<Farm> getFarms() {
         return farms;
@@ -36,6 +38,9 @@ public class map {
             }
         }
         return null;
+    }
+
+    public map() {
     }
 
     public ArrayList<Store> getStores() {

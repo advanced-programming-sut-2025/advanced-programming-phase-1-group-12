@@ -8,7 +8,6 @@ import org.example.Client.controllers.MapSetUp.MapSetUp;
 import org.example.Client.controllers.NPCcontroller;
 import org.example.Client.controllers.StoreController;
 import org.example.Client.controllers.TradeController;
-import org.example.Client.controllers.movingPlayer.PlayerController;
 import org.example.Client.controllers.movingPlayer.ClientPlayerController;
 import org.example.Client.views.GameMenu;
 import org.example.Common.models.Animal.Fish;
@@ -322,15 +321,15 @@ public class GameMenuController {
     public void Play(List<String> usernames, Map<String, Integer> farmSelections) {
         Game newGame = App.getCurrentGame();
         App.setCurrentGame(newGame);
-        
+
         // Initialize singleton date manager for multiplayer synchronization
         DateManager.getInstance().reset(); // Reset any previous date
         DateManager.getInstance().initializeGameDate();
-        
+
         MapSetUp.initializeFarms();
         MapSetUp.storesSetUp();
         MapSetUp.NPCsetUp();
-        
+
         // Initialize NPC village for animations
         if (App.getCurrentGame().getNPCvillage() == null) {
             App.getCurrentGame().initializeNPCvillage();
@@ -379,24 +378,24 @@ public class GameMenuController {
             Farm farm = App.getCurrentGame().getMainMap().getFarms().get(farmId);
             farm.setOwner(newPlayer);
             newPlayer.setOwnedFarm(farm);
-            
+
             // Set player's initial location to their farm
             Location farmLocation = farm.getLocation().getTopLeftCorner();
             newPlayer.setUserLocation(App.getCurrentGame().getMainMap().findLocation(farmLocation.getxAxis(), farmLocation.getyAxis()));
-            
+
             // Initialize Refrigrator with proper location
             Location shackLocation = farm.getShack().getLocation().getTopLeftCorner();
             Location refrigratorLocation = App.getCurrentGame().getMainMap().findLocation(
-                shackLocation.getxAxis(), 
+                shackLocation.getxAxis(),
                 shackLocation.getyAxis() + 4
             );
             newPlayer.setRefrigrator(new Refrigrator(refrigratorLocation));
-            
+
             // Create a simple client-side player controller that provides getCurrentFrame()
             // This avoids the server-side PlayerController which tries to render on server
             ClientPlayerController clientPlayerController = new ClientPlayerController(newPlayer, usernames);
             newPlayer.setPlayerController(clientPlayerController);
-            
+
             farms.add(farm);
         }
 
@@ -409,10 +408,10 @@ public class GameMenuController {
         if (usernames.size() > 1) {
             App.getCurrentGame().setMultiplayer(true);
             System.out.println("Multiplayer game started with " + usernames.size() + " players");
-            
+
             // Initialize NetworkCommandSender for multiplayer communication
             if (Main.getMain() != null && Main.getMain().getServerConnection() != null) {
-                org.example.Client.network.NetworkCommandSender networkSender = 
+                org.example.Client.network.NetworkCommandSender networkSender =
                     new org.example.Client.network.NetworkCommandSender(Main.getMain().getServerConnection());
                 App.getCurrentGame().setNetworkCommandSender(networkSender);
                 System.out.println("NetworkCommandSender initialized for multiplayer game");
@@ -691,27 +690,27 @@ public class GameMenuController {
         if (player2 == null) {
             return new Result(false, "Player with username " + username + " not found!");
         }
-        
+
         // Check if players are adjacent
         float distance = Math.abs(player1.getUserLocation().getxAxis() - player2.getUserLocation().getxAxis()) +
                         Math.abs(player1.getUserLocation().getyAxis() - player2.getUserLocation().getyAxis());
         if (distance > 2) {
             return new Result(false, "Players are not adjacent!");
         }
-        
+
         RelationShip relationShip = player1.findRelationShip(player2);
         RelationShip relationShip2 = player2.findRelationShip(player1);
-        
+
         // If no relationship exists, create one
         if (relationShip == null && relationShip2 == null) {
             relationShip = new RelationShip(player1, player2);
             player1.addRelationShip(relationShip);
             player2.addRelationShip(relationShip);
         }
-        
+
         // Use the existing relationship or the newly created one
         RelationShip activeRelationShip = (relationShip != null) ? relationShip : relationShip2;
-        
+
         activeRelationShip.hug();
         return new Result(true, "hugged successfully!" + "\nFriendShip XP: " +
                 activeRelationShip.getXP() + " Friendship level: " + activeRelationShip.getFriendshipLevel());
@@ -1306,88 +1305,88 @@ public class GameMenuController {
         return map;
     }
 
-    public Result loadGameById(int gameIdToLoad) {
-        ObjectMapper mapper = new ObjectMapper();
-        File file = new File("saves/saved_game" + gameIdToLoad + ".json");
-
-        if (!file.exists())
-            return new Result(false, "No saved game found with gameId: " + gameIdToLoad);
-
-        try {
-            System.out.println("Reading JSON file...");
-            Map<String, Object> saveData = mapper.readValue(file, new TypeReference<>() {});
-            List<Map<String, Object>> playersData = (List<Map<String, Object>>) saveData.get("players");
-            List<Map<String, Object>> mapData = (List<Map<String, Object>>) saveData.get("mainMap");
-
-            System.out.println("Building map...");
-            map mainMap = new map();
-            for (Map<String, Object> tileMap : mapData) {
-                int x = ((Number) tileMap.get("x")).intValue(); // safer casting
-                int y = ((Number) tileMap.get("y")).intValue();
-                String typeName = (String) tileMap.get("typeOfTile");
-
-                TypeOfTile type = TypeOfTile.valueOf(typeName);
-                Location loc = new Location(x, y);
-                loc.setTypeOfTile(type);
-                mainMap.getTilesOfMap().add(loc);
-            }
-
-            System.out.println("Rebuilding players...");
-            ArrayList<Player> players = new ArrayList<>();
-            for (Map<String, Object> playerMap : playersData) {
-                String username = (String) playerMap.get("username");
-                int x = ((Number) playerMap.get("x")).intValue();
-                int y = ((Number) playerMap.get("y")).intValue();
-                int energy = ((Number) playerMap.get("energy")).intValue();
-
-                Location loc = new Location(x, y);
-                User user = App.getUserByUsername(username);
-
-                Player player = new Player(user, loc, false, null, null, null, null, false, false, null);
-                player.setUserLocation(loc);
-                player.setEnergy(energy);
-
-                System.out.println("Restoring farm for player " + username);
-                Map<String, Object> farmMap = (Map<String, Object>) playerMap.get("farm");
-                Farm farm = new Farm(mapToRect((Map<String, Object>) farmMap.get("location")));
-
-                farm.setFarmLocation(mapToRect((Map<String, Object>) farmMap.get("location")));
-                farm.setLake1(new Lake(mapToRect((Map<String, Object>) farmMap.get("lake1"))));
-                farm.setLake2(new Lake(mapToRect((Map<String, Object>) farmMap.get("lake2"))));
-                farm.setGreenHouse(new GreenHouse(mapToRect((Map<String, Object>) farmMap.get("greenhouse1"))));
-                farm.setGreenHouse2(new GreenHouse(mapToRect((Map<String, Object>) farmMap.get("greenhouse2"))));
-                farm.setShack(new Shack(mapToRect((Map<String, Object>) farmMap.get("shack1"))));
-                farm.setShack2(new Shack(mapToRect((Map<String, Object>) farmMap.get("shack2"))));
-                farm.setQuarry(new Quarry(mapToRect((Map<String, Object>) farmMap.get("quarry1"))));
-                farm.setQuarry2(new Quarry(mapToRect((Map<String, Object>) farmMap.get("quarry2"))));
-                farm.setOwner(player);
-
-                player.setOwnedFarm(farm);
-                players.add(player);
-            }
-
-            System.out.println("Finalizing game setup...");
-            Game loadedGame = new Game();
-            loadedGame.setPlayers(players);
-            loadedGame.setMainMap(mainMap);
-            App.setCurrentGame(loadedGame);
-            App.getCurrentGame().setCurrentPlayer(players.get(0));
-
-            for (Player player : App.getCurrentGame().getPlayers()) {
-                Location loc = player.getUserLocation();
-                App.getCurrentGame().getMainMap().findLocation(loc.getxAxis(), loc.getyAxis()).setObjectInTile(player);
-                Farm farm = player.getOwnedFarm();
-                App.getCurrentGame().getMainMap().getFarms().add(farm);
-            }
-
-            System.out.println("Game loaded successfully.");
-            return new Result(true, "Game " + gameIdToLoad + " loaded successfully!");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new Result(false, "Failed to load the game: " + e.getMessage());
-        }
-    }
+//    public Result loadGameById(int gameIdToLoad) {
+//        ObjectMapper mapper = new ObjectMapper();
+//        File file = new File("saves/saved_game" + gameIdToLoad + ".json");
+//
+//        if (!file.exists())
+//            return new Result(false, "No saved game found with gameId: " + gameIdToLoad);
+//
+//        try {
+//            System.out.println("Reading JSON file...");
+//            Map<String, Object> saveData = mapper.readValue(file, new TypeReference<>() {});
+//            List<Map<String, Object>> playersData = (List<Map<String, Object>>) saveData.get("players");
+//            List<Map<String, Object>> mapData = (List<Map<String, Object>>) saveData.get("mainMap");
+//
+//            System.out.println("Building map...");
+//            map mainMap = new map();
+//            for (Map<String, Object> tileMap : mapData) {
+//                int x = ((Number) tileMap.get("x")).intValue(); // safer casting
+//                int y = ((Number) tileMap.get("y")).intValue();
+//                String typeName = (String) tileMap.get("typeOfTile");
+//
+//                TypeOfTile type = TypeOfTile.valueOf(typeName);
+//                Location loc = new Location(x, y);
+//                loc.setTypeOfTile(type);
+//                mainMap.getTilesOfMap().add(loc);
+//            }
+//
+//            System.out.println("Rebuilding players...");
+//            ArrayList<Player> players = new ArrayList<>();
+//            for (Map<String, Object> playerMap : playersData) {
+//                String username = (String) playerMap.get("username");
+//                int x = ((Number) playerMap.get("x")).intValue();
+//                int y = ((Number) playerMap.get("y")).intValue();
+//                int energy = ((Number) playerMap.get("energy")).intValue();
+//
+//                Location loc = new Location(x, y);
+//                User user = App.getUserByUsername(username);
+//
+//                Player player = new Player(user, loc, false, null, null, null, null, false, false, null);
+//                player.setUserLocation(loc);
+//                player.setEnergy(energy);
+//
+//                System.out.println("Restoring farm for player " + username);
+//                Map<String, Object> farmMap = (Map<String, Object>) playerMap.get("farm");
+//                Farm farm = new Farm(mapToRect((Map<String, Object>) farmMap.get("location")));
+//
+//                farm.setLocation(mapToRect((Map<String, Object>) farmMap.get("location")));
+//                farm.setLake1(new Lake(mapToRect((Map<String, Object>) farmMap.get("lake1"))));
+//                farm.setLake2(new Lake(mapToRect((Map<String, Object>) farmMap.get("lake2"))));
+//                farm.setGreenHouse(new GreenHouse(mapToRect((Map<String, Object>) farmMap.get("greenhouse1"))));
+//                farm.setGreenHouse2(new GreenHouse(mapToRect((Map<String, Object>) farmMap.get("greenhouse2"))));
+//                farm.setShack(new Shack(mapToRect((Map<String, Object>) farmMap.get("shack1"))));
+//                farm.setShack2(new Shack(mapToRect((Map<String, Object>) farmMap.get("shack2"))));
+//                farm.setQuarry(new Quarry(mapToRect((Map<String, Object>) farmMap.get("quarry1"))));
+//                farm.setQuarry2(new Quarry(mapToRect((Map<String, Object>) farmMap.get("quarry2"))));
+//                farm.setOwner(player);
+//
+//                player.setOwnedFarm(farm);
+//                players.add(player);
+//            }
+//
+//            System.out.println("Finalizing game setup...");
+//            Game loadedGame = new Game();
+//            loadedGame.setPlayers(players);
+//            loadedGame.setMainMap(mainMap);
+//            App.setCurrentGame(loadedGame);
+//            App.getCurrentGame().setCurrentPlayer(players.get(0));
+//
+//            for (Player player : App.getCurrentGame().getPlayers()) {
+//                Location loc = player.getUserLocation();
+//                App.getCurrentGame().getMainMap().findLocation(loc.getxAxis(), loc.getyAxis()).setObjectInTile(player);
+//                Farm farm = player.getOwnedFarm();
+//                App.getCurrentGame().getMainMap().getFarms().add(farm);
+//            }
+//
+//            System.out.println("Game loaded successfully.");
+//            return new Result(true, "Game " + gameIdToLoad + " loaded successfully!");
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return new Result(false, "Failed to load the game: " + e.getMessage());
+//        }
+//    }
 
 
     private LocationOfRectangle mapToRect(Map<String, Object> map) {
@@ -1472,18 +1471,18 @@ public class GameMenuController {
     public Result cheatMakeAdjacent(String username1, String username2) {
         Player player1 = App.getCurrentGame().getPlayerByName(username1);
         Player player2 = App.getCurrentGame().getPlayerByName(username2);
-        
+
         if (player1 == null) {
             return new Result(false, "Player " + username1 + " not found!");
         }
         if (player2 == null) {
             return new Result(false, "Player " + username2 + " not found!");
         }
-        
+
         // Move player2 to be adjacent to player1 (1 tile away)
         int player1X = player1.getUserLocation().getxAxis();
         int player1Y = player1.getUserLocation().getyAxis();
-        
+
         // Place player2 one tile to the right of player1
         Location adjacentLocation = App.getCurrentGame().getMainMap().findLocation(player1X + 1, player1Y);
         if (adjacentLocation != null) {

@@ -6,6 +6,8 @@ import org.example.Common.models.Fundementals.LocationOfRectangle;
 import org.example.Common.models.Item;
 import org.example.Common.models.ProductsPackage.Quality;
 
+import java.io.Serializable;
+
 public class AnimalHome extends Item {
     private int CapacityRemained;
 
@@ -19,6 +21,9 @@ public class AnimalHome extends Item {
         CapacityRemained = capacityRemained;
         Type = type;
         this.location = location;
+    }
+
+    public AnimalHome() {
     }
 
     public int getCapacityRemained() {

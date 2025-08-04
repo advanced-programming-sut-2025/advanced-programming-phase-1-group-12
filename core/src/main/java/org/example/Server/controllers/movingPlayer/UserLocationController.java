@@ -24,7 +24,7 @@ public class UserLocationController {
                 continue;
             }
             else{
-                if(farm.getFarmLocation().getLocationsInRectangle().contains(newLocation)){
+                if(farm.getLocation().getLocationsInRectangle().contains(newLocation)){
                     return new Result(false, "you can't move to others farm.");
                 }
             }
@@ -96,11 +96,11 @@ public class UserLocationController {
                 targetX, targetY
         ).setObjectInTile(App.getCurrentGame().getCurrentPlayer());
         App.getCurrentGame().getCurrentPlayer().setEnergy(currentEnergy - energyNeeded);
-        
+
         // Check if energy reached zero after movement (for multiplayer turn-based system)
         if (App.getCurrentGame().isMultiplayer() && App.getCurrentGame().getCurrentPlayer().getEnergy() <= 0) {
             App.getCurrentGame().getCurrentPlayer().setHasCollapsed(true);
-            
+
             // Get GameInstance and handle turn change
             GameSessionManager sessionManager = GameSessionManager.getInstance();
             if (sessionManager != null) {
@@ -114,7 +114,7 @@ public class UserLocationController {
             } else {
                 App.getCurrentGame().nextTurn();
             }
-            
+
             return new Result(true,
                     App.getCurrentGame().getCurrentPlayer().getUser().getUserName()
                             + " moved to new location " + x + " " + y
@@ -122,7 +122,7 @@ public class UserLocationController {
                             + " and energy reached zero. Turn passed to next player."
             );
         }
-        
+
         if(App.isLocationInPlace(newLocation, App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getShack().getLocation())){
             houseMenu();
         }
@@ -165,7 +165,7 @@ public class UserLocationController {
 
             Location loc = App.getCurrentGame().getMainMap().findLocation(x, y);
             if (loc.getTypeOfTile() != TypeOfTile.GROUND && loc.getTypeOfTile() != TypeOfTile.PLOUGHED_LAND &&
-                    loc.getTypeOfTile() != TypeOfTile.STORE && loc.getTypeOfTile() != TypeOfTile.HOUSE && 
+                    loc.getTypeOfTile() != TypeOfTile.STORE && loc.getTypeOfTile() != TypeOfTile.HOUSE &&
                     loc.getTypeOfTile() != TypeOfTile.NPC_VILLAGE && loc.getTypeOfTile() != TypeOfTile.NPC_HOUSE) continue;
 
             visited[x][y] = true;
@@ -202,7 +202,7 @@ public class UserLocationController {
 
             Location loc = App.getCurrentGame().getMainMap().findLocation(x, y);
             if (loc.getTypeOfTile() != TypeOfTile.GROUND && loc.getTypeOfTile() != TypeOfTile.PLOUGHED_LAND &&
-                    loc.getTypeOfTile() != TypeOfTile.STORE && loc.getTypeOfTile() != TypeOfTile.HOUSE && 
+                    loc.getTypeOfTile() != TypeOfTile.STORE && loc.getTypeOfTile() != TypeOfTile.HOUSE &&
                     loc.getTypeOfTile() != TypeOfTile.NPC_VILLAGE && loc.getTypeOfTile() != TypeOfTile.NPC_HOUSE) continue;
 
             int energyNeeded = (dist + 10 * turns) / 20;

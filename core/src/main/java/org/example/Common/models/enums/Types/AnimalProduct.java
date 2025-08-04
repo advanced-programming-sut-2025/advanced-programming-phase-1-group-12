@@ -42,7 +42,7 @@ public enum AnimalProduct {
     private final int price;
     private final Animal producer;
     private final boolean isDefault;
-    private final Texture texture;
+    private transient final Texture texture;
 
     AnimalProduct(String name, int price, Animal producer, boolean isDefault, Texture texture) {
         this.name = name;

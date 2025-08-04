@@ -1,5 +1,7 @@
 package org.example.Common.models.RelatedToUser;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.enums.Types.CraftingRecipe;
 
@@ -7,11 +9,13 @@ public class Ability {
     private final String name;
     private int level;
     private int amount;
-    public Ability(String name, int amount) {
+    @JsonCreator
+    public Ability(@JsonProperty("name")String name,@JsonProperty("amount") int amount) {
         this.name = name;
         this.level = 0;
         this.amount = amount;
     }
+
 
     public void setLevel(int level) {
         this.level = level;

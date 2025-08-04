@@ -18,6 +18,8 @@ public class Fruits extends Item {
     private int energyGain;
     private Season season;
     private boolean giganticGrowth;
+
+    public Fruits(){}
     public Fruits(String fruitName, String type, String origin,
                   int fullGrowthtime, boolean canCollect, boolean isCollected,
                   int collectDay, double price, boolean isEdible, int energyGain,

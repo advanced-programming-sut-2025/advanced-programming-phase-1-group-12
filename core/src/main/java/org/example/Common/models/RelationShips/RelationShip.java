@@ -4,6 +4,7 @@ import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Fundementals.Player;
 import org.example.Common.models.Item;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +24,9 @@ public class RelationShip {
     private List<Gift> receivedGifts;
     private List<Gift> sentGifts;
     private boolean hasAskedToMarry;
+
+    public RelationShip() {
+    }
 
     public RelationShip(Player player1, Player player2) {
         this.player1 = player1;

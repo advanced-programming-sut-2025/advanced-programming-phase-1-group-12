@@ -39,7 +39,7 @@ public class MapSetUp {
             Location downRight = new Location(startX + farmWidth, startY + farmHeight);
             LocationOfRectangle farmRectangle = new LocationOfRectangle(topLeft, downRight);
 
-            Farm newFarm = new Farm(farmRectangle);
+            Farm newFarm = new Farm(farmRectangle, id);
             farms.add(newFarm);
 
             newFarmSetUp.makeFarm(newFarm, id);

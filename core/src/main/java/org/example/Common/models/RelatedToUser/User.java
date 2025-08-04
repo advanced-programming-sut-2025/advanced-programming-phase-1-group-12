@@ -1,5 +1,6 @@
 package org.example.Common.models.RelatedToUser;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.example.Common.models.Fundementals.Game;
 
 import java.util.ArrayList;
@@ -58,6 +59,7 @@ public class User {
         this.tokenExpiration = tokenExpiration;
     }
 
+    @JsonIgnore
     public boolean isTokenExpired() {
         return System.currentTimeMillis() > tokenExpiration;
     }

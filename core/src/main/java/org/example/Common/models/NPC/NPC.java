@@ -44,9 +44,9 @@ public class NPC {
     private Map<Player, Boolean> talkedToday = new HashMap<>();
     private Map<Player, Boolean> giftedToday = new HashMap<>();
     private Random random = new Random();
-    
+
     // Animation state
-    private AnimationType currentAnimation = AnimationType.IDLE;
+    private transient AnimationType currentAnimation = AnimationType.IDLE;
     private float animationTime = 0f;
     private boolean isMoving = false;
     private float moveTimer = 0f;
@@ -61,6 +61,8 @@ public class NPC {
         this.isMarried = false;
         this.energy = 100;
     }
+
+    public NPC() {}
 
     public NPC(NPCdetails details, Location location, Shack shack) {
         this.name = details.getName();
@@ -318,24 +320,24 @@ public class NPC {
             giftedToday.put(player, false);
         }
     }
-    
+
     // Animation methods
     public void updateAnimation(float deltaTime) {
         animationTime += deltaTime;
-        
+
         // Keep all NPCs in idle animation for now
         currentAnimation = AnimationType.IDLE;
         isMoving = false;
     }
-    
+
     public AnimationType getCurrentAnimation() {
         return currentAnimation;
     }
-    
+
     public float getAnimationTime() {
         return animationTime;
     }
-    
+
     public boolean isMoving() {
         return isMoving;
     }

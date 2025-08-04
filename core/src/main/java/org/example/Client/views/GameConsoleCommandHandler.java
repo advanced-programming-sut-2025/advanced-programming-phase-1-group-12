@@ -70,9 +70,7 @@ public class GameConsoleCommandHandler {
             GameMenuController controller = new GameMenuController();
             controller.abarCheat();
         }
-        else if ((matcher = GameMenuCommands.LoadGame.getMather(input)) != null) {
-            controller.loadGameById(matcher.end("gameID"));
-        }  else if ((matcher = GameMenuCommands.PRINT.getMather(input)) != null) {
+         else if ((matcher = GameMenuCommands.PRINT.getMather(input)) != null) {
             controller.printMap(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y")), Integer.parseInt(matcher.group("size")), scanner);
         } else if ((matcher = GameMenuCommands.TIME.getMather(input)) != null) {
             showCurrentTime();

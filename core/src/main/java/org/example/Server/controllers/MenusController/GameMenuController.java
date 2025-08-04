@@ -1,6 +1,7 @@
 package org.example.Server.controllers.MenusController;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.Common.models.*;
@@ -15,7 +16,6 @@ import org.example.Server.controllers.NPCcontroller;
 import org.example.Server.controllers.StoreController;
 import org.example.Server.controllers.TradeController;
 import org.example.Server.controllers.movingPlayer.PlayerController;
-import org.example.Common.models.Animal.Fish;
 import org.example.Common.models.Assets.GameAssetManager;
 import org.example.Common.models.Eating.Food;
 import org.example.Common.models.Eating.Fruits;
@@ -412,6 +412,66 @@ public class GameMenuController {
         Main.getMain().setScreen(new GameMenu(usernames));
     }
 
+    public void loadGame(List<String> usernames) {
+        Game newGame = App.getCurrentGame();
+
+        // Initialize NPC village for animations
+        if (App.getCurrentGame().getNPCvillage() == null) {
+            App.getCurrentGame().initializeNPCvillage();
+        }
+        ArrayList<Farm> farms = newGame.getFarms();
+
+        App.loadAllUsersFromFiles();
+
+        for (int i = 0; i < usernames.size(); i++) {
+
+            Texture playerTexture;
+            Texture portraitFrame;
+
+            switch (i) {
+                case 0 -> {
+                    playerTexture = new Texture("sprites/Robin.png");
+                    portraitFrame = GameAssetManager.getRobinPortrait();
+                }
+                case 1 -> {
+                    playerTexture = new Texture("sprites/Abigail.png");
+                    portraitFrame = GameAssetManager.getAbigailPortrait();
+                }
+                case 2 -> {
+                    playerTexture = new Texture("sprites/Maru.png");
+                    portraitFrame = GameAssetManager.getMaruPortrait();
+                }
+                case 3 -> {
+                    playerTexture = new Texture("sprites/Leah.png");
+                    portraitFrame = GameAssetManager.getLeahPortrait();
+                }
+                default -> {
+                    playerTexture = new Texture("sprites/Robin.png");
+                    portraitFrame = GameAssetManager.getRobinPortrait();
+                }
+            }
+
+            Player player = newGame.getPlayerByName(usernames.get(i));
+            Farm farm = App.getCurrentGame().getMainMap().getFarms().get(i);
+            farm.setOwner(player);
+            player.setOwnedFarm(farm);
+            player.setPlayerTexture(playerTexture);
+            player.setPortraitFrame(portraitFrame);
+            player.setPlayerSprite(new Sprite(playerTexture));
+            player.setRect(new CollisionRect(player.getPlayerSprite().getX(), player.getPlayerSprite().getY(),
+                player.getPlayerSprite().getWidth(), player.getPlayerSprite().getHeight()));
+        }
+
+        // Set multiplayer flag only for true network multiplayer games
+        // For single-player games, always set to false regardless of number of players
+        App.getCurrentGame().setMultiplayer(false);
+        System.out.println("Single-player game started with " + usernames.size() + " characters");
+
+        MapSetUp.showMapWithFarms(App.getCurrentGame().getMainMap());
+        System.out.println("All farms have been assigned!");
+        Main.getMain().setScreen(new GameMenu(usernames));
+    }
+
     public void PlayNetworkMultiplayer(List<String> usernames, Map<String, Integer> farmSelections) {
         // Call the regular Play method first
         Play(usernames, farmSelections);
@@ -687,27 +747,27 @@ public class GameMenuController {
         if (player2 == null) {
             return new Result(false, "Player with username " + username + " not found!");
         }
-        
+
         // Check if players are adjacent
         float distance = Math.abs(player1.getUserLocation().getxAxis() - player2.getUserLocation().getxAxis()) +
                         Math.abs(player1.getUserLocation().getyAxis() - player2.getUserLocation().getyAxis());
         if (distance > 2) {
             return new Result(false, "Players are not adjacent!");
         }
-        
+
         RelationShip relationShip = player1.findRelationShip(player2);
         RelationShip relationShip2 = player2.findRelationShip(player1);
-        
+
         // If no relationship exists, create one
         if (relationShip == null && relationShip2 == null) {
             relationShip = new RelationShip(player1, player2);
             player1.addRelationShip(relationShip);
             player2.addRelationShip(relationShip);
         }
-        
+
         // Use the existing relationship or the newly created one
         RelationShip activeRelationShip = (relationShip != null) ? relationShip : relationShip2;
-        
+
         activeRelationShip.hug();
         return new Result(true, "hugged successfully!" + "\nFriendShip XP: " +
                 activeRelationShip.getXP() + " Friendship level: " + activeRelationShip.getFriendshipLevel());
@@ -1302,88 +1362,88 @@ public class GameMenuController {
         return map;
     }
 
-    public Result loadGameById(int gameIdToLoad) {
-        ObjectMapper mapper = new ObjectMapper();
-        File file = new File("saves/saved_game" + gameIdToLoad + ".json");
-
-        if (!file.exists())
-            return new Result(false, "No saved game found with gameId: " + gameIdToLoad);
-
-        try {
-            System.out.println("Reading JSON file...");
-            Map<String, Object> saveData = mapper.readValue(file, new TypeReference<>() {});
-            List<Map<String, Object>> playersData = (List<Map<String, Object>>) saveData.get("players");
-            List<Map<String, Object>> mapData = (List<Map<String, Object>>) saveData.get("mainMap");
-
-            System.out.println("Building map...");
-            map mainMap = new map();
-            for (Map<String, Object> tileMap : mapData) {
-                int x = ((Number) tileMap.get("x")).intValue(); // safer casting
-                int y = ((Number) tileMap.get("y")).intValue();
-                String typeName = (String) tileMap.get("typeOfTile");
-
-                TypeOfTile type = TypeOfTile.valueOf(typeName);
-                Location loc = new Location(x, y);
-                loc.setTypeOfTile(type);
-                mainMap.getTilesOfMap().add(loc);
-            }
-
-            System.out.println("Rebuilding players...");
-            ArrayList<Player> players = new ArrayList<>();
-            for (Map<String, Object> playerMap : playersData) {
-                String username = (String) playerMap.get("username");
-                int x = ((Number) playerMap.get("x")).intValue();
-                int y = ((Number) playerMap.get("y")).intValue();
-                int energy = ((Number) playerMap.get("energy")).intValue();
-
-                Location loc = new Location(x, y);
-                User user = App.getUserByUsername(username);
-
-                Player player = new Player(user, loc, false, null, null, null, null, false, false, null);
-                player.setUserLocation(loc);
-                player.setEnergy(energy);
-
-                System.out.println("Restoring farm for player " + username);
-                Map<String, Object> farmMap = (Map<String, Object>) playerMap.get("farm");
-                Farm farm = new Farm(mapToRect((Map<String, Object>) farmMap.get("location")));
-
-                farm.setFarmLocation(mapToRect((Map<String, Object>) farmMap.get("location")));
-                farm.setLake1(new Lake(mapToRect((Map<String, Object>) farmMap.get("lake1"))));
-                farm.setLake2(new Lake(mapToRect((Map<String, Object>) farmMap.get("lake2"))));
-                farm.setGreenHouse(new GreenHouse(mapToRect((Map<String, Object>) farmMap.get("greenhouse1"))));
-                farm.setGreenHouse2(new GreenHouse(mapToRect((Map<String, Object>) farmMap.get("greenhouse2"))));
-                farm.setShack(new Shack(mapToRect((Map<String, Object>) farmMap.get("shack1"))));
-                farm.setShack2(new Shack(mapToRect((Map<String, Object>) farmMap.get("shack2"))));
-                farm.setQuarry(new Quarry(mapToRect((Map<String, Object>) farmMap.get("quarry1"))));
-                farm.setQuarry2(new Quarry(mapToRect((Map<String, Object>) farmMap.get("quarry2"))));
-                farm.setOwner(player);
-
-                player.setOwnedFarm(farm);
-                players.add(player);
-            }
-
-            System.out.println("Finalizing game setup...");
-            Game loadedGame = new Game();
-            loadedGame.setPlayers(players);
-            loadedGame.setMainMap(mainMap);
-            App.setCurrentGame(loadedGame);
-            App.getCurrentGame().setCurrentPlayer(players.get(0));
-
-            for (Player player : App.getCurrentGame().getPlayers()) {
-                Location loc = player.getUserLocation();
-                App.getCurrentGame().getMainMap().findLocation(loc.getxAxis(), loc.getyAxis()).setObjectInTile(player);
-                Farm farm = player.getOwnedFarm();
-                App.getCurrentGame().getMainMap().getFarms().add(farm);
-            }
-
-            System.out.println("Game loaded successfully.");
-            return new Result(true, "Game " + gameIdToLoad + " loaded successfully!");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new Result(false, "Failed to load the game: " + e.getMessage());
-        }
-    }
+//    public Result loadGameById(int gameIdToLoad) {
+//        ObjectMapper mapper = new ObjectMapper();
+//        File file = new File("saves/saved_game" + gameIdToLoad + ".json");
+//
+//        if (!file.exists())
+//            return new Result(false, "No saved game found with gameId: " + gameIdToLoad);
+//
+//        try {
+//            System.out.println("Reading JSON file...");
+//            Map<String, Object> saveData = mapper.readValue(file, new TypeReference<>() {});
+//            List<Map<String, Object>> playersData = (List<Map<String, Object>>) saveData.get("players");
+//            List<Map<String, Object>> mapData = (List<Map<String, Object>>) saveData.get("mainMap");
+//
+//            System.out.println("Building map...");
+//            map mainMap = new map();
+//            for (Map<String, Object> tileMap : mapData) {
+//                int x = ((Number) tileMap.get("x")).intValue(); // safer casting
+//                int y = ((Number) tileMap.get("y")).intValue();
+//                String typeName = (String) tileMap.get("typeOfTile");
+//
+//                TypeOfTile type = TypeOfTile.valueOf(typeName);
+//                Location loc = new Location(x, y);
+//                loc.setTypeOfTile(type);
+//                mainMap.getTilesOfMap().add(loc);
+//            }
+//
+//            System.out.println("Rebuilding players...");
+//            ArrayList<Player> players = new ArrayList<>();
+//            for (Map<String, Object> playerMap : playersData) {
+//                String username = (String) playerMap.get("username");
+//                int x = ((Number) playerMap.get("x")).intValue();
+//                int y = ((Number) playerMap.get("y")).intValue();
+//                int energy = ((Number) playerMap.get("energy")).intValue();
+//
+//                Location loc = new Location(x, y);
+//                User user = App.getUserByUsername(username);
+//
+//                Player player = new Player(user, loc, false, null, null, null, null, false, false, null);
+//                player.setUserLocation(loc);
+//                player.setEnergy(energy);
+//
+//                System.out.println("Restoring farm for player " + username);
+//                Map<String, Object> farmMap = (Map<String, Object>) playerMap.get("farm");
+//                Farm farm = new Farm(mapToRect((Map<String, Object>) farmMap.get("location")));
+//
+//                farm.setLocation(mapToRect((Map<String, Object>) farmMap.get("location")));
+//                farm.setLake1(new Lake(mapToRect((Map<String, Object>) farmMap.get("lake1"))));
+//                farm.setLake2(new Lake(mapToRect((Map<String, Object>) farmMap.get("lake2"))));
+//                farm.setGreenHouse(new GreenHouse(mapToRect((Map<String, Object>) farmMap.get("greenhouse1"))));
+//                farm.setGreenHouse2(new GreenHouse(mapToRect((Map<String, Object>) farmMap.get("greenhouse2"))));
+//                farm.setShack(new Shack(mapToRect((Map<String, Object>) farmMap.get("shack1"))));
+//                farm.setShack2(new Shack(mapToRect((Map<String, Object>) farmMap.get("shack2"))));
+//                farm.setQuarry(new Quarry(mapToRect((Map<String, Object>) farmMap.get("quarry1"))));
+//                farm.setQuarry2(new Quarry(mapToRect((Map<String, Object>) farmMap.get("quarry2"))));
+//                farm.setOwner(player);
+//
+//                player.setOwnedFarm(farm);
+//                players.add(player);
+//            }
+//
+//            System.out.println("Finalizing game setup...");
+//            Game loadedGame = new Game();
+//            loadedGame.setPlayers(players);
+//            loadedGame.setMainMap(mainMap);
+//            App.setCurrentGame(loadedGame);
+//            App.getCurrentGame().setCurrentPlayer(players.get(0));
+//
+//            for (Player player : App.getCurrentGame().getPlayers()) {
+//                Location loc = player.getUserLocation();
+//                App.getCurrentGame().getMainMap().findLocation(loc.getxAxis(), loc.getyAxis()).setObjectInTile(player);
+//                Farm farm = player.getOwnedFarm();
+//                App.getCurrentGame().getMainMap().getFarms().add(farm);
+//            }
+//
+//            System.out.println("Game loaded successfully.");
+//            return new Result(true, "Game " + gameIdToLoad + " loaded successfully!");
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return new Result(false, "Failed to load the game: " + e.getMessage());
+//        }
+//    }
 
 
     private LocationOfRectangle mapToRect(Map<String, Object> map) {

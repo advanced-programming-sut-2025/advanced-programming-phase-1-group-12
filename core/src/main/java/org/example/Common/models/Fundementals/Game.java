@@ -1,5 +1,6 @@
 package org.example.Common.models.Fundementals;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.example.Common.models.Date;
 import org.example.Common.models.DateManager;
 import org.example.Common.models.NPC.NPCvillage;
@@ -19,13 +20,17 @@ public class Game {
     Map<Farm, Player> userAndMap = new HashMap<>();
     private ArrayList<Player> players = new ArrayList<>();
     private ArrayList<Farm> farms = new ArrayList<>();
+    @JsonIgnore
     private NPCvillage npcVillage;
-    
+
     // Multiplayer turn-based system fields
     private boolean isMultiplayer = false;
     private int currentPlayerIndex = 0;
     private boolean isTurnBasedMode = false;
-    
+
+    public Game() {
+    }
+
     // Network communication
     private org.example.Client.network.NetworkCommandSender networkCommandSender;
 
@@ -56,8 +61,6 @@ public class Game {
     public void setUserAndMap(Map<Farm, Player> userAndMap) {
         this.userAndMap = userAndMap;
     }
-
-    public Location[] getTilesOfMap() {return null;}
 
     public Date getDate(){
         return DateManager.getInstance().getGameDate();
@@ -157,11 +160,11 @@ public class Game {
         if (!isTurnBasedMode || players.isEmpty()) {
             return;
         }
-        
+
         // Move to next player
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
         currentPlayer = players.get(currentPlayerIndex);
-        
+
         // Reset energy for the new player
         if (currentPlayer != null) {
             currentPlayer.setEnergy(200);
@@ -175,13 +178,16 @@ public class Game {
         }
         return currentPlayer.getUser().getUserName().equals(playerName);
     }
-    
+
     public org.example.Client.network.NetworkCommandSender getNetworkCommandSender() {
         return networkCommandSender;
     }
-    
+
     public void setNetworkCommandSender(org.example.Client.network.NetworkCommandSender networkCommandSender) {
         this.networkCommandSender = networkCommandSender;
     }
 
+    public void setNpcVillage(NPCvillage npcVillage) {
+        this.npcVillage = npcVillage;
+    }
 }

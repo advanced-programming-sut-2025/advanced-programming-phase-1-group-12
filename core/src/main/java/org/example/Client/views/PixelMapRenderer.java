@@ -1,8 +1,6 @@
 package org.example.Client.views;
 
-import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.example.Common.models.Assets.GameAssetManager;
 import org.example.Common.models.Assets.PlantAssetsManager;
@@ -17,7 +15,6 @@ import org.example.Common.models.enums.foraging.GiantPlant;
 import org.example.Common.models.enums.foraging.Stone;
 import org.example.Common.models.map;
 
-import java.awt.image.BufferedImage;
 import java.util.*;
 
 public class PixelMapRenderer {
@@ -210,7 +207,7 @@ public class PixelMapRenderer {
         for(Store store: App.getCurrentGame().getMainMap().getStores()) {
             Texture storeTexture = store.getStoreTexture();
 
-            LocationOfRectangle rect = store.getLocationOfRectangle();
+            LocationOfRectangle rect = store.getLocation();
             int tileSize = 100;
 
             int x = rect.getTopLeftCorner().getxAxis() * tileSize;

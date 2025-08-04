@@ -34,7 +34,7 @@ public enum FishDetails {
     private final int basePrice;
     private final Season season;
     private final boolean isLegendary;
-    private Texture texture;
+    private transient Texture texture;
 
     FishDetails(String name, int basePrice, Season season, boolean isLegendary, Texture texture) {
         this.name = name;

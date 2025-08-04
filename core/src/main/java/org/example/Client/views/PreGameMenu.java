@@ -11,8 +11,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Client.Main;
+import org.example.Server.controllers.MenusController.GameMenuController;
+import org.example.Common.saveGame.GameSaveManager;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Assets.GameAssetManager;
+import org.example.Common.models.Fundementals.Player;
 import org.example.Common.models.RelatedToUser.User;
 import java.util.*;
 import java.util.List;
@@ -194,7 +197,14 @@ public class PreGameMenu implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Load last game clicked!");
-                // TODO: Load game logic
+                // TODO: which id, every one should click?
+                App.setCurrentGame( GameSaveManager.loadGameCompressed("saves/1"));
+                List<String> playersList = new ArrayList<>();
+                for (Player name : App.getCurrentGame().getPlayers()) {
+                    playersList.add(name.getUser().getUserName());
+                }
+                GameMenuController controller = new GameMenuController();
+                controller.loadGame(playersList);
             }
         });
 

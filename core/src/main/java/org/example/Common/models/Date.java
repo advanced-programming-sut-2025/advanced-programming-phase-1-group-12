@@ -31,6 +31,8 @@ public class Date implements Runnable {
     private boolean threadRunning = true;
     private Thread timeThread;
 
+
+
     public Date() {
         timeThread = new Thread(this);
         timeThread.setDaemon(true);
@@ -461,7 +463,7 @@ public class Date implements Runnable {
 
     public ArrayList<Location> getGroundLocation(Farm farm) {
         ArrayList<Location> availableLocations = new ArrayList<>();
-        ArrayList<Location> allLocationOfFarm = getLocationsOfRectangle(farm.getFarmLocation());
+        ArrayList<Location> allLocationOfFarm = getLocationsOfRectangle(farm.getLocation());
         for (Location location : allLocationOfFarm) {
             if (location.getTypeOfTile().equals(TypeOfTile.GROUND)) {
                 availableLocations.add(location);
@@ -472,7 +474,7 @@ public class Date implements Runnable {
 
     public ArrayList<Location> getLocationForSeeding(Farm farm) {
         ArrayList<Location> availableLocations = new ArrayList<>();
-        ArrayList<Location> allLocationOfFarm = getLocationsOfRectangle(farm.getFarmLocation());
+        ArrayList<Location> allLocationOfFarm = getLocationsOfRectangle(farm.getLocation());
         for (Location location : allLocationOfFarm) {
             if (location.getTypeOfTile().equals(TypeOfTile.PLOUGHED_LAND)) {
                 availableLocations.add(location);
