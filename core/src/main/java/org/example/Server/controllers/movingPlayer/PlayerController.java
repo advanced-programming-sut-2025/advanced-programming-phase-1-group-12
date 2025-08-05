@@ -7,7 +7,10 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.google.gson.Gson;
 import org.example.Client.Main;
+import org.example.Common.models.Fundementals.Result;
+import org.example.Common.models.RelatedToUser.User;
 import org.example.Common.saveGame.GameSaveManager;
 import org.example.Server.controllers.MenusController.GameMenuController;
 import org.example.Common.models.Animal.FarmAnimals;
@@ -24,6 +27,7 @@ import org.example.Client.views.GameMenu;
 import org.example.Client.views.PlantMenuView;
 import org.example.Client.views.StoreMenuView;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -161,11 +165,16 @@ public class PlayerController {
         }
 
         if(Gdx.input.isKeyPressed(Input.Keys.B)) {
-//            GameMenu gameMenu = new GameMenu(players);
-//            Main.getMain().setScreen(gameMenu);
-//            gameMenu.craftingView();
-//            return;
-            GameSaveManager.saveGameCompressed(App.getCurrentGame(), "saves/"+App.getCurrentGame().getGameId());
+            GameMenu gameMenu = new GameMenu(players);
+            Main.getMain().setScreen(gameMenu);
+            gameMenu.craftingView();
+            return;
+        }
+
+        //TODO:sazande save mikone?!!!
+        if(Gdx.input.isKeyPressed(Input.Keys.Q)) {
+            quitGame();
+            return;
         }
         if(Gdx.input.isKeyPressed(Input.Keys.C)) {
             GameMenu gameMenu = new GameMenu(players);
@@ -397,6 +406,51 @@ public class PlayerController {
             case LEFT -> currentAnim = walkLeft;
             case RIGHT -> currentAnim = walkRight;
         }
+    }
+
+    public void quitGame(){
+        //if you are the creator:
+        if(App.getCurrentGame().getCurrentPlayer().getUser().getUserName().equals(App.getCurrentGame().getCreator().getUserName())) {
+            GameSaveManager.saveGameCompressed(App.getCurrentGame(), "saves/" + App.getCurrentGame().getGameId());
+            for(Player player1 : App.getCurrentGame().getPlayers()){
+                updateMoneyAndExperience(player1);
+            }
+        }
+    }
+
+    public void updateMoneyAndExperience(Player player) {
+        File file = new File(player.getUser().getUserName() + ".json");
+        if (!file.exists()) {
+            System.out.println("error opening file");
+            return;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            Gson gson = new Gson();
+            User user1 = gson.fromJson(reader, User.class);
+
+            user1.setNumberOfGames(player.getUser().getNumberOfGames() + 1);
+            player.getUser().setNumberOfGames(player.getUser().getNumberOfGames() + 1);
+
+
+
+                    // Only update if the current game was the best
+                    if (player.getMoney() > player.getUser().getMostMoneyInOneGame()) {
+                        player.getUser().setMostMoneyInOneGame(player.getMoney());
+                        user1.setMostMoneyInOneGame(player.getMoney());
+                    }
+            App.getUsers().clear();
+            App.getUsers().put(user1.getUserName(), player.getUser());
+
+            try (FileWriter writer = new FileWriter(player.getUser().getUserName() + ".json")) {
+                gson.toJson(user1, writer);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("error during file operation");
+        }
+
+        System.out.println("Money and experience updated successfully");
     }
 
 }

@@ -23,6 +23,8 @@ public class Game {
     @JsonIgnore
     private NPCvillage npcVillage;
 
+    private User creator;
+
     // Multiplayer turn-based system fields
     private boolean isMultiplayer = false;
     private int currentPlayerIndex = 0;
@@ -189,5 +191,13 @@ public class Game {
 
     public void setNpcVillage(NPCvillage npcVillage) {
         this.npcVillage = npcVillage;
+    }
+
+    public User getCreator() {
+        return creator;
+    }
+
+    public void setCreator(User creator) {
+        this.creator = creator;
     }
 }

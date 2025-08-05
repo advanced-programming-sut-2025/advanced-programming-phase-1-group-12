@@ -28,6 +28,10 @@ public class User {
 
     private transient long tokenExpiration;
 
+    private int mostMoneyInOneGame;
+
+    private int numberOfGames;
+
     public User() {}
 
     public User(ArrayList<Game> games, String userName, String nickname, String password, String email,
@@ -41,6 +45,9 @@ public class User {
         this.answerOfQuestionForSecurity = answerOfQuestionForSecurity;
         this.isFemale = isFemale;
         this.avatarPath = avatarPath;
+        //initial money:
+        this.mostMoneyInOneGame = 1_000_000;
+        this.numberOfGames = 0;
     }
 
     public String getToken() {
@@ -134,5 +141,21 @@ public class User {
 
     public void setFemale(boolean female) {
         isFemale = female;
+    }
+
+    public int getMostMoneyInOneGame() {
+        return mostMoneyInOneGame;
+    }
+
+    public void setMostMoneyInOneGame(int mostMoneyInOneGame) {
+        this.mostMoneyInOneGame = mostMoneyInOneGame;
+    }
+
+    public int getNumberOfGames() {
+        return numberOfGames;
+    }
+
+    public void setNumberOfGames(int numberOfGames) {
+        this.numberOfGames = numberOfGames;
     }
 }

@@ -79,6 +79,8 @@ public class ProfileMenu implements Screen {
         infoTable.add(new Label("Email: " + currentEmail, skin)).left().row();
         infoTable.add(new Label("Nickname: " + currentNickName, skin)).left().row();
         infoTable.add(new Label("Gender: " + gender, skin)).left().row();
+        infoTable.add(new Label("number of games done: " + App.getLoggedInUser().getNumberOfGames(), skin)).left().row();
+        infoTable.add(new Label("most money in one game: " + App.getLoggedInUser().getMostMoneyInOneGame(), skin)).left().row();
         infoTable.add(avatarImage).padTop(20).padBottom(20).row();
 
         Table inputTable = new Table();

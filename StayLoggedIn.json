@@ -1,10 +1,12 @@
 {
-  "userName": "FatiJooni",
-  "avatarPath": "",
+  "userName": "Fati",
+  "avatarPath": "portrait/jas.png",
   "nickname": "a",
-  "password": "5832659887beaa1633afde301641724756e93dd29f72ffa3be68a96053ab4f5c",
-  "email": "aaa@sss.com",
+  "password": "853815b9ec4506d2189ebdea074cf3555fdda60b361ff75de91f369c98480a3d",
+  "email": "ssss@dddd.com",
   "questionForSecurity": "",
   "answerOfQuestionForSecurity": "a",
-  "isFemale": true
+  "isFemale": true,
+  "mostMoneyInOneGame": 1000000,
+  "numberOfGames": 0
 }

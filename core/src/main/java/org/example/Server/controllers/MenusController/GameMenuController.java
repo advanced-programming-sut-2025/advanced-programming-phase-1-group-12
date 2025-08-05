@@ -322,6 +322,7 @@ public class GameMenuController {
     public void Play(List<String> usernames, Map<String, Integer> farmSelections) {
         Game newGame = App.getCurrentGame();
         App.setCurrentGame(newGame);
+        newGame.setCreator(App.getLoggedInUser());
 
         // Initialize singleton date manager for multiplayer synchronization
         DateManager.getInstance().reset(); // Reset any previous date
