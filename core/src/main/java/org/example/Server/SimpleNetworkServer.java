@@ -23,10 +23,11 @@ import io.javalin.websocket.WsContext;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import org.example.Server.network.GameWebSocketHandler;
 
 public class SimpleNetworkServer {
     private static final Logger logger = LoggerFactory.getLogger(SimpleNetworkServer.class);
-    
+
     private final int port;
     private Javalin app;
     private final Map<String, String> users = new ConcurrentHashMap<>();
@@ -35,11 +36,11 @@ public class SimpleNetworkServer {
     private final GameSessionManager gameSessionManager;
     private final GameStartManager gameStartManager;
     private boolean isRunning;
-    
+
     public SimpleNetworkServer() {
         this(8080);
     }
-    
+
     public SimpleNetworkServer(int port) {
         this.port = port;
         this.playerManager = PlayerManager.getInstance();
@@ -48,7 +49,7 @@ public class SimpleNetworkServer {
         this.gameStartManager = new GameStartManager(gameSessionManager);
         // No hardcoded users - users will register themselves
     }
-    
+
     public void start() {
         try {
             app = Javalin.create(config -> {
@@ -60,22 +61,22 @@ public class SimpleNetworkServer {
                     })
                 );
             });
-            
+
             setupRoutes();
-            
+
             app.start(port);
             isRunning = true;
             logger.info("SimpleNetworkServer started on port " + port);
-            
+
             // Start periodic cleanup task
             startCleanupTask();
-            
+
         } catch (Exception e) {
             logger.error("Failed to start server", e);
             throw new RuntimeException("Failed to start server", e);
         }
     }
-    
+
     private void startCleanupTask() {
         // Run cleanup every 30 seconds
         Timer cleanupTimer = new Timer();
@@ -85,10 +86,10 @@ public class SimpleNetworkServer {
                 try {
                     // Get connected players
                     Set<String> connectedPlayers = playerManager.getOnlineUsernames();
-                    
+
                     // Clean up disconnected players from lobbies
                     lobbyManager.cleanupDisconnectedPlayers(connectedPlayers);
-                    
+
                     logger.debug("Cleanup task completed - {} connected players", connectedPlayers.size());
                 } catch (Exception e) {
                     logger.error("Error in cleanup task", e);
@@ -96,7 +97,7 @@ public class SimpleNetworkServer {
             }
         }, 30000, 30000); // Start after 30 seconds, repeat every 30 seconds
     }
-    
+
     public void stop() {
         if (app != null) {
             app.stop();
@@ -104,20 +105,20 @@ public class SimpleNetworkServer {
         isRunning = false;
         logger.info("SimpleNetworkServer stopped");
     }
-    
+
     private void setupRoutes() {
         // Health check
         app.get("/health", ctx -> ctx.json(Map.of("status", "ok", "message", "Server is running")));
-        
+
         // Authentication routes
         app.post("/auth/login", this::handleLogin);
         app.post("/auth/register", this::handleRegister);
-        
+
         // Player management routes
         app.get("/api/players/online", this::handleGetOnlinePlayers);
         app.post("/api/players/connect", this::handlePlayerConnect);
         app.post("/api/players/disconnect", this::handlePlayerDisconnect);
-        
+
         // Lobby management routes
         app.post("/lobby/create", this::handleCreateLobby);
         app.post("/lobby/join", this::handleJoinLobby);
@@ -125,90 +126,36 @@ public class SimpleNetworkServer {
         app.get("/lobby/list", this::handleGetLobbyList);
         app.get("/lobby/{lobbyId}/info", this::handleGetLobbyInfo);
         app.post("/lobby/start", this::handleStartGame);
-        
+
         // Farm selection routes
         app.post("/lobby/select-farm", this::handleSelectFarm);
         app.get("/lobby/farm-selection-status", this::handleGetFarmSelectionStatus);
         app.post("/lobby/start-game-session", this::handleStartGameSession);
-        
+
         // Test routes
         app.get("/api/test", this::handleTest);
         app.post("/api/echo", this::handleEcho);
         app.post("/api/debug/clear-lobbies", this::handleClearLobbies);
         app.post("/api/debug/cleanup-lobbies", this::handleCleanupLobbies);
-        
+
         // Setup WebSocket
         setupWebSocket();
-        
+
         logger.info("API routes configured");
     }
-    
+
     private void setupWebSocket() {
+        GameWebSocketHandler gameWebSocketHandler = new GameWebSocketHandler(gameSessionManager);
+
         app.ws("/ws", ws -> {
-            ws.onConnect(this::onWebSocketConnect);
-            ws.onMessage(this::onWebSocketMessage);
-            ws.onClose(this::onWebSocketClose);
-            ws.onError(this::onWebSocketError);
+            ws.onConnect(gameWebSocketHandler::onConnect);
+            ws.onMessage(gameWebSocketHandler::onMessage);
+            ws.onClose(gameWebSocketHandler::onClose);
+            ws.onError(gameWebSocketHandler::onError);
         });
         logger.info("WebSocket handler configured at /ws");
     }
-    
-    private void onWebSocketConnect(WsContext ctx) throws Exception {
-        String connectionId = ctx.getSessionId();
-        String userId = ctx.queryParam("userId");
-        String token = ctx.queryParam("token");
-        String gameId = ctx.queryParam("gameId");
-        
-        logger.info("WebSocket connection established for user: {} (connection: {})", userId, connectionId);
-        
-        // Send connection confirmation
-        Map<String, Object> confirmMsg = new HashMap<>();
-        confirmMsg.put("type", "connection_established");
-        confirmMsg.put("message", "Connected successfully");
-        confirmMsg.put("userId", userId != null ? userId : "unknown");
-        confirmMsg.put("timestamp", System.currentTimeMillis());
-        
-        ctx.send(confirmMsg);
-    }
-    
-    private void onWebSocketMessage(WsContext ctx) throws Exception {
-        String connectionId = ctx.getSessionId();
-        
-        logger.debug("WebSocket message received from connection: {}", connectionId);
-        
-        // For now, just send a simple response
-        Map<String, Object> response = Map.of(
-            "type", "echo",
-            "message", "Message received",
-            "timestamp", System.currentTimeMillis()
-        );
-        ctx.send(response);
-    }
-    
-    private void onWebSocketClose(WsContext ctx) throws Exception {
-        String connectionId = ctx.getSessionId();
-        String userId = ctx.queryParam("userId");
-        
-        logger.info("WebSocket connection closed: {}", connectionId);
-        
-        // Clean up lobby state if user was in a lobby
-        if (userId != null && !userId.trim().isEmpty()) {
-            // Remove player from lobby if they were in one
-            if (lobbyManager.isPlayerInLobby(userId)) {
-                logger.info("Removing player {} from lobby due to WebSocket disconnect", userId);
-                lobbyManager.removePlayerFromLobby(userId);
-            }
-            
-            // Also disconnect from player manager
-            playerManager.playerDisconnectedByUsername(userId);
-        }
-    }
-    
-    private void onWebSocketError(WsContext ctx) throws Exception {
-        String connectionId = ctx.getSessionId();
-        logger.error("WebSocket error for connection: {}", connectionId);
-    }
-    
+
     private void handleLogin(Context ctx) {
         try {
             LoginRequest request = ctx.bodyAsClass(LoginRequest.class);
@@ -219,7 +166,7 @@ public class SimpleNetworkServer {
             ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
     }
-    
+
     private void handleRegister(Context ctx) {
         try {
             RegisterRequest request = ctx.bodyAsClass(RegisterRequest.class);
@@ -230,7 +177,7 @@ public class SimpleNetworkServer {
             ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
     }
-    
+
     private void handleTest(Context ctx) {
         ctx.json(Map.of(
             "message", "Server is working!",
@@ -238,7 +185,7 @@ public class SimpleNetworkServer {
             "port", port
         ));
     }
-    
+
     private void handleEcho(Context ctx) {
         try {
             Map<String, Object> request = ctx.bodyAsClass(Map.class);
@@ -248,7 +195,7 @@ public class SimpleNetworkServer {
             ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
     }
-    
+
     private void handleClearLobbies(Context ctx) {
         try {
             lobbyManager.clearAllLobbies();
@@ -258,7 +205,7 @@ public class SimpleNetworkServer {
             ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
     }
-    
+
     private void handleCleanupLobbies(Context ctx) {
         try {
             Set<String> connectedPlayers = playerManager.getOnlineUsernames();
@@ -269,106 +216,106 @@ public class SimpleNetworkServer {
             ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
     }
-    
+
     private NetworkResult<LoginResponse> handleLoginRequest(LoginRequest request) {
         try {
             if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
                 return NetworkResult.error("Username is required", 400);
             }
-            
+
             if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
                 return NetworkResult.error("Password is required", 400);
             }
-            
+
             String username = request.getUsername().trim();
             String password = request.getPassword();
-            
+
             // Check if user exists and password matches
             String storedPassword = users.get(username);
             if (storedPassword == null || !storedPassword.equals(password)) {
                 logger.warn("Login attempt failed for user: {}", username);
                 return NetworkResult.unauthorized("Invalid username or password");
             }
-            
+
             // Create a simple user response
             LoginResponse loginResponse = new LoginResponse();
             loginResponse.setToken("test-token-" + System.currentTimeMillis());
             loginResponse.setMessage("Login successful");
-            
+
             // Track player connection
             String sessionId = "session-" + System.currentTimeMillis();
             playerManager.playerConnected(username, sessionId);
-            
+
             logger.info("Login successful for user: {}", username);
             return NetworkResult.success("Login successful", loginResponse);
-            
+
         } catch (Exception e) {
             logger.error("Error processing login request", e);
             return NetworkResult.error("Internal server error", 500);
         }
     }
-    
+
     private NetworkResult<String> handleRegisterRequest(RegisterRequest request) {
         try {
             if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
                 return NetworkResult.error("Username is required", 400);
             }
-            
+
             if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
                 return NetworkResult.error("Password is required", 400);
             }
-            
+
             if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
                 return NetworkResult.error("Email is required", 400);
             }
-            
+
             String username = request.getUsername().trim();
             String password = request.getPassword();
             String email = request.getEmail().trim();
-            
+
             // Check if username already exists
             if (users.containsKey(username)) {
                 logger.warn("Registration attempt failed - username already exists: {}", username);
                 return NetworkResult.error("Username already exists", 409);
             }
-            
+
             // Add new user
             users.put(username, password);
-            
+
             logger.info("User registered successfully: {}", username);
             return NetworkResult.success("User registered successfully");
-            
+
         } catch (Exception e) {
             logger.error("Error processing registration request", e);
             return NetworkResult.error("Internal server error", 500);
         }
     }
-    
+
     private void handleGetOnlinePlayers(Context ctx) {
         try {
             Set<String> onlineUsernames = playerManager.getOnlineUsernames();
             List<OnlinePlayersResponse.PlayerInfo> playerInfos = new ArrayList<>();
-            
+
             for (String username : onlineUsernames) {
                 String lobbyId = lobbyManager.getPlayerLobby(username);
                 String lobbyName = null;
-                
+
                 if (lobbyId != null) {
                     Lobby lobby = lobbyManager.getLobby(lobbyId);
                     if (lobby != null) {
                         lobbyName = lobby.getName();
                     }
                 }
-                
+
                 playerInfos.add(new OnlinePlayersResponse.PlayerInfo(
-                    username, 
-                    "Online", 
+                    username,
+                    "Online",
                     System.currentTimeMillis(),
                     lobbyName,
                     lobbyId
                 ));
             }
-            
+
             OnlinePlayersResponse response = new OnlinePlayersResponse();
             response.setPlayers(playerInfos);
             ctx.json(NetworkResult.success("Online players retrieved", response));
@@ -377,37 +324,37 @@ public class SimpleNetworkServer {
             ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
     }
-    
+
     private void handlePlayerConnect(Context ctx) {
         try {
             Map<String, String> request = ctx.bodyAsClass(Map.class);
             String username = request.get("username");
             String sessionId = request.get("sessionId");
-            
+
             if (username == null || username.trim().isEmpty()) {
                 ctx.status(400).json(NetworkResult.error("Username is required"));
                 return;
             }
-            
+
             if (sessionId == null || sessionId.trim().isEmpty()) {
                 sessionId = "session-" + System.currentTimeMillis();
             }
-            
+
             playerManager.playerConnected(username, sessionId);
             ctx.json(NetworkResult.success("Player connected successfully"));
-            
+
         } catch (Exception e) {
             logger.error("Error handling player connect", e);
             ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
     }
-    
+
     private void handlePlayerDisconnect(Context ctx) {
         try {
             Map<String, String> request = ctx.bodyAsClass(Map.class);
             String sessionId = request.get("sessionId");
             String username = request.get("username");
-            
+
             if (sessionId != null && !sessionId.trim().isEmpty()) {
                 playerManager.playerDisconnected(sessionId);
             } else if (username != null && !username.trim().isEmpty()) {
@@ -418,22 +365,22 @@ public class SimpleNetworkServer {
                 ctx.status(400).json(NetworkResult.error("Session ID or username is required"));
                 return;
             }
-            
+
             ctx.json(NetworkResult.success("Player disconnected successfully"));
-            
+
         } catch (Exception e) {
             logger.error("Error handling player disconnect", e);
             ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
     }
-    
+
     // Lobby management handlers
     private void handleCreateLobby(Context ctx) {
         try {
             CreateLobbyRequest request = ctx.bodyAsClass(CreateLobbyRequest.class);
-            
+
             logger.info("Received lobby creation request: {}", request);
-            
+
             // Extract username from request
             String username = request.getUsername();
             if (username == null || username.trim().isEmpty()) {
@@ -441,23 +388,23 @@ public class SimpleNetworkServer {
                 ctx.status(400).json(NetworkResult.error("Username is required"));
                 return;
             }
-            
+
             if (request.getName() == null || request.getName().trim().isEmpty()) {
                 logger.warn("Lobby name is null or empty");
                 ctx.status(400).json(NetworkResult.error("Lobby name is required"));
                 return;
             }
-            
+
             // Check if player is already in a lobby
             if (lobbyManager.isPlayerInLobby(username)) {
                 logger.warn("Player {} is already in a lobby", username);
                 ctx.status(400).json(NetworkResult.error("Player is already in a lobby"));
                 return;
             }
-            
-            logger.info("Creating lobby with name: {}, admin: {}, private: {}, visible: {}", 
+
+            logger.info("Creating lobby with name: {}, admin: {}, private: {}, visible: {}",
                 request.getName().trim(), username, request.isPrivate(), request.isVisible());
-            
+
             Lobby lobby = lobbyManager.createLobby(
                 request.getName().trim(),
                 username,
@@ -465,7 +412,7 @@ public class SimpleNetworkServer {
                 request.getPassword(),
                 request.isVisible()
             );
-            
+
             if (lobby != null) {
                 LobbyInfo lobbyInfo = new LobbyInfo(lobby);
                 LobbyResponse response = new LobbyResponse(
@@ -484,30 +431,30 @@ public class SimpleNetworkServer {
             ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
     }
-    
+
     private void handleJoinLobby(Context ctx) {
         try {
             JoinLobbyRequest request = ctx.bodyAsClass(JoinLobbyRequest.class);
-            
+
             // Extract username from request
             String username = request.getUsername();
             if (username == null || username.trim().isEmpty()) {
                 ctx.status(400).json(NetworkResult.error("Username is required"));
                 return;
             }
-            
+
             if (request.getLobbyId() == null || request.getLobbyId().trim().isEmpty()) {
                 ctx.status(400).json(NetworkResult.error("Lobby ID is required"));
                 return;
             }
-            
+
             if (lobbyManager.isPlayerInLobby(username)) {
                 ctx.status(400).json(NetworkResult.error("Player is already in a lobby"));
                 return;
             }
-            
+
             boolean joined = lobbyManager.joinLobby(request.getLobbyId(), username, request.getPassword());
-            
+
             if (joined) {
                 Lobby lobby = lobbyManager.getLobby(request.getLobbyId());
                 LobbyResponse response = new LobbyResponse(
@@ -519,43 +466,43 @@ public class SimpleNetworkServer {
             } else {
                 ctx.status(400).json(NetworkResult.error("Failed to join lobby"));
             }
-            
+
         } catch (Exception e) {
             logger.error("Error joining lobby", e);
             ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
     }
-    
+
     private void handleLeaveLobby(Context ctx) {
         try {
             LeaveLobbyRequest request = ctx.bodyAsClass(LeaveLobbyRequest.class);
-            
+
             // Extract username from request
             String username = request.getUsername();
             if (username == null || username.trim().isEmpty()) {
                 ctx.status(400).json(NetworkResult.error("Username is required"));
                 return;
             }
-            
+
             if (request.getLobbyId() == null || request.getLobbyId().trim().isEmpty()) {
                 ctx.status(400).json(NetworkResult.error("Lobby ID is required"));
                 return;
             }
-            
+
             boolean left = lobbyManager.leaveLobby(username);
-            
+
             if (left) {
                 ctx.json(NetworkResult.success("Left lobby successfully"));
             } else {
                 ctx.status(400).json(NetworkResult.error("Failed to leave lobby"));
             }
-            
+
         } catch (Exception e) {
             logger.error("Error leaving lobby", e);
             ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
     }
-    
+
     private void handleGetLobbyList(Context ctx) {
         try {
             List<LobbyInfo> lobbies = lobbyManager.getVisibleLobbies();
@@ -566,48 +513,48 @@ public class SimpleNetworkServer {
             ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
     }
-    
+
     private void handleGetLobbyInfo(Context ctx) {
         try {
             String lobbyId = ctx.pathParam("lobbyId");
-            
+
             if (lobbyId == null || lobbyId.trim().isEmpty()) {
                 ctx.status(400).json(NetworkResult.error("Lobby ID is required"));
                 return;
             }
-            
+
             LobbyInfo lobbyInfo = lobbyManager.getLobbyInfo(lobbyId);
-            
+
             if (lobbyInfo != null) {
                 ctx.json(NetworkResult.success("Lobby info retrieved", lobbyInfo));
             } else {
                 ctx.status(404).json(NetworkResult.error("Lobby not found"));
             }
-            
+
         } catch (Exception e) {
             logger.error("Error getting lobby info", e);
             ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
     }
-    
+
     private void handleStartGame(Context ctx) {
         try {
             StartGameRequest request = ctx.bodyAsClass(StartGameRequest.class);
-            
+
             // Extract username from request
             String username = request.getUsername();
             if (username == null || username.trim().isEmpty()) {
                 ctx.status(400).json(NetworkResult.error("Username is required"));
                 return;
             }
-            
+
             if (request.getLobbyId() == null || request.getLobbyId().trim().isEmpty()) {
                 ctx.status(400).json(NetworkResult.error("Lobby ID is required"));
                 return;
             }
-            
+
             boolean started = lobbyManager.startGame(request.getLobbyId(), username);
-            
+
             if (started) {
                 // Get lobby info to create farm selection session
                 Lobby lobby = lobbyManager.getLobby(request.getLobbyId());
@@ -615,7 +562,7 @@ public class SimpleNetworkServer {
                     List<String> playerNames = new ArrayList<>(lobby.getPlayers());
                     NetworkResult<String> sessionResult = gameStartManager.createFarmSelectionSession(
                         request.getLobbyId(), playerNames);
-                    
+
                     if (sessionResult.isSuccess()) {
                         ctx.json(NetworkResult.success("Game started successfully - proceed to farm selection"));
                     } else {
@@ -627,102 +574,102 @@ public class SimpleNetworkServer {
             } else {
                 ctx.status(400).json(NetworkResult.error("Failed to start game"));
             }
-            
+
         } catch (Exception e) {
             logger.error("Error starting game", e);
             ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
     }
-    
-    public boolean isRunning() { 
-        return isRunning; 
+
+    public boolean isRunning() {
+        return isRunning;
     }
-    
-    public int getPort() { 
-        return port; 
+
+    public int getPort() {
+        return port;
     }
-    
+
     private void handleSelectFarm(Context ctx) {
         try {
             SelectFarmRequest request = ctx.bodyAsClass(SelectFarmRequest.class);
-            
+
             // Validate request
             if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
                 ctx.status(400).json(NetworkResult.error("Username is required"));
                 return;
             }
-            
+
             if (request.getLobbyId() == null || request.getLobbyId().trim().isEmpty()) {
                 ctx.status(400).json(NetworkResult.error("Lobby ID is required"));
                 return;
             }
-            
+
             NetworkResult<String> result = gameStartManager.selectFarm(request);
-            
+
             if (result.isSuccess()) {
                 ctx.json(result);
             } else {
                 ctx.status(400).json(result);
             }
-            
+
         } catch (Exception e) {
             logger.error("Error selecting farm", e);
             ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
     }
-    
+
     private void handleGetFarmSelectionStatus(Context ctx) {
         try {
             String lobbyId = ctx.queryParam("lobbyId");
-            
+
             if (lobbyId == null || lobbyId.trim().isEmpty()) {
                 ctx.status(400).json(NetworkResult.error("Lobby ID is required"));
                 return;
             }
-            
+
             NetworkResult<FarmSelectionStatusResponse> result = gameStartManager.getFarmSelectionStatus(lobbyId);
-            
+
             if (result.isSuccess()) {
                 ctx.json(result);
             } else {
                 ctx.status(400).json(result);
             }
-            
+
         } catch (Exception e) {
             logger.error("Error getting farm selection status", e);
             ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
     }
-    
+
     private void handleStartGameSession(Context ctx) {
         try {
             @SuppressWarnings("unchecked")
             Map<String, String> request = ctx.bodyAsClass(Map.class);
             String lobbyId = request.get("lobbyId");
-            
+
             if (lobbyId == null || lobbyId.trim().isEmpty()) {
                 ctx.status(400).json(NetworkResult.error("Lobby ID is required"));
                 return;
             }
-            
+
             NetworkResult<String> result = gameStartManager.startGameFromSession(lobbyId);
-            
+
             if (result.isSuccess()) {
                 ctx.json(result);
             } else {
                 ctx.status(400).json(result);
             }
-            
+
         } catch (Exception e) {
             logger.error("Error starting game session", e);
             ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
     }
-    
+
     public static void main(String[] args) {
         SimpleNetworkServer server = new SimpleNetworkServer();
         server.start();
-        
+
         // Keep the server running
         try {
             Thread.sleep(Long.MAX_VALUE);
@@ -732,4 +679,4 @@ public class SimpleNetworkServer {
             server.stop();
         }
     }
-} 
+}

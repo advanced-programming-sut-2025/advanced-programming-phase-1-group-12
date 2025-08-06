@@ -139,11 +139,25 @@ public class GameMenu extends InputAdapter implements Screen {
             artisanController);
 
     public GameMenu(List<String> players) {
+        this(players, null);
+    }
+
+    public GameMenu(List<String> players, String serverGameId) {
         this.players = players;
 
         // Set current player to the logged-in user for individual farm view
         setCurrentPlayerToLoggedInUser();
         errorLabel = new Label("", skin);
+
+        // Store server game ID for WebSocket initialization
+        if (serverGameId != null) {
+            System.out.println("DEBUG: GameMenu created with server game ID: " + serverGameId);
+            // Store the server game ID in the NetworkCommandSender if available
+            if (App.getCurrentGame() != null && App.getCurrentGame().getNetworkCommandSender() != null) {
+                App.getCurrentGame().getNetworkCommandSender().setCurrentGameId(serverGameId);
+                System.out.println("DEBUG: Set server game ID in NetworkCommandSender: " + serverGameId);
+            }
+        }
     }
 
 
@@ -255,7 +269,7 @@ public class GameMenu extends InputAdapter implements Screen {
         System.out.println("DEBUG: Parsed energy update data - playerId: " + playerId + ", currentEnergy: " + currentEnergy + ", maxEnergy: " + maxEnergy + ", status: " + energyStatus);
 
         logger.debug("Handling energy update: playerId={}, currentEnergy={}, maxEnergy={}, status={}",
-                   playerId, currentEnergy, maxEnergy, energyStatus);
+            playerId, currentEnergy, maxEnergy, energyStatus);
 
         if (playerId != null && currentEnergy != null && maxEnergy != null) {
             // Find the player and update their energy
@@ -285,7 +299,7 @@ public class GameMenu extends InputAdapter implements Screen {
         } else {
             System.out.println("DEBUG: Invalid energy update data - playerId: " + playerId + ", currentEnergy: " + currentEnergy + ", maxEnergy: " + maxEnergy);
             logger.warn("Invalid energy update data: playerId={}, currentEnergy={}, maxEnergy={}",
-                       playerId, currentEnergy, maxEnergy);
+                playerId, currentEnergy, maxEnergy);
         }
     }
 
@@ -2339,7 +2353,24 @@ public class GameMenu extends InputAdapter implements Screen {
         try {
             if (App.getLoggedInUser() != null && App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
                 String userId = App.getLoggedInUser().getUserName();
-                String gameId = String.valueOf(App.getCurrentGame().getGameId()); // Convert int to String
+
+                // Use server game ID if available, otherwise fall back to local game ID
+                String gameId;
+                if (App.getCurrentGame().getNetworkCommandSender() != null) {
+                    String serverGameId = App.getCurrentGame().getNetworkCommandSender().getCurrentGameId();
+                    System.out.println("DEBUG: NetworkCommandSender exists, server game ID: " + serverGameId);
+                    if (serverGameId != null) {
+                        gameId = serverGameId;
+                        System.out.println("DEBUG: Using server game ID for WebSocket: " + gameId);
+                    } else {
+                        gameId = String.valueOf(App.getCurrentGame().getGameId());
+                        System.out.println("DEBUG: Server game ID not available, using local game ID: " + gameId);
+                    }
+                } else {
+                    gameId = String.valueOf(App.getCurrentGame().getGameId());
+                    System.out.println("DEBUG: No NetworkCommandSender, using local game ID: " + gameId);
+                }
+
                 String serverUrl = "http://localhost:8080"; // Configure based on your server
 
                 logger.info("Initializing WebSocket client for multiplayer game: userId={}, gameId={}", userId, gameId);
@@ -2654,13 +2685,13 @@ public class GameMenu extends InputAdapter implements Screen {
             if (!unlocked) {
                 cook.getLabel().setColor(Color.GRAY);
             }
-                cook.addListener(new ClickListener() {
-                    @Override
-                    public void clicked(InputEvent event, float x, float y) {
-                        System.out.println(cook.getLabel().toString());
-                        showError(controller.prepare(cook.getText().toString()).getMessage());
-                    }
-                });
+            cook.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    System.out.println(cook.getLabel().toString());
+                    showError(controller.prepare(cook.getText().toString()).getMessage());
+                }
+            });
 
             table.row();
             table.add(textureImage).width(48).height(48).padRight(10);
@@ -3297,7 +3328,7 @@ public class GameMenu extends InputAdapter implements Screen {
         showNotification(result.getMessage(), result.isSuccessful());
     }
 
-        private void performFlower(String targetUsername) {
+    private void performFlower(String targetUsername) {
         Player currentPlayer = App.getCurrentPlayerLazy();
         Player targetPlayer = App.getCurrentGame().getPlayerByName(targetUsername);
 
@@ -3308,7 +3339,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Check if players are adjacent
         float distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - targetPlayer.getUserLocation().getxAxis()) +
-                        Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
+            Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
         if (distance > 2) {
             showNotification("Players must be adjacent to give flowers!", false);
             return;
@@ -3540,7 +3571,7 @@ public class GameMenu extends InputAdapter implements Screen {
         for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
             if (!otherPlayer.equals(currentPlayer)) {
                 int distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - otherPlayer.getUserLocation().getxAxis()) +
-                             Math.abs(currentPlayer.getUserLocation().getyAxis() - otherPlayer.getUserLocation().getyAxis());
+                    Math.abs(currentPlayer.getUserLocation().getyAxis() - otherPlayer.getUserLocation().getyAxis());
 
                 if (distance <= 2) {
                     // Draw a subtle indicator around nearby players
@@ -3916,7 +3947,7 @@ public class GameMenu extends InputAdapter implements Screen {
         }
 
         float distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - targetPlayer.getUserLocation().getxAxis()) +
-                        Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
+            Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
 
         if (distance > 2) {
             showNotification("Players must be adjacent to hug!", false);
@@ -4011,7 +4042,7 @@ public class GameMenu extends InputAdapter implements Screen {
         }
 
         float distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - targetPlayer.getUserLocation().getxAxis()) +
-                        Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
+            Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
 
         if (distance > 2) {
             showNotification("Players must be adjacent to propose marriage!", false);
@@ -4118,7 +4149,7 @@ public class GameMenu extends InputAdapter implements Screen {
         }
 
         float distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - targetPlayer.getUserLocation().getxAxis()) +
-                        Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
+            Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
 
         if (distance > 2) {
             showNotification("Players must be adjacent to give flowers!", false);
@@ -4461,7 +4492,7 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
-        private void renderHugAnimation(SpriteBatch batch) {
+    private void renderHugAnimation(SpriteBatch batch) {
         if (waitingForNotificationClose) {
             return;
         }
@@ -4488,9 +4519,9 @@ public class GameMenu extends InputAdapter implements Screen {
             batch.draw(smileTextures[currentSmileFrame], centerX - smileWidth/2, centerY + 100f, smileWidth, smileHeight);
         } else {
             System.out.println("DEBUG: Cannot render smile texture - smileTextures: " + (smileTextures != null) +
-                             ", currentSmileFrame: " + currentSmileFrame +
-                             ", texture at frame: " + (smileTextures != null && currentSmileFrame >= 0 && currentSmileFrame < smileTextures.length ?
-                                 (smileTextures[currentSmileFrame] != null ? "not null" : "null") : "invalid index"));
+                ", currentSmileFrame: " + currentSmileFrame +
+                ", texture at frame: " + (smileTextures != null && currentSmileFrame >= 0 && currentSmileFrame < smileTextures.length ?
+                (smileTextures[currentSmileFrame] != null ? "not null" : "null") : "invalid index"));
         }
 
         // Render heart animation
@@ -4513,7 +4544,7 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
-        private void renderFlowerAnimation(SpriteBatch batch) {
+    private void renderFlowerAnimation(SpriteBatch batch) {
         if (waitingForFlowerNotificationClose) {
             return;
         }
@@ -4545,9 +4576,9 @@ public class GameMenu extends InputAdapter implements Screen {
             batch.draw(smileTextures[currentSmileFrame], centerX - smileWidth/2, centerY + 100f, smileWidth, smileHeight);
         } else {
             System.out.println("DEBUG: Cannot render smile texture for flower animation - smileTextures: " + (smileTextures != null) +
-                             ", currentSmileFrame: " + currentSmileFrame +
-                             ", texture at frame: " + (smileTextures != null && currentSmileFrame >= 0 && currentSmileFrame < smileTextures.length ?
-                                 (smileTextures[currentSmileFrame] != null ? "not null" : "null") : "invalid index"));
+                ", currentSmileFrame: " + currentSmileFrame +
+                ", texture at frame: " + (smileTextures != null && currentSmileFrame >= 0 && currentSmileFrame < smileTextures.length ?
+                (smileTextures[currentSmileFrame] != null ? "not null" : "null") : "invalid index"));
         }
 
         if (flowerAnimationActive && flowerTexture != null) {
@@ -4602,9 +4633,9 @@ public class GameMenu extends InputAdapter implements Screen {
             batch.draw(heartEmojiTextures[currentHeartEmojiFrame], centerX - heartEmojiWidth/2, centerY + 100f, heartEmojiWidth, heartEmojiHeight);
         } else {
             System.out.println("DEBUG: Cannot render heart emoji texture for ring animation - heartEmojiTextures: " + (heartEmojiTextures != null) +
-                             ", currentHeartEmojiFrame: " + currentHeartEmojiFrame +
-                             ", texture at frame: " + (heartEmojiTextures != null && currentHeartEmojiFrame >= 0 && currentHeartEmojiFrame < heartEmojiTextures.length ?
-                                 (heartEmojiTextures[currentHeartEmojiFrame] != null ? "not null" : "null") : "invalid index"));
+                ", currentHeartEmojiFrame: " + currentHeartEmojiFrame +
+                ", texture at frame: " + (heartEmojiTextures != null && currentHeartEmojiFrame >= 0 && currentHeartEmojiFrame < heartEmojiTextures.length ?
+                (heartEmojiTextures[currentHeartEmojiFrame] != null ? "not null" : "null") : "invalid index"));
         }
 
         if (ringAnimationActive && ringTexture != null) {

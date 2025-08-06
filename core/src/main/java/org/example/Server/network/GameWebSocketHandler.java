@@ -2,6 +2,7 @@ package org.example.Server.network;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.websocket.*;
+import org.example.Common.models.Fundementals.Player;
 import org.example.Common.network.GameProtocol;
 import org.example.Common.network.events.*;
 import org.slf4j.Logger;
@@ -37,15 +38,19 @@ public class GameWebSocketHandler {
             String token = ctx.queryParam("token");
             String gameId = ctx.queryParam("gameId");
 
-            if (userId == null || token == null) {
-                logger.warn("WebSocket connection attempt without proper authentication");
-                ctx.send("Authentication required");
+            if (userId == null) {
+                logger.warn("WebSocket connection attempt without userId");
+                ctx.send("Authentication required - userId is required");
                 ctx.session.close();
                 return;
             }
 
-            // TODO: Validate token using AuthenticationHandler
-            // For now, we'll accept the connection
+            // For development, we'll accept connections with just userId
+            // TODO: Implement proper token validation in production
+            if (token == null) {
+                logger.warn("WebSocket connection without token for user: {} (development mode)", userId);
+                // Don't close the connection, just log a warning
+            }
 
             // Store connection mapping
             userConnections.put(userId, ctx);
@@ -114,6 +119,11 @@ public class GameWebSocketHandler {
                 case GameProtocol.WS_ENERGY_UPDATE:
                     System.out.println("DEBUG: Handling energy update");
                     handleEnergyUpdate(ctx, userId, messageData);
+                    break;
+
+                case GameProtocol.WS_MOVEMENT_NOTIFICATION:
+                    System.out.println("DEBUG: Handling movement notification");
+                    handleMovementNotification(ctx, userId, messageData);
                     break;
 
                 case "ping":
@@ -194,7 +204,15 @@ public class GameWebSocketHandler {
 
     private void handleChatMessage(WsContext ctx, String userId, Map<String, Object> messageData) {
         try {
-            String gameId = (String) messageData.get("gameId");
+            // Handle gameId as either String or Integer
+            Object gameIdObj = messageData.get("gameId");
+            String gameId = null;
+            if (gameIdObj instanceof String) {
+                gameId = (String) gameIdObj;
+            } else if (gameIdObj instanceof Integer) {
+                gameId = gameIdObj.toString();
+            }
+
             String message = (String) messageData.get("message");
             String chatType = (String) messageData.getOrDefault("chatType", "public");
 
@@ -228,7 +246,15 @@ public class GameWebSocketHandler {
 
     private void handlePlayerMovement(WsContext ctx, String userId, Map<String, Object> messageData) {
         try {
-            String gameId = (String) messageData.get("gameId");
+            // Handle gameId as either String or Integer
+            Object gameIdObj = messageData.get("gameId");
+            String gameId = null;
+            if (gameIdObj instanceof String) {
+                gameId = (String) gameIdObj;
+            } else if (gameIdObj instanceof Integer) {
+                gameId = gameIdObj.toString();
+            }
+
             Object xObj = messageData.get("x");
             Object yObj = messageData.get("y");
             String direction = (String) messageData.get("direction");
@@ -286,7 +312,15 @@ public class GameWebSocketHandler {
             System.out.println("DEBUG: Server received energy update message from userId: " + userId);
             System.out.println("DEBUG: Message data: " + messageData);
 
-            String gameId = (String) messageData.get("gameId");
+            // Handle gameId as either String or Integer
+            Object gameIdObj = messageData.get("gameId");
+            String gameId = null;
+            if (gameIdObj instanceof String) {
+                gameId = (String) gameIdObj;
+            } else if (gameIdObj instanceof Integer) {
+                gameId = gameIdObj.toString();
+            }
+
             String playerId = (String) messageData.get("playerId");
             Integer currentEnergy = (Integer) messageData.get("currentEnergy");
             Integer maxEnergy = (Integer) messageData.get("maxEnergy");
@@ -325,6 +359,75 @@ public class GameWebSocketHandler {
             logger.error("Error handling energy update", e);
             sendError(ctx, "Failed to process energy update");
             e.printStackTrace();
+        }
+    }
+
+    private void handleMovementNotification(WsContext ctx, String userId, Map<String, Object> messageData) {
+        try {
+            System.out.println("DEBUG: Server received movement notification from userId: " + userId);
+            System.out.println("DEBUG: Message data: " + messageData);
+
+            // Extract the game ID from the user's current game
+            String gameId = sessionManager.getPlayerGameId(userId);
+            if (gameId == null) {
+                sendError(ctx, "User not in a game");
+                return;
+            }
+
+            GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            if (gameInstance == null) {
+                sendError(ctx, "Game not found");
+                return;
+            }
+
+            if (!gameInstance.isPlayerConnected(userId)) {
+                sendError(ctx, "You are not connected to this game");
+                return;
+            }
+
+            // The messageData should contain username as key and position as value
+            // Find the username key (should be the only key that's not a standard field)
+            String username = null;
+            Integer posX = null;
+
+            for (Map.Entry<String, Object> entry : messageData.entrySet()) {
+                String key = entry.getKey();
+                System.out.println("DEBUG: Checking key: " + key + " with value: " + entry.getValue());
+                // Skip standard WebSocket message fields
+                if (!key.equals("type") && !key.equals("gameId") && !key.equals("playerId") &&
+                    !key.equals("timestamp") && !key.equals("x") && !key.equals("y") &&
+                    !key.equals("direction")) {
+                    username = key;
+                    posX = (Integer) entry.getValue();
+                    System.out.println("DEBUG: Found username: " + username + " with posX: " + posX);
+                    break;
+                }
+            }
+
+            if (username == null || posX == null) {
+                System.out.println("DEBUG: Invalid movement notification format - username: " + username + ", posX: " + posX);
+                sendError(ctx, "Invalid movement notification format");
+                return;
+            }
+
+            // Get the player's current Y position from the game
+            Player player = gameInstance.getPlayer(username);
+            int posY = 0; // Default Y position
+            if (player != null) {
+                posY = player.getUserLocation().getyAxis();
+            }
+
+            // Create and broadcast movement notification event
+            MovementNotificationEvent moveEvent = new MovementNotificationEvent(gameId, username, username, posX, posY, "UNKNOWN");
+            broadcastToGame(gameId, moveEvent);
+
+            System.out.println("DEBUG: Movement notification broadcasted for " + username + " in game " + gameId + ": (" + posX + ", " + posY + ")");
+            logger.debug("Movement notification from {} in game {}: ({}, {})", username, gameId, posX, posY);
+
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error handling movement notification: " + e.getMessage());
+            logger.error("Error handling movement notification", e);
+            sendError(ctx, "Failed to process movement notification");
         }
     }
 
@@ -375,7 +478,15 @@ public class GameWebSocketHandler {
 
     private void handleGameStateUpdate(WsContext ctx, String userId, Map<String, Object> messageData) {
         try {
-            String gameId = (String) messageData.get("gameId");
+            // Handle gameId as either String or Integer
+            Object gameIdObj = messageData.get("gameId");
+            String gameId = null;
+            if (gameIdObj instanceof String) {
+                gameId = (String) gameIdObj;
+            } else if (gameIdObj instanceof Integer) {
+                gameId = gameIdObj.toString();
+            }
+
             String updateType = (String) messageData.get("updateType");
             Map<String, Object> data = (Map<String, Object>) messageData.get("data");
 

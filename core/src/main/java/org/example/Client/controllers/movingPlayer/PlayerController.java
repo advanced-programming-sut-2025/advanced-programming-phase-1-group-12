@@ -274,25 +274,24 @@ public class PlayerController {
                 System.out.println("DEBUG: Player " + player.getUser().getUserName() + " moving UP, reducing energy from " + player.getEnergy() + " to " + newEnergy);
                 player.setEnergy(newEnergy);
 
-                // Send movement and energy updates to server in multiplayer
+                // Send movement notification to server
                 if (App.getCurrentGame().isMultiplayer()) {
-                    // Send movement update
-                    Map<String, Object> movementData = new HashMap<>();
-                    movementData.put("type", "player_movement");
-                    movementData.put("gameId", App.getCurrentGame().getGameId());
-                    movementData.put("x", newX);
-                    movementData.put("y", newY);
-                    movementData.put("direction", "UP");
-                    App.getWebSocketClient().send(movementData);
+                    System.out.println("DEBUG: Attempting to send movement notification for player: " + player.getUser().getUserName());
+                    System.out.println("DEBUG: WebSocket client exists: " + (App.getWebSocketClient() != null));
+                    System.out.println("DEBUG: Current game is multiplayer: " + App.getCurrentGame().isMultiplayer());
 
-                    // Send energy update
-                    Map<String, Object> energyData = new HashMap<>();
-                    energyData.put("type", "energy_update");
-                    energyData.put("gameId", App.getCurrentGame().getGameId());
-                    energyData.put("playerId", player.getUser().getUserName());
-                    energyData.put("currentEnergy", newEnergy);
-                    energyData.put("maxEnergy", 200);
-                    App.getWebSocketClient().send(energyData);
+                    if (App.getWebSocketClient() != null) {
+                        Map<String, Object> movementNotification = new HashMap<>();
+                        movementNotification.put("type", "movement_notification");
+                        movementNotification.put(player.getUser().getUserName(), newX);
+                        System.out.println("DEBUG: Sending movement notification: " + movementNotification);
+                        App.getWebSocketClient().send(movementNotification);
+                        System.out.println("DEBUG: Sent movement notification: " + player.getUser().getUserName() + " : " + newX);
+                    } else {
+                        System.out.println("DEBUG: WebSocket client is null, cannot send movement notification");
+                    }
+                } else {
+                    System.out.println("DEBUG: Game is not multiplayer, skipping movement notification");
                 }
 
                 movementTimer = 0f;
@@ -313,24 +312,22 @@ public class PlayerController {
                 System.out.println("DEBUG: Player " + player.getUser().getUserName() + " moving DOWN, reducing energy from " + player.getEnergy() + " to " + newEnergy);
                 player.setEnergy(newEnergy);
 
+                // Send movement notification to server
                 if (App.getCurrentGame().isMultiplayer()) {
-                    // Send movement update
-                    Map<String, Object> movementData = new HashMap<>();
-                    movementData.put("type", "player_movement");
-                    movementData.put("gameId", App.getCurrentGame().getGameId());
-                    movementData.put("x", newX);
-                    movementData.put("y", newY);
-                    movementData.put("direction", "DOWN");
-                    App.getWebSocketClient().send(movementData);
+                    System.out.println("DEBUG: Attempting to send movement notification for player: " + player.getUser().getUserName());
+                    System.out.println("DEBUG: WebSocket client exists: " + (App.getWebSocketClient() != null));
 
-                    // Send energy update
-                    Map<String, Object> energyData = new HashMap<>();
-                    energyData.put("type", "energy_update");
-                    energyData.put("gameId", App.getCurrentGame().getGameId());
-                    energyData.put("playerId", player.getUser().getUserName());
-                    energyData.put("currentEnergy", newEnergy);
-                    energyData.put("maxEnergy", 200);
-                    App.getWebSocketClient().send(energyData);
+                    if (App.getWebSocketClient() != null) {
+                        Map<String, Object> movementNotification = new HashMap<>();
+                        movementNotification.put("type", "movement_notification");
+                        movementNotification.put(player.getUser().getUserName(), newX);
+                        App.getWebSocketClient().send(movementNotification);
+                        System.out.println("DEBUG: Sent movement notification: " + player.getUser().getUserName() + " : " + newX);
+                    } else {
+                        System.out.println("DEBUG: WebSocket client is null, cannot send movement notification");
+                    }
+                } else {
+                    System.out.println("DEBUG: Game is not multiplayer, skipping movement notification");
                 }
 
                 movementTimer = 0f;
@@ -351,25 +348,22 @@ public class PlayerController {
                 System.out.println("DEBUG: Player " + player.getUser().getUserName() + " moving LEFT, reducing energy from " + player.getEnergy() + " to " + newEnergy);
                 player.setEnergy(newEnergy);
 
-                // Send movement and energy updates to server in multiplayer
+                // Send movement notification to server
                 if (App.getCurrentGame().isMultiplayer()) {
-                    // Send movement update
-                    Map<String, Object> movementData = new HashMap<>();
-                    movementData.put("type", "player_movement");
-                    movementData.put("gameId", App.getCurrentGame().getGameId());
-                    movementData.put("x", newX);
-                    movementData.put("y", newY);
-                    movementData.put("direction", "LEFT");
-                    App.getWebSocketClient().send(movementData);
+                    System.out.println("DEBUG: Attempting to send movement notification for player: " + player.getUser().getUserName());
+                    System.out.println("DEBUG: WebSocket client exists: " + (App.getWebSocketClient() != null));
 
-                    // Send energy update
-                    Map<String, Object> energyData = new HashMap<>();
-                    energyData.put("type", "energy_update");
-                    energyData.put("gameId", App.getCurrentGame().getGameId());
-                    energyData.put("playerId", player.getUser().getUserName());
-                    energyData.put("currentEnergy", newEnergy);
-                    energyData.put("maxEnergy", 200);
-                    App.getWebSocketClient().send(energyData);
+                    if (App.getWebSocketClient() != null) {
+                        Map<String, Object> movementNotification = new HashMap<>();
+                        movementNotification.put("type", "movement_notification");
+                        movementNotification.put(player.getUser().getUserName(), newX);
+                        App.getWebSocketClient().send(movementNotification);
+                        System.out.println("DEBUG: Sent movement notification: " + player.getUser().getUserName() + " : " + newX);
+                    } else {
+                        System.out.println("DEBUG: WebSocket client is null, cannot send movement notification");
+                    }
+                } else {
+                    System.out.println("DEBUG: Game is not multiplayer, skipping movement notification");
                 }
 
                 // Reset movement timer for cooldown
@@ -392,25 +386,22 @@ public class PlayerController {
                 System.out.println("DEBUG: Player " + player.getUser().getUserName() + " moving RIGHT, reducing energy from " + player.getEnergy() + " to " + newEnergy);
                 player.setEnergy(newEnergy);
 
-                // Send movement and energy updates to server in multiplayer
+                // Send movement notification to server
                 if (App.getCurrentGame().isMultiplayer()) {
-                    // Send movement update
-                    Map<String, Object> movementData = new HashMap<>();
-                    movementData.put("type", "player_movement");
-                    movementData.put("gameId", App.getCurrentGame().getGameId());
-                    movementData.put("x", newX);
-                    movementData.put("y", newY);
-                    movementData.put("direction", "RIGHT");
-                    App.getWebSocketClient().send(movementData);
+                    System.out.println("DEBUG: Attempting to send movement notification for player: " + player.getUser().getUserName());
+                    System.out.println("DEBUG: WebSocket client exists: " + (App.getWebSocketClient() != null));
 
-                    // Send energy update
-                    Map<String, Object> energyData = new HashMap<>();
-                    energyData.put("type", "energy_update");
-                    energyData.put("gameId", App.getCurrentGame().getGameId());
-                    energyData.put("playerId", player.getUser().getUserName());
-                    energyData.put("currentEnergy", newEnergy);
-                    energyData.put("maxEnergy", 200);
-                    App.getWebSocketClient().send(energyData);
+                    if (App.getWebSocketClient() != null) {
+                        Map<String, Object> movementNotification = new HashMap<>();
+                        movementNotification.put("type", "movement_notification");
+                        movementNotification.put(player.getUser().getUserName(), newX);
+                        App.getWebSocketClient().send(movementNotification);
+                        System.out.println("DEBUG: Sent movement notification: " + player.getUser().getUserName() + " : " + newX);
+                    } else {
+                        System.out.println("DEBUG: WebSocket client is null, cannot send movement notification");
+                    }
+                } else {
+                    System.out.println("DEBUG: Game is not multiplayer, skipping movement notification");
                 }
 
                 // Reset movement timer for cooldown
@@ -489,8 +480,8 @@ public class PlayerController {
             return false;
 
         return (location.getTypeOfTile() == TypeOfTile.GROUND || location.getTypeOfTile() == TypeOfTile.BARN
-        || location.getTypeOfTile() == TypeOfTile.COOP || location.getTypeOfTile() == TypeOfTile.STORE
-        || location.getTypeOfTile() == TypeOfTile.NPC_VILLAGE || location.getTypeOfTile() == TypeOfTile.NPC_HOUSE);
+            || location.getTypeOfTile() == TypeOfTile.COOP || location.getTypeOfTile() == TypeOfTile.STORE
+            || location.getTypeOfTile() == TypeOfTile.NPC_VILLAGE || location.getTypeOfTile() == TypeOfTile.NPC_HOUSE);
     }
 
     public GameMenuController getGameController() {

@@ -7,7 +7,6 @@ import org.example.Common.network.GameProtocol;
 import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.CreateGameRequest;
 import org.example.Common.network.responses.GameStateResponse;
-import org.example.Server.controllers.MenusController.GameMenuController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,13 +73,19 @@ public class GameSessionManager {
 
     public NetworkResult<GameStateResponse> createGame(String creatorId, CreateGameRequest request) {
         try {
+            System.out.println("DEBUG: createGame called with creatorId: " + creatorId);
+            System.out.println("DEBUG: Request usernames: " + request.getUsernames());
+            System.out.println("DEBUG: Request farm selections: " + request.getFarmSelections());
+
             // Validate request
             if (request.getUsernames() == null || request.getUsernames().isEmpty()) {
+                System.out.println("DEBUG: No players specified");
                 return NetworkResult.error("No players specified");
             }
 
             if (request.getUsernames().size() < GameProtocol.MIN_PLAYERS_PER_GAME ||
                 request.getUsernames().size() > GameProtocol.MAX_PLAYERS_PER_GAME) {
+                System.out.println("DEBUG: Invalid number of players: " + request.getUsernames().size());
                 return NetworkResult.error("Invalid number of players. Must be between " +
                     GameProtocol.MIN_PLAYERS_PER_GAME + " and " + GameProtocol.MAX_PLAYERS_PER_GAME);
             }
@@ -88,12 +93,14 @@ public class GameSessionManager {
             // Check if any players are already in a game
             for (String username : request.getUsernames()) {
                 if (playerToGameMapping.containsKey(username)) {
+                    System.out.println("DEBUG: Player " + username + " is already in a game");
                     return NetworkResult.error("Player " + username + " is already in a game");
                 }
             }
 
             // Generate unique game ID
             String gameId = UUID.randomUUID().toString();
+            System.out.println("DEBUG: Generated game ID: " + gameId);
 
             // Use synchronized block to ensure thread-safe game creation
             synchronized (this) {
@@ -108,10 +115,12 @@ public class GameSessionManager {
 
                 // Add game to active games first
                 activeGames.put(gameId, gameInstance);
+                System.out.println("DEBUG: Added game to active games. Total active games: " + activeGames.size());
 
                 // Then add players to mapping
                 for (String username : request.getUsernames()) {
                     playerToGameMapping.put(username, gameId);
+                    System.out.println("DEBUG: Mapped player " + username + " to game " + gameId);
                 }
 
                 logger.info("Game created with ID: {} for {} players", gameId, request.getUsernames().size());
@@ -122,9 +131,11 @@ public class GameSessionManager {
             GameStateResponse response = new GameStateResponse(gameId, null,
                 request.getUsernames(), null);
 
+            System.out.println("DEBUG: Returning success response with game ID: " + gameId);
             return NetworkResult.success("Game session created successfully", response);
 
         } catch (Exception e) {
+            System.out.println("DEBUG: Exception in createGame: " + e.getMessage());
             logger.error("Error creating game", e);
             return NetworkResult.error("Failed to create game: " + e.getMessage());
         }
@@ -259,7 +270,11 @@ public class GameSessionManager {
     }
 
     public GameInstance getGameInstance(String gameId) {
-        return activeGames.get(gameId);
+        System.out.println("DEBUG: getGameInstance called with gameId: " + gameId);
+        System.out.println("DEBUG: Available game IDs: " + activeGames.keySet());
+        GameInstance instance = activeGames.get(gameId);
+        System.out.println("DEBUG: Found game instance: " + (instance != null));
+        return instance;
     }
 
     public String getPlayerGameId(String playerId) {
