@@ -18,7 +18,6 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Common.models.*;
-import org.example.Common.models.Date;
 import org.example.Client.Main;
 import org.example.Common.models.enums.Animal;
 import org.example.Common.models.enums.foraging.Plant;
@@ -49,11 +48,9 @@ import org.example.Common.models.enums.Types.Cooking;
 import org.example.Common.models.enums.Types.CraftingRecipe;
 import org.example.Common.models.enums.Weather;
 import org.example.Common.models.RelationShips.RelationShip;
-import org.example.Common.models.RelationShips.Gift;
 import org.example.Client.network.GameWebSocketClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.badlogic.gdx.input.GestureDetector;
 
 public class GameMenu extends InputAdapter implements Screen {
     private static final Logger logger = LoggerFactory.getLogger(GameMenu.class);
@@ -125,6 +122,10 @@ public class GameMenu extends InputAdapter implements Screen {
 
     private float foodEffect = 0f;
     public static boolean foodEaten = false;
+    //petting
+    private boolean animalGotPetted = false;
+    private float animalGotPettedTime = 0f;
+    private FarmAnimals animalPetted;
 
     private float giftCheckTimer = 0f;
     private final float GIFT_CHECK_INTERVAL = 10f; // Check every 10 seconds
@@ -857,6 +858,23 @@ public class GameMenu extends InputAdapter implements Screen {
                 batch.draw(animal.getTexture(), renderX, renderY);
             }
         }
+        if(animalGotPetted){
+            animalGotPettedTime += delta;
+
+            float heartX = animalPetted.getPosition().getxAxis() * 100f;
+            float heartY = (animalPetted.getPosition().getyAxis() + 1) * 100f;
+
+            Texture heart = GameAssetManager.getGameAssetManager().heartTexture;
+            float heartWidth = 64f;
+            float heartHeight = 64f;
+
+            batch.draw(heart, heartX, heartY, heartWidth, heartHeight);
+
+            if (animalGotPettedTime > 2f) {
+                animalGotPetted = false;
+                animalGotPettedTime = 0f;
+            }
+        }
         renderClockHand();
 
         checkForNewGifts();
@@ -1358,7 +1376,12 @@ public class GameMenu extends InputAdapter implements Screen {
         petButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                showError(animalController.pet(animal.getName()).getMessage());
+                Result result = animalController.pet(animal.getName());
+                showError(result.getMessage());
+                if(result.isSuccessful()) {
+                    animalGotPetted = true;
+                    animalPetted = animal;
+                }
             }
         });
         feedButton.addListener(new ClickListener() {
@@ -2668,9 +2691,9 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
-    public void refrigratorMenu() {
+    public void refrigeratorMenu() {
         Skin skin = GameAssetManager.skin;
-        Dialog dialog = new Dialog("Your inventory items and trash can", skin);
+        Dialog dialog = new Dialog("Your refrigerator items and trash can", skin);
 
         Player player = App.getCurrentGame().getCurrentPlayer();
         Refrigrator fridge = player.getRefrigrator();
@@ -2698,7 +2721,7 @@ public class GameMenu extends InputAdapter implements Screen {
                 Result result = gameMenuController.refrigerator("put" ,nameOfDeletingItem.getText());
                 showError(result.getMessage());
                 dialog.hide(); // Instead of recursively calling menu, close and reopen
-                refrigratorMenu();
+                refrigeratorMenu();
             }
         });
         TextButton pick = new TextButton("pick(move to inventory)", skin);
@@ -2710,7 +2733,7 @@ public class GameMenu extends InputAdapter implements Screen {
                 Result result = gameMenuController.refrigerator("pick" ,nameOfDeletingItem.getText());
                 showError(result.getMessage());
                 dialog.hide(); // Instead of recursively calling menu, close and reopen
-                refrigratorMenu();
+                refrigeratorMenu();
             }
         });
 

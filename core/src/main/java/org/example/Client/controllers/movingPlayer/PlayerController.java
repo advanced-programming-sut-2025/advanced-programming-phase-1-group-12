@@ -223,7 +223,7 @@ public class PlayerController {
             if(location.equals(App.getCurrentPlayerLazy().getRefrigrator().getLocation())) {
                 GameMenu gameMenu = new GameMenu(players);
                 Main.getMain().setScreen(gameMenu);
-                gameMenu.refrigratorMenu();
+                gameMenu.refrigeratorMenu();
             }
 
             for(FarmAnimals animals: App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()) {

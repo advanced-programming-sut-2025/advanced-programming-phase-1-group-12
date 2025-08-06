@@ -9,7 +9,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.google.gson.Gson;
 import org.example.Client.Main;
-import org.example.Common.models.Fundementals.Result;
 import org.example.Common.models.RelatedToUser.User;
 import org.example.Common.saveGame.GameSaveManager;
 import org.example.Server.controllers.MenusController.GameMenuController;
@@ -217,7 +216,7 @@ public class PlayerController {
             if(location.equals(App.getCurrentPlayerLazy().getRefrigrator().getLocation())) {
                 GameMenu gameMenu = new GameMenu(players);
                 Main.getMain().setScreen(gameMenu);
-                gameMenu.refrigratorMenu();
+                gameMenu.refrigeratorMenu();
             }
 
             for(FarmAnimals animals: App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()) {
