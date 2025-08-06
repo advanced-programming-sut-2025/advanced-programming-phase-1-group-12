@@ -1,6 +1,6 @@
 package org.example.Common.models.ToolsPackage.ToolEnums;
 
-import org.example.Server.controllers.StoreController;
+import org.example.Client.controllers.StoreController;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Fundementals.Result;
 import org.example.Common.models.ToolsPackage.ToolFunction;

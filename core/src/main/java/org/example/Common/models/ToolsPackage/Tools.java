@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import org.example.Client.views.GameMenu;
 import org.example.Common.models.Assets.ToolAssetsManager;
-import org.example.Server.controllers.ToolsController;
+import org.example.Client.controllers.ToolsController;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Fundementals.Location;
 import org.example.Common.models.Fundementals.Result;

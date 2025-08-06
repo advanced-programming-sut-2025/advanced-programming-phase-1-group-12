@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.ArrayList;
-import org.example.Server.controllers.MenusController.GameMenuController;
+import org.example.Client.controllers.MenusController.GameMenuController;
 
 public class MultiplayerFarmSelectionMenu implements Screen {
     private static final Logger logger = LoggerFactory.getLogger(MultiplayerFarmSelectionMenu.class);

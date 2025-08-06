@@ -6,8 +6,8 @@ import org.example.Common.models.Fundementals.Result;
 import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.WalkRequest;
 import org.example.Common.network.events.GameStateUpdateEvent;
-import org.example.Server.controllers.MenusController.GameMenuController;
-import org.example.Server.controllers.movingPlayer.UserLocationController;
+import org.example.Client.controllers.MenusController.GameMenuController;
+import org.example.Client.controllers.movingPlayer.UserLocationController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.javalin.websocket.WsContext;
@@ -219,7 +219,7 @@ public class GameInstance {
             }
             
             // Use existing farming controller logic
-            org.example.Server.controllers.FarmingController farmingController = new org.example.Server.controllers.FarmingController();
+            org.example.Client.controllers.FarmingController farmingController = new org.example.Client.controllers.FarmingController();
             // TODO: Implement proper plant method with Location parameter
             Result plantResult = new Result(false, "Plant action not implemented yet");
             
@@ -240,7 +240,7 @@ public class GameInstance {
             }
             
             // Use existing farming controller logic
-            org.example.Server.controllers.FarmingController farmingController = new org.example.Server.controllers.FarmingController();
+            org.example.Client.controllers.FarmingController farmingController = new org.example.Client.controllers.FarmingController();
             // TODO: Implement watering method
             Result waterResult = new Result(false, "Watering action not implemented yet");
             
@@ -261,7 +261,7 @@ public class GameInstance {
             }
             
             // Use existing farming controller logic
-            org.example.Server.controllers.FarmingController farmingController = new org.example.Server.controllers.FarmingController();
+            org.example.Client.controllers.FarmingController farmingController = new org.example.Client.controllers.FarmingController();
             // TODO: Implement reaping method
             Result harvestResult = new Result(false, "Harvest action not implemented yet");
             
@@ -282,7 +282,7 @@ public class GameInstance {
             }
             
             // Use existing store controller logic
-            org.example.Server.controllers.StoreController storeController = new org.example.Server.controllers.StoreController();
+            org.example.Client.controllers.StoreController storeController = new org.example.Client.controllers.StoreController();
             Result buyResult = storeController.buyProduct(null, itemName, quantity); // Store will be determined by location
             
             return NetworkResult.fromResult(buyResult);
@@ -323,7 +323,7 @@ public class GameInstance {
             }
             
             // Use existing trade controller logic
-            org.example.Server.controllers.TradeController tradeController = new org.example.Server.controllers.TradeController();
+            org.example.Client.controllers.TradeController tradeController = new org.example.Client.controllers.TradeController();
             Player requester = players.get(playerId);
             Player target = game.getPlayerByName(targetPlayer);
             
@@ -353,7 +353,7 @@ public class GameInstance {
             }
             
             // Use existing trade controller logic
-            org.example.Server.controllers.TradeController tradeController = new org.example.Server.controllers.TradeController();
+            org.example.Client.controllers.TradeController tradeController = new org.example.Client.controllers.TradeController();
             org.example.Common.models.RelationShips.Trade trade = tradeController.getTradeById(tradeId);
             
             if (trade == null) {
@@ -379,7 +379,7 @@ public class GameInstance {
     private NetworkResult<String> handleTradeListAction(String playerId) {
         try {
             // Use existing trade controller logic
-            org.example.Server.controllers.TradeController tradeController = new org.example.Server.controllers.TradeController();
+            org.example.Client.controllers.TradeController tradeController = new org.example.Client.controllers.TradeController();
             Player player = players.get(playerId);
             
             if (player == null) {

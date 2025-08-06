@@ -11,7 +11,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Client.Main;
-import org.example.Server.controllers.MenusController.GameMenuController;
+import org.example.Client.controllers.MenusController.GameMenuController;
 import org.example.Common.saveGame.GameSaveManager;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Assets.GameAssetManager;

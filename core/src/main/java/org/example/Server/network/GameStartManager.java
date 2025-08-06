@@ -7,7 +7,7 @@ import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.CreateGameRequest;
 import org.example.Common.network.requests.SelectFarmRequest;
 import org.example.Common.network.responses.FarmSelectionStatusResponse;
-import org.example.Server.controllers.MenusController.GameMenuController;
+import org.example.Client.controllers.MenusController.GameMenuController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

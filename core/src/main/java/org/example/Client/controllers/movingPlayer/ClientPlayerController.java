@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 import org.example.Common.models.Fundementals.Player;
-import org.example.Server.controllers.movingPlayer.PlayerController;
+import org.example.Client.controllers.movingPlayer.PlayerController;
 import org.example.Client.controllers.MenusController.GameMenuController;
 import org.example.Client.network.NetworkCommandSender;
 import org.example.Client.Main;

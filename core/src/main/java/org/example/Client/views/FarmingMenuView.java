@@ -8,7 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Client.Main;
-import org.example.Server.controllers.FarmingController;
+import org.example.Client.controllers.FarmingController;
 import org.example.Common.models.Assets.GameAssetManager;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Fundementals.Location;

@@ -1,6 +1,6 @@
 package org.example.Server.controllers.movingPlayer;
 
-import org.example.Server.controllers.MenusController.GameMenuController;
+import org.example.Client.controllers.MenusController.GameMenuController;
 import org.example.Server.network.GameSessionManager;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Fundementals.Location;

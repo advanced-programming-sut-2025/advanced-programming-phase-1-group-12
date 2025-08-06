@@ -1554,4 +1554,19 @@ public class GameMenuController {
             }
         }
     }
+
+    public void PlayNetworkMultiplayer(List<String> usernames, Map<String, Integer> farmSelections) {
+        // Initialize the game with network multiplayer functionality
+        Play(usernames, farmSelections);
+    }
+
+    public void loadGame(List<String> playersList) {
+        // Load game functionality - this method was in the Server version
+        // For now, we'll just initialize the game with the loaded players
+        Map<String, Integer> farmSelections = new HashMap<>();
+        for (int i = 0; i < playersList.size(); i++) {
+            farmSelections.put(playersList.get(i), i + 1); // Assign farm numbers sequentially
+        }
+        Play(playersList, farmSelections);
+    }
 }

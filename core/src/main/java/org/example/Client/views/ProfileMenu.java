@@ -10,7 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Client.Main;
-import org.example.Server.controllers.MenusController.ProfileMenuController;
+import org.example.Client.controllers.MenusController.ProfileMenuController;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Assets.GameAssetManager;
 public class ProfileMenu implements Screen {

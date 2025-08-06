@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.example.Common.models.*;
-import org.example.Server.controllers.movingPlayer.PlayerController;
+import org.example.Client.controllers.movingPlayer.PlayerController;
 import org.example.Common.models.NPC.NPC;
 import org.example.Common.models.Place.Farm;
 import org.example.Common.models.ProductsPackage.ArtisanItem;

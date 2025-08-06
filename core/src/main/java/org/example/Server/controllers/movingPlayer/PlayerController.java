@@ -12,7 +12,7 @@ import org.example.Client.Main;
 import org.example.Common.models.Fundementals.Result;
 import org.example.Common.models.RelatedToUser.User;
 import org.example.Common.saveGame.GameSaveManager;
-import org.example.Server.controllers.MenusController.GameMenuController;
+import org.example.Client.controllers.MenusController.GameMenuController;
 import org.example.Common.models.Animal.FarmAnimals;
 import org.example.Common.models.Craft;
 import org.example.Common.models.Fundementals.App;
