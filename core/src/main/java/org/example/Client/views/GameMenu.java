@@ -122,10 +122,14 @@ public class GameMenu extends InputAdapter implements Screen {
 
     private float foodEffect = 0f;
     public static boolean foodEaten = false;
-    //petting
+    //animals
     private boolean animalGotPetted = false;
     private float animalGotPettedTime = 0f;
     private FarmAnimals animalPetted;
+
+    private boolean animalGotFed = false;
+    private float animalGotFedTime = 0f;
+    private FarmAnimals animalFed;
 
     private float giftCheckTimer = 0f;
     private final float GIFT_CHECK_INTERVAL = 10f; // Check every 10 seconds
@@ -875,6 +879,23 @@ public class GameMenu extends InputAdapter implements Screen {
                 animalGotPettedTime = 0f;
             }
         }
+        if(animalGotFed){
+            animalGotFedTime += delta;
+
+            float heartX = (animalFed.getPosition().getxAxis() + 1) * 100f;
+            float heartY =  animalFed.getPosition().getyAxis()  * 100f;
+
+            Texture food = GameAssetManager.getGameAssetManager().animalFood;
+            float heartWidth = 64f;
+            float heartHeight = 64f;
+
+            batch.draw(food, heartX, heartY, heartWidth, heartHeight);
+
+            if (animalGotFedTime > 2f) {
+                animalGotFed = false;
+                animalGotFedTime = 0f;
+            }
+        }
         renderClockHand();
 
         checkForNewGifts();
@@ -1357,6 +1378,13 @@ public class GameMenu extends InputAdapter implements Screen {
         shepherdXField.setMessageText("X position");
         TextField shepherdYField = new TextField("", skin);
         shepherdYField.setMessageText("Y position");
+        Label unGatheredFoods = new Label("", skin);
+        AnimalController controller = new AnimalController();
+        if(animal.isWillProduceToday()) {
+            unGatheredFoods.setText("not gathered products: " + controller.whatWillProduceToday(animal.getAnimal(), animal));
+        } else{
+            unGatheredFoods.setText("no not gathered products");
+        }
 
         errorLabel.setColor(1, 0, 0, 1);
         errorLabel.setVisible(false);
@@ -1387,7 +1415,12 @@ public class GameMenu extends InputAdapter implements Screen {
         feedButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                showError(animalController.feedHay(animal.getName()).getMessage());
+                Result result = animalController.feedHay(animal.getName());
+                showError(result.getMessage());
+                if(result.isSuccessful()) {
+                    animalGotFed = true;
+                    animalFed = animal;
+                }
             }
         });
         gatherProducts.addListener(new ClickListener() {
@@ -1434,6 +1467,7 @@ public class GameMenu extends InputAdapter implements Screen {
         content.add(new Label("Shepherd Y:", skin)).pad(5).width(400f);
         content.add(shepherdYField).pad(5).width(400f).row();
         content.add(shepherdButton).colspan(2).pad(5).width(400f).row();
+        content.add(unGatheredFoods).colspan(2).pad(5).width(400f).row();
         content.add(errorLabel).colspan(2).pad(10).width(600f).row();
 
         dialog.button(closeButton);
