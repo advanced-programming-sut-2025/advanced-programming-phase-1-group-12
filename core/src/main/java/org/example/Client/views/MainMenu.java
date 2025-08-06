@@ -9,8 +9,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.google.gson.Gson;
 import org.example.Client.Main;
 import org.example.Common.models.Assets.GameAssetManager;
+import org.example.Common.models.Fundementals.App;
+import org.example.Common.models.RelatedToUser.User;
+
+import java.io.*;
 
 public class MainMenu implements Screen {
     private Skin skin = GameAssetManager.getSkin();
@@ -35,6 +40,18 @@ public class MainMenu implements Screen {
         this.multiplayerButton = new TextButton("Multiplayer", skin);
         this.serverManagementButton = new TextButton("Server Management", skin);
         setScale();
+        File file = new File(App.getLoggedInUser().getUserName() + ".json");
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            Gson gson = new Gson();
+            User user = gson.fromJson(reader, User.class);
+            App.setLoggedInUser(user);
+            App.getUsers().clear();
+            App.getUsers().put(user.getUserName(), user);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.Common.models.*;
 import org.example.Common.models.DateManager;
 import org.example.Common.models.Fundementals.*;
+import org.example.Common.models.RelatedToUser.Ability;
 import org.example.Common.models.enums.Animal;
 import org.example.Common.models.enums.Season;
 import org.example.Common.models.enums.Weather;
@@ -1098,20 +1099,29 @@ public class GameMenuController {
         if (foodToEat != null && artisanItem == null) {
             player.getBackPack().decreaseItem(foodToEat, 1);
             player.increaseEnergy(foodToEat.getFoodType().getEnergy());
-            if (!foodToEat.getFoodType().getBuffer().isEmpty()) {
-                player.setEnergy(300); // for 5 hours
+            if (foodToEat.getFoodType().getBuffer().isEmpty()) {
+            //    player.setEnergy(300); // for 5 hours
+
             }
-            if(foodToEat.getFoodType().isEnergyBuff()){
+            else if(foodToEat.getFoodType().isEnergyBuff()){
                 App.getCurrentPlayerLazy().setMaxEnergyBuffEaten(true);
-                App.getCurrentGame().getCurrentPlayer().increaseEnergy(10000);
+                App.getCurrentPlayerLazy().setEnergyUnlimited(true);
             } else {
-                App.getCurrentPlayerLazy().setSkillBuffEaten(true);
-                App.getCurrentGame().getCurrentPlayer().getAbilityByName("Farming").setLevel(
-                    App.getCurrentGame().getCurrentPlayer().getAbilityByName("Farming").getLevel() + 1
-                );
+                Random random = new Random();
+                int randomInt = random.nextInt(2);
+                if(randomInt == 0){
+                    App.getCurrentPlayerLazy().setFarmingBuffEaten(true);
+                    Ability ability = App.getCurrentPlayerLazy().getAbilityByName("Farming");
+                    ability.setLevel(ability.getLevel() + 1);
+                }
+                else{
+                    App.getCurrentPlayerLazy().setFishingBuffEaten(true);
+                    Ability ability = App.getCurrentPlayerLazy().getAbilityByName("Fishing");
+                    ability.setLevel(ability.getLevel() + 1);
+                }
             }
             GameMenu.foodEaten = true;
-            return new Result(true, "eaten food!" + foodToEat.getFoodType().getName()+ " buffer: "+ foodToEat.getFoodType().getBuffer());
+            return new Result(true, "eaten food!" + foodToEat.getFoodType().getName());
         } else if (artisanItem != null && foodToEat == null) {
             player.getBackPack().decreaseItem(artisanItem, 1);
             player.increaseEnergy(artisanItem.getEnergy());

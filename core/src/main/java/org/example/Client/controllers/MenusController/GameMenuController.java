@@ -1045,10 +1045,14 @@ public class GameMenuController {
                 App.getCurrentPlayerLazy().setMaxEnergyBuffEaten(true);
                 App.getCurrentGame().getCurrentPlayer().increaseEnergy(10000);
             } else {
-                App.getCurrentPlayerLazy().setSkillBuffEaten(true);
-                App.getCurrentGame().getCurrentPlayer().getAbilityByName("Farming").setLevel(
-                    App.getCurrentGame().getCurrentPlayer().getAbilityByName("Farming").getLevel() + 1
-                );
+                Random random = new Random();
+                int randomInt = random.nextInt(2);
+                if(randomInt == 0){
+                    App.getCurrentPlayerLazy().setFarmingBuffEaten(true);
+                }
+                else{
+                    App.getCurrentPlayerLazy().setFishingBuffEaten(true);
+                }
             }
             GameMenu.foodEaten = true;
             return new Result(true, "eaten food!" + foodToEat.getFoodType().getName()+ " buffer: "+ foodToEat.getFoodType().getBuffer());

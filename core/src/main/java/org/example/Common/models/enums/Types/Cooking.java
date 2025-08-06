@@ -10,7 +10,7 @@ public enum Cooking {
     FriedEgg(
         "Fried Egg Recipe",
         Map.of("Egg", 1),
-        "",
+        "Farming (5 hours)",
         "Starter",
         35,
         50,
@@ -22,7 +22,7 @@ public enum Cooking {
     BakedFish(
         "Baked Fish Recipe",
         Map.of("Sardine", 1, "Salmon", 1, "Wheat Flour", 1),
-        "",
+        "Fishing (5 hours)",
         "Starter",
         100,
         75,
@@ -118,7 +118,7 @@ public enum Cooking {
     Cookie(
         "Cookie Recipe",
         Map.of("Wheat Flour", 1, "Sugar", 1, "Egg", 1),
-        "",
+        "Farming (5 hours)",
         "Stardrop Saloon",
         140,
         90,

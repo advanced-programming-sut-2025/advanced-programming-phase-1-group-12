@@ -57,7 +57,8 @@ public class Player {
     private Date rejectDate;
     private int shippingMoney;
     private boolean isMaxEnergyBuffEaten = false;
-    private boolean isSkillBuffEaten = false;
+    private boolean isFishingBuffEaten = false;
+    private boolean isFarmingBuffEaten = false;
     @JsonIgnore
     private PlayerController playerController;
     @JsonIgnore
@@ -133,6 +134,9 @@ public class Player {
 
 
     public void setEnergy(int energy) {
+        if(isEnergyUnlimited && energy < 200){
+            return;
+        }
         System.out.println("DEBUG: setEnergy called for player " + this.getUser().getUserName() + " with energy: " + energy);
         setEnergyInternal(energy);
 
@@ -437,12 +441,20 @@ public class Player {
         isMaxEnergyBuffEaten = maxEnergyBuffEaten;
     }
 
-    public boolean isSkillBuffEaten() {
-        return isSkillBuffEaten;
+    public boolean isFishingBuffEaten() {
+        return isFishingBuffEaten;
     }
 
-    public void setSkillBuffEaten(boolean skillBuffEaten) {
-        isSkillBuffEaten = skillBuffEaten;
+    public void setFishingBuffEaten(boolean fishingBuffEaten) {
+        isFishingBuffEaten = fishingBuffEaten;
+    }
+
+    public boolean isFarmingBuffEaten() {
+        return isFarmingBuffEaten;
+    }
+
+    public void setFarmingBuffEaten(boolean farmingBuffEaten) {
+        isFarmingBuffEaten = farmingBuffEaten;
     }
 
     @JsonIgnore

@@ -137,6 +137,11 @@ public class GameAssetManager {
     public final Texture heartTexture = new Texture("NPC/RelationShip/Heart.png");
     public final Texture animalFood = new Texture("Tools/Hay_Hopper_Full.png");
 
+    //buffs
+    public final Texture fishingBuff = new Texture("Buff/Fishing_Skill_Icon.png");
+    public final Texture farmingBuff = new Texture("Buff/Farming_Skill_Icon.png");
+    public final Texture maxEnergyBuff = new Texture("Buff/Max_Energy_Buff.png");
+
     public Texture getHeartTexture() {
         return heartTexture;
     }

@@ -10,6 +10,7 @@ import org.example.Common.models.Place.Farm;
 import org.example.Common.models.Place.Store;
 import org.example.Common.models.ProductsPackage.ArtisanItem;
 import org.example.Common.models.ProductsPackage.StoreProducts;
+import org.example.Common.models.RelatedToUser.Ability;
 import org.example.Common.models.enums.Season;
 import org.example.Common.models.enums.Types.CraftingRecipe;
 import org.example.Common.models.enums.foraging.*;
@@ -364,12 +365,18 @@ public class Date implements Runnable {
 
     public void buffUpdates(){
         if(App.getCurrentPlayerLazy().isMaxEnergyBuffEaten()){
-            App.getCurrentPlayerLazy().setEnergy(200);
+            App.getCurrentPlayerLazy().setEnergyUnlimited(false);
             App.getCurrentPlayerLazy().setMaxEnergyBuffEaten(false);
         }
-        if(App.getCurrentPlayerLazy().isSkillBuffEaten()){
-            App.getCurrentPlayerLazy().getAbilityByName("Farming").increaseAmount(10);
-            App.getCurrentPlayerLazy().setSkillBuffEaten(false);
+        if(App.getCurrentPlayerLazy().isFarmingBuffEaten()){
+            Ability ability = App.getCurrentPlayerLazy().getAbilityByName("Farming");
+            ability.setLevel(ability.getLevel() - 1);
+            App.getCurrentPlayerLazy().setFarmingBuffEaten(false);
+        }
+        if(App.getCurrentPlayerLazy().isFishingBuffEaten()){
+            Ability ability = App.getCurrentPlayerLazy().getAbilityByName("Fishing");
+            ability.setLevel(ability.getLevel() - 1);
+            App.getCurrentPlayerLazy().setFishingBuffEaten(false);
         }
     }
 

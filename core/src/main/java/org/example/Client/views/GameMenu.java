@@ -897,6 +897,7 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
         renderClockHand();
+        renderBuffIcons();
 
         checkForNewGifts();
 
@@ -1379,6 +1380,10 @@ public class GameMenu extends InputAdapter implements Screen {
         TextField shepherdYField = new TextField("", skin);
         shepherdYField.setMessageText("Y position");
         Label unGatheredFoods = new Label("", skin);
+        Label friendShip = new Label("", skin);
+        friendShip.setText("friendShip : " + animal.getFriendShip()+" has been petted today: " + animal.isHasBeenFedToday());
+        friendShip.setColor(Color.GREEN);
+
         AnimalController controller = new AnimalController();
         if(animal.isWillProduceToday()) {
             unGatheredFoods.setText("not gathered products: " + controller.whatWillProduceToday(animal.getAnimal(), animal));
@@ -1468,6 +1473,7 @@ public class GameMenu extends InputAdapter implements Screen {
         content.add(shepherdYField).pad(5).width(400f).row();
         content.add(shepherdButton).colspan(2).pad(5).width(400f).row();
         content.add(unGatheredFoods).colspan(2).pad(5).width(400f).row();
+        content.add(friendShip).colspan(2).pad(5).width(400f).row();
         content.add(errorLabel).colspan(2).pad(10).width(600f).row();
 
         dialog.button(closeButton);
@@ -2520,6 +2526,36 @@ public class GameMenu extends InputAdapter implements Screen {
 
         if (clockHandRotation < 0) {
             clockHandRotation += 360f;
+        }
+    }
+
+    private void renderBuffIcons() {
+        Texture buffTexture;
+        float yOffset = 0f;
+        float textureWidth =  100f;
+        float textureHeight =  100f;
+        float x = App.getCurrentPlayerLazy().getUserLocation().getxAxis() * 100f;
+        float screenHeight = App.getCurrentPlayerLazy().getUserLocation().getyAxis() * 100f;
+
+        if (App.getCurrentPlayerLazy().isFarmingBuffEaten()) {
+            buffTexture = GameAssetManager.getGameAssetManager().farmingBuff;
+
+            float y = screenHeight + 100f + yOffset;
+            batch.draw(buffTexture, x, y, textureWidth, textureHeight);
+            yOffset += textureHeight + 10f;
+        }
+
+        if (App.getCurrentPlayerLazy().isFishingBuffEaten()) {
+            buffTexture = GameAssetManager.getGameAssetManager().fishingBuff;
+            float y = screenHeight + 100f + yOffset;
+            batch.draw(buffTexture, x, y, textureWidth, textureHeight);
+            yOffset += textureHeight + 10f;
+        }
+
+        if (App.getCurrentPlayerLazy().isMaxEnergyBuffEaten()) {
+            buffTexture = GameAssetManager.getGameAssetManager().maxEnergyBuff;
+            float y = screenHeight + 100f + yOffset;
+            batch.draw(buffTexture, x, y, textureWidth, textureHeight);
         }
     }
 
