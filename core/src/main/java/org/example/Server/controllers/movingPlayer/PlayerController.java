@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Array;
 import com.google.gson.Gson;
 import org.example.Client.Main;
 import org.example.Common.models.RelatedToUser.User;
+import org.example.Common.saveGame.GameDatabase;
 import org.example.Common.saveGame.GameSaveManager;
 import org.example.Server.controllers.MenusController.GameMenuController;
 import org.example.Common.models.Animal.FarmAnimals;
@@ -87,7 +88,7 @@ public class PlayerController {
         return new Animation<>(FRAME_DURATION, frames, Animation.PlayMode.LOOP_PINGPONG);
     }
 
-    public void update(float delta) {
+    public void update(float delta) throws Exception {
 
         if (isCollapsing) {
             collapseTimer += delta;
@@ -132,7 +133,7 @@ public class PlayerController {
         );
     }
 
-    private void handleInput(float delta) {
+    private void handleInput(float delta) throws Exception {
         // Update movement timer
         movementTimer += delta;
 
@@ -407,10 +408,11 @@ public class PlayerController {
         }
     }
 
-    public void quitGame(){
+    public void quitGame() throws Exception {
         //if you are the creator:
         if(App.getCurrentGame().getCurrentPlayer().getUser().getUserName().equals(App.getCurrentGame().getCreator().getUserName())) {
             GameSaveManager.saveGameCompressed(App.getCurrentGame(), "saves/" + App.getCurrentGame().getGameId());
+            GameDatabase.save(App.getCurrentGame());
             for(Player player1 : App.getCurrentGame().getPlayers()){
                 updateMoneyAndExperience(player1);
             }
