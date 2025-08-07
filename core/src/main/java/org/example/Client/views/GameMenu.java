@@ -1474,6 +1474,7 @@ public class GameMenu extends InputAdapter implements Screen {
         TextButton settingsButton = new TextButton("Settings", skin);
         TextButton socialButton = new TextButton("Social", skin);
         TextButton inventoryButton = new TextButton("Inventory Items", skin);
+        TextButton tradeButton = new TextButton("Trade", skin);
         TextButton closeButton = new TextButton("Close", skin);
 
         inventoryButton.addListener(new ClickListener() {
@@ -1481,6 +1482,14 @@ public class GameMenu extends InputAdapter implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 dialog.hide();
                 inventoryItemsMenu(); // Assuming you have an `inventoryItemsMenu` method
+            }
+        });
+
+        tradeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+                tradeMenu();
             }
         });
 
@@ -1523,6 +1532,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
         Table content = dialog.getContentTable();
         content.add(inventoryButton).pad(5).width(400f).row();
+        content.add(tradeButton).pad(5).width(400f).row();
         content.add(socialButton).pad(5).width(400f).row();
         content.add(mapButton).pad(5).width(400f).row();
         content.add(settingsButton).pad(5).width(400f).row();
@@ -4772,5 +4782,11 @@ public class GameMenu extends InputAdapter implements Screen {
             (Gdx.graphics.getHeight() - dialog.getHeight()) / 2f
         );
         dialog.show(stage);
+    }
+
+    public void tradeMenu() {
+        // Navigate to the trading menu
+        Main game = (Main) Gdx.app.getApplicationListener();
+        game.setScreen(new TradeMenuView(game));
     }
 }

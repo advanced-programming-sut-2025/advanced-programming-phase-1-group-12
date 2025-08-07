@@ -1,236 +1,279 @@
 package org.example.Client.controllers;
 
-import org.example.Common.models.Fundementals.Player;
-import org.example.Common.models.Item;
-import org.example.Common.models.RelationShips.RelationShip;
-import org.example.Common.models.RelationShips.Trade;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.Client.Main;
+import org.example.Client.network.ServerConnection;
+import org.example.Common.models.Trade;
+import org.example.Common.models.TradeHistory;
+import org.example.Common.network.GameProtocol;
+import org.example.Common.network.NetworkResult;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 public class TradeController {
-    private static List<Trade> trades = new ArrayList<>();
-
-    public static Trade createTrade(Player requester, Player target, String type, Item item, int amount, int price) {
-        Trade trade = new Trade(requester, target, type, item, amount, price);
-        trades.add(trade);
-        return trade;
+    private Main game;
+    private ServerConnection networkClient;
+    private ObjectMapper objectMapper;
+    private Trade currentTrade;
+    
+    public TradeController(Main game) {
+        this.game = game;
+        this.networkClient = game.getNetworkClient();
+        this.objectMapper = new ObjectMapper();
     }
-    public static Trade createTrade(Player requester, Player target, String type, Item item, int amount, Item targetItem, int targetAmount) {
-        Trade trade = new Trade(requester, target, type, item, amount, targetItem, targetAmount);
-        trades.add(trade);
-        return trade;
-    }
-
-    public static List<Trade> getTradesForPlayer(Player player) {
-        return trades.stream().filter(trade -> trade.getRequester().equals(player) ||
-                trade.getTarget().equals(player)).collect(Collectors.toList());
-    }
-
-    public static List<Trade> getPendingTradesForTarget(Player player) {
-        return trades.stream().filter(trade -> trade.getTarget().equals(player)
-                && trade.getStatus().equals("pending")).collect(Collectors.toList());
-    }
-
-    public static List<Trade> getNewTradesForTarget(Player player) {
-        return trades.stream()
-                .filter(trade -> trade.getTarget().equals(player) && trade.getStatus().equals("pending") && trade.isNew())
-                .collect(Collectors.toList());
-    }
-
-    public static Trade getTradeById(String id) {
-        return trades.stream()
-                .filter(trade -> trade.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-    }
-
-    public static String acceptTrade(String id) {
-        Trade trade = getTradeById(id);
-        if (trade == null) {
-            return "Trade not found with ID: " + id;
-        }
-
-        if (!trade.getStatus().equals("pending")) {
-            return "This trade is already " + trade.getStatus();
-        }
-
-        Player requester = trade.getRequester();
-        Player target = trade.getTarget();
-        Item item = trade.getItem();
-        int amount = trade.getAmount();
-
-        if (trade.getType().equals("offer")) {
-            if (requester.getBackPack().getItemByName(item.getName()) == null) {
-                trade.setStatus("rejected");
-                return "The requester no longer has the item: " + item.getName();
-            }
-        } else {
-            if (target.getBackPack().getItemByName(item.getName()) == null) {
-                trade.setStatus("rejected");
-                return "You don't have the requested item: " + item.getName();
-            }
-        }
-
-        if (trade.isMoneyTrade()) {
-            int price = trade.getPrice();
-
-            if (trade.getType().equals("offer")) {
-                if (target.getMoney() < price) {
-                    trade.setStatus("rejected");
-                    return "You don't have enough money for this trade";
-                }
-
-                requester.getBackPack().decreaseItem(item, amount);
-                if (target.getBackPack().getItemByName(item.getName()) != null) {
-                    target.getBackPack().addItem(item, amount);
-                } else {
-                    target.getBackPack().addItem(new Item(item.getName(), item.getQuality(), item.getPrice()), amount);
-                }
-
-                target.decreaseMoney(price);
-                requester.increaseMoney(price);
+    
+    /**
+     * Send a trade request to another player
+     */
+    public void sendTradeRequest(String targetPlayerId, String targetPlayerName) {
+        try {
+            Map<String, Object> requestData = new HashMap<>();
+            requestData.put("targetPlayerId", targetPlayerId);
+            requestData.put("targetPlayerName", targetPlayerName);
+            
+            String endpoint = GameProtocol.TRADE_CREATE_ENDPOINT.replace("{gameId}", game.getCurrentGameId());
+            NetworkResult<String> result = networkClient.sendPostRequest(endpoint, requestData, String.class);
+            
+            if (result.isSuccess()) {
+                Trade trade = objectMapper.readValue((String) result.getData(), Trade.class);
+                this.currentTrade = trade;
+                System.out.println("Trade request sent successfully: " + trade.getTradeId());
             } else {
-                if (requester.getMoney() < price) {
-                    trade.setStatus("rejected");
-                    return "The requester doesn't have enough money for this trade";
-                }
-                target.getBackPack().decreaseItem(item, amount);
-                if (requester.getBackPack().getItemByName(item.getName()) != null) {
-                    requester.getBackPack().addItem(item, amount);
-                } else {
-                    requester.getBackPack().addItem(new Item(item.getName(), item.getQuality(), item.getPrice()), amount);
-                }
-
-                requester.decreaseMoney(price);
-                target.increaseMoney(price);
+                System.err.println("Failed to send trade request: " + result.getMessage());
             }
-        } else {
-            Item targetItem = trade.getTargetItem();
-            int targetAmount = trade.getTargetAmount();
-
-            if (trade.getType().equals("offer")) {
-                if (target.getBackPack().getItemByName(targetItem.getName()) == null) {
-                    trade.setStatus("rejected");
-                    return "You don't have the requested item: " + targetItem.getName();
-                }
-
-                requester.getBackPack().decreaseItem(item, amount);
-                if (target.getBackPack().getItemByName(item.getName()) != null) {
-                    target.getBackPack().addItem(item, amount);
+        } catch (Exception e) {
+            System.err.println("Error sending trade request: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Cancel a pending trade request
+     */
+    public void cancelTradeRequest() {
+        if (currentTrade != null) {
+            try {
+                Map<String, Object> requestData = new HashMap<>();
+                requestData.put("tradeId", currentTrade.getTradeId());
+                requestData.put("action", "cancel");
+                
+                String endpoint = GameProtocol.TRADE_RESPOND_ENDPOINT.replace("{gameId}", game.getCurrentGameId());
+                NetworkResult<String> result = networkClient.sendPostRequest(endpoint, requestData, String.class);
+                
+                if (result.isSuccess()) {
+                    System.out.println("Trade request cancelled successfully");
+                    this.currentTrade = null;
                 } else {
-                    target.getBackPack().addItem(new Item(item.getName(), item.getQuality(), item.getPrice()), amount);
+                    System.err.println("Failed to cancel trade request: " + result.getMessage());
                 }
-
-                target.getBackPack().decreaseItem(targetItem, targetAmount);
-                if (requester.getBackPack().getItemByName(targetItem.getName()) != null) {
-                    requester.getBackPack().addItem(targetItem, targetAmount);
-                } else {
-                    requester.getBackPack().addItem(new Item(item.getName(), item.getQuality(), item.getPrice()), targetAmount);
-                }
+            } catch (Exception e) {
+                System.err.println("Error cancelling trade request: " + e.getMessage());
+            }
+        }
+    }
+    
+    /**
+     * Accept a trade request
+     */
+    public void acceptTradeRequest(String tradeId) {
+        try {
+            Map<String, Object> requestData = new HashMap<>();
+            requestData.put("tradeId", tradeId);
+            requestData.put("action", "accept");
+            
+            String endpoint = GameProtocol.TRADE_RESPOND_ENDPOINT.replace("{gameId}", game.getCurrentGameId());
+            NetworkResult<String> result = networkClient.sendPostRequest(endpoint, requestData, String.class);
+            
+            if (result.isSuccess()) {
+                Trade trade = objectMapper.readValue((String) result.getData(), Trade.class);
+                this.currentTrade = trade;
+                System.out.println("Trade accepted successfully");
             } else {
-                if (requester.getBackPack().getItemByName(targetItem.getName()) == null) {
-                    trade.setStatus("rejected");
-                    return "The requester doesn't have the offered item: " + targetItem.getName();
-                }
-
-                target.getBackPack().decreaseItem(item, amount);
-                if (requester.getBackPack().getItemByName(item.getName()) != null) {
-                    requester.getBackPack().addItem(item, amount);
-                } else {
-                    requester.getBackPack().addItem(new Item(item.getName(), item.getQuality(), item.getPrice()), amount);
-                }
-
-                requester.getBackPack().decreaseItem(targetItem, targetAmount);
-                if (target.getBackPack().getItemByName(targetItem.getName()) != null) {
-                    target.getBackPack().addItem(targetItem, targetAmount);
-                } else {
-                    target.getBackPack().addItem(new Item(item.getName(), item.getQuality(), item.getPrice()), targetAmount);
-                }
+                System.err.println("Failed to accept trade: " + result.getMessage());
             }
+        } catch (Exception e) {
+            System.err.println("Error accepting trade: " + e.getMessage());
         }
-
-        trade.setStatus("accepted");
-
-        RelationShip relationship = requester.findRelationShip(target);
-        if (relationship != null) {
-            relationship.increaseXP(50);
-        }
-
-        return "Trade accepted successfully!";
     }
-
-    public static String rejectTrade(String id) {
-        Trade trade = getTradeById(id);
-        if (trade == null) {
-            return "Trade not found with ID: " + id;
+    
+    /**
+     * Decline a trade request
+     */
+    public void declineTradeRequest(String tradeId) {
+        try {
+            Map<String, Object> requestData = new HashMap<>();
+            requestData.put("tradeId", tradeId);
+            requestData.put("action", "decline");
+            
+            String endpoint = GameProtocol.TRADE_RESPOND_ENDPOINT.replace("{gameId}", game.getCurrentGameId());
+            NetworkResult<String> result = networkClient.sendPostRequest(endpoint, requestData, String.class);
+            
+            if (result.isSuccess()) {
+                System.out.println("Trade declined successfully");
+            } else {
+                System.err.println("Failed to decline trade: " + result.getMessage());
+            }
+        } catch (Exception e) {
+            System.err.println("Error declining trade: " + e.getMessage());
         }
-
-        if (!trade.getStatus().equals("pending")) {
-            return "This trade is already " + trade.getStatus();
-        }
-
-        trade.setStatus("rejected");
-
-        Player requester = trade.getRequester();
-        Player target = trade.getTarget();
-        RelationShip relationship = requester.findRelationShip(target);
-        if (relationship != null) {
-            relationship.decreaseXP(30);
-        }
-
-        return "Trade rejected.";
     }
-
-    public static void markTradesAsSeen(Player player) {
-        getNewTradesForTarget(player).forEach(trade -> trade.setNew(false));
+    
+    /**
+     * Confirm a trade (initiator only)
+     */
+    public void confirmTrade(String tradeId) {
+        try {
+            Map<String, Object> requestData = new HashMap<>();
+            requestData.put("tradeId", tradeId);
+            requestData.put("action", "confirm");
+            
+            String endpoint = GameProtocol.TRADE_RESPOND_ENDPOINT.replace("{gameId}", game.getCurrentGameId());
+            NetworkResult<String> result = networkClient.sendPostRequest(endpoint, requestData, String.class);
+            
+            if (result.isSuccess()) {
+                System.out.println("Trade confirmed successfully");
+            } else {
+                System.err.println("Failed to confirm trade: " + result.getMessage());
+            }
+        } catch (Exception e) {
+            System.err.println("Error confirming trade: " + e.getMessage());
+        }
     }
-
-
-    public static String getTradeHistory(Player player) {
-        List<Trade> playerTrades = getTradesForPlayer(player);
-        if (playerTrades.isEmpty()) {
-            return "You have no trade history.";
+    
+    /**
+     * Accept a confirmed trade (target player)
+     */
+    public void acceptTrade(String tradeId) {
+        try {
+            Map<String, Object> requestData = new HashMap<>();
+            requestData.put("tradeId", tradeId);
+            requestData.put("action", "accept_confirmed");
+            
+            String endpoint = GameProtocol.TRADE_RESPOND_ENDPOINT.replace("{gameId}", game.getCurrentGameId());
+            NetworkResult<String> result = networkClient.sendPostRequest(endpoint, requestData, String.class);
+            
+            if (result.isSuccess()) {
+                System.out.println("Trade completed successfully");
+                this.currentTrade = null;
+            } else {
+                System.err.println("Failed to complete trade: " + result.getMessage());
+            }
+        } catch (Exception e) {
+            System.err.println("Error completing trade: " + e.getMessage());
         }
-
-        StringBuilder history = new StringBuilder("Trade History:\n");
-        for (Trade trade : playerTrades) {
-            history.append("----------------------------\n");
-            history.append(trade.toString()).append("\n");
-        }
-
-        return history.toString();
     }
-
-    public static String getTradeList(Player player) {
-        List<Trade> pendingTrades = getPendingTradesForTarget(player);
-        if (pendingTrades.isEmpty()) {
-            return "You have no pending trade requests.";
+    
+    /**
+     * Cancel an active trade
+     */
+    public void cancelTrade(String tradeId) {
+        try {
+            Map<String, Object> requestData = new HashMap<>();
+            requestData.put("tradeId", tradeId);
+            requestData.put("action", "cancel");
+            
+            String endpoint = GameProtocol.TRADE_RESPOND_ENDPOINT.replace("{gameId}", game.getCurrentGameId());
+            NetworkResult<String> result = networkClient.sendPostRequest(endpoint, requestData, String.class);
+            
+            if (result.isSuccess()) {
+                System.out.println("Trade cancelled successfully");
+                this.currentTrade = null;
+            } else {
+                System.err.println("Failed to cancel trade: " + result.getMessage());
+            }
+        } catch (Exception e) {
+            System.err.println("Error cancelling trade: " + e.getMessage());
         }
-
-        StringBuilder list = new StringBuilder("Pending Trade Requests:\n");
-        for (Trade trade : pendingTrades) {
-            list.append("----------------------------\n");
-            list.append(trade.toString()).append("\n");
-        }
-
-        return list.toString();
     }
-
-    public static String getTradeNotifications(Player player) {
-        List<Trade> newTrades = getNewTradesForTarget(player);
-        if (newTrades.isEmpty()) {
-            return null;
+    
+    /**
+     * Update trade items
+     */
+    public void updateTradeItems(String tradeId, Map<String, Integer> items) {
+        try {
+            Map<String, Object> requestData = new HashMap<>();
+            requestData.put("tradeId", tradeId);
+            requestData.put("items", items);
+            
+            String endpoint = GameProtocol.TRADE_RESPOND_ENDPOINT.replace("{gameId}", game.getCurrentGameId());
+            NetworkResult<String> result = networkClient.sendPostRequest(endpoint, requestData, String.class);
+            
+            if (result.isSuccess()) {
+                Trade trade = objectMapper.readValue((String) result.getData(), Trade.class);
+                this.currentTrade = trade;
+                System.out.println("Trade items updated successfully");
+            } else {
+                System.err.println("Failed to update trade items: " + result.getMessage());
+            }
+        } catch (Exception e) {
+            System.err.println("Error updating trade items: " + e.getMessage());
         }
-
-        StringBuilder notifications = new StringBuilder("You have new trade requests:\n");
-        for (Trade trade : newTrades) {
-            notifications.append("----------------------------\n");
-            notifications.append(trade.toString()).append("\n");
+    }
+    
+    /**
+     * Get trade history for the current player
+     */
+    public TradeHistory getTradeHistory() {
+        try {
+            String endpoint = GameProtocol.TRADE_LIST_ENDPOINT.replace("{gameId}", game.getCurrentGameId());
+            NetworkResult<String> result = networkClient.sendGetRequest(endpoint, String.class);
+            
+            if (result.isSuccess()) {
+                return objectMapper.readValue((String) result.getData(), TradeHistory.class);
+            } else {
+                System.err.println("Failed to get trade history: " + result.getMessage());
+                return new TradeHistory();
+            }
+        } catch (Exception e) {
+            System.err.println("Error getting trade history: " + e.getMessage());
+            return new TradeHistory();
         }
-
-        markTradesAsSeen(player);
-        return notifications.toString();
+    }
+    
+    /**
+     * Get list of available players for trading
+     */
+    public List<String> getAvailablePlayers() {
+        try {
+            String endpoint = GameProtocol.GAME_STATE_ENDPOINT.replace("{gameId}", game.getCurrentGameId());
+            NetworkResult<String> result = networkClient.sendGetRequest(endpoint, String.class);
+            
+            if (result.isSuccess()) {
+                Map<String, Object> gameState = objectMapper.readValue((String) result.getData(), new TypeReference<Map<String, Object>>() {});
+                @SuppressWarnings("unchecked")
+                List<String> players = (List<String>) gameState.get("players");
+                return players != null ? players : List.of();
+            } else {
+                System.err.println("Failed to get available players: " + result.getMessage());
+                return List.of();
+            }
+        } catch (Exception e) {
+            System.err.println("Error getting available players: " + e.getMessage());
+            return List.of();
+        }
+    }
+    
+    /**
+     * Check if there are any pending trade requests
+     */
+    public boolean hasPendingTradeRequests() {
+        TradeHistory history = getTradeHistory();
+        return history.getPendingTradesCount() > 0;
+    }
+    
+    /**
+     * Get current active trade
+     */
+    public Trade getCurrentTrade() {
+        return currentTrade;
+    }
+    
+    /**
+     * Set current trade
+     */
+    public void setCurrentTrade(Trade trade) {
+        this.currentTrade = trade;
     }
 }

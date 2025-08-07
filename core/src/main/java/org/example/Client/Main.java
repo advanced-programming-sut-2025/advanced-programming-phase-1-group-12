@@ -171,6 +171,15 @@ public class Main extends Game {
         return serverConnection;
     }
     
+    public ServerConnection getNetworkClient() {
+        return serverConnection;
+    }
+    
+    public String getCurrentGameId() {
+        // TODO: Implement game ID tracking
+        return "default";
+    }
+    
     public ServerManager getServerManager() {
         return serverManager;
     }

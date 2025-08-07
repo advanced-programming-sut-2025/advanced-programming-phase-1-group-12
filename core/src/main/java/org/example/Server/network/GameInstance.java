@@ -3,6 +3,8 @@ package org.example.Server.network;
 import org.example.Common.models.Fundementals.Game;
 import org.example.Common.models.Fundementals.Player;
 import org.example.Common.models.Fundementals.Result;
+import org.example.Common.models.Trade;
+import org.example.Common.models.TradeHistory;
 import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.WalkRequest;
 import org.example.Common.network.events.GameStateUpdateEvent;
@@ -29,6 +31,7 @@ public class GameInstance {
     private final ReentrantReadWriteLock gameLock;
     private volatile long lastActivity;
     private String gameStatus;
+    private final TradeManager tradeManager;
     
     public GameInstance(String gameId, Game game, GameMenuController gameController) {
         this.gameId = gameId;
@@ -40,6 +43,7 @@ public class GameInstance {
         this.gameLock = new ReentrantReadWriteLock(true); // Fair locking
         this.lastActivity = System.currentTimeMillis();
         this.gameStatus = "active";
+        this.tradeManager = new TradeManager();
         
         logger.debug("GameInstance created with ID: {}", gameId);
     }
@@ -313,30 +317,21 @@ public class GameInstance {
     private NetworkResult<String> handleTradeCreateAction(String playerId, Map<String, Object> actionData) {
         try {
             String targetPlayer = (String) actionData.get("targetPlayer");
-            String tradeType = (String) actionData.get("tradeType");
-            String item = (String) actionData.get("item");
-            Integer amount = (Integer) actionData.get("amount");
-            Integer price = (Integer) actionData.get("price");
+            String targetPlayerName = (String) actionData.get("targetPlayerName");
             
-            if (targetPlayer == null || tradeType == null || item == null || amount == null) {
-                return NetworkResult.error("Target player, trade type, item, and amount are required");
+            if (targetPlayer == null || targetPlayerName == null) {
+                return NetworkResult.error("Target player and target player name are required");
             }
             
-            // Use existing trade controller logic
-            org.example.Client.controllers.TradeController tradeController = new org.example.Client.controllers.TradeController();
             Player requester = players.get(playerId);
-            Player target = game.getPlayerByName(targetPlayer);
-            
-            if (target == null) {
-                return NetworkResult.error("Target player not found");
+            if (requester == null) {
+                return NetworkResult.error("Requester player not found");
             }
             
-            // Create trade using existing logic
-            org.example.Common.models.RelationShips.Trade trade = tradeController.createTrade(
-                requester, target, tradeType, null, amount, price
-            );
+            // Create trade using TradeManager
+            Trade trade = tradeManager.createTrade(requester.getUser().getUserName(), targetPlayerName);
             
-            return NetworkResult.success("Trade created successfully");
+            return NetworkResult.success("Trade created successfully", trade.getTradeId());
         } catch (Exception e) {
             logger.error("Error processing trade create action", e);
             return NetworkResult.error("Failed to process trade create action: " + e.getMessage());
@@ -346,29 +341,40 @@ public class GameInstance {
     private NetworkResult<String> handleTradeRespondAction(String playerId, Map<String, Object> actionData) {
         try {
             String tradeId = (String) actionData.get("tradeId");
-            String response = (String) actionData.get("response");
+            String action = (String) actionData.get("action");
             
-            if (tradeId == null || response == null) {
-                return NetworkResult.error("Trade ID and response are required");
+            if (tradeId == null || action == null) {
+                return NetworkResult.error("Trade ID and action are required");
             }
             
-            // Use existing trade controller logic
-            org.example.Client.controllers.TradeController tradeController = new org.example.Client.controllers.TradeController();
-            org.example.Common.models.RelationShips.Trade trade = tradeController.getTradeById(tradeId);
-            
+            Trade trade = tradeManager.getTradeById(tradeId);
             if (trade == null) {
                 return NetworkResult.error("Trade not found");
             }
             
-            // Process response
-            if ("accept".equals(response)) {
-                // Accept trade logic
-                return NetworkResult.success("Trade accepted");
-            } else if ("reject".equals(response)) {
-                // Reject trade logic
-                return NetworkResult.success("Trade rejected");
+            // Process action
+            boolean success = false;
+            switch (action) {
+                case "accept":
+                    success = tradeManager.acceptTrade(tradeId);
+                    break;
+                case "decline":
+                    success = tradeManager.declineTrade(tradeId);
+                    break;
+                case "cancel":
+                    success = tradeManager.cancelTrade(tradeId);
+                    break;
+                case "confirm":
+                    success = tradeManager.completeTrade(tradeId);
+                    break;
+                default:
+                    return NetworkResult.error("Invalid action: " + action);
+            }
+            
+            if (success) {
+                return NetworkResult.success("Trade " + action + " successful");
             } else {
-                return NetworkResult.error("Invalid response: " + response);
+                return NetworkResult.error("Failed to " + action + " trade");
             }
         } catch (Exception e) {
             logger.error("Error processing trade respond action", e);
@@ -378,18 +384,17 @@ public class GameInstance {
     
     private NetworkResult<String> handleTradeListAction(String playerId) {
         try {
-            // Use existing trade controller logic
-            org.example.Client.controllers.TradeController tradeController = new org.example.Client.controllers.TradeController();
             Player player = players.get(playerId);
             
             if (player == null) {
                 return NetworkResult.error("Player not found");
             }
             
-            // Get trades for player
-            java.util.List<org.example.Common.models.RelationShips.Trade> trades = tradeController.getTradesForPlayer(player);
+            // Get trades for player using TradeManager
+            List<Trade> trades = tradeManager.getTradesForPlayer(player.getUser().getUserName());
+            TradeHistory tradeHistory = tradeManager.getTradeHistory(player.getUser().getUserName());
             
-            return NetworkResult.success("Trades retrieved", trades.toString());
+            return NetworkResult.success("Trades retrieved", tradeHistory.toString());
         } catch (Exception e) {
             logger.error("Error processing trade list action", e);
             return NetworkResult.error("Failed to process trade list action: " + e.getMessage());

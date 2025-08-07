@@ -62,10 +62,11 @@ public class GameMenuController {
             }
         }
 
-        String notifications = TradeController.getTradeNotifications(currentPlayer);
-        if (notifications != null) {
-            playerList.append("\n").append(notifications);
-        }
+        // TODO: Implement trade notifications
+        // String notifications = TradeController.getTradeNotifications(currentPlayer);
+        // if (notifications != null) {
+        //     playerList.append("\n").append(notifications);
+        // }
 
         return new Result(true, playerList.toString());
     }
@@ -103,41 +104,25 @@ public class GameMenuController {
             return new Result(false, "You cannot specify both price and target item");
         }
 
-        if (price != null && price > 0) {
-            TradeController.createTrade(currentPlayer, targetPlayer, type, item, amount, price);
-            return new Result(true, "Trade request created successfully");
-        } else if (targetItemName != null && targetAmount != null && targetAmount > 0) {
-            Item targetItem = new Item(itemName, item.getQuality(), item.getPrice());
-            TradeController.createTrade(currentPlayer, targetPlayer, type, item, amount, targetItem, targetAmount);
-            return new Result(true, "Trade request created successfully");
-        } else {
-            return new Result(false, "You must specify either price or target item");
-        }
+        // TODO: Implement trade creation with new TradeController API
+        return new Result(false, "Trade system is being updated. Please use the new trading interface.");
     }
 
     public Result listTrades() {
-        Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
-        String tradeList = TradeController.getTradeList(currentPlayer);
-        return new Result(true, tradeList);
+        // TODO: Implement trade listing with new TradeController API
+        return new Result(false, "Trade system is being updated. Please use the new trading interface.");
     }
 
 
     public Result respondToTrade(String response, String id) {
-        if (response.equals("accept")) {
-            String result = TradeController.acceptTrade(id);
-
-            return new Result(result.contains("successfully"), result);
-        } else {
-            String result = TradeController.rejectTrade(id);
-            return new Result(true, result);
-        }
+        // TODO: Implement trade response with new TradeController API
+        return new Result(false, "Trade system is being updated. Please use the new trading interface.");
     }
 
 
     public Result tradeHistory() {
-        Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
-        String history = TradeController.getTradeHistory(currentPlayer);
-        return new Result(true, history);
+        // TODO: Implement trade history with new TradeController API
+        return new Result(false, "Trade system is being updated. Please use the new trading interface.");
     }
 
     public Result showHour() {
