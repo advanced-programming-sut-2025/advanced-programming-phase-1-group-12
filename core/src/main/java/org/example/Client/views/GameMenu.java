@@ -191,12 +191,23 @@ public class GameMenu extends InputAdapter implements Screen {
     // Real-time map update handler
     public void handleGameStateUpdate(String updateType, Map<String, Object> data) {
         try {
+            System.out.println("DEBUG: GameMenu.handleGameStateUpdate called with updateType: " + updateType + ", data: " + data);
+
             switch (updateType) {
                 case "player_moved":
-                    handlePlayerPositionUpdate(data);
+                    handlePlayerMovementUpdate(data);
                     break;
                 case "energy_updated":
                     handleEnergyUpdate(data);
+                    break;
+                case "player_joined":
+                    handlePlayerJoined(data);
+                    break;
+                case "player_left":
+                    handlePlayerLeft(data);
+                    break;
+                case "chat_message":
+                    handleChatMessage(data);
                     break;
                 case "npc_updated":
                     handleNPCUpdate(data);
@@ -217,11 +228,148 @@ public class GameMenu extends InputAdapter implements Screen {
                     handleObjectInteraction(data);
                     break;
                 default:
+                    System.out.println("DEBUG: Unknown game state update type: " + updateType);
                     logger.debug("Unknown game state update type: {}", updateType);
                     break;
             }
+
         } catch (Exception e) {
-            logger.error("Error handling game state update: {}", updateType, e);
+            System.out.println("DEBUG: Error handling game state update: " + e.getMessage());
+            logger.error("Error handling game state update", e);
+        }
+    }
+
+    public void onWebSocketConnected() {
+        try {
+            System.out.println("DEBUG: GameMenu.onWebSocketConnected called");
+            logger.info("WebSocket connection established for game menu");
+
+            // Update UI to show connection status
+            if (errorLabel != null) {
+                errorLabel.setText("Connected to multiplayer server");
+                errorLabel.setColor(Color.GREEN);
+                timeSinceError = 0f;
+            }
+
+            // Any additional initialization needed when WebSocket connects
+            // For example, send initial game state or player information
+
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error in onWebSocketConnected: " + e.getMessage());
+            logger.error("Error handling WebSocket connection", e);
+        }
+    }
+
+    private void handlePlayerJoined(Map<String, Object> data) {
+        try {
+            String playerId = (String) data.get("playerId");
+            String username = (String) data.get("username");
+            Integer playerCount = (Integer) data.get("playerCount");
+
+            System.out.println("DEBUG: Player joined - playerId: " + playerId + ", username: " + username + ", count: " + playerCount);
+            logger.info("Player joined: {} (total players: {})", username, playerCount);
+
+            // Update UI to show new player joined
+            if (errorLabel != null) {
+                errorLabel.setText(username + " joined the game");
+                errorLabel.setColor(Color.BLUE);
+                timeSinceError = 0f;
+            }
+
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error handling player joined: " + e.getMessage());
+            logger.error("Error handling player joined", e);
+        }
+    }
+
+    private void handlePlayerLeft(Map<String, Object> data) {
+        try {
+            String playerId = (String) data.get("playerId");
+            String username = (String) data.get("username");
+            Integer playerCount = (Integer) data.get("playerCount");
+            String reason = (String) data.get("reason");
+
+            System.out.println("DEBUG: Player left - playerId: " + playerId + ", username: " + username + ", count: " + playerCount + ", reason: " + reason);
+            logger.info("Player left: {} (total players: {}) - reason: {}", username, playerCount, reason);
+
+            // Update UI to show player left
+            if (errorLabel != null) {
+                errorLabel.setText(username + " left the game");
+                errorLabel.setColor(Color.ORANGE);
+                timeSinceError = 0f;
+            }
+
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error handling player left: " + e.getMessage());
+            logger.error("Error handling player left", e);
+        }
+    }
+
+    private void handleChatMessage(Map<String, Object> data) {
+        try {
+            String playerId = (String) data.get("playerId");
+            String username = (String) data.get("username");
+            String message = (String) data.get("message");
+            String chatType = (String) data.get("chatType");
+
+            System.out.println("DEBUG: Chat message - playerId: " + playerId + ", username: " + username + ", message: " + message + ", type: " + chatType);
+            logger.debug("Chat message from {}: {}", username, message);
+
+            // Handle chat message display
+            // This could be implemented to show chat messages in the UI
+            if (errorLabel != null) {
+                errorLabel.setText(username + ": " + message);
+                errorLabel.setColor(Color.WHITE);
+                timeSinceError = 0f;
+            }
+
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error handling chat message: " + e.getMessage());
+            logger.error("Error handling chat message", e);
+        }
+    }
+
+    private void handlePlayerMovementUpdate(Map<String, Object> data) {
+        try {
+            String playerId = (String) data.get("playerId");
+            Integer x = (Integer) data.get("x");
+            Integer y = (Integer) data.get("y");
+
+            System.out.println("DEBUG: Player movement update - playerId: " + playerId + ", x: " + x + ", y: " + y);
+            logger.debug("Player movement update: playerId={}, x={}, y={}", playerId, x, y);
+
+            if (playerId != null && x != null && y != null) {
+                // Find the player and update their position
+                boolean playerFound = false;
+                for (Player player : App.getCurrentGame().getPlayers()) {
+                    if (player.getUser().getUserName().equals(playerId)) {
+                        Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
+                        player.setUserLocation(newLocation);
+                        player.updatePosition(x, y); // Update sprite position
+                        System.out.println("DEBUG: Updated player " + playerId + " position to (" + x + ", " + y + ")");
+                        logger.debug("Updated player {} position to ({}, {})", playerId, x, y);
+                        playerFound = true;
+
+                        // If we're showing the full map, update camera position for smooth following
+                        if (showingAllMap) {
+                            updateCameraToPlayer();
+                        }
+                        break;
+                    }
+                }
+
+                if (!playerFound) {
+                    System.out.println("DEBUG: Player " + playerId + " not found in current game");
+                    logger.warn("Player {} not found in current game", playerId);
+                }
+            } else {
+                System.out.println("DEBUG: Invalid player movement data - playerId: " + playerId + ", x: " + x + ", y: " + y);
+                logger.warn("Invalid player movement data: playerId={}, x={}, y={}", playerId, x, y);
+            }
+
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error handling player movement update: " + e.getMessage());
+            logger.error("Error handling player movement update", e);
         }
     }
 
@@ -2373,10 +2521,12 @@ public class GameMenu extends InputAdapter implements Screen {
                         gameId = serverGameId;
                         System.out.println("DEBUG: Using server game ID for WebSocket: " + gameId);
                     } else {
+                        // Fall back to local game ID as string for compatibility
                         gameId = String.valueOf(App.getCurrentGame().getGameId());
                         System.out.println("DEBUG: Server game ID not available, using local game ID: " + gameId);
                     }
                 } else {
+                    // Fall back to local game ID as string for compatibility
                     gameId = String.valueOf(App.getCurrentGame().getGameId());
                     System.out.println("DEBUG: No NetworkCommandSender, using local game ID: " + gameId);
                 }

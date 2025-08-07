@@ -395,6 +395,16 @@ public class ServerConnection {
         return authToken;
     }
 
+    public void setAuthToken(String authToken) {
+        this.authToken = authToken;
+        System.out.println("DEBUG: Auth token set in ServerConnection: " + authToken);
+    }
+
+    public void setCurrentUser(User currentUser) {
+        this.currentUser = currentUser;
+        System.out.println("DEBUG: Current user set in ServerConnection: " + (currentUser != null ? currentUser.getUserName() : "null"));
+    }
+
     public User getCurrentUser() {
         return currentUser;
     }

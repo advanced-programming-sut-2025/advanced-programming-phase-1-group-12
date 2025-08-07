@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Client.Main;
 import org.example.Client.ServerManager;
 import org.example.Client.SimpleNetworkClient;
+import org.example.Client.network.ServerConnection;
 import org.example.Common.models.Assets.GameAssetManager;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.RelatedToUser.User;
@@ -45,12 +46,12 @@ public class MultiplayerMenu implements Screen {
     private final ScrollPane onlinePlayersPane;
     private final Table onlinePlayersTable;
     private final Table mainTable;
-    
+
     private SimpleNetworkClient networkClient;
     private boolean isConnected = false;
     private Timer refreshTimer;
     private List<OnlinePlayersResponse.PlayerInfo> onlinePlayers = new ArrayList<>();
-    
+
     public MultiplayerMenu() {
         this.titleLabel = new Label("Multiplayer Menu", skin);
         this.statusLabel = new Label("Not connected to server", skin);
@@ -63,7 +64,7 @@ public class MultiplayerMenu implements Screen {
         this.serverPortField = new TextField("8080", skin);
         this.usernameField = new TextField("", skin);
         this.passwordField = new TextField("", skin);
-        
+
         // Auto-fill username with logged-in user and show status
         if (App.getLoggedInUser() != null) {
             this.usernameField.setText(App.getLoggedInUser().getUserName());
@@ -76,116 +77,116 @@ public class MultiplayerMenu implements Screen {
         this.onlinePlayersTable = new Table();
         this.onlinePlayersPane = new ScrollPane(onlinePlayersTable, skin);
         this.mainTable = new Table();
-        
+
         // Set password field to password mode
         passwordField.setPasswordMode(true);
         passwordField.setPasswordCharacter('*');
-        
+
         // Set default values - let users enter their own credentials
         usernameField.setText("");
         passwordField.setText("");
-        
+
         setScale();
         setupOnlinePlayersTable();
     }
-    
+
     private void setupOnlinePlayersTable() {
         onlinePlayersTable.clear();
         onlinePlayersTable.add(new Label("Online Players:", skin)).colspan(3).pad(10);
         onlinePlayersTable.row();
-        
+
         if (onlinePlayers.isEmpty()) {
             onlinePlayersTable.add(new Label("No players online", skin)).colspan(3).pad(10);
         } else {
             for (OnlinePlayersResponse.PlayerInfo player : onlinePlayers) {
                 onlinePlayersTable.add(new Label("• " + player.getUsername(), skin)).left().pad(5);
-                
+
                 String status = player.getStatus();
                 if (player.getLobbyName() != null) {
                     status += " (Lobby: " + player.getLobbyName() + ")";
                 }
                 onlinePlayersTable.add(new Label(status, skin)).pad(5);
-                
+
                 onlinePlayersTable.add(new Label("", skin)).pad(5); // Empty column for spacing
                 onlinePlayersTable.row();
             }
         }
     }
-    
+
     @Override
     public void show() {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
-        
+
         Texture backgroundTexture = new Texture(Gdx.files.internal("menu_background.png"));
         backgroundImage = new Image(backgroundTexture);
         backgroundImage.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        
+
         // Main layout
         mainTable.setFillParent(true);
         mainTable.center();
-        
+
         // Title
         mainTable.add(titleLabel).colspan(2).pad(20);
         mainTable.row();
-        
+
         // Status
         mainTable.add(statusLabel).colspan(2).pad(10);
         mainTable.row();
-        
+
         // Server connection section
         mainTable.add(new Label("Server Settings:", skin)).colspan(2).pad(10);
         mainTable.row();
-        
+
         mainTable.add(new Label("Host:", skin)).left().pad(5);
         mainTable.add(serverHostField).width(200).height(30).pad(5);
         mainTable.row();
-        
+
         mainTable.add(new Label("Port:", skin)).left().pad(5);
         mainTable.add(serverPortField).width(200).height(30).pad(5);
         mainTable.row();
-        
+
         mainTable.add(new Label("Logged-in User:", skin)).left().pad(5);
         mainTable.add(usernameField).width(200).height(30).pad(5);
         mainTable.row();
-        
+
         mainTable.add(new Label("(Auto-connect with logged-in account)", skin)).left().pad(5);
         mainTable.add(new Label("", skin)).width(200).height(30).pad(5);
         mainTable.row();
-        
+
         // Connect button
         mainTable.add(connectButton).colspan(2).width(200).height(50).pad(20);
         mainTable.row();
-        
+
         // Online players section
         mainTable.add(new Label("Online Players:", skin)).colspan(2).pad(10);
         mainTable.row();
-        
+
         mainTable.add(onlinePlayersPane).colspan(2).width(300).height(200).pad(10);
         mainTable.row();
-        
+
         // Refresh button
         mainTable.add(refreshButton).colspan(2).width(200).height(50).pad(10);
         mainTable.row();
-        
+
         // Lobby button
         mainTable.add(lobbyButton).colspan(2).width(200).height(50).pad(10);
         mainTable.row();
-        
+
         // Restart server button
         mainTable.add(restartServerButton).colspan(2).width(200).height(50).pad(10);
         mainTable.row();
-        
+
         // Back button
         mainTable.add(backButton).colspan(2).width(200).height(50).pad(20);
-        
+
         stage.addActor(backgroundImage);
         stage.addActor(mainTable);
-        
+
         setupEventListeners();
         updateServerStatus();
     }
-    
+
     private void setupEventListeners() {
         connectButton.addListener(new ClickListener() {
             @Override
@@ -197,7 +198,7 @@ public class MultiplayerMenu implements Screen {
                 }
             }
         });
-        
+
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -206,7 +207,7 @@ public class MultiplayerMenu implements Screen {
                 Main.getMain().setScreen(new MainMenu());
             }
         });
-        
+
         refreshButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -215,7 +216,7 @@ public class MultiplayerMenu implements Screen {
                 }
             }
         });
-        
+
         lobbyButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -226,7 +227,7 @@ public class MultiplayerMenu implements Screen {
                 }
             }
         });
-        
+
         restartServerButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -234,32 +235,32 @@ public class MultiplayerMenu implements Screen {
             }
         });
     }
-    
+
     private void connectToServer() {
         try {
             String host = serverHostField.getText().trim();
             int port = Integer.parseInt(serverPortField.getText().trim());
-            
+
             // Get logged-in user credentials automatically
             User loggedInUser = App.getLoggedInUser();
             if (loggedInUser == null) {
                 updateStatus("No user logged in. Please login to the game first.", false);
                 return;
             }
-            
+
             String username = loggedInUser.getUserName();
             String password = loggedInUser.getPassword();
-            
+
             if (host.isEmpty()) {
                 updateStatus("Please enter server host", false);
                 return;
             }
-            
+
             updateStatus("Connecting to server...", false);
-            
+
             // Create network client
             networkClient = new SimpleNetworkClient(host, port);
-            
+
             // Test connection first with better error handling
             NetworkResult<String> connectionResult = networkClient.testConnection();
             if (!connectionResult.isSuccess()) {
@@ -278,32 +279,45 @@ public class MultiplayerMenu implements Screen {
                 }
                 return;
             }
-            
+
             // First, try to register the user if they don't exist on the server
             updateStatus("Checking user registration on server...", false);
-            
+
             // Create registration request for the logged-in user
             RegisterRequest registerRequest = new RegisterRequest(username, password, loggedInUser.getEmail());
-            
+
             // Send registration request (this will fail if user already exists, which is fine)
             String requestJson = new ObjectMapper().writeValueAsString(registerRequest);
             RequestBody requestBody = RequestBody.create(requestJson, MediaType.get("application/json"));
-            
+
             Request registerRequestHttp = new Request.Builder()
                 .url("http://" + host + ":" + port + "/auth/register")
                 .post(requestBody)
                 .build();
-            
+
             OkHttpClient httpClient = new OkHttpClient();
             try (Response response = httpClient.newCall(registerRequestHttp).execute()) {
                 // We don't care if registration fails (user might already exist)
                 // We just want to ensure the user exists on the server
             }
-            
+
             // Now attempt login
             updateStatus("Logging in to server...", false);
             NetworkResult<LoginResponse> loginResult = networkClient.login(username, password);
             if (loginResult.isSuccess()) {
+                // Also set the auth token in ServerConnection for game creation
+                String authToken = loginResult.getData().getToken();
+                if (authToken != null) {
+                    ServerConnection serverConnection = Main.getMain().getServerConnection();
+                    if (serverConnection != null) {
+                        // Set the auth token in ServerConnection
+                        serverConnection.setAuthToken(authToken);
+                        // Set the current user in ServerConnection
+                        serverConnection.setCurrentUser(App.getLoggedInUser());
+                        System.out.println("DEBUG: Set auth token and user in ServerConnection for game creation");
+                    }
+                }
+
                 // Connect player to server after successful login
                 updateStatus("Connecting player to server...", false);
                 NetworkResult<String> connectResult = networkClient.connectPlayer(username);
@@ -311,10 +325,10 @@ public class MultiplayerMenu implements Screen {
                     isConnected = true;
                     updateStatus("Connected as " + username, true);
                     connectButton.setText("Disconnect");
-                    
+
                     // Start periodic refresh of online players
                     startPlayerRefreshTimer();
-                    
+
                     // Initial refresh
                     refreshOnlinePlayers();
                 } else {
@@ -323,16 +337,16 @@ public class MultiplayerMenu implements Screen {
             } else {
                 updateStatus("Login failed: " + loginResult.getMessage(), false);
             }
-            
+
         } catch (NumberFormatException e) {
             updateStatus("Invalid port number", false);
         } catch (Exception e) {
             updateStatus("Connection error: " + e.getMessage(), false);
         }
     }
-    
 
-    
+
+
     private void disconnectFromServer() {
         if (networkClient != null) {
             // Disconnect player from server before logout
@@ -343,22 +357,22 @@ public class MultiplayerMenu implements Screen {
             networkClient.logout();
             networkClient = null;
         }
-        
+
         isConnected = false;
         connectButton.setText("Connect with Logged-in Account");
         updateStatus("Disconnected from server", false);
-        
+
         // Stop refresh timer
         if (refreshTimer != null) {
             refreshTimer.cancel();
             refreshTimer = null;
         }
-        
+
         // Clear online players
         onlinePlayers.clear();
         setupOnlinePlayersTable();
     }
-    
+
     private void updateStatus(String message, boolean isSuccess) {
         statusLabel.setText(message);
         if (isSuccess) {
@@ -367,7 +381,7 @@ public class MultiplayerMenu implements Screen {
             statusLabel.setColor(1, 0, 0, 1); // Red
         }
     }
-    
+
     private void updateServerStatus() {
         ServerManager serverManager = Main.getMain().getServerManager();
         if (serverManager != null && serverManager.isServerRunning()) {
@@ -376,20 +390,20 @@ public class MultiplayerMenu implements Screen {
             updateStatus("Server is not running", false);
         }
     }
-    
+
     private void restartServer() {
         updateStatus("Restarting server...", true);
-        
+
         // Disconnect from current server if connected
         if (isConnected) {
             disconnectFromServer();
         }
-        
+
         // Get server manager and restart server
         ServerManager serverManager = Main.getMain().getServerManager();
         if (serverManager != null) {
             serverManager.stopServer();
-            
+
             // Start server again
             serverManager.startServerIfNeeded().thenAccept(success -> {
                 Gdx.app.postRunnable(() -> {
@@ -404,12 +418,12 @@ public class MultiplayerMenu implements Screen {
             updateStatus("Server manager not available", false);
         }
     }
-    
+
     private void startPlayerRefreshTimer() {
         if (refreshTimer != null) {
             refreshTimer.cancel();
         }
-        
+
         refreshTimer = new Timer();
         refreshTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -420,55 +434,55 @@ public class MultiplayerMenu implements Screen {
             }
         }, 5000, 10000); // Refresh every 10 seconds after initial 5 second delay
     }
-    
+
     private void refreshOnlinePlayers() {
         if (!isConnected || networkClient == null) {
             return;
         }
-        
+
         try {
             NetworkResult<OnlinePlayersResponse> result = networkClient.getOnlinePlayers();
             if (result.isSuccess()) {
                 OnlinePlayersResponse response = result.getData();
                 onlinePlayers.clear();
-                
+
                 for (OnlinePlayersResponse.PlayerInfo player : response.getPlayers()) {
                     onlinePlayers.add(player);
                 }
-                
+
                 setupOnlinePlayersTable();
             } else {
                 System.err.println("Failed to get online players: " + result.getMessage());
             }
-            
+
         } catch (Exception e) {
             System.err.println("Error refreshing online players: " + e.getMessage());
         }
     }
-    
+
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 40f));
         stage.draw();
     }
-    
+
     @Override
     public void resize(int width, int height) {
         if (stage != null) {
             stage.getViewport().update(width, height, true);
         }
     }
-    
+
     @Override
     public void pause() {}
-    
+
     @Override
     public void resume() {}
-    
+
     @Override
     public void hide() {}
-    
+
     @Override
     public void dispose() {
         disconnectFromServer();
@@ -476,7 +490,7 @@ public class MultiplayerMenu implements Screen {
             stage.dispose();
         }
     }
-    
+
     private void setScale() {
         titleLabel.setFontScale(2f);
         statusLabel.setFontScale(1.5f);

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.Common.network.GameProtocol;
 import org.example.Common.network.events.GameStateUpdateEvent;
 import org.example.Client.views.GameMenu;
+import org.example.Client.Main;
 import org.example.Common.models.Fundementals.App;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,8 +56,23 @@ public class GameWebSocketClient {
             System.out.println("DEBUG: GameWebSocketClient.connect() called");
             System.out.println("DEBUG: Original gameId parameter: " + gameId);
 
-            // Get auth token from the current user session
-            String authToken = App.getLoggedInUser() != null ? App.getLoggedInUser().getToken() : "dummy_token";
+            // Get auth token from the ServerConnection (set during login in MultiplayerMenu)
+            String authToken = null;
+            if (Main.getMain() != null && Main.getMain().getServerConnection() != null) {
+                authToken = Main.getMain().getServerConnection().getAuthToken();
+                System.out.println("DEBUG: Got auth token from ServerConnection: " + authToken);
+            }
+
+            // Fallback to user token if available
+            if (authToken == null && App.getLoggedInUser() != null) {
+                authToken = App.getLoggedInUser().getToken();
+                System.out.println("DEBUG: Fallback to user token: " + authToken);
+            }
+
+            // Use null instead of dummy_token for better debugging
+            if (authToken == null) {
+                System.out.println("DEBUG: No auth token available");
+            }
 
             // Use server game ID if available, otherwise use the provided gameId
             String gameIdToUse = gameId;
@@ -281,6 +297,10 @@ public class GameWebSocketClient {
                     System.out.println("DEBUG: Handling movement notification");
                     handleMovementNotification(messageData);
                     break;
+                case "connection_established":
+                    System.out.println("DEBUG: Handling connection established");
+                    handleConnectionEstablished(messageData);
+                    break;
                 default:
                     System.out.println("DEBUG: Unknown message type: " + messageType);
                     logger.debug("Received unknown message type: {}", messageType);
@@ -481,6 +501,31 @@ public class GameWebSocketClient {
             webSocket.send(messageJson);
         } catch (Exception e) {
             logger.error("Error sending data through WebSocket", e);
+        }
+    }
+
+    private void handleConnectionEstablished(Map<String, Object> messageData) {
+        try {
+            String userId = (String) messageData.get("userId");
+            String message = (String) messageData.get("message");
+            Long timestamp = (Long) messageData.get("timestamp");
+
+            System.out.println("DEBUG: Connection established for user: " + userId);
+            System.out.println("DEBUG: Message: " + message);
+            System.out.println("DEBUG: Timestamp: " + timestamp);
+
+            // Update connection status
+            isConnected = true;
+            isReconnecting = false;
+            reconnectionAttempts = 0;
+
+            // Notify game menu about successful connection
+            if (gameMenu != null) {
+                gameMenu.onWebSocketConnected();
+            }
+
+        } catch (Exception e) {
+            logger.error("Error handling connection established", e);
         }
     }
 }

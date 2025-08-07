@@ -98,9 +98,12 @@ public class GameSessionManager {
                 }
             }
 
-            // Generate unique game ID
-            String gameId = UUID.randomUUID().toString();
-            System.out.println("DEBUG: Generated game ID: " + gameId);
+            // Generate game ID with client identification for tracing
+            // Format: "game_{creatorId}_{timestamp}_{randomSuffix}"
+            String timestamp = String.valueOf(System.currentTimeMillis());
+            String randomSuffix = UUID.randomUUID().toString().substring(0, 8);
+            String gameId = "game_" + creatorId + "_" + timestamp + "_" + randomSuffix;
+            System.out.println("DEBUG: Generated traceable game ID: " + gameId);
 
             // Use synchronized block to ensure thread-safe game creation
             synchronized (this) {
@@ -123,7 +126,8 @@ public class GameSessionManager {
                     System.out.println("DEBUG: Mapped player " + username + " to game " + gameId);
                 }
 
-                logger.info("Game created with ID: {} for {} players", gameId, request.getUsernames().size());
+                logger.info("Game created with traceable ID: {} for {} players (creator: {})",
+                    gameId, request.getUsernames().size(), creatorId);
             }
 
             // Return basic game session info
@@ -131,7 +135,7 @@ public class GameSessionManager {
             GameStateResponse response = new GameStateResponse(gameId, null,
                 request.getUsernames(), null);
 
-            System.out.println("DEBUG: Returning success response with game ID: " + gameId);
+            System.out.println("DEBUG: Returning success response with traceable game ID: " + gameId);
             return NetworkResult.success("Game session created successfully", response);
 
         } catch (Exception e) {
@@ -270,10 +274,15 @@ public class GameSessionManager {
     }
 
     public GameInstance getGameInstance(String gameId) {
-        System.out.println("DEBUG: getGameInstance called with gameId: " + gameId);
-        System.out.println("DEBUG: Available game IDs: " + activeGames.keySet());
         GameInstance instance = activeGames.get(gameId);
-        System.out.println("DEBUG: Found game instance: " + (instance != null));
+        if (instance != null) {
+            String clientInfo = instance.getClientInfo();
+            if (clientInfo != null) {
+                logger.debug("Accessed game instance: {} - {}", gameId, clientInfo);
+            } else {
+                logger.debug("Accessed game instance: {}", gameId);
+            }
+        }
         return instance;
     }
 
@@ -287,6 +296,21 @@ public class GameSessionManager {
 
     public List<String> getActiveGameIds() {
         return activeGames.keySet().stream().collect(Collectors.toList());
+    }
+
+    /**
+     * Get all active games with their client information for debugging
+     * @return List of game information strings
+     */
+    public List<String> getActiveGamesWithClientInfo() {
+        return activeGames.entrySet().stream()
+            .map(entry -> {
+                String gameId = entry.getKey();
+                GameInstance instance = entry.getValue();
+                String clientInfo = instance.getClientInfo();
+                return clientInfo != null ? gameId + " - " + clientInfo : gameId;
+            })
+            .collect(Collectors.toList());
     }
 
     /**
@@ -307,11 +331,16 @@ public class GameSessionManager {
                 GameInstance instance = entry.getValue();
                 if (currentTime - instance.getLastActivity() > GameProtocol.GAME_INSTANCE_TIMEOUT_MS) {
                     String gameId = entry.getKey();
+                    String clientInfo = instance.getClientInfo();
 
                     // Remove player mappings
                     instance.getConnectedPlayers().forEach(playerToGameMapping::remove);
 
-                    logger.info("Cleaned up inactive game: {}", gameId);
+                    if (clientInfo != null) {
+                        logger.info("Cleaned up inactive game: {} - {}", gameId, clientInfo);
+                    } else {
+                        logger.info("Cleaned up inactive game: {}", gameId);
+                    }
                     return true;
                 }
                 return false;

@@ -132,6 +132,11 @@ public class SimpleNetworkServer {
         app.get("/lobby/farm-selection-status", this::handleGetFarmSelectionStatus);
         app.post("/lobby/start-game-session", this::handleStartGameSession);
 
+        // Game creation routes
+        app.post("/game/create", this::handleCreateGame);
+        app.get("/game/{gameId}/state", this::handleGetGameState);
+        app.post("/game/{gameId}/player/walk", this::handlePlayerWalk);
+
         // Test routes
         app.get("/api/test", this::handleTest);
         app.post("/api/echo", this::handleEcho);
@@ -664,6 +669,91 @@ public class SimpleNetworkServer {
             logger.error("Error starting game session", e);
             ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
+    }
+
+    // Game creation handlers
+    private void handleCreateGame(Context ctx) {
+        try {
+            // Simple authentication check - look for username in request or headers
+            String username = getUsernameFromContext(ctx);
+            if (username == null) {
+                ctx.status(401).json(NetworkResult.error("Authentication required"));
+                return;
+            }
+
+            CreateGameRequest request = ctx.bodyAsClass(CreateGameRequest.class);
+            NetworkResult<GameStateResponse> result = gameSessionManager.createGame(username, request);
+            ctx.status(result.getStatusCode()).json(result);
+        } catch (Exception e) {
+            logger.error("Create game error", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
+        }
+    }
+
+    private void handleGetGameState(Context ctx) {
+        try {
+            String gameId = ctx.pathParam("gameId");
+            String username = getUsernameFromContext(ctx);
+            if (username == null) {
+                ctx.status(401).json(NetworkResult.error("Authentication required"));
+                return;
+            }
+
+            NetworkResult<GameStateResponse> result = gameSessionManager.getGameState(gameId, username);
+            ctx.status(result.getStatusCode()).json(result);
+        } catch (Exception e) {
+            logger.error("Get game state error", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
+        }
+    }
+
+    private void handlePlayerWalk(Context ctx) {
+        try {
+            String gameId = ctx.pathParam("gameId");
+            String username = getUsernameFromContext(ctx);
+            if (username == null) {
+                ctx.status(401).json(NetworkResult.error("Authentication required"));
+                return;
+            }
+
+            WalkRequest request = ctx.bodyAsClass(WalkRequest.class);
+            NetworkResult<String> result = gameSessionManager.handlePlayerAction(gameId, username, "walk", request);
+            ctx.status(result.getStatusCode()).json(result);
+        } catch (Exception e) {
+            logger.error("Player walk error", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
+        }
+    }
+
+    private String getUsernameFromContext(Context ctx) {
+        // First try to get from authorization header
+        String authHeader = ctx.header("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7); // Remove "Bearer " prefix
+            // For simplicity, we'll look up the token in our logged-in users
+            for (Map.Entry<String, String> entry : users.entrySet()) {
+                if (token.equals(entry.getValue())) {
+                    return entry.getKey();
+                }
+            }
+        }
+
+        // Fallback: try to get from query parameter (for WebSocket connections)
+        String userId = ctx.queryParam("userId");
+        if (userId != null && users.containsKey(userId)) {
+            return userId;
+        }
+
+        // Fallback: if there's only one logged-in user, use that
+        try {
+            if (users.size() == 1) {
+                return users.keySet().iterator().next();
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+
+        return null;
     }
 
     public static void main(String[] args) {
