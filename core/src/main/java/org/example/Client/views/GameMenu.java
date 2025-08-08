@@ -151,12 +151,21 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Store server game ID for WebSocket initialization
         if (serverGameId != null) {
-            System.out.println("DEBUG: GameMenu created with server game ID: " + serverGameId);
+            System.out.println("DEBUG: [GAME_MENU] GameMenu created with server game ID: " + serverGameId);
             // Store the server game ID in the NetworkCommandSender if available
             if (App.getCurrentGame() != null && App.getCurrentGame().getNetworkCommandSender() != null) {
                 App.getCurrentGame().getNetworkCommandSender().setCurrentGameId(serverGameId);
-                System.out.println("DEBUG: Set server game ID in NetworkCommandSender: " + serverGameId);
+                System.out.println("DEBUG: [GAME_MENU] Set server game ID in NetworkCommandSender: " + serverGameId);
+                
+                // Verify it was set
+                String verifyId = App.getCurrentGame().getNetworkCommandSender().getCurrentGameId();
+                System.out.println("DEBUG: [GAME_MENU] Verified server game ID in NetworkCommandSender: " + verifyId);
+            } else {
+                System.out.println("DEBUG: [GAME_MENU] Cannot set server game ID - App.getCurrentGame() is " + App.getCurrentGame() + 
+                    ", NetworkCommandSender is " + (App.getCurrentGame() != null ? App.getCurrentGame().getNetworkCommandSender() : "N/A"));
             }
+        } else {
+            System.out.println("DEBUG: [GAME_MENU] GameMenu created with NULL server game ID - will use local game ID");
         }
     }
 
@@ -345,7 +354,8 @@ public class GameMenu extends InputAdapter implements Screen {
                     if (player.getUser().getUserName().equals(playerId)) {
                         Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
                         player.setUserLocation(newLocation);
-                        player.updatePosition(x, y); // Update sprite position
+                        // Convert coordinates to scaled values (x100) for sprite positioning
+                        player.updatePosition(x * 100, y * 100); // Update sprite position with scaled coordinates
                         System.out.println("DEBUG: Updated player " + playerId + " position to (" + x + ", " + y + ")");
                         logger.debug("Updated player {} position to ({}, {})", playerId, x, y);
                         playerFound = true;
@@ -387,7 +397,8 @@ public class GameMenu extends InputAdapter implements Screen {
                 if (player.getUser().getUserName().equals(playerId)) {
                     Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
                     player.setUserLocation(newLocation);
-                    player.updatePosition(x, y); // Update sprite position
+                    // Convert coordinates to scaled values (x100) for sprite positioning
+                    player.updatePosition(x * 100, y * 100); // Update sprite position with scaled coordinates
                     logger.debug("Updated player {} position to ({}, {})", playerId, x, y);
                     playerFound = true;
 
@@ -2514,21 +2525,26 @@ public class GameMenu extends InputAdapter implements Screen {
 
                 // Use server game ID if available, otherwise fall back to local game ID
                 String gameId;
+                System.out.println("DEBUG: [WEBSOCKET_INIT] Starting WebSocket initialization");
+                System.out.println("DEBUG: [WEBSOCKET_INIT] App.getCurrentGame(): " + App.getCurrentGame());
+                
                 if (App.getCurrentGame().getNetworkCommandSender() != null) {
+                    System.out.println("DEBUG: [WEBSOCKET_INIT] NetworkCommandSender exists");
                     String serverGameId = App.getCurrentGame().getNetworkCommandSender().getCurrentGameId();
-                    System.out.println("DEBUG: NetworkCommandSender exists, server game ID: " + serverGameId);
+                    System.out.println("DEBUG: [WEBSOCKET_INIT] NetworkCommandSender.getCurrentGameId(): " + serverGameId);
+                    
                     if (serverGameId != null) {
                         gameId = serverGameId;
-                        System.out.println("DEBUG: Using server game ID for WebSocket: " + gameId);
+                        System.out.println("DEBUG: [WEBSOCKET_INIT] Using server game ID for WebSocket: " + gameId);
                     } else {
                         // Fall back to local game ID as string for compatibility
                         gameId = String.valueOf(App.getCurrentGame().getGameId());
-                        System.out.println("DEBUG: Server game ID not available, using local game ID: " + gameId);
+                        System.out.println("DEBUG: [WEBSOCKET_INIT] Server game ID is NULL, using local game ID: " + gameId);
                     }
                 } else {
                     // Fall back to local game ID as string for compatibility
                     gameId = String.valueOf(App.getCurrentGame().getGameId());
-                    System.out.println("DEBUG: No NetworkCommandSender, using local game ID: " + gameId);
+                    System.out.println("DEBUG: [WEBSOCKET_INIT] NetworkCommandSender is NULL, using local game ID: " + gameId);
                 }
 
                 String serverUrl = "http://localhost:8080"; // Configure based on your server

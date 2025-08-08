@@ -71,10 +71,10 @@ public class PlayerController {
         this.player = player;
         this.gameController = gameController;
 
-        // Initialize network command sender for multiplayer movement updates
+        // Get network command sender from the game for multiplayer movement updates
         if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
             System.out.println("DEBUG: Initializing NetworkCommandSender for multiplayer game");
-            this.networkCommandSender = new NetworkCommandSender(Main.getMain().getServerConnection());
+            this.networkCommandSender = App.getCurrentGame().getNetworkCommandSender();
             System.out.println("DEBUG: NetworkCommandSender created: " + (this.networkCommandSender != null));
         } else {
             System.out.println("DEBUG: Not initializing NetworkCommandSender - game is null or not multiplayer");
@@ -274,24 +274,16 @@ public class PlayerController {
                 System.out.println("DEBUG: Player " + player.getUser().getUserName() + " moving UP, reducing energy from " + player.getEnergy() + " to " + newEnergy);
                 player.setEnergy(newEnergy);
 
-                // Send movement notification to server
-                if (App.getCurrentGame().isMultiplayer()) {
-                    System.out.println("DEBUG: Attempting to send movement notification for player: " + player.getUser().getUserName());
-                    System.out.println("DEBUG: WebSocket client exists: " + (App.getWebSocketClient() != null));
-                    System.out.println("DEBUG: Current game is multiplayer: " + App.getCurrentGame().isMultiplayer());
-
-                    if (App.getWebSocketClient() != null) {
-                        Map<String, Object> movementNotification = new HashMap<>();
-                        movementNotification.put("type", "movement_notification");
-                        movementNotification.put(player.getUser().getUserName(), newX);
-                        System.out.println("DEBUG: Sending movement notification: " + movementNotification);
-                        App.getWebSocketClient().send(movementNotification);
-                        System.out.println("DEBUG: Sent movement notification: " + player.getUser().getUserName() + " : " + newX);
-                    } else {
-                        System.out.println("DEBUG: WebSocket client is null, cannot send movement notification");
+                // Send movement update via NetworkCommandSender for consistency
+                if (App.getCurrentGame().isMultiplayer() && networkCommandSender != null) {
+                    try {
+                        int originalX = (int) (newX / 100f);
+                        int originalY = (int) (newY / 100f);
+                        networkCommandSender.sendPlayerMovementWebSocket(originalX, originalY);
+                        System.out.println("DEBUG: Sent movement update for UP: " + player.getUser().getUserName() + " to (" + originalX + ", " + originalY + ")");
+                    } catch (Exception e) {
+                        System.out.println("DEBUG: Failed to send movement update: " + e.getMessage());
                     }
-                } else {
-                    System.out.println("DEBUG: Game is not multiplayer, skipping movement notification");
                 }
 
                 movementTimer = 0f;
@@ -312,22 +304,16 @@ public class PlayerController {
                 System.out.println("DEBUG: Player " + player.getUser().getUserName() + " moving DOWN, reducing energy from " + player.getEnergy() + " to " + newEnergy);
                 player.setEnergy(newEnergy);
 
-                // Send movement notification to server
-                if (App.getCurrentGame().isMultiplayer()) {
-                    System.out.println("DEBUG: Attempting to send movement notification for player: " + player.getUser().getUserName());
-                    System.out.println("DEBUG: WebSocket client exists: " + (App.getWebSocketClient() != null));
-
-                    if (App.getWebSocketClient() != null) {
-                        Map<String, Object> movementNotification = new HashMap<>();
-                        movementNotification.put("type", "movement_notification");
-                        movementNotification.put(player.getUser().getUserName(), newX);
-                        App.getWebSocketClient().send(movementNotification);
-                        System.out.println("DEBUG: Sent movement notification: " + player.getUser().getUserName() + " : " + newX);
-                    } else {
-                        System.out.println("DEBUG: WebSocket client is null, cannot send movement notification");
+                // Send movement update via NetworkCommandSender for consistency
+                if (App.getCurrentGame().isMultiplayer() && networkCommandSender != null) {
+                    try {
+                        int originalX = (int) (newX / 100f);
+                        int originalY = (int) (newY / 100f);
+                        networkCommandSender.sendPlayerMovementWebSocket(originalX, originalY);
+                        System.out.println("DEBUG: Sent movement update for DOWN: " + player.getUser().getUserName() + " to (" + originalX + ", " + originalY + ")");
+                    } catch (Exception e) {
+                        System.out.println("DEBUG: Failed to send movement update: " + e.getMessage());
                     }
-                } else {
-                    System.out.println("DEBUG: Game is not multiplayer, skipping movement notification");
                 }
 
                 movementTimer = 0f;
@@ -348,22 +334,16 @@ public class PlayerController {
                 System.out.println("DEBUG: Player " + player.getUser().getUserName() + " moving LEFT, reducing energy from " + player.getEnergy() + " to " + newEnergy);
                 player.setEnergy(newEnergy);
 
-                // Send movement notification to server
-                if (App.getCurrentGame().isMultiplayer()) {
-                    System.out.println("DEBUG: Attempting to send movement notification for player: " + player.getUser().getUserName());
-                    System.out.println("DEBUG: WebSocket client exists: " + (App.getWebSocketClient() != null));
-
-                    if (App.getWebSocketClient() != null) {
-                        Map<String, Object> movementNotification = new HashMap<>();
-                        movementNotification.put("type", "movement_notification");
-                        movementNotification.put(player.getUser().getUserName(), newX);
-                        App.getWebSocketClient().send(movementNotification);
-                        System.out.println("DEBUG: Sent movement notification: " + player.getUser().getUserName() + " : " + newX);
-                    } else {
-                        System.out.println("DEBUG: WebSocket client is null, cannot send movement notification");
+                // Send movement update via NetworkCommandSender for consistency
+                if (App.getCurrentGame().isMultiplayer() && networkCommandSender != null) {
+                    try {
+                        int originalX = (int) (newX / 100f);
+                        int originalY = (int) (newY / 100f);
+                        networkCommandSender.sendPlayerMovementWebSocket(originalX, originalY);
+                        System.out.println("DEBUG: Sent movement update for LEFT: " + player.getUser().getUserName() + " to (" + originalX + ", " + originalY + ")");
+                    } catch (Exception e) {
+                        System.out.println("DEBUG: Failed to send movement update: " + e.getMessage());
                     }
-                } else {
-                    System.out.println("DEBUG: Game is not multiplayer, skipping movement notification");
                 }
 
                 // Reset movement timer for cooldown
@@ -386,22 +366,16 @@ public class PlayerController {
                 System.out.println("DEBUG: Player " + player.getUser().getUserName() + " moving RIGHT, reducing energy from " + player.getEnergy() + " to " + newEnergy);
                 player.setEnergy(newEnergy);
 
-                // Send movement notification to server
-                if (App.getCurrentGame().isMultiplayer()) {
-                    System.out.println("DEBUG: Attempting to send movement notification for player: " + player.getUser().getUserName());
-                    System.out.println("DEBUG: WebSocket client exists: " + (App.getWebSocketClient() != null));
-
-                    if (App.getWebSocketClient() != null) {
-                        Map<String, Object> movementNotification = new HashMap<>();
-                        movementNotification.put("type", "movement_notification");
-                        movementNotification.put(player.getUser().getUserName(), newX);
-                        App.getWebSocketClient().send(movementNotification);
-                        System.out.println("DEBUG: Sent movement notification: " + player.getUser().getUserName() + " : " + newX);
-                    } else {
-                        System.out.println("DEBUG: WebSocket client is null, cannot send movement notification");
+                // Send movement update via NetworkCommandSender for consistency
+                if (App.getCurrentGame().isMultiplayer() && networkCommandSender != null) {
+                    try {
+                        int originalX = (int) (newX / 100f);
+                        int originalY = (int) (newY / 100f);
+                        networkCommandSender.sendPlayerMovementWebSocket(originalX, originalY);
+                        System.out.println("DEBUG: Sent movement update for RIGHT: " + player.getUser().getUserName() + " to (" + originalX + ", " + originalY + ")");
+                    } catch (Exception e) {
+                        System.out.println("DEBUG: Failed to send movement update: " + e.getMessage());
                     }
-                } else {
-                    System.out.println("DEBUG: Game is not multiplayer, skipping movement notification");
                 }
 
                 // Reset movement timer for cooldown
@@ -425,19 +399,7 @@ public class PlayerController {
 
         player.updatePosition(newX, newY);
 
-        // Send movement update to server in multiplayer mode
-        if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer() && networkCommandSender != null) {
-            try {
-                // Send WebSocket movement update for real-time synchronization
-                // Convert from scaled coordinates (100x) to original coordinates
-                int originalX = (int) (newX / 100f);
-                int originalY = (int) (newY / 100f);
-                networkCommandSender.sendPlayerMovementWebSocket(originalX, originalY);
-                logger.debug("Sent movement update to server: ({}, {})", originalX, originalY);
-            } catch (Exception e) {
-                logger.error("Failed to send movement update to server", e);
-            }
-        }
+        // Movement updates are now sent individually for each key press above
 
         switch (facing) {
             case UP -> currentAnim = walkUp;

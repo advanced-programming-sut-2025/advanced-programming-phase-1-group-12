@@ -14,9 +14,11 @@ import java.util.Map;
 
 public class Game {
     private Player currentPlayer = null;
+    @JsonIgnore
     private Map<User, Integer> score = new HashMap<>();
     private int gameId;
     private map mainMap = new map();
+    @JsonIgnore
     Map<Farm, Player> userAndMap = new HashMap<>();
     private ArrayList<Player> players = new ArrayList<>();
     private ArrayList<Farm> farms = new ArrayList<>();

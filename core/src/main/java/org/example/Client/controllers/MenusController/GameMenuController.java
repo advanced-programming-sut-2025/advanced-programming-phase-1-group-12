@@ -415,20 +415,35 @@ public class GameMenuController {
                         networkSender.createGame(usernames, farmSelections);
 
                     if (createResult.isSuccess()) {
-                        String serverGameId = createResult.getData().getGameId();
-                        networkSender.setCurrentGameId(serverGameId);
-                        System.out.println("DEBUG: Game created on server with ID: " + serverGameId);
+                        org.example.Common.network.responses.GameStateResponse gameData = createResult.getData();
+                        System.out.println("DEBUG: [GAME_CREATION] Game creation successful");
+                        System.out.println("DEBUG: [GAME_CREATION] Response data: " + gameData);
+                        System.out.println("DEBUG: [GAME_CREATION] GameData is null: " + (gameData == null));
+                        
+                        if (gameData != null) {
+                            String serverGameId = gameData.getGameId();
+                            System.out.println("DEBUG: [GAME_CREATION] Extracted server game ID: " + serverGameId);
+                            
+                            networkSender.setCurrentGameId(serverGameId);
+                            System.out.println("DEBUG: [GAME_CREATION] Set server game ID in NetworkCommandSender: " + serverGameId);
 
-                        // Connect to WebSocket for this game
-                        networkSender.connectToGameWebSocket(serverGameId);
-                        System.out.println("DEBUG: Connected to WebSocket for game: " + serverGameId);
+                            // Verify it was set correctly
+                            String verifyId = networkSender.getCurrentGameId();
+                            System.out.println("DEBUG: [GAME_CREATION] Verified NetworkCommandSender game ID: " + verifyId);
 
-                        // Create GameMenu with server game ID
-                        GameMenu gameMenu = new GameMenu(usernames, serverGameId);
-                        Main.getMain().setScreen(gameMenu);
-                        return; // Exit early since we've set the screen
+                            // Connect to WebSocket for this game
+                            networkSender.connectToGameWebSocket(serverGameId);
+                            System.out.println("DEBUG: [GAME_CREATION] Connected to WebSocket for game: " + serverGameId);
+
+                            // Create GameMenu with server game ID
+                            GameMenu gameMenu = new GameMenu(usernames, serverGameId);
+                            Main.getMain().setScreen(gameMenu);
+                            return; // Exit early since we've set the screen
+                        } else {
+                            System.out.println("DEBUG: [GAME_CREATION] GameData is null, falling back to local game");
+                        }
                     } else {
-                        System.out.println("DEBUG: Failed to create game on server: " + createResult.getMessage());
+                        System.out.println("DEBUG: [GAME_CREATION] Failed to create game on server: " + createResult.getMessage());
                         // Fall back to local game
                     }
                 } catch (Exception e) {

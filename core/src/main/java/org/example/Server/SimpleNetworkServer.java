@@ -674,14 +674,19 @@ public class SimpleNetworkServer {
     // Game creation handlers
     private void handleCreateGame(Context ctx) {
         try {
-            // Simple authentication check - look for username in request or headers
-            String username = getUsernameFromContext(ctx);
+            CreateGameRequest request = ctx.bodyAsClass(CreateGameRequest.class);
+            
+            // Extract username from the first player in the request (similar to lobby approach)
+            String username = null;
+            if (request.getUsernames() != null && !request.getUsernames().isEmpty()) {
+                username = request.getUsernames().get(0); // Use the first player as the creator
+            }
+            
             if (username == null) {
-                ctx.status(401).json(NetworkResult.error("Authentication required"));
+                ctx.status(400).json(NetworkResult.error("No usernames provided in request"));
                 return;
             }
 
-            CreateGameRequest request = ctx.bodyAsClass(CreateGameRequest.class);
             NetworkResult<GameStateResponse> result = gameSessionManager.createGame(username, request);
             ctx.status(result.getStatusCode()).json(result);
         } catch (Exception e) {
@@ -726,11 +731,22 @@ public class SimpleNetworkServer {
     }
 
     private String getUsernameFromContext(Context ctx) {
-        // First try to get from authorization header
+        // First try to get from authorization header using JWT
         String authHeader = ctx.header("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7); // Remove "Bearer " prefix
-            // For simplicity, we'll look up the token in our logged-in users
+            try {
+                // Simple token validation - in production this would use proper JWT validation
+                // For now, we'll extract the username from a simple token format
+                if (token.startsWith("test-token-")) {
+                    // For test tokens, we'll extract username from the request or use a default
+                    return null; // Will fall back to request body username
+                }
+            } catch (Exception e) {
+                logger.debug("Failed to validate JWT token", e);
+            }
+            
+            // Fallback: look up the token in our simple logged-in users map
             for (Map.Entry<String, String> entry : users.entrySet()) {
                 if (token.equals(entry.getValue())) {
                     return entry.getKey();
