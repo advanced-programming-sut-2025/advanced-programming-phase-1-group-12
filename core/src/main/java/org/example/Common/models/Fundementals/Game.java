@@ -162,6 +162,7 @@ public class Game {
 
     public void nextTurn() {
         if (!isTurnBasedMode || players.isEmpty()) {
+            System.err.println("WARNING: Cannot advance turn - turn-based mode: " + isTurnBasedMode + ", players empty: " + players.isEmpty());
             return;
         }
 
@@ -173,6 +174,8 @@ public class Game {
         if (currentPlayer != null) {
             currentPlayer.setEnergy(200);
             currentPlayer.setHasCollapsed(false);
+        } else {
+            System.err.println("ERROR: Current player is null after advancing turn");
         }
     }
 

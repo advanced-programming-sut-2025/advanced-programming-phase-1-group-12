@@ -22,15 +22,19 @@ public class Lwjgl3Launcher {
     public static void main(String[] args) {
         if (StartupHelper.startNewJvmIfRequired()) return; // This handles macOS support and helps on Windows.
 
-        // Start the server process using Gradle
-        if (startServerProcess()) {
-            System.out.println("[Launcher] ✅ Server started successfully!");
-        } else {
-            System.err.println("[Launcher] ❌ Failed to start server. Game will continue without multiplayer.");
-        }
+        // Server startup disabled - start manually with: ./gradlew :core:runServer
+        System.out.println("[Launcher] ℹ️  Server startup disabled. Start manually with: ./gradlew :core:runServer");
+        System.out.println("[Launcher] ℹ️  Game will start without multiplayer server.");
 
-        // Add shutdown hook to stop the server when the game exits
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> stopServerProcess()));
+        // Comment out automatic server startup
+        // if (startServerProcess()) {
+        //     System.out.println("[Launcher] ✅ Server started successfully!");
+        // } else {
+        //     System.err.println("[Launcher] ❌ Failed to start server. Game will continue without multiplayer.");
+        // }
+
+        // Comment out shutdown hook since server is not started automatically
+        // Runtime.getRuntime().addShutdownHook(new Thread(() -> stopServerProcess()));
 
         createApplication();
     }

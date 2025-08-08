@@ -458,6 +458,67 @@ public class GameMenuController {
                             String verifyId = networkSender.getCurrentGameId();
                             System.out.println("DEBUG: [GAME_CREATION] Verified NetworkCommandSender game ID: " + verifyId);
 
+                            // Sync local game state with server response
+                            System.out.println("DEBUG: [GAME_CREATION] Syncing local game state with server data");
+                            System.out.println("DEBUG: [GAME_CREATION] Server connectedPlayers: " + gameData.getConnectedPlayers());
+                            System.out.println("DEBUG: [GAME_CREATION] Local players before sync: " + App.getCurrentGame().getPlayers().size());
+                            
+                            // Ensure the local players list matches the server's connected players
+                            if (gameData.getConnectedPlayers() != null && !gameData.getConnectedPlayers().isEmpty()) {
+                                // Clear and rebuild the players list to match server state
+                                ArrayList<Player> syncedPlayers = new ArrayList<>();
+                                for (String username : gameData.getConnectedPlayers()) {
+                                    // Find existing player or create new one
+                                    Player existingPlayer = null;
+                                    for (Player p : players) {
+                                        if (p.getUser().getUserName().equals(username)) {
+                                            existingPlayer = p;
+                                            break;
+                                        }
+                                    }
+                                    
+                                    if (existingPlayer != null) {
+                                        syncedPlayers.add(existingPlayer);
+                                        System.out.println("DEBUG: [GAME_CREATION] Added existing player: " + username);
+                                    } else {
+                                        // Create new player if not found
+                                        User user = App.getUserByUsername(username);
+                                        if (user == null) {
+                                            user = new User(null, username, username, "defaultPassword", username + "@example.com", "", "", false, "");
+                                            App.getUsers().put(user.getUserName(), user);
+                                        }
+                                        
+                                        Player newPlayer = new Player(user, new Location(0, 0), false, new Refrigrator(), new ArrayList<>(), null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
+                                        newPlayer.setPlayerTexture(new Texture("sprites/Robin.png"));
+                                        newPlayer.setPortraitFrame(GameAssetManager.getRobinPortrait());
+                                        syncedPlayers.add(newPlayer);
+                                        System.out.println("DEBUG: [GAME_CREATION] Created new player: " + username);
+                                    }
+                                }
+                                
+                                // Update the game's players list
+                                App.getCurrentGame().setPlayers(syncedPlayers);
+                                System.out.println("DEBUG: [GAME_CREATION] Synced players list size: " + syncedPlayers.size());
+                                
+                                // Set current player to logged-in user
+                                String loggedInUsername = App.getLoggedInUser().getUserName();
+                                Player currentPlayer = null;
+                                for (Player p : syncedPlayers) {
+                                    if (p.getUser().getUserName().equals(loggedInUsername)) {
+                                        currentPlayer = p;
+                                        break;
+                                    }
+                                }
+                                
+                                if (currentPlayer != null) {
+                                    App.getCurrentGame().setCurrentPlayer(currentPlayer);
+                                    System.out.println("DEBUG: [GAME_CREATION] Set current player to: " + loggedInUsername);
+                                } else if (!syncedPlayers.isEmpty()) {
+                                    App.getCurrentGame().setCurrentPlayer(syncedPlayers.get(0));
+                                    System.out.println("DEBUG: [GAME_CREATION] Set current player to first player: " + syncedPlayers.get(0).getUser().getUserName());
+                                }
+                            }
+
                             // Connect to WebSocket for this game
                             networkSender.connectToGameWebSocket(serverGameId);
                             System.out.println("DEBUG: [GAME_CREATION] Connected to WebSocket for game: " + serverGameId);
@@ -493,10 +554,27 @@ public class GameMenuController {
 
     public Result nextTurn() {
         List<Player> players = App.getCurrentGame().getPlayers();
+        
+        // Safety check for empty players list
+        if (players == null || players.isEmpty()) {
+            System.err.println("ERROR: Players list is null or empty in nextTurn()");
+            return new Result(false, "No players available for turn management");
+        }
+        
         Player currentPlayer = App.getCurrentPlayerLazy();
+        if (currentPlayer == null) {
+            System.err.println("ERROR: Current player is null in nextTurn()");
+            return new Result(false, "Current player is not set");
+        }
+        
         currentPlayer.setEnergy(200);
 
         int index = players.indexOf(currentPlayer);
+        if (index == -1) {
+            System.err.println("ERROR: Current player not found in players list");
+            return new Result(false, "Current player not found in game");
+        }
+        
         int tries = 0;
         Player nextPlayer;
 
