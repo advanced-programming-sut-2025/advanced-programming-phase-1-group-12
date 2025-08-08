@@ -12,7 +12,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.google.gson.Gson;
 import org.example.Client.Main;
 import org.example.Common.models.RelatedToUser.User;
-import org.example.Server.controllers.MenusController.ProfileMenuController;
+import org.example.Client.controllers.MenusController.ProfileMenuController;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Assets.GameAssetManager;
 

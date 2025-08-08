@@ -8,7 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Client.Main;
-import org.example.Server.controllers.StoreController;
+import org.example.Client.controllers.StoreController;
 import org.example.Common.models.Assets.GameAssetManager;
 import org.example.Common.models.Fundementals.Player;
 import org.example.Common.models.Fundementals.Result;

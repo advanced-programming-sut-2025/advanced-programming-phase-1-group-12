@@ -13,7 +13,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Client.Main;
-import org.example.Server.controllers.MenusController.LoginRegisterMenuController;
+import org.example.Client.controllers.MenusController.LoginRegisterMenuController;
 import org.example.Common.models.Fundementals.Result;
 import org.example.Common.models.Assets.GameAssetManager;
 

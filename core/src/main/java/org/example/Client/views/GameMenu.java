@@ -22,9 +22,9 @@ import org.example.Client.Main;
 import org.example.Common.models.enums.Animal;
 import org.example.Common.models.enums.foraging.Plant;
 import org.example.Common.models.enums.foraging.TypeOfPlant;
-import org.example.Server.controllers.*;
-import org.example.Server.controllers.MenusController.GameMenuController;
-import org.example.Server.controllers.movingPlayer.PlayerController;
+import org.example.Client.controllers.*;
+import org.example.Client.controllers.MenusController.GameMenuController;
+import org.example.Client.controllers.movingPlayer.PlayerController;
 import org.example.Common.models.Animal.FarmAnimals;
 import org.example.Common.models.Assets.GameAssetManager;
 import org.example.Common.models.Assets.ToolAssetsManager;
@@ -144,11 +144,25 @@ public class GameMenu extends InputAdapter implements Screen {
             artisanController);
 
     public GameMenu(List<String> players) {
+        this(players, null);
+    }
+
+    public GameMenu(List<String> players, String serverGameId) {
         this.players = players;
 
         // Set current player to the logged-in user for individual farm view
         setCurrentPlayerToLoggedInUser();
         errorLabel = new Label("", skin);
+
+        // Store server game ID for WebSocket initialization
+        if (serverGameId != null) {
+            System.out.println("DEBUG: GameMenu created with server game ID: " + serverGameId);
+            // Store the server game ID in the NetworkCommandSender if available
+            if (App.getCurrentGame() != null && App.getCurrentGame().getNetworkCommandSender() != null) {
+                App.getCurrentGame().getNetworkCommandSender().setCurrentGameId(serverGameId);
+                System.out.println("DEBUG: Set server game ID in NetworkCommandSender: " + serverGameId);
+            }
+        }
     }
 
 
@@ -182,12 +196,23 @@ public class GameMenu extends InputAdapter implements Screen {
     // Real-time map update handler
     public void handleGameStateUpdate(String updateType, Map<String, Object> data) {
         try {
+            System.out.println("DEBUG: GameMenu.handleGameStateUpdate called with updateType: " + updateType + ", data: " + data);
+
             switch (updateType) {
                 case "player_moved":
-                    handlePlayerPositionUpdate(data);
+                    handlePlayerMovementUpdate(data);
                     break;
                 case "energy_updated":
                     handleEnergyUpdate(data);
+                    break;
+                case "player_joined":
+                    handlePlayerJoined(data);
+                    break;
+                case "player_left":
+                    handlePlayerLeft(data);
+                    break;
+                case "chat_message":
+                    handleChatMessage(data);
                     break;
                 case "npc_updated":
                     handleNPCUpdate(data);
@@ -208,11 +233,148 @@ public class GameMenu extends InputAdapter implements Screen {
                     handleObjectInteraction(data);
                     break;
                 default:
+                    System.out.println("DEBUG: Unknown game state update type: " + updateType);
                     logger.debug("Unknown game state update type: {}", updateType);
                     break;
             }
+
         } catch (Exception e) {
-            logger.error("Error handling game state update: {}", updateType, e);
+            System.out.println("DEBUG: Error handling game state update: " + e.getMessage());
+            logger.error("Error handling game state update", e);
+        }
+    }
+
+    public void onWebSocketConnected() {
+        try {
+            System.out.println("DEBUG: GameMenu.onWebSocketConnected called");
+            logger.info("WebSocket connection established for game menu");
+
+            // Update UI to show connection status
+            if (errorLabel != null) {
+                errorLabel.setText("Connected to multiplayer server");
+                errorLabel.setColor(Color.GREEN);
+                timeSinceError = 0f;
+            }
+
+            // Any additional initialization needed when WebSocket connects
+            // For example, send initial game state or player information
+
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error in onWebSocketConnected: " + e.getMessage());
+            logger.error("Error handling WebSocket connection", e);
+        }
+    }
+
+    private void handlePlayerJoined(Map<String, Object> data) {
+        try {
+            String playerId = (String) data.get("playerId");
+            String username = (String) data.get("username");
+            Integer playerCount = (Integer) data.get("playerCount");
+
+            System.out.println("DEBUG: Player joined - playerId: " + playerId + ", username: " + username + ", count: " + playerCount);
+            logger.info("Player joined: {} (total players: {})", username, playerCount);
+
+            // Update UI to show new player joined
+            if (errorLabel != null) {
+                errorLabel.setText(username + " joined the game");
+                errorLabel.setColor(Color.BLUE);
+                timeSinceError = 0f;
+            }
+
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error handling player joined: " + e.getMessage());
+            logger.error("Error handling player joined", e);
+        }
+    }
+
+    private void handlePlayerLeft(Map<String, Object> data) {
+        try {
+            String playerId = (String) data.get("playerId");
+            String username = (String) data.get("username");
+            Integer playerCount = (Integer) data.get("playerCount");
+            String reason = (String) data.get("reason");
+
+            System.out.println("DEBUG: Player left - playerId: " + playerId + ", username: " + username + ", count: " + playerCount + ", reason: " + reason);
+            logger.info("Player left: {} (total players: {}) - reason: {}", username, playerCount, reason);
+
+            // Update UI to show player left
+            if (errorLabel != null) {
+                errorLabel.setText(username + " left the game");
+                errorLabel.setColor(Color.ORANGE);
+                timeSinceError = 0f;
+            }
+
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error handling player left: " + e.getMessage());
+            logger.error("Error handling player left", e);
+        }
+    }
+
+    private void handleChatMessage(Map<String, Object> data) {
+        try {
+            String playerId = (String) data.get("playerId");
+            String username = (String) data.get("username");
+            String message = (String) data.get("message");
+            String chatType = (String) data.get("chatType");
+
+            System.out.println("DEBUG: Chat message - playerId: " + playerId + ", username: " + username + ", message: " + message + ", type: " + chatType);
+            logger.debug("Chat message from {}: {}", username, message);
+
+            // Handle chat message display
+            // This could be implemented to show chat messages in the UI
+            if (errorLabel != null) {
+                errorLabel.setText(username + ": " + message);
+                errorLabel.setColor(Color.WHITE);
+                timeSinceError = 0f;
+            }
+
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error handling chat message: " + e.getMessage());
+            logger.error("Error handling chat message", e);
+        }
+    }
+
+    private void handlePlayerMovementUpdate(Map<String, Object> data) {
+        try {
+            String playerId = (String) data.get("playerId");
+            Integer x = (Integer) data.get("x");
+            Integer y = (Integer) data.get("y");
+
+            System.out.println("DEBUG: Player movement update - playerId: " + playerId + ", x: " + x + ", y: " + y);
+            logger.debug("Player movement update: playerId={}, x={}, y={}", playerId, x, y);
+
+            if (playerId != null && x != null && y != null) {
+                // Find the player and update their position
+                boolean playerFound = false;
+                for (Player player : App.getCurrentGame().getPlayers()) {
+                    if (player.getUser().getUserName().equals(playerId)) {
+                        Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
+                        player.setUserLocation(newLocation);
+                        player.updatePosition(x, y); // Update sprite position
+                        System.out.println("DEBUG: Updated player " + playerId + " position to (" + x + ", " + y + ")");
+                        logger.debug("Updated player {} position to ({}, {})", playerId, x, y);
+                        playerFound = true;
+
+                        // If we're showing the full map, update camera position for smooth following
+                        if (showingAllMap) {
+                            updateCameraToPlayer();
+                        }
+                        break;
+                    }
+                }
+
+                if (!playerFound) {
+                    System.out.println("DEBUG: Player " + playerId + " not found in current game");
+                    logger.warn("Player {} not found in current game", playerId);
+                }
+            } else {
+                System.out.println("DEBUG: Invalid player movement data - playerId: " + playerId + ", x: " + x + ", y: " + y);
+                logger.warn("Invalid player movement data: playerId={}, x={}, y={}", playerId, x, y);
+            }
+
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error handling player movement update: " + e.getMessage());
+            logger.error("Error handling player movement update", e);
         }
     }
 
@@ -260,7 +422,7 @@ public class GameMenu extends InputAdapter implements Screen {
         System.out.println("DEBUG: Parsed energy update data - playerId: " + playerId + ", currentEnergy: " + currentEnergy + ", maxEnergy: " + maxEnergy + ", status: " + energyStatus);
 
         logger.debug("Handling energy update: playerId={}, currentEnergy={}, maxEnergy={}, status={}",
-                   playerId, currentEnergy, maxEnergy, energyStatus);
+            playerId, currentEnergy, maxEnergy, energyStatus);
 
         if (playerId != null && currentEnergy != null && maxEnergy != null) {
             // Find the player and update their energy
@@ -290,7 +452,7 @@ public class GameMenu extends InputAdapter implements Screen {
         } else {
             System.out.println("DEBUG: Invalid energy update data - playerId: " + playerId + ", currentEnergy: " + currentEnergy + ", maxEnergy: " + maxEnergy);
             logger.warn("Invalid energy update data: playerId={}, currentEnergy={}, maxEnergy={}",
-                       playerId, currentEnergy, maxEnergy);
+                playerId, currentEnergy, maxEnergy);
         }
     }
 
@@ -1527,6 +1689,7 @@ public class GameMenu extends InputAdapter implements Screen {
         TextButton settingsButton = new TextButton("Settings", skin);
         TextButton socialButton = new TextButton("Social", skin);
         TextButton inventoryButton = new TextButton("Inventory Items", skin);
+        TextButton tradeButton = new TextButton("Trade", skin);
         TextButton closeButton = new TextButton("Close", skin);
 
         inventoryButton.addListener(new ClickListener() {
@@ -1534,6 +1697,14 @@ public class GameMenu extends InputAdapter implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 dialog.hide();
                 inventoryItemsMenu(); // Assuming you have an `inventoryItemsMenu` method
+            }
+        });
+
+        tradeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+                tradeMenu();
             }
         });
 
@@ -1576,6 +1747,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
         Table content = dialog.getContentTable();
         content.add(inventoryButton).pad(5).width(400f).row();
+        content.add(tradeButton).pad(5).width(400f).row();
         content.add(socialButton).pad(5).width(400f).row();
         content.add(mapButton).pad(5).width(400f).row();
         content.add(settingsButton).pad(5).width(400f).row();
@@ -2406,7 +2578,26 @@ public class GameMenu extends InputAdapter implements Screen {
         try {
             if (App.getLoggedInUser() != null && App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
                 String userId = App.getLoggedInUser().getUserName();
-                String gameId = String.valueOf(App.getCurrentGame().getGameId()); // Convert int to String
+
+                // Use server game ID if available, otherwise fall back to local game ID
+                String gameId;
+                if (App.getCurrentGame().getNetworkCommandSender() != null) {
+                    String serverGameId = App.getCurrentGame().getNetworkCommandSender().getCurrentGameId();
+                    System.out.println("DEBUG: NetworkCommandSender exists, server game ID: " + serverGameId);
+                    if (serverGameId != null) {
+                        gameId = serverGameId;
+                        System.out.println("DEBUG: Using server game ID for WebSocket: " + gameId);
+                    } else {
+                        // Fall back to local game ID as string for compatibility
+                        gameId = String.valueOf(App.getCurrentGame().getGameId());
+                        System.out.println("DEBUG: Server game ID not available, using local game ID: " + gameId);
+                    }
+                } else {
+                    // Fall back to local game ID as string for compatibility
+                    gameId = String.valueOf(App.getCurrentGame().getGameId());
+                    System.out.println("DEBUG: No NetworkCommandSender, using local game ID: " + gameId);
+                }
+
                 String serverUrl = "http://localhost:8080"; // Configure based on your server
 
                 logger.info("Initializing WebSocket client for multiplayer game: userId={}, gameId={}", userId, gameId);
@@ -2751,13 +2942,13 @@ public class GameMenu extends InputAdapter implements Screen {
             if (!unlocked) {
                 cook.getLabel().setColor(Color.GRAY);
             }
-                cook.addListener(new ClickListener() {
-                    @Override
-                    public void clicked(InputEvent event, float x, float y) {
-                        System.out.println(cook.getLabel().toString());
-                        showError(controller.prepare(cook.getText().toString()).getMessage());
-                    }
-                });
+            cook.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    System.out.println(cook.getLabel().toString());
+                    showError(controller.prepare(cook.getText().toString()).getMessage());
+                }
+            });
 
             table.row();
             table.add(textureImage).width(48).height(48).padRight(10);
@@ -3394,7 +3585,7 @@ public class GameMenu extends InputAdapter implements Screen {
         showNotification(result.getMessage(), result.isSuccessful());
     }
 
-        private void performFlower(String targetUsername) {
+    private void performFlower(String targetUsername) {
         Player currentPlayer = App.getCurrentPlayerLazy();
         Player targetPlayer = App.getCurrentGame().getPlayerByName(targetUsername);
 
@@ -3405,7 +3596,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Check if players are adjacent
         float distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - targetPlayer.getUserLocation().getxAxis()) +
-                        Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
+            Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
         if (distance > 2) {
             showNotification("Players must be adjacent to give flowers!", false);
             return;
@@ -3637,7 +3828,7 @@ public class GameMenu extends InputAdapter implements Screen {
         for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
             if (!otherPlayer.equals(currentPlayer)) {
                 int distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - otherPlayer.getUserLocation().getxAxis()) +
-                             Math.abs(currentPlayer.getUserLocation().getyAxis() - otherPlayer.getUserLocation().getyAxis());
+                    Math.abs(currentPlayer.getUserLocation().getyAxis() - otherPlayer.getUserLocation().getyAxis());
 
                 if (distance <= 2) {
                     // Draw a subtle indicator around nearby players
@@ -4013,7 +4204,7 @@ public class GameMenu extends InputAdapter implements Screen {
         }
 
         float distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - targetPlayer.getUserLocation().getxAxis()) +
-                        Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
+            Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
 
         if (distance > 2) {
             showNotification("Players must be adjacent to hug!", false);
@@ -4108,7 +4299,7 @@ public class GameMenu extends InputAdapter implements Screen {
         }
 
         float distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - targetPlayer.getUserLocation().getxAxis()) +
-                        Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
+            Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
 
         if (distance > 2) {
             showNotification("Players must be adjacent to propose marriage!", false);
@@ -4215,7 +4406,7 @@ public class GameMenu extends InputAdapter implements Screen {
         }
 
         float distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - targetPlayer.getUserLocation().getxAxis()) +
-                        Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
+            Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
 
         if (distance > 2) {
             showNotification("Players must be adjacent to give flowers!", false);
@@ -4558,7 +4749,7 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
-        private void renderHugAnimation(SpriteBatch batch) {
+    private void renderHugAnimation(SpriteBatch batch) {
         if (waitingForNotificationClose) {
             return;
         }
@@ -4585,9 +4776,9 @@ public class GameMenu extends InputAdapter implements Screen {
             batch.draw(smileTextures[currentSmileFrame], centerX - smileWidth/2, centerY + 100f, smileWidth, smileHeight);
         } else {
             System.out.println("DEBUG: Cannot render smile texture - smileTextures: " + (smileTextures != null) +
-                             ", currentSmileFrame: " + currentSmileFrame +
-                             ", texture at frame: " + (smileTextures != null && currentSmileFrame >= 0 && currentSmileFrame < smileTextures.length ?
-                                 (smileTextures[currentSmileFrame] != null ? "not null" : "null") : "invalid index"));
+                ", currentSmileFrame: " + currentSmileFrame +
+                ", texture at frame: " + (smileTextures != null && currentSmileFrame >= 0 && currentSmileFrame < smileTextures.length ?
+                (smileTextures[currentSmileFrame] != null ? "not null" : "null") : "invalid index"));
         }
 
         // Render heart animation
@@ -4610,7 +4801,7 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
-        private void renderFlowerAnimation(SpriteBatch batch) {
+    private void renderFlowerAnimation(SpriteBatch batch) {
         if (waitingForFlowerNotificationClose) {
             return;
         }
@@ -4642,9 +4833,9 @@ public class GameMenu extends InputAdapter implements Screen {
             batch.draw(smileTextures[currentSmileFrame], centerX - smileWidth/2, centerY + 100f, smileWidth, smileHeight);
         } else {
             System.out.println("DEBUG: Cannot render smile texture for flower animation - smileTextures: " + (smileTextures != null) +
-                             ", currentSmileFrame: " + currentSmileFrame +
-                             ", texture at frame: " + (smileTextures != null && currentSmileFrame >= 0 && currentSmileFrame < smileTextures.length ?
-                                 (smileTextures[currentSmileFrame] != null ? "not null" : "null") : "invalid index"));
+                ", currentSmileFrame: " + currentSmileFrame +
+                ", texture at frame: " + (smileTextures != null && currentSmileFrame >= 0 && currentSmileFrame < smileTextures.length ?
+                (smileTextures[currentSmileFrame] != null ? "not null" : "null") : "invalid index"));
         }
 
         if (flowerAnimationActive && flowerTexture != null) {
@@ -4699,9 +4890,9 @@ public class GameMenu extends InputAdapter implements Screen {
             batch.draw(heartEmojiTextures[currentHeartEmojiFrame], centerX - heartEmojiWidth/2, centerY + 100f, heartEmojiWidth, heartEmojiHeight);
         } else {
             System.out.println("DEBUG: Cannot render heart emoji texture for ring animation - heartEmojiTextures: " + (heartEmojiTextures != null) +
-                             ", currentHeartEmojiFrame: " + currentHeartEmojiFrame +
-                             ", texture at frame: " + (heartEmojiTextures != null && currentHeartEmojiFrame >= 0 && currentHeartEmojiFrame < heartEmojiTextures.length ?
-                                 (heartEmojiTextures[currentHeartEmojiFrame] != null ? "not null" : "null") : "invalid index"));
+                ", currentHeartEmojiFrame: " + currentHeartEmojiFrame +
+                ", texture at frame: " + (heartEmojiTextures != null && currentHeartEmojiFrame >= 0 && currentHeartEmojiFrame < heartEmojiTextures.length ?
+                (heartEmojiTextures[currentHeartEmojiFrame] != null ? "not null" : "null") : "invalid index"));
         }
 
         if (ringAnimationActive && ringTexture != null) {
@@ -4838,5 +5029,11 @@ public class GameMenu extends InputAdapter implements Screen {
             (Gdx.graphics.getHeight() - dialog.getHeight()) / 2f
         );
         dialog.show(stage);
+    }
+
+    public void tradeMenu() {
+        // Navigate to the trading menu
+        Main game = (Main) Gdx.app.getApplicationListener();
+        game.setScreen(new TradeMenuView(game));
     }
 }

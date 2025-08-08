@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.example.Common.models.*;
-import org.example.Server.controllers.movingPlayer.PlayerController;
+import org.example.Client.controllers.movingPlayer.PlayerController;
 import org.example.Common.models.NPC.NPC;
 import org.example.Common.models.Place.Farm;
 import org.example.Common.models.ProductsPackage.ArtisanItem;
@@ -147,7 +147,21 @@ public class Player {
                 // Send energy update via WebSocket
                 Map<String, Object> energyData = new HashMap<>();
                 energyData.put("type", "energy_update");
-                energyData.put("gameId", App.getCurrentGame().getGameId());
+
+                // Use server game ID if available, otherwise fall back to local game ID
+                String gameId;
+                if (App.getCurrentGame().getNetworkCommandSender() != null) {
+                    String serverGameId = App.getCurrentGame().getNetworkCommandSender().getCurrentGameId();
+                    if (serverGameId != null) {
+                        gameId = serverGameId;
+                    } else {
+                        gameId = String.valueOf(App.getCurrentGame().getGameId());
+                    }
+                } else {
+                    gameId = String.valueOf(App.getCurrentGame().getGameId());
+                }
+
+                energyData.put("gameId", gameId);
                 energyData.put("playerId", this.getUser().getUserName());
                 energyData.put("currentEnergy", this.energy);
                 energyData.put("maxEnergy", 200);

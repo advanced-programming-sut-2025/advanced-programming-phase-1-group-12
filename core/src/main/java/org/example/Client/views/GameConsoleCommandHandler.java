@@ -2,9 +2,9 @@ package org.example.Client.views;
 
 import org.example.Common.models.Fundementals.Location;
 import org.example.Common.models.Fundementals.Result;
-import org.example.Server.controllers.*;
-import org.example.Server.controllers.MenusController.GameMenuController;
-import org.example.Server.controllers.movingPlayer.UserLocationController;
+import org.example.Client.controllers.*;
+import org.example.Client.controllers.MenusController.GameMenuController;
+import org.example.Client.controllers.movingPlayer.UserLocationController;
 import org.example.Common.models.Animal.FarmAnimals;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.RelatedToUser.Ability;

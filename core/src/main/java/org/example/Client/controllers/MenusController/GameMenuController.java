@@ -9,6 +9,7 @@ import org.example.Client.controllers.NPCcontroller;
 import org.example.Client.controllers.StoreController;
 import org.example.Client.controllers.TradeController;
 import org.example.Client.controllers.movingPlayer.ClientPlayerController;
+import org.example.Client.controllers.movingPlayer.PlayerController;
 import org.example.Client.views.GameMenu;
 import org.example.Common.models.Animal.Fish;
 import org.example.Common.models.Assets.GameAssetManager;
@@ -37,6 +38,7 @@ import org.example.Common.models.enums.Types.TypeOfTile;
 import org.example.Common.models.enums.Weather;
 import org.example.Common.models.enums.foraging.Plant;
 import org.example.Common.models.enums.foraging.Stone;
+import org.example.Common.network.NetworkResult;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,10 +62,11 @@ public class GameMenuController {
             }
         }
 
-        String notifications = TradeController.getTradeNotifications(currentPlayer);
-        if (notifications != null) {
-            playerList.append("\n").append(notifications);
-        }
+        // TODO: Implement trade notifications
+        // String notifications = TradeController.getTradeNotifications(currentPlayer);
+        // if (notifications != null) {
+        //     playerList.append("\n").append(notifications);
+        // }
 
         return new Result(true, playerList.toString());
     }
@@ -101,41 +104,25 @@ public class GameMenuController {
             return new Result(false, "You cannot specify both price and target item");
         }
 
-        if (price != null && price > 0) {
-            TradeController.createTrade(currentPlayer, targetPlayer, type, item, amount, price);
-            return new Result(true, "Trade request created successfully");
-        } else if (targetItemName != null && targetAmount != null && targetAmount > 0) {
-            Item targetItem = new Item(itemName, item.getQuality(), item.getPrice());
-            TradeController.createTrade(currentPlayer, targetPlayer, type, item, amount, targetItem, targetAmount);
-            return new Result(true, "Trade request created successfully");
-        } else {
-            return new Result(false, "You must specify either price or target item");
-        }
+        // TODO: Implement trade creation with new TradeController API
+        return new Result(false, "Trade system is being updated. Please use the new trading interface.");
     }
 
     public Result listTrades() {
-        Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
-        String tradeList = TradeController.getTradeList(currentPlayer);
-        return new Result(true, tradeList);
+        // TODO: Implement trade listing with new TradeController API
+        return new Result(false, "Trade system is being updated. Please use the new trading interface.");
     }
 
 
     public Result respondToTrade(String response, String id) {
-        if (response.equals("accept")) {
-            String result = TradeController.acceptTrade(id);
-
-            return new Result(result.contains("successfully"), result);
-        } else {
-            String result = TradeController.rejectTrade(id);
-            return new Result(true, result);
-        }
+        // TODO: Implement trade response with new TradeController API
+        return new Result(false, "Trade system is being updated. Please use the new trading interface.");
     }
 
 
     public Result tradeHistory() {
-        Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
-        String history = TradeController.getTradeHistory(currentPlayer);
-        return new Result(true, history);
+        // TODO: Implement trade history with new TradeController API
+        return new Result(false, "Trade system is being updated. Please use the new trading interface.");
     }
 
     public Result showHour() {
@@ -321,6 +308,7 @@ public class GameMenuController {
     public void Play(List<String> usernames, Map<String, Integer> farmSelections) {
         Game newGame = App.getCurrentGame();
         App.setCurrentGame(newGame);
+        newGame.setCreator(App.getLoggedInUser());
 
         // Initialize singleton date manager for multiplayer synchronization
         DateManager.getInstance().reset(); // Reset any previous date
@@ -341,6 +329,13 @@ public class GameMenuController {
         List<Player> players = new ArrayList<>();
         for (String username : usernames) {
             User user = App.getUserByUsername(username.trim());
+
+            // If user doesn't exist, create a new one
+            if (user == null) {
+                user = new User(null, username.trim(), username.trim(), "defaultPassword", username.trim() + "@example.com", "", "", false, "");
+                App.getUsers().put(user.getUserName(), user);
+                System.out.println("Created new user for username: " + username.trim());
+            }
 
             int farmId = farmSelections.get(username);
             Texture playerTexture;
@@ -391,11 +386,8 @@ public class GameMenuController {
             );
             newPlayer.setRefrigrator(new Refrigrator(refrigratorLocation));
 
-            // Create a simple client-side player controller that provides getCurrentFrame()
-            // This avoids the server-side PlayerController which tries to render on server
-            ClientPlayerController clientPlayerController = new ClientPlayerController(newPlayer, usernames);
-            newPlayer.setPlayerController(clientPlayerController);
-
+            PlayerController playerController = new PlayerController(newPlayer, this, usernames);
+            newPlayer.setPlayerController(playerController);
             farms.add(farm);
         }
 
@@ -404,7 +396,7 @@ public class GameMenuController {
         App.getCurrentGame().setGameId(App.getGameId());
         App.getCurrentGame().setFarms(farms);
 
-        // Set multiplayer flag if there are multiple players
+        // Set multiplayer flag based on number of players
         if (usernames.size() > 1) {
             App.getCurrentGame().setMultiplayer(true);
             System.out.println("Multiplayer game started with " + usernames.size() + " players");
@@ -415,7 +407,41 @@ public class GameMenuController {
                     new org.example.Client.network.NetworkCommandSender(Main.getMain().getServerConnection());
                 App.getCurrentGame().setNetworkCommandSender(networkSender);
                 System.out.println("NetworkCommandSender initialized for multiplayer game");
+
+                // Create game on server and get the server-provided game ID
+                try {
+                    System.out.println("DEBUG: Creating game on server with usernames: " + usernames);
+                    NetworkResult<org.example.Common.network.responses.GameStateResponse> createResult =
+                        networkSender.createGame(usernames, farmSelections);
+
+                    if (createResult.isSuccess()) {
+                        String serverGameId = createResult.getData().getGameId();
+                        networkSender.setCurrentGameId(serverGameId);
+                        System.out.println("DEBUG: Game created on server with ID: " + serverGameId);
+
+                        // Connect to WebSocket for this game
+                        networkSender.connectToGameWebSocket(serverGameId);
+                        System.out.println("DEBUG: Connected to WebSocket for game: " + serverGameId);
+
+                        // Create GameMenu with server game ID
+                        GameMenu gameMenu = new GameMenu(usernames, serverGameId);
+                        Main.getMain().setScreen(gameMenu);
+                        return; // Exit early since we've set the screen
+                    } else {
+                        System.out.println("DEBUG: Failed to create game on server: " + createResult.getMessage());
+                        // Fall back to local game
+                    }
+                } catch (Exception e) {
+                    System.out.println("DEBUG: Exception creating game on server: " + e.getMessage());
+                    // Fall back to local game
+                }
+            } else {
+                System.out.println("DEBUG: No server connection available, using local game");
             }
+        } else {
+            // Single player game
+            App.getCurrentGame().setMultiplayer(false);
+            System.out.println("Single-player game started with " + usernames.size() + " characters");
         }
 
         MapSetUp.showMapWithFarms(App.getCurrentGame().getMainMap());
@@ -693,7 +719,7 @@ public class GameMenuController {
 
         // Check if players are adjacent
         float distance = Math.abs(player1.getUserLocation().getxAxis() - player2.getUserLocation().getxAxis()) +
-                        Math.abs(player1.getUserLocation().getyAxis() - player2.getUserLocation().getyAxis());
+            Math.abs(player1.getUserLocation().getyAxis() - player2.getUserLocation().getyAxis());
         if (distance > 2) {
             return new Result(false, "Players are not adjacent!");
         }
@@ -713,7 +739,7 @@ public class GameMenuController {
 
         activeRelationShip.hug();
         return new Result(true, "hugged successfully!" + "\nFriendShip XP: " +
-                activeRelationShip.getXP() + " Friendship level: " + activeRelationShip.getFriendshipLevel());
+            activeRelationShip.getXP() + " Friendship level: " + activeRelationShip.getFriendshipLevel());
     }
 
     public Result flower(String username){
@@ -1516,5 +1542,20 @@ public class GameMenuController {
                 }
             }
         }
+    }
+
+    public void PlayNetworkMultiplayer(List<String> usernames, Map<String, Integer> farmSelections) {
+        // Initialize the game with network multiplayer functionality
+        Play(usernames, farmSelections);
+    }
+
+    public void loadGame(List<String> playersList) {
+        // Load game functionality - this method was in the Server version
+        // For now, we'll just initialize the game with the loaded players
+        Map<String, Integer> farmSelections = new HashMap<>();
+        for (int i = 0; i < playersList.size(); i++) {
+            farmSelections.put(playersList.get(i), i + 1); // Assign farm numbers sequentially
+        }
+        Play(playersList, farmSelections);
     }
 }
