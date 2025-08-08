@@ -408,10 +408,20 @@ public class GameMenuController {
             farms.add(farm);
         }
 
+        // Set game state before network initialization
         App.getCurrentGame().setPlayers((ArrayList<Player>) players);
         App.getCurrentGame().setCurrentPlayer(App.getCurrentGame().getPlayerByName(App.getLoggedInUser().getUserName()));
-        App.getCurrentGame().setGameId(App.getGameId());
         App.getCurrentGame().setFarms(farms);
+        
+        // Ensure current player is set
+        if (App.getCurrentGame().getCurrentPlayer() == null) {
+            System.out.println("DEBUG: Current player is null, attempting to set from players list");
+            if (!players.isEmpty()) {
+                Player firstPlayer = players.get(0);
+                App.getCurrentGame().setCurrentPlayer(firstPlayer);
+                System.out.println("DEBUG: Set current player to first player: " + firstPlayer.getUser().getUserName());
+            }
+        }
 
         // Set multiplayer flag based on number of players
         if (usernames.size() > 1) {

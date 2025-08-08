@@ -75,19 +75,25 @@ public class GameWebSocketClient {
                 System.out.println("DEBUG: No auth token available");
             }
 
-            // Use server game ID if available, otherwise use the provided gameId
-            String gameIdToUse = gameId;
-            if (App.getCurrentGame() != null && App.getCurrentGame().getNetworkCommandSender() != null) {
-                String serverGameId = App.getCurrentGame().getNetworkCommandSender().getCurrentGameId();
-                System.out.println("DEBUG: Found NetworkCommandSender, server game ID: " + serverGameId);
-                if (serverGameId != null) {
-                    gameIdToUse = serverGameId;
-                    System.out.println("DEBUG: GameWebSocketClient using server game ID: " + gameIdToUse);
+            // Always use the server game ID from NetworkCommandSender in multiplayer mode
+            String gameIdToUse;
+            if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
+                if (App.getCurrentGame().getNetworkCommandSender() != null) {
+                    String serverGameId = App.getCurrentGame().getNetworkCommandSender().getCurrentGameId();
+                    System.out.println("DEBUG: Found NetworkCommandSender, server game ID: " + serverGameId);
+                    if (serverGameId != null) {
+                        gameIdToUse = serverGameId;
+                        System.out.println("DEBUG: GameWebSocketClient using server game ID: " + gameIdToUse);
+                    } else {
+                        throw new IllegalStateException("Server game ID is null in multiplayer mode");
+                    }
                 } else {
-                    System.out.println("DEBUG: GameWebSocketClient using provided game ID: " + gameIdToUse);
+                    throw new IllegalStateException("NetworkCommandSender is null in multiplayer mode");
                 }
             } else {
-                System.out.println("DEBUG: No NetworkCommandSender or current game, using provided game ID: " + gameIdToUse);
+                // For non-multiplayer games, use the provided game ID
+                gameIdToUse = gameId;
+                System.out.println("DEBUG: Non-multiplayer game, using provided game ID: " + gameIdToUse);
             }
 
             String wsUrl = serverUrl.replace("http", "ws") + "/ws?userId=" + userId + "&token=" + authToken + "&gameId=" + gameIdToUse;

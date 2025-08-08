@@ -85,18 +85,42 @@ public class PlayerController {
         Texture sheet = player.getPlayerTexture();
         TextureRegion[][] grid = TextureRegion.split(sheet, FRAME_W, FRAME_H);
 
-        walkDown = buildAnim(grid[0]);
-        walkLeft = buildAnim(grid[3]);
-        walkRight = buildAnim(grid[1]);
-        walkUp = buildAnim(grid[2]);
-        collapse = buildAnim(grid[4]);
+        // Check if we have enough rows in the texture sheet
+        if (grid.length < 5) {
+            System.err.println("WARNING: Texture sheet only has " + grid.length + " rows, expected at least 5");
+            System.err.println("Using fallback animations with available rows");
+            
+            // Use available rows, fallback to first row if needed
+            walkDown = buildAnim(grid[0]);
+            walkLeft = grid.length > 3 ? buildAnim(grid[3]) : buildAnim(grid[0]);
+            walkRight = grid.length > 1 ? buildAnim(grid[1]) : buildAnim(grid[0]);
+            walkUp = grid.length > 2 ? buildAnim(grid[2]) : buildAnim(grid[0]);
+            collapse = grid.length > 4 ? buildAnim(grid[4]) : buildAnim(grid[0]);
+        } else {
+            walkDown = buildAnim(grid[0]);
+            walkLeft = buildAnim(grid[3]);
+            walkRight = buildAnim(grid[1]);
+            walkUp = buildAnim(grid[2]);
+            collapse = buildAnim(grid[4]);
+        }
 
         currentAnim = walkDown;
     }
 
     private static Animation<TextureRegion> buildAnim(TextureRegion[] row) {
         Array<TextureRegion> frames = new Array<>(3);
-        for (int i = 0; i < 3; i++) frames.add(row[i]);
+        
+        // Check if we have enough frames
+        int availableFrames = Math.min(row.length, 3);
+        for (int i = 0; i < availableFrames; i++) {
+            frames.add(row[i]);
+        }
+        
+        // If we don't have enough frames, repeat the last available frame
+        while (frames.size < 3) {
+            frames.add(row[availableFrames - 1]);
+        }
+        
         return new Animation<>(FRAME_DURATION, frames, Animation.PlayMode.LOOP_PINGPONG);
     }
 

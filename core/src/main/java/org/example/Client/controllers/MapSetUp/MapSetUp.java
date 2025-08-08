@@ -113,9 +113,13 @@ public class MapSetUp {
                 for (int y = startY; y < startY + storeHeight; y++) {
                     Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
                     if (location == null) {
-                        System.err.println("ERROR: findLocation returned null for coordinates (" + x + ", " + y + ")");
+                        System.err.println("ERROR: findLocation returned null for coordinates (" + x + ", " + y + ") in storesSetUp");
                         System.err.println("This should not happen if the map was properly initialized with 400x400 tiles");
-                        return;
+                        // Create the missing location as a fallback
+                        location = new Location(x, y);
+                        location.setTypeOfTile(TypeOfTile.GROUND);
+                        App.getCurrentGame().getMainMap().getTilesOfMap().add(location);
+                        System.out.println("DEBUG: Created missing location at (" + x + ", " + y + ") in storesSetUp");
                     }
                     location.setTypeOfTile(TypeOfTile.STORE);
                 }
@@ -173,6 +177,22 @@ public class MapSetUp {
     }
 
     public static void NPCsetUp() {
+        if (App.getCurrentGame() == null) {
+            System.err.println("ERROR: App.getCurrentGame() is null in NPCsetUp()");
+            return;
+        }
+
+        if (App.getCurrentGame().getMainMap() == null) {
+            System.err.println("ERROR: App.getCurrentGame().getMainMap() is null in NPCsetUp()");
+            return;
+        }
+
+        if (App.getCurrentGame().getMainMap().getTilesOfMap() == null) {
+            System.err.println("ERROR: App.getCurrentGame().getMainMap().getTilesOfMap() is null in NPCsetUp()");
+            return;
+        }
+
+        System.out.println("DEBUG: NPCsetUp - Map tiles count: " + App.getCurrentGame().getMainMap().getTilesOfMap().size());
 
         int npcWidth = 40;
         int npcHeight = 40;
@@ -182,7 +202,17 @@ public class MapSetUp {
 
         for (int x = StartX; x < StartX + npcWidth; x++) {
             for (int y = startY; y < startY + npcHeight; y++) {
-                App.getCurrentGame().getMainMap().findLocation(x, y).setTypeOfTile(TypeOfTile.NPC_VILLAGE);
+                Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
+                if (location == null) {
+                    System.err.println("ERROR: findLocation returned null for coordinates (" + x + ", " + y + ") in NPCsetUp");
+                    System.err.println("This should not happen if the map was properly initialized with 400x400 tiles");
+                    // Create the missing location as a fallback
+                    location = new Location(x, y);
+                    location.setTypeOfTile(TypeOfTile.GROUND);
+                    App.getCurrentGame().getMainMap().getTilesOfMap().add(location);
+                    System.out.println("DEBUG: Created missing location at (" + x + ", " + y + ") in NPCsetUp");
+                }
+                location.setTypeOfTile(TypeOfTile.NPC_VILLAGE);
             }
         }
     }

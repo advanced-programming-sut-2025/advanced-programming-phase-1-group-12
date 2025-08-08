@@ -53,6 +53,21 @@ public class GameWebSocketHandler {
                 // Don't close the connection, just log a warning
             }
 
+            // Handle multiple connections for the same user
+            WsContext existingConnection = userConnections.get(userId);
+            if (existingConnection != null) {
+                logger.info("User {} already has an active connection, closing old connection", userId);
+                try {
+                    if (existingConnection.session.isOpen()) {
+                        existingConnection.session.close();
+                    }
+                } catch (Exception e) {
+                    logger.warn("Failed to close existing connection for user: {}", userId, e);
+                }
+                // Remove old connection mapping
+                connectionToUser.remove(existingConnection.getSessionId());
+            }
+
             // Store connection mapping
             userConnections.put(userId, ctx);
             connectionToUser.put(connectionId, userId);
@@ -62,6 +77,9 @@ public class GameWebSocketHandler {
                 GameInstance gameInstance = sessionManager.getGameInstance(gameId);
                 if (gameInstance != null) {
                     gameInstance.addWebSocketConnection(ctx);
+                    
+                    // IMPORTANT: Mark the player as connected in the game instance
+                    gameInstance.connectPlayer(userId);
 
                     // Broadcast player joined event
                     PlayerJoinedEvent joinEvent = new PlayerJoinedEvent(
@@ -105,45 +123,36 @@ public class GameWebSocketHandler {
                 return;
             }
 
-            System.out.println("DEBUG: Server received message type: " + messageType + " from user: " + userId);
             switch (messageType) {
                 case GameProtocol.WS_CHAT_MESSAGE:
-                    System.out.println("DEBUG: Handling chat message");
                     handleChatMessage(ctx, userId, messageData);
                     break;
 
                 case GameProtocol.WS_PLAYER_MOVED:
-                    System.out.println("DEBUG: Handling player movement");
                     handlePlayerMovement(ctx, userId, messageData);
                     break;
 
                 case GameProtocol.WS_ENERGY_UPDATE:
-                    System.out.println("DEBUG: Handling energy update");
                     handleEnergyUpdate(ctx, userId, messageData);
                     break;
 
                 case GameProtocol.WS_MOVEMENT_NOTIFICATION:
-                    System.out.println("DEBUG: Handling movement notification");
                     handleMovementNotification(ctx, userId, messageData);
                     break;
 
                 case "ping":
-                    System.out.println("DEBUG: Handling ping");
                     handlePing(ctx, userId);
                     break;
 
                 case "join_game":
-                    System.out.println("DEBUG: Handling join game");
                     handleJoinGameWebSocket(ctx, userId, messageData);
                     break;
 
                 case GameProtocol.WS_GAME_STATE_UPDATE:
-                    System.out.println("DEBUG: Handling game state update");
                     handleGameStateUpdate(ctx, userId, messageData);
                     break;
 
                 default:
-                    System.out.println("DEBUG: Unknown message type: " + messageType);
                     logger.warn("Unknown WebSocket message type: {} from user: {}", messageType, userId);
                     sendError(ctx, "Unknown message type: " + messageType);
                     break;
@@ -161,8 +170,11 @@ public class GameWebSocketHandler {
 
         try {
             if (userId != null) {
-                // Remove connection mappings
-                userConnections.remove(userId);
+                // Only remove user connection mapping if this is the current connection for this user
+                WsContext currentConnection = userConnections.get(userId);
+                if (currentConnection != null && currentConnection.getSessionId().equals(connectionId)) {
+                    userConnections.remove(userId);
+                }
                 connectionToUser.remove(connectionId);
 
                 // Find the game this user was in and remove the connection
@@ -171,6 +183,9 @@ public class GameWebSocketHandler {
                     GameInstance gameInstance = sessionManager.getGameInstance(gameId);
                     if (gameInstance != null) {
                         gameInstance.removeWebSocketConnection(ctx);
+                        
+                        // IMPORTANT: Mark the player as disconnected in the game instance
+                        gameInstance.disconnectPlayer(userId);
 
                         // Broadcast player left event
                         PlayerLeftEvent leftEvent = new PlayerLeftEvent(
@@ -247,35 +262,63 @@ public class GameWebSocketHandler {
 
     private void handlePlayerMovement(WsContext ctx, String userId, Map<String, Object> messageData) {
         try {
-            // Handle gameId as either String or Integer
+            // First check if the WebSocket is still open
+            if (!ctx.session.isOpen()) {
+                logger.warn("WebSocket connection is closed for user: {}", userId);
+                return;
+            }
+
+            // Get the game ID from the query parameters (this is the correct game ID)
+            String expectedGameId = ctx.queryParam("gameId");
+            
+            // Get the game ID from the message
             Object gameIdObj = messageData.get("gameId");
-            String gameId = null;
+            String messageGameId = null;
             if (gameIdObj instanceof String) {
-                gameId = (String) gameIdObj;
+                messageGameId = (String) gameIdObj;
             } else if (gameIdObj instanceof Integer) {
-                gameId = gameIdObj.toString();
+                messageGameId = gameIdObj.toString();
+            }
+
+            // Validate game IDs match
+            if (messageGameId != null && !messageGameId.equals(expectedGameId)) {
+                logger.warn("Game ID mismatch for user {}: expected {}, got {}", userId, expectedGameId, messageGameId);
+                // Use the correct game ID from query parameters
+                messageGameId = expectedGameId;
             }
 
             Object xObj = messageData.get("x");
             Object yObj = messageData.get("y");
             String direction = (String) messageData.get("direction");
 
-            if (gameId == null || xObj == null || yObj == null) {
-                sendError(ctx, "gameId, x, and y are required for movement");
+            if (messageGameId == null || xObj == null || yObj == null) {
+                if (ctx.session.isOpen()) {
+                    sendError(ctx, "gameId, x, and y are required for movement");
+                }
                 return;
             }
 
             int x = xObj instanceof Integer ? (Integer) xObj : Integer.parseInt(xObj.toString());
             int y = yObj instanceof Integer ? (Integer) yObj : Integer.parseInt(yObj.toString());
 
-            GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            GameInstance gameInstance = sessionManager.getGameInstance(messageGameId);
             if (gameInstance == null) {
-                sendError(ctx, "Game not found");
-                return;
+                // Try to find game instance by user ID as fallback
+                String userGameId = sessionManager.getPlayerGameId(userId);
+                if (userGameId != null) {
+                    gameInstance = sessionManager.getGameInstance(userGameId);
+                }
+                
+                if (gameInstance == null && ctx.session.isOpen()) {
+                    sendError(ctx, "Game not found");
+                    return;
+                }
             }
 
             if (!gameInstance.isPlayerConnected(userId)) {
-                sendError(ctx, "You are not connected to this game");
+                if (ctx.session.isOpen()) {
+                    sendError(ctx, "You are not connected to this game");
+                }
                 return;
             }
 
@@ -288,7 +331,7 @@ public class GameWebSocketHandler {
 
             // Broadcast movement to all players in the game
             GameStateUpdateEvent updateEvent = new GameStateUpdateEvent(
-                gameId,
+                messageGameId,
                 userId,
                 "player_moved",
                 movementData
@@ -297,10 +340,10 @@ public class GameWebSocketHandler {
             gameInstance.broadcastToAllPlayers(updateEvent);
 
             // Create and broadcast player movement event
-            PlayerMovedEvent moveEvent = new PlayerMovedEvent(gameId, userId, userId, x, y, direction);
-            broadcastToGame(gameId, moveEvent);
+            PlayerMovedEvent moveEvent = new PlayerMovedEvent(messageGameId, userId, userId, x, y, direction);
+            broadcastToGame(messageGameId, moveEvent);
 
-            logger.debug("Player movement from {} in game {}: ({}, {}) - broadcasted to all players", userId, gameId, x, y);
+            logger.debug("Player movement from {} in game {}: ({}, {}) - broadcasted to all players", userId, messageGameId, x, y);
 
         } catch (Exception e) {
             logger.error("Error handling player movement", e);
@@ -310,9 +353,6 @@ public class GameWebSocketHandler {
 
     private void handleEnergyUpdate(WsContext ctx, String userId, Map<String, Object> messageData) {
         try {
-            System.out.println("DEBUG: Server received energy update message from userId: " + userId);
-            System.out.println("DEBUG: Message data: " + messageData);
-
             // Handle gameId as either String or Integer
             Object gameIdObj = messageData.get("gameId");
             String gameId = null;
@@ -326,37 +366,29 @@ public class GameWebSocketHandler {
             Integer currentEnergy = (Integer) messageData.get("currentEnergy");
             Integer maxEnergy = (Integer) messageData.get("maxEnergy");
 
-            System.out.println("DEBUG: Parsed data - gameId: " + gameId + ", playerId: " + playerId + ", currentEnergy: " + currentEnergy + ", maxEnergy: " + maxEnergy);
-
             if (gameId == null || playerId == null || currentEnergy == null || maxEnergy == null) {
-                System.out.println("DEBUG: Missing required fields for energy update");
                 sendError(ctx, "gameId, playerId, currentEnergy, and maxEnergy are required for energy update");
                 return;
             }
 
             GameInstance gameInstance = sessionManager.getGameInstance(gameId);
             if (gameInstance == null) {
-                System.out.println("DEBUG: Game instance not found for gameId: " + gameId);
                 sendError(ctx, "Game not found");
                 return;
             }
 
             if (!gameInstance.isPlayerConnected(userId)) {
-                System.out.println("DEBUG: User " + userId + " is not connected to game " + gameId);
                 sendError(ctx, "You are not connected to this game");
                 return;
             }
 
             // Create and broadcast energy update event
-            System.out.println("DEBUG: Creating EnergyUpdateEvent and broadcasting to game: " + gameId);
             EnergyUpdateEvent energyEvent = new EnergyUpdateEvent(gameId, playerId, playerId, currentEnergy, maxEnergy);
             broadcastToGame(gameId, energyEvent);
-            System.out.println("DEBUG: Energy update broadcasted successfully");
 
             logger.debug("Energy update from {} in game {}: {}/{}", playerId, gameId, currentEnergy, maxEnergy);
 
         } catch (Exception e) {
-            System.out.println("DEBUG: Error handling energy update: " + e.getMessage());
             logger.error("Error handling energy update", e);
             sendError(ctx, "Failed to process energy update");
             e.printStackTrace();
@@ -365,9 +397,6 @@ public class GameWebSocketHandler {
 
     private void handleMovementNotification(WsContext ctx, String userId, Map<String, Object> messageData) {
         try {
-            System.out.println("DEBUG: Server received movement notification from userId: " + userId);
-            System.out.println("DEBUG: Message data: " + messageData);
-
             // Extract the game ID from the user's current game
             String gameId = sessionManager.getPlayerGameId(userId);
             if (gameId == null) {
@@ -393,20 +422,18 @@ public class GameWebSocketHandler {
 
             for (Map.Entry<String, Object> entry : messageData.entrySet()) {
                 String key = entry.getKey();
-                System.out.println("DEBUG: Checking key: " + key + " with value: " + entry.getValue());
+
                 // Skip standard WebSocket message fields
                 if (!key.equals("type") && !key.equals("gameId") && !key.equals("playerId") &&
                     !key.equals("timestamp") && !key.equals("x") && !key.equals("y") &&
                     !key.equals("direction")) {
                     username = key;
                     posX = (Integer) entry.getValue();
-                    System.out.println("DEBUG: Found username: " + username + " with posX: " + posX);
                     break;
                 }
             }
 
             if (username == null || posX == null) {
-                System.out.println("DEBUG: Invalid movement notification format - username: " + username + ", posX: " + posX);
                 sendError(ctx, "Invalid movement notification format");
                 return;
             }
@@ -422,11 +449,9 @@ public class GameWebSocketHandler {
             MovementNotificationEvent moveEvent = new MovementNotificationEvent(gameId, username, username, posX, posY, "UNKNOWN");
             broadcastToGame(gameId, moveEvent);
 
-            System.out.println("DEBUG: Movement notification broadcasted for " + username + " in game " + gameId + ": (" + posX + ", " + posY + ")");
             logger.debug("Movement notification from {} in game {}: ({}, {})", username, gameId, posX, posY);
 
         } catch (Exception e) {
-            System.out.println("DEBUG: Error handling movement notification: " + e.getMessage());
             logger.error("Error handling movement notification", e);
             sendError(ctx, "Failed to process movement notification");
         }
@@ -561,6 +586,18 @@ public class GameWebSocketHandler {
     }
 
     private void sendError(WsContext ctx, String errorMessage) {
+        // First check if the context and session are valid
+        if (ctx == null || ctx.session == null) {
+            logger.warn("Cannot send error - context or session is null. Error was: {}", errorMessage);
+            return;
+        }
+
+        // Only try to send if the session is still open
+        if (!ctx.session.isOpen()) {
+            logger.warn("Cannot send error - WebSocket session is closed. Error was: {}", errorMessage);
+            return;
+        }
+
         try {
             Map<String, Object> errorMsg = Map.of(
                 "type", GameProtocol.WS_ERROR,
@@ -569,7 +606,17 @@ public class GameWebSocketHandler {
             );
             ctx.send(errorMsg);
         } catch (Exception e) {
-            logger.error("Failed to send error message", e);
+            logger.error("Failed to send error message: {}. Error was: {}", e.getMessage(), errorMessage);
+            
+            // If this is a ClosedChannelException, try to clean up the connection
+            if (e.getCause() instanceof java.nio.channels.ClosedChannelException) {
+                String userId = connectionToUser.get(ctx.getSessionId());
+                if (userId != null) {
+                    logger.info("Cleaning up closed connection for user: {}", userId);
+                    userConnections.remove(userId);
+                    connectionToUser.remove(ctx.getSessionId());
+                }
+            }
         }
     }
 

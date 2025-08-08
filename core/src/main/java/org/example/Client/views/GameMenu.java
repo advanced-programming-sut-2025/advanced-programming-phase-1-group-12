@@ -20,6 +20,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Common.models.*;
 import org.example.Common.models.Date;
 import org.example.Client.Main;
+import org.example.Common.models.ToolsPackage.ToolEnums.BackPackTypes;
 import org.example.Common.models.enums.Animal;
 import org.example.Common.models.enums.foraging.Plant;
 import org.example.Common.models.enums.foraging.TypeOfPlant;
@@ -624,10 +625,36 @@ public class GameMenu extends InputAdapter implements Screen {
             if (App.getCurrentGame().getPlayers() != null) {
                 System.out.println("DEBUG: Number of players: " + App.getCurrentGame().getPlayers().size());
             }
-        }
 
-        // Ensure current player is set
-        setCurrentPlayerToLoggedInUser();
+            // Try to set current player multiple ways
+            if (App.getCurrentGame().getCurrentPlayer() == null) {
+                System.out.println("DEBUG: Current player is null, trying to set it");
+
+                // First try setting to logged in user
+                setCurrentPlayerToLoggedInUser();
+
+                // If still null, try setting to first player in list
+                if (App.getCurrentGame().getCurrentPlayer() == null &&
+                    App.getCurrentGame().getPlayers() != null &&
+                    !App.getCurrentGame().getPlayers().isEmpty()) {
+                    Player firstPlayer = App.getCurrentGame().getPlayers().get(0);
+                    App.getCurrentGame().setCurrentPlayer(firstPlayer);
+                    System.out.println("DEBUG: Set current player to first player: " + firstPlayer.getUser().getUserName());
+                }
+
+                // If still null, try creating a new player for logged in user
+                if (App.getCurrentGame().getCurrentPlayer() == null && App.getLoggedInUser() != null) {
+                    System.out.println("DEBUG: Creating new player for logged in user");
+                    Player newPlayer = new Player(App.getLoggedInUser(), new Location(0, 0), false, new Refrigrator(), new ArrayList<>(), null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
+                    if (App.getCurrentGame().getPlayers() == null) {
+                        App.getCurrentGame().setPlayers(new ArrayList<>());
+                    }
+                    App.getCurrentGame().getPlayers().add(newPlayer);
+                    App.getCurrentGame().setCurrentPlayer(newPlayer);
+                    System.out.println("DEBUG: Created and set new player for: " + App.getLoggedInUser().getUserName());
+                }
+            }
+        }
 
         batch = Main.getMain().getBatch();
         stage = new Stage(new ScreenViewport());
@@ -2602,14 +2629,10 @@ public class GameMenu extends InputAdapter implements Screen {
                         gameId = serverGameId;
                         System.out.println("DEBUG: [WEBSOCKET_INIT] Using server game ID for WebSocket: " + gameId);
                     } else {
-                        // Fall back to local game ID as string for compatibility
-                        gameId = String.valueOf(App.getCurrentGame().getGameId());
-                        System.out.println("DEBUG: [WEBSOCKET_INIT] Server game ID is NULL, using local game ID: " + gameId);
+                        throw new IllegalStateException("Server game ID is null in multiplayer mode");
                     }
                 } else {
-                    // Fall back to local game ID as string for compatibility
-                    gameId = String.valueOf(App.getCurrentGame().getGameId());
-                    System.out.println("DEBUG: [WEBSOCKET_INIT] NetworkCommandSender is NULL, using local game ID: " + gameId);
+                    throw new IllegalStateException("NetworkCommandSender is null in multiplayer mode");
                 }
 
                 String serverUrl = "http://localhost:8080"; // Configure based on your server

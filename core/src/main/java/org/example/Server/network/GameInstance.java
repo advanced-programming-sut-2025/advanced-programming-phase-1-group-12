@@ -1,5 +1,6 @@
 package org.example.Server.network;
 
+import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Fundementals.Game;
 import org.example.Common.models.Fundementals.Player;
 import org.example.Common.models.Fundementals.Result;
@@ -44,6 +45,7 @@ public class GameInstance {
         this.lastActivity = System.currentTimeMillis();
         this.gameStatus = "active";
         this.tradeManager = new TradeManager();
+        App.setCurrentGame(this.game);
 
         // Log traceable game instance creation
         if (gameId.startsWith("game_")) {
