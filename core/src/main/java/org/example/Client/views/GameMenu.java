@@ -636,7 +636,11 @@ public class GameMenu extends InputAdapter implements Screen {
 
         playerController = player.getPlayerController();
         TextureRegion frame = playerController.getCurrentFrame();
-        playerController.update(delta);
+        try {
+            playerController.update(delta);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         float px = playerController.getPlayer().getUserLocation().getxAxis();
         float py = playerController.getPlayer().getUserLocation().getyAxis();
