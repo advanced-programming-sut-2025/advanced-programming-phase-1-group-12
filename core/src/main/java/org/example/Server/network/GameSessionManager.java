@@ -71,6 +71,23 @@ public class GameSessionManager {
         return null;
     }
 
+    // Method to remove a player from their current game
+    public void removePlayerFromGame(String playerId) {
+        String gameId = playerToGameMapping.remove(playerId);
+        if (gameId != null) {
+            System.out.println("DEBUG: Removed player " + playerId + " from game " + gameId);
+            
+            // Check if the game has no more players and remove it if empty
+            boolean hasPlayers = playerToGameMapping.values().contains(gameId);
+            if (!hasPlayers) {
+                GameInstance removedGame = activeGames.remove(gameId);
+                if (removedGame != null) {
+                    System.out.println("DEBUG: Removed empty game " + gameId);
+                }
+            }
+        }
+    }
+
     public NetworkResult<GameStateResponse> createGame(String creatorId, CreateGameRequest request) {
         try {
             System.out.println("DEBUG: createGame called with creatorId: " + creatorId);
@@ -90,11 +107,13 @@ public class GameSessionManager {
                     GameProtocol.MIN_PLAYERS_PER_GAME + " and " + GameProtocol.MAX_PLAYERS_PER_GAME);
             }
 
-            // Check if any players are already in a game
+            // Clear any existing game mappings for these players (auto-cleanup)
+            // This handles cases where players were in previous games that didn't properly clean up
             for (String username : request.getUsernames()) {
-                if (playerToGameMapping.containsKey(username)) {
-                    System.out.println("DEBUG: Player " + username + " is already in a game");
-                    return NetworkResult.error("Player " + username + " is already in a game");
+                String existingGameId = playerToGameMapping.get(username);
+                if (existingGameId != null) {
+                    System.out.println("DEBUG: Player " + username + " was in game " + existingGameId + ", clearing...");
+                    removePlayerFromGame(username);
                 }
             }
 
@@ -132,8 +151,12 @@ public class GameSessionManager {
 
             // Return basic game session info
             // The actual game state will be created on the client side
-            GameStateResponse response = new GameStateResponse(gameId, null,
-                request.getUsernames(), null);
+            GameStateResponse response = new GameStateResponse();
+            response.setGameId(gameId);
+            response.setConnectedPlayers(request.getUsernames());
+            response.setGameState(null); // Explicitly set to null to avoid serialization issues
+            response.setCurrentPlayer(null); // Explicitly set to null to avoid serialization issues
+            response.setGameStatus("active");
 
             System.out.println("DEBUG: Returning success response with traceable game ID: " + gameId);
             return NetworkResult.success("Game session created successfully", response);
