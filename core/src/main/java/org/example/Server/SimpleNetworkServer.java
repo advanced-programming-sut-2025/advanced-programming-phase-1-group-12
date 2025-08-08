@@ -3,6 +3,7 @@ package org.example.Server;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import org.example.Common.network.NetworkObjectMapper;
 import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.*;
 import org.example.Common.network.responses.*;
@@ -54,8 +55,8 @@ public class SimpleNetworkServer {
         try {
             app = Javalin.create(config -> {
                 config.plugins.enableDevLogging();
-                // Configure Jackson to ignore unknown properties
-                config.jsonMapper(new io.javalin.json.JavalinJackson()
+                // Configure Jackson to use our custom ObjectMapper
+                config.jsonMapper(new io.javalin.json.JavalinJackson(NetworkObjectMapper.getInstance())
                     .updateMapper(mapper -> {
                         mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                     })
@@ -675,13 +676,13 @@ public class SimpleNetworkServer {
     private void handleCreateGame(Context ctx) {
         try {
             CreateGameRequest request = ctx.bodyAsClass(CreateGameRequest.class);
-            
+
             // Extract username from the first player in the request (similar to lobby approach)
             String username = null;
             if (request.getUsernames() != null && !request.getUsernames().isEmpty()) {
                 username = request.getUsernames().get(0); // Use the first player as the creator
             }
-            
+
             if (username == null) {
                 ctx.status(400).json(NetworkResult.error("No usernames provided in request"));
                 return;
@@ -745,7 +746,7 @@ public class SimpleNetworkServer {
             } catch (Exception e) {
                 logger.debug("Failed to validate JWT token", e);
             }
-            
+
             // Fallback: look up the token in our simple logged-in users map
             for (Map.Entry<String, String> entry : users.entrySet()) {
                 if (token.equals(entry.getValue())) {

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.websocket.*;
 import org.example.Common.models.Fundementals.Player;
 import org.example.Common.network.GameProtocol;
+import org.example.Common.network.NetworkObjectMapper;
 import org.example.Common.network.events.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ public class GameWebSocketHandler {
 
     public GameWebSocketHandler(GameSessionManager sessionManager) {
         this.sessionManager = sessionManager;
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = NetworkObjectMapper.getInstance();
         this.userConnections = new ConcurrentHashMap<>();
         this.connectionToUser = new ConcurrentHashMap<>();
 

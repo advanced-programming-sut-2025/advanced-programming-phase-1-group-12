@@ -48,12 +48,12 @@ public class UserLocationController {
             }
 
             App.getCurrentGame().getMainMap().findLocation(
-                    currentLocation.getxAxis(), currentLocation.getyAxis()
+                currentLocation.getxAxis(), currentLocation.getyAxis()
             ).setObjectInTile(null);
 
             App.getCurrentGame().getCurrentPlayer().setUserLocation(finalReachable);
             App.getCurrentGame().getMainMap().findLocation(
-                    finalReachable.getxAxis(), finalReachable.getyAxis()
+                finalReachable.getxAxis(), finalReachable.getyAxis()
             ).setObjectInTile(App.getCurrentGame().getCurrentPlayer());
 
             App.getCurrentGame().getCurrentPlayer().setEnergy(0);
@@ -64,25 +64,44 @@ public class UserLocationController {
             // GameMenuController gameMenuController = App.getCurrentPlayerLazy().getPlayerController().getGameController();
             // gameMenuController.nextTurn();
             return new Result(false, "You didn't have enough energy. You moved partially and fainted at "
-                    + finalReachable.getxAxis() + ", " + finalReachable.getyAxis());
+                + finalReachable.getxAxis() + ", " + finalReachable.getyAxis());
         }
 
         App.getCurrentGame().getMainMap().findLocation(
-                currentLocation.getxAxis(), currentLocation.getyAxis()
+            currentLocation.getxAxis(), currentLocation.getyAxis()
         ).setObjectInTile(null);
 
         App.getCurrentGame().getCurrentPlayer().setUserLocation(newLocation);
         App.getCurrentGame().getMainMap().findLocation(
-                targetX, targetY
+            targetX, targetY
         ).setObjectInTile(App.getCurrentGame().getCurrentPlayer());
         App.getCurrentGame().getCurrentPlayer().setEnergy(currentEnergy - energyNeeded);
+
+        // Clear current location
+        Location currentMapLocation = App.getCurrentGame().getMainMap().findLocation(
+            currentLocation.getxAxis(), currentLocation.getyAxis()
+        );
+        if (currentMapLocation != null) {
+            currentMapLocation.setObjectInTile(null);
+        }
+
+        App.getCurrentGame().getCurrentPlayer().setUserLocation(newLocation);
+
+        // Set new location
+        Location newMapLocation = App.getCurrentGame().getMainMap().findLocation(targetX, targetY);
+        if (newMapLocation != null) {
+            newMapLocation.setObjectInTile(App.getCurrentGame().getCurrentPlayer());
+        } else {
+            System.err.println("ERROR: findLocation returned null for target coordinates (" + targetX + ", " + targetY + ") in walkPlayer()");
+        }
+
         if(App.isLocationInPlace(newLocation, App.getCurrentGame().getCurrentPlayer().getOwnedFarm().getShack().getLocation())){
             houseMenu();
         }
         return new Result(true,
-                App.getCurrentGame().getCurrentPlayer().getUser().getUserName()
-                        + " moved to new location " + x + " " + y
-                        + " (distance = " + distance + ", turns = " + turns + ", energy cost = " + energyNeeded + ")"
+            App.getCurrentGame().getCurrentPlayer().getUser().getUserName()
+                + " moved to new location " + x + " " + y
+                + " (distance = " + distance + ", turns = " + turns + ", energy cost = " + energyNeeded + ")"
         );
     }
 
@@ -99,8 +118,8 @@ public class UserLocationController {
         boolean[][] visited = new boolean[maxX][maxY];
 
         int[][] directions = {
-                {1, 0}, {-1, 0}, {0, 1}, {0, -1},
-                {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+            {1, 0}, {-1, 0}, {0, 1}, {0, -1},
+            {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
         };
 
         Queue<int[]> queue = new LinkedList<>();
@@ -117,9 +136,13 @@ public class UserLocationController {
             if (x < 0 || y < 0 || x >= maxX || y >= maxY || visited[x][y]) continue;
 
             Location loc = App.getCurrentGame().getMainMap().findLocation(x, y);
+            if (loc == null) {
+                System.err.println("ERROR: findLocation returned null for coordinates (" + x + ", " + y + ") in bfsDistanceWithTurns()");
+                continue;
+            }
             if (loc.getTypeOfTile() != TypeOfTile.GROUND && loc.getTypeOfTile() != TypeOfTile.PLOUGHED_LAND &&
-                    loc.getTypeOfTile() != TypeOfTile.STORE && loc.getTypeOfTile() != TypeOfTile.HOUSE &&
-                    loc.getTypeOfTile() != TypeOfTile.NPC_VILLAGE && loc.getTypeOfTile() != TypeOfTile.NPC_HOUSE) continue;
+                loc.getTypeOfTile() != TypeOfTile.STORE && loc.getTypeOfTile() != TypeOfTile.HOUSE &&
+                loc.getTypeOfTile() != TypeOfTile.NPC_VILLAGE && loc.getTypeOfTile() != TypeOfTile.NPC_HOUSE) continue;
 
             visited[x][y] = true;
 
@@ -138,8 +161,8 @@ public class UserLocationController {
         boolean[][] visited = new boolean[maxX][maxY];
 
         int[][] directions = {
-                {1, 0}, {-1, 0}, {0, 1}, {0, -1},
-                {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+            {1, 0}, {-1, 0}, {0, 1}, {0, -1},
+            {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
         };
 
         Queue<int[]> queue = new LinkedList<>();
@@ -154,9 +177,13 @@ public class UserLocationController {
             if (x < 0 || y < 0 || x >= maxX || y >= maxY || visited[x][y]) continue;
 
             Location loc = App.getCurrentGame().getMainMap().findLocation(x, y);
+            if (loc == null) {
+                System.err.println("ERROR: findLocation returned null for coordinates (" + x + ", " + y + ") in bfsMaxReachable()");
+                continue;
+            }
             if (loc.getTypeOfTile() != TypeOfTile.GROUND && loc.getTypeOfTile() != TypeOfTile.PLOUGHED_LAND &&
-                    loc.getTypeOfTile() != TypeOfTile.STORE && loc.getTypeOfTile() != TypeOfTile.HOUSE &&
-                    loc.getTypeOfTile() != TypeOfTile.NPC_VILLAGE && loc.getTypeOfTile() != TypeOfTile.NPC_HOUSE) continue;
+                loc.getTypeOfTile() != TypeOfTile.STORE && loc.getTypeOfTile() != TypeOfTile.HOUSE &&
+                loc.getTypeOfTile() != TypeOfTile.NPC_VILLAGE && loc.getTypeOfTile() != TypeOfTile.NPC_HOUSE) continue;
 
             int energyNeeded = (dist + 10 * turns) / 20;
             if (energyNeeded > maxEnergy) continue;

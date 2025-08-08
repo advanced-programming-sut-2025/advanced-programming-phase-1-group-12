@@ -30,7 +30,7 @@ public class map {
     }
 
     public Location findLocation(int x, int y){
-        for(Location location: App.getCurrentGame().getMainMap().getTilesOfMap()){
+        for(Location location: this.getTilesOfMap()){
             if(location.getxAxis() == x){
                 if(location.getyAxis() ==y)
                     return location;

@@ -2,6 +2,7 @@ package org.example.Client.network;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.Common.network.GameProtocol;
+import org.example.Common.network.NetworkObjectMapper;
 import org.example.Common.network.events.GameStateUpdateEvent;
 import org.example.Client.views.GameMenu;
 import org.example.Client.Main;
@@ -46,7 +47,7 @@ public class GameWebSocketClient {
         this.userId = userId;
         this.gameId = gameId;
         this.gameMenu = gameMenu;
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = NetworkObjectMapper.getInstance();
     }
 
     public CompletableFuture<Boolean> connect() {

@@ -3,6 +3,7 @@ package org.example.Server.GameServers;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import org.example.Common.network.GameProtocol;
+import org.example.Common.network.NetworkObjectMapper;
 import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.*;
 import org.example.Common.network.responses.*;
@@ -64,6 +65,12 @@ public class GameServer {
 
         app = Javalin.create(config -> {
             config.showJavalinBanner = false;
+            // Configure Jackson to use our custom ObjectMapper
+            config.jsonMapper(new io.javalin.json.JavalinJackson(NetworkObjectMapper.getInstance())
+                .updateMapper(mapper -> {
+                    mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                })
+            );
         }).start(port);
 
         setupRoutes();

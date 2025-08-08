@@ -376,7 +376,16 @@ public class GameMenuController {
 
             // Set player's initial location to their farm
             Location farmLocation = farm.getLocation().getTopLeftCorner();
-            newPlayer.setUserLocation(App.getCurrentGame().getMainMap().findLocation(farmLocation.getxAxis(), farmLocation.getyAxis()));
+            Location playerLocation = App.getCurrentGame().getMainMap().findLocation(farmLocation.getxAxis(), farmLocation.getyAxis());
+            if (playerLocation == null) {
+                System.err.println("ERROR: findLocation returned null for player farm location (" + farmLocation.getxAxis() + ", " + farmLocation.getyAxis() + ")");
+                // Create a fallback location
+                playerLocation = new Location(farmLocation.getxAxis(), farmLocation.getyAxis());
+                playerLocation.setTypeOfTile(TypeOfTile.GROUND);
+                App.getCurrentGame().getMainMap().getTilesOfMap().add(playerLocation);
+                System.out.println("DEBUG: Created fallback player location at (" + farmLocation.getxAxis() + ", " + farmLocation.getyAxis() + ")");
+            }
+            newPlayer.setUserLocation(playerLocation);
 
             // Initialize Refrigrator with proper location
             Location shackLocation = farm.getShack().getLocation().getTopLeftCorner();
@@ -384,6 +393,14 @@ public class GameMenuController {
                 shackLocation.getxAxis(),
                 shackLocation.getyAxis() + 4
             );
+            if (refrigratorLocation == null) {
+                System.err.println("ERROR: findLocation returned null for refrigerator location (" + shackLocation.getxAxis() + ", " + (shackLocation.getyAxis() + 4) + ")");
+                // Create a fallback location
+                refrigratorLocation = new Location(shackLocation.getxAxis(), shackLocation.getyAxis() + 4);
+                refrigratorLocation.setTypeOfTile(TypeOfTile.HOUSE);
+                App.getCurrentGame().getMainMap().getTilesOfMap().add(refrigratorLocation);
+                System.out.println("DEBUG: Created fallback refrigerator location at (" + shackLocation.getxAxis() + ", " + (shackLocation.getyAxis() + 4) + ")");
+            }
             newPlayer.setRefrigrator(new Refrigrator(refrigratorLocation));
 
             PlayerController playerController = new PlayerController(newPlayer, this, usernames);
@@ -392,7 +409,7 @@ public class GameMenuController {
         }
 
         App.getCurrentGame().setPlayers((ArrayList<Player>) players);
-        App.getCurrentGame().setCurrentPlayer(players.get(0));
+        App.getCurrentGame().setCurrentPlayer(App.getCurrentGame().getPlayerByName(App.getLoggedInUser().getUserName()));
         App.getCurrentGame().setGameId(App.getGameId());
         App.getCurrentGame().setFarms(farms);
 
@@ -419,11 +436,11 @@ public class GameMenuController {
                         System.out.println("DEBUG: [GAME_CREATION] Game creation successful");
                         System.out.println("DEBUG: [GAME_CREATION] Response data: " + gameData);
                         System.out.println("DEBUG: [GAME_CREATION] GameData is null: " + (gameData == null));
-                        
+
                         if (gameData != null) {
                             String serverGameId = gameData.getGameId();
                             System.out.println("DEBUG: [GAME_CREATION] Extracted server game ID: " + serverGameId);
-                            
+
                             networkSender.setCurrentGameId(serverGameId);
                             System.out.println("DEBUG: [GAME_CREATION] Set server game ID in NetworkCommandSender: " + serverGameId);
 
@@ -443,15 +460,15 @@ public class GameMenuController {
                             System.out.println("DEBUG: [GAME_CREATION] GameData is null, falling back to local game");
                         }
                     } else {
-                        System.out.println("DEBUG: [GAME_CREATION] Failed to create game on server: " + createResult.getMessage());
+                        System.out.println("DEBUG: [GAME_CREATION] Failed to create game on server: " + createResult.getMessage()); // moshkel ine
                         // Fall back to local game
                     }
                 } catch (Exception e) {
-                    System.out.println("DEBUG: Exception creating game on server: " + e.getMessage());
+                    System.out.println("DEBUG: Exception creating game on server: " + e.getMessage()); // pleye
                     // Fall back to local game
                 }
             } else {
-                System.out.println("DEBUG: No server connection available, using local game");
+                System.out.println("DEBUG: No server connection available, using local game"); // ok bood
             }
         } else {
             // Single player game
@@ -461,7 +478,7 @@ public class GameMenuController {
 
         MapSetUp.showMapWithFarms(App.getCurrentGame().getMainMap());
         System.out.println("All farms have been assigned!");
-        Main.getMain().setScreen(new GameMenu(usernames));
+        Main.getMain().setScreen(new GameMenu(usernames)); // eshtebah!
     }
 
     public Result nextTurn() {

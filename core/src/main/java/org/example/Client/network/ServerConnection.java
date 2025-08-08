@@ -5,6 +5,7 @@ import okhttp3.*;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.RelatedToUser.User;
 import org.example.Common.network.GameProtocol;
+import org.example.Common.network.NetworkObjectMapper;
 import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.LoginRequest;
 import org.example.Common.network.responses.LoginResponse;
@@ -31,7 +32,7 @@ public class ServerConnection {
 
     public ServerConnection(String serverHost, int serverPort) {
         this.serverBaseUrl = "http://" + serverHost + ":" + serverPort;
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = NetworkObjectMapper.getInstance();
         this.isConnected = false;
 
         // Configure HTTP client with timeouts

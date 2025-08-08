@@ -156,12 +156,12 @@ public class GameMenu extends InputAdapter implements Screen {
             if (App.getCurrentGame() != null && App.getCurrentGame().getNetworkCommandSender() != null) {
                 App.getCurrentGame().getNetworkCommandSender().setCurrentGameId(serverGameId);
                 System.out.println("DEBUG: [GAME_MENU] Set server game ID in NetworkCommandSender: " + serverGameId);
-                
+
                 // Verify it was set
                 String verifyId = App.getCurrentGame().getNetworkCommandSender().getCurrentGameId();
                 System.out.println("DEBUG: [GAME_MENU] Verified server game ID in NetworkCommandSender: " + verifyId);
             } else {
-                System.out.println("DEBUG: [GAME_MENU] Cannot set server game ID - App.getCurrentGame() is " + App.getCurrentGame() + 
+                System.out.println("DEBUG: [GAME_MENU] Cannot set server game ID - App.getCurrentGame() is " + App.getCurrentGame() +
                     ", NetworkCommandSender is " + (App.getCurrentGame() != null ? App.getCurrentGame().getNetworkCommandSender() : "N/A"));
             }
         } else {
@@ -171,28 +171,51 @@ public class GameMenu extends InputAdapter implements Screen {
 
 
     private void setCurrentPlayerToLoggedInUser() {
+        System.out.println("DEBUG: setCurrentPlayerToLoggedInUser() called");
+        System.out.println("DEBUG: App.getLoggedInUser(): " + App.getLoggedInUser());
+        System.out.println("DEBUG: App.getCurrentGame(): " + App.getCurrentGame());
+
+        if (App.getCurrentGame() != null) {
+            System.out.println("DEBUG: App.getCurrentGame().getPlayers(): " + App.getCurrentGame().getPlayers());
+            if (App.getCurrentGame().getPlayers() != null) {
+                System.out.println("DEBUG: Number of players: " + App.getCurrentGame().getPlayers().size());
+            }
+        }
+
         if (App.getLoggedInUser() != null) {
             String loggedInUsername = App.getLoggedInUser().getUserName();
+            System.out.println("DEBUG: Logged in username: " + loggedInUsername);
 
             // Find the player object for the logged-in user
-            for (Player player : App.getCurrentGame().getPlayers()) {
-                if (player.getUser().getUserName().equals(loggedInUsername)) {
-                    App.getCurrentGame().setCurrentPlayer(player);
-                    logger.debug("Set current player to logged-in user: {}", loggedInUsername);
-                    return;
+            if (App.getCurrentGame() != null && App.getCurrentGame().getPlayers() != null) {
+                for (Player player : App.getCurrentGame().getPlayers()) {
+                    if (player.getUser().getUserName().equals(loggedInUsername)) {
+                        App.getCurrentGame().setCurrentPlayer(player);
+                        System.out.println("DEBUG: Set current player to logged-in user: " + loggedInUsername);
+                        logger.debug("Set current player to logged-in user: {}", loggedInUsername);
+                        return;
+                    }
                 }
-            }
 
-            // If logged-in user not found, fall back to first player
-            if (!App.getCurrentGame().getPlayers().isEmpty()) {
-                App.getCurrentGame().setCurrentPlayer(App.getCurrentGame().getPlayers().get(0));
-                logger.warn("Logged-in user {} not found in game, using first player", loggedInUsername);
+                // If logged-in user not found, fall back to first player
+                if (!App.getCurrentGame().getPlayers().isEmpty()) {
+                    App.getCurrentGame().setCurrentPlayer(App.getCurrentGame().getPlayers().get(0));
+                    System.out.println("DEBUG: Logged-in user " + loggedInUsername + " not found in game, using first player");
+                    logger.warn("Logged-in user {} not found in game, using first player", loggedInUsername);
+                } else {
+                    System.out.println("DEBUG: No players available in game");
+                }
+            } else {
+                System.out.println("DEBUG: Game or players list is null");
             }
         } else {
             // No logged-in user, use first player
-            if (!App.getCurrentGame().getPlayers().isEmpty()) {
+            if (App.getCurrentGame() != null && App.getCurrentGame().getPlayers() != null && !App.getCurrentGame().getPlayers().isEmpty()) {
                 App.getCurrentGame().setCurrentPlayer(App.getCurrentGame().getPlayers().get(0));
+                System.out.println("DEBUG: No logged-in user, using first player");
                 logger.debug("No logged-in user, using first player");
+            } else {
+                System.out.println("DEBUG: No logged-in user and no players available");
             }
         }
     }
@@ -592,6 +615,20 @@ public class GameMenu extends InputAdapter implements Screen {
 
     @Override
     public void show() {
+        System.out.println("DEBUG: GameMenu.show() called");
+        System.out.println("DEBUG: App.getCurrentGame(): " + App.getCurrentGame());
+
+        if (App.getCurrentGame() != null) {
+            System.out.println("DEBUG: App.getCurrentGame().getCurrentPlayer(): " + App.getCurrentGame().getCurrentPlayer());
+            System.out.println("DEBUG: App.getCurrentGame().getPlayers(): " + App.getCurrentGame().getPlayers());
+            if (App.getCurrentGame().getPlayers() != null) {
+                System.out.println("DEBUG: Number of players: " + App.getCurrentGame().getPlayers().size());
+            }
+        }
+
+        // Ensure current player is set
+        setCurrentPlayerToLoggedInUser();
+
         batch = Main.getMain().getBatch();
         stage = new Stage(new ScreenViewport());
         font = new BitmapFont(Gdx.files.internal("fonts/new.fnt"));
@@ -600,13 +637,11 @@ public class GameMenu extends InputAdapter implements Screen {
         clockHandTexture = new Texture(Gdx.files.internal("Clock/flesh.png"));
         clockHandRegion = new TextureRegion(clockHandTexture);
 
-
         initializeLighting();
         initializeWeatherSystem();
 
         // Initialize WebSocket client for real-time updates
         initializeWebSocketClient();
-
 
         float clockSize = 100f;
         clockImage.setSize(clockSize, clockSize);
@@ -647,7 +682,6 @@ public class GameMenu extends InputAdapter implements Screen {
         stage.addActor(goldLabel);
 
         initializeFriendsButton();
-
 
         if (smileTextures[0] == null) {
             try {
@@ -752,6 +786,14 @@ public class GameMenu extends InputAdapter implements Screen {
         }
 
         Player player = App.getCurrentPlayerLazy();
+
+        System.out.println("DEBUG: Player from App.getCurrentPlayerLazy(): " + player);
+
+        if (player == null) {
+            System.err.println("ERROR: Player is null in GameMenu.show()");
+            System.err.println("This means App.getCurrentGame().getCurrentPlayer() is null");
+            return;
+        }
 
         player.getPlayerSprite().setPosition(
             player.getUserLocation().getxAxis(),
@@ -1093,8 +1135,8 @@ public class GameMenu extends InputAdapter implements Screen {
         float clockX = stage.getWidth() - clockSize - 20f;
         float clockY = stage.getHeight() - clockSize - 20f;
 
-        dayLabel.setPosition(clockX + clockSize / 2 - dayLabel.getWidth() / 2 - 3f, clockY + 85f);
-        timeLabel.setPosition(clockX + clockSize / 2 - timeLabel.getWidth() / 2 - 3f, clockY + 45f);
+        dayLabel.setPosition(clockX + clockSize / 2 - dayLabel.getWidth() / 2 - 3f, clockY + clockSize + 5f);
+        timeLabel.setPosition(clockX + clockSize / 2 - timeLabel.getWidth() / 2 - 3f, clockY - 25f);
         goldLabel.setPosition(clockX + clockSize / 2 + goldLabel.getWidth() / 2 - 20f, clockY + 12f);
     }
 
@@ -1223,7 +1265,8 @@ public class GameMenu extends InputAdapter implements Screen {
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
-        if (App.getCurrentPlayerLazy().getCurrentTool() != null) {
+        Player currentPlayer = App.getCurrentPlayerLazy();
+        if (currentPlayer != null && currentPlayer.getCurrentTool() != null) {
             toolsController.handleToolRotation(screenX, screenY);
             return false;
         }
@@ -1244,6 +1287,9 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Check if clicked on another player's location
         Player currentPlayer = App.getCurrentPlayerLazy();
+        if (currentPlayer == null) {
+            return false; // No current player available
+        }
 
         for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
             if (!otherPlayer.equals(currentPlayer) &&
@@ -1254,7 +1300,7 @@ public class GameMenu extends InputAdapter implements Screen {
         }
 
         // Handle tool usage if player has a tool equipped
-        if (App.getCurrentPlayerLazy().getCurrentTool() != null) {
+        if (currentPlayer.getCurrentTool() != null) {
             Location targetLocation = getClickedLocation(screenX, screenY);
             if (targetLocation != null) {
                 showToolUseDialog(targetLocation);
@@ -1515,16 +1561,21 @@ public class GameMenu extends InputAdapter implements Screen {
 
         errorLabel.setColor(1, 0, 0, 1);
         errorLabel.setVisible(false);
-        for (Location location : animal.getHome().getLocation().getLocationsInRectangle()) {
-            boolean isEmpty = true;
-            for (FarmAnimals farmAnimals : App.getCurrentPlayerLazy().getOwnedFarm().getFarmAnimals()) {
-                if (location.equals(farmAnimals.getHome().getLocation())) {
-                    isEmpty = false;
+        Player currentPlayer = App.getCurrentPlayerLazy();
+        if (currentPlayer == null) {
+            homeLable.setText("No player available");
+        } else {
+            for (Location location : animal.getHome().getLocation().getLocationsInRectangle()) {
+                boolean isEmpty = true;
+                for (FarmAnimals farmAnimals : currentPlayer.getOwnedFarm().getFarmAnimals()) {
+                    if (location.equals(farmAnimals.getHome().getLocation())) {
+                        isEmpty = false;
+                    }
                 }
-            }
-            if (isEmpty) {
-                homeLable.setText("your home x:" + location.getxAxis() + " y:" + location.getyAxis());
-                break;
+                if (isEmpty) {
+                    homeLable.setText("your home x:" + location.getxAxis() + " y:" + location.getyAxis());
+                    break;
+                }
             }
         }
 
@@ -1602,7 +1653,12 @@ public class GameMenu extends InputAdapter implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 String poleName = poleNameField.getText().trim();  // Get the entered pole name
-                boolean hasPole = App.getCurrentPlayerLazy().getBackPack().getItemNames().containsKey(poleName);
+                Player currentPlayer = App.getCurrentPlayerLazy();
+                if (currentPlayer == null) {
+                    showError("No player available");
+                    return;
+                }
+                boolean hasPole = currentPlayer.getBackPack().getItemNames().containsKey(poleName);
 
                 if (!hasPole) {
                     showError("You do not have any poles of this type");
@@ -2058,7 +2114,16 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     public int getGold() {
-        return App.getCurrentPlayerLazy().getMoney();
+        Player currentPlayer = App.getCurrentPlayerLazy();
+        if (currentPlayer == null) {
+            // If no current player is set, try to set it and return 0 as fallback
+            setCurrentPlayerToLoggedInUser();
+            currentPlayer = App.getCurrentPlayerLazy();
+            if (currentPlayer == null) {
+                return 0; // Return 0 if still no player available
+            }
+        }
+        return currentPlayer.getMoney();
     }
 
     private void initializeLighting() {
@@ -2527,12 +2592,12 @@ public class GameMenu extends InputAdapter implements Screen {
                 String gameId;
                 System.out.println("DEBUG: [WEBSOCKET_INIT] Starting WebSocket initialization");
                 System.out.println("DEBUG: [WEBSOCKET_INIT] App.getCurrentGame(): " + App.getCurrentGame());
-                
+
                 if (App.getCurrentGame().getNetworkCommandSender() != null) {
                     System.out.println("DEBUG: [WEBSOCKET_INIT] NetworkCommandSender exists");
                     String serverGameId = App.getCurrentGame().getNetworkCommandSender().getCurrentGameId();
                     System.out.println("DEBUG: [WEBSOCKET_INIT] NetworkCommandSender.getCurrentGameId(): " + serverGameId);
-                    
+
                     if (serverGameId != null) {
                         gameId = serverGameId;
                         System.out.println("DEBUG: [WEBSOCKET_INIT] Using server game ID for WebSocket: " + gameId);

@@ -17,6 +17,20 @@ public class MapSetUp {
     static FarmSetUp newFarmSetUp = new FarmSetUp();
 
     public static void initializeFarms() {
+        System.out.println("DEBUG: Starting initializeFarms()");
+        System.out.println("DEBUG: App.getCurrentGame(): " + App.getCurrentGame());
+
+        if (App.getCurrentGame() == null) {
+            System.err.println("ERROR: App.getCurrentGame() is null in initializeFarms()");
+            return;
+        }
+
+        if (App.getCurrentGame().getMainMap() == null) {
+            System.err.println("ERROR: App.getCurrentGame().getMainMap() is null in initializeFarms()");
+            return;
+        }
+
+        System.out.println("DEBUG: Creating 400x400 map tiles...");
         for (int i = 0; i < 400; i++) {
             for (int j = 0; j < 400; j++) {
                 Location location = new Location(i, j);
@@ -24,6 +38,8 @@ public class MapSetUp {
                 App.getCurrentGame().getMainMap().getTilesOfMap().add(location);
             }
         }
+        System.out.println("DEBUG: Map tiles created. Total tiles: " + App.getCurrentGame().getMainMap().getTilesOfMap().size());
+
         ArrayList<Farm> farms = new ArrayList<>();
         int farmWidth = 30;
         int farmHeight = 30;
@@ -46,6 +62,7 @@ public class MapSetUp {
             id++;
         }
         App.getCurrentGame().getMainMap().setFarms(farms);
+        System.out.println("DEBUG: Farms initialized. Total farms: " + farms.size());
     }
 
     public static void showMapWithFarms(map newMap) {
@@ -62,6 +79,22 @@ public class MapSetUp {
     }
 
     public static void storesSetUp() {
+        if (App.getCurrentGame() == null) {
+            System.err.println("ERROR: App.getCurrentGame() is null in storesSetUp()");
+            return;
+        }
+
+        if (App.getCurrentGame().getMainMap() == null) {
+            System.err.println("ERROR: App.getCurrentGame().getMainMap() is null in storesSetUp()");
+            return;
+        }
+
+        if (App.getCurrentGame().getMainMap().getTilesOfMap() == null) {
+            System.err.println("ERROR: App.getCurrentGame().getMainMap().getTilesOfMap() is null in storesSetUp()");
+            return;
+        }
+
+        System.out.println("DEBUG: Map tiles count: " + App.getCurrentGame().getMainMap().getTilesOfMap().size());
 
         //in case we may want to make it rectangle instead of square
         int storeWidth = 20;
@@ -78,7 +111,13 @@ public class MapSetUp {
             //setting types as store
             for (int x = startX; x < startX + storeWidth; x++) {
                 for (int y = startY; y < startY + storeHeight; y++) {
-                    App.getCurrentGame().getMainMap().findLocation(x, y).setTypeOfTile(TypeOfTile.STORE);
+                    Location location = App.getCurrentGame().getMainMap().findLocation(x, y);
+                    if (location == null) {
+                        System.err.println("ERROR: findLocation returned null for coordinates (" + x + ", " + y + ")");
+                        System.err.println("This should not happen if the map was properly initialized with 400x400 tiles");
+                        return;
+                    }
+                    location.setTypeOfTile(TypeOfTile.STORE);
                 }
             }
             App.getCurrentGame().getMainMap().getStores().add(storeDetailsSetUp(i, storeRectangle));
