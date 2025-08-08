@@ -1,6 +1,7 @@
 package org.example.Common.models.Fundementals;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.example.Common.models.Date;
 import org.example.Common.models.DateManager;
 import org.example.Common.models.NPC.NPCvillage;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Game {
     private Player currentPlayer;
     private Map<User, Integer> score = new HashMap<>();
@@ -133,9 +135,15 @@ public class Game {
         return !isTurnBasedMode || currentPlayer == null ||
             currentPlayer.getUser().getUserName().equals(playerName);
     }
+
+    public Game() {
+    }
+
+    @JsonIgnore
     public org.example.Client.network.NetworkCommandSender getNetworkCommandSender() {
         return networkCommandSender;
     }
+    @JsonIgnore
     public void setNetworkCommandSender(org.example.Client.network.NetworkCommandSender sender) {
         this.networkCommandSender = sender;
         if (sender != null) networkId = sender.getCurrentGameId();

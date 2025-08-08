@@ -115,6 +115,11 @@ public class GameServer {
         app.post(GameProtocol.CHAT_SEND_ENDPOINT, this::handleChatSend);
         app.get(GameProtocol.CHAT_HISTORY_ENDPOINT, this::handleChatHistory);
 
+        //load
+        app.post("/{gameId}/load", this::handleLoadGame);
+        app.get("/{gameId}/load-status", this::handleLoadStatus);
+        app.delete("/{gameId}/clear-load", this::handleClearLoadState);
+
         // Health check
         app.get("/health", ctx -> ctx.json(NetworkResult.success("Server is running")));
 
@@ -365,6 +370,51 @@ public class GameServer {
     public boolean isRunning() { return isRunning; }
     public int getPort() { return port; }
     public GameSessionManager getSessionManager() { return sessionManager; }
+
+    // In GameServer.java
+    private void handleLoadGame(Context ctx) {
+        try {
+            String gameId = ctx.pathParam("gameId");
+            String userId = authHandler.getUserIdFromContext(ctx);
+            LoadGameRequest request = ctx.bodyAsClass(LoadGameRequest.class);
+
+            System.out.println(gameId + " mmmmm " + userId + " mmmm "+ request.getGameName());
+
+            NetworkResult<String> result = sessionManager.handleLoadRequest(
+                gameId,
+                userId,
+                request.getGameName()
+            );
+
+            ctx.status(result.getStatusCode()).json(result);
+        } catch (Exception e) {
+            logger.error("Load game error", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
+        }
+    }
+
+    private void handleLoadStatus(Context ctx) {
+        try {
+            String gameId = ctx.pathParam("gameId");
+            String gameName = ctx.queryParam("gameName");
+            NetworkResult<String> result = sessionManager.checkLoadStatus(gameId, gameName);
+            ctx.status(result.getStatusCode()).json(result);
+        } catch (Exception e) {
+            logger.error("Load status error", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
+        }
+    }
+
+    private void handleClearLoadState(Context ctx) {
+        try {
+            String gameId = ctx.pathParam("gameId");
+            NetworkResult<String> result = sessionManager.clearLoadState(gameId);
+            ctx.status(result.getStatusCode()).json(result);
+        } catch (Exception e) {
+            logger.error("Clear load state error", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
+        }
+    }
 
     // Main method for standalone server
     public static void main(String[] args) {

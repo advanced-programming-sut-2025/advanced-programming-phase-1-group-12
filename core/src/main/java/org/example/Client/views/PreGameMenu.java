@@ -3,20 +3,25 @@ package org.example.Client.views;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Client.Main;
 import org.example.Client.controllers.MenusController.GameMenuController;
+import org.example.Common.models.Fundementals.Game;
 import org.example.Common.saveGame.GameSaveManager;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Assets.GameAssetManager;
 import org.example.Common.models.Fundementals.Player;
 import org.example.Common.models.RelatedToUser.User;
+
+import java.io.File;
 import java.util.*;
 import java.util.List;
 
@@ -27,7 +32,7 @@ public class PreGameMenu implements Screen {
     private Image backgroundImage;
     private final Label menuLabel;
     private final TextButton newGame;
-    private final TextButton loadLastGame;
+    private SelectBox loadGameButton = new SelectBox(skin);
     private final TextButton showInformation;
     private final TextButton exitGame;
     public Table table = new Table();
@@ -37,7 +42,25 @@ public class PreGameMenu implements Screen {
         this.menuLabel = new Label("pre_game menu", skin);
 
         this.newGame = new TextButton("new Game", skin);
-        this.loadLastGame = new TextButton("Load last game", skin);
+        ArrayList<String> games = new ArrayList<>();
+        File folder = new File("saves");
+
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+
+        String[] files = folder.list();
+        if (files != null && files.length > 0) {
+            for (String file : files) {
+                games.add(file); // store just filename for display
+            }
+        }
+        if (games.isEmpty()) {
+            games.add("No saved games");
+        }
+        loadGameButton.setItems(games.toArray(new String[0]));
+
+
         this.showInformation = new TextButton("show information of current play", skin);
         this.exitGame = new TextButton("Exit and delete game", skin);
     }
@@ -58,7 +81,7 @@ public class PreGameMenu implements Screen {
         table.add(newGame).width(300).height(60);
 
         table.row().pad(30, 0, 10, 0);
-        table.add(loadLastGame).width(300).height(60);
+        table.add(loadGameButton).width(300).height(60);
 
         table.row().pad(30, 0, 10, 0);
         table.add(showInformation).width(300).height(60);
@@ -193,18 +216,29 @@ public class PreGameMenu implements Screen {
             }
         });
 
-        loadLastGame.addListener(new ClickListener() {
+        loadGameButton.addListener(new ChangeListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
-                System.out.println("Load last game clicked!");
-                // TODO: which id, every one should click?
-                App.setCurrentGame( GameSaveManager.loadGameCompressed("saves/1"));
-                List<String> playersList = new ArrayList<>();
-                for (Player name : App.getCurrentGame().getPlayers()) {
-                    playersList.add(name.getUser().getUserName());
+            public void changed (ChangeEvent event, Actor actor) {
+                String game = "saves/" + loadGameButton.getSelected();
+                if(game.contains("No saved games")){
+                    return;
                 }
-                GameMenuController controller = new GameMenuController();
-                controller.loadGame(playersList);
+                Game loadedGame = GameSaveManager.loadGameCompressed(game);
+                for (Player player : loadedGame.getPlayers()) {
+                    if(player.getUser().getUserName().equals(App.getLoggedInUser().getUserName())) {
+                        App.setCurrentGame(loadedGame);
+                        List<String> playersList = new ArrayList<>();
+                        for (Player name : App.getCurrentGame().getPlayers()) {
+                            playersList.add(name.getUser().getUserName());
+                        }
+                        GameMenuController controller = new GameMenuController();
+                        controller.loadGame(playersList);
+                        return;
+                    }
+                }
+                new Dialog("Error", skin)
+                    .text("you are not a member of this game to load it")
+                    .button("OK").show(stage);
             }
         });
 

@@ -78,4 +78,9 @@ public class GameProtocol {
     // Authentication
     public static final String AUTH_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "Bearer ";
+
+    //loading
+    public static final String LOAD_GAME_ENDPOINT = "/lobby/:lobbyId/load";
+    public static final String LOAD_STATUS_ENDPOINT = "/lobby/:lobbyId/load-status";
+    public static final String CLEAR_LOAD_STATE_ENDPOINT = "/lobby/:lobbyId/clear-load";
 }

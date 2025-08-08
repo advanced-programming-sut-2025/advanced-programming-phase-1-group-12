@@ -516,7 +516,7 @@ public class PlayerController {
         //if you are the creator:
         if(App.getCurrentGame().getCurrentPlayer().getUser().getUserName().equals(App.getCurrentGame().getCreator().getUserName())) {
             GameSaveManager.saveGameCompressed(App.getCurrentGame(), "saves/" + App.getCurrentGame().getGameId());
-            GameDatabase.save(App.getCurrentGame());
+          //  GameDatabase.save(App.getCurrentGame());
             for(Player player1 : App.getCurrentGame().getPlayers()){
                 updateMoneyAndExperience(player1);
             }
