@@ -7,6 +7,7 @@ import org.example.Common.network.GameProtocol;
 import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.CreateGameRequest;
 import org.example.Common.network.responses.GameStateResponse;
+import org.example.Common.network.responses.LoadStatusResponse;
 import org.example.Common.saveGame.GameSaveManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -402,14 +403,17 @@ public class GameSessionManager {
         String gameSessionId = UUID.randomUUID().toString();
 
         gameLoadSelections.put(gameSessionId, loadedGame);
-        Game load = GameSaveManager.loadGameCompressed(loadedGame);
 
-        for (Player player : load.getPlayers()) {
-            playerToSession.put(player.getUser().getUserName(), gameSessionId);
+//        for (Player player : load.getPlayers()) {
+//            playerToSession.put(player.getUser().getUserName(), gameSessionId);
+//        }
+        List<String> loadedPlayerNames = GameSaveManager.loadPlayerUsernames("C:\\Users\\Lenovo\\Desktop\\advanced-programming-phase-1-group-12\\savePlayers\\1.json");
+        for(String playerName : loadedPlayerNames) {
+            playerToSession.put(playerName, gameSessionId);
         }
 
         logger.info("Game loaded into session {} with {} players",
-            gameSessionId, load.getPlayers().size());
+            gameSessionId, loadedPlayerNames.size());
 
         return NetworkResult.success("Game loaded successfully", gameSessionId);
     }

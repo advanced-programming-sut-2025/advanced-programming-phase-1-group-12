@@ -286,13 +286,10 @@ public class GameStartManager {
                 if (gameId == null) {
                     return false;
                 }
-                Game loadedGame = GameSaveManager.loadGameCompressed(gameId);
-                if (loadedGame == null) {
-                    return false;
-                }
-                boolean playerFound = loadedGame.getPlayers().stream()
-                    .anyMatch(p -> p.getUser().getUserName().equals(username));
-                if (!playerFound) {
+                List<String>playersOfGame = GameSaveManager.loadPlayerUsernames("C:\\Users\\Lenovo\\Desktop\\advanced-programming-phase-1-group-12\\savePlayers\\1.json");
+                assert playersOfGame != null;
+                boolean found = playersOfGame.contains(username);
+                if(!found) {
                     return false;
                 }
             }
@@ -346,16 +343,13 @@ public class GameStartManager {
                 return NetworkResult.error("No game selected for the first player");
             }
 
-            Game loadedGame = GameSaveManager.loadGameCompressed(gameIdToLoad);
-            if (loadedGame == null) {
-                return NetworkResult.error("Failed to load game with ID " + gameIdToLoad);
-            }
+//            Game loadedGame = GameSaveManager.loadGameCompressed(gameIdToLoad);
+//            if (loadedGame == null) {
+//                return NetworkResult.error("Failed to load game with ID " + gameIdToLoad);
+//            }
 
             // Make sure all players in the loaded game match the session players
-            Set<String> loadedPlayerNames = new HashSet<>();
-            for (Player p : loadedGame.getPlayers()) {
-                loadedPlayerNames.add(p.getUser().getUserName());
-            }
+            List<String> loadedPlayerNames = GameSaveManager.loadPlayerUsernames("C:\\Users\\Lenovo\\Desktop\\advanced-programming-phase-1-group-12\\savePlayers\\1.json");
 
             if (!loadedPlayerNames.containsAll(session.playerNames)) {
                 return NetworkResult.error("Loaded game players do not match session players");

@@ -1,8 +1,9 @@
 package org.example.Common.network.responses;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.Map;
 
-// LoadStatusResponse.java
 public class LoadStatusResponse {
     private boolean allPlayersReady;
     private String message;

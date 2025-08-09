@@ -1,6 +1,7 @@
 package org.example.Common.models.enums;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.example.Common.models.Assets.AnimalAssetsManager;
 import org.example.Common.models.enums.Types.AnimalProduct;
 
@@ -48,6 +49,7 @@ public enum Animal {
     private final String description;
     private final ArrayList<String> placesCanStay;
     private final int producingCycle;
+    @JsonIgnore
     private transient final Texture animalTexture;
 
     Animal(int purchaseCost, AnimalProduct defaultProduct, Set<AnimalProduct> nonDefaultProducts, boolean isCoop,

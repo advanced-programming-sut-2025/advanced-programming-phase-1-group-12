@@ -82,6 +82,9 @@ public class LobbyMenu implements Screen {
     private boolean isAdmin = false;
     private Timer.Task refreshTask;
 
+    //load
+    private Game loadedGame;
+
     public LobbyMenu() {
         this.titleLabel = new Label("Lobby System", skin);
         this.statusLabel = new Label("Loading lobbies...", skin);
@@ -222,7 +225,7 @@ public class LobbyMenu implements Screen {
                     return;
                 }
                 // Compose game save name
-                String gameName = "saves/" + selected;
+                String gameName = "C:\\Users\\Lenovo\\Desktop\\advanced-programming-phase-1-group-12\\saves\\1" ;
 
                 if (!isInLobby || currentLobby == null) {
                     updateStatus("You must be in a lobby to load a game", false);
@@ -232,7 +235,7 @@ public class LobbyMenu implements Screen {
                 String currentPlayer = App.getLoggedInUser().getUserName();
 
                 // Instead of loading locally, just request server to load game
-                LoadGameRequest request = new LoadGameRequest(currentPlayer, currentLobby.getId(), gameName);
+                LoadGameRequest request = new LoadGameRequest(currentPlayer, currentLobby.getId(), selected);
 
                 updateStatus("Requesting to load game...", true);
 
@@ -250,10 +253,10 @@ public class LobbyMenu implements Screen {
                             LoadStatusResponse response = (LoadStatusResponse) result.getData();
                             if (response.isAllPlayersReady()) {
                                 // After all players ready, fetch full game data from server or receive it from server response
-                                fetchAndLoadGameFromServer(gameName);
+                                fetchAndLoadGameFromServer(selected);
                             } else {
                                 updateStatus(response.getMessage(), true);
-                                startLoadStatusPolling(currentLobby.getId(), gameName);
+                                startLoadStatusPolling(currentLobby.getId(), selected);
                             }
                         } else {
                             updateStatus("Load failed: " + result.getMessage(), false);
@@ -304,7 +307,7 @@ public class LobbyMenu implements Screen {
                             LoadStatusResponse response = (LoadStatusResponse) result.getData();
                             if (response.isAllPlayersReady()) {
                                 this.cancel();
-                                Game loadedGame = GameSaveManager.loadGameCompressed(gameName);
+                                Game loadedGame = GameSaveManager.loadGameCompressed("saves/"+ gameName);
                                 proceedWithGameLoad(loadedGame);
                             } else {
                                 updateStatus(response.getMessage(), true);
@@ -823,5 +826,13 @@ public class LobbyMenu implements Screen {
     private void setScale() {
         titleLabel.setFontScale(2.0f);
         statusLabel.setFontScale(1.2f);
+    }
+
+    public Game getLoadedGame() {
+        return loadedGame;
+    }
+
+    public void setLoadedGame(Game loadedGame) {
+        this.loadedGame = loadedGame;
     }
 }
