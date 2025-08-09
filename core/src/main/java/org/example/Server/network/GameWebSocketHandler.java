@@ -75,7 +75,7 @@ public class GameWebSocketHandler {
             // If gameId is provided, add connection to the game instance
             if (gameId != null) {
                 GameInstance gameInstance = sessionManager.getGameInstance(gameId);
-                
+
                 // Fallback: if gameInstance is null, try to find by user mapping
                 if (gameInstance == null) {
                     String userGameId = sessionManager.getPlayerGameId(userId);
@@ -84,7 +84,7 @@ public class GameWebSocketHandler {
                         logger.info("Found game instance {} for user {} via player mapping", userGameId, userId);
                     }
                 }
-                
+
                 if (gameInstance != null) {
                     gameInstance.addWebSocketConnection(ctx);
 
@@ -283,7 +283,7 @@ public class GameWebSocketHandler {
 
             // Get the correct game ID from the WebSocket query parameters
             String gameId = ctx.queryParam("gameId");
-            
+
             // Fallback: Handle gameId from message data if query param is null
             if (gameId == null) {
                 Object gameIdObj = messageData.get("gameId");
@@ -367,7 +367,7 @@ public class GameWebSocketHandler {
         try {
             // Get the correct game ID from the WebSocket query parameters
             String gameId = ctx.queryParam("gameId");
-            
+
             // Fallback: Handle gameId from message data if query param is null
             if (gameId == null) {
                 Object gameIdObj = messageData.get("gameId");
@@ -410,6 +410,11 @@ public class GameWebSocketHandler {
                 for (String id: gameInstance.getAllPlayerIds()){
                     System.out.println(id);
                 }
+
+                System.out.println("=====================================connectedPlayers===============================");
+                 for (String id: gameInstance.getConnectedPlayers()){
+                     System.out.println(id);
+                 }
 
                 System.out.println("================================userId============================");
                 System.out.println(userId);

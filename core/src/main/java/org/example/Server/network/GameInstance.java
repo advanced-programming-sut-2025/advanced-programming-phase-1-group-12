@@ -105,6 +105,12 @@ public class GameInstance {
     public boolean isPlayerConnected(String playerId) {
         gameLock.readLock().lock();
         try {
+//            for(String id: getAllPlayerIds()){
+//                if(id.equals(playerId)){
+//                    return true;
+//                }
+//            }
+//            return false;
             return Boolean.TRUE.equals(connectedPlayers.get(playerId));
         } finally {
             gameLock.readLock().unlock();
@@ -651,6 +657,8 @@ public class GameInstance {
     public Set<String> getAllPlayerIds() {
         gameLock.readLock().lock();
         try {
+
+
             return new HashSet<>(players.keySet());
         } finally {
             gameLock.readLock().unlock();
