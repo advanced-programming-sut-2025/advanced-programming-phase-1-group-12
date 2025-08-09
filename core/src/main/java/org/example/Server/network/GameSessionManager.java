@@ -3,6 +3,8 @@ package org.example.Server.network;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Fundementals.Game;
 import org.example.Common.models.Fundementals.Player;
+import org.example.Common.models.RelatedToUser.User;
+import org.example.Common.models.Fundementals.Location;
 import org.example.Common.network.GameProtocol;
 import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.CreateGameRequest;
@@ -10,6 +12,7 @@ import org.example.Common.network.responses.GameStateResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
@@ -139,10 +142,22 @@ public class GameSessionManager {
                 activeGames.put(gameId, gameInstance);
                 System.out.println("DEBUG: Added game to active games. Total active games: " + activeGames.size());
 
-                // Then add players to mapping
+                // Then add players to mapping and game instance
                 for (String username : request.getUsernames()) {
                     playerToGameMapping.put(username, gameId);
                     System.out.println("DEBUG: Mapped player " + username + " to game " + gameId);
+                    
+                    // Create a basic player object and add it to the game instance
+                    // This ensures the player exists in the GameInstance for connection validation
+                    User user = App.getUserByUsername(username);
+                    if (user == null) {
+                        user = new User(null, username, username, "defaultPassword", username + "@example.com", "", "", false, "");
+                        App.getUsers().put(user.getUserName(), user);
+                    }
+                    
+                    Player player = new Player(user, new Location(0, 0), false, null, new ArrayList<>(), null, null, false, false, new ArrayList<>());
+                    gameInstance.addPlayer(username, player);
+                    System.out.println("DEBUG: Added player " + username + " to GameInstance " + gameId);
                 }
 
                 logger.info("Game created with traceable ID: {} for {} players (creator: {})",

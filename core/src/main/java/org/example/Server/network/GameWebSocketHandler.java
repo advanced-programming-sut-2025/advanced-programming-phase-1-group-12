@@ -75,17 +75,30 @@ public class GameWebSocketHandler {
             // If gameId is provided, add connection to the game instance
             if (gameId != null) {
                 GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+                
+                // Fallback: if gameInstance is null, try to find by user mapping
+                if (gameInstance == null) {
+                    String userGameId = sessionManager.getPlayerGameId(userId);
+                    if (userGameId != null) {
+                        gameInstance = sessionManager.getGameInstance(userGameId);
+                        logger.info("Found game instance {} for user {} via player mapping", userGameId, userId);
+                    }
+                }
+                
                 if (gameInstance != null) {
                     gameInstance.addWebSocketConnection(ctx);
 
                     // IMPORTANT: Mark the player as connected in the game instance
                     gameInstance.connectPlayer(userId);
+                    logger.info("Player {} connected to game {} via WebSocket", userId, gameInstance.getGameId());
 
                     // Broadcast player joined event
                     PlayerJoinedEvent joinEvent = new PlayerJoinedEvent(
-                        gameId, userId, userId, gameInstance.getConnectedPlayerCount()
+                        gameInstance.getGameId(), userId, userId, gameInstance.getConnectedPlayerCount()
                     );
-                    broadcastToGame(gameId, joinEvent);
+                    broadcastToGame(gameInstance.getGameId(), joinEvent);
+                } else {
+                    logger.warn("Could not find game instance for gameId: {} and userId: {}", gameId, userId);
                 }
             }
 
@@ -268,30 +281,24 @@ public class GameWebSocketHandler {
                 return;
             }
 
-            // Get the game ID from the query parameters (this is the correct game ID)
-            String expectedGameId = ctx.queryParam("gameId");
-
-            // Get the game ID from the message
-            Object gameIdObj = messageData.get("gameId");
-            String messageGameId = null;
-            if (gameIdObj instanceof String) {
-                messageGameId = (String) gameIdObj;
-            } else if (gameIdObj instanceof Integer) {
-                messageGameId = gameIdObj.toString();
-            }
-
-            // Validate game IDs match
-            if (messageGameId != null && !messageGameId.equals(expectedGameId)) {
-                logger.warn("Game ID mismatch for user {}: expected {}, got {}", userId, expectedGameId, messageGameId);
-                // Use the correct game ID from query parameters
-                messageGameId = expectedGameId;
+            // Get the correct game ID from the WebSocket query parameters
+            String gameId = ctx.queryParam("gameId");
+            
+            // Fallback: Handle gameId from message data if query param is null
+            if (gameId == null) {
+                Object gameIdObj = messageData.get("gameId");
+                if (gameIdObj instanceof String) {
+                    gameId = (String) gameIdObj;
+                } else if (gameIdObj instanceof Integer) {
+                    gameId = gameIdObj.toString();
+                }
             }
 
             Object xObj = messageData.get("x");
             Object yObj = messageData.get("y");
             String direction = (String) messageData.get("direction");
 
-            if (messageGameId == null || xObj == null || yObj == null) {
+            if (gameId == null || xObj == null || yObj == null) {
                 if (ctx.session.isOpen()) {
                     sendError(ctx, "gameId, x, and y are required for movement");
                 }
@@ -301,18 +308,23 @@ public class GameWebSocketHandler {
             int x = xObj instanceof Integer ? (Integer) xObj : Integer.parseInt(xObj.toString());
             int y = yObj instanceof Integer ? (Integer) yObj : Integer.parseInt(yObj.toString());
 
-            GameInstance gameInstance = sessionManager.getGameInstance(messageGameId);
+            GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            // If game instance is null, try to find it by user ID as fallback
             if (gameInstance == null) {
-                // Try to find game instance by user ID as fallback
                 String userGameId = sessionManager.getPlayerGameId(userId);
                 if (userGameId != null) {
                     gameInstance = sessionManager.getGameInstance(userGameId);
+                    // Update gameId to the correct one for consistent messaging
+                    gameId = userGameId;
                 }
+            }
 
-                if (gameInstance == null && ctx.session.isOpen()) {
-                    sendError(ctx, "Game not found 4");
-                    return;
+            if (gameInstance == null) {
+                if (ctx.session.isOpen()) {
+                    logger.warn("Game instance not found for gameId: {} and userId: {}", gameId, userId);
+                    sendError(ctx, "Game not found - please rejoin the game");
                 }
+                return;
             }
 
             if (!gameInstance.isPlayerConnected(userId)) {
@@ -331,7 +343,7 @@ public class GameWebSocketHandler {
 
             // Broadcast movement to all players in the game
             GameStateUpdateEvent updateEvent = new GameStateUpdateEvent(
-                messageGameId,
+                gameId,
                 userId,
                 "player_moved",
                 movementData
@@ -340,10 +352,10 @@ public class GameWebSocketHandler {
             gameInstance.broadcastToAllPlayers(updateEvent);
 
             // Create and broadcast player movement event
-            PlayerMovedEvent moveEvent = new PlayerMovedEvent(messageGameId, userId, userId, x, y, direction);
-            broadcastToGame(messageGameId, moveEvent);
+            PlayerMovedEvent moveEvent = new PlayerMovedEvent(gameId, userId, userId, x, y, direction);
+            broadcastToGame(gameId, moveEvent);
 
-            logger.debug("Player movement from {} in game {}: ({}, {}) - broadcasted to all players", userId, messageGameId, x, y);
+            logger.debug("Player movement from {} in game {}: ({}, {}) - broadcasted to all players", userId, gameId, x, y);
 
         } catch (Exception e) {
             logger.error("Error handling player movement", e);
@@ -353,13 +365,17 @@ public class GameWebSocketHandler {
 
     private void handleEnergyUpdate(WsContext ctx, String userId, Map<String, Object> messageData) {
         try {
-            // Handle gameId as either String or Integer
-            Object gameIdObj = messageData.get("gameId");
-            String gameId = null;
-            if (gameIdObj instanceof String) {
-                gameId = (String) gameIdObj;
-            } else if (gameIdObj instanceof Integer) {
-                gameId = gameIdObj.toString();
+            // Get the correct game ID from the WebSocket query parameters
+            String gameId = ctx.queryParam("gameId");
+            
+            // Fallback: Handle gameId from message data if query param is null
+            if (gameId == null) {
+                Object gameIdObj = messageData.get("gameId");
+                if (gameIdObj instanceof String) {
+                    gameId = (String) gameIdObj;
+                } else if (gameIdObj instanceof Integer) {
+                    gameId = gameIdObj.toString();
+                }
             }
 
             String playerId = (String) messageData.get("playerId");
@@ -373,9 +389,19 @@ public class GameWebSocketHandler {
 
             GameInstance gameInstance = sessionManager.getGameInstance(gameId);
 
-            //TODO: cursor fix this
+            // If game instance is null, try to find it by user ID as fallback
             if (gameInstance == null) {
-                sendError(ctx, "Game not found 5"); //local(2)
+                String userGameId = sessionManager.getPlayerGameId(userId);
+                if (userGameId != null) {
+                    gameInstance = sessionManager.getGameInstance(userGameId);
+                    // Update gameId to the correct one for consistent messaging
+                    gameId = userGameId;
+                }
+            }
+
+            if (gameInstance == null) {
+                logger.warn("Game instance not found for gameId: {} and userId: {}", gameId, userId);
+                sendError(ctx, "Game not found - please rejoin the game");
                 return;
             }
 

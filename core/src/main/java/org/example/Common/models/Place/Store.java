@@ -116,25 +116,25 @@ public class Store implements Place {
         if(storeTexture == null) {
             switch (nameOfStore) {
                 case "Blacksmith":
-                    storeTexture = GameAssetManager.blackSmith;
+                    storeTexture = GameAssetManager.getBlackSmith();
                     break;
                 case "JojaMart":
-                    storeTexture = GameAssetManager.jojaMArt;
+                    storeTexture = GameAssetManager.getJojaMArt();
                     break;
                 case "Pierre's General Store":
-                    storeTexture = GameAssetManager.PierresGeneral;
+                    storeTexture = GameAssetManager.getPierresGeneral();
                     break;
                 case "Carpenter's Shop":
-                    storeTexture = GameAssetManager.Carpenter;
+                    storeTexture = GameAssetManager.getCarpenter();
                     break;
                 case "Fish Shop":
-                    storeTexture = GameAssetManager.fishShop;
+                    storeTexture = GameAssetManager.getFishShop();
                     break;
                 case "Marnie's Ranch":
-                    storeTexture = GameAssetManager.Marnie;
+                    storeTexture = GameAssetManager.getMarnie();
                     break;
                 default:
-                    storeTexture = GameAssetManager.StardropSaloon;
+                    storeTexture = GameAssetManager.getStardropSaloon();
             }
         }
         return storeTexture;

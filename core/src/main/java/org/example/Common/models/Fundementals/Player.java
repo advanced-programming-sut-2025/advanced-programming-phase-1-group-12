@@ -67,12 +67,24 @@ public class Player {
     protected Player() {
         // For Jackson deserialization only
     }
+    
+    // Check if we're running in a LibGDX context (client-side)
+    private static boolean isLibGDXAvailable() {
+        try {
+            return com.badlogic.gdx.Gdx.files != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     public Player(User user, Location userLocation, boolean isMarried, Refrigrator refrigrator,
                   ArrayList<RelationShip> relationShips, Farm ownedFarm, BackPack backPack, boolean isEnergyUnlimited,
                   boolean hasCollapsed, ArrayList<Ability> abilitis) {
-        this.playerTexture = new Texture("Emoji/Emojis000.png");
-        this.playerSprite = new Sprite(playerTexture);
+        // Only create textures and sprites when LibGDX is available (client-side)
+        if (isLibGDXAvailable()) {
+            this.playerTexture = new Texture("Emoji/Emojis000.png");
+            this.playerSprite = new Sprite(playerTexture);
+        }
         this.user = user;
         this.userLocation = userLocation;
         this.isMarried = isMarried;
@@ -97,14 +109,23 @@ public class Player {
         initializeAbilities();
         initializerecepies();
 
-        rect = new CollisionRect(playerSprite.getX(), playerSprite.getY(), playerSprite.getWidth(), playerSprite.getHeight());
+        // Only initialize collision rect when sprite is available (client-side)
+        if (playerSprite != null) {
+            rect = new CollisionRect(playerSprite.getX(), playerSprite.getY(), playerSprite.getWidth(), playerSprite.getHeight());
+        } else {
+            // Server-side: create a basic collision rect with default dimensions
+            rect = new CollisionRect(0, 0, 32, 32); // Default player size
+        }
     }
 
     public void updatePosition(int posX, int posY) {
         Location newLocation = App.getCurrentGame().getMainMap().findLocation(posX, posY);
         setUserLocation(newLocation);
         rect.move(posX, posY);
-        playerSprite.setPosition(posX, posY);
+        // Only update sprite position when sprite is available (client-side)
+        if (playerSprite != null) {
+            playerSprite.setPosition(posX, posY);
+        }
     }
 
     public User getUser() {

@@ -13,135 +13,147 @@ import java.util.EnumMap;
 
 public class GameAssetManager {
     public static Skin skin;
+    
+    // Check if we're running in a LibGDX context (client-side)
+    private static boolean isLibGDXAvailable() {
+        try {
+            return com.badlogic.gdx.Gdx.files != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     public static Skin getSkin() {
-        if (skin == null) {
+        if (skin == null && isLibGDXAvailable()) {
             skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
         }
         return skin;
     }
     private static GameAssetManager gameAssetManager;
 
-    private final Texture fridge = new Texture("Mini-Fridge.png");
+    // Lazy-loaded textures - only created when LibGDX is available
+    private Texture fridge;
     private static EnumMap<ArtisanTypes, Texture> craftingTextures;
 
+    private Texture LAKE_TEXTURE;
+    private Texture PLANTS;
+    private Texture STONE;
+    private Texture NPC_VILLAGE;
+    private Texture GREEN_HOUSE;
+    private Texture QUARRY;
+    private Texture BURNED_GROUND;
+    private Texture GROUND;
+    private Texture STORE;
+    private Texture HOUSE;
 
-    private final Texture LAKE_TEXTURE = new Texture("Flooring/Flooring_26.png");
-    private final Texture PLANTS = new Texture("Flooring/Flooring_50.png");
-    private final Texture STONE = new Texture("Rock/Farm_Boulder.png");
-    private final Texture NPC_VILLAGE = new Texture("Flooring/Flooring_83.png");
-    private final Texture GREEN_HOUSE = new Texture("Greenhouse/greenhouse.png");
-    private final Texture QUARRY = new Texture("Flooring/Flooring_08.png");
-    private final Texture BURNED_GROUND = new Texture("Flooring/Flooring_39.png");
-    private final Texture GROUND = new Texture("Flooring/Flooring_53.png");
-    private final Texture STORE = new Texture("Flooring/Flooring_02.png");
-    private final Texture HOUSE = new Texture("House_farmer.png");
+    //shops - lazy loaded
+    public static Texture blackSmith;
+    public static Texture Carpenter;
+    public static Texture fishShop;
+    public static Texture jojaMArt;
+    public static Texture Marnie;
+    public static Texture PierresGeneral;
+    public static Texture StardropSaloon;
 
-    //shops
-    public final static Texture blackSmith = new Texture("Shop/BlackSmith.png");
-    public final static Texture Carpenter = new Texture("Shop/Carpenter.png");
-    public final static Texture fishShop = new Texture("Shop/Fish.png");
-    public final static Texture jojaMArt = new Texture("Shop/Jojamart.png");
-    public final static Texture Marnie = new Texture("Shop/Marnie.png");
-    public final static Texture PierresGeneral = new Texture("Shop/PierresGeneral.png");
-    public final static Texture StardropSaloon = new Texture("Shop/StardropSaloon.png");
+    // NPC House textures - lazy loaded
+    private Texture NPC_HOUSE_1;
+    private Texture NPC_HOUSE_2;
+    private Texture NPC_HOUSE_3;
+    private Texture NPC_HOUSE_4;
+    private Texture NPC_HOUSE_5;
 
-    // NPC House textures
-    private final Texture NPC_HOUSE_1 = new Texture("NPC/House/npcHouse_1.PNG");
-    private final Texture NPC_HOUSE_2 = new Texture("NPC/House/npcHouse_2.PNG");
-    private final Texture NPC_HOUSE_3 = new Texture("NPC/House/npcHouse_3.PNG");
-    private final Texture NPC_HOUSE_4 = new Texture("NPC/House/npcHouse_4.PNG");
-    private final Texture NPC_HOUSE_5 = new Texture("NPC/House/npcHouse_5.PNG");
+    private Texture barn;
+    private Texture coop;
+    private Texture ploughedLand;
 
-    private final Texture barn = new Texture("Decor/Weathered_Floor_Tile.png");
-    private final Texture coop = new Texture("Decor/Stone_Floor_Tile.png");
-    private final Texture ploughedLand = new Texture("Flooring/Flooring_14.png");
+    private static Texture LeahPortrait;
+    private static Texture MarniePortrait;
+    private static Texture AbigailPortrait;
+    private static Texture MaruPortrait;
+    private static Texture RobinPortrait;
 
-    private static final Texture LeahPortrait = new Texture("sprites/LeahPortrait.png");
-    private static final Texture MarniePortrait = new Texture("sprites/MarniePortrait.png");
-    private static final Texture AbigailPortrait = new Texture("sprites/AbigailPortrait.png");
-    private static final Texture MaruPortrait = new Texture("sprites/MaruPortrait.png");
-    private static final Texture RobinPortrait = new Texture("sprites/RobinPortrait.png");
+    //Season assets - lazy loaded
+    private Texture winter;
+    private Texture summer;
+    private Texture autumn;
+    private Texture spring;
 
-    //Season assets
-    private final Texture winter = new Texture("Clock/Seasons/Winter.png");
-    private final Texture summer = new Texture("Clock/Seasons/Summer.png");
-    private final Texture autumn = new Texture("Clock/Seasons/Fall.png");
-    private final Texture spring = new Texture("Clock/Seasons/Spring.png");
+    //Weather assets - lazy loaded
+    private Texture snowy;
+    private Texture rainy;
+    private Texture sunny;
+    private Texture stormy;
 
-    //Weather assets
-    private final Texture snowy = new Texture("Clock/Weather/Snowy.png");
-    private final Texture rainy = new Texture("Clock/Weather/Rainy.png");
-    private final Texture sunny = new Texture("Clock/Weather/Sunny.png");
-    private final Texture stormy = new Texture("Clock/Weather/Stormy.png");
+    private static Texture furnace;
+    private static Texture charcoal;
+    private static Texture Bee_House;
+    private static Texture CHEESE_PRESS;
+    private static Texture Keg;
+    private static Texture Loom;
+    private static Texture Mayonnaise_Machine;
+    private static Texture Oil_Maker;
+    private static Texture Preserves_Jar;
+    private static Texture Dehydrator;
+    private static Texture Fish_Smoker;
 
-    private static final Texture furnace = new Texture("Crafting/Furnace.png");
-    private static final Texture charcoal = new Texture("Crafting/Charcoal_Kiln.png");
-    private static final Texture Bee_House = new Texture("Crafting/Bee_House.png");
-    private static final Texture CHEESE_PRESS = new Texture("Crafting/Cheese_Press.png");
-    private static final Texture Keg = new Texture("Crafting/Keg.png");
-    private static final Texture Loom = new Texture("Crafting/Loom.png");
-    private static final Texture Mayonnaise_Machine = new Texture("Crafting/Mayonnaise_Machine.png");
-    private static final Texture Oil_Maker = new Texture("Crafting/Oil_Maker.png");
-    private static final Texture Preserves_Jar = new Texture("Crafting/Preserves_Jar.png");
-    private static final Texture Dehydrator = new Texture("Crafting/Dehydrator.png");
-    private static final Texture Fish_Smoker = new Texture("Crafting/Fish_Smoker.png");
+    private static Texture shippingBin;
 
-    private static final Texture shippingBin = new Texture("Chest/Chest.png");
+    //foods - lazy loaded
+    private Texture Fried_Egg;
+    private Texture BakedFish;
+    private Texture Salad;
+    private Texture Omelet;
+    private Texture PumpkinPie;
+    private Texture spaghetti;
+    private Texture pizza;
+    private Texture tortilla;
+    private Texture makiRoll;
+    private Texture espressso;
+    private Texture cookie;
+    private Texture farmerLunch;
 
-    //foods
-    private final Texture Fried_Egg = new Texture("Recipe/Fried_Egg.png");
-    private final Texture BakedFish = new Texture("Recipe/Baked_Fish.png");
-    private final Texture Salad = new Texture("Recipe/Salad.png");
-    private final Texture Omelet = new Texture("Recipe/Omelet.png");
-    private final Texture PumpkinPie = new Texture("Recipe/Pumpkin_Pie.png");
-    private final Texture spaghetti = new Texture("Recipe/Spaghetti.png");
-    private final Texture pizza = new Texture("Recipe/Pizza.png");
-    private final Texture tortilla = new Texture("Recipe/Tortilla.png");
-    private final Texture makiRoll = new Texture("Recipe/Maki_Roll.png");
-    private final Texture espressso = new Texture("Recipe/Triple_Shot_Espresso.png");
-    private final Texture cookie = new Texture("Recipe/Cookie.png");
-    private final Texture farmerLunch = new Texture("Recipe/Farmer%27s_Lunch.png");
+    //fish - lazy loaded
+    private Texture nonLegendFish;
+    private Texture legendFish;
 
-    //fish
-    private final Texture nonLegendFish = new Texture("Fish/Blue_Discus.png");
-    private final Texture legendFish = new Texture("Fish/Legend.png");
+    //some things for inventory - lazy loaded
+    public static Texture GOLD;
+    public static Texture COAL;
+    public static Texture IRIDIUM_ORE;
+    public static Texture IRON_ORE;
+    public static Texture COPPER_ORE;
+    public static Texture PRISMATIC_SHARD;
+    public static Texture AMETHYST;
+    public static Texture EMERALD;
+    public static Texture JADE;
+    public static Texture RUBY;
+    public static Texture TOPAZ;
+    public static Texture AQUAMARINE;
+    public static Texture FIRE_QUARTZ;
+    public static Texture FROZEN_TEAR;
+    public static Texture EARTH_CRYSTAL;
+    public static Texture QUARTZ;
+    public static Texture DIAMOND;
+    public static Texture checkMark;
+    //soil - lazy loaded
+    public static Texture BASIC_RETAINING_SOIL;
+    public static Texture TEA_SAPLING;
+    public static Texture SUGAR;
+    public static Texture RICE;
+    public static Texture WHEAT_FLOUR;
+    public static Texture WOOD;
 
-    //some things for inventory
-    public static final Texture GOLD = new Texture("Crafting/Gold.png");
-    public static final Texture COAL = new Texture("Crafting/Coal.png");
-    public static final Texture IRIDIUM_ORE = new Texture("Crafting/Iridium_Ore.png");
-    public static final Texture IRON_ORE = new Texture("Crafting/Iron_Ore.png");
-    public static final Texture COPPER_ORE = new Texture("Crafting/Copper_Ore.png");
-    public static final Texture PRISMATIC_SHARD = new Texture("Crafting/Prismatic_Shard.png");
-    public static final Texture AMETHYST = new Texture("Gem/Amethyst.png");
-    public static final Texture EMERALD = new Texture("Gem/Emerald.png");
-    public static final Texture JADE = new Texture("Gem/Jade.png");
-    public static final Texture RUBY = new Texture("Gem/Ruby.png");
-    public static final Texture TOPAZ = new Texture("Gem/Topaz.png");
-    public static final Texture AQUAMARINE = new Texture("Crafting/Aquamarine.png");
-    public static final Texture FIRE_QUARTZ = new Texture("Crafting/Fire_Quartz.png");
-    public static final Texture FROZEN_TEAR = new Texture("Crafting/Frozen_Tear.png");
-    public static final Texture EARTH_CRYSTAL = new Texture("Crafting/Earth_Crystal.png");
-    public static final Texture QUARTZ = new Texture("Mineral/Quartz.png");
-    public static final Texture DIAMOND = new Texture("Crafting/Diamond.png");
-    public static final Texture checkMark = new Texture("Emoji/Emojis139.png");
-    //soil
-    public static final Texture BASIC_RETAINING_SOIL = new Texture("Crafting/Basic_Retaining_Soil.png");
-    public static final Texture TEA_SAPLING = new Texture("Crafting/Tea_Sapling.png");
-    public static final Texture SUGAR = new Texture("Crops/Sugar.png");
-    public static final Texture RICE = new Texture("Crops/Rice.png");
-    public static final Texture WHEAT_FLOUR = new Texture("Crops/Wheat_Flour.png");
-    public static final Texture WOOD = new Texture("Crafting/Wood.png");
-
-    public final Texture heartTexture = new Texture("NPC/RelationShip/Heart.png");
+    public Texture heartTexture;
 
     public Texture getHeartTexture() {
+        if (heartTexture == null && isLibGDXAvailable()) {
+            heartTexture = new Texture("NPC/RelationShip/Heart.png");
+        }
         return heartTexture;
     }
 
     public Texture getAnimalHome() {
-        if (animalHome == null) {
+        if (animalHome == null && isLibGDXAvailable()) {
             animalHome = new Texture("Flooring/Flooring_53.png"); // Using ground texture as placeholder
         }
         return animalHome;
@@ -154,19 +166,27 @@ public class GameAssetManager {
     public static GameAssetManager getGameAssetManager() {
         if (gameAssetManager == null) {
             gameAssetManager = new GameAssetManager();
-            craftingTextures = new EnumMap<ArtisanTypes, Texture>(ArtisanTypes.class);
-            loadCraftingTextures();
+            if (isLibGDXAvailable()) {
+                craftingTextures = new EnumMap<ArtisanTypes, Texture>(ArtisanTypes.class);
+                loadCraftingTextures();
+            }
         }
         return gameAssetManager;
     }
 
     private static void loadCraftingTextures() {
-        for (ArtisanTypes recipe : ArtisanTypes.values()) {
-            craftingTextures.put(recipe, new Texture(recipe.getTexturePath()));
+        if (isLibGDXAvailable()) {
+            for (ArtisanTypes recipe : ArtisanTypes.values()) {
+                craftingTextures.put(recipe, new Texture(recipe.getTexturePath()));
+            }
         }
     }
     public Texture getCraftingTexture(ArtisanTypes recipe) {
-        return craftingTextures.get(recipe);
+        if (craftingTextures == null && isLibGDXAvailable()) {
+            craftingTextures = new EnumMap<ArtisanTypes, Texture>(ArtisanTypes.class);
+            loadCraftingTextures();
+        }
+        return craftingTextures != null ? craftingTextures.get(recipe) : null;
     }
 
 
@@ -175,182 +195,351 @@ public class GameAssetManager {
     }
 
     public Texture getLAKE_TEXTURE() {
+        if (LAKE_TEXTURE == null && isLibGDXAvailable()) {
+            LAKE_TEXTURE = new Texture("Flooring/Flooring_26.png");
+        }
         return LAKE_TEXTURE;
     }
 
     public Texture getPLANTS() {
+        if (PLANTS == null && isLibGDXAvailable()) {
+            PLANTS = new Texture("Flooring/Flooring_50.png");
+        }
         return PLANTS;
     }
 
     public Texture getSTONE() {
+        if (STONE == null && isLibGDXAvailable()) {
+            STONE = new Texture("Rock/Farm_Boulder.png");
+        }
         return STONE;
     }
 
     public Texture getNPC_VILLAGE() {
+        if (NPC_VILLAGE == null && isLibGDXAvailable()) {
+            NPC_VILLAGE = new Texture("Flooring/Flooring_83.png");
+        }
         return NPC_VILLAGE;
     }
 
     public Texture getGREEN_HOUSE() {
+        if (GREEN_HOUSE == null && isLibGDXAvailable()) {
+            GREEN_HOUSE = new Texture("Greenhouse/greenhouse.png");
+        }
         return GREEN_HOUSE;
     }
 
     public Texture getQUARRY() {
+        if (QUARRY == null && isLibGDXAvailable()) {
+            QUARRY = new Texture("Flooring/Flooring_08.png");
+        }
         return QUARRY;
     }
 
     public Texture getBURNED_GROUND() {
+        if (BURNED_GROUND == null && isLibGDXAvailable()) {
+            BURNED_GROUND = new Texture("Flooring/Flooring_39.png");
+        }
         return BURNED_GROUND;
     }
 
     public Texture getGROUND() {
+        if (GROUND == null && isLibGDXAvailable()) {
+            GROUND = new Texture("Flooring/Flooring_53.png");
+        }
         return GROUND;
     }
 
     public Texture getSTORE() {
+        if (STORE == null && isLibGDXAvailable()) {
+            STORE = new Texture("Flooring/Flooring_02.png");
+        }
         return STORE;
     }
 
     public Texture getHOUSE() {
+        if (HOUSE == null && isLibGDXAvailable()) {
+            HOUSE = new Texture("House_farmer.png");
+        }
         return HOUSE;
     }
 
     // NPC House getters
     public Texture getNPC_HOUSE_1() {
+        if (NPC_HOUSE_1 == null && isLibGDXAvailable()) {
+            NPC_HOUSE_1 = new Texture("NPC/House/npcHouse_1.PNG");
+        }
         return NPC_HOUSE_1;
     }
 
     public Texture getNPC_HOUSE_2() {
+        if (NPC_HOUSE_2 == null && isLibGDXAvailable()) {
+            NPC_HOUSE_2 = new Texture("NPC/House/npcHouse_2.PNG");
+        }
         return NPC_HOUSE_2;
     }
 
     public Texture getNPC_HOUSE_3() {
+        if (NPC_HOUSE_3 == null && isLibGDXAvailable()) {
+            NPC_HOUSE_3 = new Texture("NPC/House/npcHouse_3.PNG");
+        }
         return NPC_HOUSE_3;
     }
 
     public Texture getNPC_HOUSE_4() {
+        if (NPC_HOUSE_4 == null && isLibGDXAvailable()) {
+            NPC_HOUSE_4 = new Texture("NPC/House/npcHouse_4.PNG");
+        }
         return NPC_HOUSE_4;
     }
 
     public Texture getNPC_HOUSE_5() {
+        if (NPC_HOUSE_5 == null && isLibGDXAvailable()) {
+            NPC_HOUSE_5 = new Texture("NPC/House/npcHouse_5.PNG");
+        }
         return NPC_HOUSE_5;
     }
 
+    // Shop texture getters with lazy loading
+    public static Texture getBlackSmith() {
+        if (blackSmith == null && isLibGDXAvailable()) {
+            blackSmith = new Texture("Shop/Blacksmith.png");
+        }
+        return blackSmith;
+    }
+
+    public static Texture getCarpenter() {
+        if (Carpenter == null && isLibGDXAvailable()) {
+            Carpenter = new Texture("Shop/Carpenter.png");
+        }
+        return Carpenter;
+    }
+
+    public static Texture getFishShop() {
+        if (fishShop == null && isLibGDXAvailable()) {
+            fishShop = new Texture("Shop/Fish.png");
+        }
+        return fishShop;
+    }
+
+    public static Texture getJojaMArt() {
+        if (jojaMArt == null && isLibGDXAvailable()) {
+            jojaMArt = new Texture("Shop/Jojamart.png");
+        }
+        return jojaMArt;
+    }
+
+    public static Texture getMarnie() {
+        if (Marnie == null && isLibGDXAvailable()) {
+            Marnie = new Texture("Shop/Marnie.png");
+        }
+        return Marnie;
+    }
+
+    public static Texture getPierresGeneral() {
+        if (PierresGeneral == null && isLibGDXAvailable()) {
+            PierresGeneral = new Texture("Shop/PierresGeneral.png");
+        }
+        return PierresGeneral;
+    }
+
+    public static Texture getStardropSaloon() {
+        if (StardropSaloon == null && isLibGDXAvailable()) {
+            StardropSaloon = new Texture("Shop/StardropSaloon.png");
+        }
+        return StardropSaloon;
+    }
+
     public static Texture craftType(Location location) {
+        if (!isLibGDXAvailable()) {
+            return null; // Return null when LibGDX is not available
+        }
+        
         Craft craft = (Craft) location.getObjectInTile();
         CraftingRecipe recipe = craft.getRecipe();
 
+        // Lazy load textures as needed
         switch (recipe) {
             case CHARCOAL_KILN -> {
+                if (charcoal == null) charcoal = new Texture("Crafting/Charcoal_Kiln.png");
                 return charcoal;
             }
             case FURNACE -> {
+                if (furnace == null) furnace = new Texture("Crafting/Furnace.png");
                 return furnace;
             }
             case KEG -> {
+                if (Keg == null) Keg = new Texture("Crafting/Keg.png");
                 return Keg;
             }
             case BEE_HOUSE -> {
+                if (Bee_House == null) Bee_House = new Texture("Crafting/Bee_House.png");
                 return Bee_House;
             }
             case CHEESE_PRESS -> {
+                if (CHEESE_PRESS == null) CHEESE_PRESS = new Texture("Crafting/Cheese_Press.png");
                 return CHEESE_PRESS;
             }
             case LOOM -> {
+                if (Loom == null) Loom = new Texture("Crafting/Loom.png");
                 return Loom;
             }
             case MAYONNAISE_MACHINE -> {
+                if (Mayonnaise_Machine == null) Mayonnaise_Machine = new Texture("Crafting/Mayonnaise_Machine.png");
                 return Mayonnaise_Machine;
             }
             case OIL_MAKER -> {
+                if (Oil_Maker == null) Oil_Maker = new Texture("Crafting/Oil_Maker.png");
                 return Oil_Maker;
             }
             case PRESERVES_JAR -> {
+                if (Preserves_Jar == null) Preserves_Jar = new Texture("Crafting/Preserves_Jar.png");
                 return Preserves_Jar;
             }
             case DEHYDRATOR -> {
+                if (Dehydrator == null) Dehydrator = new Texture("Crafting/Dehydrator.png");
                 return Dehydrator;
             }
             case FISH_SMOKER -> {
+                if (Fish_Smoker == null) Fish_Smoker = new Texture("Crafting/Fish_Smoker.png");
                 return Fish_Smoker;
             }
         }
         //TODO :bomb and scarecrow stuff be added?
+        if (charcoal == null) charcoal = new Texture("Crafting/Charcoal_Kiln.png");
         return charcoal;
     }
 
     public Texture getBarn() {
+        if (barn == null && isLibGDXAvailable()) {
+            barn = new Texture("Decor/Weathered_Floor_Tile.png");
+        }
         return barn;
     }
 
     public Texture getCoop() {
+        if (coop == null && isLibGDXAvailable()) {
+            coop = new Texture("Decor/Stone_Floor_Tile.png");
+        }
         return coop;
     }
 
     public static Texture getLeahPortrait() {
+        if (LeahPortrait == null && isLibGDXAvailable()) {
+            LeahPortrait = new Texture("sprites/LeahPortrait.png");
+        }
         return LeahPortrait;
     }
 
     public static Texture getAbigailPortrait() {
+        if (AbigailPortrait == null && isLibGDXAvailable()) {
+            AbigailPortrait = new Texture("sprites/AbigailPortrait.png");
+        }
         return AbigailPortrait;
     }
 
     public static Texture getMaruPortrait() {
+        if (MaruPortrait == null && isLibGDXAvailable()) {
+            MaruPortrait = new Texture("sprites/MaruPortrait.png");
+        }
         return MaruPortrait;
     }
 
     public static Texture getMarniePortrait() {
+        if (MarniePortrait == null && isLibGDXAvailable()) {
+            MarniePortrait = new Texture("sprites/MarniePortrait.png");
+        }
         return MarniePortrait;
     }
 
     public static Texture getRobinPortrait() {
+        if (RobinPortrait == null && isLibGDXAvailable()) {
+            RobinPortrait = new Texture("sprites/RobinPortrait.png");
+        }
         return RobinPortrait;
     }
 
     public Texture getWinter() {
+        if (winter == null && isLibGDXAvailable()) {
+            winter = new Texture("Clock/Seasons/Winter.png");
+        }
         return winter;
     }
 
     public Texture getSummer() {
+        if (summer == null && isLibGDXAvailable()) {
+            summer = new Texture("Clock/Seasons/Summer.png");
+        }
         return summer;
     }
 
     public Texture getAutumn() {
+        if (autumn == null && isLibGDXAvailable()) {
+            autumn = new Texture("Clock/Seasons/Fall.png");
+        }
         return autumn;
     }
 
     public Texture getSpring() {
+        if (spring == null && isLibGDXAvailable()) {
+            spring = new Texture("Clock/Seasons/Spring.png");
+        }
         return spring;
     }
 
     public Texture getSnowy() {
+        if (snowy == null && isLibGDXAvailable()) {
+            snowy = new Texture("Clock/Weather/Snowy.png");
+        }
         return snowy;
     }
 
     public Texture getRainy() {
+        if (rainy == null && isLibGDXAvailable()) {
+            rainy = new Texture("Clock/Weather/Rainy.png");
+        }
         return rainy;
     }
 
     public Texture getSunny() {
+        if (sunny == null && isLibGDXAvailable()) {
+            sunny = new Texture("Clock/Weather/Sunny.png");
+        }
         return sunny;
     }
 
     public Texture getStormy() {
+        if (stormy == null && isLibGDXAvailable()) {
+            stormy = new Texture("Clock/Weather/Stormy.png");
+        }
         return stormy;
     }
 
     public Texture getPloughedLand() {
+        if (ploughedLand == null && isLibGDXAvailable()) {
+            ploughedLand = new Texture("Flooring/Flooring_14.png");
+        }
         return ploughedLand;
     }
 
     public Texture getNonLegendFish() {
+        if (nonLegendFish == null && isLibGDXAvailable()) {
+            nonLegendFish = new Texture("Fish/Blue_Discus.png");
+        }
         return nonLegendFish;
     }
 
     public Texture getLegendFish() {
+        if (legendFish == null && isLibGDXAvailable()) {
+            legendFish = new Texture("Fish/Legend.png");
+        }
         return legendFish;
     }
 
     public Texture getShippingBin() {
+        if (shippingBin == null && isLibGDXAvailable()) {
+            shippingBin = new Texture("Chest/Chest.png");
+        }
         return shippingBin;
     }
 
@@ -403,6 +592,9 @@ public class GameAssetManager {
     }
 
     public Texture getFridge() {
+        if (fridge == null && isLibGDXAvailable()) {
+            fridge = new Texture("Mini-Fridge.png");
+        }
         return fridge;
     }
 }
