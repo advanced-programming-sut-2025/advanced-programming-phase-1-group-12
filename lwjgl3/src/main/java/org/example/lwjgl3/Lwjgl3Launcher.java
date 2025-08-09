@@ -44,7 +44,7 @@ public class Lwjgl3Launcher {
             // Set the working directory to the project root
             String projectRoot = System.getProperty("user.dir");
             Path gradlewPath = getGradlewPath(projectRoot);
-            
+
             if (!Files.exists(gradlewPath)) {
                 System.err.println("[Launcher] ❌ Gradlew not found at: " + gradlewPath);
                 return false;
@@ -57,10 +57,10 @@ public class Lwjgl3Launcher {
             ProcessBuilder pb = new ProcessBuilder(gradlewPath.toString(), ":core:runServer");
             pb.directory(new java.io.File(projectRoot));
             pb.inheritIO(); // Show server output in the console
-            
+
             serverProcess = pb.start();
             System.out.println("[Launcher] ⏳ Waiting for server to start...");
-            
+
             // Wait for server to be ready
             if (waitForServerReady()) {
                 System.out.println("[Launcher] ✅ Server is ready and responding!");
@@ -70,7 +70,7 @@ public class Lwjgl3Launcher {
                 stopServerProcess();
                 return false;
             }
-            
+
         } catch (IOException e) {
             System.err.println("[Launcher] ❌ Failed to start server process: " + e.getMessage());
             e.printStackTrace();
@@ -86,7 +86,7 @@ public class Lwjgl3Launcher {
 
     private static boolean waitForServerReady() {
         long startTime = System.currentTimeMillis();
-        
+
         while (System.currentTimeMillis() - startTime < MAX_STARTUP_WAIT_TIME) {
             try {
                 // Check if server process is still alive
@@ -94,21 +94,21 @@ public class Lwjgl3Launcher {
                     System.err.println("[Launcher] ❌ Server process died unexpectedly");
                     return false;
                 }
-                
+
                 // Try to connect to server health endpoint
                 if (isServerHealthy()) {
                     return true;
                 }
-                
+
                 // Wait before next check
                 Thread.sleep(HEALTH_CHECK_INTERVAL);
-                
+
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 return false;
             }
         }
-        
+
         return false;
     }
 
@@ -119,10 +119,10 @@ public class Lwjgl3Launcher {
             connection.setRequestMethod("GET");
             connection.setConnectTimeout(2000);
             connection.setReadTimeout(2000);
-            
+
             int responseCode = connection.getResponseCode();
             return responseCode == 200;
-            
+
         } catch (Exception e) {
             // Server not ready yet, this is expected during startup
             return false;
@@ -133,7 +133,7 @@ public class Lwjgl3Launcher {
         if (serverProcess != null && serverProcess.isAlive()) {
             System.out.println("[Launcher] 🛑 Stopping server process...");
             serverProcess.destroy();
-            
+
             // Give it a chance to shutdown gracefully
             try {
                 if (!serverProcess.waitFor(5, TimeUnit.SECONDS)) { // Wait up to 5 seconds
@@ -145,7 +145,7 @@ public class Lwjgl3Launcher {
                 Thread.currentThread().interrupt();
                 System.err.println("[Launcher] ❌ Error waiting for server to stop: " + e.getMessage());
             }
-            
+
             System.out.println("[Launcher] ✅ Server process stopped.");
         }
     }

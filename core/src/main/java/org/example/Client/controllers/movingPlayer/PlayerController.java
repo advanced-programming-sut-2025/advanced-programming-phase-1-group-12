@@ -295,7 +295,7 @@ public class PlayerController {
             if (isWalkable(newX, newY)) {
                 facing = Dir.UP;
                 int newEnergy = player.getEnergy() - 1;
-                System.out.println("DEBUG: Player " + player.getUser().getUserName() + " moving UP, reducing energy from " + player.getEnergy() + " to " + newEnergy);
+                // Player moving UP, reducing energy
                 player.setEnergy(newEnergy);
 
                 // Send movement update via NetworkCommandSender for consistency
@@ -304,7 +304,7 @@ public class PlayerController {
                         int originalX = (int) (newX / 100f);
                         int originalY = (int) (newY / 100f);
                         networkCommandSender.sendPlayerMovementWebSocket(originalX, originalY);
-                        System.out.println("DEBUG: Sent movement update for UP: " + player.getUser().getUserName() + " to (" + originalX + ", " + originalY + ")");
+                        // Sent movement update for UP
                     } catch (Exception e) {
                         System.out.println("DEBUG: Failed to send movement update: " + e.getMessage());
                     }
@@ -325,7 +325,7 @@ public class PlayerController {
             if (isWalkable(newX, newY)) {
                 facing = Dir.DOWN;
                 int newEnergy = player.getEnergy() - 1;
-                System.out.println("DEBUG: Player " + player.getUser().getUserName() + " moving DOWN, reducing energy from " + player.getEnergy() + " to " + newEnergy);
+                // Player moving DOWN, reducing energy
                 player.setEnergy(newEnergy);
 
                 // Send movement update via NetworkCommandSender for consistency
@@ -334,7 +334,7 @@ public class PlayerController {
                         int originalX = (int) (newX / 100f);
                         int originalY = (int) (newY / 100f);
                         networkCommandSender.sendPlayerMovementWebSocket(originalX, originalY);
-                        System.out.println("DEBUG: Sent movement update for DOWN: " + player.getUser().getUserName() + " to (" + originalX + ", " + originalY + ")");
+                        // Sent movement update for DOWN
                     } catch (Exception e) {
                         System.out.println("DEBUG: Failed to send movement update: " + e.getMessage());
                     }
@@ -355,7 +355,7 @@ public class PlayerController {
             if (isWalkable(newX, newY)) {
                 facing = Dir.LEFT;
                 int newEnergy = player.getEnergy() - 1;
-                System.out.println("DEBUG: Player " + player.getUser().getUserName() + " moving LEFT, reducing energy from " + player.getEnergy() + " to " + newEnergy);
+                // Player moving LEFT, reducing energy
                 player.setEnergy(newEnergy);
 
                 // Send movement update via NetworkCommandSender for consistency
@@ -387,7 +387,7 @@ public class PlayerController {
             if (isWalkable(newX, newY)) {
                 facing = Dir.RIGHT;
                 int newEnergy = player.getEnergy() - 1;
-                System.out.println("DEBUG: Player " + player.getUser().getUserName() + " moving RIGHT, reducing energy from " + player.getEnergy() + " to " + newEnergy);
+                // Player moving RIGHT, reducing energy
                 player.setEnergy(newEnergy);
 
                 // Send movement update via NetworkCommandSender for consistency

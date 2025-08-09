@@ -43,18 +43,19 @@ public class Main extends Game {
         backgroundSprite = new Sprite(backgroundTexture);
 
         // Initialize server manager and start server automatically
-        serverManager = ServerManager.getInstance();
-        serverManager.startServerIfNeeded().thenAccept(success -> {
-            if (success) {
-                System.out.println("✅ Server started successfully!");
-            } else {
-                System.out.println("❌ Failed to start server automatically");
-            }
-        });
+        // Note: Server should be started manually in a separate terminal
+        // serverManager = ServerManager.getInstance();
+        // serverManager.startServerIfNeeded().thenAccept(success -> {
+        //     if (success) {
+        //         System.out.println("✅ Server started successfully!");
+        //     } else {
+        //         System.out.println("❌ Failed to start server automatically");
+        //     }
+        // });
 
         // Initialize server connection
         serverConnection = ServerConnection.getInstance();
-        // Add shutdown hook to properly close server connection and stop server
+        // Add shutdown hook to properly close server connection
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutting down game...");
 
@@ -63,25 +64,23 @@ public class Main extends Game {
                 String username = App.getLoggedInUser().getUserName();
                 System.out.println("Disconnecting player " + username + " from lobby...");
 
-                            try {
-                if (serverConnection != null) {
-                    // Send disconnect request to server
-                    // TODO: Fix disconnect request
-                    // Map<String, String> disconnectRequest = new HashMap<>();
-                    // disconnectRequest.put("username", username);
-                    // serverConnection.sendPostRequest("/api/players/disconnect", disconnectRequest, String.class);
+                try {
+                    if (serverConnection != null) {
+                        // Send disconnect request to server
+                        // TODO: Fix disconnect request
+                        // Map<String, String> disconnectRequest = new HashMap<>();
+                        // disconnectRequest.put("username", username);
+                        // serverConnection.sendPostRequest("/api/players/disconnect", disconnectRequest, String.class);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error disconnecting player from lobby: " + e.getMessage());
                 }
-            } catch (Exception e) {
-                System.out.println("Error disconnecting player from lobby: " + e.getMessage());
-            }
             }
 
             if (serverConnection != null) {
                 serverConnection.shutdown();
             }
-            if (serverManager != null) {
-                serverManager.stopServer();
-            }
+            // Note: Server runs separately, so we don't stop it here
         }));
 
         autoLoginIfPossible();
@@ -128,13 +127,11 @@ public class Main extends Game {
             }
         }
 
-        // Properly shutdown server connection and server before disposing
+        // Properly shutdown server connection before disposing
         if (serverConnection != null) {
             serverConnection.shutdown();
         }
-        if (serverManager != null) {
-            serverManager.stopServer();
-        }
+        // Note: Server runs separately, so we don't stop it here
 
         batch.dispose();
         backgroundTexture.dispose();

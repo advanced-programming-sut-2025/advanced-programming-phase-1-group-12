@@ -383,7 +383,7 @@ public class GameMenuController {
                 playerLocation = new Location(farmLocation.getxAxis(), farmLocation.getyAxis());
                 playerLocation.setTypeOfTile(TypeOfTile.GROUND);
                 App.getCurrentGame().getMainMap().getTilesOfMap().add(playerLocation);
-                System.out.println("DEBUG: Created fallback player location at (" + farmLocation.getxAxis() + ", " + farmLocation.getyAxis() + ")");
+                // Created fallback player location
             }
             newPlayer.setUserLocation(playerLocation);
 
@@ -399,7 +399,7 @@ public class GameMenuController {
                 refrigratorLocation = new Location(shackLocation.getxAxis(), shackLocation.getyAxis() + 4);
                 refrigratorLocation.setTypeOfTile(TypeOfTile.HOUSE);
                 App.getCurrentGame().getMainMap().getTilesOfMap().add(refrigratorLocation);
-                System.out.println("DEBUG: Created fallback refrigerator location at (" + shackLocation.getxAxis() + ", " + (shackLocation.getyAxis() + 4) + ")");
+                // Created fallback refrigerator location
             }
             newPlayer.setRefrigrator(new Refrigrator(refrigratorLocation));
 
@@ -412,14 +412,14 @@ public class GameMenuController {
         App.getCurrentGame().setPlayers((ArrayList<Player>) players);
         App.getCurrentGame().setCurrentPlayer(App.getCurrentGame().getPlayerByName(App.getLoggedInUser().getUserName()));
         App.getCurrentGame().setFarms(farms);
-        
+
         // Ensure current player is set
         if (App.getCurrentGame().getCurrentPlayer() == null) {
-            System.out.println("DEBUG: Current player is null, attempting to set from players list");
+            // Current player is null, attempting to set from players list
             if (!players.isEmpty()) {
                 Player firstPlayer = players.get(0);
                 App.getCurrentGame().setCurrentPlayer(firstPlayer);
-                System.out.println("DEBUG: Set current player to first player: " + firstPlayer.getUser().getUserName());
+                System.out.println("Set current player to first player: " + firstPlayer.getUser().getUserName());
             }
         }
 
@@ -462,7 +462,7 @@ public class GameMenuController {
                             System.out.println("DEBUG: [GAME_CREATION] Syncing local game state with server data");
                             System.out.println("DEBUG: [GAME_CREATION] Server connectedPlayers: " + gameData.getConnectedPlayers());
                             System.out.println("DEBUG: [GAME_CREATION] Local players before sync: " + App.getCurrentGame().getPlayers().size());
-                            
+
                             // Ensure the local players list matches the server's connected players
                             if (gameData.getConnectedPlayers() != null && !gameData.getConnectedPlayers().isEmpty()) {
                                 // Clear and rebuild the players list to match server state
@@ -476,10 +476,10 @@ public class GameMenuController {
                                             break;
                                         }
                                     }
-                                    
+
                                     if (existingPlayer != null) {
                                         syncedPlayers.add(existingPlayer);
-                                        System.out.println("DEBUG: [GAME_CREATION] Added existing player: " + username);
+                                        // Added existing player
                                     } else {
                                         // Create new player if not found
                                         User user = App.getUserByUsername(username);
@@ -487,19 +487,19 @@ public class GameMenuController {
                                             user = new User(null, username, username, "defaultPassword", username + "@example.com", "", "", false, "");
                                             App.getUsers().put(user.getUserName(), user);
                                         }
-                                        
+
                                         Player newPlayer = new Player(user, new Location(0, 0), false, new Refrigrator(), new ArrayList<>(), null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
                                         newPlayer.setPlayerTexture(new Texture("sprites/Robin.png"));
                                         newPlayer.setPortraitFrame(GameAssetManager.getRobinPortrait());
                                         syncedPlayers.add(newPlayer);
-                                        System.out.println("DEBUG: [GAME_CREATION] Created new player: " + username);
+                                        // Created new player
                                     }
                                 }
-                                
+
                                 // Update the game's players list
                                 App.getCurrentGame().setPlayers(syncedPlayers);
                                 System.out.println("DEBUG: [GAME_CREATION] Synced players list size: " + syncedPlayers.size());
-                                
+
                                 // Set current player to logged-in user
                                 String loggedInUsername = App.getLoggedInUser().getUserName();
                                 Player currentPlayer = null;
@@ -509,7 +509,7 @@ public class GameMenuController {
                                         break;
                                     }
                                 }
-                                
+
                                 if (currentPlayer != null) {
                                     App.getCurrentGame().setCurrentPlayer(currentPlayer);
                                     System.out.println("DEBUG: [GAME_CREATION] Set current player to: " + loggedInUsername);
@@ -529,17 +529,23 @@ public class GameMenuController {
                             return; // Exit early since we've set the screen
                         } else {
                             System.out.println("DEBUG: [GAME_CREATION] GameData is null, falling back to local game");
+                            // Switch to single player mode since server game creation failed
+                            App.getCurrentGame().setMultiplayer(false);
                         }
                     } else {
                         System.out.println("DEBUG: [GAME_CREATION] Failed to create game on server: " + createResult.getMessage()); // moshkel ine
                         // Fall back to local game
+                        App.getCurrentGame().setMultiplayer(false);
                     }
                 } catch (Exception e) {
                     System.out.println("DEBUG: Exception creating game on server: " + e.getMessage()); // pleye
                     // Fall back to local game
+                    App.getCurrentGame().setMultiplayer(false);
                 }
             } else {
                 System.out.println("DEBUG: No server connection available, using local game"); // ok bood
+                // Switch to single player mode since no server connection
+                App.getCurrentGame().setMultiplayer(false);
             }
         } else {
             // Single player game
@@ -547,26 +553,35 @@ public class GameMenuController {
             System.out.println("Single-player game started with " + usernames.size() + " characters");
         }
 
+        // Only create GameMenu if we haven't already created one with server game ID
         MapSetUp.showMapWithFarms(App.getCurrentGame().getMainMap());
         System.out.println("All farms have been assigned!");
-        Main.getMain().setScreen(new GameMenu(usernames)); // eshtebah!
+
+        // For single player or when multiplayer setup failed, create local GameMenu
+        if (!App.getCurrentGame().isMultiplayer()) {
+//            Main.getMain().setScreen(new GameMenu(usernames));
+            System.out.println("WHYYYYYY");
+            System.out.println("isMultiplayer: " + App.getCurrentGame().isMultiplayer());
+        } else {
+            System.out.println("DEBUG: Multiplayer game - GameMenu should already be created with server game ID");
+        }
     }
 
     public Result nextTurn() {
         List<Player> players = App.getCurrentGame().getPlayers();
-        
+
         // Safety check for empty players list
         if (players == null || players.isEmpty()) {
             System.err.println("ERROR: Players list is null or empty in nextTurn()");
             return new Result(false, "No players available for turn management");
         }
-        
+
         Player currentPlayer = App.getCurrentPlayerLazy();
         if (currentPlayer == null) {
             System.err.println("ERROR: Current player is null in nextTurn()");
             return new Result(false, "Current player is not set");
         }
-        
+
         currentPlayer.setEnergy(200);
 
         int index = players.indexOf(currentPlayer);
@@ -574,7 +589,7 @@ public class GameMenuController {
             System.err.println("ERROR: Current player not found in players list");
             return new Result(false, "Current player not found in game");
         }
-        
+
         int tries = 0;
         Player nextPlayer;
 

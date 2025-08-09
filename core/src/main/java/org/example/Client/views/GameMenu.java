@@ -166,7 +166,21 @@ public class GameMenu extends InputAdapter implements Screen {
                     ", NetworkCommandSender is " + (App.getCurrentGame() != null ? App.getCurrentGame().getNetworkCommandSender() : "N/A"));
             }
         } else {
-            System.out.println("DEBUG: [GAME_MENU] GameMenu created with NULL server game ID - will use local game ID");
+            System.out.println("DEBUG: [GAME_MENU] CRITICAL: GameMenu created with NULL server game ID");
+
+            // Check if this is a multiplayer game that should have a server game ID
+            if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
+                System.out.println("DEBUG: [GAME_MENU] ERROR: This is a multiplayer game but server game ID is NULL!");
+                System.out.println("DEBUG: [GAME_MENU] Game state - Players: " + (App.getCurrentGame().getPlayers() != null ? App.getCurrentGame().getPlayers().size() : "NULL"));
+                System.out.println("DEBUG: [GAME_MENU] NetworkSender exists: " + (App.getCurrentGame().getNetworkCommandSender() != null));
+
+                if (App.getCurrentGame().getNetworkCommandSender() != null) {
+                    String currentId = App.getCurrentGame().getNetworkCommandSender().getCurrentGameId();
+                    System.out.println("DEBUG: [GAME_MENU] NetworkSender current game ID: " + currentId);
+                }
+            } else {
+                System.out.println("DEBUG: [GAME_MENU] Single-player game mode detected");
+            }
         }
     }
 

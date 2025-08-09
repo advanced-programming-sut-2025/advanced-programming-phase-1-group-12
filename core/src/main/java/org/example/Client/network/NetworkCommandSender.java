@@ -304,9 +304,14 @@ public class NetworkCommandSender {
     public void sendPlayerMovementWebSocket(int x, int y) {
         try {
             if (currentGameId == null) {
-                logger.warn("Cannot send movement update: not in a game");
+                System.out.println("DEBUG: [NETWORK_SENDER] CRITICAL: Cannot send movement update - currentGameId is NULL!");
+                System.out.println("DEBUG: [NETWORK_SENDER] This indicates the NetworkCommandSender was not properly initialized with a game ID");
+                System.out.println("DEBUG: [NETWORK_SENDER] Player trying to move to: (" + x + ", " + y + ")");
+                logger.warn("Cannot send movement update: not in a game (currentGameId is null)");
                 return;
             }
+
+            System.out.println("DEBUG: [NETWORK_SENDER] Sending movement update for game: " + currentGameId + " to (" + x + ", " + y + ")");
 
             Map<String, Object> wsMessage = new HashMap<>();
             wsMessage.put("type", GameProtocol.WS_PLAYER_MOVED);
@@ -318,6 +323,7 @@ public class NetworkCommandSender {
             serverConnection.sendWebSocketMessage(wsMessage);
             logger.debug("Sent player movement WebSocket message: ({}, {}) for game {}", x, y, currentGameId);
         } catch (Exception e) {
+            System.out.println("DEBUG: [NETWORK_SENDER] ERROR sending movement WebSocket message: " + e.getMessage());
             logger.error("Error sending movement WebSocket message", e);
         }
     }
@@ -398,7 +404,16 @@ public class NetworkCommandSender {
     }
 
     public void setCurrentGameId(String gameId) {
+        System.out.println("DEBUG: [NETWORK_SENDER] setCurrentGameId called - Old ID: " + this.currentGameId + ", New ID: " + gameId);
+        
+        if (gameId == null) {
+            System.out.println("DEBUG: [NETWORK_SENDER] WARNING: Setting game ID to NULL!");
+            // Print stack trace to see where this is being called from
+            Thread.dumpStack();
+        }
+        
         this.currentGameId = gameId;
+        System.out.println("DEBUG: [NETWORK_SENDER] Game ID successfully set to: " + this.currentGameId);
     }
 
     public ServerConnection getServerConnection() {
