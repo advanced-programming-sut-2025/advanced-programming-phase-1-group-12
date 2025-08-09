@@ -7,6 +7,7 @@ import org.example.Common.network.GameProtocol;
 import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.CreateGameRequest;
 import org.example.Common.network.responses.GameStateResponse;
+import org.example.Common.saveGame.GameSaveManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,7 @@ public class GameSessionManager {
     private final ScheduledExecutorService cleanupScheduler;
     // Add these with your other instance variables
     private final ConcurrentHashMap<String, String> gameLoadSelections = new ConcurrentHashMap<>(); // playerId -> gameName
-    private final ConcurrentHashMap<String, Set<String>> lobbyReadyPlayers = new ConcurrentHashMap<>(); // gameId -> Set<playerId>
+    private final ConcurrentHashMap<String, String> playerToSession = new ConcurrentHashMap<>(); // gameId -> Set<playerId>
 
     public GameSessionManager() {
         this.activeGames = new ConcurrentHashMap<>();
@@ -397,87 +398,21 @@ public class GameSessionManager {
             logger.warn("Shutdown interrupted");
         }
     }
-    public NetworkResult<String> checkLoadStatus(String gameId, String gameName) {
-        try {
-            GameInstance instance = activeGames.get(gameId);
-            if (instance == null) {
-                return NetworkResult.notFound("Game not found");
-            }
+    public NetworkResult<String> createGameFromLoad(String loadedGame) {
+        String gameSessionId = UUID.randomUUID().toString();
 
-            if (checkAllPlayersReady(gameId, gameName)) {
-                return NetworkResult.success("All players ready to load " + gameName);
-            } else {
-                List<String> notReadyPlayers = getNotReadyPlayers(gameId, gameName);
-                String message = notReadyPlayers.isEmpty()
-                    ? "Waiting for all players to select a game"
-                    : "Waiting for: " + String.join(", ", notReadyPlayers);
-                return NetworkResult.success(message);
-            }
-        } catch (Exception e) {
-            logger.error("Error checking load status for game {}", gameId, e);
-            return NetworkResult.error("Failed to check load status: " + e.getMessage());
+        gameLoadSelections.put(gameSessionId, loadedGame);
+        Game load = GameSaveManager.loadGameCompressed(loadedGame);
+
+        for (Player player : load.getPlayers()) {
+            playerToSession.put(player.getUser().getUserName(), gameSessionId);
         }
+
+        logger.info("Game loaded into session {} with {} players",
+            gameSessionId, load.getPlayers().size());
+
+        return NetworkResult.success("Game loaded successfully", gameSessionId);
     }
 
-    private boolean checkAllPlayersReady(String gameId, String gameName) {
-        return getNotReadyPlayers(gameId, gameName).isEmpty();
-    }
 
-    private List<String> getNotReadyPlayers(String gameId, String gameName) {
-        GameInstance instance = activeGames.get(gameId);
-        if (instance == null) return Collections.emptyList();
-
-        return instance.getGame().getPlayers().stream()
-            .map(p -> p.getUser().getUserName())
-            .filter(playerId -> {
-                String selectedGame = gameLoadSelections.get(playerId);
-                return selectedGame == null || !selectedGame.equals(gameName);
-            })
-            .collect(Collectors.toList());
-    }
-
-    public NetworkResult<String> handleLoadRequest(String gameId, String playerId, String gameName) {
-        try {
-            // Validate game exists
-            GameInstance instance = activeGames.get(gameId);
-            if (instance == null) {
-                return NetworkResult.notFound("Game not found");
-            }
-
-            // Verify player is in this game
-            if (!instance.getGame().getPlayers().stream()
-                .anyMatch(p -> p.getUser().getUserName().equals(playerId))) {
-                return NetworkResult.error("You are not in this game");
-            }
-
-            // Track player's selection
-            gameLoadSelections.put(playerId, gameName);
-            lobbyReadyPlayers.computeIfAbsent(gameId, k -> ConcurrentHashMap.newKeySet())
-                .add(playerId);
-
-            // Return current status (reuses checkLoadStatus)
-            return checkLoadStatus(gameId, gameName);
-        } catch (Exception e) {
-            logger.error("Error processing load request from {} for game {}", playerId, gameId, e);
-            return NetworkResult.error("Failed to process load request: " + e.getMessage());
-        }
-    }
-
-    public NetworkResult<String> clearLoadState(String gameId) {
-        try {
-            // Remove all player selections for this game
-            gameLoadSelections.entrySet().removeIf(entry ->
-                lobbyReadyPlayers.getOrDefault(gameId, Collections.emptySet())
-                    .contains(entry.getKey())
-            );
-
-            // Remove the game's ready players set
-            lobbyReadyPlayers.remove(gameId);
-
-            return NetworkResult.success("Load state cleared for game " + gameId);
-        } catch (Exception e) {
-            logger.error("Error clearing load state for game {}", gameId, e);
-            return NetworkResult.error("Failed to clear load state: " + e.getMessage());
-        }
-    }
 }

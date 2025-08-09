@@ -126,6 +126,7 @@ public class SimpleNetworkServer {
         app.get("/lobby/list", this::handleGetLobbyList);
         app.get("/lobby/{lobbyId}/info", this::handleGetLobbyInfo);
         app.post("/lobby/start", this::handleStartGame);
+        app.post("/lobby/load", this::handleLoad);
 
         // Farm selection routes
         app.post("/lobby/select-farm", this::handleSelectFarm);
@@ -586,6 +587,49 @@ public class SimpleNetworkServer {
         }
     }
 
+    private void handleLoad(Context ctx) {
+        try {
+            LoadGameRequest request = ctx.bodyAsClass(LoadGameRequest.class);
+
+            // Validate request
+            if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+                ctx.status(400).json(NetworkResult.error("Username is required"));
+                return;
+            }
+
+            if (request.getLobbyId() == null || request.getLobbyId().trim().isEmpty()) {
+                ctx.status(400).json(NetworkResult.error("Lobby ID is required"));
+                return;
+            }
+
+            Lobby lobby = lobbyManager.getLobby(request.getLobbyId());
+            if (lobby != null) {
+                List<String> playerNames = new ArrayList<>(lobby.getPlayers());
+                NetworkResult<String> sessionResult = gameStartManager.createLoadSession(
+                    request.getLobbyId(), playerNames);
+
+                if (sessionResult.isSuccess()) {
+                    ctx.json(NetworkResult.success("Game started successfully - proceed to farm selection"));
+                } else {
+                    ctx.json(NetworkResult.error("Failed to create load selection session: " + sessionResult.getMessage()));
+                }
+            } else {
+                ctx.json(NetworkResult.error("Lobby not found"));
+            }
+            NetworkResult<String> result = gameStartManager.selectLoad(request);
+
+            if (result.isSuccess()) {
+                ctx.json(result);
+            } else {
+                ctx.status(400).json(result);
+            }
+
+        } catch (Exception e) {
+            logger.error("Error selecting load", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
+        }
+    }
+
     public boolean isRunning() {
         return isRunning;
     }
@@ -675,13 +719,13 @@ public class SimpleNetworkServer {
     private void handleCreateGame(Context ctx) {
         try {
             CreateGameRequest request = ctx.bodyAsClass(CreateGameRequest.class);
-            
+
             // Extract username from the first player in the request (similar to lobby approach)
             String username = null;
             if (request.getUsernames() != null && !request.getUsernames().isEmpty()) {
                 username = request.getUsernames().get(0); // Use the first player as the creator
             }
-            
+
             if (username == null) {
                 ctx.status(400).json(NetworkResult.error("No usernames provided in request"));
                 return;
@@ -745,7 +789,7 @@ public class SimpleNetworkServer {
             } catch (Exception e) {
                 logger.debug("Failed to validate JWT token", e);
             }
-            
+
             // Fallback: look up the token in our simple logged-in users map
             for (Map.Entry<String, String> entry : users.entrySet()) {
                 if (token.equals(entry.getValue())) {

@@ -217,74 +217,74 @@ public class LobbyMenu implements Screen {
         loadGameButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                String game = "saves/" + loadGameButton.getSelected();
-                if(game.contains("No saved games")) {
+                String selected = (String) loadGameButton.getSelected();
+                if (selected == null || selected.contains("No saved games")) {
                     return;
                 }
-                Game loadedGame = GameSaveManager.loadGameCompressed(game);
-                loadGame(loadedGame, (String) loadGameButton.getSelected());
+                // Compose game save name
+                String gameName = "saves/" + selected;
+
+                if (!isInLobby || currentLobby == null) {
+                    updateStatus("You must be in a lobby to load a game", false);
+                    return;
+                }
+
+                String currentPlayer = App.getLoggedInUser().getUserName();
+
+                // Instead of loading locally, just request server to load game
+                LoadGameRequest request = new LoadGameRequest(currentPlayer, currentLobby.getId(), gameName);
+
+                updateStatus("Requesting to load game...", true);
+
+                CompletableFuture.supplyAsync(() -> {
+                    try {
+                        ServerConnection connection = Main.getMain().getServerConnection();
+                        return connection.sendPostRequest("/lobby/load", request, String.class);
+                    } catch (Exception e) {
+                        return NetworkResult.error("Failed to load game: " + e.getMessage());
+                    }
+                }).thenAccept(result -> {
+                    Gdx.app.postRunnable(() -> {
+                        if (result.isSuccess()) {
+                            // Server response with load status
+                            LoadStatusResponse response = (LoadStatusResponse) result.getData();
+                            if (response.isAllPlayersReady()) {
+                                // After all players ready, fetch full game data from server or receive it from server response
+                                fetchAndLoadGameFromServer(gameName);
+                            } else {
+                                updateStatus(response.getMessage(), true);
+                                startLoadStatusPolling(currentLobby.getId(), gameName);
+                            }
+                        } else {
+                            updateStatus("Load failed: " + result.getMessage(), false);
+                        }
+                    });
+                });
             }
         });
+
     }
-
-    private void loadGame(Game loadedGame, String gameName) {
-        if (!isInLobby || currentLobby == null) {
-            updateStatus("You must be in a lobby to load a game", false);
-            return;
-        }
-
-        // Verify current player is in this game
-        String currentPlayer = App.getLoggedInUser().getUserName();
-        boolean isInGame = loadedGame.getPlayers().stream()
-            .anyMatch(p -> p.getUser().getUserName().equals(currentPlayer));
-
-        if (!isInGame) {
-            updateStatus("You are not in this saved game", false);
-            return;
-        }
-
-        // Send load request to server
-        updateStatus("Requesting to load game...", true);
-
-        LoadGameRequest request = new LoadGameRequest(
-            //his username
-            currentPlayer,
-            currentLobby.getId(),
-            //sth like saves/1
-            gameName
-        );
-
+    private void fetchAndLoadGameFromServer(String gameName) {
         CompletableFuture.supplyAsync(() -> {
             try {
                 ServerConnection connection = Main.getMain().getServerConnection();
-                return connection.sendPostRequest(
-                    "/games/" + currentLobby.getId() + "/load",
-                    request,
-                    LoadStatusResponse.class
-                );
+                return connection.sendGetRequest("/games/load?gameName=" + gameName, Game.class);
             } catch (Exception e) {
-                return NetworkResult.error("Failed to load game: " + e.getMessage());
+                return NetworkResult.error("Failed to fetch game data: " + e.getMessage());
             }
         }).thenAccept(result -> {
             Gdx.app.postRunnable(() -> {
                 if (result.isSuccess()) {
-                    LoadStatusResponse response = (LoadStatusResponse) result.getData();
-                    if (response.isAllPlayersReady()) {
-                        // All players ready - load the game
-                        proceedWithGameLoad(loadedGame);
-                    } else {
-                        updateStatus(response.getMessage(), true);
-                        // Start polling for status updates
-                        startLoadStatusPolling(currentLobby.getId(), gameName, loadedGame);
-                    }
+                    Game loadedGame = (Game) result.getData();
+                    proceedWithGameLoad(loadedGame);
                 } else {
-                    updateStatus("Load failed: " + result.getMessage(), false);
+                    updateStatus("Failed to fetch game data: " + result.getMessage(), false);
                 }
             });
         });
     }
 
-    private void startLoadStatusPolling(String lobbyId, String gameName, Game loadedGame) {
+    private void startLoadStatusPolling(String lobbyId, String gameName) {
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
@@ -304,6 +304,7 @@ public class LobbyMenu implements Screen {
                             LoadStatusResponse response = (LoadStatusResponse) result.getData();
                             if (response.isAllPlayersReady()) {
                                 this.cancel();
+                                Game loadedGame = GameSaveManager.loadGameCompressed(gameName);
                                 proceedWithGameLoad(loadedGame);
                             } else {
                                 updateStatus(response.getMessage(), true);
