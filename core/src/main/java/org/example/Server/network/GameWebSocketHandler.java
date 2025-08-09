@@ -405,6 +405,11 @@ public class GameWebSocketHandler {
                 return;
             }
 
+            System.out.println("=====================================connectedPlayers===============================");
+            for (String id: gameInstance.getConnectedPlayers()){
+                System.out.println(id);
+            }
+
             if (!gameInstance.isPlayerConnected(userId)) {
                 System.out.println("===================================================HELP=========================");
                 for (String id: gameInstance.getAllPlayerIds()){
