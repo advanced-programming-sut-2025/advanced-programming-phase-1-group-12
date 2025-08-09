@@ -76,7 +76,7 @@ public class GameSessionManager {
         String gameId = playerToGameMapping.remove(playerId);
         if (gameId != null) {
             System.out.println("DEBUG: Removed player " + playerId + " from game " + gameId);
-            
+
             // Check if the game has no more players and remove it if empty
             boolean hasPlayers = playerToGameMapping.values().contains(gameId);
             if (!hasPlayers) {
@@ -172,7 +172,7 @@ public class GameSessionManager {
         try {
             GameInstance instance = activeGames.get(gameId);
             if (instance == null) {
-                return NetworkResult.notFound("Game not found");
+                return NetworkResult.notFound("Game not found 1");
             }
 
             if (playerToGameMapping.containsKey(playerId)) {
@@ -218,7 +218,7 @@ public class GameSessionManager {
         try {
             GameInstance instance = activeGames.get(gameId);
             if (instance == null) {
-                return NetworkResult.notFound("Game not found");
+                return NetworkResult.notFound("Game not found 3");
             }
 
             synchronized (instance) {
@@ -245,11 +245,11 @@ public class GameSessionManager {
         try {
             GameInstance instance = activeGames.get(gameId);
             if (instance == null) {
-                return NetworkResult.notFound("Game not found");
+                return NetworkResult.notFound("Game not found 6");
             }
 
             if (!instance.isPlayerConnected(playerId)) {
-                return NetworkResult.error("You are not connected to this game");
+                return NetworkResult.error("You are not connected to this game 6");
             }
 
             List<String> connectedPlayers = instance.getConnectedPlayers();
@@ -270,11 +270,11 @@ public class GameSessionManager {
         try {
             GameInstance instance = activeGames.get(gameId);
             if (instance == null) {
-                return NetworkResult.notFound("Game not found");
+                return NetworkResult.notFound("Game not found 10");
             }
 
             if (!instance.isPlayerConnected(playerId)) {
-                return NetworkResult.error("You are not connected to this game");
+                return NetworkResult.error("You are not connected to this game 7");
             }
 
             // Submit action for processing in game thread

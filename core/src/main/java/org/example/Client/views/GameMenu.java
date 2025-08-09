@@ -140,47 +140,57 @@ public class GameMenu extends InputAdapter implements Screen {
             artisanController);
 
     public GameMenu(List<String> players) {
-        this(players, null);
-    }
-
-    public GameMenu(List<String> players, String serverGameId) {
         this.players = players;
 
         // Set current player to the logged-in user for individual farm view
         setCurrentPlayerToLoggedInUser();
         errorLabel = new Label("", skin);
 
-        // Store server game ID for WebSocket initialization
-        if (serverGameId != null) {
-            System.out.println("DEBUG: [GAME_MENU] GameMenu created with server game ID: " + serverGameId);
-            // Store the server game ID in the NetworkCommandSender if available
-            if (App.getCurrentGame() != null && App.getCurrentGame().getNetworkCommandSender() != null) {
-                App.getCurrentGame().getNetworkCommandSender().setCurrentGameId(serverGameId);
-                System.out.println("DEBUG: [GAME_MENU] Set server game ID in NetworkCommandSender: " + serverGameId);
+        // Initialize server game ID from NetworkCommandSender if available
+        initializeServerGameId();
+    }
 
-                // Verify it was set
-                String verifyId = App.getCurrentGame().getNetworkCommandSender().getCurrentGameId();
-                System.out.println("DEBUG: [GAME_MENU] Verified server game ID in NetworkCommandSender: " + verifyId);
+    private void initializeServerGameId() {
+        if (App.getCurrentGame() != null && App.getCurrentGame().getNetworkCommandSender() != null) {
+            String serverGameId = App.getCurrentGame().getNetworkCommandSender().getCurrentGameId();
+            if (serverGameId != null) {
+                System.out.println("DEBUG: [GAME_MENU] GameMenu initialized with server game ID from NetworkCommandSender: " + serverGameId);
             } else {
-                System.out.println("DEBUG: [GAME_MENU] Cannot set server game ID - App.getCurrentGame() is " + App.getCurrentGame() +
-                    ", NetworkCommandSender is " + (App.getCurrentGame() != null ? App.getCurrentGame().getNetworkCommandSender() : "N/A"));
+                System.out.println("DEBUG: [GAME_MENU] NetworkCommandSender exists but server game ID is NULL");
+
+                // Check if this is a multiplayer game that should have a server game ID
+                if (App.getCurrentGame().isMultiplayer()) {
+                    System.out.println("DEBUG: [GAME_MENU] ERROR: This is a multiplayer game but server game ID is NULL!");
+                    System.out.println("DEBUG: [GAME_MENU] Game state - Players: " + (App.getCurrentGame().getPlayers() != null ? App.getCurrentGame().getPlayers().size() : "NULL"));
+                }
             }
         } else {
-            System.out.println("DEBUG: [GAME_MENU] CRITICAL: GameMenu created with NULL server game ID");
-
-            // Check if this is a multiplayer game that should have a server game ID
+            System.out.println("DEBUG: [GAME_MENU] No NetworkCommandSender available or current game is null");
             if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
-                System.out.println("DEBUG: [GAME_MENU] ERROR: This is a multiplayer game but server game ID is NULL!");
-                System.out.println("DEBUG: [GAME_MENU] Game state - Players: " + (App.getCurrentGame().getPlayers() != null ? App.getCurrentGame().getPlayers().size() : "NULL"));
-                System.out.println("DEBUG: [GAME_MENU] NetworkSender exists: " + (App.getCurrentGame().getNetworkCommandSender() != null));
-
-                if (App.getCurrentGame().getNetworkCommandSender() != null) {
-                    String currentId = App.getCurrentGame().getNetworkCommandSender().getCurrentGameId();
-                    System.out.println("DEBUG: [GAME_MENU] NetworkSender current game ID: " + currentId);
-                }
+                System.out.println("DEBUG: [GAME_MENU] ERROR: Multiplayer game detected but no NetworkCommandSender!");
             } else {
                 System.out.println("DEBUG: [GAME_MENU] Single-player game mode detected");
             }
+        }
+    }
+
+    /**
+     * Set the server game ID on the NetworkCommandSender if available.
+     * This method can be called after GameMenu initialization to update the server game ID.
+     *
+     * @param serverGameId The server game ID to set
+     */
+    public void setServerGameId(String serverGameId) {
+        if (App.getCurrentGame() != null && App.getCurrentGame().getNetworkCommandSender() != null) {
+            App.getCurrentGame().getNetworkCommandSender().setCurrentGameId(serverGameId);
+            System.out.println("DEBUG: [GAME_MENU] Set server game ID in NetworkCommandSender: " + serverGameId);
+
+            // Verify it was set
+            String verifyId = App.getCurrentGame().getNetworkCommandSender().getCurrentGameId();
+            System.out.println("DEBUG: [GAME_MENU] Verified server game ID in NetworkCommandSender: " + verifyId);
+        } else {
+            System.out.println("DEBUG: [GAME_MENU] Cannot set server game ID - App.getCurrentGame() is " + App.getCurrentGame() +
+                ", NetworkCommandSender is " + (App.getCurrentGame() != null ? App.getCurrentGame().getNetworkCommandSender() : "N/A"));
         }
     }
 

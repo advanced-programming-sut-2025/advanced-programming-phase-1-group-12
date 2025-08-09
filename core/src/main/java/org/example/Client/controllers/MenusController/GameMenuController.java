@@ -523,8 +523,8 @@ public class GameMenuController {
                             networkSender.connectToGameWebSocket(serverGameId);
                             System.out.println("DEBUG: [GAME_CREATION] Connected to WebSocket for game: " + serverGameId);
 
-                            // Create GameMenu with server game ID
-                            GameMenu gameMenu = new GameMenu(usernames, serverGameId);
+                            // Create GameMenu - server game ID will be retrieved from NetworkCommandSender
+                            GameMenu gameMenu = new GameMenu(usernames);
                             Main.getMain().setScreen(gameMenu);
                             return; // Exit early since we've set the screen
                         } else {

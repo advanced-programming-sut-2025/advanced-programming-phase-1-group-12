@@ -77,7 +77,7 @@ public class GameWebSocketHandler {
                 GameInstance gameInstance = sessionManager.getGameInstance(gameId);
                 if (gameInstance != null) {
                     gameInstance.addWebSocketConnection(ctx);
-                    
+
                     // IMPORTANT: Mark the player as connected in the game instance
                     gameInstance.connectPlayer(userId);
 
@@ -183,7 +183,7 @@ public class GameWebSocketHandler {
                     GameInstance gameInstance = sessionManager.getGameInstance(gameId);
                     if (gameInstance != null) {
                         gameInstance.removeWebSocketConnection(ctx);
-                        
+
                         // IMPORTANT: Mark the player as disconnected in the game instance
                         gameInstance.disconnectPlayer(userId);
 
@@ -239,12 +239,12 @@ public class GameWebSocketHandler {
 
             GameInstance gameInstance = sessionManager.getGameInstance(gameId);
             if (gameInstance == null) {
-                sendError(ctx, "Game not found");
+                sendError(ctx, "Game not found 2");
                 return;
             }
 
             if (!gameInstance.isPlayerConnected(userId)) {
-                sendError(ctx, "You are not connected to this game");
+                sendError(ctx, "You are not connected to this game 1");
                 return;
             }
 
@@ -270,7 +270,7 @@ public class GameWebSocketHandler {
 
             // Get the game ID from the query parameters (this is the correct game ID)
             String expectedGameId = ctx.queryParam("gameId");
-            
+
             // Get the game ID from the message
             Object gameIdObj = messageData.get("gameId");
             String messageGameId = null;
@@ -308,16 +308,16 @@ public class GameWebSocketHandler {
                 if (userGameId != null) {
                     gameInstance = sessionManager.getGameInstance(userGameId);
                 }
-                
+
                 if (gameInstance == null && ctx.session.isOpen()) {
-                    sendError(ctx, "Game not found");
+                    sendError(ctx, "Game not found 4");
                     return;
                 }
             }
 
             if (!gameInstance.isPlayerConnected(userId)) {
                 if (ctx.session.isOpen()) {
-                    sendError(ctx, "You are not connected to this game");
+                    sendError(ctx, "You are not connected to this game 2");
                 }
                 return;
             }
@@ -372,13 +372,22 @@ public class GameWebSocketHandler {
             }
 
             GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+
+            //TODO: cursor fix this
             if (gameInstance == null) {
-                sendError(ctx, "Game not found");
+                sendError(ctx, "Game not found 5"); //local(2)
                 return;
             }
 
             if (!gameInstance.isPlayerConnected(userId)) {
-                sendError(ctx, "You are not connected to this game");
+                System.out.println("===================================================HELP=========================");
+                for (String id: gameInstance.getAllPlayerIds()){
+                    System.out.println(id);
+                }
+
+                System.out.println("================================userId============================");
+                System.out.println(userId);
+                sendError(ctx, "You are not connected to this game 3");//local(3)
                 return;
             }
 
@@ -406,12 +415,12 @@ public class GameWebSocketHandler {
 
             GameInstance gameInstance = sessionManager.getGameInstance(gameId);
             if (gameInstance == null) {
-                sendError(ctx, "Game not found");
+                sendError(ctx, "Game not found 7");
                 return;
             }
 
             if (!gameInstance.isPlayerConnected(userId)) {
-                sendError(ctx, "You are not connected to this game");
+                sendError(ctx, "You are not connected to this game 4");
                 return;
             }
 
@@ -480,7 +489,7 @@ public class GameWebSocketHandler {
 
             GameInstance gameInstance = sessionManager.getGameInstance(gameId);
             if (gameInstance == null) {
-                sendError(ctx, "Game not found");
+                sendError(ctx, "Game not found 8");
                 return;
             }
 
@@ -523,12 +532,12 @@ public class GameWebSocketHandler {
 
             GameInstance gameInstance = sessionManager.getGameInstance(gameId);
             if (gameInstance == null) {
-                sendError(ctx, "Game not found");
+                sendError(ctx, "Game not found 9");
                 return;
             }
 
             if (!gameInstance.isPlayerConnected(userId)) {
-                sendError(ctx, "You are not connected to this game");
+                sendError(ctx, "You are not connected to this game 5");
                 return;
             }
 
@@ -607,7 +616,7 @@ public class GameWebSocketHandler {
             ctx.send(errorMsg);
         } catch (Exception e) {
             logger.error("Failed to send error message: {}. Error was: {}", e.getMessage(), errorMessage);
-            
+
             // If this is a ClosedChannelException, try to clean up the connection
             if (e.getCause() instanceof java.nio.channels.ClosedChannelException) {
                 String userId = connectionToUser.get(ctx.getSessionId());
