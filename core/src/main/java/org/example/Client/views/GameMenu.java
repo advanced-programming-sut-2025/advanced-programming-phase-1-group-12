@@ -143,6 +143,123 @@ public class GameMenu extends InputAdapter implements Screen {
             craftingController,
             artisanController);
 
+    // Portrait animation variables
+    private Map<String, com.badlogic.gdx.graphics.g2d.Animation<com.badlogic.gdx.graphics.g2d.TextureRegion>> portraitAnimations = new HashMap<>();
+    private Map<String, Float> portraitAnimationTimes = new HashMap<>();
+    private final float PORTRAIT_FRAME_DURATION = 0.3f; // Time per portrait frame
+
+    // Custom Actor for animated portraits
+    private static class AnimatedPortraitActor extends Actor {
+        private com.badlogic.gdx.graphics.g2d.Animation<com.badlogic.gdx.graphics.g2d.TextureRegion> animation;
+        private float animationTime = 0f;
+        private com.badlogic.gdx.graphics.g2d.TextureRegion currentFrame;
+        private float width, height;
+
+        public AnimatedPortraitActor(com.badlogic.gdx.graphics.g2d.Animation<com.badlogic.gdx.graphics.g2d.TextureRegion> animation, float width, float height) {
+            this.animation = animation;
+            this.width = width;
+            this.height = height;
+            if (animation != null) {
+                this.currentFrame = animation.getKeyFrame(0);
+            }
+        }
+
+        @Override
+        public void act(float delta) {
+            super.act(delta);
+            animationTime += delta;
+            if (animation != null) {
+                currentFrame = animation.getKeyFrame(animationTime, true);
+            }
+        }
+
+        @Override
+        public void draw(com.badlogic.gdx.graphics.g2d.Batch batch, float parentAlpha) {
+            if (currentFrame != null) {
+                batch.setColor(getColor().r, getColor().g, getColor().b, getColor().a * parentAlpha);
+                batch.draw(currentFrame, getX(), getY(), width, height);
+                batch.setColor(1, 1, 1, 1);
+            }
+        }
+    }
+
+    private com.badlogic.gdx.graphics.g2d.Animation<com.badlogic.gdx.graphics.g2d.TextureRegion> loadPortraitAnimation(String npcName) {
+        // Check if animation is already loaded
+        if (portraitAnimations.containsKey(npcName)) {
+            return portraitAnimations.get(npcName);
+        }
+
+        com.badlogic.gdx.utils.Array<com.badlogic.gdx.graphics.g2d.TextureRegion> frames = new com.badlogic.gdx.utils.Array<>();
+        
+        // Try to load face_0.png through face_9.png (or more if available)
+        for (int i = 0; i <= 9; i++) {
+            String portraitPath = "NPC/" + npcName + "/face_" + i + ".png";
+            try {
+                com.badlogic.gdx.graphics.Texture portraitTexture = new com.badlogic.gdx.graphics.Texture(portraitPath);
+                frames.add(new com.badlogic.gdx.graphics.g2d.TextureRegion(portraitTexture));
+            } catch (Exception e) {
+                // Continue to next face file
+                break; // Stop if we can't find the next frame
+            }
+        }
+
+        // If no face files found, try to use a fallback sprite
+        if (frames.size == 0) {
+            String fallbackPath = "sprites/" + npcName + ".png";
+            try {
+                com.badlogic.gdx.graphics.Texture fallbackTexture = new com.badlogic.gdx.graphics.Texture(fallbackPath);
+                frames.add(new com.badlogic.gdx.graphics.g2d.TextureRegion(fallbackTexture));
+            } catch (Exception e) {
+                // If all else fails, return null
+                return null;
+            }
+        }
+
+        // Create animation
+        com.badlogic.gdx.graphics.g2d.Animation<com.badlogic.gdx.graphics.g2d.TextureRegion> animation = 
+            new com.badlogic.gdx.graphics.g2d.Animation<>(PORTRAIT_FRAME_DURATION, frames, com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP);
+        
+        // Store the animation
+        portraitAnimations.put(npcName, animation);
+        
+        return animation;
+    }
+
+    private Actor createNPCPortrait(String npcName) {
+        com.badlogic.gdx.graphics.g2d.Animation<com.badlogic.gdx.graphics.g2d.TextureRegion> animation = loadPortraitAnimation(npcName);
+        
+        if (animation != null) {
+            // Create animated portrait actor
+            return new AnimatedPortraitActor(animation, 150, 150);
+        } else {
+            // Fallback to static image if animation loading fails
+            try {
+                // Try to load face_0.png first, then face_1, face_2, face_3, face_4
+                for (int i = 0; i <= 4; i++) {
+                    String portraitPath = "NPC/" + npcName + "/face_" + i + ".png";
+                    try {
+                        Texture portraitTexture = new Texture(portraitPath);
+                        return new Image(portraitTexture);
+                    } catch (Exception e) {
+                        // Continue to next face file
+                    }
+                }
+
+                // If no face files found, try to use a fallback sprite
+                String fallbackPath = "sprites/" + npcName + ".png";
+                try {
+                    Texture fallbackTexture = new Texture(fallbackPath);
+                    return new Image(fallbackTexture);
+                } catch (Exception e) {
+                    // If all else fails, return null
+                    return null;
+                }
+            } catch (Exception e) {
+                return null;
+            }
+        }
+    }
+
     public GameMenu(List<String> players) {
         this.players = players;
 
@@ -1546,12 +1663,12 @@ public class GameMenu extends InputAdapter implements Screen {
         if (stage.getKeyboardFocus() instanceof TextField) {
             return true;
         }
-        
+
         // Check if any dialog with input fields is open
         if (showingNPCFullScreenMenu || showingFullScreenMenu) {
             return true;
         }
-        
+
         // Check if any dialog is modal (which usually means input is blocked)
         for (Actor actor : stage.getActors()) {
             if (actor instanceof Dialog) {
@@ -1561,12 +1678,12 @@ public class GameMenu extends InputAdapter implements Screen {
                 }
             }
         }
-        
+
         // Check if terminal window is open
         if (cmdHandler != null && cmdHandler.isTerminalOpen()) {
             return true;
         }
-        
+
         return false;
     }
 
@@ -3637,7 +3754,6 @@ public class GameMenu extends InputAdapter implements Screen {
         hugButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                System.out.println("DEBUG: Hug button clicked in nearby player menu!");
                 interactionDialog.hide();
                 startHugAnimation(targetPlayer);
             }
@@ -3683,6 +3799,26 @@ public class GameMenu extends InputAdapter implements Screen {
 
     private void performHug(String targetUsername) {
         Player currentPlayer = App.getCurrentPlayerLazy();
+        Player targetPlayer = App.getCurrentGame().getPlayerByName(targetUsername);
+
+        if (targetPlayer == null) {
+            showNotification("Player not found!", false);
+            return;
+        }
+
+        // Check if players are adjacent
+        float distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - targetPlayer.getUserLocation().getxAxis()) +
+            Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
+        
+        if (distance > 2) {
+            showNotification("Players must be adjacent to hug!", false);
+            return;
+        }
+
+        // Start hug animation first
+        startHugAnimation(targetPlayer);
+
+        // Show notification after starting animation
         GameMenuController controller = new GameMenuController();
         Result result = controller.hug(targetUsername);
         showNotification(result.getMessage(), result.isSuccessful());
@@ -3705,13 +3841,13 @@ public class GameMenu extends InputAdapter implements Screen {
             return;
         }
 
-        // Show notification first
+        // Start flower animation first
+        startFlowerAnimation(targetPlayer);
+
+        // Show notification after starting animation
         GameMenuController controller = new GameMenuController();
         Result result = controller.flower(targetUsername);
         showNotification(result.getMessage(), result.isSuccessful());
-
-        // Start flower animation after showing notification
-        startFlowerAnimation(targetPlayer);
     }
 
     private void showMarriageProposalDialog(String targetUsername) {
@@ -3748,6 +3884,20 @@ public class GameMenu extends InputAdapter implements Screen {
                 ringButton.addListener(new ClickListener() {
                     @Override
                     public void clicked(InputEvent event, float x, float y) {
+                        // Get target player for animation
+                        Player currentPlayer = App.getCurrentPlayerLazy();
+                        Player targetPlayer = App.getCurrentGame().getPlayerByName(targetUsername);
+                        
+                        if (targetPlayer != null) {
+                            // Check if players are adjacent
+                            float distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - targetPlayer.getUserLocation().getxAxis()) +
+                                Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
+                            if (distance <= 2) {
+                                // Start ring animation first
+                                startRingAnimation(targetPlayer);
+                            }
+                        }
+                        
                         // Propose marriage with this ring
                         GameMenuController controller = new GameMenuController();
                         Result result = controller.askMarriage(targetUsername, ring.getName());
@@ -4253,32 +4403,7 @@ public class GameMenu extends InputAdapter implements Screen {
         Gdx.input.setInputProcessor(npcMenuStage);
     }
 
-    private Image createNPCPortrait(String npcName) {
-        try {
-            // Try to load face_0.png first, then face_1, face_2, face_3, face_4
-            for (int i = 0; i <= 4; i++) {
-                String portraitPath = "NPC/" + npcName + "/face_" + i + ".png";
-                try {
-                    Texture portraitTexture = new Texture(portraitPath);
-                    return new Image(portraitTexture);
-                } catch (Exception e) {
-                    // Continue to next face file
-                }
-            }
 
-            // If no face files found, try to use a fallback sprite
-            String fallbackPath = "sprites/" + npcName + ".png";
-            try {
-                Texture fallbackTexture = new Texture(fallbackPath);
-                return new Image(fallbackTexture);
-            } catch (Exception e) {
-                // If all else fails, return null
-                return null;
-            }
-        } catch (Exception e) {
-            return null;
-        }
-    }
 
     private void showNPCDialogue(String npcName, String dialogue) {
         // Create a full-screen dialogue display
@@ -4329,10 +4454,10 @@ public class GameMenu extends InputAdapter implements Screen {
         mainTable.add(titleLabel).colspan(3).pad(50).row();
 
         // Create portrait image
-        Image portraitImage = createNPCPortrait(npcName);
-        if (portraitImage != null) {
-            portraitImage.setSize(300, 300);
-            mainTable.add(portraitImage).colspan(3).center().pad(20).row();
+        Actor portraitActor = createNPCPortrait(npcName);
+        if (portraitActor != null) {
+            portraitActor.setSize(150, 150);
+            mainTable.add(portraitActor).colspan(3).center().pad(20).row();
         }
 
         // Create dialogue text with proper wrapping
@@ -4412,10 +4537,10 @@ public class GameMenu extends InputAdapter implements Screen {
         mainTable.add(titleLabel).colspan(3).pad(30).row();
 
         // Create portrait image
-        Image portraitImage = createNPCPortrait(npcName);
-        if (portraitImage != null) {
-            portraitImage.setSize(250, 250);
-            mainTable.add(portraitImage).colspan(3).center().pad(10).row();
+        Actor portraitActor = createNPCPortrait(npcName);
+        if (portraitActor != null) {
+            portraitActor.setSize(180, 180);
+            mainTable.add(portraitActor).colspan(3).center().pad(10).row();
         }
 
         // Create chat history display
@@ -4477,10 +4602,10 @@ public class GameMenu extends InputAdapter implements Screen {
                     String currentChat = finalChatHistoryLabel.getText().toString();
                     String playerMessage = "You: " + message + "\n";
                     finalChatHistoryLabel.setText(currentChat + playerMessage);
-                    
+
                     // Clear input field
                     finalInputField.setText("");
-                    
+
                     // Generate NPC response
                     generateNPCResponse(npcName, message, finalChatHistoryLabel, finalChatScrollPane);
                 }
@@ -4498,10 +4623,10 @@ public class GameMenu extends InputAdapter implements Screen {
                         String currentChat = finalChatHistoryLabel.getText().toString();
                         String playerMessage = "You: " + message + "\n";
                         finalChatHistoryLabel.setText(currentChat + playerMessage);
-                        
+
                         // Clear input field
                         finalInputField.setText("");
-                        
+
                         // Generate NPC response
                         generateNPCResponse(npcName, message, finalChatHistoryLabel, finalChatScrollPane);
                     }
@@ -4521,7 +4646,7 @@ public class GameMenu extends InputAdapter implements Screen {
                 }
             }
         });
-        
+
         // Set initial focus
         inputField.setCursorPosition(0);
     }
@@ -4530,19 +4655,19 @@ public class GameMenu extends InputAdapter implements Screen {
         // Show typing indicator
         String currentChat = chatHistoryLabel.getText().toString();
         chatHistoryLabel.setText(currentChat + npcName + " is typing...\n");
-        
+
         // Generate response using AI
         new Thread(() -> {
             try {
                 String response = generateAIResponse(npcName, playerMessage);
-                
+
                 // Update UI on the main thread
                 Gdx.app.postRunnable(() -> {
                     String updatedChat = chatHistoryLabel.getText().toString();
                     // Remove typing indicator and add response
                     updatedChat = updatedChat.replace(npcName + " is typing...\n", "");
                     chatHistoryLabel.setText(updatedChat + npcName + ": " + response + "\n");
-                    
+
                     // Scroll to bottom
                     chatScrollPane.scrollTo(0, 0, 0, 0);
                 });
@@ -4564,26 +4689,26 @@ public class GameMenu extends InputAdapter implements Screen {
             if (App.getCurrentGame().getNPCvillage() != null) {
                 npc = App.getCurrentGame().getNPCvillage().getNPCByName(npcName);
             }
-            
+
             if (npc == null) {
                 return "Hello! I'm " + npcName + ". Nice to meet you!";
             }
-            
+
             // Get current game context
             int hour = App.getCurrentGame().getDate().getHour();
             String season = App.getCurrentGame().getDate().getSeason().name().toLowerCase();
             String weather = App.getCurrentGame().getDate().getWeather().name().toLowerCase();
-            
+
             // Build context for AI
             String context = String.format(
                 "NPC: %s, Job: %s, Personality: %s, Season: %s, Weather: %s, Hour: %d. " +
                 "Player message: %s",
                 npcName, npc.getJob(), npc.getPersonality(), season, weather, hour, playerMessage
             );
-            
+
             // Use the existing NpcAI class
             return org.example.Common.models.Utils.NpcAI.generateDialogue(npc, context);
-            
+
         } catch (Exception e) {
             System.err.println("Error generating AI response: " + e.getMessage());
             return "Hello! I'm " + npcName + ". Nice to meet you!";
@@ -4633,10 +4758,10 @@ public class GameMenu extends InputAdapter implements Screen {
         mainTable.add(titleLabel).colspan(3).pad(50).row();
 
         // Create portrait image
-        Image portraitImage = createNPCPortrait(npc.getName());
-        if (portraitImage != null) {
-            portraitImage.setSize(300, 300);
-            mainTable.add(portraitImage).colspan(3).center().pad(20).row();
+        Actor portraitActor = createNPCPortrait(npc.getName());
+        if (portraitActor != null) {
+            portraitActor.setSize(150, 150);
+            mainTable.add(portraitActor).colspan(3).center().pad(20).row();
         }
 
         Label instructionLabel = new Label("Select an item to gift:", skin);
@@ -4741,10 +4866,10 @@ public class GameMenu extends InputAdapter implements Screen {
         mainTable.add(titleLabel).colspan(3).pad(50).row();
 
         // Create portrait image
-        Image portraitImage = createNPCPortrait(npc.getName());
-        if (portraitImage != null) {
-            portraitImage.setSize(300, 300);
-            mainTable.add(portraitImage).colspan(3).center().pad(20).row();
+        Actor portraitActor = createNPCPortrait(npc.getName());
+        if (portraitActor != null) {
+            portraitActor.setSize(150, 150);
+            mainTable.add(portraitActor).colspan(3).center().pad(20).row();
         }
 
         int friendshipPoints = npc.getFriendshipPoints(currentPlayer);
@@ -4879,10 +5004,10 @@ public class GameMenu extends InputAdapter implements Screen {
         mainTable.add(subtitleLabel).colspan(3).pad(20).row();
 
         // Create portrait image
-        Image portraitImage = createNPCPortrait(targetNPCForMenu.getName());
-        if (portraitImage != null) {
-            portraitImage.setSize(300, 300);
-            mainTable.add(portraitImage).colspan(3).center().pad(20).row();
+        Actor portraitActor = createNPCPortrait(targetNPCForMenu.getName());
+        if (portraitActor != null) {
+            portraitActor.setSize(150, 150);
+            mainTable.add(portraitActor).colspan(3).center().pad(20).row();
         }
 
         TextButton talkButton = new TextButton("Talk", skin);
@@ -5032,6 +5157,7 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void startHugAnimation(Player targetPlayer) {
+        System.out.println("DEBUG: startHugAnimation called");
         Player currentPlayer = App.getCurrentPlayerLazy();
         if (currentPlayer == null || targetPlayer == null) {
             System.out.println("DEBUG: One of the players is null - currentPlayer: " + (currentPlayer != null) + ", targetPlayer: " + (targetPlayer != null));
@@ -5046,24 +5172,41 @@ public class GameMenu extends InputAdapter implements Screen {
             return;
         }
 
-        // Set up waiting for notification to close before starting animations
-        waitingForNotificationClose = true;
-        notificationCloseTimer = 0f;
+        // Set up animation state
+        isHugging = true;
+        huggingTimer = 0f;
+        currentSmileFrame = 0;
+        smileAnimationTimer = 0f;
+        heartAnimationActive = true;
+        heartAnimationProgress = 0f;
         huggingPlayer1 = currentPlayer;
         huggingPlayer2 = targetPlayer;
 
         // Initialize heart animation setup (but don't start yet)
         if (heartTexture == null) {
-            heartTexture = new Texture("NPC/RelationShip/Heart.png");
+            try {
+                heartTexture = new Texture(Gdx.files.internal("assets/NPC/RelationShip/Heart.png"));
+                heartTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+            } catch (Exception e) {
+                try {
+                    Pixmap pixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
+                    pixmap.setColor(Color.RED);
+                    pixmap.fill();
+                    heartTexture = new Texture(pixmap);
+                    pixmap.dispose();
+                } catch (Exception emergencyException) {
+                    return; // Don't start animation if we can't load any texture
+                }
+            }
         }
 
         // Initialize smile textures if not already done
         if (!smileTexturesLoaded) {
             try {
-                smileTextures[0] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_1.png"));
-                smileTextures[1] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_2.png"));
-                smileTextures[2] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_3.png"));
-                smileTextures[3] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_4.png"));
+                smileTextures[0] = new Texture(Gdx.files.internal("assets/NPC/RelationShip/SmileQ_1.png"));
+                smileTextures[1] = new Texture(Gdx.files.internal("assets/NPC/RelationShip/SmileQ_2.png"));
+                smileTextures[2] = new Texture(Gdx.files.internal("assets/NPC/RelationShip/SmileQ_3.png"));
+                smileTextures[3] = new Texture(Gdx.files.internal("assets/NPC/RelationShip/SmileQ_4.png"));
 
                 // Set texture filtering for better quality
                 for (int i = 0; i < smileTextures.length; i++) {
@@ -5073,20 +5216,16 @@ public class GameMenu extends InputAdapter implements Screen {
                 }
 
                 smileTexturesLoaded = true; // Mark textures as loaded
-                System.out.println("DEBUG: Successfully loaded all smile textures for hugging animation");
             } catch (Exception e) {
-                System.out.println("DEBUG: Failed to load smile textures: " + e.getMessage());
                 // Create a fallback texture to prevent null rendering
                 try {
-                    Texture fallbackTexture = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_1.png"));
+                    Texture fallbackTexture = new Texture(Gdx.files.internal("assets/NPC/RelationShip/SmileQ_1.png"));
                     fallbackTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
                     for (int i = 0; i < smileTextures.length; i++) {
                         smileTextures[i] = fallbackTexture;
                     }
                     smileTexturesLoaded = true; // Mark textures as loaded
-                    System.out.println("DEBUG: Using fallback texture for all smile frames in hugging animation");
                 } catch (Exception fallbackException) {
-                    System.out.println("DEBUG: Even fallback texture failed for hugging animation: " + fallbackException.getMessage());
                     // Create emergency texture as last resort
                     try {
                         Pixmap pixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
@@ -5098,9 +5237,8 @@ public class GameMenu extends InputAdapter implements Screen {
                             smileTextures[i] = emergencyTexture;
                         }
                         smileTexturesLoaded = true; // Mark textures as loaded
-                        System.out.println("DEBUG: Using emergency yellow texture for hugging animation");
                     } catch (Exception emergencyException) {
-                        System.out.println("DEBUG: Emergency texture creation failed for hugging: " + emergencyException.getMessage());
+                        // Handle error silently
                     }
                 }
             }
@@ -5120,13 +5258,10 @@ public class GameMenu extends InputAdapter implements Screen {
         System.out.println("DEBUG: Hug animation started - isHugging: " + isHugging + ", player1: " + currentPlayer.getUser().getUserName() + ", player2: " + targetPlayer.getUser().getUserName());
 
         makePlayersFaceEachOther(currentPlayer, targetPlayer);
-
-        GameMenuController controller = new GameMenuController();
-        Result result = controller.hug(targetPlayer.getUser().getUserName());
-        showNotification(result.getMessage(), result.isSuccessful());
     }
 
     private void startRingAnimation(Player targetPlayer) {
+        System.out.println("DEBUG: startRingAnimation called");
         Player currentPlayer = App.getCurrentPlayerLazy();
         if (currentPlayer == null || targetPlayer == null) {
             System.out.println("DEBUG: One of the players is null - currentPlayer: " + (currentPlayer != null) + ", targetPlayer: " + (targetPlayer != null));
@@ -5141,39 +5276,39 @@ public class GameMenu extends InputAdapter implements Screen {
             return;
         }
 
-        waitingForRingNotificationClose = true;
-        ringNotificationCloseTimer = 0f;
+        // Set up animation state
+        isRinging = true;
+        ringingTimer = 0f;
+        currentHeartEmojiFrame = 0;
+        heartEmojiAnimationTimer = 0f;
+        ringAnimationActive = true;
+        ringAnimationProgress = 0f;
         ringingPlayer1 = currentPlayer;
         ringingPlayer2 = targetPlayer;
 
         if (ringTexture == null) {
             try {
-                ringTexture = new Texture(Gdx.files.internal("NPC/RelationShip/Wedding_Ring.png"));
+                ringTexture = new Texture(Gdx.files.internal("assets/NPC/RelationShip/Wedding_Ring.png"));
                 ringTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-                System.out.println("DEBUG: Ring texture loaded successfully");
             } catch (Exception e) {
-                System.out.println("DEBUG: Failed to load ring texture: " + e.getMessage());
                 try {
                     Pixmap pixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
                     pixmap.setColor(Color.GOLD);
                     pixmap.fill();
                     ringTexture = new Texture(pixmap);
                     pixmap.dispose();
-                    System.out.println("DEBUG: Using emergency gold texture for ring");
                 } catch (Exception emergencyException) {
-                    System.out.println("DEBUG: Emergency ring texture creation failed: " + emergencyException.getMessage());
                     return; // Don't start animation if we can't load any texture
                 }
             }
         }
 
         if (!heartEmojiTexturesLoaded) {
-            System.out.println("DEBUG: Loading heart emoji textures for ring animation...");
             try {
-                heartEmojiTextures[0] = new Texture(Gdx.files.internal("NPC/RelationShip/HeartQ_1.png"));
-                heartEmojiTextures[1] = new Texture(Gdx.files.internal("NPC/RelationShip/HeartQ_2.png"));
-                heartEmojiTextures[2] = new Texture(Gdx.files.internal("NPC/RelationShip/HeartQ_3.png"));
-                heartEmojiTextures[3] = new Texture(Gdx.files.internal("NPC/RelationShip/HeartQ_4.png"));
+                heartEmojiTextures[0] = new Texture(Gdx.files.internal("assets/NPC/RelationShip/HeartQ_1.png"));
+                heartEmojiTextures[1] = new Texture(Gdx.files.internal("assets/NPC/RelationShip/HeartQ_2.png"));
+                heartEmojiTextures[2] = new Texture(Gdx.files.internal("assets/NPC/RelationShip/HeartQ_3.png"));
+                heartEmojiTextures[3] = new Texture(Gdx.files.internal("assets/NPC/RelationShip/HeartQ_4.png"));
 
                 for (int i = 0; i < heartEmojiTextures.length; i++) {
                     if (heartEmojiTextures[i] != null) {
@@ -5182,19 +5317,15 @@ public class GameMenu extends InputAdapter implements Screen {
                 }
 
                 heartEmojiTexturesLoaded = true;
-                System.out.println("DEBUG: Successfully loaded all heart emoji textures for ring animation");
             } catch (Exception e) {
-                System.out.println("DEBUG: Failed to load heart emoji textures for ring animation: " + e.getMessage());
                 try {
-                    Texture fallbackTexture = new Texture(Gdx.files.internal("NPC/RelationShip/HeartQ_1.png"));
+                    Texture fallbackTexture = new Texture(Gdx.files.internal("assets/NPC/RelationShip/HeartQ_1.png"));
                     fallbackTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
                     for (int i = 0; i < heartEmojiTextures.length; i++) {
                         heartEmojiTextures[i] = fallbackTexture;
                     }
                     heartEmojiTexturesLoaded = true;
-                    System.out.println("DEBUG: Using fallback texture for all heart emoji frames in ring animation");
                 } catch (Exception fallbackException) {
-                    System.out.println("DEBUG: Even fallback texture failed for ring animation: " + fallbackException.getMessage());
                     try {
                         Pixmap pixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
                         pixmap.setColor(Color.RED);
@@ -5205,9 +5336,8 @@ public class GameMenu extends InputAdapter implements Screen {
                             heartEmojiTextures[i] = emergencyTexture;
                         }
                         heartEmojiTexturesLoaded = true;
-                        System.out.println("DEBUG: Using emergency red texture for ring animation");
                     } catch (Exception emergencyException) {
-                        System.out.println("DEBUG: Emergency texture creation failed for ring: " + emergencyException.getMessage());
+                        // Handle error silently
                     }
                 }
             }
@@ -5234,6 +5364,7 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void startFlowerAnimation(Player targetPlayer) {
+        System.out.println("DEBUG: startFlowerAnimation called");
         Player currentPlayer = App.getCurrentPlayerLazy();
         if (currentPlayer == null || targetPlayer == null) {
             System.out.println("DEBUG: One of the players is null - currentPlayer: " + (currentPlayer != null) + ", targetPlayer: " + (targetPlayer != null));
@@ -5248,9 +5379,13 @@ public class GameMenu extends InputAdapter implements Screen {
             return;
         }
 
-        // Set up waiting for notification to close before starting animations
-        waitingForFlowerNotificationClose = true;
-        flowerNotificationCloseTimer = 0f;
+        // Set up animation state
+        isFlowering = true;
+        floweringTimer = 0f;
+        currentSmileFrame = 0;
+        smileAnimationTimer = 0f;
+        flowerAnimationActive = true;
+        flowerAnimationProgress = 0f;
         floweringPlayer1 = currentPlayer;
         floweringPlayer2 = targetPlayer;
 
@@ -5260,7 +5395,7 @@ public class GameMenu extends InputAdapter implements Screen {
         // Initialize flower animation setup (but don't start yet)
         if (flowerTexture == null) {
             try {
-                flowerTexture = new Texture(Gdx.files.internal("NPC/RelationShip/Bouquet.png"));
+                flowerTexture = new Texture(Gdx.files.internal("assets/NPC/RelationShip/Bouquet.png"));
                 flowerTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
                 System.out.println("DEBUG: Flower texture loaded successfully");
             } catch (Exception e) {
@@ -5284,10 +5419,10 @@ public class GameMenu extends InputAdapter implements Screen {
         if (!smileTexturesLoaded) {
             System.out.println("DEBUG: Loading smile textures for flower animation...");
             try {
-                smileTextures[0] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_1.png"));
-                smileTextures[1] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_2.png"));
-                smileTextures[2] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_3.png"));
-                smileTextures[3] = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_4.png"));
+                smileTextures[0] = new Texture(Gdx.files.internal("assets/NPC/RelationShip/SmileQ_1.png"));
+                smileTextures[1] = new Texture(Gdx.files.internal("assets/NPC/RelationShip/SmileQ_2.png"));
+                smileTextures[2] = new Texture(Gdx.files.internal("assets/NPC/RelationShip/SmileQ_3.png"));
+                smileTextures[3] = new Texture(Gdx.files.internal("assets/NPC/RelationShip/SmileQ_4.png"));
 
                 // Set texture filtering for better quality
                 for (int i = 0; i < smileTextures.length; i++) {
@@ -5302,7 +5437,7 @@ public class GameMenu extends InputAdapter implements Screen {
                 System.out.println("DEBUG: Failed to load smile textures for flower animation: " + e.getMessage());
                 // Create a fallback texture to prevent null rendering
                 try {
-                    Texture fallbackTexture = new Texture(Gdx.files.internal("NPC/RelationShip/SmileQ_1.png"));
+                    Texture fallbackTexture = new Texture(Gdx.files.internal("assets/NPC/RelationShip/SmileQ_1.png"));
                     fallbackTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
                     for (int i = 0; i < smileTextures.length; i++) {
                         smileTextures[i] = fallbackTexture;
@@ -5382,25 +5517,6 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void updateHugAnimation(float delta) {
-        // Handle waiting for notification to close
-        if (waitingForNotificationClose) {
-            notificationCloseTimer += delta;
-
-            if (notificationCloseTimer >= NOTIFICATION_DISPLAY_TIME) {
-                // Start the animations after notification closes
-                waitingForNotificationClose = false;
-                isHugging = true;
-                huggingTimer = 0f;
-                currentSmileFrame = 0;
-                smileAnimationTimer = 0f;
-                heartAnimationActive = true;
-                heartAnimationProgress = 0f;
-
-                System.out.println("DEBUG: Starting hug animations after notification closed");
-            }
-            return;
-        }
-
         if (!isHugging) {
             return;
         }
@@ -5420,6 +5536,12 @@ public class GameMenu extends InputAdapter implements Screen {
         if (smileAnimationTimer >= SMILE_FRAME_DURATION) {
             currentSmileFrame = (currentSmileFrame + 1) % 4;
             smileAnimationTimer = 0f;
+        }
+
+        // Start heart animation after a short delay
+        if (!heartAnimationActive && huggingTimer >= 0.5f) {
+            heartAnimationActive = true;
+            heartAnimationProgress = 0f;
         }
 
         // Update heart animation
@@ -5443,30 +5565,10 @@ public class GameMenu extends InputAdapter implements Screen {
             huggingPlayer1 = null;
             huggingPlayer2 = null;
             heartAnimationActive = false;
-            waitingForNotificationClose = false;
         }
     }
 
     private void updateFlowerAnimation(float delta) {
-        // Handle waiting for notification to close
-        if (waitingForFlowerNotificationClose) {
-            flowerNotificationCloseTimer += delta;
-
-            if (flowerNotificationCloseTimer >= FLOWER_NOTIFICATION_DISPLAY_TIME) {
-                // Start the animations after notification closes
-                waitingForFlowerNotificationClose = false;
-                isFlowering = true;
-                floweringTimer = 0f;
-                currentSmileFrame = 0;
-                smileAnimationTimer = 0f;
-                flowerAnimationActive = true;
-                flowerAnimationProgress = 0f;
-
-                System.out.println("DEBUG: Starting flower animations after notification closed");
-            }
-            return;
-        }
-
         if (!isFlowering) {
             return;
         }
@@ -5486,6 +5588,21 @@ public class GameMenu extends InputAdapter implements Screen {
         if (smileAnimationTimer >= SMILE_FRAME_DURATION) {
             currentSmileFrame = (currentSmileFrame + 1) % 4;
             smileAnimationTimer = 0f;
+        }
+
+        // Start flower animation after a short delay
+        if (!flowerAnimationActive && floweringTimer >= 0.5f) {
+            flowerAnimationActive = true;
+            flowerAnimationProgress = 0f;
+            
+            // Calculate start and end positions for flower animation
+            flowerStartX = floweringPlayer1.getUserLocation().getxAxis();
+            flowerStartY = floweringPlayer1.getUserLocation().getyAxis() + 50f;
+            flowerEndX = floweringPlayer2.getUserLocation().getxAxis();
+            flowerEndY = floweringPlayer2.getUserLocation().getyAxis() + 50f;
+            
+            flowerX = flowerStartX;
+            flowerY = flowerStartY;
         }
 
         // Update flower animation
@@ -5514,25 +5631,6 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void updateRingAnimation(float delta) {
-        // Handle waiting for notification to close
-        if (waitingForRingNotificationClose) {
-            ringNotificationCloseTimer += delta;
-
-            if (ringNotificationCloseTimer >= RING_NOTIFICATION_DISPLAY_TIME) {
-                // Start the animations after notification closes
-                waitingForRingNotificationClose = false;
-                isRinging = true;
-                ringingTimer = 0f;
-                currentHeartEmojiFrame = 0;
-                heartEmojiAnimationTimer = 0f;
-                ringAnimationActive = true;
-                ringAnimationProgress = 0f;
-
-                System.out.println("DEBUG: Starting ring animations after notification closed");
-            }
-            return;
-        }
-
         if (!isRinging) {
             return;
         }
@@ -5559,6 +5657,21 @@ public class GameMenu extends InputAdapter implements Screen {
             heartEmojiAnimationTimer = 0f;
         }
 
+        // Start ring animation after a short delay
+        if (!ringAnimationActive && ringingTimer >= 0.5f) {
+            ringAnimationActive = true;
+            ringAnimationProgress = 0f;
+            
+            // Calculate start and end positions for ring animation
+            ringStartX = ringingPlayer1.getUserLocation().getxAxis();
+            ringStartY = ringingPlayer1.getUserLocation().getyAxis() + 50f;
+            ringEndX = ringingPlayer2.getUserLocation().getxAxis();
+            ringEndY = ringingPlayer2.getUserLocation().getyAxis() + 50f;
+            
+            ringX = ringStartX;
+            ringY = ringStartY;
+        }
+
         // Update ring animation
         if (ringAnimationActive) {
             ringAnimationProgress += delta / RING_ANIMATION_DURATION;
@@ -5580,21 +5693,15 @@ public class GameMenu extends InputAdapter implements Screen {
             ringingPlayer1 = null;
             ringingPlayer2 = null;
             ringAnimationActive = false;
-            waitingForRingNotificationClose = false;
         }
     }
 
     private void renderHugAnimation(SpriteBatch batch) {
-        if (waitingForNotificationClose) {
-            return;
-        }
-
         if (!isHugging || huggingPlayer1 == null || huggingPlayer2 == null) {
             return;
         }
 
         if (!smileTexturesLoaded) {
-            System.out.println("DEBUG: Smile textures not ready for hug animation, skipping render");
             return;
         }
 
@@ -5609,17 +5716,13 @@ public class GameMenu extends InputAdapter implements Screen {
             float smileWidth = smileTextures[currentSmileFrame].getWidth() * 5f; // Scale up 5x for bigger visibility
             float smileHeight = smileTextures[currentSmileFrame].getHeight() * 5f;
             batch.draw(smileTextures[currentSmileFrame], centerX - smileWidth/2, centerY + 100f, smileWidth, smileHeight);
-        } else {
-            System.out.println("DEBUG: Cannot render smile texture - smileTextures: " + (smileTextures != null) +
-                ", currentSmileFrame: " + currentSmileFrame +
-                ", texture at frame: " + (smileTextures != null && currentSmileFrame >= 0 && currentSmileFrame < smileTextures.length ?
-                (smileTextures[currentSmileFrame] != null ? "not null" : "null") : "invalid index"));
         }
 
         // Render heart animation
         if (heartAnimationActive && heartTexture != null) {
-            // Convert world coordinates to screen coordinates
-            Vector3 heartScreenPos = camera.project(new Vector3(heartX, heartY, 0));
+            // Convert world coordinates to screen coordinates manually
+            float screenX = (heartX - camera.position.x) * camera.zoom + Gdx.graphics.getWidth() / 2f;
+            float screenY = (heartY - camera.position.y) * camera.zoom + Gdx.graphics.getHeight() / 2f;
 
             float heartSize = 32f; // Size of the heart
             float alpha = 1.0f;
@@ -5631,27 +5734,21 @@ public class GameMenu extends InputAdapter implements Screen {
 
             // Set color with alpha for fading effect
             batch.setColor(1.0f, 1.0f, 1.0f, alpha);
-            batch.draw(heartTexture, heartScreenPos.x - heartSize/2, heartScreenPos.y - heartSize/2, heartSize, heartSize);
+            batch.draw(heartTexture, screenX - heartSize/2, screenY - heartSize/2, heartSize, heartSize);
             batch.setColor(1.0f, 1.0f, 1.0f, 1.0f); // Reset color
         }
     }
 
     private void renderFlowerAnimation(SpriteBatch batch) {
-        if (waitingForFlowerNotificationClose) {
-            return;
-        }
-
         if (!isFlowering || floweringPlayer1 == null || floweringPlayer2 == null) {
             return;
         }
 
         if (!smileTexturesLoaded) {
-            System.out.println("DEBUG: Smile textures not ready for flower animation, skipping render");
             return;
         }
 
         if (flowerTexture == null) {
-            System.out.println("DEBUG: Flower texture not ready for flower animation, skipping render");
             return;
         }
 
@@ -5666,16 +5763,13 @@ public class GameMenu extends InputAdapter implements Screen {
             float smileWidth = smileTextures[currentSmileFrame].getWidth() * 5f; // Scale up 5x for bigger visibility
             float smileHeight = smileTextures[currentSmileFrame].getHeight() * 5f;
             batch.draw(smileTextures[currentSmileFrame], centerX - smileWidth/2, centerY + 100f, smileWidth, smileHeight);
-        } else {
-            System.out.println("DEBUG: Cannot render smile texture for flower animation - smileTextures: " + (smileTextures != null) +
-                ", currentSmileFrame: " + currentSmileFrame +
-                ", texture at frame: " + (smileTextures != null && currentSmileFrame >= 0 && currentSmileFrame < smileTextures.length ?
-                (smileTextures[currentSmileFrame] != null ? "not null" : "null") : "invalid index"));
         }
 
         if (flowerAnimationActive && flowerTexture != null) {
             try {
-                Vector3 flowerScreenPos = camera.project(new Vector3(flowerX, flowerY, 0));
+                // Convert world coordinates to screen coordinates manually
+                float screenX = (flowerX - camera.position.x) * camera.zoom + Gdx.graphics.getWidth() / 2f;
+                float screenY = (flowerY - camera.position.y) * camera.zoom + Gdx.graphics.getHeight() / 2f;
 
                 float flowerSize = 32f; // Size of the flower
                 float alpha = 1.0f;
@@ -5685,30 +5779,24 @@ public class GameMenu extends InputAdapter implements Screen {
                 }
 
                 batch.setColor(1.0f, 1.0f, 1.0f, alpha);
-                batch.draw(flowerTexture, flowerScreenPos.x - flowerSize/2, flowerScreenPos.y - flowerSize/2, flowerSize, flowerSize);
+                batch.draw(flowerTexture, screenX - flowerSize/2, screenY - flowerSize/2, flowerSize, flowerSize);
                 batch.setColor(1.0f, 1.0f, 1.0f, 1.0f); // Reset color
             } catch (Exception e) {
-                System.out.println("DEBUG: Error rendering flower texture: " + e.getMessage());
+                // Handle error silently
             }
         }
     }
 
     private void renderRingAnimation(SpriteBatch batch) {
-        if (waitingForRingNotificationClose) {
-            return;
-        }
-
         if (!isRinging || ringingPlayer1 == null || ringingPlayer2 == null) {
             return;
         }
 
         if (!heartEmojiTexturesLoaded) {
-            System.out.println("DEBUG: Heart emoji textures not ready for ring animation, skipping render");
             return;
         }
 
         if (ringTexture == null) {
-            System.out.println("DEBUG: Ring texture not ready for ring animation, skipping render");
             return;
         }
 
@@ -5723,16 +5811,13 @@ public class GameMenu extends InputAdapter implements Screen {
             float heartEmojiWidth = heartEmojiTextures[currentHeartEmojiFrame].getWidth() * 5f; // Scale up 5x for bigger visibility
             float heartEmojiHeight = heartEmojiTextures[currentHeartEmojiFrame].getHeight() * 5f;
             batch.draw(heartEmojiTextures[currentHeartEmojiFrame], centerX - heartEmojiWidth/2, centerY + 100f, heartEmojiWidth, heartEmojiHeight);
-        } else {
-            System.out.println("DEBUG: Cannot render heart emoji texture for ring animation - heartEmojiTextures: " + (heartEmojiTextures != null) +
-                ", currentHeartEmojiFrame: " + currentHeartEmojiFrame +
-                ", texture at frame: " + (heartEmojiTextures != null && currentHeartEmojiFrame >= 0 && currentHeartEmojiFrame < heartEmojiTextures.length ?
-                (heartEmojiTextures[currentHeartEmojiFrame] != null ? "not null" : "null") : "invalid index"));
         }
 
         if (ringAnimationActive && ringTexture != null) {
             try {
-                Vector3 ringScreenPos = camera.project(new Vector3(ringX, ringY, 0));
+                // Convert world coordinates to screen coordinates manually
+                float screenX = (ringX - camera.position.x) * camera.zoom + Gdx.graphics.getWidth() / 2f;
+                float screenY = (ringY - camera.position.y) * camera.zoom + Gdx.graphics.getHeight() / 2f;
 
                 float ringSize = 32f; // Size of the ring
                 float alpha = 1.0f;
@@ -5742,10 +5827,10 @@ public class GameMenu extends InputAdapter implements Screen {
                 }
 
                 batch.setColor(1.0f, 1.0f, 1.0f, alpha);
-                batch.draw(ringTexture, ringScreenPos.x - ringSize/2, ringScreenPos.y - ringSize/2, ringSize, ringSize);
+                batch.draw(ringTexture, screenX - ringSize/2, screenY - ringSize/2, ringSize, ringSize);
                 batch.setColor(1.0f, 1.0f, 1.0f, 1.0f); // Reset color
             } catch (Exception e) {
-                System.out.println("DEBUG: Error rendering ring texture: " + e.getMessage());
+                // Handle error silently
             }
         }
     }
