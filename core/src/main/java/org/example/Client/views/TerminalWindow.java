@@ -3,6 +3,7 @@ package org.example.Client.views;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -71,6 +72,21 @@ public class TerminalWindow extends Window {
             @Override
             public boolean keyDown(InputEvent e, int keycode) {
                 if (keycode == Keys.GRAVE) {
+                    commandHandler.setTerminalOpen(false);
+                    remove();
+                    return true;
+                }
+                return false;
+            }
+        });
+        
+        // Add listener for when window is removed
+        addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                // If clicked outside the window, close it
+                if (x < 0 || y < 0 || x > getWidth() || y > getHeight()) {
+                    commandHandler.setTerminalOpen(false);
                     remove();
                     return true;
                 }
@@ -82,6 +98,7 @@ public class TerminalWindow extends Window {
     public void attach(Stage stage) {
         stage.addActor(this);
         stage.setKeyboardFocus(inputField);
+        commandHandler.setTerminalOpen(true);
     }
 
     private void executeCommand() {

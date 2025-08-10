@@ -1492,8 +1492,10 @@ public class GameMenu extends InputAdapter implements Screen {
 
     @Override
     public boolean keyDown(int keycode) {
-
-        if (stage.getKeyboardFocus() instanceof TextField) return false;
+        // Block all game input if any input field is focused
+        if (isAnyInputFieldFocused()) {
+            return false;
+        }
 
         if (keycode == Input.Keys.M) {
             showAllMap();
@@ -1532,6 +1534,39 @@ public class GameMenu extends InputAdapter implements Screen {
             return true;
         }
 
+        return false;
+    }
+
+    /**
+     * Check if any input field is currently focused
+     * This includes TextFields, input dialogs, and other input components
+     */
+    private boolean isAnyInputFieldFocused() {
+        // Check if stage has keyboard focus on any input component
+        if (stage.getKeyboardFocus() instanceof TextField) {
+            return true;
+        }
+        
+        // Check if any dialog with input fields is open
+        if (showingNPCFullScreenMenu || showingFullScreenMenu) {
+            return true;
+        }
+        
+        // Check if any dialog is modal (which usually means input is blocked)
+        for (Actor actor : stage.getActors()) {
+            if (actor instanceof Dialog) {
+                Dialog dialog = (Dialog) actor;
+                if (dialog.isModal()) {
+                    return true;
+                }
+            }
+        }
+        
+        // Check if terminal window is open
+        if (cmdHandler != null && cmdHandler.isTerminalOpen()) {
+            return true;
+        }
+        
         return false;
     }
 

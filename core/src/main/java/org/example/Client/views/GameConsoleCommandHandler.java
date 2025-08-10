@@ -24,6 +24,9 @@ public class GameConsoleCommandHandler {
     private final StoreController storeController;
     private final CraftingController craftingController;
     private final ArtisanController artisanController;
+    
+    // Track terminal state
+    private boolean terminalOpen = false;
 
     public GameConsoleCommandHandler(GameMenuController controller,
                                      FarmingController farmingController,
@@ -525,5 +528,19 @@ public class GameConsoleCommandHandler {
         Result result = controller.createTrade(username, type, item, amount,
             price, targetItem, targetAmount);
         System.out.println(result.getMessage());
+    }
+    
+    /**
+     * Check if the terminal window is currently open
+     */
+    public boolean isTerminalOpen() {
+        return terminalOpen;
+    }
+    
+    /**
+     * Set the terminal open state
+     */
+    public void setTerminalOpen(boolean open) {
+        this.terminalOpen = open;
     }
 }

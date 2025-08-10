@@ -2,6 +2,7 @@ package org.example.Client.controllers.movingPlayer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -172,6 +173,11 @@ public class PlayerController {
     private void handleInput(float delta) {
         // Update movement timer
         movementTimer += delta;
+
+        // Block input if any input field is focused
+        if (isInputBlocked()) {
+            return;
+        }
 
         // In multiplayer mode, only allow the logged-in user to control their own character
         if (App.getCurrentGame().isMultiplayer()) {
@@ -487,6 +493,31 @@ public class PlayerController {
             case LEFT -> currentAnim = walkLeft;
             case RIGHT -> currentAnim = walkRight;
         }
+    }
+    
+    /**
+     * Check if input should be blocked due to focused input fields
+     */
+    private boolean isInputBlocked() {
+        // Get the current screen
+        Screen currentScreen = Main.getMain().getScreen();
+        
+        // Check if current screen is GameMenu
+        if (currentScreen instanceof org.example.Client.views.GameMenu) {
+            org.example.Client.views.GameMenu gameMenu = (org.example.Client.views.GameMenu) currentScreen;
+            
+            // Use reflection to access the private method
+            try {
+                java.lang.reflect.Method method = org.example.Client.views.GameMenu.class.getDeclaredMethod("isAnyInputFieldFocused");
+                method.setAccessible(true);
+                return (Boolean) method.invoke(gameMenu);
+            } catch (Exception e) {
+                // If reflection fails, fall back to basic checks
+                return false;
+            }
+        }
+        
+        return false;
     }
 
 }
