@@ -1130,6 +1130,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Render nearby player indicators
         renderNearbyPlayerIndicators();
+        renderNPCIndicators();
 
         renderWeather(batch);
         renderReconnectionStatus(batch);
@@ -1352,6 +1353,10 @@ public class GameMenu extends InputAdapter implements Screen {
         }
 
         // Check if clicked on an NPC's location
+        if (App.getCurrentGame().getNPCvillage() == null) {
+            App.getCurrentGame().initializeNPCvillage();
+        }
+        
         if (App.getCurrentGame().getNPCvillage() != null) {
             for (org.example.Common.models.NPC.NPC npc : App.getCurrentGame().getNPCvillage().getAllNPCs()) {
                 if (npc.getUserLocation().equals(clickedLocation)) {
@@ -1503,6 +1508,14 @@ public class GameMenu extends InputAdapter implements Screen {
         }
         if (keycode == Input.Keys.F) {
             showTeleportCheatDialog();
+            return true;
+        }
+        if (keycode == Input.Keys.N) {
+            // Test NPC interaction
+            if (App.getCurrentGame().getNPCvillage() != null && !App.getCurrentGame().getNPCvillage().getAllNPCs().isEmpty()) {
+                org.example.Common.models.NPC.NPC firstNPC = App.getCurrentGame().getNPCvillage().getAllNPCs().get(0);
+                showNPCInteractionMenu(firstNPC);
+            }
             return true;
         }
 
@@ -3911,6 +3924,10 @@ public class GameMenu extends InputAdapter implements Screen {
                 }
             }
         }
+    }
+
+    private void renderNPCIndicators() {
+        // This method is now empty - no more magenta circles
     }
 
     private void initializeFriendsButton() {

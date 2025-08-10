@@ -1,6 +1,7 @@
 package org.example.Common.models.Fundementals;
 
 import org.example.Common.models.enums.Types.TypeOfTile;
+import java.util.Objects;
 
 public class Location {
     private int xAxis;
@@ -61,6 +62,19 @@ public class Location {
 
     public Object getObjectInTile() {
         return objectInTile;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Location location = (Location) obj;
+        return xAxis == location.xAxis && yAxis == location.yAxis;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(xAxis, yAxis);
     }
 }
 

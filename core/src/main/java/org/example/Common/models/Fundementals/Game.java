@@ -113,7 +113,6 @@ public class Game {
     }
 
     public void initializeNPCvillage() {
-
         Location topLeft = new Location(180, 180);
         Location bottomRight = new Location(220, 220);
         LocationOfRectangle villageArea = new LocationOfRectangle(topLeft, bottomRight);
