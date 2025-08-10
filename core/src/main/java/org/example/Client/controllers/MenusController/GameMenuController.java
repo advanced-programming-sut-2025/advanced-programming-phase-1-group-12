@@ -394,6 +394,7 @@ public class GameMenuController {
 
         App.getCurrentGame().setPlayers((ArrayList<Player>) players);
         App.getCurrentGame().setCurrentPlayer(players.get(0));
+        createGameId();
         App.getCurrentGame().setGameId(App.getGameId());
         App.getCurrentGame().setFarms(farms);
 
@@ -448,6 +449,38 @@ public class GameMenuController {
         MapSetUp.showMapWithFarms(App.getCurrentGame().getMainMap());
         System.out.println("All farms have been assigned!");
         Main.getMain().setScreen(new GameMenu(usernames));
+    }
+
+    public void createGameId(){
+        File folder = new File("saves");
+
+        File[] files = folder.listFiles();
+        if (files == null) {
+            System.out.println("Folder does not exist or is empty.");
+            return;
+        }
+
+        ArrayList<Integer> numbers = new ArrayList<>();
+        for (File file : files) {
+            String name = file.getName();
+
+            // Remove extension if any
+            if (name.contains(".")) {
+                name = name.substring(0, name.lastIndexOf('.'));
+            }
+
+            try {
+                numbers.add(Integer.parseInt(name));
+            } catch (NumberFormatException e) {
+                System.out.println("Skipping non-integer file name: " + file.getName());
+            }
+        }
+
+        while(numbers.contains(App.getGameId())){
+            Random rand = new Random();
+            int random = rand.nextInt(1, 201);
+            App.setGameId(random);
+        }
     }
 
     public Result nextTurn() {

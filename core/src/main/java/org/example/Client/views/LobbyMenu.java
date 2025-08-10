@@ -251,26 +251,6 @@ public class LobbyMenu implements Screen {
             Gdx.app.postRunnable(() -> {
                 if (result.isSuccess()) {
                     updateStatus("Load request sent. Waiting for all players...", true);
-                    // Maybe update UI to show "waiting for others"
-//                    Game loadedGame = GameSaveManager.loadGameCompressed(game);
-//                    for (Player player : loadedGame.getPlayers()) {
-//                        if (player.getUser().getUserName().equals(App.getLoggedInUser().getUserName())) {
-//                            App.setCurrentGame(loadedGame);
-//                            List<String> playersList = new ArrayList<>();
-//                            for (Player name : App.getCurrentGame().getPlayers()) {
-//                                playersList.add(name.getUser().getUserName());
-//                            }
-//                            GameMenuController controller = new GameMenuController();
-//                            controller.loadGame(playersList);
-//                            Timer.schedule(new Timer.Task() {
-//                                @Override
-//                                public void run() {
-//                                    Main.getMain().setScreen(new GameMenu(playersList));
-//                                }
-//                            }, 1.0f);
-//                            return;
-//                        }
-//                    }
                     checkLoadSelectionStatus(game);
                 } else {
                     updateStatus("Failed to request game load: " + result.getMessage(), false);
@@ -812,8 +792,14 @@ public class LobbyMenu implements Screen {
             Gdx.app.postRunnable(() -> {
                 if (result.isSuccess()) {
                     Game loadedGame = GameSaveManager.loadGameCompressed(gameName);
+                    boolean isGameCorrect = true;
                     for (Player player : loadedGame.getPlayers()) {
-                        if (player.getUser().getUserName().equals(App.getLoggedInUser().getUserName())) {
+                        if(!currentLobby.getPlayers().contains(player.getUser().getUserName())) {
+                            //one of these players are not in the lobby
+                            isGameCorrect = false;
+                        }
+                    }
+                        if (isGameCorrect) {
                             App.setCurrentGame(loadedGame);
                             List<String> playersList = new ArrayList<>();
                             for (Player name : App.getCurrentGame().getPlayers()) {
@@ -828,9 +814,10 @@ public class LobbyMenu implements Screen {
                                     Main.getMain().setScreen(new GameMenu(playersList));
                                 }
                             }, 1.0f);
-                            return;
                         }
-                    }
+                        else {
+                            updateStatus("some of the game's players are not in the lobby", false);
+                        }
 
                 } else {
                     updateStatus("Failed to start game session: " + result.getMessage(),false);
