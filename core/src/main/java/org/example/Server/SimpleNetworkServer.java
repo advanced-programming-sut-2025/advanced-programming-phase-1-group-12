@@ -616,7 +616,7 @@ public class SimpleNetworkServer {
             } else {
                 ctx.json(NetworkResult.error("Lobby not found"));
             }
-            NetworkResult<String> result = gameStartManager.selectLoad(request);
+            NetworkResult<LoadStatusResponse> result = gameStartManager.selectLoad(request);
 
             if (result.isSuccess()) {
                 ctx.json(result);

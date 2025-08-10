@@ -1,6 +1,7 @@
 package org.example.Client.controllers.MenusController;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.Client.Main;
@@ -1549,13 +1550,65 @@ public class GameMenuController {
         Play(usernames, farmSelections);
     }
 
-    public void loadGame(List<String> playersList) {
-        // Load game functionality - this method was in the Server version
-        // For now, we'll just initialize the game with the loaded players
-        Map<String, Integer> farmSelections = new HashMap<>();
-        for (int i = 0; i < playersList.size(); i++) {
-            farmSelections.put(playersList.get(i), i + 1); // Assign farm numbers sequentially
+    public void loadGame(List<String> usernames) {
+        Game newGame = App.getCurrentGame();
+
+        // Initialize NPC village for animations
+        if (App.getCurrentGame().getNPCvillage() == null) {
+            App.getCurrentGame().initializeNPCvillage();
         }
-        Play(playersList, farmSelections);
+        MapSetUp.NPCsetUp();
+
+        for (int i = 0; i < usernames.size(); i++) {
+
+            Texture playerTexture;
+            Texture portraitFrame;
+
+            switch (i) {
+                case 0 -> {
+                    playerTexture = new Texture("sprites/Robin.png");
+                    portraitFrame = GameAssetManager.getRobinPortrait();
+                }
+                case 1 -> {
+                    playerTexture = new Texture("sprites/Abigail.png");
+                    portraitFrame = GameAssetManager.getAbigailPortrait();
+                }
+                case 2 -> {
+                    playerTexture = new Texture("sprites/Maru.png");
+                    portraitFrame = GameAssetManager.getMaruPortrait();
+                }
+                case 3 -> {
+                    playerTexture = new Texture("sprites/Leah.png");
+                    portraitFrame = GameAssetManager.getLeahPortrait();
+                }
+                default -> {
+                    playerTexture = new Texture("sprites/Robin.png");
+                    portraitFrame = GameAssetManager.getRobinPortrait();
+                }
+            }
+
+            Player player = newGame.getPlayerByName(usernames.get(i));
+            player.setPlayerTexture(playerTexture);
+            player.setPortraitFrame(portraitFrame);
+            player.setPlayerSprite(new Sprite(playerTexture));
+            player.getPlayerSprite().setSize(50, 60);
+            player.setRect(new CollisionRect(player.getPlayerSprite().getX(), player.getPlayerSprite().getY(),
+                player.getPlayerSprite().getWidth(), player.getPlayerSprite().getHeight()));
+
+            for(Farm farm : App.getCurrentGame().getFarms()) {
+                if(player.getOwnedFarm().getFarmId() == farm.getFarmId()) {
+                    farm.setOwner(player);
+                }
+            }
+        }
+
+        // Set multiplayer flag only for true network multiplayer games
+        // For single-player games, always set to false regardless of number of players
+        App.getCurrentGame().setMultiplayer(false);
+        System.out.println("Single-player game started with " + usernames.size() + " characters");
+
+        MapSetUp.showMapWithFarms(App.getCurrentGame().getMainMap());
+        System.out.println("All farms have been assigned!");
+        Main.getMain().setScreen(new GameMenu(usernames));
     }
 }

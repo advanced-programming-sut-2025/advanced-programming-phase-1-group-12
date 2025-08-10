@@ -7,6 +7,7 @@ import org.example.Common.network.requests.CreateGameRequest;
 import org.example.Common.network.requests.LoadGameRequest;
 import org.example.Common.network.requests.SelectFarmRequest;
 import org.example.Common.network.responses.FarmSelectionStatusResponse;
+import org.example.Common.network.responses.LoadStatusResponse;
 import org.example.Common.saveGame.GameSaveManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -297,7 +298,7 @@ public class GameStartManager {
         }
     }
 
-    public NetworkResult<String> selectLoad(LoadGameRequest request) {
+    public NetworkResult<LoadStatusResponse> selectLoad(LoadGameRequest request) {
         try {
             LoadSelectionSession session = loadSelectionSessions.get(request.getLobbyId());
             if (session == null) {
@@ -314,7 +315,8 @@ public class GameStartManager {
                 return loadGameFromSession(request.getLobbyId());
             }
 
-            return NetworkResult.success("Load selected successfully", "Load " + request.getGameName() + " selected");
+            LoadStatusResponse loadStatusResponse = new LoadStatusResponse(false, "load selected for this player");
+            return NetworkResult.success("you selected to load this game but wait for others to select it to", loadStatusResponse);
 
         } catch (Exception e) {
             logger.error("Error selecting load for lobby " + request.getLobbyId(), e);
@@ -322,7 +324,7 @@ public class GameStartManager {
         }
     }
 
-    private NetworkResult<String> loadGameFromSession(String lobbyId) {
+    private NetworkResult<LoadStatusResponse> loadGameFromSession(String lobbyId) {
         try {
             LoadSelectionSession session = loadSelectionSessions.get(lobbyId);
             if (session == null) {
@@ -342,11 +344,6 @@ public class GameStartManager {
             if (gameIdToLoad == null) {
                 return NetworkResult.error("No game selected for the first player");
             }
-
-//            Game loadedGame = GameSaveManager.loadGameCompressed(gameIdToLoad);
-//            if (loadedGame == null) {
-//                return NetworkResult.error("Failed to load game with ID " + gameIdToLoad);
-//            }
 
             // Make sure all players in the loaded game match the session players
             List<String> loadedPlayerNames = GameSaveManager.loadPlayerUsernames("C:\\Users\\Lenovo\\Desktop\\advanced-programming-phase-1-group-12\\savePlayers\\1.json");
@@ -369,7 +366,9 @@ public class GameStartManager {
             session.gameSessionId = gameSessionResult.getData();
             logger.info("Loaded game session {} for lobby {}", session.gameSessionId, lobbyId);
 
-            return NetworkResult.success("Game session loaded successfully", session.gameSessionId);
+       //     return NetworkResult.success("Game session loaded successfully", session.gameSessionId);
+            LoadStatusResponse loadStatusResponse = new LoadStatusResponse(true, "load selected for all players");
+            return NetworkResult.success("game loaded successfully", loadStatusResponse);
 
         } catch (Exception e) {
             logger.error("Error loading game from session for lobby " + lobbyId, e);

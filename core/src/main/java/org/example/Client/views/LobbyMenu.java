@@ -82,8 +82,8 @@ public class LobbyMenu implements Screen {
     private boolean isAdmin = false;
     private Timer.Task refreshTask;
 
-    //load
-    private Game loadedGame;
+//    //load
+//    private Game loadedGame;
 
     public LobbyMenu() {
         this.titleLabel = new Label("Lobby System", skin);
@@ -242,7 +242,7 @@ public class LobbyMenu implements Screen {
                 CompletableFuture.supplyAsync(() -> {
                     try {
                         ServerConnection connection = Main.getMain().getServerConnection();
-                        return connection.sendPostRequest("/lobby/load", request, String.class);
+                        return connection.sendPostRequest("/lobby/load", request, LoadStatusResponse.class);
                     } catch (Exception e) {
                         return NetworkResult.error("Failed to load game: " + e.getMessage());
                     }
@@ -253,7 +253,9 @@ public class LobbyMenu implements Screen {
                             LoadStatusResponse response = (LoadStatusResponse) result.getData();
                             if (response.isAllPlayersReady()) {
                                 // After all players ready, fetch full game data from server or receive it from server response
-                                fetchAndLoadGameFromServer(selected);
+                            //    Game loadedGame = GameSaveManager.loadGameCompressed("saves/"+ gameName);
+                                List<String>players = GameSaveManager.loadPlayerUsernames(gameName);
+                                proceedWithGameLoad(players);
                             } else {
                                 updateStatus(response.getMessage(), true);
                                 startLoadStatusPolling(currentLobby.getId(), selected);
@@ -267,25 +269,25 @@ public class LobbyMenu implements Screen {
         });
 
     }
-    private void fetchAndLoadGameFromServer(String gameName) {
-        CompletableFuture.supplyAsync(() -> {
-            try {
-                ServerConnection connection = Main.getMain().getServerConnection();
-                return connection.sendGetRequest("/games/load?gameName=" + gameName, Game.class);
-            } catch (Exception e) {
-                return NetworkResult.error("Failed to fetch game data: " + e.getMessage());
-            }
-        }).thenAccept(result -> {
-            Gdx.app.postRunnable(() -> {
-                if (result.isSuccess()) {
-                    Game loadedGame = (Game) result.getData();
-                    proceedWithGameLoad(loadedGame);
-                } else {
-                    updateStatus("Failed to fetch game data: " + result.getMessage(), false);
-                }
-            });
-        });
-    }
+//    private void fetchAndLoadGameFromServer(String gameName) {
+//        CompletableFuture.supplyAsync(() -> {
+//            try {
+//                ServerConnection connection = Main.getMain().getServerConnection();
+//                return connection.sendGetRequest("/games/load?gameName=" + gameName, Game.class);
+//            } catch (Exception e) {
+//                return NetworkResult.error("Failed to fetch game data: " + e.getMessage());
+//            }
+//        }).thenAccept(result -> {
+//            Gdx.app.postRunnable(() -> {
+//                if (result.isSuccess()) {
+//                    Game loadedGame = (Game) result.getData();
+//                    proceedWithGameLoad(loadedGame);
+//                } else {
+//                    updateStatus("Failed to fetch game data: " + result.getMessage(), false);
+//                }
+//            });
+//        });
+//    }
 
     private void startLoadStatusPolling(String lobbyId, String gameName) {
         Timer.schedule(new Timer.Task() {
@@ -307,8 +309,8 @@ public class LobbyMenu implements Screen {
                             LoadStatusResponse response = (LoadStatusResponse) result.getData();
                             if (response.isAllPlayersReady()) {
                                 this.cancel();
-                                Game loadedGame = GameSaveManager.loadGameCompressed("saves/"+ gameName);
-                                proceedWithGameLoad(loadedGame);
+                                List<String>players = GameSaveManager.loadPlayerUsernames(gameName);
+                                proceedWithGameLoad(players);
                             } else {
                                 updateStatus(response.getMessage(), true);
                             }
@@ -319,11 +321,11 @@ public class LobbyMenu implements Screen {
         }, 1, 1); // Check every second
     }
 
-    private void proceedWithGameLoad(Game loadedGame) {
-        App.setCurrentGame(loadedGame);
-        List<String> playersList = loadedGame.getPlayers().stream()
-            .map(p -> p.getUser().getUserName())
-            .collect(Collectors.toList());
+    private void proceedWithGameLoad(List<String> playersList ) {
+//        App.setCurrentGame(loadedGame);
+//        List<String> playersList = loadedGame.getPlayers().stream()
+//            .map(p -> p.getUser().getUserName())
+//            .collect(Collectors.toList());
 
         new GameMenuController().loadGame(playersList);
     }
@@ -826,13 +828,5 @@ public class LobbyMenu implements Screen {
     private void setScale() {
         titleLabel.setFontScale(2.0f);
         statusLabel.setFontScale(1.2f);
-    }
-
-    public Game getLoadedGame() {
-        return loadedGame;
-    }
-
-    public void setLoadedGame(Game loadedGame) {
-        this.loadedGame = loadedGame;
     }
 }
