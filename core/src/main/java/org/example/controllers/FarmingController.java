@@ -70,18 +70,13 @@ public class FarmingController {
     }
 
     public Result plant(String seed, Location newLocation) {
-        Location currentLocation = App.getCurrentGame().getCurrentPlayer().getUserLocation();
-        if (currentLocation.getTypeOfTile().equals(TypeOfTile.GREENHOUSE)) {
-            return new Result(false, "You can't grow giant plants in a green house");
-        }
-
 
         SeedTypes seedTypes = SeedTypes.stringToSeed(seed);
         if (seedTypes == null) return new Result(false, "Invalid seed name.");
         if (!App.getCurrentPlayerLazy().getBackPack().hasItem(seed))
             return new Result(false, "You don't have this seed.");
-        if (!newLocation.getTypeOfTile().equals(TypeOfTile.PLOUGHED_LAND))
-            return new Result(false, "You can only plant on ploughed land.");
+        if (!newLocation.getTypeOfTile().equals(TypeOfTile.PLOUGHED_LAND) && !newLocation.getTypeOfTile().equals(TypeOfTile.GREENHOUSE))
+            return new Result(false, "You can only plant on ploughed land or greenHouse.");
 
         newLocation.setTypeOfTile(TypeOfTile.PLANT);
 

@@ -195,7 +195,7 @@ public class PlayerController {
                     return;
                 }
             }
-            if (location.getTypeOfTile() == TypeOfTile.PLOUGHED_LAND) {
+            if (location.getTypeOfTile() == TypeOfTile.PLOUGHED_LAND || location.getTypeOfTile() == TypeOfTile.GREENHOUSE) {
                 Gdx.app.postRunnable(() ->
                     Main.getMain().setScreen(new FarmingMenuView(players, playerList, location)));
                 return;
@@ -312,7 +312,7 @@ public class PlayerController {
         if (location.getObjectInTile() instanceof Stone)
             return false;
 
-        return (location.getTypeOfTile() == TypeOfTile.GROUND || location.getTypeOfTile() == TypeOfTile.BARN
+        return (location.getTypeOfTile() == TypeOfTile.GROUND || location.getTypeOfTile() == TypeOfTile.GREENHOUSE || location.getTypeOfTile() == TypeOfTile.BARN
             || location.getTypeOfTile() == TypeOfTile.COOP || location.getTypeOfTile() == TypeOfTile.STORE);
     }
 
