@@ -33,7 +33,9 @@ import org.example.Common.models.Assets.GameAssetManager;
 import org.example.Common.models.Assets.ToolAssetsManager;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Fundementals.Location;
+import org.example.Common.models.Fundementals.LocationOfRectangle;
 import org.example.Common.models.Fundementals.Player;
+import org.example.Common.models.MapDetails.Shack;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import org.example.Common.models.Fundementals.Result;
 import org.example.Common.models.Place.Farm;
@@ -1082,6 +1084,16 @@ public class GameMenu extends InputAdapter implements Screen {
             renderFullScreenMenu();
             return; // Don't render the normal game screen when showing full-screen menu
         }
+
+        // Render full-screen NPC interaction menu if active
+        if (showingNPCFullScreenMenu) {
+            // End the batch if it's drawing to prevent conflicts
+            if (batch.isDrawing()) {
+                batch.end();
+            }
+            renderNPCFullScreenMenu();
+            return; // Don't render the normal game screen when showing full-screen menu
+        }
         if (timeForAnimalMove >= 0.5f) {
             for (Farm farm : App.getCurrentGame().getFarms()) {
                 for (FarmAnimals animal : farm.getFarmAnimals()) {
@@ -1356,7 +1368,7 @@ public class GameMenu extends InputAdapter implements Screen {
         if (App.getCurrentGame().getNPCvillage() == null) {
             App.getCurrentGame().initializeNPCvillage();
         }
-        
+
         if (App.getCurrentGame().getNPCvillage() != null) {
             for (org.example.Common.models.NPC.NPC npc : App.getCurrentGame().getNPCvillage().getAllNPCs()) {
                 if (npc.getUserLocation().equals(clickedLocation)) {
@@ -3992,7 +4004,7 @@ public class GameMenu extends InputAdapter implements Screen {
     public void cheatChangeApproximation(String targetName){
         Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
         Location targetLocation = null;
-        
+
         // First try to find a player with this name
         Player targetPlayer = App.getCurrentGame().getPlayerByName(targetName);
         if (targetPlayer != null) {
@@ -4006,7 +4018,7 @@ public class GameMenu extends InputAdapter implements Screen {
                 }
             }
         }
-        
+
         if (targetLocation != null) {
             // Teleport to one tile away from the target
             Location newLoc = new Location(targetLocation.getxAxis()-1, targetLocation.getyAxis());
@@ -4183,76 +4195,26 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     public void showNPCInteractionMenu(org.example.Common.models.NPC.NPC npc) {
-        Skin skin = GameAssetManager.skin;
-        Dialog dialog = new Dialog("Interact with " + npc.getName(), skin);
-        dialog.setModal(true);
-        dialog.setSize(500, 400);
+        targetNPCForMenu = npc;
+        showingNPCFullScreenMenu = true;
 
-        Table content = new Table();
-        content.pad(20);
-
-        // Create portrait image
-        Image portraitImage = createNPCPortrait(npc.getName());
-        if (portraitImage != null) {
-            portraitImage.setSize(120, 120);
-            content.add(portraitImage).top().right().pad(10).row();
+        if (npcBackgroundTexture == null) {
+            npcBackgroundTexture = new Texture("NPC/RelationShip/backFriendship.png");
         }
 
-        // NPC name label
-        Label nameLabel = new Label(npc.getName(), skin);
-        nameLabel.setFontScale(1.5f);
-        nameLabel.setColor(Color.WHITE);
-        content.add(nameLabel).colspan(2).center().pad(10).row();
+        if (npcMenuStage == null) {
+            npcMenuStage = new Stage(new ScreenViewport());
+        } else {
+            // Clear the stage to remove old actors and listeners
+            npcMenuStage.clear();
+        }
 
-        // Talk button
-        TextButton talkButton = new TextButton("💬 Talk", skin);
-        talkButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                dialog.hide();
-                NPCcontroller npcController = new NPCcontroller();
-                String dialogue = npcController.meetNPC(npc.getName());
-                showNPCDialogue(npc.getName(), dialogue);
-            }
-        });
+        // Always create the UI when showing the menu
+        createNPCMenuUI();
 
-        // Gift button
-        TextButton giftButton = new TextButton("🎁 Give Gift", skin);
-        giftButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                dialog.hide();
-                showNPCGiftMenu(npc);
-            }
-        });
-
-        // Friendship info button
-        TextButton friendshipButton = new TextButton("❤️ Friendship", skin);
-        friendshipButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                dialog.hide();
-                showNPCFriendshipInfo(npc);
-            }
-        });
-
-        // Close button
-        TextButton closeButton = new TextButton("Close", skin);
-        closeButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                dialog.hide();
-            }
-        });
-
-        // Add buttons to content
-        content.add(talkButton).width(150).height(50).pad(5).row();
-        content.add(giftButton).width(150).height(50).pad(5).row();
-        content.add(friendshipButton).width(150).height(50).pad(5).row();
-        content.add(closeButton).width(150).height(50).pad(10).row();
-
-        dialog.add(content);
-        dialog.show(stage);
+        // Store the original input processor before changing it
+        originalNPCInputProcessor = Gdx.input.getInputProcessor();
+        Gdx.input.setInputProcessor(npcMenuStage);
     }
 
     private Image createNPCPortrait(String npcName) {
@@ -4267,7 +4229,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     // Continue to next face file
                 }
             }
-            
+
             // If no face files found, try to use a fallback sprite
             String fallbackPath = "sprites/" + npcName + ".png";
             try {
@@ -4283,116 +4245,272 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void showNPCDialogue(String npcName, String dialogue) {
-        Skin skin = GameAssetManager.skin;
-        Dialog dialog = new Dialog(npcName + " says:", skin);
-        dialog.setModal(true);
-        dialog.setSize(400, 300);
+        // Create a full-screen dialogue display
+        showingNPCFullScreenMenu = true;
 
+        // Try to get the NPC from the village, but create a fallback if needed
+        if (App.getCurrentGame().getNPCvillage() != null) {
+            targetNPCForMenu = App.getCurrentGame().getNPCvillage().getNPCByName(npcName);
+        }
+
+        // If we still don't have an NPC, create a temporary one for display purposes
+        if (targetNPCForMenu == null) {
+            // Create a temporary NPC object just for the dialogue display
+            Location tempLocation = new Location(0, 0);
+            Shack tempShack = new Shack(new LocationOfRectangle(tempLocation, tempLocation));
+            targetNPCForMenu = new org.example.Common.models.NPC.NPC(npcName, "Unknown", "Unknown", tempLocation, tempShack);
+        }
+
+        if (npcBackgroundTexture == null) {
+            npcBackgroundTexture = new Texture("NPC/RelationShip/backFriendship.png");
+        }
+
+        if (npcMenuStage == null) {
+            npcMenuStage = new Stage(new ScreenViewport());
+        }
+
+        // Store the original input processor before changing it
+        originalNPCInputProcessor = Gdx.input.getInputProcessor();
+        Gdx.input.setInputProcessor(npcMenuStage);
+
+        // Create the dialogue UI
+        createNPCDialogueUI(npcName, dialogue);
+    }
+
+    private void createNPCDialogueUI(String npcName, String dialogue) {
+        if (npcMenuStage == null) return;
+
+        npcMenuStage.clear();
+
+        Table mainTable = new Table();
+        mainTable.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        mainTable.setPosition(0, 0);
+
+        Label titleLabel = new Label(npcName + " says:", skin);
+        titleLabel.setFontScale(2.0f);
+        titleLabel.setAlignment(Align.center);
+        titleLabel.setColor(Color.WHITE);
+        mainTable.add(titleLabel).colspan(3).pad(50).row();
+
+        // Create portrait image
+        Image portraitImage = createNPCPortrait(npcName);
+        if (portraitImage != null) {
+            portraitImage.setSize(200, 200);
+            mainTable.add(portraitImage).colspan(3).center().pad(20).row();
+        }
+
+        // Create dialogue text with proper wrapping
         Label dialogueLabel = new Label(dialogue, skin);
         dialogueLabel.setWrap(true);
         dialogueLabel.setAlignment(Align.center);
+        dialogueLabel.setFontScale(1.2f);
+        dialogueLabel.setColor(Color.WHITE);
+
+        // Create a scroll pane for long dialogues
+        ScrollPane scrollPane = new ScrollPane(dialogueLabel, skin);
+        scrollPane.setScrollingDisabled(true, false);
+        scrollPane.setFadeScrollBars(false);
+
+        mainTable.add(scrollPane).expand().fill().pad(50).width(800f).height(400f).row();
 
         TextButton closeButton = new TextButton("Close", skin);
+        closeButton.setSize(300f, 80f);
+        closeButton.getLabel().setFontScale(1.5f);
         closeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                dialog.hide();
+                closeNPCFullScreenMenu();
             }
         });
 
-        dialog.add(dialogueLabel).expand().fill().pad(20).row();
-        dialog.add(closeButton).pad(10);
-        dialog.show(stage);
+        mainTable.add(closeButton).pad(30);
+        npcMenuStage.addActor(mainTable);
     }
 
     private void showNPCGiftMenu(org.example.Common.models.NPC.NPC npc) {
-        Skin skin = GameAssetManager.skin;
-        Dialog dialog = new Dialog("Give Gift to " + npc.getName(), skin);
-        dialog.setModal(true);
-        dialog.setSize(400, 500);
+        // Create a full-screen gift menu
+        showingNPCFullScreenMenu = true;
+        targetNPCForMenu = npc;
+
+        if (npcBackgroundTexture == null) {
+            npcBackgroundTexture = new Texture("NPC/RelationShip/backFriendship.png");
+        }
+
+        if (npcMenuStage == null) {
+            npcMenuStage = new Stage(new ScreenViewport());
+        }
+
+        // Store the original input processor before changing it
+        originalNPCInputProcessor = Gdx.input.getInputProcessor();
+        Gdx.input.setInputProcessor(npcMenuStage);
+
+        // Create the gift menu UI
+        createNPCGiftMenuUI(npc);
+    }
+
+    private void createNPCGiftMenuUI(org.example.Common.models.NPC.NPC npc) {
+        if (npcMenuStage == null) return;
+
+        npcMenuStage.clear();
 
         Player currentPlayer = App.getCurrentPlayerLazy();
         if (currentPlayer == null) {
-            dialog.hide();
+            closeNPCFullScreenMenu();
             return;
         }
 
-        Table content = new Table();
-        content.pad(20);
+        Table mainTable = new Table();
+        mainTable.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        mainTable.setPosition(0, 0);
+
+        Label titleLabel = new Label("Give Gift to " + npc.getName(), skin);
+        titleLabel.setFontScale(2.0f);
+        titleLabel.setAlignment(Align.center);
+        titleLabel.setColor(Color.WHITE);
+        mainTable.add(titleLabel).colspan(3).pad(50).row();
+
+        // Create portrait image
+        Image portraitImage = createNPCPortrait(npc.getName());
+        if (portraitImage != null) {
+            portraitImage.setSize(200, 200);
+            mainTable.add(portraitImage).colspan(3).center().pad(20).row();
+        }
 
         Label instructionLabel = new Label("Select an item to gift:", skin);
-        content.add(instructionLabel).colspan(2).center().pad(10).row();
+        instructionLabel.setFontScale(1.5f);
+        instructionLabel.setAlignment(Align.center);
+        instructionLabel.setColor(Color.WHITE);
+        mainTable.add(instructionLabel).colspan(3).center().pad(20).row();
 
-        ScrollPane scrollPane = new ScrollPane(content, skin);
-        scrollPane.setScrollingDisabled(true, false);
+        // Create content table for items
+        Table contentTable = new Table();
+        contentTable.pad(20);
 
         // Get player's inventory items
         Map<Item, Integer> inventoryItems = currentPlayer.getBackPack().getItems();
-        
+
         if (inventoryItems.isEmpty()) {
             Label noItemsLabel = new Label("You have no items to gift!", skin);
-            content.add(noItemsLabel).colspan(2).center().pad(10).row();
+            noItemsLabel.setFontScale(1.2f);
+            noItemsLabel.setColor(Color.WHITE);
+            contentTable.add(noItemsLabel).colspan(2).center().pad(10).row();
         } else {
             for (Map.Entry<Item, Integer> entry : inventoryItems.entrySet()) {
                 Item item = entry.getKey();
                 Integer quantity = entry.getValue();
                 TextButton itemButton = new TextButton(item.getName() + " (x" + quantity + ")", skin);
+                itemButton.setSize(400, 60);
+                itemButton.getLabel().setFontScale(1.2f);
                 itemButton.addListener(new ClickListener() {
                     @Override
                     public void clicked(InputEvent event, float x, float y) {
-                        dialog.hide();
+                        closeNPCFullScreenMenu();
                         NPCcontroller npcController = new NPCcontroller();
                         String result = npcController.giftNPC(npc.getName(), item.getName());
                         showNotification(result, true);
                     }
                 });
-                content.add(itemButton).width(200).height(40).pad(5).row();
+                contentTable.add(itemButton).width(400).height(60).pad(10).row();
             }
         }
 
+        // Create scroll pane for items
+        ScrollPane scrollPane = new ScrollPane(contentTable, skin);
+        scrollPane.setScrollingDisabled(true, false);
+        scrollPane.setFadeScrollBars(false);
+
+        mainTable.add(scrollPane).expand().fill().pad(50).width(600f).height(400f).row();
+
         TextButton cancelButton = new TextButton("Cancel", skin);
+        cancelButton.setSize(300f, 80f);
+        cancelButton.getLabel().setFontScale(1.5f);
         cancelButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                dialog.hide();
+                closeNPCFullScreenMenu();
             }
         });
 
-        dialog.add(scrollPane).expand().fill().pad(10).row();
-        dialog.add(cancelButton).pad(10);
-        dialog.show(stage);
+        mainTable.add(cancelButton).pad(30);
+        npcMenuStage.addActor(mainTable);
     }
 
     private void showNPCFriendshipInfo(org.example.Common.models.NPC.NPC npc) {
-        Skin skin = GameAssetManager.skin;
-        Dialog dialog = new Dialog("Friendship with " + npc.getName(), skin);
-        dialog.setModal(true);
-        dialog.setSize(400, 300);
+        // Create a full-screen friendship info display
+        showingNPCFullScreenMenu = true;
+        targetNPCForMenu = npc;
+
+        if (npcBackgroundTexture == null) {
+            npcBackgroundTexture = new Texture("NPC/RelationShip/backFriendship.png");
+        }
+
+        if (npcMenuStage == null) {
+            npcMenuStage = new Stage(new ScreenViewport());
+        }
+
+        // Store the original input processor before changing it
+        originalNPCInputProcessor = Gdx.input.getInputProcessor();
+        Gdx.input.setInputProcessor(npcMenuStage);
+
+        // Create the friendship info UI
+        createNPCFriendshipInfoUI(npc);
+    }
+
+    private void createNPCFriendshipInfoUI(org.example.Common.models.NPC.NPC npc) {
+        if (npcMenuStage == null) return;
+
+        npcMenuStage.clear();
 
         Player currentPlayer = App.getCurrentPlayerLazy();
         if (currentPlayer == null) {
-            dialog.hide();
+            closeNPCFullScreenMenu();
             return;
+        }
+
+        Table mainTable = new Table();
+        mainTable.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        mainTable.setPosition(0, 0);
+
+        Label titleLabel = new Label("Friendship with " + npc.getName(), skin);
+        titleLabel.setFontScale(2.0f);
+        titleLabel.setAlignment(Align.center);
+        titleLabel.setColor(Color.WHITE);
+        mainTable.add(titleLabel).colspan(3).pad(50).row();
+
+        // Create portrait image
+        Image portraitImage = createNPCPortrait(npc.getName());
+        if (portraitImage != null) {
+            portraitImage.setSize(200, 200);
+            mainTable.add(portraitImage).colspan(3).center().pad(20).row();
         }
 
         int friendshipPoints = npc.getFriendshipPoints(currentPlayer);
         int friendshipLevel = npc.getFriendshipLevel(currentPlayer);
 
         Label pointsLabel = new Label("Friendship Points: " + friendshipPoints, skin);
+        pointsLabel.setFontScale(1.5f);
+        pointsLabel.setAlignment(Align.center);
+        pointsLabel.setColor(Color.WHITE);
+        mainTable.add(pointsLabel).colspan(3).center().pad(20).row();
+
         Label levelLabel = new Label("Friendship Level: " + friendshipLevel, skin);
+        levelLabel.setFontScale(1.5f);
+        levelLabel.setAlignment(Align.center);
+        levelLabel.setColor(Color.WHITE);
+        mainTable.add(levelLabel).colspan(3).center().pad(20).row();
 
         TextButton closeButton = new TextButton("Close", skin);
+        closeButton.setSize(300f, 80f);
+        closeButton.getLabel().setFontScale(1.5f);
         closeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                dialog.hide();
+                closeNPCFullScreenMenu();
             }
         });
 
-        dialog.add(pointsLabel).center().pad(10).row();
-        dialog.add(levelLabel).center().pad(10).row();
-        dialog.add(closeButton).pad(10);
-        dialog.show(stage);
+        mainTable.add(closeButton).pad(30);
+        npcMenuStage.addActor(mainTable);
     }
 
     private void createMenuUI() {
@@ -4474,6 +4592,106 @@ public class GameMenu extends InputAdapter implements Screen {
         menuStage.addActor(mainTable);
     }
 
+    private void createNPCMenuUI() {
+        if (npcMenuStage == null || targetNPCForMenu == null) {
+            return;
+        }
+
+        npcMenuStage.clear();
+
+        Table mainTable = new Table();
+        mainTable.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        mainTable.setPosition(0, 0);
+
+        Label titleLabel = new Label("NPC Interaction", skin);
+        titleLabel.setFontScale(2.0f);
+        titleLabel.setAlignment(Align.center);
+        titleLabel.setColor(Color.WHITE);
+        mainTable.add(titleLabel).colspan(3).pad(50).row();
+
+        Label subtitleLabel = new Label("Interaction with " + targetNPCForMenu.getName(), skin);
+        subtitleLabel.setFontScale(1.5f);
+        subtitleLabel.setAlignment(Align.center);
+        subtitleLabel.setColor(Color.WHITE);
+        mainTable.add(subtitleLabel).colspan(3).pad(20).row();
+
+        // Create portrait image
+        Image portraitImage = createNPCPortrait(targetNPCForMenu.getName());
+        if (portraitImage != null) {
+            portraitImage.setSize(200, 200);
+            mainTable.add(portraitImage).colspan(3).center().pad(20).row();
+        }
+
+        TextButton talkButton = new TextButton("Talk", skin);
+        TextButton giftButton = new TextButton("Give Gift", skin);
+        TextButton friendshipButton = new TextButton("Friendship", skin);
+        TextButton cancelButton = new TextButton("Cancel", skin);
+
+        float buttonWidth = 300f;
+        float buttonHeight = 80f;
+        float buttonSpacing = 30f;
+
+        talkButton.setSize(buttonWidth, buttonHeight);
+        giftButton.setSize(buttonWidth, buttonHeight);
+        friendshipButton.setSize(buttonWidth, buttonHeight);
+        cancelButton.setSize(buttonWidth, buttonHeight);
+
+        talkButton.getLabel().setFontScale(1.5f);
+        giftButton.getLabel().setFontScale(1.5f);
+        friendshipButton.getLabel().setFontScale(1.5f);
+        cancelButton.getLabel().setFontScale(1.2f);
+
+        // Store the NPC name locally to avoid null pointer issues
+        final String npcName = targetNPCForMenu != null ? targetNPCForMenu.getName() : "Unknown";
+
+        talkButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                closeNPCFullScreenMenu();
+                NPCcontroller npcController = new NPCcontroller();
+                String dialogue = npcController.meetNPC(npcName);
+                showNPCDialogue(npcName, dialogue);
+            }
+        });
+
+        // Store the NPC reference locally to avoid null pointer issues
+        final org.example.Common.models.NPC.NPC npcRef = targetNPCForMenu;
+
+        giftButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (npcRef != null) {
+                    closeNPCFullScreenMenu();
+                    showNPCGiftMenu(npcRef);
+                }
+            }
+        });
+
+        friendshipButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (npcRef != null) {
+                    closeNPCFullScreenMenu();
+                    showNPCFriendshipInfo(npcRef);
+                }
+            }
+        });
+
+        cancelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                closeNPCFullScreenMenu();
+            }
+        });
+
+        mainTable.add(talkButton).pad(buttonSpacing).row();
+        mainTable.add(giftButton).pad(buttonSpacing).row();
+        mainTable.add(friendshipButton).pad(buttonSpacing).row();
+        mainTable.add(cancelButton).pad(buttonSpacing).row();
+
+        npcMenuStage.addActor(mainTable);
+    }
+
     private void renderFullScreenMenu() {
         if (!showingFullScreenMenu || targetPlayerForMenu == null || menuStage == null) return;
 
@@ -4498,6 +4716,34 @@ public class GameMenu extends InputAdapter implements Screen {
         menuStage.draw();
     }
 
+    private void renderNPCFullScreenMenu() {
+        if (!showingNPCFullScreenMenu || targetNPCForMenu == null || npcMenuStage == null) return;
+
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        SpriteBatch menuBatch = new SpriteBatch();
+        menuBatch.begin();
+        menuBatch.draw(npcBackgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        menuBatch.end();
+        menuBatch.dispose();
+
+        if (npcMenuStage.getRoot().hasChildren()) {
+            Table mainTable = (Table) npcMenuStage.getRoot().getChild(0);
+            if (mainTable.getChildren().size > 1 && targetNPCForMenu != null) {
+                // Find the subtitle label (it should be at index 1)
+                Actor child = mainTable.getChild(1);
+                if (child instanceof Label) {
+                    Label subtitleLabel = (Label) child;
+                    subtitleLabel.setText("Interaction with " + targetNPCForMenu.getName());
+                }
+            }
+        }
+
+        // Render the menu stage
+        npcMenuStage.act();
+        npcMenuStage.draw();
+    }
+
     private void closeFullScreenMenu() {
         showingFullScreenMenu = false;
         targetPlayerForMenu = null;
@@ -4505,6 +4751,19 @@ public class GameMenu extends InputAdapter implements Screen {
         if (originalInputProcessor != null) {
             Gdx.input.setInputProcessor(originalInputProcessor);
             originalInputProcessor = null;
+        } else {
+            // Fallback to the main game stage if original processor is not available
+            Gdx.input.setInputProcessor(stage);
+        }
+    }
+
+    private void closeNPCFullScreenMenu() {
+        showingNPCFullScreenMenu = false;
+        targetNPCForMenu = null;
+        // Restore the original input processor
+        if (originalNPCInputProcessor != null) {
+            Gdx.input.setInputProcessor(originalNPCInputProcessor);
+            originalNPCInputProcessor = null;
         } else {
             // Fallback to the main game stage if original processor is not available
             Gdx.input.setInputProcessor(stage);
@@ -5351,4 +5610,11 @@ public class GameMenu extends InputAdapter implements Screen {
         Main game = (Main) Gdx.app.getApplicationListener();
         game.setScreen(new TradeMenuView(game));
     }
+
+    // Full-screen menu system for NPC interactions
+    private boolean showingNPCFullScreenMenu = false;
+    private org.example.Common.models.NPC.NPC targetNPCForMenu = null;
+    private Texture npcBackgroundTexture = null;
+    private Stage npcMenuStage = null;
+    private InputProcessor originalNPCInputProcessor = null;
 }
