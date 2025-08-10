@@ -2,6 +2,7 @@ package org.example.Client.views;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -23,15 +24,14 @@ import org.example.Common.models.Fundementals.Player;
 import org.example.Common.models.LobbyInfo;
 import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.*;
+import org.example.Common.network.responses.FarmSelectionStatusResponse;
 import org.example.Common.network.responses.LoadStatusResponse;
 import org.example.Common.network.responses.LobbyListResponse;
 import org.example.Common.network.responses.LobbyResponse;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -238,7 +238,7 @@ public class LobbyMenu implements Screen {
         updateStatus("Requesting to load game...", true);
 
         String username = App.getLoggedInUser() != null ? App.getLoggedInUser().getUserName() : "anonymous";
-        LoadGameRequest request = new LoadGameRequest(username, currentLobby.getId());
+        LoadGameRequest request = new LoadGameRequest(username, currentLobby.getId(), game);
 
         CompletableFuture.supplyAsync(() -> {
             try {
@@ -252,25 +252,26 @@ public class LobbyMenu implements Screen {
                 if (result.isSuccess()) {
                     updateStatus("Load request sent. Waiting for all players...", true);
                     // Maybe update UI to show "waiting for others"
-                    Game loadedGame = GameSaveManager.loadGameCompressed(game);
-                    for (Player player : loadedGame.getPlayers()) {
-                        if (player.getUser().getUserName().equals(App.getLoggedInUser().getUserName())) {
-                            App.setCurrentGame(loadedGame);
-                            List<String> playersList = new ArrayList<>();
-                            for (Player name : App.getCurrentGame().getPlayers()) {
-                                playersList.add(name.getUser().getUserName());
-                            }
-                            GameMenuController controller = new GameMenuController();
-                            controller.loadGame(playersList);
-                            Timer.schedule(new Timer.Task() {
-                                @Override
-                                public void run() {
-                                    Main.getMain().setScreen(new GameMenu(playersList));
-                                }
-                            }, 1.0f);
-                            return;
-                        }
-                    }
+//                    Game loadedGame = GameSaveManager.loadGameCompressed(game);
+//                    for (Player player : loadedGame.getPlayers()) {
+//                        if (player.getUser().getUserName().equals(App.getLoggedInUser().getUserName())) {
+//                            App.setCurrentGame(loadedGame);
+//                            List<String> playersList = new ArrayList<>();
+//                            for (Player name : App.getCurrentGame().getPlayers()) {
+//                                playersList.add(name.getUser().getUserName());
+//                            }
+//                            GameMenuController controller = new GameMenuController();
+//                            controller.loadGame(playersList);
+//                            Timer.schedule(new Timer.Task() {
+//                                @Override
+//                                public void run() {
+//                                    Main.getMain().setScreen(new GameMenu(playersList));
+//                                }
+//                            }, 1.0f);
+//                            return;
+//                        }
+//                    }
+                    checkLoadSelectionStatus(game);
                 } else {
                     updateStatus("Failed to request game load: " + result.getMessage(), false);
                 }
@@ -736,6 +737,106 @@ public class LobbyMenu implements Screen {
             }
         };
         Timer.schedule(refreshTask, 2, 2); // Refresh every 2 seconds for better responsiveness
+    }
+    private void checkLoadSelectionStatus(String gameName) {
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                ServerConnection connection = Main.getMain().getServerConnection();
+                return connection.sendGetRequest(
+                    "/lobby/load-selection-status?lobbyId=" + currentLobby.getId(),
+                    LoadStatusResponse.class
+                );
+
+            } catch (Exception e) {
+                logger.error("Error checking load selection status", e);
+                return NetworkResult.<LoadStatusResponse>error(
+                    "Failed to check status: " + e.getMessage()
+                );
+            }
+        }).thenAccept(result -> {
+            Gdx.app.postRunnable(() -> {
+                if (result.isSuccess()) {
+                    updateLoadsDisplay(result.getData(), gameName);
+                } else {
+                    logger.warn("Failed to get load selection status: {}", result.getMessage());
+                }
+            });
+        });
+    }
+
+    private void updateLoadsDisplay(LoadStatusResponse status, String gameName) {
+        if (status == null) return;
+
+        // Check if all farms are selected
+        if (status.isAllPlayersReady()) {
+            updateStatus("All loads selected! Starting game...", true);
+
+            // Store the player list for game start
+            java.util.List<String> allPlayers = new ArrayList<>();
+            for (String playerName : status.getSelectedLoads().values()) {
+                if (playerName != null && !playerName.isEmpty()) {
+                    allPlayers.add(playerName);
+                }
+            }
+
+            // Transition to game after a short delay
+            Timer.schedule(new Timer.Task() {
+                @Override
+                public void run() {
+                    startLoadSession(allPlayers, gameName);
+                }
+            }, 2.0f);
+        } else {
+            int selectedCount = (int) status.getSelectedLoads().values().stream()
+                .filter(Objects::nonNull)
+                .filter(s -> !s.isEmpty())
+                .count();
+            int totalPlayers = status.getTotalPlayers();
+
+            updateStatus("load selected: " + selectedCount + "/" + totalPlayers, true);
+        }
+    }
+    private void startLoadSession(java.util.List<String> allPlayers, String gameName) {
+        updateStatus("Initializing game session...", true);
+
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                ServerConnection connection = Main.getMain().getServerConnection();
+                return connection.sendPostRequest("/lobby/start-game-session",
+                    Map.of("lobbyId", currentLobby.getId()), String.class);
+            } catch (Exception e) {
+                logger.error("Error starting game session", e);
+                return NetworkResult.error("Failed to start game session: " + e.getMessage());
+            }
+        }).thenAccept(result -> {
+            Gdx.app.postRunnable(() -> {
+                if (result.isSuccess()) {
+                    Game loadedGame = GameSaveManager.loadGameCompressed(gameName);
+                    for (Player player : loadedGame.getPlayers()) {
+                        if (player.getUser().getUserName().equals(App.getLoggedInUser().getUserName())) {
+                            App.setCurrentGame(loadedGame);
+                            List<String> playersList = new ArrayList<>();
+                            for (Player name : App.getCurrentGame().getPlayers()) {
+                                playersList.add(name.getUser().getUserName());
+                            }
+                            GameMenuController controller = new GameMenuController();
+                            controller.loadGame(playersList);
+                            App.getCurrentGame().setMultiplayer(true);
+                            Timer.schedule(new Timer.Task() {
+                                @Override
+                                public void run() {
+                                    Main.getMain().setScreen(new GameMenu(playersList));
+                                }
+                            }, 1.0f);
+                            return;
+                        }
+                    }
+
+                } else {
+                    updateStatus("Failed to start game session: " + result.getMessage(),false);
+                }
+            });
+        });
     }
 
     @Override

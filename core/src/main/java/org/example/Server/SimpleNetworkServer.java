@@ -1,12 +1,10 @@
 package org.example.Server;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.*;
 import org.example.Common.network.responses.*;
-import org.example.Server.LobbyManager;
 import org.example.Server.network.GameStartManager;
 import org.example.Server.network.GameSessionManager;
 import org.example.Common.models.Lobby;
@@ -19,8 +17,6 @@ import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
-import io.javalin.websocket.WsContext;
-import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import org.example.Server.network.GameWebSocketHandler;
@@ -127,6 +123,7 @@ public class SimpleNetworkServer {
         app.get("/lobby/{lobbyId}/info", this::handleGetLobbyInfo);
         app.post("/lobby/start", this::handleStartGame);
         app.post("/lobby/load", this::handleLoad);
+        app.get("/lobby/load-selection-status", this::handleLoadSelectionStatus);
 
         // Farm selection routes
         app.post("/lobby/select-farm", this::handleSelectFarm);
@@ -587,43 +584,6 @@ public class SimpleNetworkServer {
         }
     }
 
-    private void handleLoad(Context ctx) {
-        try {
-            LoadGameRequest request = ctx.bodyAsClass(LoadGameRequest.class);
-
-            // Validate request
-            if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
-                ctx.status(400).json(NetworkResult.error("Username is required"));
-                return;
-            }
-
-            if (request.getLobbyId() == null || request.getLobbyId().trim().isEmpty()) {
-                ctx.status(400).json(NetworkResult.error("Lobby ID is required"));
-                return;
-            }
-
-            Lobby lobby = lobbyManager.getLobby(request.getLobbyId());
-            if (lobby != null) {
-                List<String> playerNames = new ArrayList<>(lobby.getPlayers());
-
-                lobby.getPlayersClickedLoad().add(request.getUsername());
-                System.out.println(playerNames);
-                System.out.println(lobby.getPlayersClickedLoad());
-                if (lobby.getPlayersClickedLoad().size() >= playerNames.size()) {
-                    ctx.json(NetworkResult.success("Game started successfully"));
-                } else {
-                    ctx.json(NetworkResult.error("Failed to create load selection session: " ));
-                }
-            } else {
-                ctx.json(NetworkResult.error("Lobby not found"));
-            }
-        //    NetworkResult<LoadStatusResponse> result = gameStartManager.selectLoad(request);
-
-        } catch (Exception e) {
-            logger.error("Error selecting load", e);
-            ctx.status(500).json(NetworkResult.error("Internal server error"));
-        }
-    }
 
     public boolean isRunning() {
         return isRunning;
@@ -662,6 +622,39 @@ public class SimpleNetworkServer {
         }
     }
 
+    private void handleLoad(Context ctx) {
+            try {
+                LoadGameRequest request = ctx.bodyAsClass(LoadGameRequest.class);
+
+                // Validate request
+                if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+                    ctx.status(400).json(NetworkResult.error("Username is required"));
+                    return;
+                }
+
+                if (request.getLobbyId() == null || request.getLobbyId().trim().isEmpty()) {
+                    ctx.status(400).json(NetworkResult.error("Lobby ID is required"));
+                    return;
+                }
+                Lobby lobby = lobbyManager.getLobby(request.getLobbyId());
+                NetworkResult<String>result1 = gameStartManager.createLoadSelectionSession(lobby.getId(), new ArrayList<>(lobby.getPlayers()));
+                System.out.println("man mast meyam " + result1.getMessage());
+            //    if (result1.isSuccess()) {
+                    NetworkResult<String> result = gameStartManager.selectLoad(request);
+
+                    if (result.isSuccess()) {
+                        ctx.json(result);
+                    } else {
+                        ctx.status(400).json(result);
+                    }
+            //    }
+
+            } catch (Exception e) {
+                logger.error("Error selecting farm", e);
+                ctx.status(500).json(NetworkResult.error("Internal server error"));
+            }
+    }
+
     private void handleGetFarmSelectionStatus(Context ctx) {
         try {
             String lobbyId = ctx.queryParam("lobbyId");
@@ -672,6 +665,28 @@ public class SimpleNetworkServer {
             }
 
             NetworkResult<FarmSelectionStatusResponse> result = gameStartManager.getFarmSelectionStatus(lobbyId);
+
+            if (result.isSuccess()) {
+                ctx.json(result);
+            } else {
+                ctx.status(400).json(result);
+            }
+
+        } catch (Exception e) {
+            logger.error("Error getting farm selection status", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
+        }
+    }
+    private void handleLoadSelectionStatus(Context ctx) {
+        try {
+            String lobbyId = ctx.queryParam("lobbyId");
+
+            if (lobbyId == null || lobbyId.trim().isEmpty()) {
+                ctx.status(400).json(NetworkResult.error("Lobby ID is required"));
+                return;
+            }
+
+            NetworkResult<LoadStatusResponse> result = gameStartManager.getLoadSelectionStatus(lobbyId);
 
             if (result.isSuccess()) {
                 ctx.json(result);

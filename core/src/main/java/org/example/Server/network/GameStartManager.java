@@ -1,14 +1,11 @@
 package org.example.Server.network;
 
-import org.example.Common.models.Fundementals.Game;
-import org.example.Common.models.Fundementals.Player;
 import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.CreateGameRequest;
 import org.example.Common.network.requests.LoadGameRequest;
 import org.example.Common.network.requests.SelectFarmRequest;
 import org.example.Common.network.responses.FarmSelectionStatusResponse;
 import org.example.Common.network.responses.LoadStatusResponse;
-import org.example.Common.saveGame.GameSaveManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,10 +16,12 @@ public class GameStartManager {
     private static final Logger logger = LoggerFactory.getLogger(GameStartManager.class);
 
     private final ConcurrentHashMap<String, FarmSelectionSession> farmSelectionSessions;
+    private final ConcurrentHashMap<String, LoadGameSession> loadSelectedGames;
     private final GameSessionManager gameSessionManager;
 
     public GameStartManager( GameSessionManager gameSessionManager) {
         this.farmSelectionSessions = new ConcurrentHashMap<>();
+        this.loadSelectedGames = new ConcurrentHashMap<>();
         this.gameSessionManager = gameSessionManager;
     }
 
@@ -37,6 +36,26 @@ public class GameStartManager {
 
             FarmSelectionSession session = new FarmSelectionSession(lobbyId, playerNames);
             farmSelectionSessions.put(lobbyId, session);
+
+            logger.info("Created farm selection session for lobby {} with {} players",
+                lobbyId, playerNames.size());
+
+            return NetworkResult.success("Farm selection session created", lobbyId);
+
+        } catch (Exception e) {
+            logger.error("Error creating farm selection session for lobby " + lobbyId, e);
+            return NetworkResult.error("Failed to create farm selection session: " + e.getMessage());
+        }
+    }
+
+    public NetworkResult<String> createLoadSelectionSession(String lobbyId, List<String> playerNames) {
+        try {
+            if (loadSelectedGames.containsKey(lobbyId)) {
+                return NetworkResult.error("load selection session already exists for lobby " + lobbyId);
+            }
+
+            LoadGameSession session = new LoadGameSession(lobbyId, playerNames);
+            loadSelectedGames.put(lobbyId, session);
 
             logger.info("Created farm selection session for lobby {} with {} players",
                 lobbyId, playerNames.size());
@@ -95,6 +114,40 @@ public class GameStartManager {
         }
     }
 
+    public NetworkResult<String> selectLoad(LoadGameRequest request) {
+        try {
+            LoadGameSession session = loadSelectedGames.get(request.getLobbyId());
+            if (session == null) {
+                return NetworkResult.error("No active farm selection session for lobby (in select load)" + request.getLobbyId());
+            }
+
+            // Select the farm
+            session.selectedloads.put(request.getGameId(), request.getUsername());
+            session.playerSelections.put(request.getUsername(), request.getGameId());
+
+            logger.info("Player {} selected load {} in lobby {}",
+                request.getUsername(), request.getGameId(), request.getLobbyId());
+
+            // Check if all farms are selected
+            if (session.areAllLoadsSelected()) {
+                logger.info("All loads selected for lobby {}. Starting game session...", request.getLobbyId());
+                createFarmSelectionSession(request.getLobbyId(), session.playerNames);
+                int i = 1;
+                for(String playerName : session.playerNames) {
+                    selectFarm(new SelectFarmRequest(playerName, i, request.getLobbyId()));
+                    i++;
+                }
+                return startLoadGameFromSession(request.getLobbyId());
+            }
+
+            return NetworkResult.success("load selected successfully", "Farm " + request.getGameId() + " selected");
+
+        } catch (Exception e) {
+            logger.error("Error selecting load for lobby " + request.getLobbyId(), e);
+            return NetworkResult.error("Failed to select farm: " + e.getMessage());
+        }
+    }
+
     /**
      * Gets the current farm selection status for a lobby
      */
@@ -113,6 +166,28 @@ public class GameStartManager {
             );
 
             return NetworkResult.success("Farm selection status retrieved", response);
+
+        } catch (Exception e) {
+            logger.error("Error getting farm selection status for lobby " + lobbyId, e);
+            return NetworkResult.error("Failed to get farm selection status: " + e.getMessage());
+        }
+    }
+
+    public NetworkResult<LoadStatusResponse> getLoadSelectionStatus(String lobbyId) {
+        try {
+            LoadGameSession session = loadSelectedGames.get(lobbyId);
+            if (session == null) {
+                return NetworkResult.error("No active farm selection session for lobby while loading" + lobbyId);
+            }
+
+            LoadStatusResponse response = new LoadStatusResponse(
+                session.areAllLoadsSelected(),
+                session.playerNames.size(),
+                session.lobbyId,
+                new HashMap<>(session.selectedloads)
+            );
+
+            return NetworkResult.success("load selection status retrieved", response);
 
         } catch (Exception e) {
             logger.error("Error getting farm selection status for lobby " + lobbyId, e);
@@ -163,6 +238,63 @@ public class GameStartManager {
                 session.gameStarted = true;
 
                 return NetworkResult.success("Game session started", session.gameSessionId);
+            } else {
+                return NetworkResult.error("Failed to create game session: " + gameResult.getMessage());
+            }
+
+        } catch (Exception e) {
+            logger.error("Error starting game from session for lobby " + lobbyId, e);
+            return NetworkResult.error("Failed to start game session: " + e.getMessage());
+        }
+    }
+
+    public NetworkResult<String> startLoadGameFromSession(String lobbyId) {
+        try {
+            LoadGameSession session = loadSelectedGames.get(lobbyId);
+            if (session == null) {
+                return NetworkResult.error("No farm selection session found for lobby (in startLoadGameFromSession)" + lobbyId);
+            }
+
+            if (!session.areAllLoadsSelected()) {
+                return NetworkResult.error("Not all loads have been selected yet (startLoadGameFromSession)");
+            }
+
+//            // Check if a game session already exists
+//            if (session.gameSessionId != null && session.gameStarted) {
+//                logger.info("Game session {} already exists for lobby {}", session.gameSessionId, lobbyId);
+//                return NetworkResult.success("Game session already started", session.gameSessionId);
+//            }
+
+            // Clear any existing player mappings to avoid "already in a game" errors
+            gameSessionManager.clearPlayerMappings(session.playerNames);
+            Map<String, Integer>haha = new HashMap<>();
+            int i = 1;
+            for(String playerName : session.playerNames) {
+                haha.put(playerName, i);
+                selectFarm(new SelectFarmRequest(playerName, i, lobbyId));
+                i++;
+            }
+
+            // Create game request with farm selections
+            CreateGameRequest gameRequest = new CreateGameRequest(
+                new ArrayList<>(session.playerNames),
+                haha
+            );
+
+            // Create the actual game session
+            // Use the first player as the creator
+            String creatorId = session.playerNames.get(0);
+            NetworkResult<org.example.Common.network.responses.GameStateResponse> gameResult =
+                gameSessionManager.createGame(creatorId, gameRequest);
+
+            if (gameResult.isSuccess()) {
+            //    session.lobbyId = gameResult.getData().getGameId();
+                logger.info("Game session {} created for lobby {}", session.lobbyId, lobbyId);
+
+                // Keep the session for status queries but mark as completed
+             //   session.gameStarted = true;
+
+                return NetworkResult.success("Game session started", session.lobbyId);
             } else {
                 return NetworkResult.error("Failed to create game session: " + gameResult.getMessage());
             }
@@ -241,6 +373,25 @@ public class GameStartManager {
 
         boolean areAllFarmsSelected() {
             return selectedFarms.size() >= playerNames.size();
+        }
+    }
+    private static class LoadGameSession {
+        final String lobbyId;
+        final List<String> playerNames;
+        final Map<String, String> selectedloads; // gameId -> username
+        final Map<String, String> playerSelections; // username -> gameId
+        final long createdAt;
+
+        LoadGameSession(String lobbyId, List<String> playerNames) {
+            this.lobbyId = lobbyId;
+            this.playerNames = new ArrayList<>(playerNames);
+            this.selectedloads = new ConcurrentHashMap<>();
+            this.playerSelections = new ConcurrentHashMap<>();
+            this.createdAt = System.currentTimeMillis();
+        }
+
+        boolean areAllLoadsSelected() {
+            return playerSelections.size() >= playerNames.size();
         }
     }
 

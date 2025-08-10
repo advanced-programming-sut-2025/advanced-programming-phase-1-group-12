@@ -30,8 +30,6 @@ public class GameSessionManager {
     private final ExecutorService gameProcessorPool;
     private final ScheduledExecutorService cleanupScheduler;
     // Add these with your other instance variables
-    private final ConcurrentHashMap<String, String> gameLoadSelections = new ConcurrentHashMap<>(); // playerId -> gameName
-    private final ConcurrentHashMap<String, String> playerToSession = new ConcurrentHashMap<>(); // gameId -> Set<playerId>
 
     public GameSessionManager() {
         this.activeGames = new ConcurrentHashMap<>();
@@ -398,24 +396,6 @@ public class GameSessionManager {
             Thread.currentThread().interrupt();
             logger.warn("Shutdown interrupted");
         }
-    }
-    public NetworkResult<String> createGameFromLoad(String loadedGame) {
-        String gameSessionId = UUID.randomUUID().toString();
-
-        gameLoadSelections.put(gameSessionId, loadedGame);
-
-//        for (Player player : load.getPlayers()) {
-//            playerToSession.put(player.getUser().getUserName(), gameSessionId);
-//        }
-        List<String> loadedPlayerNames = GameSaveManager.loadPlayerUsernames("C:\\Users\\Lenovo\\Desktop\\advanced-programming-phase-1-group-12\\savePlayers\\1.json");
-        for(String playerName : loadedPlayerNames) {
-            playerToSession.put(playerName, gameSessionId);
-        }
-
-        logger.info("Game loaded into session {} with {} players",
-            gameSessionId, loadedPlayerNames.size());
-
-        return NetworkResult.success("Game loaded successfully", gameSessionId);
     }
 
 
