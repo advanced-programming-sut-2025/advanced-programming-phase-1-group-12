@@ -7,6 +7,7 @@ import org.example.Common.models.Fundementals.Result;
 import org.example.Common.models.Trade;
 import org.example.Common.models.TradeHistory;
 import org.example.Common.network.NetworkResult;
+import org.example.Common.network.GameProtocol;
 import org.example.Common.network.requests.WalkRequest;
 import org.example.Common.network.events.GameStateUpdateEvent;
 import org.example.Client.controllers.MenusController.GameMenuController;
@@ -19,6 +20,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
+import org.example.Common.models.RelatedToUser.Ability;
 
 public class GameInstance {
     private static final Logger logger = LoggerFactory.getLogger(GameInstance.class);
@@ -215,13 +217,25 @@ public class GameInstance {
 
     private NetworkResult<String> handleWalkAction(String playerId, WalkRequest walkRequest) {
         try {
+            System.out.println("DEBUG: [SERVER] handleWalkAction called for player: " + playerId + " to (" + walkRequest.getX() + ", " + walkRequest.getY() + ")");
+            
             // Use existing UserLocationController logic
             Result walkResult = UserLocationController.walkPlayer(walkRequest.getX(), walkRequest.getY());
 
+            System.out.println("DEBUG: [SERVER] Walk result: " + (walkResult.isSuccessful() ? "SUCCESS" : "FAILED") + " - " + walkResult.getMessage());
+
             if (walkResult.isSuccessful()) {
-                // Broadcast player movement to other connected players
-                broadcastPlayerMovement(playerId, Integer.parseInt(walkRequest.getX()),
-                    Integer.parseInt(walkRequest.getY()));
+                // Get the updated player object
+                Player updatedPlayer = players.get(playerId);
+                if (updatedPlayer != null) {
+                    System.out.println("DEBUG: [SERVER] Found updated player, broadcasting full player update");
+                    // Broadcast full player object to all players
+                    broadcastFullPlayerUpdate(playerId, updatedPlayer);
+                } else {
+                    System.out.println("DEBUG: [SERVER] ERROR: Updated player not found for playerId: " + playerId);
+                }
+            } else {
+                System.out.println("DEBUG: [SERVER] Walk action failed, not broadcasting update");
             }
 
             return NetworkResult.fromResult(walkResult);
@@ -231,6 +245,90 @@ public class GameInstance {
         } catch (Exception e) {
             logger.error("Error processing walk action", e);
             return NetworkResult.error("Failed to process walk action: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Broadcasts the full player object to all players in the game
+     * This includes all player properties that might have changed
+     */
+    private void broadcastFullPlayerUpdate(String playerId, Player player) {
+        try {
+            System.out.println("DEBUG: [SERVER] broadcastFullPlayerUpdate called for player: " + playerId);
+            
+            Map<String, Object> playerUpdate = new HashMap<>();
+            playerUpdate.put("type", GameProtocol.WS_PLAYER_FULL_UPDATE);
+            playerUpdate.put("gameId", gameId);
+            playerUpdate.put("playerId", playerId);
+            playerUpdate.put("timestamp", System.currentTimeMillis());
+            
+            // Create a map of all player properties that should be synchronized
+            Map<String, Object> playerData = new HashMap<>();
+            
+            // Basic player info
+            if (player.getUser() != null) {
+                playerData.put("username", player.getUser().getUserName());
+                playerData.put("nickname", player.getUser().getNickname());
+            }
+            
+            // Location and position
+            if (player.getUserLocation() != null) {
+                playerData.put("x", player.getUserLocation().getxAxis());
+                playerData.put("y", player.getUserLocation().getyAxis());
+                // Location doesn't have a getName() method, so we'll use coordinates as location name
+                playerData.put("locationName", "Location(" + player.getUserLocation().getxAxis() + "," + player.getUserLocation().getyAxis() + ")");
+            }
+            
+            // Player state
+            playerData.put("energy", player.getEnergy());
+            playerData.put("money", player.getMoney());
+            playerData.put("isMarried", player.isMarried());
+            playerData.put("hasCollapsed", player.isHasCollapsed());
+            playerData.put("isEnergyUnlimited", player.isEnergyUnlimited());
+            playerData.put("speed", player.getSpeed());
+            
+            // Current tool
+            if (player.getCurrentTool() != null) {
+                playerData.put("currentTool", player.getCurrentTool().getName());
+            }
+            
+            // Abilities
+            if (player.getAbilitis() != null) {
+                Map<String, Integer> abilities = new HashMap<>();
+                for (Ability ability : player.getAbilitis()) {
+                    abilities.put(ability.getName(), ability.getLevel());
+                }
+                playerData.put("abilities", abilities);
+            }
+            
+            // Backpack info (basic info only to avoid large payloads)
+            if (player.getBackPack() != null) {
+                playerData.put("backpackCapacity", player.getBackPack().getType().getBackPackCapacity());
+                playerData.put("backpackUsedSlots", player.getBackPack().getItems().size());
+            }
+            
+            // Refrigerator info (basic info only)
+            if (player.getRefrigrator() != null) {
+                playerData.put("refrigeratorCapacity", player.getRefrigrator().getMaxProduction());
+                playerData.put("refrigeratorUsedSlots", player.getRefrigrator().getProducts().size());
+            }
+            
+            // Shipping info
+            playerData.put("shippingMoney", player.getShippingMoney());
+            
+            // Buff states
+            playerData.put("isMaxEnergyBuffEaten", player.isMaxEnergyBuffEaten());
+            playerData.put("isSkillBuffEaten", player.isSkillBuffEaten());
+            
+            playerUpdate.put("playerData", playerData);
+            
+            // Broadcast to all players
+            broadcastToAllPlayers(playerUpdate);
+            
+            logger.debug("Broadcasted full player update for player: {} in game: {}", playerId, gameId);
+            
+        } catch (Exception e) {
+            logger.error("Error broadcasting full player update for player: {}", playerId, e);
         }
     }
 
@@ -309,6 +407,14 @@ public class GameInstance {
             // Use existing store controller logic
             org.example.Client.controllers.StoreController storeController = new org.example.Client.controllers.StoreController();
             Result buyResult = storeController.buyProduct(null, itemName, quantity); // Store will be determined by location
+
+            if (buyResult.isSuccessful()) {
+                // Get the updated player object and broadcast full update
+                Player updatedPlayer = players.get(playerId);
+                if (updatedPlayer != null) {
+                    broadcastFullPlayerUpdate(playerId, updatedPlayer);
+                }
+            }
 
             return NetworkResult.fromResult(buyResult);
         } catch (Exception e) {
@@ -393,6 +499,25 @@ public class GameInstance {
             }
 
             if (success) {
+                // If trade was completed, broadcast full player updates for both players
+                if (action.equals("confirm") || action.equals("accept")) {
+                                    // Get both players involved in the trade
+                String requesterId = trade.getInitiatorUsername();
+                String targetId = trade.getTargetUsername();
+                    
+                    // Broadcast full player update for requester
+                    Player requesterPlayer = players.get(requesterId);
+                    if (requesterPlayer != null) {
+                        broadcastFullPlayerUpdate(requesterId, requesterPlayer);
+                    }
+                    
+                    // Broadcast full player update for target
+                    Player targetPlayer = players.get(targetId);
+                    if (targetPlayer != null) {
+                        broadcastFullPlayerUpdate(targetId, targetPlayer);
+                    }
+                }
+                
                 return NetworkResult.success("Trade " + action + " successful");
             } else {
                 return NetworkResult.error("Failed to " + action + " trade");
@@ -469,20 +594,30 @@ public class GameInstance {
     }
 
     public void broadcastToAllPlayers(Object message) {
+        System.out.println("DEBUG: [SERVER] broadcastToAllPlayers called with message: " + message);
+        System.out.println("DEBUG: [SERVER] Number of WebSocket connections: " + webSocketConnections.size());
+        
         Set<WsContext> deadConnections = new HashSet<>();
+        int messagesSent = 0;
 
         for (WsContext wsContext : webSocketConnections) {
             try {
                 if (wsContext.session.isOpen()) {
                     wsContext.send(message);
+                    messagesSent++;
+                    System.out.println("DEBUG: [SERVER] Message sent to WebSocket connection " + messagesSent);
                 } else {
+                    System.out.println("DEBUG: [SERVER] Found dead WebSocket connection, marking for cleanup");
                     deadConnections.add(wsContext);
                 }
             } catch (Exception e) {
+                System.out.println("DEBUG: [SERVER] Failed to send message to WebSocket connection: " + e.getMessage());
                 logger.warn("Failed to send message to WebSocket connection", e);
                 deadConnections.add(wsContext);
             }
         }
+
+        System.out.println("DEBUG: [SERVER] Broadcast completed - " + messagesSent + " messages sent, " + deadConnections.size() + " dead connections found");
 
         // Clean up dead connections
         webSocketConnections.removeAll(deadConnections);

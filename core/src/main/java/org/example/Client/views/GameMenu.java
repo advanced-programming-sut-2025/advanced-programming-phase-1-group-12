@@ -375,6 +375,9 @@ public class GameMenu extends InputAdapter implements Screen {
                 case "player_moved":
                     handlePlayerMovementUpdate(data);
                     break;
+                case "player_full_update":
+                    handleFullPlayerUpdate(data);
+                    break;
                 case "energy_updated":
                     handleEnergyUpdate(data);
                     break;
@@ -509,28 +512,42 @@ public class GameMenu extends InputAdapter implements Screen {
 
     private void handlePlayerMovementUpdate(Map<String, Object> data) {
         try {
+            System.out.println("DEBUG: [GAME_MENU] handlePlayerMovementUpdate called with data: " + data);
+            
             String playerId = (String) data.get("playerId");
             Integer x = (Integer) data.get("x");
             Integer y = (Integer) data.get("y");
 
-            System.out.println("DEBUG: Player movement update - playerId: " + playerId + ", x: " + x + ", y: " + y);
+            System.out.println("DEBUG: [GAME_MENU] Parsed movement data - playerId: " + playerId + ", x: " + x + ", y: " + y);
             logger.debug("Player movement update: playerId={}, x={}, y={}", playerId, x, y);
 
             if (playerId != null && x != null && y != null) {
+                System.out.println("DEBUG: [GAME_MENU] Valid movement data, looking for player: " + playerId);
+                System.out.println("DEBUG: [GAME_MENU] Available players in game: " + App.getCurrentGame().getPlayers().size());
+                
                 // Find the player and update their position
                 boolean playerFound = false;
                 for (Player player : App.getCurrentGame().getPlayers()) {
+                    System.out.println("DEBUG: [GAME_MENU] Checking player: " + player.getUser().getUserName());
                     if (player.getUser().getUserName().equals(playerId)) {
+                        System.out.println("DEBUG: [GAME_MENU] Found player, updating position from (" + 
+                            player.getUserLocation().getxAxis() + ", " + player.getUserLocation().getyAxis() + 
+                            ") to (" + x + ", " + y + ")");
+                        
                         Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
                         player.setUserLocation(newLocation);
+                        
                         // Convert coordinates to scaled values (x100) for sprite positioning
+                        System.out.println("DEBUG: [GAME_MENU] Calling player.updatePosition with scaled coordinates: (" + (x * 100) + ", " + (y * 100) + ")");
                         player.updatePosition(x * 100, y * 100); // Update sprite position with scaled coordinates
-                        System.out.println("DEBUG: Updated player " + playerId + " position to (" + x + ", " + y + ")");
+                        
+                        System.out.println("DEBUG: [GAME_MENU] Player position update completed for: " + playerId);
                         logger.debug("Updated player {} position to ({}, {})", playerId, x, y);
                         playerFound = true;
 
                         // If we're showing the full map, update camera position for smooth following
                         if (showingAllMap) {
+                            System.out.println("DEBUG: [GAME_MENU] Updating camera position for full map view");
                             updateCameraToPlayer();
                         }
                         break;
@@ -538,16 +555,16 @@ public class GameMenu extends InputAdapter implements Screen {
                 }
 
                 if (!playerFound) {
-                    System.out.println("DEBUG: Player " + playerId + " not found in current game");
+                    System.out.println("DEBUG: [GAME_MENU] Player " + playerId + " not found in current game");
                     logger.warn("Player {} not found in current game", playerId);
                 }
             } else {
-                System.out.println("DEBUG: Invalid player movement data - playerId: " + playerId + ", x: " + x + ", y: " + y);
+                System.out.println("DEBUG: [GAME_MENU] Invalid player movement data - playerId: " + playerId + ", x: " + x + ", y: " + y);
                 logger.warn("Invalid player movement data: playerId={}, x={}, y={}", playerId, x, y);
             }
 
         } catch (Exception e) {
-            System.out.println("DEBUG: Error handling player movement update: " + e.getMessage());
+            System.out.println("DEBUG: [GAME_MENU] Error handling player movement update: " + e.getMessage());
             logger.error("Error handling player movement update", e);
         }
     }
@@ -588,13 +605,10 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void handleEnergyUpdate(Map<String, Object> data) {
-        System.out.println("DEBUG: GameMenu.handleEnergyUpdate called with data: " + data);
         String playerId = (String) data.get("playerId");
         Integer currentEnergy = (Integer) data.get("currentEnergy");
         Integer maxEnergy = (Integer) data.get("maxEnergy");
         String energyStatus = (String) data.get("energyStatus");
-
-        System.out.println("DEBUG: Parsed energy update data - playerId: " + playerId + ", currentEnergy: " + currentEnergy + ", maxEnergy: " + maxEnergy + ", status: " + energyStatus);
 
         logger.debug("Handling energy update: playerId={}, currentEnergy={}, maxEnergy={}, status={}",
             playerId, currentEnergy, maxEnergy, energyStatus);
@@ -602,16 +616,11 @@ public class GameMenu extends InputAdapter implements Screen {
         if (playerId != null && currentEnergy != null && maxEnergy != null) {
             // Find the player and update their energy
             boolean playerFound = false;
-            System.out.println("DEBUG: Looking for player with username: " + playerId);
-            System.out.println("DEBUG: Available players in game: " + App.getCurrentGame().getPlayers().size());
 
             for (Player player : App.getCurrentGame().getPlayers()) {
-                System.out.println("DEBUG: Checking player: " + player.getUser().getUserName());
                 if (player.getUser().getUserName().equals(playerId)) {
                     // Update the player's energy (without triggering another broadcast)
-                    System.out.println("DEBUG: Found player, updating energy from " + player.getEnergy() + " to " + currentEnergy);
                     player.setEnergyInternal(currentEnergy);
-                    System.out.println("DEBUG: Player energy updated successfully");
                     logger.debug("Updated player {} energy to {}/{}", playerId, currentEnergy, maxEnergy);
                     playerFound = true;
                     break;
@@ -619,15 +628,162 @@ public class GameMenu extends InputAdapter implements Screen {
             }
 
             if (!playerFound) {
-                System.out.println("DEBUG: Player " + playerId + " not found in current game");
                 logger.warn("Player {} not found in current game", playerId);
-            } else {
-                System.out.println("DEBUG: Player energy updated successfully for: " + playerId);
             }
         } else {
-            System.out.println("DEBUG: Invalid energy update data - playerId: " + playerId + ", currentEnergy: " + currentEnergy + ", maxEnergy: " + maxEnergy);
             logger.warn("Invalid energy update data: playerId={}, currentEnergy={}, maxEnergy={}",
                 playerId, currentEnergy, maxEnergy);
+        }
+    }
+
+    /**
+     * Handles full player object updates from the server
+     * This method receives the complete player state and applies it to the local game
+     */
+    private void handleFullPlayerUpdate(Map<String, Object> data) {
+        try {
+            System.out.println("DEBUG: GameMenu.handleFullPlayerUpdate called with data: " + data);
+            
+            String playerId = (String) data.get("playerId");
+            Map<String, Object> playerData = (Map<String, Object>) data.get("playerData");
+            
+            if (playerId == null || playerData == null) {
+                System.out.println("DEBUG: Invalid full player update data - playerId: " + playerId + ", playerData: " + playerData);
+                logger.warn("Invalid full player update data: playerId={}, playerData={}", playerId, playerData);
+                return;
+            }
+            
+            System.out.println("DEBUG: Processing full player update for player: " + playerId);
+            logger.debug("Processing full player update for player: {}", playerId);
+            
+            // Find the player in the current game
+            Player targetPlayer = null;
+            for (Player player : App.getCurrentGame().getPlayers()) {
+                if (player.getUser().getUserName().equals(playerId)) {
+                    targetPlayer = player;
+                    break;
+                }
+            }
+            
+            if (targetPlayer == null) {
+                System.out.println("DEBUG: Player " + playerId + " not found in current game");
+                logger.warn("Player {} not found in current game", playerId);
+                return;
+            }
+            
+            // Apply all the player data updates
+            applyPlayerDataUpdate(targetPlayer, playerData);
+            
+            System.out.println("DEBUG: Full player update processed successfully for player: " + playerId);
+            logger.debug("Full player update processed for player: {}", playerId);
+            
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error handling full player update: " + e.getMessage());
+            logger.error("Error handling full player update", e);
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Applies the received player data to the target player object
+     * This method updates all the relevant player properties
+     */
+    private void applyPlayerDataUpdate(Player targetPlayer, Map<String, Object> playerData) {
+        try {
+            System.out.println("DEBUG: Applying player data update to player: " + targetPlayer.getUser().getUserName());
+            
+            // Update location and position
+            if (playerData.containsKey("x") && playerData.containsKey("y")) {
+                Integer x = (Integer) playerData.get("x");
+                Integer y = (Integer) playerData.get("y");
+                if (x != null && y != null) {
+                    // Find the location object
+                    Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
+                    if (newLocation != null) {
+                        targetPlayer.setUserLocation(newLocation);
+                        // Update sprite position with scaled coordinates
+                        targetPlayer.updatePosition(x * 100, y * 100);
+                        System.out.println("DEBUG: Updated player position to (" + x + ", " + y + ")");
+                    }
+                }
+            }
+            
+            // Update energy
+            if (playerData.containsKey("energy")) {
+                Integer energy = (Integer) playerData.get("energy");
+                if (energy != null) {
+                    targetPlayer.setEnergyInternal(energy);
+                    System.out.println("DEBUG: Updated player energy to " + energy);
+                }
+            }
+            
+            // Update money
+            if (playerData.containsKey("money")) {
+                Integer money = (Integer) playerData.get("money");
+                if (money != null) {
+                    targetPlayer.setMoney(money);
+                    System.out.println("DEBUG: Updated player money to " + money);
+                }
+            }
+            
+            // Update player state flags
+            if (playerData.containsKey("isMarried")) {
+                targetPlayer.setMarried((Boolean) playerData.get("isMarried"));
+            }
+            
+            if (playerData.containsKey("hasCollapsed")) {
+                targetPlayer.setHasCollapsed((Boolean) playerData.get("hasCollapsed"));
+            }
+            
+            if (playerData.containsKey("isEnergyUnlimited")) {
+                targetPlayer.setEnergyUnlimited((Boolean) playerData.get("isEnergyUnlimited"));
+            }
+            
+            if (playerData.containsKey("speed")) {
+                Double speed = (Double) playerData.get("speed");
+                if (speed != null) {
+                    targetPlayer.setSpeed(speed.floatValue());
+                }
+            }
+            
+            // Update abilities
+            if (playerData.containsKey("abilities")) {
+                Map<String, Integer> abilities = (Map<String, Integer>) playerData.get("abilities");
+                if (abilities != null) {
+                    for (Map.Entry<String, Integer> entry : abilities.entrySet()) {
+                        Ability ability = targetPlayer.getAbilityByName(entry.getKey());
+                        if (ability != null) {
+                            ability.setLevel(entry.getValue());
+                        }
+                    }
+                    System.out.println("DEBUG: Updated player abilities");
+                }
+            }
+            
+            // Update shipping money
+            if (playerData.containsKey("shippingMoney")) {
+                Integer shippingMoney = (Integer) playerData.get("shippingMoney");
+                if (shippingMoney != null) {
+                    targetPlayer.setShippingMoney(shippingMoney);
+                }
+            }
+            
+            // Update buff states
+            if (playerData.containsKey("isMaxEnergyBuffEaten")) {
+                targetPlayer.setMaxEnergyBuffEaten((Boolean) playerData.get("isMaxEnergyBuffEaten"));
+            }
+            
+            if (playerData.containsKey("isSkillBuffEaten")) {
+                targetPlayer.setSkillBuffEaten((Boolean) playerData.get("isSkillBuffEaten"));
+            }
+            
+            System.out.println("DEBUG: Successfully applied all player data updates");
+            logger.debug("Applied full player data update for player: {}", targetPlayer.getUser().getUserName());
+            
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error applying player data update: " + e.getMessage());
+            logger.error("Error applying player data update", e);
+            e.printStackTrace();
         }
     }
 

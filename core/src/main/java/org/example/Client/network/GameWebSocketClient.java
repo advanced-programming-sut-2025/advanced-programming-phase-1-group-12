@@ -272,16 +272,14 @@ public class GameWebSocketClient {
 
     private void handleMessage(String message) {
         try {
-            // First, try to parse as JSON
+            System.out.println("DEBUG: GameWebSocketClient received message: " + message);
+            logger.debug("Received WebSocket message: {}", message);
+
+            // Try to parse as JSON first
             Map<String, Object> messageData = objectMapper.readValue(message, Map.class);
             String messageType = (String) messageData.get("type");
 
-            System.out.println("DEBUG: Client received message type: " + messageType + " with data: " + messageData);
-
-            if (messageType == null) {
-                logger.warn("Received message without type: {}", message);
-                return;
-            }
+            System.out.println("DEBUG: Parsed message type: " + messageType);
 
             switch (messageType) {
                 case GameProtocol.WS_GAME_STATE_UPDATE:
@@ -293,8 +291,11 @@ public class GameWebSocketClient {
                     handlePlayerMovement(messageData);
                     break;
                 case GameProtocol.WS_ENERGY_UPDATE:
-                    System.out.println("DEBUG: Handling energy update");
                     handleEnergyUpdate(messageData);
+                    break;
+                case GameProtocol.WS_PLAYER_FULL_UPDATE:
+                    System.out.println("DEBUG: Handling full player update");
+                    handleFullPlayerUpdate(messageData);
                     break;
                 case GameProtocol.WS_CHAT_MESSAGE:
                     System.out.println("DEBUG: Handling chat message");
@@ -304,6 +305,7 @@ public class GameWebSocketClient {
                     System.out.println("DEBUG: Handling movement notification");
                     handleMovementNotification(messageData);
                     break;
+
                 case "connection_established":
                     System.out.println("DEBUG: Handling connection established");
                     handleConnectionEstablished(messageData);
@@ -351,26 +353,34 @@ public class GameWebSocketClient {
 
     private void handlePlayerMovement(Map<String, Object> messageData) {
         try {
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] handlePlayerMovement called with data: " + messageData);
+            
             // PlayerMovedEvent uses 'username' field, but we need 'playerId' for consistency
             String playerId = (String) messageData.get("playerId");
             if (playerId == null) {
                 // Fallback to username if playerId is not available
                 playerId = (String) messageData.get("username");
+                System.out.println("DEBUG: [WEBSOCKET_CLIENT] Using username as playerId: " + playerId);
             }
             Integer x = (Integer) messageData.get("x");
             Integer y = (Integer) messageData.get("y");
 
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Parsed movement data - playerId: " + playerId + ", x: " + x + ", y: " + y);
             logger.debug("Received player movement: playerId={}, x={}, y={}", playerId, x, y);
 
             if (playerId != null && x != null && y != null) {
+                System.out.println("DEBUG: [WEBSOCKET_CLIENT] Valid movement data, calling gameMenu.handleGameStateUpdate");
                 Map<String, Object> data = Map.of("playerId", playerId, "x", x, "y", y);
                 gameMenu.handleGameStateUpdate("player_moved", data);
+                System.out.println("DEBUG: [WEBSOCKET_CLIENT] Movement update sent to GameMenu for player: " + playerId);
                 logger.debug("Processed player movement update for player: {}", playerId);
             } else {
+                System.out.println("DEBUG: [WEBSOCKET_CLIENT] Invalid movement data - playerId: " + playerId + ", x: " + x + ", y: " + y);
                 logger.warn("Invalid player movement data: playerId={}, x={}, y={}", playerId, x, y);
             }
 
         } catch (Exception e) {
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Error handling player movement: " + e.getMessage());
             logger.error("Error handling player movement", e);
         }
     }
@@ -440,6 +450,44 @@ public class GameWebSocketClient {
         } catch (Exception e) {
             System.out.println("DEBUG: Error handling energy update: " + e.getMessage());
             logger.error("Error handling energy update", e);
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Handles full player object updates from the server
+     * This method receives the complete player state and applies it to the local game
+     */
+    private void handleFullPlayerUpdate(Map<String, Object> messageData) {
+        try {
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] handleFullPlayerUpdate called with data: " + messageData);
+            
+            String playerId = (String) messageData.get("playerId");
+            Map<String, Object> playerData = (Map<String, Object>) messageData.get("playerData");
+            
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Parsed full player update - playerId: " + playerId + ", playerData: " + playerData);
+            
+            if (playerId == null || playerData == null) {
+                System.out.println("DEBUG: [WEBSOCKET_CLIENT] Invalid full player update data - playerId: " + playerId + ", playerData: " + playerData);
+                logger.warn("Invalid full player update data: playerId={}, playerData={}", playerId, playerData);
+                return;
+            }
+            
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Valid full player data, calling gameMenu.handleGameStateUpdate");
+            logger.debug("Processing full player update for player: {}", playerId);
+            
+            // Forward the full player update to the game menu for processing
+            gameMenu.handleGameStateUpdate("player_full_update", Map.of(
+                "playerId", playerId,
+                "playerData", playerData
+            ));
+            
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Full player update sent to GameMenu for player: " + playerId);
+            logger.debug("Full player update processed for player: {}", playerId);
+            
+        } catch (Exception e) {
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Error handling full player update: " + e.getMessage());
+            logger.error("Error handling full player update", e);
             e.printStackTrace();
         }
     }

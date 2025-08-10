@@ -48,7 +48,6 @@ public class SimpleNetworkServer {
         this.lobbyManager = LobbyManager.getInstance();
         this.gameSessionManager = new GameSessionManager();
         this.gameStartManager = new GameStartManager(gameSessionManager);
-        // No hardcoded users - users will register themselves
     }
 
     public void start() {

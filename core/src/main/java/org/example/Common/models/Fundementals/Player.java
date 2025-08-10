@@ -119,13 +119,19 @@ public class Player {
     }
 
     public void updatePosition(int posX, int posY) {
+        System.out.println("DEBUG: [PLAYER] updatePosition called for player " + (user != null ? user.getUserName() : "unknown") + " to (" + posX + ", " + posY + ")");
+        
         Location newLocation = App.getCurrentGame().getMainMap().findLocation(posX, posY);
         setUserLocation(newLocation);
         rect.move(posX, posY);
+        
         // Only update sprite position when sprite is available (client-side)
         if (playerSprite != null) {
             playerSprite.setPosition(posX, posY);
+            System.out.println("DEBUG: [PLAYER] Sprite position updated to (" + posX + ", " + posY + ")");
         }
+        
+        System.out.println("DEBUG: [PLAYER] Position update completed for player " + (user != null ? user.getUserName() : "unknown"));
     }
 
     public User getUser() {
@@ -154,12 +160,10 @@ public class Player {
 
 
     public void setEnergy(int energy) {
-        System.out.println("DEBUG: setEnergy called for player " + this.getUser().getUserName() + " with energy: " + energy);
         setEnergyInternal(energy);
 
         // Broadcast energy update to all players in multiplayer mode
         if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
-            System.out.println("DEBUG: Game is multiplayer, attempting to broadcast energy update");
             try {
                 // Send energy update via WebSocket
                 Map<String, Object> energyData = new HashMap<>();
@@ -184,11 +188,7 @@ public class Player {
                 energyData.put("maxEnergy", 200);
 
                 if (App.getWebSocketClient() != null) {
-                    System.out.println("DEBUG: WebSocket client exists, sending energy update");
                     App.getWebSocketClient().send(energyData);
-                    System.out.println("DEBUG: Energy update sent successfully via WebSocket");
-                } else {
-                    System.out.println("DEBUG: WebSocket client is null, cannot send energy update");
                 }
             } catch (Exception e) {
                 // Log error but don't break the game
@@ -412,6 +412,10 @@ public class Player {
 
     public void setMarried(boolean married) {
         isMarried = married;
+    }
+
+    public boolean isMarried() {
+        return isMarried;
     }
 
     public PlayerController getPlayerController() {

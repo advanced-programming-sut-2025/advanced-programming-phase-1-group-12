@@ -54,6 +54,7 @@ public class GameProtocol {
     public static final String WS_TRADE_NOTIFICATION = "trade_notification";
     public static final String WS_GAME_STATE_UPDATE = "game_state_update";
     public static final String WS_ENERGY_UPDATE = "energy_update";
+    public static final String WS_PLAYER_FULL_UPDATE = "player_full_update";
     public static final String WS_TIME_UPDATE = "time_update";
     public static final String WS_WEATHER_UPDATE = "weather_update";
     public static final String WS_LOBBY_CREATED = "lobby_created";
