@@ -151,6 +151,9 @@ Thumbs.db
 ## Environment Variables:
 .env
 
+## API Configuration:
+**/api_config.properties
+
 ## Miscellaneous:
 *~
 *.*#

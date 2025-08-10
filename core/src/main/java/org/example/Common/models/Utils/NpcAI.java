@@ -1,5 +1,6 @@
 package org.example.Common.models.Utils;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import org.example.Common.models.NPC.NPC;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -10,9 +11,12 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 
 public class NpcAI {
-    private static final String API_URL = "https://openrouter.ai/api/v1/chat/completions";
-    private static final String API_KEY = System.getenv("OPENROUTER_API_KEY");
+    private static Dotenv dotenv = Dotenv.configure().directory("../") // :)
+        .ignoreIfMissing()
+        .load();
 
+    private static final String API_URL = "https://openrouter.ai/api/v1/chat/completions";
+    private static final String API_KEY = dotenv.get("OPENROUTER_API_KEY");
 
     private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
         .version(HttpClient.Version.HTTP_2)
