@@ -24,15 +24,19 @@ public class GameDatabase {
             """);
         }
     }
-    public static void save(Game game) throws Exception {
+    public static void save(Game game, String saveName) throws Exception {
+        if (saveName == null || saveName.isBlank()) {
+            throw new IllegalArgumentException("Save name cannot be null or empty");
+        }
         String sql = "INSERT OR REPLACE INTO GameSaves (save_name, data) VALUES (?, ?)";
         try (Connection c = DriverManager.getConnection(DB_URL);
              PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setString(1, game.getNetworkId());
+            ps.setString(1, saveName);
             ps.setBytes(2, GameSaveManager.serializeAndCompress(game));
             ps.executeUpdate();
         }
     }
+
     public static List<String> list() throws SQLException {
         List<String> out = new ArrayList<>();
         String sql = "SELECT save_name FROM GameSaves ORDER BY created_at DESC";

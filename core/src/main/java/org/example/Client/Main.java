@@ -13,11 +13,13 @@ import org.example.Client.views.MainMenu;
 import org.example.Client.views.RegisterMenuView;
 import org.example.Client.network.ServerConnection;
 import org.example.Client.ServerManager;
+import org.example.Common.saveGame.GameDatabase;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +40,13 @@ public class Main extends Game {
     @Override
     public void create() {
         main = this;
+        try {
+            GameDatabase.init();
+            System.out.println("✅ Game database initialized.");
+        } catch (SQLException e) {
+            System.err.println("❌ Failed to initialize game database: " + e.getMessage());
+            e.printStackTrace();
+        }
         batch = new SpriteBatch();
         backgroundTexture = new Texture("background.png");
         backgroundSprite = new Sprite(backgroundTexture);
@@ -52,18 +61,16 @@ public class Main extends Game {
             }
         });
 
-        // Initialize server connection
         serverConnection = ServerConnection.getInstance();
-        
-        // Add shutdown hook to properly close server connection and stop server
+
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutting down game...");
-            
+
             // Disconnect player from lobby if they're in one
             if (App.getLoggedInUser() != null) {
                 String username = App.getLoggedInUser().getUserName();
                 System.out.println("Disconnecting player " + username + " from lobby...");
-                
+
                             try {
                 if (serverConnection != null) {
                     // Send disconnect request to server
@@ -76,7 +83,7 @@ public class Main extends Game {
                 System.out.println("Error disconnecting player from lobby: " + e.getMessage());
             }
             }
-            
+
             if (serverConnection != null) {
                 serverConnection.shutdown();
             }
@@ -115,7 +122,7 @@ public class Main extends Game {
         if (App.getLoggedInUser() != null) {
             String username = App.getLoggedInUser().getUserName();
             System.out.println("Disconnecting player " + username + " from lobby...");
-            
+
             try {
                 if (serverConnection != null) {
                     // Send disconnect request to server
@@ -128,7 +135,7 @@ public class Main extends Game {
                 System.out.println("Error disconnecting player from lobby: " + e.getMessage());
             }
         }
-        
+
         // Properly shutdown server connection and server before disposing
         if (serverConnection != null) {
             serverConnection.shutdown();
@@ -136,7 +143,7 @@ public class Main extends Game {
         if (serverManager != null) {
             serverManager.stopServer();
         }
-        
+
         batch.dispose();
         backgroundTexture.dispose();
     }
@@ -166,20 +173,20 @@ public class Main extends Game {
     public static void setMain(Main main) {
         Main.main = main;
     }
-    
+
     public ServerConnection getServerConnection() {
         return serverConnection;
     }
-    
+
     public ServerConnection getNetworkClient() {
         return serverConnection;
     }
-    
+
     public String getCurrentGameId() {
         // TODO: Implement game ID tracking
         return "default";
     }
-    
+
     public ServerManager getServerManager() {
         return serverManager;
     }
