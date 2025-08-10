@@ -605,24 +605,19 @@ public class SimpleNetworkServer {
             Lobby lobby = lobbyManager.getLobby(request.getLobbyId());
             if (lobby != null) {
                 List<String> playerNames = new ArrayList<>(lobby.getPlayers());
-                NetworkResult<String> sessionResult = gameStartManager.createLoadSession(
-                    request.getLobbyId(), playerNames);
 
-                if (sessionResult.isSuccess()) {
-                    ctx.json(NetworkResult.success("Game started successfully - proceed to farm selection"));
+                lobby.getPlayersClickedLoad().add(request.getUsername());
+                System.out.println(playerNames);
+                System.out.println(lobby.getPlayersClickedLoad());
+                if (lobby.getPlayersClickedLoad().size() >= playerNames.size()) {
+                    ctx.json(NetworkResult.success("Game started successfully"));
                 } else {
-                    ctx.json(NetworkResult.error("Failed to create load selection session: " + sessionResult.getMessage()));
+                    ctx.json(NetworkResult.error("Failed to create load selection session: " ));
                 }
             } else {
                 ctx.json(NetworkResult.error("Lobby not found"));
             }
-            NetworkResult<LoadStatusResponse> result = gameStartManager.selectLoad(request);
-
-            if (result.isSuccess()) {
-                ctx.json(result);
-            } else {
-                ctx.status(400).json(result);
-            }
+        //    NetworkResult<LoadStatusResponse> result = gameStartManager.selectLoad(request);
 
         } catch (Exception e) {
             logger.error("Error selecting load", e);

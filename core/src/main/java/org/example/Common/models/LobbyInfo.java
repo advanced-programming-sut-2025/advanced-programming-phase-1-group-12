@@ -1,5 +1,6 @@
 package org.example.Common.models;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class LobbyInfo {
@@ -12,10 +13,10 @@ public class LobbyInfo {
     private boolean isVisible;
     private boolean isGameStarted;
     private long createdAt;
-    
+
     // Default constructor for Jackson deserialization
     public LobbyInfo() {}
-    
+
     public LobbyInfo(Lobby lobby) {
         this.id = lobby.getId();
         this.name = lobby.getName();
@@ -27,7 +28,7 @@ public class LobbyInfo {
         this.isGameStarted = lobby.isGameStarted();
         this.createdAt = lobby.getCreatedAt();
     }
-    
+
     // Getters
     public String getId() { return id; }
     public String getName() { return name; }
@@ -38,7 +39,7 @@ public class LobbyInfo {
     public boolean isVisible() { return isVisible; }
     public boolean isGameStarted() { return isGameStarted; }
     public long getCreatedAt() { return createdAt; }
-    
+
     // Setters for Jackson deserialization
     public void setId(String id) { this.id = id; }
     public void setName(String name) { this.name = name; }
@@ -49,7 +50,7 @@ public class LobbyInfo {
     public void setVisible(boolean isVisible) { this.isVisible = isVisible; }
     public void setGameStarted(boolean isGameStarted) { this.isGameStarted = isGameStarted; }
     public void setCreatedAt(long createdAt) { this.createdAt = createdAt; }
-    
+
     @Override
     public String toString() {
         return "LobbyInfo{" +

@@ -58,7 +58,6 @@ public class LobbyMenu implements Screen {
     private final TextButton startGameButton;
     private SelectBox loadGameButton = new SelectBox(skin);
     //name of the player to name of the game
-    private Map<String, String>loadedPlayers = new HashMap<>();
     private final Table mainTable;
     private final Table lobbyListTable;
     private final Table currentLobbyTable;
@@ -224,110 +223,59 @@ public class LobbyMenu implements Screen {
                 if (selected == null || selected.contains("No saved games")) {
                     return;
                 }
-                // Compose game save name
-                String gameName = "C:\\Users\\Lenovo\\Desktop\\advanced-programming-phase-1-group-12\\saves\\1" ;
-
-                if (!isInLobby || currentLobby == null) {
-                    updateStatus("You must be in a lobby to load a game", false);
-                    return;
-                }
-
-                String currentPlayer = App.getLoggedInUser().getUserName();
-
-                // Instead of loading locally, just request server to load game
-                LoadGameRequest request = new LoadGameRequest(currentPlayer, currentLobby.getId(), selected);
-
-                updateStatus("Requesting to load game...", true);
-
-                CompletableFuture.supplyAsync(() -> {
-                    try {
-                        ServerConnection connection = Main.getMain().getServerConnection();
-                        return connection.sendPostRequest("/lobby/load", request, LoadStatusResponse.class);
-                    } catch (Exception e) {
-                        return NetworkResult.error("Failed to load game: " + e.getMessage());
-                    }
-                }).thenAccept(result -> {
-                    Gdx.app.postRunnable(() -> {
-                        if (result.isSuccess()) {
-                            // Server response with load status
-                            LoadStatusResponse response = (LoadStatusResponse) result.getData();
-                            if (response.isAllPlayersReady()) {
-                                // After all players ready, fetch full game data from server or receive it from server response
-                            //    Game loadedGame = GameSaveManager.loadGameCompressed("saves/"+ gameName);
-                                List<String>players = GameSaveManager.loadPlayerUsernames(gameName);
-                                proceedWithGameLoad(players);
-                            } else {
-                                updateStatus(response.getMessage(), true);
-                                startLoadStatusPolling(currentLobby.getId(), selected);
-                            }
-                        } else {
-                            updateStatus("Load failed: " + result.getMessage(), false);
-                        }
-                    });
-                });
+                loadGame( "saves/" + selected);
             }
         });
 
-    }
-//    private void fetchAndLoadGameFromServer(String gameName) {
-//        CompletableFuture.supplyAsync(() -> {
-//            try {
-//                ServerConnection connection = Main.getMain().getServerConnection();
-//                return connection.sendGetRequest("/games/load?gameName=" + gameName, Game.class);
-//            } catch (Exception e) {
-//                return NetworkResult.error("Failed to fetch game data: " + e.getMessage());
-//            }
-//        }).thenAccept(result -> {
-//            Gdx.app.postRunnable(() -> {
-//                if (result.isSuccess()) {
-//                    Game loadedGame = (Game) result.getData();
-//                    proceedWithGameLoad(loadedGame);
-//                } else {
-//                    updateStatus("Failed to fetch game data: " + result.getMessage(), false);
-//                }
-//            });
-//        });
-//    }
 
-    private void startLoadStatusPolling(String lobbyId, String gameName) {
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                CompletableFuture.supplyAsync(() -> {
-                    try {
-                        ServerConnection connection = Main.getMain().getServerConnection();
-                        return connection.sendGetRequest(
-                            "/games/" + lobbyId + "/load-status?gameName=" + gameName,
-                            LoadStatusResponse.class
-                        );
-                    } catch (Exception e) {
-                        return NetworkResult.error("Polling error: " + e.getMessage());
-                    }
-                }).thenAccept(result -> {
-                    Gdx.app.postRunnable(() -> {
-                        if (result.isSuccess()) {
-                            LoadStatusResponse response = (LoadStatusResponse) result.getData();
-                            if (response.isAllPlayersReady()) {
-                                this.cancel();
-                                List<String>players = GameSaveManager.loadPlayerUsernames(gameName);
-                                proceedWithGameLoad(players);
-                            } else {
-                                updateStatus(response.getMessage(), true);
-                            }
-                        }
-                    });
-                });
+    }
+    private void loadGame(String game) {
+        if (!isInLobby || currentLobby == null) {
+            updateStatus("You must be in a lobby to load a game", false);
+            return;
+        }
+
+        updateStatus("Requesting to load game...", true);
+
+        String username = App.getLoggedInUser() != null ? App.getLoggedInUser().getUserName() : "anonymous";
+        LoadGameRequest request = new LoadGameRequest(username, currentLobby.getId());
+
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                ServerConnection connection = Main.getMain().getServerConnection();
+                return connection.sendPostRequest("/lobby/load", request, String.class);
+            } catch (Exception e) {
+                return NetworkResult.error("Failed to request game load: " + e.getMessage());
             }
-        }, 1, 1); // Check every second
-    }
-
-    private void proceedWithGameLoad(List<String> playersList ) {
-//        App.setCurrentGame(loadedGame);
-//        List<String> playersList = loadedGame.getPlayers().stream()
-//            .map(p -> p.getUser().getUserName())
-//            .collect(Collectors.toList());
-
-        new GameMenuController().loadGame(playersList);
+        }).thenAccept(result -> {
+            Gdx.app.postRunnable(() -> {
+                if (result.isSuccess()) {
+                    updateStatus("Load request sent. Waiting for all players...", true);
+                    // Maybe update UI to show "waiting for others"
+                    Game loadedGame = GameSaveManager.loadGameCompressed(game);
+                    for (Player player : loadedGame.getPlayers()) {
+                        if (player.getUser().getUserName().equals(App.getLoggedInUser().getUserName())) {
+                            App.setCurrentGame(loadedGame);
+                            List<String> playersList = new ArrayList<>();
+                            for (Player name : App.getCurrentGame().getPlayers()) {
+                                playersList.add(name.getUser().getUserName());
+                            }
+                            GameMenuController controller = new GameMenuController();
+                            controller.loadGame(playersList);
+                            Timer.schedule(new Timer.Task() {
+                                @Override
+                                public void run() {
+                                    Main.getMain().setScreen(new GameMenu(playersList));
+                                }
+                            }, 1.0f);
+                            return;
+                        }
+                    }
+                } else {
+                    updateStatus("Failed to request game load: " + result.getMessage(), false);
+                }
+            });
+        });
     }
 
     private void showCreateLobbyDialog() {

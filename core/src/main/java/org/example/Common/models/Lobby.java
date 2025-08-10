@@ -9,6 +9,7 @@ public class Lobby {
     private String name;
     private String adminUsername;
     private final Set<String> players;
+    private final Set<String> playersClickedLoad;
     private final long createdAt;
     private long lastActivity;
     private boolean isPrivate;
@@ -16,7 +17,7 @@ public class Lobby {
     private boolean isVisible;
     private boolean isGameStarted;
     private String gameId;
-    
+
     public Lobby(String id, String name, String adminUsername) {
         this.id = id;
         this.name = name;
@@ -27,11 +28,12 @@ public class Lobby {
         this.isPrivate = false;
         this.isVisible = true;
         this.isGameStarted = false;
-        
+        this.playersClickedLoad = new CopyOnWriteArraySet<>();
+
         // Add admin as first player
         this.players.add(adminUsername);
     }
-    
+
     // Getters
     public String getId() { return id; }
     public String getName() { return name; }
@@ -45,7 +47,7 @@ public class Lobby {
     public boolean isVisible() { return isVisible; }
     public boolean isGameStarted() { return isGameStarted; }
     public String getGameId() { return gameId; }
-    
+
     // Setters
     public void setName(String name) { this.name = name; }
     public void setPrivate(boolean isPrivate) { this.isPrivate = isPrivate; }
@@ -53,7 +55,7 @@ public class Lobby {
     public void setVisible(boolean isVisible) { this.isVisible = isVisible; }
     public void setGameStarted(boolean isGameStarted) { this.isGameStarted = isGameStarted; }
     public void setGameId(String gameId) { this.gameId = gameId; }
-    
+
     // Player management
     public boolean addPlayer(String username) {
         if (players.size() >= 4) {
@@ -65,12 +67,12 @@ public class Lobby {
         }
         return added;
     }
-    
+
     public boolean removePlayer(String username) {
         boolean removed = players.remove(username);
         if (removed) {
             updateActivity();
-            
+
             // If admin left, assign new admin
             if (username.equals(adminUsername)) {
                 assignNewAdmin();
@@ -78,15 +80,15 @@ public class Lobby {
         }
         return removed;
     }
-    
+
     public boolean isPlayerInLobby(String username) {
         return players.contains(username);
     }
-    
+
     public boolean isAdmin(String username) {
         return username.equals(adminUsername);
     }
-    
+
     private void assignNewAdmin() {
         if (players.isEmpty()) {
             adminUsername = null;
@@ -95,27 +97,27 @@ public class Lobby {
             adminUsername = players.iterator().next();
         }
     }
-    
+
     public void updateActivity() {
         this.lastActivity = System.currentTimeMillis();
     }
-    
+
     public boolean isInactive(long timeoutMs) {
         return System.currentTimeMillis() - lastActivity > timeoutMs;
     }
-    
+
     public boolean canStartGame() {
         return players.size() >= 2 && !isGameStarted;
     }
-    
+
     public boolean isFull() {
         return players.size() >= 4;
     }
-    
+
     public boolean isEmpty() {
         return players.isEmpty();
     }
-    
+
     @Override
     public String toString() {
         return "Lobby{" +
@@ -128,5 +130,9 @@ public class Lobby {
                 ", isVisible=" + isVisible +
                 ", isGameStarted=" + isGameStarted +
                 '}';
+    }
+
+    public Set<String> getPlayersClickedLoad() {
+        return playersClickedLoad;
     }
 }

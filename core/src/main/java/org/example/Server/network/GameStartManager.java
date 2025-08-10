@@ -19,11 +19,9 @@ public class GameStartManager {
     private static final Logger logger = LoggerFactory.getLogger(GameStartManager.class);
 
     private final ConcurrentHashMap<String, FarmSelectionSession> farmSelectionSessions;
-    private final ConcurrentHashMap<String, LoadSelectionSession> loadSelectionSessions;
     private final GameSessionManager gameSessionManager;
 
     public GameStartManager( GameSessionManager gameSessionManager) {
-        this.loadSelectionSessions = new ConcurrentHashMap<>();
         this.farmSelectionSessions = new ConcurrentHashMap<>();
         this.gameSessionManager = gameSessionManager;
     }
@@ -48,25 +46,6 @@ public class GameStartManager {
         } catch (Exception e) {
             logger.error("Error creating farm selection session for lobby " + lobbyId, e);
             return NetworkResult.error("Failed to create farm selection session: " + e.getMessage());
-        }
-    }
-    public NetworkResult<String> createLoadSession(String lobbyId, List<String> playerNames) {
-        try {
-            if (loadSelectionSessions.containsKey(lobbyId)) {
-                return NetworkResult.error("load selection session already exists for lobby " + lobbyId);
-            }
-
-            LoadSelectionSession session = new LoadSelectionSession(lobbyId, playerNames);
-            loadSelectionSessions.put(lobbyId, session);
-
-            logger.info("Created load selection session for lobby {} with {} players",
-                lobbyId, playerNames.size());
-
-            return NetworkResult.success("load selection session created", lobbyId);
-
-        } catch (Exception e) {
-            logger.error("Error creating load selection session for lobby " + lobbyId, e);
-            return NetworkResult.error("Failed to create load selection session: " + e.getMessage());
         }
     }
 
@@ -264,116 +243,5 @@ public class GameStartManager {
             return selectedFarms.size() >= playerNames.size();
         }
     }
-    private static class LoadSelectionSession {
-        final String lobbyId;
-        final List<String> playerNames;
-        final Map<String, String> selectedGames; // username -> gameId
-        final long createdAt;
-        String gameSessionId;
 
-        public LoadSelectionSession(String lobbyId, List<String> playerNames) {
-            this.lobbyId = lobbyId;
-            this.playerNames = new ArrayList<>(playerNames);
-            this.createdAt = System.currentTimeMillis();
-            this.selectedGames = new ConcurrentHashMap<>();
-        }
-
-        public boolean areAllLoadsSelected() {
-            if (selectedGames.size() < playerNames.size()) {
-                return false;
-            }
-            for (String username : playerNames) {
-                String gameId = selectedGames.get(username);
-                if (gameId == null) {
-                    return false;
-                }
-                List<String>playersOfGame = GameSaveManager.loadPlayerUsernames("C:\\Users\\Lenovo\\Desktop\\advanced-programming-phase-1-group-12\\savePlayers\\1.json");
-                assert playersOfGame != null;
-                boolean found = playersOfGame.contains(username);
-                if(!found) {
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-
-    public NetworkResult<LoadStatusResponse> selectLoad(LoadGameRequest request) {
-        try {
-            LoadSelectionSession session = loadSelectionSessions.get(request.getLobbyId());
-            if (session == null) {
-                return NetworkResult.error("No active load selection session for lobby " + request.getLobbyId());
-            }
-
-            session.selectedGames.put(request.getUsername(), request.getGameName());
-
-            logger.info("Player {} selected load {} in lobby {}",
-                request.getUsername(), request.getGameName(), request.getLobbyId());
-
-            if (session.areAllLoadsSelected()) {
-                logger.info("All loads selected for lobby {}. Starting game session...", request.getLobbyId());
-                return loadGameFromSession(request.getLobbyId());
-            }
-
-            LoadStatusResponse loadStatusResponse = new LoadStatusResponse(false, "load selected for this player");
-            return NetworkResult.success("you selected to load this game but wait for others to select it to", loadStatusResponse);
-
-        } catch (Exception e) {
-            logger.error("Error selecting load for lobby " + request.getLobbyId(), e);
-            return NetworkResult.error("Failed to select load: " + e.getMessage());
-        }
-    }
-
-    private NetworkResult<LoadStatusResponse> loadGameFromSession(String lobbyId) {
-        try {
-            LoadSelectionSession session = loadSelectionSessions.get(lobbyId);
-            if (session == null) {
-                return NetworkResult.error("No load selection session found for lobby " + lobbyId);
-            }
-
-            if (!session.areAllLoadsSelected()) {
-                return NetworkResult.error("Not all players have selected a game to load");
-            }
-
-            // We’ll load the game based on the first player's choice
-            String firstPlayer = session.playerNames.get(0);
-            String gameIdToLoad = session.selectedGames.get(firstPlayer);
-            System.out.println("haha Player " + firstPlayer + " selected farm " + gameIdToLoad + " in lobby " + lobbyId);
-
-
-            if (gameIdToLoad == null) {
-                return NetworkResult.error("No game selected for the first player");
-            }
-
-            // Make sure all players in the loaded game match the session players
-            List<String> loadedPlayerNames = GameSaveManager.loadPlayerUsernames("C:\\Users\\Lenovo\\Desktop\\advanced-programming-phase-1-group-12\\savePlayers\\1.json");
-
-            if (!loadedPlayerNames.containsAll(session.playerNames)) {
-                return NetworkResult.error("Loaded game players do not match session players");
-            }
-
-            // Clear existing player mappings to avoid conflicts
-            gameSessionManager.clearPlayerMappings(session.playerNames);
-
-            // Create a game session using the loaded game
-            NetworkResult<String> gameSessionResult =
-                gameSessionManager.createGameFromLoad(gameIdToLoad);
-
-            if (!gameSessionResult.isSuccess()) {
-                return NetworkResult.error("Failed to create loaded game session: " + gameSessionResult.getMessage());
-            }
-
-            session.gameSessionId = gameSessionResult.getData();
-            logger.info("Loaded game session {} for lobby {}", session.gameSessionId, lobbyId);
-
-       //     return NetworkResult.success("Game session loaded successfully", session.gameSessionId);
-            LoadStatusResponse loadStatusResponse = new LoadStatusResponse(true, "load selected for all players");
-            return NetworkResult.success("game loaded successfully", loadStatusResponse);
-
-        } catch (Exception e) {
-            logger.error("Error loading game from session for lobby " + lobbyId, e);
-            return NetworkResult.error("Failed to load game session: " + e.getMessage());
-        }
-
-    }
 }
