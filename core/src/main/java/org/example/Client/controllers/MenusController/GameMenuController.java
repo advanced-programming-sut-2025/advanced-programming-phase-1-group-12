@@ -306,6 +306,10 @@ public class GameMenuController {
     }
 
     public void Play(List<String> usernames, Map<String, Integer> farmSelections) {
+        Play(usernames, farmSelections, false); // Default to offline game
+    }
+
+    public void Play(List<String> usernames, Map<String, Integer> farmSelections, boolean forceMultiplayer) {
         Game newGame = App.getCurrentGame();
         App.setCurrentGame(newGame);
         newGame.setCreator(App.getLoggedInUser());
@@ -423,130 +427,128 @@ public class GameMenuController {
             }
         }
 
-        // Set multiplayer flag based on number of players
-        if (usernames.size() > 1) {
+        // Set multiplayer flag based on forceMultiplayer parameter and server connection availability
+        if (forceMultiplayer && usernames.size() > 1 && Main.getMain() != null && Main.getMain().getServerConnection() != null) {
             App.getCurrentGame().setMultiplayer(true);
             System.out.println("Multiplayer game started with " + usernames.size() + " players");
 
             // Initialize NetworkCommandSender for multiplayer communication
-            if (Main.getMain() != null && Main.getMain().getServerConnection() != null) {
-                org.example.Client.network.NetworkCommandSender networkSender =
-                    new org.example.Client.network.NetworkCommandSender(Main.getMain().getServerConnection());
-                App.getCurrentGame().setNetworkCommandSender(networkSender);
-                System.out.println("NetworkCommandSender initialized for multiplayer game");
+            org.example.Client.network.NetworkCommandSender networkSender =
+                new org.example.Client.network.NetworkCommandSender(Main.getMain().getServerConnection());
+            App.getCurrentGame().setNetworkCommandSender(networkSender);
+            System.out.println("NetworkCommandSender initialized for multiplayer game");
 
-                // Create game on server and get the server-provided game ID
-                try {
-                    System.out.println("DEBUG: Creating game on server with usernames: " + usernames);
-                    NetworkResult<org.example.Common.network.responses.GameStateResponse> createResult =
-                        networkSender.createGame(usernames, farmSelections);
+            // Create game on server and get the server-provided game ID
+            try {
+                System.out.println("DEBUG: Creating game on server with usernames: " + usernames);
+                NetworkResult<org.example.Common.network.responses.GameStateResponse> createResult =
+                    networkSender.createGame(usernames, farmSelections);
 
-                    if (createResult.isSuccess()) {
-                        org.example.Common.network.responses.GameStateResponse gameData = createResult.getData();
-                        System.out.println("DEBUG: [GAME_CREATION] Game creation successful");
-                        System.out.println("DEBUG: [GAME_CREATION] Response data: " + gameData);
-                        System.out.println("DEBUG: [GAME_CREATION] GameData is null: " + (gameData == null));
+                if (createResult.isSuccess()) {
+                    org.example.Common.network.responses.GameStateResponse gameData = createResult.getData();
+                    System.out.println("DEBUG: [GAME_CREATION] Game creation successful");
+                    System.out.println("DEBUG: [GAME_CREATION] Response data: " + gameData);
+                    System.out.println("DEBUG: [GAME_CREATION] GameData is null: " + (gameData == null));
 
-                        if (gameData != null) {
-                            String serverGameId = gameData.getGameId();
-                            System.out.println("DEBUG: [GAME_CREATION] Extracted server game ID: " + serverGameId);
+                    if (gameData != null) {
+                        String serverGameId = gameData.getGameId();
+                        System.out.println("DEBUG: [GAME_CREATION] Extracted server game ID: " + serverGameId);
 
-                            networkSender.setCurrentGameId(serverGameId);
-                            System.out.println("DEBUG: [GAME_CREATION] Set server game ID in NetworkCommandSender: " + serverGameId);
+                        networkSender.setCurrentGameId(serverGameId);
+                        System.out.println("DEBUG: [GAME_CREATION] Set server game ID in NetworkCommandSender: " + serverGameId);
 
-                            // Verify it was set correctly
-                            String verifyId = networkSender.getCurrentGameId();
-                            System.out.println("DEBUG: [GAME_CREATION] Verified NetworkCommandSender game ID: " + verifyId);
+                        // Verify it was set correctly
+                        String verifyId = networkSender.getCurrentGameId();
+                        System.out.println("DEBUG: [GAME_CREATION] Verified NetworkCommandSender game ID: " + verifyId);
 
-                            // Sync local game state with server response
-                            System.out.println("DEBUG: [GAME_CREATION] Syncing local game state with server data");
-                            System.out.println("DEBUG: [GAME_CREATION] Server connectedPlayers: " + gameData.getConnectedPlayers());
-                            System.out.println("DEBUG: [GAME_CREATION] Local players before sync: " + App.getCurrentGame().getPlayers().size());
+                        // Sync local game state with server response
+                        System.out.println("DEBUG: [GAME_CREATION] Syncing local game state with server data");
+                        System.out.println("DEBUG: [GAME_CREATION] Server connectedPlayers: " + gameData.getConnectedPlayers());
+                        System.out.println("DEBUG: [GAME_CREATION] Local players before sync: " + App.getCurrentGame().getPlayers().size());
 
-                            // Ensure the local players list matches the server's connected players
-                            if (gameData.getConnectedPlayers() != null && !gameData.getConnectedPlayers().isEmpty()) {
-                                // Clear and rebuild the players list to match server state
-                                ArrayList<Player> syncedPlayers = new ArrayList<>();
-                                for (String username : gameData.getConnectedPlayers()) {
-                                    // Find existing player or create new one
-                                    Player existingPlayer = null;
-                                    for (Player p : players) {
-                                        if (p.getUser().getUserName().equals(username)) {
-                                            existingPlayer = p;
-                                            break;
-                                        }
-                                    }
-
-                                    if (existingPlayer != null) {
-                                        syncedPlayers.add(existingPlayer);
-                                        // Added existing player
-                                    } else {
-                                        // Create new player if not found
-                                        User user = App.getUserByUsername(username);
-                                        if (user == null) {
-                                            user = new User(null, username, username, "defaultPassword", username + "@example.com", "", "", false, "");
-                                            App.getUsers().put(user.getUserName(), user);
-                                        }
-
-                                        Player newPlayer = new Player(user, new Location(0, 0), false, new Refrigrator(), new ArrayList<>(), null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
-                                        newPlayer.setPlayerTexture(new Texture("sprites/Robin.png"));
-                                        newPlayer.setPortraitFrame(GameAssetManager.getRobinPortrait());
-                                        syncedPlayers.add(newPlayer);
-                                        // Created new player
-                                    }
-                                }
-
-                                // Update the game's players list
-                                App.getCurrentGame().setPlayers(syncedPlayers);
-                                System.out.println("DEBUG: [GAME_CREATION] Synced players list size: " + syncedPlayers.size());
-
-                                // Set current player to logged-in user
-                                String loggedInUsername = App.getLoggedInUser().getUserName();
-                                Player currentPlayer = null;
-                                for (Player p : syncedPlayers) {
-                                    if (p.getUser().getUserName().equals(loggedInUsername)) {
-                                        currentPlayer = p;
+                        // Ensure the local players list matches the server's connected players
+                        if (gameData.getConnectedPlayers() != null && !gameData.getConnectedPlayers().isEmpty()) {
+                            // Clear and rebuild the players list to match server state
+                            ArrayList<Player> syncedPlayers = new ArrayList<>();
+                            for (String username : gameData.getConnectedPlayers()) {
+                                // Find existing player or create new one
+                                Player existingPlayer = null;
+                                for (Player p : players) {
+                                    if (p.getUser().getUserName().equals(username)) {
+                                        existingPlayer = p;
                                         break;
                                     }
                                 }
 
-                                if (currentPlayer != null) {
-                                    App.getCurrentGame().setCurrentPlayer(currentPlayer);
-                                    System.out.println("DEBUG: [GAME_CREATION] Set current player to: " + loggedInUsername);
-                                } else if (!syncedPlayers.isEmpty()) {
-                                    App.getCurrentGame().setCurrentPlayer(syncedPlayers.get(0));
-                                    System.out.println("DEBUG: [GAME_CREATION] Set current player to first player: " + syncedPlayers.get(0).getUser().getUserName());
+                                if (existingPlayer != null) {
+                                    syncedPlayers.add(existingPlayer);
+                                    // Added existing player
+                                } else {
+                                    // Create new player if not found
+                                    User user = App.getUserByUsername(username);
+                                    if (user == null) {
+                                        user = new User(null, username, username, "defaultPassword", username + "@example.com", "", "", false, "");
+                                        App.getUsers().put(user.getUserName(), user);
+                                    }
+
+                                    Player newPlayer = new Player(user, new Location(0, 0), false, new Refrigrator(), new ArrayList<>(), null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
+                                    newPlayer.setPlayerTexture(new Texture("sprites/Robin.png"));
+                                    newPlayer.setPortraitFrame(GameAssetManager.getRobinPortrait());
+                                    syncedPlayers.add(newPlayer);
+                                    // Created new player
                                 }
                             }
 
-                            // Connect to WebSocket for this game
-                            networkSender.connectToGameWebSocket(serverGameId);
-                            System.out.println("DEBUG: [GAME_CREATION] Connected to WebSocket for game: " + serverGameId);
+                            // Update the game's players list
+                            App.getCurrentGame().setPlayers(syncedPlayers);
+                            System.out.println("DEBUG: [GAME_CREATION] Synced players list size: " + syncedPlayers.size());
 
-                            // Create GameMenu - server game ID will be retrieved from NetworkCommandSender
-                            GameMenu gameMenu = new GameMenu(usernames);
-                            Main.getMain().setScreen(gameMenu);
-                            return; // Exit early since we've set the screen
-                        } else {
-                            System.out.println("DEBUG: [GAME_CREATION] GameData is null, falling back to local game");
-                            // Switch to single player mode since server game creation failed
-                            App.getCurrentGame().setMultiplayer(false);
+                            // Set current player to logged-in user
+                            String loggedInUsername = App.getLoggedInUser().getUserName();
+                            Player currentPlayer = null;
+                            for (Player p : syncedPlayers) {
+                                if (p.getUser().getUserName().equals(loggedInUsername)) {
+                                    currentPlayer = p;
+                                    break;
+                                }
+                            }
+
+                            if (currentPlayer != null) {
+                                App.getCurrentGame().setCurrentPlayer(currentPlayer);
+                                System.out.println("DEBUG: [GAME_CREATION] Set current player to: " + loggedInUsername);
+                            } else if (!syncedPlayers.isEmpty()) {
+                                App.getCurrentGame().setCurrentPlayer(syncedPlayers.get(0));
+                                System.out.println("DEBUG: [GAME_CREATION] Set current player to first player: " + syncedPlayers.get(0).getUser().getUserName());
+                            }
                         }
+
+                        // Connect to WebSocket for this game
+                        networkSender.connectToGameWebSocket(serverGameId);
+                        System.out.println("DEBUG: [GAME_CREATION] Connected to WebSocket for game: " + serverGameId);
+
+                        // Create GameMenu - server game ID will be retrieved from NetworkCommandSender
+                        GameMenu gameMenu = new GameMenu(usernames);
+                        Main.getMain().setScreen(gameMenu);
+                        return; // Exit early since we've set the screen
                     } else {
-                        System.out.println("DEBUG: [GAME_CREATION] Failed to create game on server: " + createResult.getMessage()); // moshkel ine
-                        // Fall back to local game
+                        System.out.println("DEBUG: [GAME_CREATION] GameData is null, falling back to local game");
+                        // Switch to single player mode since server game creation failed
                         App.getCurrentGame().setMultiplayer(false);
                     }
-                } catch (Exception e) {
-                    System.out.println("DEBUG: Exception creating game on server: " + e.getMessage()); // pleye
+                } else {
+                    System.out.println("DEBUG: [GAME_CREATION] Failed to create game on server: " + createResult.getMessage()); // moshkel ine
                     // Fall back to local game
                     App.getCurrentGame().setMultiplayer(false);
                 }
-            } else {
-                System.out.println("DEBUG: No server connection available, using local game"); // ok bood
-                // Switch to single player mode since no server connection
+            } catch (Exception e) {
+                System.out.println("DEBUG: Exception creating game on server: " + e.getMessage()); // pleye
+                // Fall back to local game
                 App.getCurrentGame().setMultiplayer(false);
             }
+        } else if (usernames.size() > 1) {
+            // Multiple players but no server connection - offline multi-character mode
+            App.getCurrentGame().setMultiplayer(false);
+            System.out.println("Offline multi-character game started with " + usernames.size() + " characters");
         } else {
             // Single player game
             App.getCurrentGame().setMultiplayer(false);
@@ -559,8 +561,8 @@ public class GameMenuController {
 
         // For single player or when multiplayer setup failed, create local GameMenu
         if (!App.getCurrentGame().isMultiplayer()) {
-//            Main.getMain().setScreen(new GameMenu(usernames));
-            System.out.println("WHYYYYYY");
+            Main.getMain().setScreen(new GameMenu(usernames));
+            System.out.println("Offline game started - GameMenu created");
             System.out.println("isMultiplayer: " + App.getCurrentGame().isMultiplayer());
         } else {
             System.out.println("DEBUG: Multiplayer game - GameMenu should already be created with server game ID");
@@ -1677,7 +1679,7 @@ public class GameMenuController {
 
     public void PlayNetworkMultiplayer(List<String> usernames, Map<String, Integer> farmSelections) {
         // Initialize the game with network multiplayer functionality
-        Play(usernames, farmSelections);
+        Play(usernames, farmSelections, true); // Force multiplayer
     }
 
     public void loadGame(List<String> playersList) {
