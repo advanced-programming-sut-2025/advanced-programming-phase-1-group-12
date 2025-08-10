@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -4327,6 +4328,233 @@ public class GameMenu extends InputAdapter implements Screen {
         npcMenuStage.addActor(mainTable);
     }
 
+    private void showNPCChatInterface(String npcName) {
+        // Create a full-screen chat interface
+        showingNPCFullScreenMenu = true;
+
+        // Try to get the NPC from the village, but create a fallback if needed
+        if (App.getCurrentGame().getNPCvillage() != null) {
+            targetNPCForMenu = App.getCurrentGame().getNPCvillage().getNPCByName(npcName);
+        }
+
+        // If we still don't have an NPC, create a temporary one for display purposes
+        if (targetNPCForMenu == null) {
+            // Create a temporary NPC object just for the chat display
+            Location tempLocation = new Location(0, 0);
+            Shack tempShack = new Shack(new LocationOfRectangle(tempLocation, tempLocation));
+            targetNPCForMenu = new org.example.Common.models.NPC.NPC(npcName, "Unknown", "Unknown", tempLocation, tempShack);
+        }
+
+        if (npcBackgroundTexture == null) {
+            npcBackgroundTexture = new Texture("NPC/RelationShip/backFriendship.png");
+        }
+
+        if (npcMenuStage == null) {
+            npcMenuStage = new Stage(new ScreenViewport());
+        }
+
+        // Store the original input processor before changing it
+        originalNPCInputProcessor = Gdx.input.getInputProcessor();
+        Gdx.input.setInputProcessor(npcMenuStage);
+
+        // Create the chat UI
+        createNPCChatUI(npcName);
+    }
+
+    private void createNPCChatUI(String npcName) {
+        if (npcMenuStage == null) return;
+
+        npcMenuStage.clear();
+
+        Table mainTable = new Table();
+        mainTable.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        mainTable.setPosition(0, 0);
+
+        Label titleLabel = new Label("Chat with " + npcName, skin);
+        titleLabel.setFontScale(2.0f);
+        titleLabel.setAlignment(Align.center);
+        titleLabel.setColor(Color.WHITE);
+        mainTable.add(titleLabel).colspan(3).pad(30).row();
+
+        // Create portrait image
+        Image portraitImage = createNPCPortrait(npcName);
+        if (portraitImage != null) {
+            portraitImage.setSize(150, 150);
+            mainTable.add(portraitImage).colspan(3).center().pad(10).row();
+        }
+
+        // Create chat history display
+        Label chatHistoryLabel = new Label("", skin);
+        chatHistoryLabel.setWrap(true);
+        chatHistoryLabel.setAlignment(Align.topLeft);
+        chatHistoryLabel.setFontScale(1.0f);
+        chatHistoryLabel.setColor(Color.WHITE);
+
+        ScrollPane chatScrollPane = new ScrollPane(chatHistoryLabel, skin);
+        chatScrollPane.setScrollingDisabled(true, false);
+        chatScrollPane.setFadeScrollBars(false);
+
+        mainTable.add(chatScrollPane).expand().fill().pad(20).width(800f).height(300f).row();
+
+        // Create input field
+        TextField inputField = new TextField("", skin);
+        inputField.setMessageText("Type your message here...");
+        inputField.setSize(600f, 50f);
+        inputField.setMaxLength(200);
+
+        // Create send button
+        TextButton sendButton = new TextButton("Send", skin);
+        sendButton.setSize(150f, 50f);
+        sendButton.getLabel().setFontScale(1.2f);
+
+        // Create input row
+        Table inputRow = new Table();
+        inputRow.add(inputField).padRight(10);
+        inputRow.add(sendButton);
+        mainTable.add(inputRow).pad(20).row();
+
+        // Create close button
+        TextButton closeButton = new TextButton("Close Chat", skin);
+        closeButton.setSize(200f, 60f);
+        closeButton.getLabel().setFontScale(1.3f);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                closeNPCFullScreenMenu();
+            }
+        });
+
+        mainTable.add(closeButton).pad(20);
+        npcMenuStage.addActor(mainTable);
+
+        // Store references for the send button listener
+        final Label finalChatHistoryLabel = chatHistoryLabel;
+        final TextField finalInputField = inputField;
+        final ScrollPane finalChatScrollPane = chatScrollPane;
+
+        // Add send button listener
+        sendButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                String message = finalInputField.getText().trim();
+                if (!message.isEmpty()) {
+                    // Add player message to chat
+                    String currentChat = finalChatHistoryLabel.getText().toString();
+                    String playerMessage = "You: " + message + "\n";
+                    finalChatHistoryLabel.setText(currentChat + playerMessage);
+                    
+                    // Clear input field
+                    finalInputField.setText("");
+                    
+                    // Generate NPC response
+                    generateNPCResponse(npcName, message, finalChatHistoryLabel, finalChatScrollPane);
+                }
+            }
+        });
+
+        // Add enter key listener to input field
+        inputField.addListener(new InputListener() {
+            @Override
+            public boolean keyDown(InputEvent event, int keycode) {
+                if (keycode == Input.Keys.ENTER) {
+                    String message = finalInputField.getText().trim();
+                    if (!message.isEmpty()) {
+                        // Add player message to chat
+                        String currentChat = finalChatHistoryLabel.getText().toString();
+                        String playerMessage = "You: " + message + "\n";
+                        finalChatHistoryLabel.setText(currentChat + playerMessage);
+                        
+                        // Clear input field
+                        finalInputField.setText("");
+                        
+                        // Generate NPC response
+                        generateNPCResponse(npcName, message, finalChatHistoryLabel, finalChatScrollPane);
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        // Set focus to input field
+        inputField.setTextFieldListener(new TextField.TextFieldListener() {
+            @Override
+            public void keyTyped(TextField textField, char c) {
+                // Auto-focus the input field
+                if (!textField.hasKeyboardFocus()) {
+                    textField.setCursorPosition(textField.getText().length());
+                }
+            }
+        });
+        
+        // Set initial focus
+        inputField.setCursorPosition(0);
+    }
+
+    private void generateNPCResponse(String npcName, String playerMessage, Label chatHistoryLabel, ScrollPane chatScrollPane) {
+        // Show typing indicator
+        String currentChat = chatHistoryLabel.getText().toString();
+        chatHistoryLabel.setText(currentChat + npcName + " is typing...\n");
+        
+        // Generate response using AI
+        new Thread(() -> {
+            try {
+                String response = generateAIResponse(npcName, playerMessage);
+                
+                // Update UI on the main thread
+                Gdx.app.postRunnable(() -> {
+                    String updatedChat = chatHistoryLabel.getText().toString();
+                    // Remove typing indicator and add response
+                    updatedChat = updatedChat.replace(npcName + " is typing...\n", "");
+                    chatHistoryLabel.setText(updatedChat + npcName + ": " + response + "\n");
+                    
+                    // Scroll to bottom
+                    chatScrollPane.scrollTo(0, 0, 0, 0);
+                });
+            } catch (Exception e) {
+                // Handle error on main thread
+                Gdx.app.postRunnable(() -> {
+                    String updatedChat = chatHistoryLabel.getText().toString();
+                    updatedChat = updatedChat.replace(npcName + " is typing...\n", "");
+                    chatHistoryLabel.setText(updatedChat + npcName + ": Sorry, I'm having trouble responding right now.\n");
+                });
+            }
+        }).start();
+    }
+
+    private String generateAIResponse(String npcName, String playerMessage) {
+        try {
+            // Get NPC details
+            org.example.Common.models.NPC.NPC npc = null;
+            if (App.getCurrentGame().getNPCvillage() != null) {
+                npc = App.getCurrentGame().getNPCvillage().getNPCByName(npcName);
+            }
+            
+            if (npc == null) {
+                return "Hello! I'm " + npcName + ". Nice to meet you!";
+            }
+            
+            // Get current game context
+            int hour = App.getCurrentGame().getDate().getHour();
+            String season = App.getCurrentGame().getDate().getSeason().name().toLowerCase();
+            String weather = App.getCurrentGame().getDate().getWeather().name().toLowerCase();
+            
+            // Build context for AI
+            String context = String.format(
+                "NPC: %s, Job: %s, Personality: %s, Season: %s, Weather: %s, Hour: %d. " +
+                "Player message: %s",
+                npcName, npc.getJob(), npc.getPersonality(), season, weather, hour, playerMessage
+            );
+            
+            // Use the existing NpcAI class
+            return org.example.Common.models.Utils.NpcAI.generateDialogue(npc, context);
+            
+        } catch (Exception e) {
+            System.err.println("Error generating AI response: " + e.getMessage());
+            return "Hello! I'm " + npcName + ". Nice to meet you!";
+        }
+    }
+
     private void showNPCGiftMenu(org.example.Common.models.NPC.NPC npc) {
         // Create a full-screen gift menu
         showingNPCFullScreenMenu = true;
@@ -4648,9 +4876,7 @@ public class GameMenu extends InputAdapter implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 closeNPCFullScreenMenu();
-                NPCcontroller npcController = new NPCcontroller();
-                String dialogue = npcController.meetNPC(npcName);
-                showNPCDialogue(npcName, dialogue);
+                showNPCChatInterface(npcName);
             }
         });
 
