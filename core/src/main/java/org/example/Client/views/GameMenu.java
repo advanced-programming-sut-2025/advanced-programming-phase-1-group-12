@@ -4323,7 +4323,7 @@ public class GameMenu extends InputAdapter implements Screen {
         mainTable.setPosition(0, 0);
 
         Label titleLabel = new Label(npcName + " says:", skin);
-        titleLabel.setFontScale(2.0f);
+        titleLabel.setFontScale(2.5f);
         titleLabel.setAlignment(Align.center);
         titleLabel.setColor(Color.WHITE);
         mainTable.add(titleLabel).colspan(3).pad(50).row();
@@ -4331,7 +4331,7 @@ public class GameMenu extends InputAdapter implements Screen {
         // Create portrait image
         Image portraitImage = createNPCPortrait(npcName);
         if (portraitImage != null) {
-            portraitImage.setSize(200, 200);
+            portraitImage.setSize(300, 300);
             mainTable.add(portraitImage).colspan(3).center().pad(20).row();
         }
 
@@ -4339,7 +4339,7 @@ public class GameMenu extends InputAdapter implements Screen {
         Label dialogueLabel = new Label(dialogue, skin);
         dialogueLabel.setWrap(true);
         dialogueLabel.setAlignment(Align.center);
-        dialogueLabel.setFontScale(1.2f);
+        dialogueLabel.setFontScale(1.8f);
         dialogueLabel.setColor(Color.WHITE);
 
         // Create a scroll pane for long dialogues
@@ -4347,11 +4347,11 @@ public class GameMenu extends InputAdapter implements Screen {
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFadeScrollBars(false);
 
-        mainTable.add(scrollPane).expand().fill().pad(50).width(800f).height(400f).row();
+        mainTable.add(scrollPane).expand().fill().pad(50).width(1000f).height(500f).row();
 
         TextButton closeButton = new TextButton("Close", skin);
-        closeButton.setSize(300f, 80f);
-        closeButton.getLabel().setFontScale(1.5f);
+        closeButton.setSize(350f, 90f);
+        closeButton.getLabel().setFontScale(1.8f);
         closeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -4406,7 +4406,7 @@ public class GameMenu extends InputAdapter implements Screen {
         mainTable.setPosition(0, 0);
 
         Label titleLabel = new Label("Chat with " + npcName, skin);
-        titleLabel.setFontScale(2.0f);
+        titleLabel.setFontScale(2.5f);
         titleLabel.setAlignment(Align.center);
         titleLabel.setColor(Color.WHITE);
         mainTable.add(titleLabel).colspan(3).pad(30).row();
@@ -4414,7 +4414,7 @@ public class GameMenu extends InputAdapter implements Screen {
         // Create portrait image
         Image portraitImage = createNPCPortrait(npcName);
         if (portraitImage != null) {
-            portraitImage.setSize(150, 150);
+            portraitImage.setSize(250, 250);
             mainTable.add(portraitImage).colspan(3).center().pad(10).row();
         }
 
@@ -4422,25 +4422,25 @@ public class GameMenu extends InputAdapter implements Screen {
         Label chatHistoryLabel = new Label("", skin);
         chatHistoryLabel.setWrap(true);
         chatHistoryLabel.setAlignment(Align.topLeft);
-        chatHistoryLabel.setFontScale(1.0f);
+        chatHistoryLabel.setFontScale(1.5f);
         chatHistoryLabel.setColor(Color.WHITE);
 
         ScrollPane chatScrollPane = new ScrollPane(chatHistoryLabel, skin);
         chatScrollPane.setScrollingDisabled(true, false);
         chatScrollPane.setFadeScrollBars(false);
 
-        mainTable.add(chatScrollPane).expand().fill().pad(20).width(800f).height(300f).row();
+        mainTable.add(chatScrollPane).expand().fill().pad(20).width(1000f).height(400f).row();
 
         // Create input field
         TextField inputField = new TextField("", skin);
         inputField.setMessageText("Type your message here...");
-        inputField.setSize(600f, 50f);
+        inputField.setSize(800f, 60f);
         inputField.setMaxLength(200);
 
         // Create send button
         TextButton sendButton = new TextButton("Send", skin);
-        sendButton.setSize(150f, 50f);
-        sendButton.getLabel().setFontScale(1.2f);
+        sendButton.setSize(200f, 60f);
+        sendButton.getLabel().setFontScale(1.5f);
 
         // Create input row
         Table inputRow = new Table();
@@ -4450,8 +4450,8 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Create close button
         TextButton closeButton = new TextButton("Close Chat", skin);
-        closeButton.setSize(200f, 60f);
-        closeButton.getLabel().setFontScale(1.3f);
+        closeButton.setSize(250f, 70f);
+        closeButton.getLabel().setFontScale(1.6f);
         closeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -4627,7 +4627,7 @@ public class GameMenu extends InputAdapter implements Screen {
         mainTable.setPosition(0, 0);
 
         Label titleLabel = new Label("Give Gift to " + npc.getName(), skin);
-        titleLabel.setFontScale(2.0f);
+        titleLabel.setFontScale(2.5f);
         titleLabel.setAlignment(Align.center);
         titleLabel.setColor(Color.WHITE);
         mainTable.add(titleLabel).colspan(3).pad(50).row();
@@ -4635,12 +4635,12 @@ public class GameMenu extends InputAdapter implements Screen {
         // Create portrait image
         Image portraitImage = createNPCPortrait(npc.getName());
         if (portraitImage != null) {
-            portraitImage.setSize(200, 200);
+            portraitImage.setSize(300, 300);
             mainTable.add(portraitImage).colspan(3).center().pad(20).row();
         }
 
         Label instructionLabel = new Label("Select an item to gift:", skin);
-        instructionLabel.setFontScale(1.5f);
+        instructionLabel.setFontScale(2.0f);
         instructionLabel.setAlignment(Align.center);
         instructionLabel.setColor(Color.WHITE);
         mainTable.add(instructionLabel).colspan(3).center().pad(20).row();
@@ -4735,7 +4735,7 @@ public class GameMenu extends InputAdapter implements Screen {
         mainTable.setPosition(0, 0);
 
         Label titleLabel = new Label("Friendship with " + npc.getName(), skin);
-        titleLabel.setFontScale(2.0f);
+        titleLabel.setFontScale(2.5f);
         titleLabel.setAlignment(Align.center);
         titleLabel.setColor(Color.WHITE);
         mainTable.add(titleLabel).colspan(3).pad(50).row();
@@ -4743,7 +4743,7 @@ public class GameMenu extends InputAdapter implements Screen {
         // Create portrait image
         Image portraitImage = createNPCPortrait(npc.getName());
         if (portraitImage != null) {
-            portraitImage.setSize(200, 200);
+            portraitImage.setSize(300, 300);
             mainTable.add(portraitImage).colspan(3).center().pad(20).row();
         }
 
@@ -4751,20 +4751,20 @@ public class GameMenu extends InputAdapter implements Screen {
         int friendshipLevel = npc.getFriendshipLevel(currentPlayer);
 
         Label pointsLabel = new Label("Friendship Points: " + friendshipPoints, skin);
-        pointsLabel.setFontScale(1.5f);
+        pointsLabel.setFontScale(2.0f);
         pointsLabel.setAlignment(Align.center);
         pointsLabel.setColor(Color.WHITE);
         mainTable.add(pointsLabel).colspan(3).center().pad(20).row();
 
         Label levelLabel = new Label("Friendship Level: " + friendshipLevel, skin);
-        levelLabel.setFontScale(1.5f);
+        levelLabel.setFontScale(2.0f);
         levelLabel.setAlignment(Align.center);
         levelLabel.setColor(Color.WHITE);
         mainTable.add(levelLabel).colspan(3).center().pad(20).row();
 
         TextButton closeButton = new TextButton("Close", skin);
-        closeButton.setSize(300f, 80f);
-        closeButton.getLabel().setFontScale(1.5f);
+        closeButton.setSize(350f, 90f);
+        closeButton.getLabel().setFontScale(1.8f);
         closeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -4867,13 +4867,13 @@ public class GameMenu extends InputAdapter implements Screen {
         mainTable.setPosition(0, 0);
 
         Label titleLabel = new Label("NPC Interaction", skin);
-        titleLabel.setFontScale(2.0f);
+        titleLabel.setFontScale(2.5f);
         titleLabel.setAlignment(Align.center);
         titleLabel.setColor(Color.WHITE);
         mainTable.add(titleLabel).colspan(3).pad(50).row();
 
         Label subtitleLabel = new Label("Interaction with " + targetNPCForMenu.getName(), skin);
-        subtitleLabel.setFontScale(1.5f);
+        subtitleLabel.setFontScale(2.0f);
         subtitleLabel.setAlignment(Align.center);
         subtitleLabel.setColor(Color.WHITE);
         mainTable.add(subtitleLabel).colspan(3).pad(20).row();
@@ -4881,7 +4881,7 @@ public class GameMenu extends InputAdapter implements Screen {
         // Create portrait image
         Image portraitImage = createNPCPortrait(targetNPCForMenu.getName());
         if (portraitImage != null) {
-            portraitImage.setSize(200, 200);
+            portraitImage.setSize(300, 300);
             mainTable.add(portraitImage).colspan(3).center().pad(20).row();
         }
 
@@ -4890,8 +4890,8 @@ public class GameMenu extends InputAdapter implements Screen {
         TextButton friendshipButton = new TextButton("Friendship", skin);
         TextButton cancelButton = new TextButton("Cancel", skin);
 
-        float buttonWidth = 300f;
-        float buttonHeight = 80f;
+        float buttonWidth = 350f;
+        float buttonHeight = 90f;
         float buttonSpacing = 30f;
 
         talkButton.setSize(buttonWidth, buttonHeight);
@@ -4899,10 +4899,10 @@ public class GameMenu extends InputAdapter implements Screen {
         friendshipButton.setSize(buttonWidth, buttonHeight);
         cancelButton.setSize(buttonWidth, buttonHeight);
 
-        talkButton.getLabel().setFontScale(1.5f);
-        giftButton.getLabel().setFontScale(1.5f);
-        friendshipButton.getLabel().setFontScale(1.5f);
-        cancelButton.getLabel().setFontScale(1.2f);
+        talkButton.getLabel().setFontScale(1.8f);
+        giftButton.getLabel().setFontScale(1.8f);
+        friendshipButton.getLabel().setFontScale(1.8f);
+        cancelButton.getLabel().setFontScale(1.5f);
 
         // Store the NPC name locally to avoid null pointer issues
         final String npcName = targetNPCForMenu != null ? targetNPCForMenu.getName() : "Unknown";
