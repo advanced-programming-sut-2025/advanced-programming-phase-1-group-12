@@ -31,6 +31,9 @@ dependencies {
   
   // Additional JSON processing
   implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
+  
+  // JSON library for simple JSON operations
+  implementation 'org.json:json:20231013'
 }
 
 compileJava {
