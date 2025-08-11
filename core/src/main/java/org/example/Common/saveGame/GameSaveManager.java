@@ -58,7 +58,7 @@ public class GameSaveManager {
     public static void saveGameCompressed(Game game, String filePath) {
         try (GZIPOutputStream gos = new GZIPOutputStream(new FileOutputStream(filePath))) {
             mapper.writeValue(gos, game);
-            savePlayerUsernames(game, "savePlayers");
+        //    savePlayerUsernames(game, "savePlayers");
             System.out.println("✅ Game saved compressed to " + filePath);
         } catch (IOException e) {
             System.err.println("❌ Failed to save game: " + e.getMessage());

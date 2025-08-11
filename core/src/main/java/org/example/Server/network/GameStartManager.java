@@ -259,12 +259,6 @@ public class GameStartManager {
                 return NetworkResult.error("Not all loads have been selected yet (startLoadGameFromSession)");
             }
 
-//            // Check if a game session already exists
-//            if (session.gameSessionId != null && session.gameStarted) {
-//                logger.info("Game session {} already exists for lobby {}", session.gameSessionId, lobbyId);
-//                return NetworkResult.success("Game session already started", session.gameSessionId);
-//            }
-
             // Clear any existing player mappings to avoid "already in a game" errors
             gameSessionManager.clearPlayerMappings(session.playerNames);
             Map<String, Integer>haha = new HashMap<>();
@@ -290,9 +284,6 @@ public class GameStartManager {
             if (gameResult.isSuccess()) {
             //    session.lobbyId = gameResult.getData().getGameId();
                 logger.info("Game session {} created for lobby {}", session.lobbyId, lobbyId);
-
-                // Keep the session for status queries but mark as completed
-             //   session.gameStarted = true;
 
                 return NetworkResult.success("Game session started", session.lobbyId);
             } else {

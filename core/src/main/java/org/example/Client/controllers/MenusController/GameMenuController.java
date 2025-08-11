@@ -1581,6 +1581,7 @@ public class GameMenuController {
     public void PlayNetworkMultiplayer(List<String> usernames, Map<String, Integer> farmSelections) {
         // Initialize the game with network multiplayer functionality
         Play(usernames, farmSelections);
+        App.getCurrentGame().setMultiplayer(true);
     }
 
     public void loadGame(List<String> usernames) {

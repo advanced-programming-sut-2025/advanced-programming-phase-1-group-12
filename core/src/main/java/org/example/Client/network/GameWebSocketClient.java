@@ -6,6 +6,7 @@ import org.example.Common.network.events.GameStateUpdateEvent;
 import org.example.Client.views.GameMenu;
 import org.example.Client.Main;
 import org.example.Common.models.Fundementals.App;
+import org.example.Common.saveGame.GameSaveManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import okhttp3.*;
@@ -143,6 +144,8 @@ public class GameWebSocketClient {
     private void handleDisconnection() {
         isConnected = false;
         disconnectionTime = System.currentTimeMillis();
+        System.out.println("saving here");
+        GameSaveManager.saveGameCompressed(App.getCurrentGame(), "saves/" + App.getCurrentGame().getGameId());
 
         // Start reconnection process if not already reconnecting
         if (!isReconnecting) {
