@@ -190,7 +190,7 @@ public class GameMenu extends InputAdapter implements Screen {
         }
 
         com.badlogic.gdx.utils.Array<com.badlogic.gdx.graphics.g2d.TextureRegion> frames = new com.badlogic.gdx.utils.Array<>();
-        
+
         // Try to load face_0.png through face_9.png (or more if available)
         for (int i = 0; i <= 9; i++) {
             String portraitPath = "NPC/" + npcName + "/face_" + i + ".png";
@@ -216,18 +216,18 @@ public class GameMenu extends InputAdapter implements Screen {
         }
 
         // Create animation
-        com.badlogic.gdx.graphics.g2d.Animation<com.badlogic.gdx.graphics.g2d.TextureRegion> animation = 
+        com.badlogic.gdx.graphics.g2d.Animation<com.badlogic.gdx.graphics.g2d.TextureRegion> animation =
             new com.badlogic.gdx.graphics.g2d.Animation<>(PORTRAIT_FRAME_DURATION, frames, com.badlogic.gdx.graphics.g2d.Animation.PlayMode.LOOP);
-        
+
         // Store the animation
         portraitAnimations.put(npcName, animation);
-        
+
         return animation;
     }
 
     private Actor createNPCPortrait(String npcName) {
         com.badlogic.gdx.graphics.g2d.Animation<com.badlogic.gdx.graphics.g2d.TextureRegion> animation = loadPortraitAnimation(npcName);
-        
+
         if (animation != null) {
             // Create animated portrait actor
             return new AnimatedPortraitActor(animation, 150, 150);
@@ -513,7 +513,7 @@ public class GameMenu extends InputAdapter implements Screen {
     private void handlePlayerMovementUpdate(Map<String, Object> data) {
         try {
             System.out.println("DEBUG: [GAME_MENU] handlePlayerMovementUpdate called with data: " + data);
-            
+
             String playerId = (String) data.get("playerId");
             Integer x = (Integer) data.get("x");
             Integer y = (Integer) data.get("y");
@@ -524,23 +524,23 @@ public class GameMenu extends InputAdapter implements Screen {
             if (playerId != null && x != null && y != null) {
                 System.out.println("DEBUG: [GAME_MENU] Valid movement data, looking for player: " + playerId);
                 System.out.println("DEBUG: [GAME_MENU] Available players in game: " + App.getCurrentGame().getPlayers().size());
-                
+
                 // Find the player and update their position
                 boolean playerFound = false;
                 for (Player player : App.getCurrentGame().getPlayers()) {
                     System.out.println("DEBUG: [GAME_MENU] Checking player: " + player.getUser().getUserName());
                     if (player.getUser().getUserName().equals(playerId)) {
-                        System.out.println("DEBUG: [GAME_MENU] Found player, updating position from (" + 
-                            player.getUserLocation().getxAxis() + ", " + player.getUserLocation().getyAxis() + 
+                        System.out.println("DEBUG: [GAME_MENU] Found player, updating position from (" +
+                            player.getUserLocation().getxAxis() + ", " + player.getUserLocation().getyAxis() +
                             ") to (" + x + ", " + y + ")");
-                        
+
                         Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
                         player.setUserLocation(newLocation);
-                        
+
                         // Update sprite position with original coordinates (not scaled)
                         System.out.println("DEBUG: [GAME_MENU] Calling player.updatePosition with original coordinates: (" + x + ", " + y + ")");
                         player.updatePosition(x, y); // Update sprite position with original coordinates
-                        
+
                         System.out.println("DEBUG: [GAME_MENU] Player position update completed for: " + playerId);
                         logger.debug("Updated player {} position to ({}, {})", playerId, x, y);
                         playerFound = true;
@@ -584,17 +584,17 @@ public class GameMenu extends InputAdapter implements Screen {
                 if (player.getUser().getUserName().equals(playerId)) {
                     System.out.println("DEBUG: [GAME_MENU] Found player: " + playerId);
                     System.out.println("DEBUG: [GAME_MENU] Current player location before update: " + player.getUserLocation());
-                    
+
                     Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
                     System.out.println("DEBUG: [GAME_MENU] New location from map: " + newLocation);
-                    
+
                     player.setUserLocation(newLocation);
                     System.out.println("DEBUG: [GAME_MENU] Player location after setUserLocation: " + player.getUserLocation());
-                    
+
                     // Update sprite position with original coordinates (not scaled)
                     player.updatePosition(x, y); // Update sprite position with original coordinates
                     System.out.println("DEBUG: [GAME_MENU] Player location after updatePosition: " + player.getUserLocation());
-                    
+
                     logger.debug("Updated player {} position to ({}, {})", playerId, x, y);
                     playerFound = true;
 
@@ -655,19 +655,19 @@ public class GameMenu extends InputAdapter implements Screen {
     private void handleFullPlayerUpdate(Map<String, Object> data) {
         try {
             System.out.println("DEBUG: GameMenu.handleFullPlayerUpdate called with data: " + data);
-            
+
             String playerId = (String) data.get("playerId");
             Map<String, Object> playerData = (Map<String, Object>) data.get("playerData");
-            
+
             if (playerId == null || playerData == null) {
                 System.out.println("DEBUG: Invalid full player update data - playerId: " + playerId + ", playerData: " + playerData);
                 logger.warn("Invalid full player update data: playerId={}, playerData={}", playerId, playerData);
                 return;
             }
-            
+
             System.out.println("DEBUG: Processing full player update for player: " + playerId);
             logger.debug("Processing full player update for player: {}", playerId);
-            
+
             // Find the player in the current game
             Player targetPlayer = null;
             for (Player player : App.getCurrentGame().getPlayers()) {
@@ -676,26 +676,26 @@ public class GameMenu extends InputAdapter implements Screen {
                     break;
                 }
             }
-            
+
             if (targetPlayer == null) {
                 System.out.println("DEBUG: Player " + playerId + " not found in current game");
                 logger.warn("Player {} not found in current game", playerId);
                 return;
             }
-            
+
             // Apply all the player data updates
             applyPlayerDataUpdate(targetPlayer, playerData);
-            
+
             System.out.println("DEBUG: Full player update processed successfully for player: " + playerId);
             logger.debug("Full player update processed for player: {}", playerId);
-            
+
         } catch (Exception e) {
             System.out.println("DEBUG: Error handling full player update: " + e.getMessage());
             logger.error("Error handling full player update", e);
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Applies the received player data to the target player object
      * This method updates all the relevant player properties
@@ -704,7 +704,7 @@ public class GameMenu extends InputAdapter implements Screen {
         try {
             System.out.println("DEBUG: [GAME_MENU] Applying player data update to player: " + targetPlayer.getUser().getUserName());
             System.out.println("DEBUG: [GAME_MENU] Current player location before update: " + targetPlayer.getUserLocation());
-            
+
             // Update location and position
             if (playerData.containsKey("x") && playerData.containsKey("y")) {
                 Integer x = (Integer) playerData.get("x");
@@ -726,7 +726,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     }
                 }
             }
-            
+
             // Update energy
             if (playerData.containsKey("energy")) {
                 Integer energy = (Integer) playerData.get("energy");
@@ -735,7 +735,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     System.out.println("DEBUG: Updated player energy to " + energy);
                 }
             }
-            
+
             // Update money
             if (playerData.containsKey("money")) {
                 Integer money = (Integer) playerData.get("money");
@@ -744,27 +744,27 @@ public class GameMenu extends InputAdapter implements Screen {
                     System.out.println("DEBUG: Updated player money to " + money);
                 }
             }
-            
+
             // Update player state flags
             if (playerData.containsKey("isMarried")) {
                 targetPlayer.setMarried((Boolean) playerData.get("isMarried"));
             }
-            
+
             if (playerData.containsKey("hasCollapsed")) {
                 targetPlayer.setHasCollapsed((Boolean) playerData.get("hasCollapsed"));
             }
-            
+
             if (playerData.containsKey("isEnergyUnlimited")) {
                 targetPlayer.setEnergyUnlimited((Boolean) playerData.get("isEnergyUnlimited"));
             }
-            
+
             if (playerData.containsKey("speed")) {
                 Double speed = (Double) playerData.get("speed");
                 if (speed != null) {
                     targetPlayer.setSpeed(speed.floatValue());
                 }
             }
-            
+
             // Update abilities
             if (playerData.containsKey("abilities")) {
                 Map<String, Integer> abilities = (Map<String, Integer>) playerData.get("abilities");
@@ -778,7 +778,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     System.out.println("DEBUG: Updated player abilities");
                 }
             }
-            
+
             // Update shipping money
             if (playerData.containsKey("shippingMoney")) {
                 Integer shippingMoney = (Integer) playerData.get("shippingMoney");
@@ -786,19 +786,19 @@ public class GameMenu extends InputAdapter implements Screen {
                     targetPlayer.setShippingMoney(shippingMoney);
                 }
             }
-            
+
             // Update buff states
             if (playerData.containsKey("isMaxEnergyBuffEaten")) {
                 targetPlayer.setMaxEnergyBuffEaten((Boolean) playerData.get("isMaxEnergyBuffEaten"));
             }
-            
+
             if (playerData.containsKey("isSkillBuffEaten")) {
                 targetPlayer.setSkillBuffEaten((Boolean) playerData.get("isSkillBuffEaten"));
             }
-            
+
             System.out.println("DEBUG: Successfully applied all player data updates");
             logger.debug("Applied full player data update for player: {}", targetPlayer.getUser().getUserName());
-            
+
         } catch (Exception e) {
             System.out.println("DEBUG: Error applying player data update: " + e.getMessage());
             logger.error("Error applying player data update", e);
@@ -967,7 +967,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     System.out.println("DEBUG: [GAME_MENU] Creating new player for logged in user: " + App.getLoggedInUser().getUserName());
                     Player newPlayer = new Player(App.getLoggedInUser(), new Location(0, 0), false, new Refrigrator(), new ArrayList<>(), null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
                     System.out.println("DEBUG: [GAME_MENU] New player created with location: " + newPlayer.getUserLocation());
-                    
+
                     if (App.getCurrentGame().getPlayers() == null) {
                         App.getCurrentGame().setPlayers(new ArrayList<>());
                     }
@@ -1820,14 +1820,14 @@ public class GameMenu extends InputAdapter implements Screen {
             showTeleportCheatDialog();
             return true;
         }
-        if (keycode == Input.Keys.N) {
-            // Test NPC interaction
-            if (App.getCurrentGame().getNPCvillage() != null && !App.getCurrentGame().getNPCvillage().getAllNPCs().isEmpty()) {
-                org.example.Common.models.NPC.NPC firstNPC = App.getCurrentGame().getNPCvillage().getAllNPCs().get(0);
-                showNPCInteractionMenu(firstNPC);
-            }
-            return true;
-        }
+//        if (keycode == Input.Keys.N) {
+//            // Test NPC interaction
+//            if (App.getCurrentGame().getNPCvillage() != null && !App.getCurrentGame().getNPCvillage().getAllNPCs().isEmpty()) {
+//                org.example.Common.models.NPC.NPC firstNPC = App.getCurrentGame().getNPCvillage().getAllNPCs().get(0);
+//                showNPCInteractionMenu(firstNPC);
+//            }
+//            return true;
+//        }
 
         return false;
     }
@@ -3987,7 +3987,7 @@ public class GameMenu extends InputAdapter implements Screen {
         // Check if players are adjacent
         float distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - targetPlayer.getUserLocation().getxAxis()) +
             Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
-        
+
         if (distance > 2) {
             showNotification("Players must be adjacent to hug!", false);
             return;
@@ -4065,7 +4065,7 @@ public class GameMenu extends InputAdapter implements Screen {
                         // Get target player for animation
                         Player currentPlayer = App.getCurrentPlayerLazy();
                         Player targetPlayer = App.getCurrentGame().getPlayerByName(targetUsername);
-                        
+
                         if (targetPlayer != null) {
                             // Check if players are adjacent
                             float distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - targetPlayer.getUserLocation().getxAxis()) +
@@ -4075,7 +4075,7 @@ public class GameMenu extends InputAdapter implements Screen {
                                 startRingAnimation(targetPlayer);
                             }
                         }
-                        
+
                         // Propose marriage with this ring
                         GameMenuController controller = new GameMenuController();
                         Result result = controller.askMarriage(targetUsername, ring.getName());
@@ -4254,7 +4254,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
     private void renderNearbyPlayerIndicators() {
         Player currentPlayer = App.getCurrentPlayerLazy();
-        
+
         // Check if current player has a valid location
         if (currentPlayer == null || currentPlayer.getUserLocation() == null) {
             return; // Skip rendering if current player or their location is null
@@ -5779,13 +5779,13 @@ public class GameMenu extends InputAdapter implements Screen {
         if (!flowerAnimationActive && floweringTimer >= 0.5f) {
             flowerAnimationActive = true;
             flowerAnimationProgress = 0f;
-            
+
             // Calculate start and end positions for flower animation
             flowerStartX = floweringPlayer1.getUserLocation().getxAxis();
             flowerStartY = floweringPlayer1.getUserLocation().getyAxis() + 50f;
             flowerEndX = floweringPlayer2.getUserLocation().getxAxis();
             flowerEndY = floweringPlayer2.getUserLocation().getyAxis() + 50f;
-            
+
             flowerX = flowerStartX;
             flowerY = flowerStartY;
         }
@@ -5846,13 +5846,13 @@ public class GameMenu extends InputAdapter implements Screen {
         if (!ringAnimationActive && ringingTimer >= 0.5f) {
             ringAnimationActive = true;
             ringAnimationProgress = 0f;
-            
+
             // Calculate start and end positions for ring animation
             ringStartX = ringingPlayer1.getUserLocation().getxAxis();
             ringStartY = ringingPlayer1.getUserLocation().getyAxis() + 50f;
             ringEndX = ringingPlayer2.getUserLocation().getxAxis();
             ringEndY = ringingPlayer2.getUserLocation().getyAxis() + 50f;
-            
+
             ringX = ringStartX;
             ringY = ringStartY;
         }
