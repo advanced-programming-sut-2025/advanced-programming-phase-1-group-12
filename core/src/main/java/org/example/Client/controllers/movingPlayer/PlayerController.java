@@ -188,6 +188,8 @@ public class PlayerController {
             return;
         }
         if(Gdx.input.isKeyPressed(Input.Keys.Q)) {
+            String name = "play" + App.getCurrentGame().getGameId();
+            GameDatabase.save(App.getCurrentGame(), name);
             quitGame();
             return;
         }
