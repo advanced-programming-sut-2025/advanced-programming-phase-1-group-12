@@ -405,13 +405,13 @@ public class NetworkCommandSender {
 
     public void setCurrentGameId(String gameId) {
         System.out.println("DEBUG: [NETWORK_SENDER] setCurrentGameId called - Old ID: " + this.currentGameId + ", New ID: " + gameId);
-        
+
         if (gameId == null) {
             System.out.println("DEBUG: [NETWORK_SENDER] WARNING: Setting game ID to NULL!");
             // Print stack trace to see where this is being called from
             Thread.dumpStack();
         }
-        
+
         this.currentGameId = gameId;
         System.out.println("DEBUG: [NETWORK_SENDER] Game ID successfully set to: " + this.currentGameId);
     }
@@ -419,4 +419,6 @@ public class NetworkCommandSender {
     public ServerConnection getServerConnection() {
         return serverConnection;
     }
+
+    //just something random for chaching
 }
