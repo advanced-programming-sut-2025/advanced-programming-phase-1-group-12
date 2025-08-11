@@ -86,6 +86,7 @@ public class GameAssetManager {
     private static final Texture Preserves_Jar = new Texture("Crafting/Preserves_Jar.png");
     private static final Texture Dehydrator = new Texture("Crafting/Dehydrator.png");
     private static final Texture Fish_Smoker = new Texture("Crafting/Fish_Smoker.png");
+    private static final Texture SCARECROW = new Texture("Farming/Scarecrow.png");
 
     private static final Texture shippingBin = new Texture("Chest/Chest.png");
 
@@ -279,8 +280,12 @@ public class GameAssetManager {
             case FISH_SMOKER -> {
                 return Fish_Smoker;
             }
+            case SCARECROW ->
+            {
+                return SCARECROW;
+            }
         }
-        //TODO :bomb and scarecrow stuff be added?
+        //TODO :bomb stuff be added?
         return charcoal;
     }
 
