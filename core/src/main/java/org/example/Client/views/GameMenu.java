@@ -1171,6 +1171,9 @@ public class GameMenu extends InputAdapter implements Screen {
         updateHugAnimation(delta);
         updateFlowerAnimation(delta);
         updateRingAnimation(delta);
+        
+        // Update NPC movements based on current time
+        updateNPCMovements(delta);
 
         if (errorLabel.isVisible()) {
             timeSinceError += delta;
@@ -5878,6 +5881,27 @@ public class GameMenu extends InputAdapter implements Screen {
             ringingPlayer1 = null;
             ringingPlayer2 = null;
             ringAnimationActive = false;
+        }
+    }
+    
+    /**
+     * Update NPC movements based on current time
+     */
+    private void updateNPCMovements(float delta) {
+        try {
+            // Get current game time
+            org.example.Common.models.Date currentDate = App.getCurrentGame().getDate();
+            int currentHour = currentDate.getHour();
+            
+            // Update NPC movements using the movement controller
+            org.example.Server.NPCMovementController movementController = 
+                org.example.Server.NPCMovementController.getInstance();
+            movementController.updateNPCMovements(delta, currentHour);
+            
+        } catch (Exception e) {
+            // Log error but don't crash the game
+            System.err.println("Error updating NPC movements: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

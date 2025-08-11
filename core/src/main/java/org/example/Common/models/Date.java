@@ -74,6 +74,9 @@ public class Date implements Runnable {
             changeAdvancedDay(1);
             this.hour -= 13;
         }
+        
+        // Update NPC movements when time changes
+        updateNPCMovements();
     }
 
     public void artisansUpdate(int hours) {
@@ -349,6 +352,7 @@ public class Date implements Runnable {
         changesDayAnimal();
 //        attackingCrow();
         resetNPCStatus();
+        resetNPCMovements();
         buffUpdates();
         updateRecepies();
         resetDailyLimit();
@@ -538,6 +542,37 @@ public class Date implements Runnable {
                     App.getCurrentPlayerLazy().getRecepies().put(recipe, true);
                 }
             }
+        }
+    }
+    
+    /**
+     * Update NPC movements when time changes
+     */
+    private void updateNPCMovements() {
+        try {
+            // Update NPC locations based on current time
+            org.example.Server.NPCController npcController = org.example.Server.NPCController.getInstance();
+            npcController.updateNPCLocations(this.hour);
+        } catch (Exception e) {
+            // Log error but don't crash the game
+            System.err.println("Error updating NPC movements in Date class: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Reset NPC movements to home locations for new day
+     */
+    private void resetNPCMovements() {
+        try {
+            // Reset all NPCs to their home locations
+            org.example.Server.NPCMovementController movementController = 
+                org.example.Server.NPCMovementController.getInstance();
+            movementController.resetAllNPCsToHome();
+        } catch (Exception e) {
+            // Log error but don't crash the game
+            System.err.println("Error resetting NPC movements in Date class: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
