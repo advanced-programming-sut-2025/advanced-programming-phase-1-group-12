@@ -553,6 +553,7 @@ public class Date implements Runnable {
             // Update NPC locations based on current time
             org.example.Server.NPCController npcController = org.example.Server.NPCController.getInstance();
             npcController.updateNPCLocations(this.hour);
+            
         } catch (Exception e) {
             // Log error but don't crash the game
             System.err.println("Error updating NPC movements in Date class: " + e.getMessage());

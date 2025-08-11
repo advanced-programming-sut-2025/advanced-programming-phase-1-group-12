@@ -992,6 +992,9 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Initialize WebSocket client for real-time updates
         initializeWebSocketClient();
+        
+        // Initialize NPC movement
+        initializeNPCMovement();
 
         float clockSize = 100f;
         clockImage.setSize(clockSize, clockSize);
@@ -1172,7 +1175,7 @@ public class GameMenu extends InputAdapter implements Screen {
         updateFlowerAnimation(delta);
         updateRingAnimation(delta);
         
-        // Update NPC movements based on current time
+        // Disabled NPC movements - waiting for command
         updateNPCMovements(delta);
 
         if (errorLabel.isVisible()) {
@@ -5901,6 +5904,53 @@ public class GameMenu extends InputAdapter implements Screen {
         } catch (Exception e) {
             // Log error but don't crash the game
             System.err.println("Error updating NPC movements: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Force NPC movement test - can be called from console
+     */
+    public void forceNPCMovementTest() {
+        try {
+            System.out.println("DEBUG: Force NPC movement test called");
+            
+            // Initialize everything
+            org.example.Server.NPCController npcController = 
+                org.example.Server.NPCController.getInstance();
+            npcController.initializeWhenReady();
+            
+            org.example.Server.NPCMovementController movementController = 
+                org.example.Server.NPCMovementController.getInstance();
+            
+            // Force movement to work location (hour 10)
+            movementController.forceAllNPCsToMove(10);
+            
+            System.out.println("DEBUG: NPC movement test completed");
+            
+        } catch (Exception e) {
+            System.err.println("Error in NPC movement test: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Simple NPC initialization: Set all NPCs to their home locations with idle animations
+     */
+    private void initializeNPCMovement() {
+        try {
+            System.out.println("DEBUG: GameMenu.initializeNPCMovement() called");
+            
+            // Simple initialization: Set all NPCs to home with idle animations
+            org.example.Server.NPCController npcController = 
+                org.example.Server.NPCController.getInstance();
+            npcController.initializeNPCsToHome();
+            
+            System.out.println("DEBUG: NPCs initialized to home locations with idle animations");
+            
+        } catch (Exception e) {
+            // Log error but don't crash the game
+            System.err.println("Error initializing NPCs: " + e.getMessage());
             e.printStackTrace();
         }
     }

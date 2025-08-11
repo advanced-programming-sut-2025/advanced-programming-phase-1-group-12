@@ -16,12 +16,13 @@ public class NPCAnimationManager {
     private static final float FRAME_DURATION = 0.2f;
 
     public enum AnimationType {
-        IDLE, WALK, BACK, FACE, WORK, SHOOT, TOOL, FLY
+        IDLE, WALK, BACK, FACE, WORK, SHOOT, TOOL, FLY, WALK_LEFT
     }
 
     public static class NPCAnimations {
         public transient final Animation<TextureRegion> idle;
         public transient final Animation<TextureRegion> walk;
+        public transient final Animation<TextureRegion> walkLeft;
         public transient final Animation<TextureRegion> back;
         public transient final Animation<TextureRegion> face;
         public transient final Animation<TextureRegion> work;
@@ -30,11 +31,12 @@ public class NPCAnimationManager {
         public transient final Animation<TextureRegion> fly;
 
         public NPCAnimations(Animation<TextureRegion> idle, Animation<TextureRegion> walk,
-                           Animation<TextureRegion> back, Animation<TextureRegion> face,
+                           Animation<TextureRegion> walkLeft, Animation<TextureRegion> back, Animation<TextureRegion> face,
                            Animation<TextureRegion> work, Animation<TextureRegion> shoot,
                            Animation<TextureRegion> tool, Animation<TextureRegion> fly) {
             this.idle = idle;
             this.walk = walk;
+            this.walkLeft = walkLeft;
             this.back = back;
             this.face = face;
             this.work = work;
@@ -56,6 +58,7 @@ public class NPCAnimationManager {
     }
 
     private void loadAllNPCAnimations() {
+        System.out.println("Loading NPC animations...");
         loadNPCAnimations("Abigail");
         loadNPCAnimations("Harvey");
         loadNPCAnimations("Jojo");
@@ -64,14 +67,16 @@ public class NPCAnimationManager {
         loadNPCAnimations("Robin");
         loadNPCAnimations("Sebastian");
         loadNPCAnimations("Willy");
+        System.out.println("NPC animations loading completed.");
     }
 
     private void loadNPCAnimations(String npcName) {
         try {
             Animation<TextureRegion> idle = loadAnimation(npcName, "idle", getActualFrameCount(npcName, "idle"));
             Animation<TextureRegion> walk = loadAnimation(npcName, "walk", getActualFrameCount(npcName, "walk"));
+            Animation<TextureRegion> walkLeft = createFlippedAnimation(walk); // Create flipped version for left movement
             Animation<TextureRegion> back = loadAnimation(npcName, "back", getActualFrameCount(npcName, "back"));
-            Animation<TextureRegion> face = loadAnimation(npcName, "face", getActualFrameCount(npcName, "face"));
+            Animation<TextureRegion> face = idle; // Walking down uses idle frames (idle_0.png to idle_3.png)
 
             // Load special animations based on NPC
             Animation<TextureRegion> work = null;
@@ -100,11 +105,12 @@ public class NPCAnimationManager {
             if (tool == null) tool = idle;
             if (fly == null) fly = idle;
 
-            NPCAnimations animations = new NPCAnimations(idle, walk, back, face, work, shoot, tool, fly);
+            NPCAnimations animations = new NPCAnimations(idle, walk, walkLeft, back, face, work, shoot, tool, fly);
             npcAnimations.put(npcName, animations);
 
         } catch (Exception e) {
             System.err.println("Failed to load animations for " + npcName + ": " + e.getMessage());
+            e.printStackTrace();
             // Create default animations with a placeholder texture
             createDefaultAnimations(npcName);
         }
@@ -113,25 +119,45 @@ public class NPCAnimationManager {
     private Animation<TextureRegion> loadAnimation(String npcName, String animationType, int frameCount) {
         Array<TextureRegion> frames = new Array<>();
 
+        // For IDLE animation, only load the first frame (idle_0.png)
+        if (animationType.equals("idle")) {
+            frameCount = 1; // Only use one frame for idle
+        }
+
         for (int i = 0; i < frameCount; i++) {
             String fileName = getAnimationFileName(npcName, animationType, i);
             try {
                 Texture texture = new Texture("NPC/" + npcName + "/" + fileName);
                 frames.add(new TextureRegion(texture));
+                System.out.println("DEBUG: Loaded animation frame " + fileName + " for " + npcName);
             } catch (Exception e) {
                 // Try to find an alternative file or use a fallback
                 Texture fallbackTexture = getFallbackTexture(npcName, animationType, i);
-                frames.add(new TextureRegion(fallbackTexture));
+                if (fallbackTexture != null) {
+                    frames.add(new TextureRegion(fallbackTexture));
+                    System.out.println("DEBUG: Used fallback texture for " + fileName + " for " + npcName);
+                } else {
+                    // If even fallback fails, skip this frame
+                    System.err.println("Warning: Could not load animation frame " + fileName + " for " + npcName);
+                }
             }
         }
 
         // If no frames were loaded, create a default animation
         if (frames.size == 0) {
-            Texture defaultTexture = new Texture("sprites/" + npcName + ".png");
-            frames.add(new TextureRegion(defaultTexture));
+            Texture defaultTexture = getFallbackTexture(npcName, "idle", 0);
+            if (defaultTexture == null) {
+                defaultTexture = createSimpleTexture();
+            }
+            if (defaultTexture != null) {
+                frames.add(new TextureRegion(defaultTexture));
+                System.out.println("DEBUG: Used default texture for " + npcName);
+            }
         }
 
-        return new Animation<>(FRAME_DURATION, frames, Animation.PlayMode.LOOP);
+        // For IDLE animation, use NO_LOOP to show static image
+        Animation.PlayMode playMode = animationType.equals("idle") ? Animation.PlayMode.NORMAL : Animation.PlayMode.LOOP;
+        return new Animation<>(FRAME_DURATION, frames, playMode);
     }
 
     private Texture getFallbackTexture(String npcName, String animationType, int frameIndex) {
@@ -139,7 +165,9 @@ public class NPCAnimationManager {
         String[] fallbackPaths = {
             "sprites/" + npcName + ".png",
             "sprites/Abigail.png", // Use Abigail as universal fallback
-            "sprites/Robin.png"    // Use Robin as final fallback
+            "sprites/Robin.png",   // Use Robin as fallback
+            "sprites/Sebastian.png", // Use Sebastian as fallback
+            "sprites/Harvey.png"   // Use Harvey as final fallback
         };
 
         for (String path : fallbackPaths) {
@@ -150,8 +178,8 @@ public class NPCAnimationManager {
             }
         }
 
-        // If all fallbacks fail, create a simple colored texture
-        return createDefaultTexture();
+        // If all fallbacks fail, return null and let calling code handle it
+        return null;
     }
 
     private Texture createDefaultTexture() {
@@ -164,8 +192,38 @@ public class NPCAnimationManager {
             return null;
         }
     }
+    
+    /**
+     * Create a simple colored texture as ultimate fallback
+     */
+    private Texture createSimpleTexture() {
+        try {
+            // Try to use an existing texture from the assets
+            return new Texture("sprites/Abigail.png");
+        } catch (Exception e) {
+            try {
+                // Try another fallback
+                return new Texture("sprites/Robin.png");
+            } catch (Exception e2) {
+                try {
+                    // Try a generic sprite
+                    return new Texture("sprites/Abigail.png");
+                } catch (Exception e3) {
+                    // If all else fails, return null and let the calling code handle it
+                    System.err.println("Warning: Could not create any fallback texture for NPC animations");
+                    return null;
+                }
+            }
+        }
+    }
 
     private String getAnimationFileName(String npcName, String animationType, int frameIndex) {
+        // Use the standard naming convention as specified by the user
+        // idle_0.png to idle_3.png for walking down (FACE animation)
+        // back_0.png to back_3.png for walking up (BACK animation)
+        // walk_0.png to walk_3.png for walking right (WALK animation)
+        // walk_0.png to walk_3.png flipped horizontally for walking left (WALK_LEFT animation)
+        
         switch (npcName) {
             case "Willy":
                 if (animationType.equals("idle")) {
@@ -183,10 +241,11 @@ public class NPCAnimationManager {
 
     private int getActualFrameCount(String npcName, String animationType) {
         // Return the actual number of frames available for each NPC and animation type
+        // All walking animations use 4 frames as specified by the user
         switch (npcName) {
             case "Willy":
                 switch (animationType) {
-                    case "idle": return 4;
+                    case "idle": return 1; // Only use idle_0.png for static image
                     case "face": return 4; // WillyFace_0 to WillyFace_3
                     case "walk": return 4; // walk_0, Walk_1, Walk_2, Walk_3
                     case "back": return 4;
@@ -210,43 +269,76 @@ public class NPCAnimationManager {
                 break;
             case "Harvey":
                 switch (animationType) {
-                    case "idle": return 4;
+                    case "idle": return 1; // Only use idle_0.png for static image
                     case "walk": return 4;
                     case "back": return 4;
                 }
                 break;
             case "Robin":
                 switch (animationType) {
-                    case "idle": return 4;
+                    case "idle": return 1; // Only use idle_0.png for static image
                     case "walk": return 4;
                     case "back": return 4;
                 }
                 break;
         }
 
-        // Default frame counts
+        // Default frame counts - idle uses 1 frame (static), others use 4 frames
         switch (animationType) {
-            case "idle": return 4;
-            case "walk": return 4;
-            case "back": return 4;
-            case "face": return 10;
+            case "idle": return 1; // Only use idle_0.png for static image
+            case "walk": return 4; // walk_0.png to walk_3.png for walking right
+            case "back": return 4; // back_0.png to back_3.png for walking up
+            case "face": return 4; // idle_0.png to idle_3.png for walking down (same as idle)
             default: return 4;
         }
     }
 
     private void createDefaultAnimations(String npcName) {
-        // Create a simple placeholder animation
-        Texture placeholder = new Texture("sprites/" + npcName + ".png");
+        // Create a simple placeholder animation using a more robust fallback
+        Texture placeholder = getFallbackTexture(npcName, "idle", 0);
+        if (placeholder == null) {
+            // If even the fallback fails, create a simple colored texture
+            placeholder = createSimpleTexture();
+        }
+        
         TextureRegion region = new TextureRegion(placeholder);
 
         Array<TextureRegion> frames = new Array<>();
         frames.add(region);
 
-        Animation<TextureRegion> defaultAnim = new Animation<>(FRAME_DURATION, frames, Animation.PlayMode.LOOP);
+        Animation<TextureRegion> defaultAnim = new Animation<>(FRAME_DURATION, frames, Animation.PlayMode.NORMAL);
 
-        NPCAnimations animations = new NPCAnimations(defaultAnim, defaultAnim, defaultAnim, defaultAnim,
+        NPCAnimations animations = new NPCAnimations(defaultAnim, defaultAnim, defaultAnim, defaultAnim, defaultAnim,
                                                    defaultAnim, defaultAnim, defaultAnim, defaultAnim);
         npcAnimations.put(npcName, animations);
+    }
+    
+    /**
+     * Create a horizontally flipped version of an animation
+     */
+    private Animation<TextureRegion> createFlippedAnimation(Animation<TextureRegion> originalAnimation) {
+        if (originalAnimation == null) {
+            return null;
+        }
+        
+        Array<TextureRegion> flippedFrames = new Array<>();
+        
+        // Get all frames from the original animation
+        Object[] keyFrames = originalAnimation.getKeyFrames();
+        for (int i = 0; i < keyFrames.length; i++) {
+            if (keyFrames[i] instanceof TextureRegion) {
+                TextureRegion originalFrame = (TextureRegion) keyFrames[i];
+                if (originalFrame != null) {
+                    // Create a flipped version of the frame
+                    TextureRegion flippedFrame = new TextureRegion(originalFrame);
+                    flippedFrame.flip(true, false); // Flip horizontally
+                    flippedFrames.add(flippedFrame);
+                }
+            }
+        }
+        
+        // Create new animation with flipped frames
+        return new Animation<>(originalAnimation.getFrameDuration(), flippedFrames, originalAnimation.getPlayMode());
     }
 
     public NPCAnimations getNPCAnimations(String npcName) {
@@ -259,17 +351,22 @@ public class NPCAnimationManager {
             return null;
         }
 
+        Animation<TextureRegion> result = null;
         switch (type) {
-            case IDLE: return animations.idle;
-            case WALK: return animations.walk;
-            case BACK: return animations.back;
-            case FACE: return animations.face;
-            case WORK: return animations.work;
-            case SHOOT: return animations.shoot;
-            case TOOL: return animations.tool;
-            case FLY: return animations.fly;
-            default: return animations.idle;
+            case IDLE: result = animations.idle; break;
+            case WALK: result = animations.walk; break;
+            case WALK_LEFT: result = animations.walkLeft; break;
+            case BACK: result = animations.back; break;
+            case FACE: result = animations.face; break;
+            case WORK: result = animations.work; break;
+            case SHOOT: result = animations.shoot; break;
+            case TOOL: result = animations.tool; break;
+            case FLY: result = animations.fly; break;
+            default: result = animations.idle; break;
         }
+        
+        // Return the result if it's not null, otherwise return idle as fallback
+        return result != null ? result : animations.idle;
     }
 
     public void dispose() {

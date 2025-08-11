@@ -1,5 +1,6 @@
 package org.example.Common.models.NPC;
 
+import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Fundementals.Location;
 import org.example.Common.models.Fundementals.Player;
 import org.example.Common.models.Item;
@@ -149,6 +150,22 @@ public class NPC {
 
     public void setUserLocation(Location userLocation) {
         this.userLocation = userLocation;
+    }
+
+    /**
+     * Update NPC position similar to player movement
+     * This method updates both the location and handles sprite positioning
+     */
+    public void updatePosition(int posX, int posY) {
+        System.out.println("DEBUG: [NPC] updatePosition called for NPC " + name + " to (" + posX + ", " + posY + ")");
+
+        Location newLocation = App.getCurrentGame().getMainMap().findLocation(posX, posY);
+        System.out.println("DEBUG: [NPC] findLocation returned: " + newLocation + " for coordinates (" + posX + ", " + posY + ")");
+
+        setUserLocation(newLocation);
+        System.out.println("DEBUG: [NPC] setUserLocation called with: " + newLocation);
+
+        System.out.println("DEBUG: [NPC] updatePosition completed. Final userLocation: " + this.userLocation);
     }
 
     public Shack getShack() {
@@ -324,18 +341,18 @@ public class NPC {
     // Animation methods
     public void updateAnimation(float deltaTime) {
         animationTime += deltaTime;
-        
+
         // Animation state is now managed by NPCMovementController
         // This method is called by the movement controller to update animation timing
     }
-    
+
     /**
      * Set the current animation type (called by movement controller)
      */
     public void setCurrentAnimation(AnimationType animationType) {
         this.currentAnimation = animationType;
     }
-    
+
     /**
      * Set moving state (called by movement controller)
      */
