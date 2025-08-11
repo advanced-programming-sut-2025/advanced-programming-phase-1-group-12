@@ -20,7 +20,7 @@ public enum Tool {
                 TypeOfTile tileType = location.getTypeOfTile();
                 if (tileType == TypeOfTile.GROUND) {
                     location.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
-                    App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - tool.getType().getEnergyDamage());
+                    App.getCurrentPlayerLazy().reduceEnergy(tool.getType().getEnergyDamage());
                     return new Result(true, "You tilled the soil!");
                 }
                 return new Result(false, "You can't use your hoe here!");
@@ -45,7 +45,7 @@ public enum Tool {
                     StoreController storeController = new StoreController();
                     storeController.cheatAddItem("Stone", 1);
 
-                    App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - tool.getType().getEnergyDamage());
+                    App.getCurrentPlayerLazy().reduceEnergy(tool.getType().getEnergyDamage());
                     return new Result(true, "You broke the stone");
                 }
                 if (tileType == TypeOfTile.QUARRY) {
@@ -77,9 +77,7 @@ public enum Tool {
                 TypeOfTile tileType = location.getTypeOfTile();
                 if (tileType == TypeOfTile.PLANT) {
                     location.setTypeOfTile(TypeOfTile.GROUND);
-                    App.getCurrentPlayerLazy().setEnergy(
-                            App.getCurrentPlayerLazy().getEnergy() - tools.getType().getEnergyDamage()
-                    );
+                    App.getCurrentPlayerLazy().reduceEnergy(tools.getType().getEnergyDamage());
                     return new Result(true, "You chopped down the tree and collected wood!");
                 }
                 return new Result(false, "You can't use your axe here!");
@@ -127,7 +125,7 @@ public enum Tool {
 
                 if (tileType == TypeOfTile.LAKE) {
                     if (tools != null && tools.isWateringCan()) {
-                        App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - tools.getType().getEnergyDamage());
+                        App.getCurrentPlayerLazy().reduceEnergy(tools.getType().getEnergyDamage());
                         return new Result(true, "You filled your watering can to capacity: " + tools.getCapacity());
                     }
                     return new Result(true, "You filled your watering can");
@@ -145,7 +143,7 @@ public enum Tool {
                     if (!useResult.isSuccessful()) {
                         return useResult;
                     }
-                    App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - tools.getType().getEnergyDamage());
+                    App.getCurrentPlayerLazy().reduceEnergy(tools.getType().getEnergyDamage());
                     return new Result(true, "You watered the soil. Water remaining: " + tools.getCurrentWater());
                 }
 
@@ -186,7 +184,7 @@ public enum Tool {
                 TypeOfTile tileType = location.getTypeOfTile();
                 if (tileType == TypeOfTile.GROUND) {
                     location.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
-                    App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - tool.getType().getEnergyDamage());
+                    App.getCurrentPlayerLazy().reduceEnergy(tool.getType().getEnergyDamage());
                     return new Result(true, "You swang the scythe!");
                 }
                 return new Result(false, "You can't use your Scythe here!");

@@ -34,7 +34,7 @@ public class CraftingController {
                     System.out.println("you decrease " + entry.getValue() + " ingredients");
                 }
             }
-            App.getCurrentPlayerLazy().setEnergy(App.getCurrentGame().getCurrentPlayer().getEnergy() - 2);
+            App.getCurrentPlayerLazy().reduceEnergy(2);
             ItemBuilder.addToBackPack(ItemBuilder.builder(itemName, Quality.NORMAL, recipe.getSellPrice()), count, Quality.NORMAL);
         }
         return new Result(true, "we add " + itemName + " to the back pack");
@@ -114,7 +114,7 @@ public class CraftingController {
                     App.getCurrentPlayerLazy().getBackPack().decreaseItem(item, entry.getValue());
                     // return new Result(true, "you decrease " + entry.getValue() + " ingredients");
                 }
-            App.getCurrentPlayerLazy().setEnergy(App.getCurrentGame().getCurrentPlayer().getEnergy() - 2);
+            App.getCurrentPlayerLazy().reduceEnergy(2);
             ItemBuilder.addToBackPack(ItemBuilder.builder(itemName, Quality.NORMAL, recipe.getSellPrice()), 1, Quality.NORMAL);
 
                 if(location.getTypeOfTile().equals(TypeOfTile.GROUND) && location.getObjectInTile() == null){

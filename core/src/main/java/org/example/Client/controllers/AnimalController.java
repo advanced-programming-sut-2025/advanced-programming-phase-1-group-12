@@ -113,7 +113,7 @@ public class AnimalController {
                 }
             }
             animal.setWillProduceToday(false);
-            App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - 1);
+            App.getCurrentPlayerLazy().reduceEnergy(1);
             animal.setHasCollectedProductToday(true);
             return new Result(true, "You just milked " + animalName);
         } else {
@@ -153,7 +153,7 @@ public class AnimalController {
             return new Result(false, "You do not have a shear!");
         }
         Quality quality = findQulaity(animal.getFriendShip());
-        App.getCurrentPlayerLazy().setEnergy(App.getCurrentPlayerLazy().getEnergy() - 1);
+        App.getCurrentPlayerLazy().reduceEnergy(1);
         ItemBuilder.addToBackPack(ItemBuilder.builder(AnimalProduct.WOOL_SHEEP.getName(), quality, AnimalProduct.WOOL_SHEEP.getPrice()), 1, quality);
         return new Result(true, "You just sheared " + animalName);
     }

@@ -324,10 +324,23 @@ public class NPC {
     // Animation methods
     public void updateAnimation(float deltaTime) {
         animationTime += deltaTime;
-
-        // Keep all NPCs in idle animation for now
-        currentAnimation = AnimationType.IDLE;
-        isMoving = false;
+        
+        // Animation state is now managed by NPCMovementController
+        // This method is called by the movement controller to update animation timing
+    }
+    
+    /**
+     * Set the current animation type (called by movement controller)
+     */
+    public void setCurrentAnimation(AnimationType animationType) {
+        this.currentAnimation = animationType;
+    }
+    
+    /**
+     * Set moving state (called by movement controller)
+     */
+    public void setMoving(boolean moving) {
+        this.isMoving = moving;
     }
 
     public AnimationType getCurrentAnimation() {

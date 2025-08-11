@@ -67,7 +67,7 @@ public class Player {
     protected Player() {
         // For Jackson deserialization only
     }
-    
+
     // Check if we're running in a LibGDX context (client-side)
     private static boolean isLibGDXAvailable() {
         try {
@@ -87,7 +87,7 @@ public class Player {
         }
         this.user = user;
         this.userLocation = userLocation;
-        
+
         this.isMarried = isMarried;
         this.energy = 200;
         this.Refrigrator = refrigrator;
@@ -117,26 +117,26 @@ public class Player {
             // Server-side: create a basic collision rect with default dimensions
             rect = new CollisionRect(0, 0, 32, 32); // Default player size
         }
-        
+
 
     }
 
     public void updatePosition(int posX, int posY) {
         System.out.println("DEBUG: [PLAYER] updatePosition called for player " + (user != null ? user.getUserName() : "unknown") + " to (" + posX + ", " + posY + ")");
-        
+
         Location newLocation = App.getCurrentGame().getMainMap().findLocation(posX, posY);
         System.out.println("DEBUG: [PLAYER] findLocation returned: " + newLocation + " for coordinates (" + posX + ", " + posY + ")");
-        
+
         setUserLocation(newLocation);
         System.out.println("DEBUG: [PLAYER] setUserLocation called with: " + newLocation);
-        
+
         rect.move(posX, posY);
-        
+
         // Only update sprite position when sprite is available (client-side)
         if (playerSprite != null) {
             playerSprite.setPosition(posX, posY);
         }
-        
+
         System.out.println("DEBUG: [PLAYER] updatePosition completed. Final userLocation: " + this.userLocation);
     }
 

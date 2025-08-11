@@ -75,7 +75,7 @@ public class UserLocationController {
         App.getCurrentGame().getMainMap().findLocation(
             targetX, targetY
         ).setObjectInTile(App.getCurrentGame().getCurrentPlayer());
-        App.getCurrentGame().getCurrentPlayer().setEnergy(currentEnergy - energyNeeded);
+        App.getCurrentGame().getCurrentPlayer().reduceEnergy(energyNeeded);
 
         // Clear current location
         Location currentMapLocation = App.getCurrentGame().getMainMap().findLocation(
