@@ -369,6 +369,9 @@ public class GameMenuController {
             }
 
             Player newPlayer = new Player(user, new Location(0, 0), false, new Refrigrator(), new ArrayList<>(), null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
+            System.out.println("DEBUG: [GAME_MENU_CONTROLLER] Created new player: " + user.getUserName());
+            System.out.println("DEBUG: [GAME_MENU_CONTROLLER] Initial player location: " + newPlayer.getUserLocation());
+
             newPlayer.setPlayerTexture(playerTexture);
             newPlayer.setPortraitFrame(portraitFrame);
 
@@ -380,16 +383,23 @@ public class GameMenuController {
 
             // Set player's initial location to their farm
             Location farmLocation = farm.getLocation().getTopLeftCorner();
+            System.out.println("DEBUG: [GAME_MENU_CONTROLLER] Farm location: " + farmLocation);
+
             Location playerLocation = App.getCurrentGame().getMainMap().findLocation(farmLocation.getxAxis(), farmLocation.getyAxis());
+            System.out.println("DEBUG: [GAME_MENU_CONTROLLER] Found player location from map: " + playerLocation);
+
             if (playerLocation == null) {
                 System.err.println("ERROR: findLocation returned null for player farm location (" + farmLocation.getxAxis() + ", " + farmLocation.getyAxis() + ")");
                 // Create a fallback location
                 playerLocation = new Location(farmLocation.getxAxis(), farmLocation.getyAxis());
                 playerLocation.setTypeOfTile(TypeOfTile.GROUND);
                 App.getCurrentGame().getMainMap().getTilesOfMap().add(playerLocation);
-                // Created fallback player location
+                System.out.println("DEBUG: [GAME_MENU_CONTROLLER] Created fallback player location: " + playerLocation);
             }
+
+            System.out.println("DEBUG: [GAME_MENU_CONTROLLER] Setting player location to: " + playerLocation);
             newPlayer.setUserLocation(playerLocation);
+            System.out.println("DEBUG: [GAME_MENU_CONTROLLER] Player location after setting: " + newPlayer.getUserLocation());
 
             // Initialize Refrigrator with proper location
             Location shackLocation = farm.getShack().getLocation().getTopLeftCorner();

@@ -179,6 +179,11 @@ public class PlayerController {
             return;
         }
 
+        // Safety check: ensure current player location is not null
+        if (App.getCurrentGame() == null || App.getCurrentGame().getCurrentPlayer() == null || App.getCurrentGame().getCurrentPlayer().getUserLocation() == null) {
+            return;
+        }
+
         // In multiplayer mode, only allow the logged-in user to control their own character
         if (App.getCurrentGame().isMultiplayer()) {
             String currentUsername = App.getLoggedInUser().getUserName();

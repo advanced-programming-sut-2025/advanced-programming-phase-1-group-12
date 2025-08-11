@@ -537,9 +537,9 @@ public class GameMenu extends InputAdapter implements Screen {
                         Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
                         player.setUserLocation(newLocation);
                         
-                        // Convert coordinates to scaled values (x100) for sprite positioning
-                        System.out.println("DEBUG: [GAME_MENU] Calling player.updatePosition with scaled coordinates: (" + (x * 100) + ", " + (y * 100) + ")");
-                        player.updatePosition(x * 100, y * 100); // Update sprite position with scaled coordinates
+                        // Update sprite position with original coordinates (not scaled)
+                        System.out.println("DEBUG: [GAME_MENU] Calling player.updatePosition with original coordinates: (" + x + ", " + y + ")");
+                        player.updatePosition(x, y); // Update sprite position with original coordinates
                         
                         System.out.println("DEBUG: [GAME_MENU] Player position update completed for: " + playerId);
                         logger.debug("Updated player {} position to ({}, {})", playerId, x, y);
@@ -575,16 +575,26 @@ public class GameMenu extends InputAdapter implements Screen {
         Integer y = (Integer) data.get("y");
 
         logger.debug("Handling player position update: playerId={}, x={}, y={}", playerId, x, y);
+        System.out.println("DEBUG: [GAME_MENU] Handling player position update: playerId=" + playerId + ", x=" + x + ", y=" + y);
 
         if (playerId != null && x != null && y != null) {
             // Find the player and update their position
             boolean playerFound = false;
             for (Player player : App.getCurrentGame().getPlayers()) {
                 if (player.getUser().getUserName().equals(playerId)) {
+                    System.out.println("DEBUG: [GAME_MENU] Found player: " + playerId);
+                    System.out.println("DEBUG: [GAME_MENU] Current player location before update: " + player.getUserLocation());
+                    
                     Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
+                    System.out.println("DEBUG: [GAME_MENU] New location from map: " + newLocation);
+                    
                     player.setUserLocation(newLocation);
-                    // Convert coordinates to scaled values (x100) for sprite positioning
-                    player.updatePosition(x * 100, y * 100); // Update sprite position with scaled coordinates
+                    System.out.println("DEBUG: [GAME_MENU] Player location after setUserLocation: " + player.getUserLocation());
+                    
+                    // Update sprite position with original coordinates (not scaled)
+                    player.updatePosition(x, y); // Update sprite position with original coordinates
+                    System.out.println("DEBUG: [GAME_MENU] Player location after updatePosition: " + player.getUserLocation());
+                    
                     logger.debug("Updated player {} position to ({}, {})", playerId, x, y);
                     playerFound = true;
 
@@ -598,9 +608,11 @@ public class GameMenu extends InputAdapter implements Screen {
 
             if (!playerFound) {
                 logger.warn("Player {} not found in current game", playerId);
+                System.out.println("DEBUG: [GAME_MENU] Player " + playerId + " not found in current game");
             }
         } else {
             logger.warn("Invalid player position data: playerId={}, x={}, y={}", playerId, x, y);
+            System.out.println("DEBUG: [GAME_MENU] Invalid player position data: playerId=" + playerId + ", x=" + x + ", y=" + y);
         }
     }
 
@@ -690,20 +702,27 @@ public class GameMenu extends InputAdapter implements Screen {
      */
     private void applyPlayerDataUpdate(Player targetPlayer, Map<String, Object> playerData) {
         try {
-            System.out.println("DEBUG: Applying player data update to player: " + targetPlayer.getUser().getUserName());
+            System.out.println("DEBUG: [GAME_MENU] Applying player data update to player: " + targetPlayer.getUser().getUserName());
+            System.out.println("DEBUG: [GAME_MENU] Current player location before update: " + targetPlayer.getUserLocation());
             
             // Update location and position
             if (playerData.containsKey("x") && playerData.containsKey("y")) {
                 Integer x = (Integer) playerData.get("x");
                 Integer y = (Integer) playerData.get("y");
                 if (x != null && y != null) {
+                    System.out.println("DEBUG: [GAME_MENU] Updating player position to (" + x + ", " + y + ")");
                     // Find the location object
                     Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
+                    System.out.println("DEBUG: [GAME_MENU] Found location from map: " + newLocation);
                     if (newLocation != null) {
                         targetPlayer.setUserLocation(newLocation);
-                        // Update sprite position with scaled coordinates
-                        targetPlayer.updatePosition(x * 100, y * 100);
-                        System.out.println("DEBUG: Updated player position to (" + x + ", " + y + ")");
+                        System.out.println("DEBUG: [GAME_MENU] Player location after setUserLocation: " + targetPlayer.getUserLocation());
+                        // Update sprite position with original coordinates (not scaled)
+                        targetPlayer.updatePosition(x, y);
+                        System.out.println("DEBUG: [GAME_MENU] Player location after updatePosition: " + targetPlayer.getUserLocation());
+                        System.out.println("DEBUG: [GAME_MENU] Updated player position to (" + x + ", " + y + ")");
+                    } else {
+                        System.out.println("DEBUG: [GAME_MENU] WARNING: Could not find location for coordinates (" + x + ", " + y + ")");
                     }
                 }
             }
@@ -945,14 +964,17 @@ public class GameMenu extends InputAdapter implements Screen {
 
                 // If still null, try creating a new player for logged in user
                 if (App.getCurrentGame().getCurrentPlayer() == null && App.getLoggedInUser() != null) {
-                    System.out.println("DEBUG: Creating new player for logged in user");
+                    System.out.println("DEBUG: [GAME_MENU] Creating new player for logged in user: " + App.getLoggedInUser().getUserName());
                     Player newPlayer = new Player(App.getLoggedInUser(), new Location(0, 0), false, new Refrigrator(), new ArrayList<>(), null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
+                    System.out.println("DEBUG: [GAME_MENU] New player created with location: " + newPlayer.getUserLocation());
+                    
                     if (App.getCurrentGame().getPlayers() == null) {
                         App.getCurrentGame().setPlayers(new ArrayList<>());
                     }
                     App.getCurrentGame().getPlayers().add(newPlayer);
                     App.getCurrentGame().setCurrentPlayer(newPlayer);
-                    System.out.println("DEBUG: Created and set new player for: " + App.getLoggedInUser().getUserName());
+                    System.out.println("DEBUG: [GAME_MENU] Created and set new player for: " + App.getLoggedInUser().getUserName());
+                    System.out.println("DEBUG: [GAME_MENU] Current player location after setting: " + App.getCurrentGame().getCurrentPlayer().getUserLocation());
                 }
             }
         }
