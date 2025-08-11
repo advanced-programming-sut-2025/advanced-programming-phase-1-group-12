@@ -5,6 +5,7 @@ import org.example.Common.network.GameProtocol;
 import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.*;
 import org.example.Common.network.responses.*;
+import org.example.Common.models.Fundementals.App;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -311,17 +312,27 @@ public class NetworkCommandSender {
                 return;
             }
 
-            System.out.println("DEBUG: [NETWORK_SENDER] Sending movement update for game: " + currentGameId + " to (" + x + ", " + y + ")");
+            // Get the gameId from the WebSocket client to ensure consistency
+            String gameIdToUse = currentGameId;
+            if (App.getWebSocketClient() != null) {
+                String wsGameId = App.getWebSocketClient().getGameId();
+                if (wsGameId != null) {
+                    gameIdToUse = wsGameId;
+                    System.out.println("DEBUG: [NETWORK_SENDER] Using WebSocket client gameId: " + gameIdToUse);
+                }
+            }
+
+            System.out.println("DEBUG: [NETWORK_SENDER] Sending movement update for game: " + gameIdToUse + " to (" + x + ", " + y + ")");
 
             Map<String, Object> wsMessage = new HashMap<>();
             wsMessage.put("type", GameProtocol.WS_PLAYER_MOVED);
-            wsMessage.put("gameId", currentGameId);
+            wsMessage.put("gameId", gameIdToUse);
             wsMessage.put("x", x);
             wsMessage.put("y", y);
             wsMessage.put("timestamp", System.currentTimeMillis());
 
             serverConnection.sendWebSocketMessage(wsMessage);
-            logger.debug("Sent player movement WebSocket message: ({}, {}) for game {}", x, y, currentGameId);
+            logger.debug("Sent player movement WebSocket message: ({}, {}) for game {}", x, y, gameIdToUse);
         } catch (Exception e) {
             System.out.println("DEBUG: [NETWORK_SENDER] ERROR sending movement WebSocket message: " + e.getMessage());
             logger.error("Error sending movement WebSocket message", e);
@@ -337,9 +348,19 @@ public class NetworkCommandSender {
                 return;
             }
 
+            // Get the gameId from the WebSocket client to ensure consistency
+            String gameIdToUse = currentGameId;
+            if (App.getWebSocketClient() != null) {
+                String wsGameId = App.getWebSocketClient().getGameId();
+                if (wsGameId != null) {
+                    gameIdToUse = wsGameId;
+                    System.out.println("DEBUG: [NETWORK_SENDER] Using WebSocket client gameId for energy update: " + gameIdToUse);
+                }
+            }
+
             Map<String, Object> wsMessage = new HashMap<>();
             wsMessage.put("type", GameProtocol.WS_ENERGY_UPDATE);
-            wsMessage.put("gameId", currentGameId);
+            wsMessage.put("gameId", gameIdToUse);
             wsMessage.put("playerId", playerId);
             wsMessage.put("currentEnergy", currentEnergy);
             wsMessage.put("maxEnergy", maxEnergy);
@@ -350,7 +371,7 @@ public class NetworkCommandSender {
             serverConnection.sendWebSocketMessage(wsMessage);
             System.out.println("DEBUG: Energy update WebSocket message sent successfully");
             logger.debug("Sent energy update WebSocket message: playerId={}, energy={}/{} for game {}",
-                playerId, currentEnergy, maxEnergy, currentGameId);
+                playerId, currentEnergy, maxEnergy, gameIdToUse);
         } catch (Exception e) {
             System.out.println("DEBUG: Error sending energy update WebSocket message: " + e.getMessage());
             logger.error("Error sending energy update WebSocket message", e);

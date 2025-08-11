@@ -207,7 +207,25 @@ public class GameWebSocketClient {
 
     private void attemptReconnection() {
         try {
-            String wsUrl = serverUrl.replace("http", "ws") + "/ws?userId=" + userId + "&gameId=" + gameId;
+            // Get auth token from the ServerConnection (set during login in MultiplayerMenu)
+            String authToken = null;
+            if (Main.getMain() != null && Main.getMain().getServerConnection() != null) {
+                authToken = Main.getMain().getServerConnection().getAuthToken();
+            }
+
+            // Fallback to user token if available
+            if (authToken == null && App.getLoggedInUser() != null) {
+                authToken = App.getLoggedInUser().getToken();
+            }
+
+            // Use null instead of dummy_token for better debugging
+            if (authToken == null) {
+                System.out.println("DEBUG: No auth token available for reconnection");
+            }
+
+            String wsUrl = serverUrl.replace("http", "ws") + "/ws?userId=" + userId + "&token=" + authToken + "&gameId=" + gameId;
+            System.out.println("DEBUG: GameWebSocketClient reconnecting to URL: " + wsUrl);
+            
             Request request = new Request.Builder()
                 .url(wsUrl)
                 .build();
@@ -535,6 +553,10 @@ public class GameWebSocketClient {
 
     public boolean isReconnecting() {
         return isReconnecting;
+    }
+
+    public String getGameId() {
+        return gameId;
     }
 
     public long getRemainingReconnectionTime() {

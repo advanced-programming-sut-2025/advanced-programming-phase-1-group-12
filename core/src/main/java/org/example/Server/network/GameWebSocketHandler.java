@@ -66,11 +66,16 @@ public class GameWebSocketHandler {
                 }
                 // Remove old connection mapping
                 connectionToUser.remove(existingConnection.getSessionId());
+                
+                // Wait a moment for the old connection to close
+                Thread.sleep(100);
             }
 
             // Store connection mapping
             userConnections.put(userId, ctx);
             connectionToUser.put(connectionId, userId);
+
+            logger.info("WebSocket connection established for user: {} (connection: {})", userId, connectionId);
 
             // If gameId is provided, add connection to the game instance
             if (gameId != null) {
@@ -102,8 +107,6 @@ public class GameWebSocketHandler {
                 }
             }
 
-            logger.info("WebSocket connection established for user: {} (connection: {})", userId, connectionId);
-
             // Send connection confirmation
             Map<String, Object> confirmMsg = Map.of(
                 "type", "connection_established",
@@ -126,6 +129,31 @@ public class GameWebSocketHandler {
         try {
             String message = ctx.message();
             logger.debug("WebSocket message received from {}: {}", userId, message);
+
+            // Check if we have a valid userId for this connection
+            if (userId == null) {
+                logger.warn("Received message from unknown connection: {} - message: {}", connectionId, message);
+                // Try to extract userId from the message itself as fallback
+                try {
+                    Map<String, Object> messageData = objectMapper.readValue(message, Map.class);
+                    String messageUserId = (String) messageData.get("userId");
+                    if (messageUserId != null) {
+                        // Update the mapping
+                        connectionToUser.put(connectionId, messageUserId);
+                        userConnections.put(messageUserId, ctx);
+                        userId = messageUserId;
+                        logger.info("Recovered userId {} for connection {}", userId, connectionId);
+                    } else {
+                        logger.error("Cannot process message - no userId found for connection: {}", connectionId);
+                        sendError(ctx, "Authentication required - please reconnect");
+                        return;
+                    }
+                } catch (Exception e) {
+                    logger.error("Failed to extract userId from message for connection: {}", connectionId, e);
+                    sendError(ctx, "Authentication required - please reconnect");
+                    return;
+                }
+            }
 
             // Parse message as JSON
             Map<String, Object> messageData = objectMapper.readValue(message, Map.class);
@@ -283,14 +311,17 @@ public class GameWebSocketHandler {
 
             // Get the correct game ID from the WebSocket query parameters
             String gameId = ctx.queryParam("gameId");
+            logger.debug("WebSocket gameId from query params: {}", gameId);
 
             // Fallback: Handle gameId from message data if query param is null
             if (gameId == null) {
                 Object gameIdObj = messageData.get("gameId");
                 if (gameIdObj instanceof String) {
                     gameId = (String) gameIdObj;
+                    logger.debug("Using gameId from message data: {}", gameId);
                 } else if (gameIdObj instanceof Integer) {
                     gameId = gameIdObj.toString();
+                    logger.debug("Using gameId from message data (converted): {}", gameId);
                 }
             }
 
@@ -309,13 +340,17 @@ public class GameWebSocketHandler {
             int y = yObj instanceof Integer ? (Integer) yObj : Integer.parseInt(yObj.toString());
 
             GameInstance gameInstance = sessionManager.getGameInstance(gameId);
-            // If game instance is null, try to find it by user ID as fallback
+            logger.debug("Looking for game instance with gameId: {}", gameId);
+            
+            // If game instance is null, try to find it by user mapping
             if (gameInstance == null) {
                 String userGameId = sessionManager.getPlayerGameId(userId);
+                logger.debug("Game instance not found for gameId: {}, trying user mapping: {}", gameId, userGameId);
                 if (userGameId != null) {
                     gameInstance = sessionManager.getGameInstance(userGameId);
                     // Update gameId to the correct one for consistent messaging
                     gameId = userGameId;
+                    logger.info("Found game instance via user mapping: {} for user: {}", gameId, userId);
                 }
             }
 
@@ -329,10 +364,13 @@ public class GameWebSocketHandler {
 
             if (!gameInstance.isPlayerConnected(userId)) {
                 if (ctx.session.isOpen()) {
-                    sendError(ctx, "You are not connected to this game 2");
+                    logger.warn("Player {} is not connected to game {}", userId, gameId);
+                    sendError(ctx, "You are not connected to this game");
                 }
                 return;
             }
+
+            logger.debug("Processing movement for user: {} in game: {} to position: ({}, {})", userId, gameId, x, y);
 
             // Create movement update event
             Map<String, Object> movementData = new HashMap<>();

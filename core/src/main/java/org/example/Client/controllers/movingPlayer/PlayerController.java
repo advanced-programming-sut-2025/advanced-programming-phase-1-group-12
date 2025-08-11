@@ -307,10 +307,9 @@ public class PlayerController {
                 // Send movement update via NetworkCommandSender for consistency
                 if (App.getCurrentGame().isMultiplayer() && networkCommandSender != null) {
                     try {
-                        int originalX = (int) (newX / 100f);
-                        int originalY = (int) (newY / 100f);
-                        networkCommandSender.sendPlayerMovementWebSocket(originalX, originalY);
-                        // Sent movement update for UP
+                        // Send the actual tile coordinates (no division by 100 needed)
+                        networkCommandSender.sendPlayerMovementWebSocket(newX, newY);
+                        System.out.println("DEBUG: Sent movement update for UP: " + player.getUser().getUserName() + " to (" + newX + ", " + newY + ")");
                     } catch (Exception e) {
                         System.out.println("DEBUG: Failed to send movement update: " + e.getMessage());
                     }
@@ -337,10 +336,9 @@ public class PlayerController {
                 // Send movement update via NetworkCommandSender for consistency
                 if (App.getCurrentGame().isMultiplayer() && networkCommandSender != null) {
                     try {
-                        int originalX = (int) (newX / 100f);
-                        int originalY = (int) (newY / 100f);
-                        networkCommandSender.sendPlayerMovementWebSocket(originalX, originalY);
-                        // Sent movement update for DOWN
+                        // Send the actual tile coordinates (no division by 100 needed)
+                        networkCommandSender.sendPlayerMovementWebSocket(newX, newY);
+                        System.out.println("DEBUG: Sent movement update for DOWN: " + player.getUser().getUserName() + " to (" + newX + ", " + newY + ")");
                     } catch (Exception e) {
                         System.out.println("DEBUG: Failed to send movement update: " + e.getMessage());
                     }
@@ -367,10 +365,9 @@ public class PlayerController {
                 // Send movement update via NetworkCommandSender for consistency
                 if (App.getCurrentGame().isMultiplayer() && networkCommandSender != null) {
                     try {
-                        int originalX = (int) (newX / 100f);
-                        int originalY = (int) (newY / 100f);
-                        networkCommandSender.sendPlayerMovementWebSocket(originalX, originalY);
-                        System.out.println("DEBUG: Sent movement update for LEFT: " + player.getUser().getUserName() + " to (" + originalX + ", " + originalY + ")");
+                        // Send the actual tile coordinates (no division by 100 needed)
+                        networkCommandSender.sendPlayerMovementWebSocket(newX, newY);
+                        System.out.println("DEBUG: Sent movement update for LEFT: " + player.getUser().getUserName() + " to (" + newX + ", " + newY + ")");
                     } catch (Exception e) {
                         System.out.println("DEBUG: Failed to send movement update: " + e.getMessage());
                     }
@@ -399,10 +396,9 @@ public class PlayerController {
                 // Send movement update via NetworkCommandSender for consistency
                 if (App.getCurrentGame().isMultiplayer() && networkCommandSender != null) {
                     try {
-                        int originalX = (int) (newX / 100f);
-                        int originalY = (int) (newY / 100f);
-                        networkCommandSender.sendPlayerMovementWebSocket(originalX, originalY);
-                        System.out.println("DEBUG: Sent movement update for RIGHT: " + player.getUser().getUserName() + " to (" + originalX + ", " + originalY + ")");
+                        // Send the actual tile coordinates (no division by 100 needed)
+                        networkCommandSender.sendPlayerMovementWebSocket(newX, newY);
+                        System.out.println("DEBUG: Sent movement update for RIGHT: " + player.getUser().getUserName() + " to (" + newX + ", " + newY + ")");
                     } catch (Exception e) {
                         System.out.println("DEBUG: Failed to send movement update: " + e.getMessage());
                     }

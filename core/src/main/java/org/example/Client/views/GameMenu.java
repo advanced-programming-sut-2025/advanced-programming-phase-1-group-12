@@ -4232,10 +4232,15 @@ public class GameMenu extends InputAdapter implements Screen {
 
     private void renderNearbyPlayerIndicators() {
         Player currentPlayer = App.getCurrentPlayerLazy();
+        
+        // Check if current player has a valid location
+        if (currentPlayer == null || currentPlayer.getUserLocation() == null) {
+            return; // Skip rendering if current player or their location is null
+        }
 
         // Draw indicators for nearby players
         for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
-            if (!otherPlayer.equals(currentPlayer)) {
+            if (!otherPlayer.equals(currentPlayer) && otherPlayer.getUserLocation() != null) {
                 int distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - otherPlayer.getUserLocation().getxAxis()) +
                     Math.abs(currentPlayer.getUserLocation().getyAxis() - otherPlayer.getUserLocation().getyAxis());
 
@@ -4259,21 +4264,23 @@ public class GameMenu extends InputAdapter implements Screen {
         // Draw indicators for nearby NPCs
         if (App.getCurrentGame().getNPCvillage() != null) {
             for (org.example.Common.models.NPC.NPC npc : App.getCurrentGame().getNPCvillage().getAllNPCs()) {
-                int distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - npc.getUserLocation().getxAxis()) +
-                    Math.abs(currentPlayer.getUserLocation().getyAxis() - npc.getUserLocation().getyAxis());
+                if (npc.getUserLocation() != null) {
+                    int distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - npc.getUserLocation().getxAxis()) +
+                        Math.abs(currentPlayer.getUserLocation().getyAxis() - npc.getUserLocation().getyAxis());
 
-                if (distance <= 1) { // NPCs have smaller interaction range
-                    // Draw a subtle indicator around nearby NPCs
-                    float npcX = npc.getUserLocation().getxAxis() * 100f;
-                    float npcY = npc.getUserLocation().getyAxis() * 100f;
+                    if (distance <= 1) { // NPCs have smaller interaction range
+                        // Draw a subtle indicator around nearby NPCs
+                        float npcX = npc.getUserLocation().getxAxis() * 100f;
+                        float npcY = npc.getUserLocation().getyAxis() * 100f;
 
-                    // Use shape renderer to draw a circle for NPCs
-                    if (shapeRenderer != null) {
-                        shapeRenderer.setProjectionMatrix(camera.combined);
-                        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-                        shapeRenderer.setColor(0, 1, 1, 0.4f); // Cyan glow for NPCs
-                        shapeRenderer.circle(npcX + 50, npcY + 50, 60); // 50 is half tile size
-                        shapeRenderer.end();
+                        // Use shape renderer to draw a circle for NPCs
+                        if (shapeRenderer != null) {
+                            shapeRenderer.setProjectionMatrix(camera.combined);
+                            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+                            shapeRenderer.setColor(0, 1, 1, 0.4f); // Cyan glow for NPCs
+                            shapeRenderer.circle(npcX + 50, npcY + 50, 60); // 50 is half tile size
+                            shapeRenderer.end();
+                        }
                     }
                 }
             }
