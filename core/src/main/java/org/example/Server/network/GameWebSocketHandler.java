@@ -34,10 +34,17 @@ public class GameWebSocketHandler {
         String connectionId = ctx.getSessionId();
 
         try {
+            System.out.println("🔌🔌🔌 [SERVER] WebSocket connection attempt 🔌🔌🔌");
+            System.out.println("🔌🔌🔌 [SERVER] Connection ID: " + connectionId + " 🔌🔌🔌");
+            
             // Extract user information from query parameters or headers
             String userId = ctx.queryParam("userId");
             String token = ctx.queryParam("token");
             String gameId = ctx.queryParam("gameId");
+            
+            System.out.println("🔌🔌🔌 [SERVER] User ID: " + userId + " 🔌🔌🔌");
+            System.out.println("🔌🔌🔌 [SERVER] Game ID: " + gameId + " 🔌🔌🔌");
+            System.out.println("🔌🔌🔌 [SERVER] Token: " + token + " 🔌🔌🔌");
 
             if (userId == null) {
                 logger.warn("WebSocket connection attempt without userId");
@@ -75,6 +82,7 @@ public class GameWebSocketHandler {
             userConnections.put(userId, ctx);
             connectionToUser.put(connectionId, userId);
 
+            System.out.println("✅✅✅ [SERVER] WebSocket connection established for user: " + userId + " (connection: " + connectionId + ") ✅✅✅");
             logger.info("WebSocket connection established for user: {} (connection: {})", userId, connectionId);
 
             // If gameId is provided, add connection to the game instance
@@ -164,6 +172,11 @@ public class GameWebSocketHandler {
             Map<String, Object> messageData = objectMapper.readValue(message, Map.class);
             String messageType = (String) messageData.get("type");
 
+            System.out.println("🔍🔍🔍 [SERVER] Received WebSocket message 🔍🔍🔍");
+            System.out.println("🔍🔍🔍 [SERVER] User: " + userId + " 🔍🔍🔍");
+            System.out.println("🔍🔍🔍 [SERVER] Message type: " + messageType + " 🔍🔍🔍");
+            System.out.println("🔍🔍🔍 [SERVER] Message data: " + messageData + " 🔍🔍🔍");
+
             if (messageType == null) {
                 sendError(ctx, "Message type is required");
                 return;
@@ -234,12 +247,17 @@ public class GameWebSocketHandler {
         String connectionId = ctx.getSessionId();
         String userId = connectionToUser.get(connectionId);
 
+        System.out.println("🔌🔌🔌 [SERVER] WebSocket connection closed 🔌🔌🔌");
+        System.out.println("🔌🔌🔌 [SERVER] Connection ID: " + connectionId + " 🔌🔌🔌");
+        System.out.println("🔌🔌🔌 [SERVER] User ID: " + userId + " 🔌🔌🔌");
+
         try {
             if (userId != null) {
                 // Only remove user connection mapping if this is the current connection for this user
                 WsContext currentConnection = userConnections.get(userId);
                 if (currentConnection != null && currentConnection.getSessionId().equals(connectionId)) {
                     userConnections.remove(userId);
+                    System.out.println("❌❌❌ [SERVER] Removed user connection for: " + userId + " ❌❌❌");
                 }
                 connectionToUser.remove(connectionId);
 
@@ -261,12 +279,15 @@ public class GameWebSocketHandler {
                     }
                 }
 
+                System.out.println("❌❌❌ [SERVER] WebSocket connection closed for user: " + userId + " (connection: " + connectionId + ") ❌❌❌");
                 logger.info("WebSocket connection closed for user: {} (connection: {})", userId, connectionId);
             } else {
+                System.out.println("❌❌❌ [SERVER] WebSocket connection closed (connection: " + connectionId + ") ❌❌❌");
                 logger.info("WebSocket connection closed (connection: {})", connectionId);
             }
 
         } catch (Exception e) {
+            System.out.println("💥💥💥 [SERVER] Error handling WebSocket close: " + e.getMessage() + " 💥💥💥");
             logger.error("Error handling WebSocket close", e);
         }
     }
@@ -275,12 +296,17 @@ public class GameWebSocketHandler {
         String connectionId = ctx.getSessionId();
         String userId = connectionToUser.get(connectionId);
 
+        System.out.println("💥💥💥 [SERVER] WebSocket error 💥💥💥");
+        System.out.println("💥💥💥 [SERVER] Connection ID: " + connectionId + " 💥💥💥");
+        System.out.println("💥💥💥 [SERVER] User ID: " + userId + " 💥💥💥");
+
         logger.error("WebSocket error for user: {} (connection: {})", userId, connectionId);
 
         // Clean up connection
         if (userId != null) {
             userConnections.remove(userId);
             connectionToUser.remove(connectionId);
+            System.out.println("❌❌❌ [SERVER] Cleaned up connection for user: " + userId + " ❌❌❌");
         }
     }
 
@@ -870,30 +896,31 @@ public class GameWebSocketHandler {
 
     private void handleRadioTrackUploaded(WsContext ctx, String userId, Map<String, Object> messageData) {
         try {
-            System.out.println("DEBUG: [SERVER] handleRadioTrackUploaded called");
-            System.out.println("DEBUG: [SERVER] User: " + userId);
-            System.out.println("DEBUG: [SERVER] Message data: " + messageData);
+            System.out.println("🎵🎵🎵 [SERVER] handleRadioTrackUploaded called 🎵🎵🎵");
+            System.out.println("🎵🎵🎵 [SERVER] User: " + userId + " 🎵🎵🎵");
+            System.out.println("🎵🎵🎵 [SERVER] Message data: " + messageData + " 🎵🎵🎵");
             
             String gameId = (String) messageData.get("gameId");
             String trackName = (String) messageData.get("trackName");
             String trackFile = (String) messageData.get("trackFile");
             String stationOwner = (String) messageData.get("stationOwner");
             
-            System.out.println("DEBUG: [SERVER] Broadcasting radio track uploaded event to game: " + gameId);
-            System.out.println("DEBUG: [SERVER] Track: " + trackName + " (" + trackFile + ")");
-            System.out.println("DEBUG: [SERVER] Station owner: " + stationOwner);
+            System.out.println("🎵🎵🎵 [SERVER] Broadcasting radio track uploaded event to game: " + gameId + " 🎵🎵🎵");
+            System.out.println("🎵🎵🎵 [SERVER] Track: " + trackName + " (" + trackFile + ") 🎵🎵🎵");
+            System.out.println("🎵🎵🎵 [SERVER] Station owner: " + stationOwner + " 🎵🎵🎵");
             
             // Broadcast to all players in the game
             GameInstance gameInstance = sessionManager.getGameInstance(gameId);
             if (gameInstance != null) {
+                System.out.println("🎵🎵🎵 [SERVER] Found game instance, broadcasting to all players 🎵🎵🎵");
                 gameInstance.broadcastToAllPlayers(messageData);
-                System.out.println("DEBUG: [SERVER] Radio track uploaded event broadcasted successfully");
+                System.out.println("🎵🎵🎵 [SERVER] Radio track uploaded event broadcasted successfully 🎵🎵🎵");
             } else {
-                System.out.println("DEBUG: [SERVER] Game instance not found for gameId: " + gameId);
+                System.out.println("❌❌❌ [SERVER] Game instance not found for gameId: " + gameId + " ❌❌❌");
             }
             
         } catch (Exception e) {
-            System.out.println("DEBUG: [SERVER] Error handling radio track uploaded: " + e.getMessage());
+            System.out.println("💥💥💥 [SERVER] Error handling radio track uploaded: " + e.getMessage() + " 💥💥💥");
             logger.error("Error handling radio track uploaded", e);
         }
     }

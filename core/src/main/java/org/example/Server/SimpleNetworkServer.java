@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import org.example.Server.network.GameWebSocketHandler;
+import org.example.Server.network.GameInstance;
 
 public class SimpleNetworkServer {
     private static final Logger logger = LoggerFactory.getLogger(SimpleNetworkServer.class);
@@ -136,6 +137,7 @@ public class SimpleNetworkServer {
         app.post("/game/create", this::handleCreateGame);
         app.get("/game/{gameId}/state", this::handleGetGameState);
         app.post("/game/{gameId}/player/walk", this::handlePlayerWalk);
+        app.get("/game/active", this::handleGetActiveGames);
 
         // Test routes
         app.get("/api/test", this::handleTest);
@@ -726,6 +728,37 @@ public class SimpleNetworkServer {
             ctx.status(result.getStatusCode()).json(result);
         } catch (Exception e) {
             logger.error("Player walk error", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
+        }
+    }
+
+    private void handleGetActiveGames(Context ctx) {
+        try {
+            String username = getUsernameFromContext(ctx);
+            if (username == null) {
+                ctx.status(401).json(NetworkResult.error("Authentication required"));
+                return;
+            }
+
+            // Get all active games that contain this player
+            List<GameStateResponse> activeGames = new ArrayList<>();
+            
+            // Get the game ID for the current player
+            String playerGameId = gameSessionManager.getPlayerGameId(username);
+            if (playerGameId != null) {
+                GameInstance gameInstance = gameSessionManager.getGameInstance(playerGameId);
+                if (gameInstance != null) {
+                    GameStateResponse gameState = new GameStateResponse();
+                    gameState.setGameId(playerGameId);
+                    gameState.setConnectedPlayers(gameInstance.getConnectedPlayers());
+                    gameState.setGameStatus("active");
+                    activeGames.add(gameState);
+                }
+            }
+
+            ctx.json(NetworkResult.success("Active games retrieved", activeGames));
+        } catch (Exception e) {
+            logger.error("Get active games error", e);
             ctx.status(500).json(NetworkResult.error("Internal server error"));
         }
     }

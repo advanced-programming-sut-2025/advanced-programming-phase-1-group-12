@@ -95,9 +95,10 @@ public class GameSessionManager {
 
     public NetworkResult<GameStateResponse> createGame(String creatorId, CreateGameRequest request) {
         try {
-            System.out.println("DEBUG: createGame called with creatorId: " + creatorId);
-            System.out.println("DEBUG: Request usernames: " + request.getUsernames());
-            System.out.println("DEBUG: Request farm selections: " + request.getFarmSelections());
+            System.out.println("🎮🎮🎮 [SERVER] createGame called 🎮🎮🎮");
+            System.out.println("🎮🎮🎮 [SERVER] Creator ID: " + creatorId + " 🎮🎮🎮");
+            System.out.println("🎮🎮🎮 [SERVER] Request usernames: " + request.getUsernames() + " 🎮🎮🎮");
+            System.out.println("🎮🎮🎮 [SERVER] Request farm selections: " + request.getFarmSelections() + " 🎮🎮🎮");
 
             // Validate request
             if (request.getUsernames() == null || request.getUsernames().isEmpty()) {
@@ -122,12 +123,33 @@ public class GameSessionManager {
                 }
             }
 
-            // Generate game ID with client identification for tracing
-            // Format: "game_{creatorId}_{timestamp}_{randomSuffix}"
-            String timestamp = String.valueOf(System.currentTimeMillis());
-            String randomSuffix = UUID.randomUUID().toString().substring(0, 8);
-            String gameId = "game_" + creatorId + "_" + timestamp + "_" + randomSuffix;
-            System.out.println("DEBUG: Generated traceable game ID: " + gameId);
+            // Generate shared game ID based on lobby to ensure all players join the same game
+            // Format: "game_shared_{lobbyHash}_{minuteBasedTimestamp}"
+            String lobbyHash = String.valueOf(request.getUsernames().hashCode());
+            String minuteBasedTimestamp = String.valueOf(System.currentTimeMillis() / 60000); // Minute-based
+            String gameId = "game_shared_" + lobbyHash + "_" + minuteBasedTimestamp;
+            System.out.println("🎮🎮🎮 [SERVER] Generated SHARED game ID: " + gameId + " 🎮🎮🎮");
+            System.out.println("🎮🎮🎮 [SERVER] Lobby hash: " + lobbyHash + " 🎮🎮🎮");
+            System.out.println("🎮🎮🎮 [SERVER] Minute timestamp: " + minuteBasedTimestamp + " 🎮🎮🎮");
+            
+            // Check if a game with this shared ID already exists
+            GameInstance existingGame = activeGames.get(gameId);
+            if (existingGame != null) {
+                System.out.println("🎮🎮🎮 [SERVER] Found existing game with shared ID: " + gameId + " - reusing it 🎮🎮🎮");
+                
+                // Add the creator to the existing game
+                playerToGameMapping.put(creatorId, gameId);
+                System.out.println("🎮🎮🎮 [SERVER] Added creator " + creatorId + " to existing game " + gameId + " 🎮🎮🎮");
+                
+                // Return the existing game
+                GameStateResponse response = new GameStateResponse();
+                response.setGameId(gameId);
+                response.setConnectedPlayers(existingGame.getConnectedPlayers());
+                response.setGameStatus("active");
+                
+                System.out.println("🎮🎮🎮 [SERVER] Returning existing game with shared ID: " + gameId + " 🎮🎮🎮");
+                return NetworkResult.success("Joined existing game with shared ID", response);
+            }
 
             // Use synchronized block to ensure thread-safe game creation
             synchronized (this) {
@@ -187,8 +209,14 @@ public class GameSessionManager {
 
     public NetworkResult<GameStateResponse> joinGame(String gameId, String playerId) {
         try {
+            System.out.println("🎮🎮🎮 [SERVER] joinGame called 🎮🎮🎮");
+            System.out.println("🎮🎮🎮 [SERVER] Game ID: " + gameId + " 🎮🎮🎮");
+            System.out.println("🎮🎮🎮 [SERVER] Player ID: " + playerId + " 🎮🎮🎮");
+            System.out.println("🎮🎮🎮 [SERVER] Active games: " + activeGames.keySet() + " 🎮🎮🎮");
+            
             GameInstance instance = activeGames.get(gameId);
             if (instance == null) {
+                System.out.println("❌❌❌ [SERVER] Game not found: " + gameId + " ❌❌❌");
                 return NetworkResult.notFound("Game not found 1");
             }
 
