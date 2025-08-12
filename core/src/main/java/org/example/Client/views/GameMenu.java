@@ -56,6 +56,8 @@ import org.example.Common.models.enums.Weather;
 import org.example.Common.models.RelationShips.RelationShip;
 import org.example.Common.models.RelationShips.Gift;
 import org.example.Client.network.GameWebSocketClient;
+import org.example.Common.models.Reaction;
+import org.example.Common.models.ReactionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.badlogic.gdx.input.GestureDetector;
@@ -118,9 +120,12 @@ public class GameMenu extends InputAdapter implements Screen {
     // Friends window components
     private TextButton friendsButton;
     private TextButton radioButton;
+    private TextButton reactionButton;
     private Dialog friendsDialog;
     private Table friendsTable;
     private ScrollPane friendsScrollPane;
+    private ReactionMenu reactionMenu;
+    private ReactionRenderer reactionRenderer;
 
     private Map<Player, ProgressBar> energyBars;
     private Map<Craft, ProgressBar> craftBars;
@@ -1091,6 +1096,34 @@ public class GameMenu extends InputAdapter implements Screen {
 
         initializeFriendsButton();
         initializeRadioButton();
+        initializeReactionButton();
+        
+        // Initialize reaction system
+        reactionRenderer = new ReactionRenderer(batch, font);
+        // Initialize reaction menu with null player initially, will be updated when needed
+        reactionMenu = new ReactionMenu(stage, skin, null, new ReactionMenu.ReactionMenuCallback() {
+            @Override
+            public void onReactionSelected(Reaction reaction) {
+                // Add reaction above current player
+                Player currentPlayer = getCurrentPlayerCharacter();
+                if (currentPlayer != null) {
+                    float playerX = currentPlayer.getUserLocation().getxAxis() * 100;
+                    float playerY = currentPlayer.getUserLocation().getyAxis() * 100;
+                    reactionRenderer.addReaction(reaction, playerX, playerY);
+                }
+            }
+            
+            @Override
+            public void onCustomReactionAdded(Reaction reaction) {
+                // Add custom reaction above current player
+                Player currentPlayer = getCurrentPlayerCharacter();
+                if (currentPlayer != null) {
+                    float playerX = currentPlayer.getUserLocation().getxAxis() * 100;
+                    float playerY = currentPlayer.getUserLocation().getyAxis() * 100;
+                    reactionRenderer.addReaction(reaction, playerX, playerY);
+                }
+            }
+        });
 
         if (smileTextures[0] == null) {
             try {
@@ -1515,6 +1548,11 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Render ring animation after lighting overlay to ensure it's visible
         renderRingAnimation(batch);
+        
+        // Render reactions
+        if (reactionRenderer != null) {
+            reactionRenderer.render(delta);
+        }
 
         // Periodic gift checking
         giftCheckTimer += delta;
@@ -1635,6 +1673,14 @@ public class GameMenu extends InputAdapter implements Screen {
         // Dispose flower texture
         if (flowerTexture != null) {
             flowerTexture.dispose();
+        }
+        
+        // Dispose reaction system
+        if (reactionMenu != null) {
+            reactionMenu.dispose();
+        }
+        if (reactionRenderer != null) {
+            reactionRenderer.dispose();
         }
 
         stage.dispose();
@@ -4405,6 +4451,31 @@ public class GameMenu extends InputAdapter implements Screen {
         });
 
         stage.addActor(radioButton);
+    }
+    
+    private void initializeReactionButton() {
+        reactionButton = new TextButton("Reactions", skin);
+        reactionButton.setSize(120, 40);
+        reactionButton.setPosition(20, stage.getHeight() - 220);
+        reactionButton.getLabel().setFontScale(1.2f);
+
+        reactionButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                showReactionMenu();
+            }
+        });
+        stage.addActor(reactionButton);
+    }
+    
+    private void showReactionMenu() {
+        if (reactionMenu != null) {
+            Player currentPlayer = getCurrentPlayerCharacter();
+            if (currentPlayer != null) {
+                reactionMenu.updateCurrentPlayer(currentPlayer);
+            }
+            reactionMenu.show();
+        }
     }
 
     private void cycleToNextPlayerWithFullEnergy() {
