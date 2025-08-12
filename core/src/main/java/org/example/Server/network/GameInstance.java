@@ -594,8 +594,10 @@ public class GameInstance {
     }
 
     public void broadcastToAllPlayers(Object message) {
-        System.out.println("DEBUG: [SERVER] broadcastToAllPlayers called with message: " + message);
-        System.out.println("DEBUG: [SERVER] Number of WebSocket connections: " + webSocketConnections.size());
+        System.out.println("🔴🔴🔴 [GAME_INSTANCE] broadcastToAllPlayers() called 🔴🔴🔴");
+        System.out.println("🔴🔴🔴 [GAME_INSTANCE] Message type: " + message.getClass().getSimpleName() + " 🔴🔴🔴");
+        System.out.println("🔴🔴🔴 [GAME_INSTANCE] Message content: " + message + " 🔴🔴🔴");
+        System.out.println("🔴🔴🔴 [GAME_INSTANCE] Number of WebSocket connections: " + webSocketConnections.size() + " 🔴🔴🔴");
         
         Set<WsContext> deadConnections = new HashSet<>();
         int messagesSent = 0;
@@ -603,21 +605,22 @@ public class GameInstance {
         for (WsContext wsContext : webSocketConnections) {
             try {
                 if (wsContext.session.isOpen()) {
+                    System.out.println("🔴🔴🔴 [GAME_INSTANCE] Sending message to WebSocket connection " + (messagesSent + 1) + " 🔴🔴🔴");
                     wsContext.send(message);
                     messagesSent++;
-                    System.out.println("DEBUG: [SERVER] Message sent to WebSocket connection " + messagesSent);
+                    System.out.println("🔴🔴🔴 [GAME_INSTANCE] Message sent successfully to connection " + messagesSent + " 🔴🔴🔴");
                 } else {
-                    System.out.println("DEBUG: [SERVER] Found dead WebSocket connection, marking for cleanup");
+                    System.out.println("🔴🔴🔴 [GAME_INSTANCE] Found dead WebSocket connection, marking for cleanup 🔴🔴🔴");
                     deadConnections.add(wsContext);
                 }
             } catch (Exception e) {
-                System.out.println("DEBUG: [SERVER] Failed to send message to WebSocket connection: " + e.getMessage());
+                System.out.println("🔴🔴🔴 [GAME_INSTANCE] Failed to send message to WebSocket connection: " + e.getMessage() + " 🔴🔴🔴");
                 logger.warn("Failed to send message to WebSocket connection", e);
                 deadConnections.add(wsContext);
             }
         }
 
-        System.out.println("DEBUG: [SERVER] Broadcast completed - " + messagesSent + " messages sent, " + deadConnections.size() + " dead connections found");
+        System.out.println("🔴🔴🔴 [GAME_INSTANCE] Broadcast completed - " + messagesSent + " messages sent, " + deadConnections.size() + " dead connections found 🔴🔴🔴");
 
         // Clean up dead connections
         webSocketConnections.removeAll(deadConnections);

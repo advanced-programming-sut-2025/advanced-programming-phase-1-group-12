@@ -299,6 +299,10 @@ public class ChatMenu implements Screen, Disposable {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 if (parentScreen != null) {
+                    // Clear the reference in GameMenu if it's the parent
+                    if (parentScreen instanceof GameMenu) {
+                        ((GameMenu) parentScreen).clearChatMenuReference();
+                    }
                     Gdx.app.postRunnable(() -> {
                         Main.getMain().setScreen(parentScreen);
                     });
@@ -332,26 +336,40 @@ public class ChatMenu implements Screen, Disposable {
     }
     
     private void sendMessage() {
+        System.out.println("🔵🔵🔵 [CHAT_MENU] sendMessage() called 🔵🔵🔵");
+        
         String message = inputField.getText().trim();
+        System.out.println("🔵🔵🔵 [CHAT_MENU] Message content: '" + message + "' 🔵🔵🔵");
+        
         if (message.isEmpty()) {
+            System.out.println("🔵🔵🔵 [CHAT_MENU] Message is empty, returning 🔵🔵🔵");
             return;
         }
         
         if (currentChatType == ChatType.PRIVATE && selectedPlayer == null) {
+            System.out.println("🔵🔵🔵 [CHAT_MENU] Private chat selected but no player chosen 🔵🔵🔵");
             statusLabel.setText("Please select a player");
             statusLabel.setColor(Color.RED);
             return;
         }
         
         String sender = App.getLoggedInUser().getUserName();
+        System.out.println("🔵🔵🔵 [CHAT_MENU] Sender: " + sender + " 🔵🔵🔵");
+        System.out.println("🔵🔵🔵 [CHAT_MENU] Chat type: " + currentChatType + " 🔵🔵🔵");
+        System.out.println("🔵🔵🔵 [CHAT_MENU] Selected player: " + selectedPlayer + " 🔵🔵🔵");
+        
         ChatMessage chatMessage = new ChatMessage(sender, message, currentChatType, selectedPlayer);
         
         // Add to local history
+        System.out.println("🔵🔵🔵 [CHAT_MENU] Adding message to local history 🔵🔵🔵");
         addMessage(chatMessage);
         
         // Send via network
         if (networkSender != null) {
+            System.out.println("🔵🔵🔵 [CHAT_MENU] NetworkSender is available, sending message 🔵🔵🔵");
             Result result = networkSender.sendChatMessage(message);
+            System.out.println("🔵🔵🔵 [CHAT_MENU] Network send result: " + result.isSuccessful() + " - " + result.getMessage() + " 🔵🔵🔵");
+            
             if (!result.isSuccessful()) {
                 statusLabel.setText("Error sending message: " + result.getMessage());
                 statusLabel.setColor(Color.RED);
@@ -359,10 +377,13 @@ public class ChatMenu implements Screen, Disposable {
                 statusLabel.setText("Message sent");
                 statusLabel.setColor(Color.GREEN);
             }
+        } else {
+            System.out.println("🔵🔵🔵 [CHAT_MENU] NetworkSender is null! 🔵🔵🔵");
         }
         
         // Clear input field
         inputField.setText("");
+        System.out.println("🔵🔵🔵 [CHAT_MENU] sendMessage() completed 🔵🔵🔵");
     }
     
     private void addMessage(ChatMessage message) {
@@ -399,8 +420,16 @@ public class ChatMenu implements Screen, Disposable {
     }
     
     public void receiveMessage(String sender, String content, ChatType type, String recipient) {
+        System.out.println("🔵🔵🔵 [CHAT_MENU] receiveMessage() called 🔵🔵🔵");
+        System.out.println("🔵🔵🔵 [CHAT_MENU] Sender: " + sender + " 🔵🔵🔵");
+        System.out.println("🔵🔵🔵 [CHAT_MENU] Content: '" + content + "' 🔵🔵🔵");
+        System.out.println("🔵🔵🔵 [CHAT_MENU] Type: " + type + " 🔵🔵🔵");
+        System.out.println("🔵🔵🔵 [CHAT_MENU] Recipient: " + recipient + " 🔵🔵🔵");
+        
         ChatMessage message = new ChatMessage(sender, content, type, recipient);
         addMessage(message);
+        
+        System.out.println("🔵🔵🔵 [CHAT_MENU] receiveMessage() completed 🔵🔵🔵");
     }
     
     public void updateOnlinePlayers(List<String> players) {
@@ -454,6 +483,11 @@ public class ChatMenu implements Screen, Disposable {
     
     @Override
     public void dispose() {
+        // Clear the reference in GameMenu if it's the parent
+        if (parentScreen instanceof GameMenu) {
+            ((GameMenu) parentScreen).clearChatMenuReference();
+        }
+        
         if (stage != null) {
             stage.dispose();
         }

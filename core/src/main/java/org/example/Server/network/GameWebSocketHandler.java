@@ -311,6 +311,10 @@ public class GameWebSocketHandler {
     }
 
     private void handleChatMessage(WsContext ctx, String userId, Map<String, Object> messageData) {
+        System.out.println("🔴🔴🔴 [SERVER] handleChatMessage() called 🔴🔴🔴");
+        System.out.println("🔴🔴🔴 [SERVER] User ID: " + userId + " 🔴🔴🔴");
+        System.out.println("🔴🔴🔴 [SERVER] Message data: " + messageData + " 🔴🔴🔴");
+        
         try {
             // Handle gameId as either String or Integer
             Object gameIdObj = messageData.get("gameId");
@@ -320,33 +324,65 @@ public class GameWebSocketHandler {
             } else if (gameIdObj instanceof Integer) {
                 gameId = gameIdObj.toString();
             }
+            System.out.println("🔴🔴🔴 [SERVER] Parsed game ID: " + gameId + " 🔴🔴🔴");
 
             String message = (String) messageData.get("message");
             String chatType = (String) messageData.getOrDefault("chatType", "public");
+            System.out.println("🔴🔴🔴 [SERVER] Message: '" + message + "' 🔴🔴🔴");
+            System.out.println("🔴🔴🔴 [SERVER] Chat type: " + chatType + " 🔴🔴🔴");
 
             if (gameId == null || message == null) {
+                System.out.println("🔴🔴🔴 [SERVER] Missing gameId or message, sending error 🔴🔴🔴");
                 sendError(ctx, "gameId and message are required for chat");
                 return;
             }
 
             GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            System.out.println("🔴🔴🔴 [SERVER] Game instance: " + (gameInstance != null ? "found" : "not found") + " 🔴🔴🔴");
+            
             if (gameInstance == null) {
+                System.out.println("🔴🔴🔴 [SERVER] Game not found, sending error 🔴🔴🔴");
                 sendError(ctx, "Game not found 2");
                 return;
             }
 
             if (!gameInstance.isPlayerConnected(userId)) {
+                System.out.println("🔴🔴🔴 [SERVER] Player not connected to game, sending error 🔴🔴🔴");
                 sendError(ctx, "You are not connected to this game 1");
                 return;
             }
 
+            // Get the actual username for the user
+            String senderUsername = userId; // Default to userId if we can't get the actual username
+            try {
+                // Try to get the actual username from the game instance
+                if (gameInstance != null) {
+                    Player player = gameInstance.getPlayer(userId);
+                    System.out.println("🔴🔴🔴 [SERVER] Player object: " + (player != null ? "found" : "not found") + " 🔴🔴🔴");
+                    
+                    if (player != null && player.getUser() != null) {
+                        senderUsername = player.getUser().getUserName();
+                        System.out.println("🔴🔴🔴 [SERVER] Actual username: " + senderUsername + " 🔴🔴🔴");
+                    } else {
+                        System.out.println("🔴🔴🔴 [SERVER] Player or User object is null, using userId 🔴🔴🔴");
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("🔴🔴🔴 [SERVER] Error getting username: " + e.getMessage() + " 🔴🔴🔴");
+                logger.warn("Could not get actual username for user {}, using userId", userId);
+            }
+            
             // Create and broadcast chat message event
-            ChatMessageEvent chatEvent = new ChatMessageEvent(gameId, userId, userId, message, chatType);
+            System.out.println("🔴🔴🔴 [SERVER] Creating ChatMessageEvent with senderUsername: " + senderUsername + " 🔴🔴🔴");
+            ChatMessageEvent chatEvent = new ChatMessageEvent(gameId, userId, senderUsername, message, chatType);
+            System.out.println("🔴🔴🔴 [SERVER] Broadcasting chat message to game 🔴🔴🔴");
             broadcastToGame(gameId, chatEvent);
 
+            System.out.println("🔴🔴🔴 [SERVER] Chat message broadcast completed 🔴🔴🔴");
             logger.debug("Chat message from {} in game {}: {}", userId, gameId, message);
 
         } catch (Exception e) {
+            System.out.println("🔴🔴🔴 [SERVER] Error handling chat message: " + e.getMessage() + " 🔴🔴🔴");
             logger.error("Error handling chat message", e);
             sendError(ctx, "Failed to send chat message");
         }

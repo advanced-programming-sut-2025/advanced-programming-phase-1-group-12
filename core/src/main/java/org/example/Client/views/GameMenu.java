@@ -122,6 +122,7 @@ public class GameMenu extends InputAdapter implements Screen {
     private TextButton radioButton;
     private TextButton reactionButton;
     private TextButton chatButton;
+    private ChatMenu currentChatMenu;
     private Dialog friendsDialog;
     private Table friendsTable;
     private ScrollPane friendsScrollPane;
@@ -494,27 +495,52 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void handleChatMessage(Map<String, Object> data) {
+        System.out.println("🟣🟣🟣 [GAME_MENU] handleChatMessage() called 🟣🟣🟣");
+        System.out.println("🟣🟣🟣 [GAME_MENU] Received data: " + data + " 🟣🟣🟣");
+        
         try {
             String playerId = (String) data.get("playerId");
             String username = (String) data.get("username");
             String message = (String) data.get("message");
             String chatType = (String) data.get("chatType");
 
-            System.out.println("DEBUG: Chat message - playerId: " + playerId + ", username: " + username + ", message: " + message + ", type: " + chatType);
+            System.out.println("🟣🟣🟣 [GAME_MENU] Parsed values: 🟣🟣🟣");
+            System.out.println("🟣🟣🟣 [GAME_MENU]   playerId: " + playerId + " 🟣🟣🟣");
+            System.out.println("🟣🟣🟣 [GAME_MENU]   username: " + username + " 🟣🟣🟣");
+            System.out.println("🟣🟣🟣 [GAME_MENU]   message: '" + message + "' 🟣🟣🟣");
+            System.out.println("🟣🟣🟣 [GAME_MENU]   chatType: " + chatType + " 🟣🟣🟣");
+            
             logger.debug("Chat message from {}: {}", username, message);
 
-            // Handle chat message display
-            // This could be implemented to show chat messages in the UI
+            // Forward the message to the ChatMenu if it's open
+            System.out.println("🟣🟣🟣 [GAME_MENU] CurrentChatMenu: " + (currentChatMenu != null ? "available" : "null") + " 🟣🟣🟣");
+            
+            if (currentChatMenu != null) {
+                ChatMenu.ChatType type = "private".equals(chatType) ? ChatMenu.ChatType.PRIVATE : ChatMenu.ChatType.PUBLIC;
+                String recipient = "private".equals(chatType) ? data.get("recipient") != null ? (String) data.get("recipient") : null : null;
+                
+                System.out.println("🟣🟣🟣 [GAME_MENU] Forwarding to ChatMenu: 🟣🟣🟣");
+                System.out.println("🟣🟣🟣 [GAME_MENU]   type: " + type + " 🟣🟣🟣");
+                System.out.println("🟣🟣🟣 [GAME_MENU]   recipient: " + recipient + " 🟣🟣🟣");
+                
+                currentChatMenu.receiveMessage(username, message, type, recipient);
+                System.out.println("🟣🟣🟣 [GAME_MENU] Message forwarded to ChatMenu successfully 🟣🟣🟣");
+            } else {
+                System.out.println("🟣🟣🟣 [GAME_MENU] ChatMenu is not open, skipping forward 🟣🟣🟣");
+            }
+
+            // Also show a brief notification in the game UI
             if (errorLabel != null) {
                 errorLabel.setText(username + ": " + message);
                 errorLabel.setColor(Color.WHITE);
                 timeSinceError = 0f;
+                System.out.println("🟣🟣🟣 [GAME_MENU] Updated error label with message 🟣🟣🟣");
+            } else {
+                System.out.println("🟣🟣🟣 [GAME_MENU] Error label is null, cannot show notification 🟣🟣🟣");
             }
-            
-
 
         } catch (Exception e) {
-            System.out.println("DEBUG: Error handling chat message: " + e.getMessage());
+            System.out.println("🟣🟣🟣 [GAME_MENU] Error handling chat message: " + e.getMessage() + " 🟣🟣🟣");
             logger.error("Error handling chat message", e);
         }
     }
@@ -4496,10 +4522,23 @@ public class GameMenu extends InputAdapter implements Screen {
     }
     
     private void openChatMenu() {
+        System.out.println("🟣🟣🟣 [GAME_MENU] openChatMenu() called 🟣🟣🟣");
+        System.out.println("🟣🟣🟣 [GAME_MENU] CurrentGame: " + (App.getCurrentGame() != null ? "available" : "null") + " 🟣🟣🟣");
+        
         if (App.getCurrentGame() != null && App.getCurrentGame().getNetworkCommandSender() != null) {
-            ChatMenu chatMenu = new ChatMenu(this, App.getCurrentGame().getNetworkCommandSender());
-            Main.getMain().setScreen(chatMenu);
+            System.out.println("🟣🟣🟣 [GAME_MENU] NetworkCommandSender: " + (App.getCurrentGame().getNetworkCommandSender() != null ? "available" : "null") + " 🟣🟣🟣");
+            currentChatMenu = new ChatMenu(this, App.getCurrentGame().getNetworkCommandSender());
+            System.out.println("🟣🟣🟣 [GAME_MENU] ChatMenu created, setting as current screen 🟣🟣🟣");
+            Main.getMain().setScreen(currentChatMenu);
+        } else {
+            System.out.println("🟣🟣🟣 [GAME_MENU] Cannot open ChatMenu - missing game or network sender 🟣🟣🟣");
         }
+    }
+    
+    public void clearChatMenuReference() {
+        System.out.println("🟣🟣🟣 [GAME_MENU] clearChatMenuReference() called 🟣🟣🟣");
+        currentChatMenu = null;
+        System.out.println("🟣🟣🟣 [GAME_MENU] ChatMenu reference cleared 🟣🟣🟣");
     }
     
     private void showReactionMenu() {

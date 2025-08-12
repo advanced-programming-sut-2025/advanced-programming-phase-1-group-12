@@ -431,8 +431,53 @@ public class GameWebSocketClient {
     }
 
     private void handleChatMessage(Map<String, Object> messageData) {
-        // Handle chat messages if needed
-        logger.debug("Received chat message: {}", messageData);
+        System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT] handleChatMessage() called 🟢🟢🟢");
+        System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT] Raw message data: " + messageData + " 🟢🟢🟢");
+        
+        try {
+            String playerId = (String) messageData.get("playerId");
+            String senderUsername = (String) messageData.get("senderUsername");
+            String message = (String) messageData.get("message");
+            String chatType = (String) messageData.get("chatType");
+            
+            System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT] Parsed values: 🟢🟢🟢");
+            System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT]   playerId: " + playerId + " 🟢🟢🟢");
+            System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT]   senderUsername: " + senderUsername + " 🟢🟢🟢");
+            System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT]   message: '" + message + "' 🟢🟢🟢");
+            System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT]   chatType: " + chatType + " 🟢🟢🟢");
+            
+            logger.debug("Received chat message: playerId={}, senderUsername={}, message={}, chatType={}", 
+                playerId, senderUsername, message, chatType);
+            
+            if (playerId != null && senderUsername != null && message != null) {
+                // Forward the chat message to the game menu for processing
+                Map<String, Object> data = Map.of(
+                    "playerId", playerId,
+                    "username", senderUsername,
+                    "message", message,
+                    "chatType", chatType != null ? chatType : "public"
+                );
+                
+                System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT] Forwarding to GameMenu with data: " + data + " 🟢🟢🟢");
+                System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT] GameMenu: " + (gameMenu != null ? "available" : "null") + " 🟢🟢🟢");
+                
+                gameMenu.handleGameStateUpdate("chat_message", data);
+                System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT] Chat message forwarded to GameMenu successfully 🟢🟢🟢");
+                logger.debug("Chat message forwarded to GameMenu for processing");
+            } else {
+                System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT] Invalid chat message data: 🟢🟢🟢");
+                System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT]   playerId: " + playerId + " 🟢🟢🟢");
+                System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT]   senderUsername: " + senderUsername + " 🟢🟢🟢");
+                System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT]   message: " + message + " 🟢🟢🟢");
+                logger.warn("Invalid chat message data: playerId={}, senderUsername={}, message={}", 
+                    playerId, senderUsername, message);
+            }
+            
+        } catch (Exception e) {
+            System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT] Error handling chat message: " + e.getMessage() + " 🟢🟢🟢");
+            logger.error("Error handling chat message", e);
+            e.printStackTrace();
+        }
     }
 
     private void handleMovementNotification(Map<String, Object> messageData) {
