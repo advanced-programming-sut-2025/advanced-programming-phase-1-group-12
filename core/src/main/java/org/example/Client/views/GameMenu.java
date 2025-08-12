@@ -117,6 +117,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
     // Friends window components
     private TextButton friendsButton;
+    private TextButton radioButton;
     private Dialog friendsDialog;
     private Table friendsTable;
     private ScrollPane friendsScrollPane;
@@ -1035,6 +1036,7 @@ public class GameMenu extends InputAdapter implements Screen {
         stage.addActor(goldLabel);
 
         initializeFriendsButton();
+        initializeRadioButton();
 
         if (smileTextures[0] == null) {
             try {
@@ -4333,6 +4335,22 @@ public class GameMenu extends InputAdapter implements Screen {
         });
 
         stage.addActor(friendsButton);
+    }
+
+    private void initializeRadioButton() {
+        radioButton = new TextButton("Radio", skin);
+        radioButton.setSize(120, 40);
+        radioButton.setPosition(20, stage.getHeight() - 170);
+        radioButton.getLabel().setFontScale(1.2f);
+
+        radioButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Main.getMain().setScreen(new RadioMenu());
+            }
+        });
+
+        stage.addActor(radioButton);
     }
 
     private void cycleToNextPlayerWithFullEnergy() {

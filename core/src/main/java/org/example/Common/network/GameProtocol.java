@@ -46,6 +46,15 @@ public class GameProtocol {
     public static final String CHAT_SEND_ENDPOINT = GAME_BASE + "/{gameId}/chat/send";
     public static final String CHAT_HISTORY_ENDPOINT = GAME_BASE + "/{gameId}/chat/history";
 
+    // Radio Endpoints
+    public static final String RADIO_BASE = "/radio";
+    public static final String RADIO_UPLOAD_ENDPOINT = RADIO_BASE + "/upload";
+    public static final String RADIO_STATION_LIST_ENDPOINT = RADIO_BASE + "/stations";
+    public static final String RADIO_TRACK_LIST_ENDPOINT = RADIO_BASE + "/tracks";
+    public static final String RADIO_JOIN_STATION_ENDPOINT = RADIO_BASE + "/station/join";
+    public static final String RADIO_LEAVE_STATION_ENDPOINT = RADIO_BASE + "/station/leave";
+    public static final String RADIO_PLAY_TRACK_ENDPOINT = RADIO_BASE + "/station/play";
+
     // WebSocket Message Types
     public static final String WS_PLAYER_MOVED = "player_moved";
     public static final String WS_PLAYER_JOINED = "player_joined";
@@ -63,6 +72,11 @@ public class GameProtocol {
     public static final String WS_LOBBY_UPDATED = "lobby_updated";
     public static final String WS_GAME_STARTED = "game_started";
     public static final String WS_MOVEMENT_NOTIFICATION = "movement_notification";
+    public static final String WS_RADIO_STATION_JOINED = "radio_station_joined";
+    public static final String WS_RADIO_STATION_LEFT = "radio_station_left";
+    public static final String WS_RADIO_TRACK_PLAYED = "radio_track_played";
+    public static final String WS_RADIO_TRACK_PAUSED = "radio_track_paused";
+    public static final String WS_RADIO_TRACK_STOPPED = "radio_track_stopped";
     public static final String WS_ERROR = "error";
 
     // Network Configuration
