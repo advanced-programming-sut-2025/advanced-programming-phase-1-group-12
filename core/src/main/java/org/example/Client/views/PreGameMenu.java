@@ -255,7 +255,7 @@ public class PreGameMenu implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Exit game clicked!");
                 // TODO: Clean up if needed before exit
-//                Gdx.app.exit();
+                Gdx.app.exit();
             }
         });
     }

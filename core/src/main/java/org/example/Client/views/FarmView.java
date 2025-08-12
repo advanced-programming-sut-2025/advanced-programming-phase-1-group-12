@@ -127,11 +127,11 @@ public class FarmView implements Screen {
                 } else if (shippingBin) {
                     Item Wood = App.getCurrentPlayerLazy().getBackPack().getItemNames().get("Wood");
 
-                    if (Wood == null || App.getCurrentPlayerLazy().getBackPack().getItems().get(Wood) < 100) {
+                    if (Wood == null || App.getCurrentPlayerLazy().getBackPack().getItems().get(Wood) < 50) {
                         StoreMenuView.showError("You do not have enough wood for shipping bin", errorLabel);
                         return;
                     }
-                    App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Wood"), 100);
+                    App.getCurrentPlayerLazy().getBackPack().decreaseItem(App.getCurrentPlayerLazy().getBackPack().getItemByName("Wood"), 50);
                     ShippingBin shippingBin = new ShippingBin(location, App.getCurrentPlayerLazy());
                     shippingBin.getShippingBinLocation().setObjectInTile(shippingBin);
                     shippingBin.getShippingBinLocation().setTypeOfTile(TypeOfTile.SHIPPINGBIN);
@@ -183,12 +183,14 @@ public class FarmView implements Screen {
                         boolean hasLeft = greenhouseTiles.contains((l.getxAxis() - 1) + "," + l.getyAxis());
                         boolean hasBelow = greenhouseTiles.contains(l.getxAxis() + "," + (l.getyAxis() - 1));
 
-                        if (!hasLeft && !hasBelow) greenhouseAnchors.add(l);
+                        if (!hasLeft && !hasBelow)
+                            greenhouseAnchors.add(l);
                     } else if (l.getTypeOfTile() == TypeOfTile.HOUSE) {
                         boolean hasLeft = houseTiles.contains((l.getxAxis() - 1) + "," + l.getyAxis());
                         boolean hasAbove = houseTiles.contains(l.getxAxis() + "," + (l.getyAxis() + 1));
 
-                        if (!hasLeft && !hasAbove) houseAnchors.add(l);
+                        if (!hasLeft && !hasAbove)
+                            houseAnchors.add(l);
                     }
                     Texture tileTexture = pixelMapRenderer.getTextureForTile(l.getTypeOfTile(), l);
                     // Draw relative to screen with offset for UI
@@ -200,15 +202,21 @@ public class FarmView implements Screen {
             }
         }
         for (Location anchor : greenhouseAnchors) {
-            float drawX = anchor.getxAxis() * tileSize;
-            float drawY = anchor.getyAxis() * tileSize - tileSize;
-            batch.draw(GameAssetManager.getGameAssetManager().getGREEN_HOUSE(), drawX, drawY - 80, tileSize * 4, tileSize * 4);
+            float drawX = (anchor.getxAxis() - farmX1) * tileSize;
+            float drawY = Gdx.graphics.getHeight() - ((anchor.getyAxis() - farmY1 + 4) * tileSize);
+            batch.draw(GameAssetManager.getGameAssetManager().getGREEN_HOUSE(),
+                drawX, drawY + 120,
+                tileSize * 4, tileSize * 4);
         }
+
         for (Location anchor : houseAnchors) {
-            float drawX = anchor.getxAxis() * tileSize;
-            float drawY = anchor.getyAxis() * tileSize;
-            batch.draw(GameAssetManager.getGameAssetManager().getHOUSE(), drawX, drawY - 80, tileSize * 4, tileSize * 4);
+            float drawX = (anchor.getxAxis() - farmX1) * tileSize;
+            float drawY = Gdx.graphics.getHeight() - ((anchor.getyAxis() - farmY1 + 4) * tileSize);
+            batch.draw(GameAssetManager.getGameAssetManager().getHOUSE(),
+                drawX, drawY + 120,
+                tileSize * 4, tileSize * 4);
         }
+
     }
 
 
