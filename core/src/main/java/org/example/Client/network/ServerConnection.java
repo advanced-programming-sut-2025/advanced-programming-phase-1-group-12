@@ -282,20 +282,33 @@ public class ServerConnection {
     }
 
     public void sendWebSocketMessage(Object message) {
+        System.out.println("🟡🟡🟡 [SERVER_CONNECTION] sendWebSocketMessage() called 🟡🟡🟡");
+        System.out.println("🟡🟡🟡 [SERVER_CONNECTION] WebSocket: " + (webSocket != null ? "exists" : "null") + " 🟡🟡🟡");
+        
         if (webSocket != null) {
+            System.out.println("🟡🟡🟡 [SERVER_CONNECTION] WebSocket exists 🟡🟡🟡");
+            
             try {
                 String messageJson = objectMapper.writeValueAsString(message);
+                System.out.println("🟡🟡🟡 [SERVER_CONNECTION] Sending JSON: " + messageJson + " 🟡🟡🟡");
+                
                 boolean sent = webSocket.send(messageJson);
+                System.out.println("🟡🟡🟡 [SERVER_CONNECTION] Send result: " + sent + " 🟡🟡🟡");
+                
                 if (sent) {
                     logger.debug("WebSocket message sent: {}", messageJson);
+                    System.out.println("🟡🟡🟡 [SERVER_CONNECTION] Message sent successfully 🟡🟡🟡");
                 } else {
                     logger.warn("Failed to send WebSocket message - connection may be closed");
+                    System.out.println("🟡🟡🟡 [SERVER_CONNECTION] Failed to send message - connection may be closed 🟡🟡🟡");
                 }
             } catch (Exception e) {
                 logger.error("Failed to send WebSocket message", e);
+                System.out.println("🟡🟡🟡 [SERVER_CONNECTION] Exception sending message: " + e.getMessage() + " 🟡🟡🟡");
             }
         } else {
             logger.warn("WebSocket not connected, cannot send message");
+            System.out.println("🟡🟡🟡 [SERVER_CONNECTION] WebSocket is null, cannot send message 🟡🟡🟡");
         }
     }
 
@@ -389,6 +402,8 @@ public class ServerConnection {
     }
 
     public boolean isWebSocketConnected() {
+        // OkHttp WebSocket doesn't have isOpen() method, so we just check if it exists
+        // The send() method will return false if the connection is closed
         return webSocket != null;
     }
 

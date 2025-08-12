@@ -61,6 +61,8 @@ public class SimpleNetworkServer {
                         mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                     })
                 );
+                
+                // Note: Using client-side keep-alive mechanism to prevent WebSocket timeouts
             });
 
             setupRoutes();

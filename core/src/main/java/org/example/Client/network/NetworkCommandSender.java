@@ -346,6 +346,18 @@ public class NetworkCommandSender {
                 return new Result(false, "Not in a game");
             }
 
+            // Check WebSocket connection status
+            if (serverConnection == null) {
+                System.out.println("🟡🟡🟡 [NETWORK_SENDER] ServerConnection is null! 🟡🟡🟡");
+                return new Result(false, "No server connection");
+            }
+
+            // Check if WebSocket is connected
+            if (!serverConnection.isWebSocketConnected()) {
+                System.out.println("🟡🟡🟡 [NETWORK_SENDER] WebSocket is not connected! 🟡🟡🟡");
+                return new Result(false, "WebSocket not connected");
+            }
+
             // Send via WebSocket for real-time chat
             Map<String, Object> wsMessage = new HashMap<>();
             wsMessage.put("type", GameProtocol.WS_CHAT_MESSAGE);
@@ -355,6 +367,7 @@ public class NetworkCommandSender {
 
             System.out.println("🟡🟡🟡 [NETWORK_SENDER] Prepared WebSocket message: " + wsMessage + " 🟡🟡🟡");
             System.out.println("🟡🟡🟡 [NETWORK_SENDER] ServerConnection: " + (serverConnection != null ? "available" : "null") + " 🟡🟡🟡");
+            System.out.println("🟡🟡🟡 [NETWORK_SENDER] WebSocket connected: " + serverConnection.isWebSocketConnected() + " 🟡🟡🟡");
 
             serverConnection.sendWebSocketMessage(wsMessage);
 

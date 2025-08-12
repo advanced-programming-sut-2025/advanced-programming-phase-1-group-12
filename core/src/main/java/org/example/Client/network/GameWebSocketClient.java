@@ -26,6 +26,9 @@ public class GameWebSocketClient {
     private static final long RECONNECTION_TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes
     private static final long RECONNECTION_CHECK_INTERVAL_MS = 5000; // Check every 5 seconds
     private static final int MAX_RECONNECTION_ATTEMPTS = 24; // 2 minutes / 5 seconds = 24 attempts
+    
+    // Keep-alive constants
+    private static final long KEEP_ALIVE_INTERVAL_MS = 30000; // Send ping every 30 seconds
 
     private final String serverUrl;
     private final String userId;
@@ -41,6 +44,10 @@ public class GameWebSocketClient {
     private int reconnectionAttempts = 0;
     private final ScheduledExecutorService reconnectionExecutor = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> reconnectionFuture;
+    
+    // Keep-alive tracking
+    private final ScheduledExecutorService keepAliveExecutor = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledFuture<?> keepAliveFuture;
 
     public GameWebSocketClient(String serverUrl, String userId, String gameId, GameMenu gameMenu) {
         this.serverUrl = serverUrl;
@@ -118,6 +125,9 @@ public class GameWebSocketClient {
                     if (reconnectionFuture != null && !reconnectionFuture.isCancelled()) {
                         reconnectionFuture.cancel(false);
                     }
+                    
+                    // Start keep-alive ping mechanism
+                    startKeepAlive();
                 }
 
                 @Override
@@ -150,6 +160,9 @@ public class GameWebSocketClient {
     private void handleDisconnection() {
         isConnected = false;
         disconnectionTime = System.currentTimeMillis();
+
+        // Stop keep-alive mechanism
+        stopKeepAlive();
 
         // Start reconnection process if not already reconnecting
         if (!isReconnecting) {
@@ -284,8 +297,64 @@ public class GameWebSocketClient {
         // Show timeout notification and terminate game
         gameMenu.showReconnectionTimeoutNotification();
 
-        // Shutdown executor
+        // Shutdown executors
         reconnectionExecutor.shutdown();
+        keepAliveExecutor.shutdown();
+    }
+    
+    private void startKeepAlive() {
+        if (keepAliveFuture != null && !keepAliveFuture.isCancelled()) {
+            keepAliveFuture.cancel(false);
+        }
+        
+        keepAliveFuture = keepAliveExecutor.scheduleAtFixedRate(() -> {
+            if (!isConnected || webSocket == null) {
+                return;
+            }
+            
+            try {
+                // Send a ping message to keep the connection alive
+                Map<String, Object> pingMessage = Map.of(
+                    "type", "ping",
+                    "timestamp", System.currentTimeMillis(),
+                    "userId", userId
+                );
+                
+                String pingJson = objectMapper.writeValueAsString(pingMessage);
+                boolean sent = webSocket.send(pingJson);
+                
+                if (sent) {
+                    logger.debug("Keep-alive ping sent successfully");
+                } else {
+                    logger.warn("Failed to send keep-alive ping");
+                }
+            } catch (Exception e) {
+                logger.warn("Error sending keep-alive ping: {}", e.getMessage());
+            }
+        }, KEEP_ALIVE_INTERVAL_MS, KEEP_ALIVE_INTERVAL_MS, TimeUnit.MILLISECONDS);
+        
+        logger.info("Keep-alive mechanism started (ping every {} seconds)", KEEP_ALIVE_INTERVAL_MS / 1000);
+    }
+    
+    private void stopKeepAlive() {
+        if (keepAliveFuture != null && !keepAliveFuture.isCancelled()) {
+            keepAliveFuture.cancel(false);
+            logger.info("Keep-alive mechanism stopped");
+        }
+    }
+    
+    private void handlePong(Map<String, Object> messageData) {
+        try {
+            Long timestamp = (Long) messageData.get("timestamp");
+            String pongUserId = (String) messageData.get("userId");
+            
+            if (timestamp != null && pongUserId != null && pongUserId.equals(userId)) {
+                long latency = System.currentTimeMillis() - timestamp;
+                logger.debug("Received pong response (latency: {}ms)", latency);
+            }
+        } catch (Exception e) {
+            logger.warn("Error handling pong response: {}", e.getMessage());
+        }
     }
 
     private void handleMessage(String message) {
@@ -353,6 +422,10 @@ public class GameWebSocketClient {
                 case "radio_track_uploaded":
                     System.out.println("DEBUG: Handling radio track uploaded event");
                     handleRadioTrackUploaded(messageData);
+                    break;
+                case "pong":
+                    System.out.println("DEBUG: Handling pong response");
+                    handlePong(messageData);
                     break;
                     
                 default:
