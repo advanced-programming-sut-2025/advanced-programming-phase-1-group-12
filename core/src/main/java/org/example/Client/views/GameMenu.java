@@ -121,6 +121,7 @@ public class GameMenu extends InputAdapter implements Screen {
     private TextButton friendsButton;
     private TextButton radioButton;
     private TextButton reactionButton;
+    private TextButton chatButton;
     private Dialog friendsDialog;
     private Table friendsTable;
     private ScrollPane friendsScrollPane;
@@ -509,6 +510,8 @@ public class GameMenu extends InputAdapter implements Screen {
                 errorLabel.setColor(Color.WHITE);
                 timeSinceError = 0f;
             }
+            
+
 
         } catch (Exception e) {
             System.out.println("DEBUG: Error handling chat message: " + e.getMessage());
@@ -1097,6 +1100,7 @@ public class GameMenu extends InputAdapter implements Screen {
         initializeFriendsButton();
         initializeRadioButton();
         initializeReactionButton();
+        initializeChatButton();
         
         // Initialize reaction system
         reactionRenderer = new ReactionRenderer(batch, font);
@@ -1682,6 +1686,8 @@ public class GameMenu extends InputAdapter implements Screen {
         if (reactionRenderer != null) {
             reactionRenderer.dispose();
         }
+        
+
 
         stage.dispose();
         pixelMapRenderer.dispose();
@@ -1730,6 +1736,8 @@ public class GameMenu extends InputAdapter implements Screen {
         float clockSize = 100f;
         clockImage.setPosition(stage.getWidth() - clockSize - 20f, stage.getHeight() - clockSize - 20f);
         updateClockDisplay();
+        
+
     }
 
     @Override
@@ -1926,6 +1934,10 @@ public class GameMenu extends InputAdapter implements Screen {
         }
         if (keycode == Input.Keys.F) {
             showTeleportCheatDialog();
+            return true;
+        }
+        if (keycode == Input.Keys.C) {
+            openChatMenu();
             return true;
         }
 //        if (keycode == Input.Keys.N) {
@@ -4466,6 +4478,28 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         });
         stage.addActor(reactionButton);
+    }
+    
+    private void initializeChatButton() {
+        chatButton = new TextButton("Chat", skin);
+        chatButton.setSize(120, 40);
+        chatButton.setPosition(20, stage.getHeight() - 270);
+        chatButton.getLabel().setFontScale(1.2f);
+
+        chatButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                openChatMenu();
+            }
+        });
+        stage.addActor(chatButton);
+    }
+    
+    private void openChatMenu() {
+        if (App.getCurrentGame() != null && App.getCurrentGame().getNetworkCommandSender() != null) {
+            ChatMenu chatMenu = new ChatMenu(this, App.getCurrentGame().getNetworkCommandSender());
+            Main.getMain().setScreen(chatMenu);
+        }
     }
     
     private void showReactionMenu() {
