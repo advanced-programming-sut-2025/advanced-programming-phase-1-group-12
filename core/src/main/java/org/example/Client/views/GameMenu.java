@@ -6365,4 +6365,5 @@ public class GameMenu extends InputAdapter implements Screen {
     private Texture npcBackgroundTexture = null;
     private Stage npcMenuStage = null;
     private InputProcessor originalNPCInputProcessor = null;
+    
 }
