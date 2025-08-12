@@ -328,6 +328,33 @@ public class GameWebSocketClient {
                     System.out.println("DEBUG: Handling connection established");
                     handleConnectionEstablished(messageData);
                     break;
+                    
+                // Radio event handlers
+                case "radio_station_joined":
+                    System.out.println("DEBUG: Handling radio station joined event");
+                    handleRadioStationJoined(messageData);
+                    break;
+                case "radio_station_left":
+                    System.out.println("DEBUG: Handling radio station left event");
+                    handleRadioStationLeft(messageData);
+                    break;
+                case "radio_track_played":
+                    System.out.println("DEBUG: Handling radio track played event");
+                    handleRadioTrackPlayed(messageData);
+                    break;
+                case "radio_track_paused":
+                    System.out.println("DEBUG: Handling radio track paused event");
+                    handleRadioTrackPaused(messageData);
+                    break;
+                case "radio_track_stopped":
+                    System.out.println("DEBUG: Handling radio track stopped event");
+                    handleRadioTrackStopped(messageData);
+                    break;
+                case "radio_track_uploaded":
+                    System.out.println("DEBUG: Handling radio track uploaded event");
+                    handleRadioTrackUploaded(messageData);
+                    break;
+                    
                 default:
                     System.out.println("DEBUG: Unknown message type: " + messageType);
                     logger.debug("Received unknown message type: {}", messageType);
@@ -603,6 +630,165 @@ public class GameWebSocketClient {
 
         } catch (Exception e) {
             logger.error("Error handling connection established", e);
+        }
+    }
+
+    // Radio event handlers
+    private void handleRadioStationJoined(Map<String, Object> messageData) {
+        try {
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] handleRadioStationJoined called with data: " + messageData);
+            
+            String stationId = (String) messageData.get("stationId");
+            String stationName = (String) messageData.get("stationName");
+            String stationOwner = (String) messageData.get("stationOwner");
+            String playerId = (String) messageData.get("playerId");
+            
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Player " + playerId + " joined station " + stationName + " owned by " + stationOwner);
+            
+            // Forward to game menu for processing
+            if (gameMenu != null) {
+                gameMenu.handleRadioWebSocketMessage("radio_station_joined", messageData);
+            }
+            
+            // Also forward to RadioMenu if it's the current screen
+            if (Main.getMain() != null && Main.getMain().getScreen() instanceof org.example.Client.views.RadioMenu) {
+                org.example.Client.views.RadioMenu radioMenu = (org.example.Client.views.RadioMenu) Main.getMain().getScreen();
+                radioMenu.handleRadioWebSocketMessage("radio_station_joined", messageData);
+            }
+            
+        } catch (Exception e) {
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Error handling radio station joined: " + e.getMessage());
+            logger.error("Error handling radio station joined", e);
+        }
+    }
+
+    private void handleRadioStationLeft(Map<String, Object> messageData) {
+        try {
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] handleRadioStationLeft called with data: " + messageData);
+            
+            String stationId = (String) messageData.get("stationId");
+            String stationName = (String) messageData.get("stationName");
+            String stationOwner = (String) messageData.get("stationOwner");
+            String playerId = (String) messageData.get("playerId");
+            
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Player " + playerId + " left station " + stationName + " owned by " + stationOwner);
+            
+            // Forward to game menu for processing
+            if (gameMenu != null) {
+                gameMenu.handleRadioWebSocketMessage("radio_station_left", messageData);
+            }
+            
+            // Also forward to RadioMenu if it's the current screen
+            if (Main.getMain() != null && Main.getMain().getScreen() instanceof org.example.Client.views.RadioMenu) {
+                org.example.Client.views.RadioMenu radioMenu = (org.example.Client.views.RadioMenu) Main.getMain().getScreen();
+                radioMenu.handleRadioWebSocketMessage("radio_station_left", messageData);
+            }
+            
+        } catch (Exception e) {
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Error handling radio station left: " + e.getMessage());
+            logger.error("Error handling radio station left", e);
+        }
+    }
+
+    private void handleRadioTrackPlayed(Map<String, Object> messageData) {
+        try {
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] handleRadioTrackPlayed called with data: " + messageData);
+            
+            String trackName = (String) messageData.get("trackName");
+            String trackFile = (String) messageData.get("trackFile");
+            String stationOwner = (String) messageData.get("stationOwner");
+            String playerId = (String) messageData.get("playerId");
+            
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Player " + playerId + " started playing track: " + trackName);
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Track file: " + trackFile);
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Station owner: " + stationOwner);
+            
+            // Forward to game menu for processing
+            if (gameMenu != null) {
+                gameMenu.handleRadioWebSocketMessage("radio_track_played", messageData);
+            }
+            
+            // Also forward to RadioMenu if it's the current screen
+            if (Main.getMain() != null && Main.getMain().getScreen() instanceof org.example.Client.views.RadioMenu) {
+                org.example.Client.views.RadioMenu radioMenu = (org.example.Client.views.RadioMenu) Main.getMain().getScreen();
+                radioMenu.handleRadioWebSocketMessage("radio_track_played", messageData);
+            }
+            
+        } catch (Exception e) {
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Error handling radio track played: " + e.getMessage());
+            logger.error("Error handling radio track played", e);
+        }
+    }
+
+    private void handleRadioTrackPaused(Map<String, Object> messageData) {
+        try {
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] handleRadioTrackPaused called with data: " + messageData);
+            
+            // Forward to game menu for processing
+            if (gameMenu != null) {
+                gameMenu.handleRadioWebSocketMessage("radio_track_paused", messageData);
+            }
+            
+            // Also forward to RadioMenu if it's the current screen
+            if (Main.getMain() != null && Main.getMain().getScreen() instanceof org.example.Client.views.RadioMenu) {
+                org.example.Client.views.RadioMenu radioMenu = (org.example.Client.views.RadioMenu) Main.getMain().getScreen();
+                radioMenu.handleRadioWebSocketMessage("radio_track_paused", messageData);
+            }
+            
+        } catch (Exception e) {
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Error handling radio track paused: " + e.getMessage());
+            logger.error("Error handling radio track paused", e);
+        }
+    }
+
+    private void handleRadioTrackStopped(Map<String, Object> messageData) {
+        try {
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] handleRadioTrackStopped called with data: " + messageData);
+            
+            // Forward to game menu for processing
+            if (gameMenu != null) {
+                gameMenu.handleRadioWebSocketMessage("radio_track_stopped", messageData);
+            }
+            
+            // Also forward to RadioMenu if it's the current screen
+            if (Main.getMain() != null && Main.getMain().getScreen() instanceof org.example.Client.views.RadioMenu) {
+                org.example.Client.views.RadioMenu radioMenu = (org.example.Client.views.RadioMenu) Main.getMain().getScreen();
+                radioMenu.handleRadioWebSocketMessage("radio_track_stopped", messageData);
+            }
+            
+        } catch (Exception e) {
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Error handling radio track stopped: " + e.getMessage());
+            logger.error("Error handling radio track stopped", e);
+        }
+    }
+
+    private void handleRadioTrackUploaded(Map<String, Object> messageData) {
+        try {
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] handleRadioTrackUploaded called with data: " + messageData);
+            
+            String trackName = (String) messageData.get("trackName");
+            String trackFile = (String) messageData.get("trackFile");
+            String stationOwner = (String) messageData.get("stationOwner");
+            String playerId = (String) messageData.get("playerId");
+            
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Player " + playerId + " uploaded track: " + trackName);
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Track file: " + trackFile);
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Station owner: " + stationOwner);
+            
+            // Forward to game menu for processing
+            if (gameMenu != null) {
+                gameMenu.handleRadioWebSocketMessage("radio_track_uploaded", messageData);
+            }
+            
+            // Also forward to RadioMenu if it's the current screen
+            if (Main.getMain() != null && Main.getMain().getScreen() instanceof org.example.Client.views.RadioMenu) {
+                org.example.Client.views.RadioMenu radioMenu = (org.example.Client.views.RadioMenu) Main.getMain().getScreen();
+                radioMenu.handleRadioWebSocketMessage("radio_track_uploaded", messageData);
+            }
+            
+        } catch (Exception e) {
+            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Error handling radio track uploaded: " + e.getMessage());
+            logger.error("Error handling radio track uploaded", e);
         }
     }
 }

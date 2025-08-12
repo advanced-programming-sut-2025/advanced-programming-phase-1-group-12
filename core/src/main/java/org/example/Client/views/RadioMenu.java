@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class RadioMenu implements Screen {
@@ -252,46 +254,13 @@ public class RadioMenu implements Screen {
         System.out.println("DEBUG: Refreshing local tracks...");
         refreshLocalTracks();
         
-        // Create test audio file for debugging
-        createTestAudioFile();
+        // Test audio file creation removed for cleaner testing
         
         System.out.println("DEBUG: RadioMenu.show() completed");
         System.out.println("=== DEBUG: RadioMenu.show() completed ===");
     }
     
-    private void createTestAudioFile() {
-        System.out.println("DEBUG: Creating test audio file for debugging...");
-        try {
-            // Create a simple test audio file in the assets directory
-            String testAudioPath = "audio/test_audio.mp3";
-            System.out.println("DEBUG: Test audio path: " + testAudioPath);
-            
-            // Add a test track to the local tracks for debugging
-            RadioTrack testTrack = new RadioTrack(
-                "test_track_001",
-                "Test Audio File",
-                "test_audio.mp3",
-                App.getLoggedInUser().getUserName(),
-                App.getLoggedInUser().getUserName(),
-                120, // 2 minutes duration
-                testAudioPath
-            );
-            
-            localTracks.add(testTrack);
-            System.out.println("DEBUG: Test track added to local tracks");
-            System.out.println("DEBUG: Test track details:");
-            System.out.println("DEBUG:   - Name: " + testTrack.getName());
-            System.out.println("DEBUG:   - File path: " + testTrack.getFilePath());
-            System.out.println("DEBUG:   - Duration: " + testTrack.getDuration());
-            
-            // Update the track list display
-            setupTrackList();
-            
-        } catch (Exception e) {
-            System.out.println("DEBUG: Error creating test audio file: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
+
 
     private void setupMainLayout() {
         stage.clear();
@@ -327,7 +296,19 @@ public class RadioMenu implements Screen {
         rightPanel.add(stationListTable).size(400, 350).pad(15).row();
         rightPanel.add(joinStationButton).size(180, 60).pad(10);
         rightPanel.add(leaveStationButton).size(180, 60).pad(10).row();
-        rightPanel.add(refreshStationsButton).size(180, 60).pad(10).row();
+        rightPanel.add(refreshStationsButton).size(180, 60).pad(10);
+        
+        // Add test button for WebSocket debugging
+        TextButton testWebSocketButton = new TextButton("Test WebSocket", skin);
+        testWebSocketButton.getLabel().setFontScale(1.2f);
+        testWebSocketButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                System.out.println("DEBUG: Test WebSocket button clicked!");
+                testWebSocketIntegration();
+            }
+        });
+        rightPanel.add(testWebSocketButton).size(180, 60).pad(10).row();
 
         contentTable.add(leftPanel).size(420, 500).pad(20);
         contentTable.add(rightPanel).size(420, 500).pad(20);
@@ -713,6 +694,18 @@ public class RadioMenu implements Screen {
         localTracks.add(newTrack);
         System.out.println("DEBUG: Track added to localTracks. New size: " + localTracks.size());
         
+        // Send WebSocket message to notify other players about the new track
+        System.out.println("DEBUG: Notifying other players about new track upload");
+        Map<String, Object> uploadMessage = new HashMap<>();
+        uploadMessage.put("trackName", trackName);
+        uploadMessage.put("trackFile", trackName); // Use trackName as trackFile
+        uploadMessage.put("trackDuration", newTrack.getDuration());
+        uploadMessage.put("stationOwner", App.getLoggedInUser().getUserName()); // We are the station owner
+        uploadMessage.put("playerId", App.getLoggedInUser().getUserName());
+        uploadMessage.put("action", "uploaded");
+        
+        sendRadioWebSocketMessage("radio_track_uploaded", uploadMessage);
+        
         setupTrackList();
         System.out.println("DEBUG: Track list updated");
         
@@ -837,6 +830,18 @@ public class RadioMenu implements Screen {
         System.out.println("DEBUG: isInStation: " + isInStation);
         System.out.println("DEBUG: isStationOwner: " + isStationOwner);
         
+        // Send WebSocket message to notify other players about the connection
+        System.out.println("DEBUG: Sending WebSocket message for station join");
+        Map<String, Object> radioMessage = new HashMap<>();
+        radioMessage.put("stationId", stationToJoin.getId());
+        radioMessage.put("stationName", stationToJoin.getName());
+        radioMessage.put("stationOwner", stationToJoin.getOwnerName());
+        radioMessage.put("playerId", App.getLoggedInUser().getUserName());
+        radioMessage.put("action", "joined");
+        
+        sendRadioWebSocketMessage("radio_station_joined", radioMessage);
+        System.out.println("DEBUG: WebSocket message sent for station join");
+        
         setupStationList();
         joinStationDialog.hide();
         statusLabel.setText("Connected to " + stationToJoin.getOwnerName() + "'s radio system");
@@ -844,14 +849,35 @@ public class RadioMenu implements Screen {
     }
 
     private void leaveCurrentStation() {
+        System.out.println("=== DEBUG: leaveCurrentStation() called ===");
         if (currentStation != null) {
+            System.out.println("DEBUG: Leaving station: " + currentStation.getName());
+            System.out.println("DEBUG: Station owner: " + currentStation.getOwnerName());
+            
             currentStation.setCurrentListeners(currentStation.getCurrentListeners() - 1);
             currentStation = null;
             isInStation = false;
             isStationOwner = false;
+            
+            // Send WebSocket message to notify other players about disconnection
+            System.out.println("DEBUG: Sending WebSocket message for station leave");
+            Map<String, Object> radioMessage = new HashMap<>();
+            radioMessage.put("stationId", currentStation.getId());
+            radioMessage.put("stationName", currentStation.getName());
+            radioMessage.put("stationOwner", currentStation.getOwnerName());
+            radioMessage.put("playerId", App.getLoggedInUser().getUserName());
+            radioMessage.put("action", "left");
+            
+            sendRadioWebSocketMessage("radio_station_left", radioMessage);
+            System.out.println("DEBUG: WebSocket message sent for station leave");
+            
             setupStationList();
             statusLabel.setText("Disconnected from radio system");
+            System.out.println("DEBUG: Successfully left station");
+        } else {
+            System.out.println("DEBUG: No current station to leave");
         }
+        System.out.println("=== DEBUG: leaveCurrentStation() completed ===");
     }
 
     private void playCurrentTrack() {
@@ -920,6 +946,31 @@ public class RadioMenu implements Screen {
             System.out.println("DEBUG: Track marked as playing");
             statusLabel.setText("Playing: " + currentTrack.getName());
             System.out.println("DEBUG: Status label updated to: Playing: " + currentTrack.getName());
+            
+            // Send WebSocket message to synchronize audio with other players
+            System.out.println("DEBUG: Sending WebSocket message for audio playback synchronization");
+            
+            // Determine the correct station owner for this track
+            String stationOwner;
+            if (currentStation != null) {
+                // We're connected to someone else's station
+                stationOwner = currentStation.getOwnerName();
+                System.out.println("DEBUG: Playing track on connected station owned by: " + stationOwner);
+            } else {
+                // We're playing on our own station (we are the station owner)
+                stationOwner = App.getLoggedInUser().getUserName();
+                System.out.println("DEBUG: Playing track on our own station, we are the owner: " + stationOwner);
+            }
+            
+            Map<String, Object> radioMessage = new HashMap<>();
+            radioMessage.put("trackName", currentTrack.getName());
+            radioMessage.put("trackFile", currentTrack.getFileName());
+            radioMessage.put("trackDuration", currentTrack.getDuration());
+            radioMessage.put("stationOwner", stationOwner);
+            radioMessage.put("playerId", App.getLoggedInUser().getUserName());
+            
+            sendRadioWebSocketMessage("radio_track_played", radioMessage);
+            System.out.println("DEBUG: WebSocket message sent for audio synchronization");
         } catch (Exception e) {
             System.out.println("DEBUG: Error playing track: " + e.getMessage());
             e.printStackTrace();
@@ -1085,6 +1136,12 @@ public class RadioMenu implements Screen {
         
         setupStationList();
         statusLabel.setText("Other players' audio systems loaded");
+        
+        // TODO: Check WebSocket connection for real-time updates
+        System.out.println("DEBUG: TODO - Need to check WebSocket connection for radio events");
+        System.out.println("DEBUG: WebSocket client: " + (App.getWebSocketClient() != null ? "connected" : "null"));
+        System.out.println("DEBUG: This is where real-time station updates should be received");
+        
         System.out.println("=== DEBUG: refreshStationList() completed ===");
     }
 
@@ -1192,6 +1249,212 @@ public class RadioMenu implements Screen {
             currentMusic.dispose();
             currentMusic = null;
         }
+    }
+
+    /**
+     * Test WebSocket integration for debugging
+     */
+    public void testWebSocketIntegration() {
+        System.out.println("=== DEBUG: testWebSocketIntegration() called ===");
+        System.out.println("DEBUG: Testing WebSocket connection for radio system");
+        
+        if (App.getWebSocketClient() != null) {
+            System.out.println("DEBUG: WebSocket client is available");
+            System.out.println("DEBUG: WebSocket connection status: " + (App.getWebSocketClient().isConnected() ? "connected" : "disconnected"));
+            
+            // Test sending a simple radio message
+            Map<String, Object> testMessage = new HashMap<>();
+            testMessage.put("test", "radio_sync_test");
+            testMessage.put("timestamp", System.currentTimeMillis());
+            testMessage.put("playerId", App.getLoggedInUser().getUserName());
+            
+            sendRadioWebSocketMessage("radio_test", testMessage);
+        } else {
+            System.out.println("DEBUG: WebSocket client is null - this is the main issue!");
+            System.out.println("DEBUG: Audio synchronization cannot work without WebSocket connection");
+            System.out.println("DEBUG: Need to ensure WebSocket client is initialized before radio operations");
+        }
+        
+        System.out.println("=== DEBUG: testWebSocketIntegration() completed ===");
+    }
+
+    /**
+     * Send radio WebSocket message for audio synchronization
+     */
+    private void sendRadioWebSocketMessage(String messageType, Map<String, Object> messageData) {
+        System.out.println("=== DEBUG: sendRadioWebSocketMessage() called ===");
+        System.out.println("DEBUG: Message type: " + messageType);
+        System.out.println("DEBUG: Message data: " + messageData);
+        
+        try {
+            if (App.getWebSocketClient() != null) {
+                System.out.println("DEBUG: WebSocket client is available, sending message");
+                
+                // Create the actual WebSocket message
+                Map<String, Object> wsMessage = new HashMap<>();
+                wsMessage.put("type", messageType);
+                wsMessage.put("gameId", App.getCurrentGame().getNetworkCommandSender().getCurrentGameId());
+                wsMessage.put("timestamp", System.currentTimeMillis());
+                wsMessage.putAll(messageData); // Add all the radio-specific data
+                
+                System.out.println("DEBUG: Prepared WebSocket message: " + wsMessage);
+                
+                // Send the message via WebSocket
+                App.getWebSocketClient().send(wsMessage);
+                System.out.println("DEBUG: WebSocket message sent successfully to server");
+                System.out.println("DEBUG: This will broadcast the radio event to all players");
+            } else {
+                System.out.println("DEBUG: WebSocket client is null, cannot send message");
+                System.out.println("DEBUG: This is why audio synchronization is not working!");
+            }
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error sending radio WebSocket message: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        System.out.println("=== DEBUG: sendRadioWebSocketMessage() completed ===");
+    }
+
+    /**
+     * Handle radio WebSocket messages for audio synchronization
+     */
+    public void handleRadioWebSocketMessage(String messageType, Map<String, Object> messageData) {
+        System.out.println("=== DEBUG: handleRadioWebSocketMessage() called ===");
+        System.out.println("DEBUG: Message type: " + messageType);
+        System.out.println("DEBUG: Message data: " + messageData);
+        
+        switch (messageType) {
+            case "radio_station_joined":
+                System.out.println("DEBUG: Another player joined a radio station");
+                System.out.println("DEBUG: TODO - Update station listener count");
+                break;
+                
+            case "radio_station_left":
+                System.out.println("DEBUG: Another player left a radio station");
+                System.out.println("DEBUG: TODO - Update station listener count");
+                break;
+                
+            case "radio_track_uploaded":
+                System.out.println("DEBUG: Another player uploaded a new track");
+                
+                String uploadedTrackName = (String) messageData.get("trackName");
+                String uploadedTrackFile = (String) messageData.get("trackFile");
+                String uploadedStationOwner = (String) messageData.get("stationOwner");
+                String uploaderPlayerId = (String) messageData.get("playerId");
+                
+                System.out.println("DEBUG: New track uploaded:");
+                System.out.println("DEBUG:   - Track: " + uploadedTrackName);
+                System.out.println("DEBUG:   - File: " + uploadedTrackFile);
+                System.out.println("DEBUG:   - Station owner: " + uploadedStationOwner);
+                System.out.println("DEBUG:   - Uploader: " + uploaderPlayerId);
+                
+                // Check if we're connected to this station
+                if (currentStation != null && currentStation.getOwnerName().equals(uploadedStationOwner)) {
+                    System.out.println("DEBUG: We are connected to this station, adding the new track");
+                    
+                    // Check if we already have this track
+                    boolean trackExists = false;
+                    for (RadioTrack track : localTracks) {
+                        if (track.getName().equals(uploadedTrackName) || track.getFileName().equals(uploadedTrackFile)) {
+                            trackExists = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!trackExists) {
+                        System.out.println("DEBUG: Adding new track to our local tracks");
+                        String trackId = "shared_track_" + System.currentTimeMillis();
+                        RadioTrack newTrack = new RadioTrack(trackId, uploadedTrackName, uploadedTrackFile, uploaderPlayerId, uploaderPlayerId, 0, uploadedTrackFile);
+                        
+                        localTracks.add(newTrack);
+                        setupTrackList(); // Refresh the UI
+                        
+                        System.out.println("DEBUG: New track added to local tracks");
+                        statusLabel.setText("New track available: " + uploadedTrackName);
+                    } else {
+                        System.out.println("DEBUG: Track already exists in our local tracks");
+                    }
+                } else {
+                    System.out.println("DEBUG: We are not connected to this station, ignoring track upload");
+                    System.out.println("DEBUG: Current station: " + (currentStation != null ? currentStation.getOwnerName() : "null"));
+                }
+                break;
+                
+            case "radio_track_played":
+                System.out.println("DEBUG: Another player started playing a track");
+                System.out.println("DEBUG: Starting synchronized audio playback");
+                
+                String trackName = (String) messageData.get("trackName");
+                String trackFile = (String) messageData.get("trackFile");
+                String stationOwner = (String) messageData.get("stationOwner");
+                String playerId = (String) messageData.get("playerId");
+                
+                System.out.println("DEBUG: Synchronizing audio playback:");
+                System.out.println("DEBUG:   - Track: " + trackName);
+                System.out.println("DEBUG:   - File: " + trackFile);
+                System.out.println("DEBUG:   - Station owner: " + stationOwner);
+                System.out.println("DEBUG:   - Player who started: " + playerId);
+                
+                // Check if we're connected to this station
+                if (currentStation != null && currentStation.getOwnerName().equals(stationOwner)) {
+                    System.out.println("DEBUG: We are connected to this station, starting synchronized playback");
+                    
+                    // Find the track in our local tracks
+                    RadioTrack trackToPlay = null;
+                    for (RadioTrack track : localTracks) {
+                        if (track.getName().equals(trackName) || track.getFileName().equals(trackFile)) {
+                            trackToPlay = track;
+                            break;
+                        }
+                    }
+                    
+                    if (trackToPlay != null) {
+                        System.out.println("DEBUG: Found matching track, starting playback");
+                        // Set the current track and play it
+                        currentTrackIndex = localTracks.indexOf(trackToPlay);
+                        playCurrentTrack();
+                    } else {
+                        System.out.println("DEBUG: Track not found in local tracks, attempting to add it");
+                        
+                        // Try to add the track to local tracks if we can find the file
+                        // For now, we'll create a placeholder track that the user can replace
+                        String trackId = "shared_track_" + System.currentTimeMillis();
+                        RadioTrack newTrack = new RadioTrack(trackId, trackName, trackFile, App.getLoggedInUser().getUserName(), App.getLoggedInUser().getUserName(), 0, trackFile);
+                        
+                        System.out.println("DEBUG: Adding shared track to local tracks:");
+                        System.out.println("DEBUG:   - ID: " + trackId);
+                        System.out.println("DEBUG:   - Name: " + trackName);
+                        System.out.println("DEBUG:   - File: " + trackFile);
+                        
+                        localTracks.add(newTrack);
+                        setupTrackList(); // Refresh the UI
+                        
+                        System.out.println("DEBUG: Track added to local tracks, now starting playback");
+                        currentTrackIndex = localTracks.size() - 1; // Play the newly added track
+                        playCurrentTrack();
+                    }
+                } else {
+                    System.out.println("DEBUG: We are not connected to this station, ignoring audio event");
+                    System.out.println("DEBUG: Current station: " + (currentStation != null ? currentStation.getOwnerName() : "null"));
+                }
+                break;
+                
+            case "radio_track_paused":
+                System.out.println("DEBUG: Another player paused a track");
+                System.out.println("DEBUG: TODO - Pause the same track for synchronization");
+                break;
+                
+            case "radio_track_stopped":
+                System.out.println("DEBUG: Another player stopped a track");
+                System.out.println("DEBUG: TODO - Stop the same track for synchronization");
+                break;
+                
+            default:
+                System.out.println("DEBUG: Unknown radio message type: " + messageType);
+                break;
+        }
+        
+        System.out.println("=== DEBUG: handleRadioWebSocketMessage() completed ===");
     }
 
     @Override

@@ -876,6 +876,60 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
+    /**
+     * Handle radio WebSocket messages for audio synchronization
+     * This method is called by the WebSocket client when radio events are received
+     */
+    public void handleRadioWebSocketMessage(String messageType, Map<String, Object> messageData) {
+        System.out.println("=== DEBUG: GameMenu.handleRadioWebSocketMessage() called ===");
+        System.out.println("DEBUG: Message type: " + messageType);
+        System.out.println("DEBUG: Message data: " + messageData);
+        
+        // Forward radio events to the radio menu if it's open
+        // For now, we'll just log the events since the radio menu is a separate screen
+        switch (messageType) {
+            case "radio_station_joined":
+                System.out.println("DEBUG: Radio station joined event received");
+                System.out.println("DEBUG: Station: " + messageData.get("stationName"));
+                System.out.println("DEBUG: Player: " + messageData.get("playerId"));
+                break;
+                
+            case "radio_station_left":
+                System.out.println("DEBUG: Radio station left event received");
+                System.out.println("DEBUG: Station: " + messageData.get("stationName"));
+                System.out.println("DEBUG: Player: " + messageData.get("playerId"));
+                break;
+                
+            case "radio_track_played":
+                System.out.println("DEBUG: Radio track played event received");
+                System.out.println("DEBUG: Track: " + messageData.get("trackName"));
+                System.out.println("DEBUG: Station owner: " + messageData.get("stationOwner"));
+                System.out.println("DEBUG: Player: " + messageData.get("playerId"));
+                break;
+                
+            case "radio_track_paused":
+                System.out.println("DEBUG: Radio track paused event received");
+                break;
+                
+            case "radio_track_stopped":
+                System.out.println("DEBUG: Radio track stopped event received");
+                break;
+                
+            case "radio_track_uploaded":
+                System.out.println("DEBUG: Radio track uploaded event received");
+                System.out.println("DEBUG: Track: " + messageData.get("trackName"));
+                System.out.println("DEBUG: Station owner: " + messageData.get("stationOwner"));
+                System.out.println("DEBUG: Player: " + messageData.get("playerId"));
+                break;
+                
+            default:
+                System.out.println("DEBUG: Unknown radio message type: " + messageType);
+                break;
+        }
+        
+        System.out.println("=== DEBUG: GameMenu.handleRadioWebSocketMessage() completed ===");
+    }
+
     public static class RainDrop {
         public float x, y;
         public float speed;

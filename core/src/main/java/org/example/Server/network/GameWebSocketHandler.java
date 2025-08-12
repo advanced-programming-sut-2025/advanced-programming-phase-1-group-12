@@ -198,6 +198,26 @@ public class GameWebSocketHandler {
                     handleGameStateUpdate(ctx, userId, messageData);
                     break;
 
+                // Radio event handlers
+                case "radio_station_joined":
+                    handleRadioStationJoined(ctx, userId, messageData);
+                    break;
+                case "radio_station_left":
+                    handleRadioStationLeft(ctx, userId, messageData);
+                    break;
+                case "radio_track_played":
+                    handleRadioTrackPlayed(ctx, userId, messageData);
+                    break;
+                case "radio_track_paused":
+                    handleRadioTrackPaused(ctx, userId, messageData);
+                    break;
+                case "radio_track_stopped":
+                    handleRadioTrackStopped(ctx, userId, messageData);
+                    break;
+                case "radio_track_uploaded":
+                    handleRadioTrackUploaded(ctx, userId, messageData);
+                    break;
+
                 default:
                     logger.warn("Unknown WebSocket message type: {} from user: {}", messageType, userId);
                     sendError(ctx, "Unknown message type: " + messageType);
@@ -727,6 +747,154 @@ public class GameWebSocketHandler {
             } catch (Exception e) {
                 logger.error("Error disconnecting user: {}", userId, e);
             }
+        }
+    }
+
+    // Radio event handlers
+    private void handleRadioStationJoined(WsContext ctx, String userId, Map<String, Object> messageData) {
+        try {
+            System.out.println("DEBUG: [SERVER] handleRadioStationJoined called");
+            System.out.println("DEBUG: [SERVER] User: " + userId);
+            System.out.println("DEBUG: [SERVER] Message data: " + messageData);
+            
+            String gameId = (String) messageData.get("gameId");
+            String stationId = (String) messageData.get("stationId");
+            String stationName = (String) messageData.get("stationName");
+            String stationOwner = (String) messageData.get("stationOwner");
+            
+            System.out.println("DEBUG: [SERVER] Broadcasting radio station joined event to game: " + gameId);
+            
+            // Broadcast to all players in the game
+            GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            if (gameInstance != null) {
+                gameInstance.broadcastToAllPlayers(messageData);
+                System.out.println("DEBUG: [SERVER] Radio station joined event broadcasted successfully");
+            } else {
+                System.out.println("DEBUG: [SERVER] Game instance not found for gameId: " + gameId);
+            }
+            
+        } catch (Exception e) {
+            System.out.println("DEBUG: [SERVER] Error handling radio station joined: " + e.getMessage());
+            logger.error("Error handling radio station joined", e);
+        }
+    }
+
+    private void handleRadioStationLeft(WsContext ctx, String userId, Map<String, Object> messageData) {
+        try {
+            System.out.println("DEBUG: [SERVER] handleRadioStationLeft called");
+            System.out.println("DEBUG: [SERVER] User: " + userId);
+            System.out.println("DEBUG: [SERVER] Message data: " + messageData);
+            
+            String gameId = (String) messageData.get("gameId");
+            
+            // Broadcast to all players in the game
+            GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            if (gameInstance != null) {
+                gameInstance.broadcastToAllPlayers(messageData);
+                System.out.println("DEBUG: [SERVER] Radio station left event broadcasted successfully");
+            }
+            
+        } catch (Exception e) {
+            System.out.println("DEBUG: [SERVER] Error handling radio station left: " + e.getMessage());
+            logger.error("Error handling radio station left", e);
+        }
+    }
+
+    private void handleRadioTrackPlayed(WsContext ctx, String userId, Map<String, Object> messageData) {
+        try {
+            System.out.println("DEBUG: [SERVER] handleRadioTrackPlayed called");
+            System.out.println("DEBUG: [SERVER] User: " + userId);
+            System.out.println("DEBUG: [SERVER] Message data: " + messageData);
+            
+            String gameId = (String) messageData.get("gameId");
+            String trackName = (String) messageData.get("trackName");
+            String trackFile = (String) messageData.get("trackFile");
+            String stationOwner = (String) messageData.get("stationOwner");
+            
+            System.out.println("DEBUG: [SERVER] Broadcasting radio track played event to game: " + gameId);
+            System.out.println("DEBUG: [SERVER] Track: " + trackName + " (" + trackFile + ")");
+            System.out.println("DEBUG: [SERVER] Station owner: " + stationOwner);
+            
+            // Broadcast to all players in the game
+            GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            if (gameInstance != null) {
+                gameInstance.broadcastToAllPlayers(messageData);
+                System.out.println("DEBUG: [SERVER] Radio track played event broadcasted successfully");
+            } else {
+                System.out.println("DEBUG: [SERVER] Game instance not found for gameId: " + gameId);
+            }
+            
+        } catch (Exception e) {
+            System.out.println("DEBUG: [SERVER] Error handling radio track played: " + e.getMessage());
+            logger.error("Error handling radio track played", e);
+        }
+    }
+
+    private void handleRadioTrackPaused(WsContext ctx, String userId, Map<String, Object> messageData) {
+        try {
+            System.out.println("DEBUG: [SERVER] handleRadioTrackPaused called");
+            System.out.println("DEBUG: [SERVER] User: " + userId);
+            
+            String gameId = (String) messageData.get("gameId");
+            
+            // Broadcast to all players in the game
+            GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            if (gameInstance != null) {
+                gameInstance.broadcastToAllPlayers(messageData);
+            }
+            
+        } catch (Exception e) {
+            System.out.println("DEBUG: [SERVER] Error handling radio track paused: " + e.getMessage());
+            logger.error("Error handling radio track paused", e);
+        }
+    }
+
+    private void handleRadioTrackStopped(WsContext ctx, String userId, Map<String, Object> messageData) {
+        try {
+            System.out.println("DEBUG: [SERVER] handleRadioTrackStopped called");
+            System.out.println("DEBUG: [SERVER] User: " + userId);
+            
+            String gameId = (String) messageData.get("gameId");
+            
+            // Broadcast to all players in the game
+            GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            if (gameInstance != null) {
+                gameInstance.broadcastToAllPlayers(messageData);
+            }
+            
+        } catch (Exception e) {
+            System.out.println("DEBUG: [SERVER] Error handling radio track stopped: " + e.getMessage());
+            logger.error("Error handling radio track stopped", e);
+        }
+    }
+
+    private void handleRadioTrackUploaded(WsContext ctx, String userId, Map<String, Object> messageData) {
+        try {
+            System.out.println("DEBUG: [SERVER] handleRadioTrackUploaded called");
+            System.out.println("DEBUG: [SERVER] User: " + userId);
+            System.out.println("DEBUG: [SERVER] Message data: " + messageData);
+            
+            String gameId = (String) messageData.get("gameId");
+            String trackName = (String) messageData.get("trackName");
+            String trackFile = (String) messageData.get("trackFile");
+            String stationOwner = (String) messageData.get("stationOwner");
+            
+            System.out.println("DEBUG: [SERVER] Broadcasting radio track uploaded event to game: " + gameId);
+            System.out.println("DEBUG: [SERVER] Track: " + trackName + " (" + trackFile + ")");
+            System.out.println("DEBUG: [SERVER] Station owner: " + stationOwner);
+            
+            // Broadcast to all players in the game
+            GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            if (gameInstance != null) {
+                gameInstance.broadcastToAllPlayers(messageData);
+                System.out.println("DEBUG: [SERVER] Radio track uploaded event broadcasted successfully");
+            } else {
+                System.out.println("DEBUG: [SERVER] Game instance not found for gameId: " + gameId);
+            }
+            
+        } catch (Exception e) {
+            System.out.println("DEBUG: [SERVER] Error handling radio track uploaded: " + e.getMessage());
+            logger.error("Error handling radio track uploaded", e);
         }
     }
 }
