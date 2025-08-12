@@ -298,7 +298,6 @@ public class ChatMenu implements Screen, Disposable {
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                dispose();
                 if (parentScreen != null) {
                     Gdx.app.postRunnable(() -> {
                         Main.getMain().setScreen(parentScreen);
@@ -449,7 +448,9 @@ public class ChatMenu implements Screen, Disposable {
     public void resume() {}
     
     @Override
-    public void hide() {}
+    public void hide() {
+        dispose();
+    }
     
     @Override
     public void dispose() {
