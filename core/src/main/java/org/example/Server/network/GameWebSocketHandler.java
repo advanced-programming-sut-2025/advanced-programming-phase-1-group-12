@@ -79,14 +79,19 @@ public class GameWebSocketHandler {
 
             // If gameId is provided, add connection to the game instance
             if (gameId != null) {
+                logger.info("WebSocket connecting with gameId: {} for user: {}", gameId, userId);
+                
                 GameInstance gameInstance = sessionManager.getGameInstance(gameId);
 
                 // Fallback: if gameInstance is null, try to find by user mapping
                 if (gameInstance == null) {
                     String userGameId = sessionManager.getPlayerGameId(userId);
+                    logger.info("Game instance not found for gameId: {}, checking user mapping: {}", gameId, userGameId);
                     if (userGameId != null) {
                         gameInstance = sessionManager.getGameInstance(userGameId);
                         logger.info("Found game instance {} for user {} via player mapping", userGameId, userId);
+                    } else {
+                        logger.warn("No game mapping found for user: {}", userId);
                     }
                 }
 
@@ -351,6 +356,8 @@ public class GameWebSocketHandler {
                     // Update gameId to the correct one for consistent messaging
                     gameId = userGameId;
                     logger.info("Found game instance via user mapping: {} for user: {}", gameId, userId);
+                } else {
+                    logger.warn("No game mapping found for user: {} in movement handler", userId);
                 }
             }
 

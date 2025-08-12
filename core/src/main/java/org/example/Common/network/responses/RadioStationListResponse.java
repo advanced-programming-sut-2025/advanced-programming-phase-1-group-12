@@ -86,3 +86,5 @@ public class RadioStationListResponse extends NetworkResult {
         public void setPlaying(boolean isPlaying) { this.isPlaying = isPlaying; }
     }
 }
+
+

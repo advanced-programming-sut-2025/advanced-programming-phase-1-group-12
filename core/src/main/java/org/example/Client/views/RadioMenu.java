@@ -40,6 +40,7 @@ public class RadioMenu implements Screen {
     private final TextButton createStationButton;
     private final TextButton joinStationButton;
     private final TextButton leaveStationButton;
+    private final TextButton refreshStationsButton;
     private final Table mainTable;
     private final Table trackListTable;
     private final Table stationListTable;
@@ -71,6 +72,37 @@ public class RadioMenu implements Screen {
     private boolean isInStation = false;
     private boolean isStationOwner = false;
     private Music currentMusic;
+
+    // Static list to track all created stations across all players
+    private static final List<RadioStation> allCreatedStations = new ArrayList<>();
+    
+    // Method to clear global stations (useful for testing)
+    public static void clearGlobalStations() {
+        System.out.println("DEBUG: Clearing global stations. Previous count: " + allCreatedStations.size());
+        allCreatedStations.clear();
+        System.out.println("DEBUG: Global stations cleared. New count: " + allCreatedStations.size());
+    }
+    
+    // Method to get global station count for debugging
+    public static int getGlobalStationCount() {
+        return allCreatedStations.size();
+    }
+    
+    // Method to add a test station for debugging
+    public static void addTestStation(String ownerName) {
+        System.out.println("DEBUG: Adding test station for: " + ownerName);
+        RadioStation testStation = new RadioStation(
+            "station_" + ownerName,
+            ownerName + "'s Test Radio",
+            ownerName,
+            ownerName,
+            false, // Public
+            0, // No listeners
+            10 // Max listeners
+        );
+        allCreatedStations.add(testStation);
+        System.out.println("DEBUG: Test station added. Global count: " + allCreatedStations.size());
+    }
 
     // Radio track and station data classes
     public static class RadioTrack {
@@ -168,6 +200,7 @@ public class RadioMenu implements Screen {
         this.createStationButton = new TextButton("Create My Radio", skin);
         this.joinStationButton = new TextButton("Connect to Player", skin);
         this.leaveStationButton = new TextButton("Disconnect", skin);
+        this.refreshStationsButton = new TextButton("Refresh Stations", skin);
         this.mainTable = new Table();
         this.trackListTable = new Table();
         this.stationListTable = new Table();
@@ -192,11 +225,13 @@ public class RadioMenu implements Screen {
         createStationButton.getLabel().setFontScale(1.4f);
         joinStationButton.getLabel().setFontScale(1.4f);
         leaveStationButton.getLabel().setFontScale(1.4f);
+        refreshStationsButton.getLabel().setFontScale(1.4f);
     }
 
     @Override
     public void show() {
         System.out.println("=== DEBUG: RadioMenu.show() called ===");
+        System.out.println("DEBUG: Global station count at start: " + getGlobalStationCount());
         System.out.println("DEBUG: Creating new stage...");
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
@@ -292,6 +327,7 @@ public class RadioMenu implements Screen {
         rightPanel.add(stationListTable).size(400, 350).pad(15).row();
         rightPanel.add(joinStationButton).size(180, 60).pad(10);
         rightPanel.add(leaveStationButton).size(180, 60).pad(10).row();
+        rightPanel.add(refreshStationsButton).size(180, 60).pad(10).row();
 
         contentTable.add(leftPanel).size(420, 500).pad(20);
         contentTable.add(rightPanel).size(420, 500).pad(20);
@@ -477,6 +513,13 @@ public class RadioMenu implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 leaveCurrentStation();
+            }
+        });
+
+        refreshStationsButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                refreshStationList();
             }
         });
     }
@@ -680,15 +723,23 @@ public class RadioMenu implements Screen {
     }
 
     private void createStation() {
+        System.out.println("=== DEBUG: createStation() called ===");
         String stationName = stationNameField.getText();
+        System.out.println("DEBUG: Station name: " + stationName);
+        
         if (stationName.isEmpty()) {
+            System.out.println("DEBUG: Station name is empty");
             statusLabel.setText("Please enter a station name");
             return;
         }
 
         // Create personal radio station
+        String stationId = "station_" + App.getLoggedInUser().getUserName();
+        System.out.println("DEBUG: Creating station with ID: " + stationId);
+        System.out.println("DEBUG: Current user: " + App.getLoggedInUser().getUserName());
+        
         RadioStation newStation = new RadioStation(
-            "station_" + App.getLoggedInUser().getUserName(),
+            stationId,
             stationName,
             App.getLoggedInUser().getUserName(),
             App.getLoggedInUser().getUserName(),
@@ -697,37 +748,80 @@ public class RadioMenu implements Screen {
             10 // Max 10 listeners
         );
 
+        System.out.println("DEBUG: New station created:");
+        System.out.println("DEBUG:   - ID: " + newStation.getId());
+        System.out.println("DEBUG:   - Name: " + newStation.getName());
+        System.out.println("DEBUG:   - Owner: " + newStation.getOwnerName());
+        System.out.println("DEBUG:   - Is Private: " + newStation.isPrivate());
+
         availableStations.add(newStation);
+        System.out.println("DEBUG: Station added to availableStations. New size: " + availableStations.size());
+        
+        // Add to global list so other players can see it
+        allCreatedStations.add(newStation);
+        System.out.println("DEBUG: Station added to global allCreatedStations. Global size: " + allCreatedStations.size());
+        
         currentStation = newStation;
         isInStation = true;
         isStationOwner = true;
+        
+        System.out.println("DEBUG: Current station set to new station");
+        System.out.println("DEBUG: isInStation: " + isInStation);
+        System.out.println("DEBUG: isStationOwner: " + isStationOwner);
+        
         setupStationList();
         createStationDialog.hide();
         statusLabel.setText("Your radio station created: " + stationName);
+        System.out.println("=== DEBUG: createStation() completed ===");
     }
 
     private void joinStation() {
+        System.out.println("=== DEBUG: joinStation() called ===");
         String stationId = joinStationIdField.getText();
+        System.out.println("DEBUG: Attempting to join station with ID: " + stationId);
+        
         if (stationId.isEmpty()) {
+            System.out.println("DEBUG: Station ID is empty");
             statusLabel.setText("Please enter a station ID");
             return;
+        }
+
+        System.out.println("DEBUG: Available stations count: " + availableStations.size());
+        System.out.println("DEBUG: Available stations:");
+        for (int i = 0; i < availableStations.size(); i++) {
+            RadioStation station = availableStations.get(i);
+            System.out.println("DEBUG:   [" + i + "] ID: '" + station.getId() + "', Name: '" + station.getName() + "', Owner: '" + station.getOwnerName() + "'");
         }
 
         // Find the station
         RadioStation stationToJoin = null;
         for (RadioStation station : availableStations) {
+            System.out.println("DEBUG: Checking station ID: '" + station.getId() + "' against target: '" + stationId + "'");
             if (station.getId().equals(stationId)) {
                 stationToJoin = station;
+                System.out.println("DEBUG: Found matching station!");
                 break;
             }
         }
 
         if (stationToJoin == null) {
+            System.out.println("DEBUG: Station not found in availableStations");
+            System.out.println("DEBUG: Available station IDs:");
+            for (RadioStation station : availableStations) {
+                System.out.println("DEBUG:   - '" + station.getId() + "'");
+            }
             statusLabel.setText("Station not found");
             return;
         }
 
+        System.out.println("DEBUG: Found station to join:");
+        System.out.println("DEBUG:   - ID: " + stationToJoin.getId());
+        System.out.println("DEBUG:   - Name: " + stationToJoin.getName());
+        System.out.println("DEBUG:   - Current listeners: " + stationToJoin.getCurrentListeners());
+        System.out.println("DEBUG:   - Max listeners: " + stationToJoin.getMaxListeners());
+
         if (stationToJoin.getCurrentListeners() >= stationToJoin.getMaxListeners()) {
+            System.out.println("DEBUG: Station is full");
             statusLabel.setText("Station is full");
             return;
         }
@@ -737,9 +831,16 @@ public class RadioMenu implements Screen {
         isInStation = true;
         isStationOwner = false;
         stationToJoin.setCurrentListeners(stationToJoin.getCurrentListeners() + 1);
+        
+        System.out.println("DEBUG: Successfully joined station");
+        System.out.println("DEBUG: Current station: " + currentStation.getName());
+        System.out.println("DEBUG: isInStation: " + isInStation);
+        System.out.println("DEBUG: isStationOwner: " + isStationOwner);
+        
         setupStationList();
         joinStationDialog.hide();
         statusLabel.setText("Connected to " + stationToJoin.getOwnerName() + "'s radio system");
+        System.out.println("=== DEBUG: joinStation() completed ===");
     }
 
     private void leaveCurrentStation() {
@@ -898,32 +999,93 @@ public class RadioMenu implements Screen {
     }
 
     private void refreshStationList() {
+        System.out.println("=== DEBUG: refreshStationList() called ===");
+        System.out.println("DEBUG: Global station count at refresh: " + getGlobalStationCount());
         // Fetch other players' radio stations
         // In a real implementation, this would make an API call to get all online players' stations
         statusLabel.setText("Loading other players' radio stations...");
         
+        System.out.println("DEBUG: Current game: " + (App.getCurrentGame() != null ? "exists" : "null"));
+        System.out.println("DEBUG: Current user: " + (App.getLoggedInUser() != null ? App.getLoggedInUser().getUserName() : "null"));
+        
         // Get all online players and create stations for them
         if (App.getCurrentGame() != null && App.getCurrentGame().getPlayers() != null) {
+            System.out.println("DEBUG: Game players count: " + App.getCurrentGame().getPlayers().size());
+            System.out.println("DEBUG: Current availableStations size before clear: " + availableStations.size());
+            System.out.println("DEBUG: Global allCreatedStations size: " + allCreatedStations.size());
+            
             availableStations.clear();
-            for (org.example.Common.models.Fundementals.Player player : App.getCurrentGame().getPlayers()) {
-                // Don't create station for current user
-                if (!player.getUser().getUserName().equals(App.getLoggedInUser().getUserName())) {
-                    RadioStation playerStation = new RadioStation(
-                        "station_" + player.getUser().getUserName(),
-                        player.getUser().getUserName() + "'s Radio",
-                        player.getUser().getUserName(),
-                        player.getUser().getUserName(),
-                        false, // Public by default
-                        0, // No listeners initially
-                        10 // Max 10 listeners
-                    );
-                    availableStations.add(playerStation);
+            System.out.println("DEBUG: Cleared availableStations");
+            
+            // First, add all stations from the global list (stations created by other players)
+            for (RadioStation globalStation : allCreatedStations) {
+                System.out.println("DEBUG: Processing global station: " + globalStation.getOwnerName());
+                System.out.println("DEBUG: Current user: " + App.getLoggedInUser().getUserName());
+                System.out.println("DEBUG: Is current user's station? " + globalStation.getOwnerName().equals(App.getLoggedInUser().getUserName()));
+                
+                // Don't add current user's own station to the available list
+                if (!globalStation.getOwnerName().equals(App.getLoggedInUser().getUserName())) {
+                    System.out.println("DEBUG: Adding global station to availableStations: " + globalStation.getName());
+                    availableStations.add(globalStation);
+                    System.out.println("DEBUG: Added global station. New availableStations size: " + availableStations.size());
+                } else {
+                    System.out.println("DEBUG: Skipping current user's global station");
                 }
             }
+            
+            // Then, create default stations for players who haven't created stations yet
+            for (org.example.Common.models.Fundementals.Player player : App.getCurrentGame().getPlayers()) {
+                System.out.println("DEBUG: Processing player: " + player.getUser().getUserName());
+                System.out.println("DEBUG: Current user: " + App.getLoggedInUser().getUserName());
+                System.out.println("DEBUG: Is current user? " + player.getUser().getUserName().equals(App.getLoggedInUser().getUserName()));
+                
+                // Don't create station for current user
+                if (!player.getUser().getUserName().equals(App.getLoggedInUser().getUserName())) {
+                    // Check if this player already has a station in the global list
+                    boolean playerHasStation = false;
+                    for (RadioStation globalStation : allCreatedStations) {
+                        if (globalStation.getOwnerName().equals(player.getUser().getUserName())) {
+                            playerHasStation = true;
+                            System.out.println("DEBUG: Player " + player.getUser().getUserName() + " already has a station in global list");
+                            break;
+                        }
+                    }
+                    
+                    if (!playerHasStation) {
+                        String stationId = "station_" + player.getUser().getUserName();
+                        System.out.println("DEBUG: Creating default station for player: " + player.getUser().getUserName());
+                        System.out.println("DEBUG: Station ID: " + stationId);
+                        
+                        RadioStation playerStation = new RadioStation(
+                            stationId,
+                            player.getUser().getUserName() + "'s Radio",
+                            player.getUser().getUserName(),
+                            player.getUser().getUserName(),
+                            false, // Public by default
+                            0, // No listeners initially
+                            10 // Max 10 listeners
+                        );
+                        availableStations.add(playerStation);
+                        System.out.println("DEBUG: Added default station to availableStations. New size: " + availableStations.size());
+                    }
+                } else {
+                    System.out.println("DEBUG: Skipping current user's station creation");
+                }
+            }
+        } else {
+            System.out.println("DEBUG: No current game or players found");
+        }
+        
+        System.out.println("DEBUG: Final availableStations size: " + availableStations.size());
+        System.out.println("DEBUG: Available stations:");
+        for (int i = 0; i < availableStations.size(); i++) {
+            RadioStation station = availableStations.get(i);
+            System.out.println("DEBUG:   [" + i + "] ID: '" + station.getId() + "', Name: '" + station.getName() + "', Owner: '" + station.getOwnerName() + "'");
         }
         
         setupStationList();
         statusLabel.setText("Other players' audio systems loaded");
+        System.out.println("=== DEBUG: refreshStationList() completed ===");
     }
 
     private void refreshLocalTracks() {
@@ -1040,3 +1202,5 @@ public class RadioMenu implements Screen {
         stage.dispose();
     }
 }
+
+

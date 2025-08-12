@@ -13,7 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -352,13 +354,33 @@ public class GameSessionManager {
     }
 
     /**
-     * Clears player mappings for specific players
+     * Clears player mappings for specific players and removes associated game instances
      */
     public void clearPlayerMappings(List<String> playerNames) {
+        // First, collect all game IDs that these players were part of
+        Set<String> gameIdsToRemove = new HashSet<>();
+        for (String playerName : playerNames) {
+            String gameId = playerToGameMapping.get(playerName);
+            if (gameId != null) {
+                gameIdsToRemove.add(gameId);
+            }
+        }
+        
+        // Remove player mappings
         for (String playerName : playerNames) {
             playerToGameMapping.remove(playerName);
         }
-        logger.info("Cleared player mappings for {} players", playerNames.size());
+        
+        // Remove the game instances that these players were part of
+        for (String gameId : gameIdsToRemove) {
+            GameInstance removedGame = activeGames.remove(gameId);
+            if (removedGame != null) {
+                logger.info("Removed game instance {} due to player mapping cleanup", gameId);
+            }
+        }
+        
+        logger.info("Cleared player mappings for {} players and removed {} game instances", 
+            playerNames.size(), gameIdsToRemove.size());
     }
 
     private void cleanupInactiveGames() {
