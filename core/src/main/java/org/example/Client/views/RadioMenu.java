@@ -48,6 +48,7 @@ public class RadioMenu implements Screen {
     // File upload dialog components
     private Dialog uploadDialog;
     private TextField trackNameField;
+    private String selectedFilePath; // Store the selected file path
 
     // Station creation dialog components
     private Dialog createStationDialog;
@@ -195,18 +196,66 @@ public class RadioMenu implements Screen {
 
     @Override
     public void show() {
+        System.out.println("=== DEBUG: RadioMenu.show() called ===");
+        System.out.println("DEBUG: Creating new stage...");
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
         // Load background image
+        System.out.println("DEBUG: Loading background image...");
         Texture backgroundTexture = new Texture(Gdx.files.internal("NPC/RelationShip/backFriendship.png"));
         backgroundImage = new Image(backgroundTexture);
         backgroundImage.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        System.out.println("DEBUG: Background image loaded and sized");
 
+        System.out.println("DEBUG: Setting up main layout...");
         setupMainLayout();
+        System.out.println("DEBUG: Setting up event listeners...");
         setupEventListeners();
+        System.out.println("DEBUG: Refreshing station list...");
         refreshStationList();
+        System.out.println("DEBUG: Refreshing local tracks...");
         refreshLocalTracks();
+        
+        // Create test audio file for debugging
+        createTestAudioFile();
+        
+        System.out.println("DEBUG: RadioMenu.show() completed");
+        System.out.println("=== DEBUG: RadioMenu.show() completed ===");
+    }
+    
+    private void createTestAudioFile() {
+        System.out.println("DEBUG: Creating test audio file for debugging...");
+        try {
+            // Create a simple test audio file in the assets directory
+            String testAudioPath = "audio/test_audio.mp3";
+            System.out.println("DEBUG: Test audio path: " + testAudioPath);
+            
+            // Add a test track to the local tracks for debugging
+            RadioTrack testTrack = new RadioTrack(
+                "test_track_001",
+                "Test Audio File",
+                "test_audio.mp3",
+                App.getLoggedInUser().getUserName(),
+                App.getLoggedInUser().getUserName(),
+                120, // 2 minutes duration
+                testAudioPath
+            );
+            
+            localTracks.add(testTrack);
+            System.out.println("DEBUG: Test track added to local tracks");
+            System.out.println("DEBUG: Test track details:");
+            System.out.println("DEBUG:   - Name: " + testTrack.getName());
+            System.out.println("DEBUG:   - File path: " + testTrack.getFilePath());
+            System.out.println("DEBUG:   - Duration: " + testTrack.getDuration());
+            
+            // Update the track list display
+            setupTrackList();
+            
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error creating test audio file: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void setupMainLayout() {
@@ -273,6 +322,9 @@ public class RadioMenu implements Screen {
     }
 
     private void setupTrackList() {
+        System.out.println("=== DEBUG: setupTrackList() called ===");
+        System.out.println("DEBUG: localTracks.size() = " + localTracks.size());
+        
         trackListTable.clear();
         
         // Header
@@ -280,17 +332,36 @@ public class RadioMenu implements Screen {
         trackListTable.add(new Label("Duration", skin)).size(100, 35).pad(8).row();
 
         // Add tracks
-        for (RadioTrack track : localTracks) {
+        for (int i = 0; i < localTracks.size(); i++) {
+            RadioTrack track = localTracks.get(i);
+            System.out.println("DEBUG: Adding track " + i + ": " + track.getName());
+            
             TextButton trackButton = new TextButton(track.getName(), skin);
             trackButton.getLabel().setFontScale(0.9f);
+            
+            // Add click listener to track button for debugging
+            final int trackIndex = i;
+            trackButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    System.out.println("DEBUG: Track button clicked! Index: " + trackIndex);
+                    System.out.println("DEBUG: Track name: " + track.getName());
+                    currentTrackIndex = trackIndex;
+                    playCurrentTrack();
+                }
+            });
+            
             trackListTable.add(trackButton).size(250, 35).pad(3);
             trackListTable.add(new Label(formatDuration(track.getDuration()), skin)).size(100, 35).pad(3).row();
         }
         
         // Show message if no tracks
         if (localTracks.isEmpty()) {
+            System.out.println("DEBUG: No tracks available, showing empty message");
             trackListTable.add(new Label("No audio files uploaded yet", skin)).colspan(2).size(350, 35).pad(10).row();
         }
+        
+        System.out.println("=== DEBUG: setupTrackList() completed ===");
     }
 
     private void setupStationList() {
@@ -351,6 +422,7 @@ public class RadioMenu implements Screen {
         playButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                System.out.println("DEBUG: Play button clicked!");
                 playCurrentTrack();
             }
         });
@@ -358,6 +430,7 @@ public class RadioMenu implements Screen {
         pauseButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                System.out.println("DEBUG: Pause button clicked!");
                 pauseCurrentTrack();
             }
         });
@@ -365,6 +438,7 @@ public class RadioMenu implements Screen {
         stopButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                System.out.println("DEBUG: Stop button clicked!");
                 stopCurrentTrack();
             }
         });
@@ -372,6 +446,7 @@ public class RadioMenu implements Screen {
         nextButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                System.out.println("DEBUG: Next button clicked!");
                 playNextTrack();
             }
         });
@@ -379,6 +454,7 @@ public class RadioMenu implements Screen {
         previousButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                System.out.println("DEBUG: Previous button clicked!");
                 playPreviousTrack();
             }
         });
@@ -551,11 +627,28 @@ public class RadioMenu implements Screen {
     }
 
     private void uploadTrack() {
+        System.out.println("=== DEBUG: uploadTrack() called ===");
         String trackName = trackNameField.getText();
+        System.out.println("DEBUG: trackName = '" + trackName + "'");
+        
         if (trackName.isEmpty()) {
+            System.out.println("DEBUG: Track name is empty - returning early");
             statusLabel.setText("Please enter a track name");
             return;
         }
+
+        // Get the file path from the file selection dialog
+        String filePath;
+        if (selectedFilePath != null) {
+            filePath = selectedFilePath;
+        } else if (trackName.contains("/") || trackName.contains("\\")) {
+            // If track name contains path separators, treat it as a file path
+            filePath = trackName;
+        } else {
+            // Otherwise, treat it as just a filename and look in assets/audio
+            filePath = "audio/" + trackName;
+        }
+        System.out.println("DEBUG: Using file path: " + filePath);
 
         // Create new track with user-provided information
         RadioTrack newTrack = new RadioTrack(
@@ -565,13 +658,25 @@ public class RadioMenu implements Screen {
             App.getLoggedInUser().getUserName(),
             App.getLoggedInUser().getUserName(),
             0, // Duration will be determined when file is actually loaded
-            trackName // File path is the track name for now
+            filePath // Use the actual file path
         );
+        
+        System.out.println("DEBUG: Created new track:");
+        System.out.println("DEBUG:   - ID: " + newTrack.getId());
+        System.out.println("DEBUG:   - Name: " + newTrack.getName());
+        System.out.println("DEBUG:   - File path: " + newTrack.getFilePath());
+        System.out.println("DEBUG:   - Uploader: " + newTrack.getUploaderName());
 
         localTracks.add(newTrack);
+        System.out.println("DEBUG: Track added to localTracks. New size: " + localTracks.size());
+        
         setupTrackList();
+        System.out.println("DEBUG: Track list updated");
+        
         uploadDialog.hide();
         statusLabel.setText("Track added to your library: " + trackName);
+        System.out.println("DEBUG: Upload dialog hidden, status updated");
+        System.out.println("=== DEBUG: uploadTrack() completed ===");
     }
 
     private void createStation() {
@@ -649,66 +754,147 @@ public class RadioMenu implements Screen {
     }
 
     private void playCurrentTrack() {
+        System.out.println("=== DEBUG: playCurrentTrack() called ===");
+        System.out.println("DEBUG: localTracks.size() = " + localTracks.size());
+        System.out.println("DEBUG: currentTrackIndex = " + currentTrackIndex);
+        
         if (localTracks.isEmpty()) {
+            System.out.println("DEBUG: No tracks available - returning early");
             statusLabel.setText("No tracks available");
             return;
         }
 
         if (currentTrackIndex >= localTracks.size()) {
+            System.out.println("DEBUG: currentTrackIndex out of bounds, resetting to 0");
             currentTrackIndex = 0;
         }
 
         currentTrack = localTracks.get(currentTrackIndex);
+        System.out.println("DEBUG: Selected track: " + currentTrack.getName());
+        System.out.println("DEBUG: Track file path: " + currentTrack.getFilePath());
+        System.out.println("DEBUG: Track duration: " + currentTrack.getDuration());
         
-        // Simulate music playback
+        // Real audio playback implementation
         try {
+            System.out.println("DEBUG: Attempting to play track...");
             if (currentMusic != null) {
+                System.out.println("DEBUG: Disposing previous music instance");
                 currentMusic.dispose();
             }
-            // In a real implementation, this would load the actual audio file
-            // currentMusic = Gdx.audio.newMusic(Gdx.files.internal(currentTrack.getFilePath()));
-            // currentMusic.play();
+            
+            // Try to load the actual audio file
+            System.out.println("DEBUG: Loading audio file from: " + currentTrack.getFilePath());
+            
+            // First try to load from the file path directly
+            try {
+                currentMusic = Gdx.audio.newMusic(Gdx.files.internal(currentTrack.getFilePath()));
+                System.out.println("DEBUG: Successfully loaded audio file from: " + currentTrack.getFilePath());
+            } catch (Exception e) {
+                System.out.println("DEBUG: Failed to load from file path: " + e.getMessage());
+                
+                // If that fails, try to load from assets directory
+                try {
+                    String assetPath = "audio/" + currentTrack.getFileName();
+                    System.out.println("DEBUG: Trying to load from assets: " + assetPath);
+                    currentMusic = Gdx.audio.newMusic(Gdx.files.internal(assetPath));
+                    System.out.println("DEBUG: Successfully loaded audio file from assets: " + assetPath);
+                } catch (Exception e2) {
+                    System.out.println("DEBUG: Failed to load from assets: " + e2.getMessage());
+                    
+                    // If both fail, create a dummy music instance for testing
+                    System.out.println("DEBUG: Creating dummy music instance for testing");
+                    currentMusic = null; // We'll simulate without actual audio
+                }
+            }
+            
+            // Play the music if we have a valid instance
+            if (currentMusic != null) {
+                currentMusic.play();
+                System.out.println("DEBUG: Audio playback started successfully");
+            } else {
+                System.out.println("DEBUG: No valid music instance, simulating playback");
+            }
+            
             isPlaying = true;
+            System.out.println("DEBUG: Track marked as playing");
             statusLabel.setText("Playing: " + currentTrack.getName());
+            System.out.println("DEBUG: Status label updated to: Playing: " + currentTrack.getName());
         } catch (Exception e) {
+            System.out.println("DEBUG: Error playing track: " + e.getMessage());
+            e.printStackTrace();
             statusLabel.setText("Error playing track: " + e.getMessage());
         }
+        System.out.println("=== DEBUG: playCurrentTrack() completed ===");
     }
 
     private void pauseCurrentTrack() {
+        System.out.println("=== DEBUG: pauseCurrentTrack() called ===");
+        System.out.println("DEBUG: currentMusic = " + currentMusic);
+        System.out.println("DEBUG: isPlaying = " + isPlaying);
+        System.out.println("DEBUG: currentTrack = " + (currentTrack != null ? currentTrack.getName() : "null"));
+        
         if (currentMusic != null && isPlaying) {
+            System.out.println("DEBUG: Pausing music...");
             currentMusic.pause();
             isPlaying = false;
             statusLabel.setText("Paused: " + currentTrack.getName());
+            System.out.println("DEBUG: Music paused successfully");
+        } else {
+            System.out.println("DEBUG: Cannot pause - no music or not playing");
         }
+        System.out.println("=== DEBUG: pauseCurrentTrack() completed ===");
     }
 
     private void stopCurrentTrack() {
+        System.out.println("=== DEBUG: stopCurrentTrack() called ===");
+        System.out.println("DEBUG: currentMusic = " + currentMusic);
+        System.out.println("DEBUG: isPlaying = " + isPlaying);
+        System.out.println("DEBUG: currentTrack = " + (currentTrack != null ? currentTrack.getName() : "null"));
+        
         if (currentMusic != null) {
+            System.out.println("DEBUG: Stopping music...");
             currentMusic.stop();
             isPlaying = false;
             statusLabel.setText("Stopped playback");
+            System.out.println("DEBUG: Music stopped successfully");
+        } else {
+            System.out.println("DEBUG: Cannot stop - no music instance");
         }
+        System.out.println("=== DEBUG: stopCurrentTrack() completed ===");
     }
 
     private void playNextTrack() {
+        System.out.println("=== DEBUG: playNextTrack() called ===");
+        System.out.println("DEBUG: localTracks.size() = " + localTracks.size());
+        System.out.println("DEBUG: currentTrackIndex = " + currentTrackIndex);
+        
         if (localTracks.isEmpty()) {
+            System.out.println("DEBUG: No tracks available - returning early");
             statusLabel.setText("No tracks available");
             return;
         }
 
         currentTrackIndex = (currentTrackIndex + 1) % localTracks.size();
+        System.out.println("DEBUG: New currentTrackIndex = " + currentTrackIndex);
         playCurrentTrack();
+        System.out.println("=== DEBUG: playNextTrack() completed ===");
     }
 
     private void playPreviousTrack() {
+        System.out.println("=== DEBUG: playPreviousTrack() called ===");
+        System.out.println("DEBUG: localTracks.size() = " + localTracks.size());
+        System.out.println("DEBUG: currentTrackIndex = " + currentTrackIndex);
+        
         if (localTracks.isEmpty()) {
+            System.out.println("DEBUG: No tracks available - returning early");
             statusLabel.setText("No tracks available");
             return;
         }
 
         currentTrackIndex = (currentTrackIndex - 1 + localTracks.size()) % localTracks.size();
+        System.out.println("DEBUG: New currentTrackIndex = " + currentTrackIndex);
         playCurrentTrack();
+        System.out.println("=== DEBUG: playPreviousTrack() completed ===");
     }
 
     private void refreshStationList() {
@@ -786,11 +972,16 @@ public class RadioMenu implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 String filePath = filePathField.getText().trim();
                 if (!filePath.isEmpty()) {
+                    // Store the full file path
+                    selectedFilePath = filePath;
+                    System.out.println("DEBUG: Selected file path: " + selectedFilePath);
+                    
                     // Extract filename from path
                     String fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
                     trackNameField.setText(fileName);
                     fileDialog.hide();
                     statusLabel.setText("Selected: " + fileName);
+                    System.out.println("DEBUG: File selected: " + fileName);
                 } else {
                     statusLabel.setText("Please enter a valid file path");
                 }
