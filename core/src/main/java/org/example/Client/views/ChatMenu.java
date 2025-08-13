@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Common.models.Assets.GameAssetManager;
 import org.example.Common.models.Fundementals.App;
+import org.example.Common.models.Fundementals.Player;
 import org.example.Client.network.NetworkCommandSender;
 import org.example.Common.models.Fundementals.Result;
 import org.example.Client.Main;
@@ -155,8 +156,8 @@ public class ChatMenu implements Screen, Disposable {
 
         stage.addActor(mainTable);
 
-        // Initialize with some sample players (in real implementation, this would come from server)
-        updateOnlinePlayers(Arrays.asList("Player1", "Player2", "Player3"));
+        // Initialize with actual players from the current game
+        updateOnlinePlayersFromGame();
     }
 
     private void createChatTypeButtons() {
@@ -367,7 +368,9 @@ public class ChatMenu implements Screen, Disposable {
         // Send via network
         if (networkSender != null) {
             System.out.println("🔵🔵🔵 [CHAT_MENU] NetworkSender is available, sending message 🔵🔵🔵");
-            Result result = networkSender.sendChatMessage(message);
+            
+            String chatTypeStr = (currentChatType == ChatType.PRIVATE) ? "private" : "public";
+            Result result = networkSender.sendChatMessage(message, chatTypeStr, selectedPlayer);
             System.out.println("🔵🔵🔵 [CHAT_MENU] Network send result: " + result.isSuccessful() + " - " + result.getMessage() + " 🔵🔵🔵");
 
             if (!result.isSuccessful()) {
@@ -442,6 +445,30 @@ public class ChatMenu implements Screen, Disposable {
             playerArray[i + 1] = players.get(i);
         }
         playerSelectBox.setItems(playerArray);
+    }
+    
+    private void updateOnlinePlayersFromGame() {
+        if (App.getCurrentGame() != null && App.getCurrentGame().getPlayers() != null) {
+            List<String> playerNames = new ArrayList<>();
+            String currentUser = App.getLoggedInUser() != null ? App.getLoggedInUser().getUserName() : null;
+            
+            for (Player player : App.getCurrentGame().getPlayers()) {
+                if (player.getUser() != null) {
+                    String playerName = player.getUser().getUserName();
+                    // Don't include the current user in the list for private messaging
+                    if (!playerName.equals(currentUser)) {
+                        playerNames.add(playerName);
+                    }
+                }
+            }
+            
+            updateOnlinePlayers(playerNames);
+            System.out.println("🔵🔵🔵 [CHAT_MENU] Updated online players: " + playerNames + " 🔵🔵🔵");
+        } else {
+            // Fallback to empty list if no game is available
+            updateOnlinePlayers(new ArrayList<>());
+            System.out.println("🔵🔵🔵 [CHAT_MENU] No game available, using empty player list 🔵🔵🔵");
+        }
     }
 
 

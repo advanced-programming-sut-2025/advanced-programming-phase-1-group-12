@@ -328,8 +328,10 @@ public class GameWebSocketHandler {
 
             String message = (String) messageData.get("message");
             String chatType = (String) messageData.getOrDefault("chatType", "public");
+            String recipient = (String) messageData.get("recipient");
             System.out.println("🔴🔴🔴 [SERVER] Message: '" + message + "' 🔴🔴🔴");
             System.out.println("🔴🔴🔴 [SERVER] Chat type: " + chatType + " 🔴🔴🔴");
+            System.out.println("🔴🔴🔴 [SERVER] Recipient: '" + recipient + "' 🔴🔴🔴");
 
             if (gameId == null || message == null) {
                 System.out.println("🔴🔴🔴 [SERVER] Missing gameId or message, sending error 🔴🔴🔴");
@@ -374,9 +376,19 @@ public class GameWebSocketHandler {
             
             // Create and broadcast chat message event
             System.out.println("🔴🔴🔴 [SERVER] Creating ChatMessageEvent with senderUsername: " + senderUsername + " 🔴🔴🔴");
-            ChatMessageEvent chatEvent = new ChatMessageEvent(gameId, userId, senderUsername, message, chatType);
+            ChatMessageEvent chatEvent = new ChatMessageEvent(gameId, userId, senderUsername, message, chatType, recipient);
             System.out.println("🔴🔴🔴 [SERVER] Broadcasting chat message to game 🔴🔴🔴");
-            broadcastToGame(gameId, chatEvent);
+            
+            // Handle private vs public messages
+            if ("private".equals(chatType) && recipient != null) {
+                // For private messages, send only to the sender and recipient
+                System.out.println("🔴🔴🔴 [SERVER] Sending private message to sender and recipient 🔴🔴🔴");
+                sendPrivateChatMessage(gameId, chatEvent, userId, recipient);
+            } else {
+                // For public messages, broadcast to all players
+                System.out.println("🔴🔴🔴 [SERVER] Broadcasting public message to all players 🔴🔴🔴");
+                broadcastToGame(gameId, chatEvent);
+            }
 
             System.out.println("🔴🔴🔴 [SERVER] Chat message broadcast completed 🔴🔴🔴");
             logger.debug("Chat message from {} in game {}: {}", userId, gameId, message);
@@ -639,6 +651,37 @@ public class GameWebSocketHandler {
             ctx.send(pongMsg);
         } catch (Exception e) {
             logger.error("Error handling ping", e);
+        }
+    }
+    
+    private void sendPrivateChatMessage(String gameId, ChatMessageEvent chatEvent, String senderId, String recipientUsername) {
+        try {
+            GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            if (gameInstance == null) {
+                logger.warn("Game instance not found for private message: {}", gameId);
+                return;
+            }
+            
+            // Send to sender
+            sendToUser(senderId, chatEvent);
+            System.out.println("🔴🔴🔴 [SERVER] Private message sent to sender: " + senderId + " 🔴🔴🔴");
+            
+            // Find recipient by username and send to them
+            for (String playerId : gameInstance.getConnectedPlayers()) {
+                Player player = gameInstance.getPlayer(playerId);
+                if (player != null && player.getUser() != null) {
+                    String playerUsername = player.getUser().getUserName();
+                    if (recipientUsername.equals(playerUsername)) {
+                        sendToUser(playerId, chatEvent);
+                        System.out.println("🔴🔴🔴 [SERVER] Private message sent to recipient: " + playerId + " (" + playerUsername + ") 🔴🔴🔴");
+                        break;
+                    }
+                }
+            }
+            
+            logger.debug("Private chat message sent from {} to {} in game {}", senderId, recipientUsername, gameId);
+        } catch (Exception e) {
+            logger.error("Error sending private chat message", e);
         }
     }
 

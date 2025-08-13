@@ -336,8 +336,14 @@ public class NetworkCommandSender {
     // Chat Commands
 
     public Result sendChatMessage(String message) {
+        return sendChatMessage(message, "public", null);
+    }
+    
+    public Result sendChatMessage(String message, String chatType, String recipient) {
         System.out.println("🟡🟡🟡 [NETWORK_SENDER] sendChatMessage() called 🟡🟡🟡");
         System.out.println("🟡🟡🟡 [NETWORK_SENDER] Message: '" + message + "' 🟡🟡🟡");
+        System.out.println("🟡🟡🟡 [NETWORK_SENDER] Chat type: '" + chatType + "' 🟡🟡🟡");
+        System.out.println("🟡🟡🟡 [NETWORK_SENDER] Recipient: '" + recipient + "' 🟡🟡🟡");
         System.out.println("🟡🟡🟡 [NETWORK_SENDER] Current game ID: " + currentGameId + " 🟡🟡🟡");
         
         try {
@@ -363,7 +369,12 @@ public class NetworkCommandSender {
             wsMessage.put("type", GameProtocol.WS_CHAT_MESSAGE);
             wsMessage.put("gameId", currentGameId);
             wsMessage.put("message", message);
-            wsMessage.put("chatType", "public");
+            wsMessage.put("chatType", chatType);
+            
+            // Add recipient for private messages
+            if ("private".equals(chatType) && recipient != null) {
+                wsMessage.put("recipient", recipient);
+            }
 
             System.out.println("🟡🟡🟡 [NETWORK_SENDER] Prepared WebSocket message: " + wsMessage + " 🟡🟡🟡");
             System.out.println("🟡🟡🟡 [NETWORK_SENDER] ServerConnection: " + (serverConnection != null ? "available" : "null") + " 🟡🟡🟡");

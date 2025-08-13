@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import okhttp3.*;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -512,24 +513,28 @@ public class GameWebSocketClient {
             String senderUsername = (String) messageData.get("senderUsername");
             String message = (String) messageData.get("message");
             String chatType = (String) messageData.get("chatType");
+            String recipient = (String) messageData.get("recipient");
             
             System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT] Parsed values: 🟢🟢🟢");
             System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT]   playerId: " + playerId + " 🟢🟢🟢");
             System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT]   senderUsername: " + senderUsername + " 🟢🟢🟢");
             System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT]   message: '" + message + "' 🟢🟢🟢");
             System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT]   chatType: " + chatType + " 🟢🟢🟢");
+            System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT]   recipient: " + recipient + " 🟢🟢🟢");
             
-            logger.debug("Received chat message: playerId={}, senderUsername={}, message={}, chatType={}", 
-                playerId, senderUsername, message, chatType);
+            logger.debug("Received chat message: playerId={}, senderUsername={}, message={}, chatType={}, recipient={}", 
+                playerId, senderUsername, message, chatType, recipient);
             
             if (playerId != null && senderUsername != null && message != null) {
                 // Forward the chat message to the game menu for processing
-                Map<String, Object> data = Map.of(
-                    "playerId", playerId,
-                    "username", senderUsername,
-                    "message", message,
-                    "chatType", chatType != null ? chatType : "public"
-                );
+                Map<String, Object> data = new HashMap<>();
+                data.put("playerId", playerId);
+                data.put("username", senderUsername);
+                data.put("message", message);
+                data.put("chatType", chatType != null ? chatType : "public");
+                if (recipient != null) {
+                    data.put("recipient", recipient);
+                }
                 
                 System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT] Forwarding to GameMenu with data: " + data + " 🟢🟢🟢");
                 System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT] GameMenu: " + (gameMenu != null ? "available" : "null") + " 🟢🟢🟢");

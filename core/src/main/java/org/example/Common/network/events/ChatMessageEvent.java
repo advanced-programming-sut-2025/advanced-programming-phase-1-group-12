@@ -6,6 +6,7 @@ public class ChatMessageEvent extends WebSocketMessage {
     private String senderUsername;
     private String message;
     private String chatType; // "public", "private", "team"
+    private String recipient; // For private messages
     
     public ChatMessageEvent() {
         super(GameProtocol.WS_CHAT_MESSAGE, null, null);
@@ -16,6 +17,14 @@ public class ChatMessageEvent extends WebSocketMessage {
         this.senderUsername = senderUsername;
         this.message = message;
         this.chatType = chatType;
+    }
+    
+    public ChatMessageEvent(String gameId, String playerId, String senderUsername, String message, String chatType, String recipient) {
+        super(GameProtocol.WS_CHAT_MESSAGE, gameId, playerId);
+        this.senderUsername = senderUsername;
+        this.message = message;
+        this.chatType = chatType;
+        this.recipient = recipient;
     }
     
     public String getSenderUsername() {
@@ -40,5 +49,13 @@ public class ChatMessageEvent extends WebSocketMessage {
     
     public void setChatType(String chatType) {
         this.chatType = chatType;
+    }
+    
+    public String getRecipient() {
+        return recipient;
+    }
+    
+    public void setRecipient(String recipient) {
+        this.recipient = recipient;
     }
 } 
