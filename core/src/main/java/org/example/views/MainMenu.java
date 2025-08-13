@@ -12,6 +12,8 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.example.Main;
 import org.example.models.Assets.GameAssetManager;
+import org.example.models.Fundementals.App;
+import org.example.models.RelatedToUser.User;
 
 public class MainMenu implements Screen {
     private Skin skin = GameAssetManager.skin;
@@ -38,22 +40,44 @@ public class MainMenu implements Screen {
     public void show() {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
+
         Texture backgroundTexture = new Texture(Gdx.files.internal("menu_background.png"));
         backgroundImage = new Image(backgroundTexture);
         backgroundImage.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        table.setFillParent(true);
-        table.center();
-        table.add(menuLabel).colspan(2).pad(10);
+        User currentUser = App.getLoggedInUser();
+        String avatarPath = "default_avatar.png";
+        String nickname = "Guest";
 
-        table.row().pad(50, 0, 40, 0);
-        table.add(profileButton).width(200).height(50);
-        table.row().pad(40, 0, 40, 0);
-        table.add(preGameButton).width(200).height(50);
-        table.row().pad(40, 0, 40, 0);
-        table.add(LogOut).width(200).height(50);
-        table.row().pad(40, 0, 40, 0);
-        table.add(exitButton).width(200).height(50);
+        if (currentUser != null) {
+            if (currentUser.getAvatarPath() != null) {
+                avatarPath = currentUser.getAvatarPath();
+            }
+            if (currentUser.getNickname() != null) {
+                nickname = currentUser.getNickname();
+            }
+        }
+
+        Texture avatarTexture = new Texture(Gdx.files.internal(avatarPath));
+        Image avatarImage = new Image(avatarTexture);
+        avatarImage.setSize(128, 128);
+
+        Label nicknameLabel = new Label("Nickname: " + nickname, skin);
+        nicknameLabel.setFontScale(2f);
+
+        table.setFillParent(true);
+        table.top().padTop(30);
+        menuLabel.setFontScale(4f);
+        menuLabel.setColor(1, 0.84f, 0, 1);
+        table.add(menuLabel).padBottom(20).row();
+
+        table.add(avatarImage).size(128, 128).padBottom(10).row();
+        table.add(nicknameLabel).padBottom(40).row();
+
+        table.add(profileButton).width(200).height(50).padBottom(20).row();
+        table.add(preGameButton).width(200).height(50).padBottom(20).row();
+        table.add(LogOut).width(200).height(50).padBottom(20).row();
+        table.add(exitButton).width(200).height(50).padBottom(20).row();
 
         stage.addActor(backgroundImage);
         stage.addActor(table);
@@ -63,7 +87,6 @@ public class MainMenu implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 Main.getMain().getScreen().dispose();
                 Main.getMain().setScreen(new ProfileMenu());
-                System.out.println("Profile Menu selected");
             }
         });
 
@@ -72,15 +95,12 @@ public class MainMenu implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 Main.getMain().getScreen().dispose();
                 Main.getMain().setScreen(new PreGameMenu());
-                System.out.println("Pre-Game Menu selected");
             }
         });
 
         LogOut.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                System.out.println("now you are logged out");
-                // Handle logout logic
                 Main.getMain().getScreen().dispose();
                 Main.getMain().setScreen(new RegisterMenuView());
             }

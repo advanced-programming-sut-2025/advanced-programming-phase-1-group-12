@@ -853,7 +853,7 @@ public class GameMenu extends InputAdapter implements Screen {
         }
         if (keycode == Input.Keys.B) {
             controller.EXIT();
-            Main.getMain().setScreen(new PreGameMenu());
+            Main.getMain().setScreen(new MainMenu());
             return true;
         }
         if (keycode == Input.Keys.U) {
