@@ -213,21 +213,70 @@ public class TradeController {
 
 
     public List<String> getAvailablePlayers() {
+        System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Starting to fetch available players");
         try {
-            String endpoint = GameProtocol.GAME_STATE_ENDPOINT.replace("{gameId}", game.getCurrentGameId());
+            // Use the dedicated online players endpoint instead of game state
+            String endpoint = "/api/players/online";
+            System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Using endpoint: " + endpoint);
+            
             NetworkResult<String> result = networkClient.sendGetRequest(endpoint, String.class);
-
+            System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Network result success: " + result.isSuccess());
+            System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Network result message: " + result.getMessage());
+            
             if (result.isSuccess()) {
-                Map<String, Object> gameState = objectMapper.readValue((String) result.getData(), new TypeReference<Map<String, Object>>() {});
-                @SuppressWarnings("unchecked")
-                List<String> players = (List<String>) gameState.get("players");
-                return players != null ? players : List.of();
+                String responseData = (String) result.getData();
+                System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Raw response data: " + responseData);
+                
+                // Parse the response to get the online players
+                Map<String, Object> response = objectMapper.readValue(responseData, new TypeReference<Map<String, Object>>() {});
+                System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Parsed response keys: " + response.keySet());
+                
+                // Get the data field which contains the OnlinePlayersResponse
+                Object data = response.get("data");
+                System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Response data: " + data);
+                
+                if (data != null) {
+                    Map<String, Object> onlinePlayersData = objectMapper.convertValue(data, new TypeReference<Map<String, Object>>() {});
+                    System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Online players data keys: " + onlinePlayersData.keySet());
+                    
+                    // Get the players list - it's a list of player objects, not strings
+                    @SuppressWarnings("unchecked")
+                    List<Map<String, Object>> playerObjects = (List<Map<String, Object>>) onlinePlayersData.get("players");
+                    System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Player objects from response: " + playerObjects);
+                    
+                    if (playerObjects != null) {
+                        // Extract usernames from player objects
+                        List<String> onlinePlayers = playerObjects.stream()
+                            .map(playerObj -> (String) playerObj.get("username"))
+                            .collect(java.util.stream.Collectors.toList());
+                        
+                        System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Extracted usernames: " + onlinePlayers);
+                        
+                        // Filter out the current player from the list
+                        String currentPlayerName = game.getCurrentPlayerName();
+                        System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Current player name: " + currentPlayerName);
+                        
+                        List<String> filteredPlayers = onlinePlayers.stream()
+                            .filter(playerName -> !playerName.equals(currentPlayerName))
+                            .collect(java.util.stream.Collectors.toList());
+                        
+                        System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Filtered players (excluding self): " + filteredPlayers);
+                        return filteredPlayers;
+                    } else {
+                        System.out.println("[DEBUG] TradeController.getAvailablePlayers() - No players found in response");
+                        return List.of();
+                    }
+                } else {
+                    System.out.println("[DEBUG] TradeController.getAvailablePlayers() - No data field in response");
+                    return List.of();
+                }
             } else {
-                System.err.println("Failed to get available players: " + result.getMessage());
+                System.err.println("[ERROR] TradeController.getAvailablePlayers() - Failed to get available players: " + result.getMessage());
                 return List.of();
             }
         } catch (Exception e) {
-            System.err.println("Error getting available players: " + e.getMessage());
+            System.err.println("[ERROR] TradeController.getAvailablePlayers() - Exception getting available players: " + e.getMessage());
+            e.printStackTrace();
             return List.of();
         }
     }

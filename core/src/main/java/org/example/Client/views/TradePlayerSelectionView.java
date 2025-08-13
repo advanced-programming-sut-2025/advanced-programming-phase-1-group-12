@@ -37,6 +37,7 @@ public class TradePlayerSelectionView implements Screen {
     private Label loadingLabel;
     
     public TradePlayerSelectionView(Main game) {
+        System.out.println("[DEBUG] TradePlayerSelectionView constructor - Creating new TradePlayerSelectionView");
         this.game = game;
         this.batch = new SpriteBatch();
         this.font = new BitmapFont();
@@ -50,9 +51,12 @@ public class TradePlayerSelectionView implements Screen {
             System.out.println("Could not load background texture: " + e.getMessage());
         }
         
+        System.out.println("[DEBUG] TradePlayerSelectionView constructor - Setting up UI");
         setupUI();
+        System.out.println("[DEBUG] TradePlayerSelectionView constructor - Loading available players");
         loadAvailablePlayers();
         Gdx.input.setInputProcessor(stage);
+        System.out.println("[DEBUG] TradePlayerSelectionView constructor - Constructor completed");
     }
     
     private void setupUI() {
@@ -113,13 +117,18 @@ public class TradePlayerSelectionView implements Screen {
     }
     
     private void loadAvailablePlayers() {
+        System.out.println("[DEBUG] TradePlayerSelectionView.loadAvailablePlayers() - Starting to load available players");
+        
         // Get available players from server
         List<String> availablePlayers = tradeController.getAvailablePlayers();
+        System.out.println("[DEBUG] TradePlayerSelectionView.loadAvailablePlayers() - Received available players: " + availablePlayers);
+        System.out.println("[DEBUG] TradePlayerSelectionView.loadAvailablePlayers() - Number of available players: " + availablePlayers.size());
         
         // Remove loading label
         loadingLabel.remove();
         
         if (availablePlayers.isEmpty()) {
+            System.out.println("[DEBUG] TradePlayerSelectionView.loadAvailablePlayers() - No players available, showing error message");
             Label noPlayersLabel = new Label("No online players available for trading", 
                 GameAssetManager.getSkin());
             noPlayersLabel.setAlignment(Align.center);
@@ -127,14 +136,18 @@ public class TradePlayerSelectionView implements Screen {
             noPlayersLabel.setColor(Color.RED);
             mainTable.add(noPlayersLabel).colspan(2).padBottom(30).row();
         } else {
+            System.out.println("[DEBUG] TradePlayerSelectionView.loadAvailablePlayers() - Adding player buttons for " + availablePlayers.size() + " players");
             // Add player buttons
             for (String playerName : availablePlayers) {
+                System.out.println("[DEBUG] TradePlayerSelectionView.loadAvailablePlayers() - Adding button for player: " + playerName);
                 addPlayerButton(playerName);
             }
         }
     }
     
     private void addPlayerButton(String playerName) {
+        System.out.println("[DEBUG] TradePlayerSelectionView.addPlayerButton() - Creating button for player: " + playerName);
+        
         Skin skin = GameAssetManager.getSkin();
         TextButton playerButton = new TextButton(playerName, skin);
         playerButton.getLabel().setFontScale(1.3f);
@@ -143,6 +156,7 @@ public class TradePlayerSelectionView implements Screen {
         playerButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                System.out.println("[DEBUG] TradePlayerSelectionView.addPlayerButton() - Player button clicked for: " + playerName);
                 // Send trade request to selected player
                 tradeController.sendTradeRequest(playerName, playerName);
                 game.setScreen(new TradeWaitingView(game, playerName));
@@ -150,6 +164,7 @@ public class TradePlayerSelectionView implements Screen {
         });
         
         playerTable.add(playerButton).width(350).height(50).padBottom(10).row();
+        System.out.println("[DEBUG] TradePlayerSelectionView.addPlayerButton() - Button added to table for player: " + playerName);
     }
     
     @Override

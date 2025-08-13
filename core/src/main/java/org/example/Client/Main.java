@@ -173,16 +173,23 @@ public class Main extends Game {
 
     public String getCurrentGameId() {
         // TODO: Implement game ID tracking
+        System.out.println("[DEBUG] Main.getCurrentGameId() - Returning default game ID: default");
         return "default";
     }
 
     public String getCurrentPlayerName() {
+        System.out.println("[DEBUG] Main.getCurrentPlayerName() - Getting current player name");
         if (App.getLoggedInUser() != null) {
-            return App.getLoggedInUser().getUserName();
+            String username = App.getLoggedInUser().getUserName();
+            System.out.println("[DEBUG] Main.getCurrentPlayerName() - Returning logged in user: " + username);
+            return username;
         }
         if (App.getCurrentGame() != null && App.getCurrentGame().getCurrentPlayer() != null) {
-            return App.getCurrentGame().getCurrentPlayer().getUser().getUserName();
+            String username = App.getCurrentGame().getCurrentPlayer().getUser().getUserName();
+            System.out.println("[DEBUG] Main.getCurrentPlayerName() - Returning current game player: " + username);
+            return username;
         }
+        System.out.println("[DEBUG] Main.getCurrentPlayerName() - No player found, returning 'Unknown'");
         return "Unknown";
     }
 

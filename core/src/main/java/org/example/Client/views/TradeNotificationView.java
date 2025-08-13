@@ -15,135 +15,160 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import org.example.Client.Main;
 import org.example.Client.controllers.TradeController;
+import org.example.Common.models.Trade;
 import org.example.Common.models.Assets.GameAssetManager;
-import java.util.ArrayList;
 
-public class TradeMenuView implements Screen {
+public class TradeNotificationView implements Screen {
     private Main game;
     private Stage stage;
     private SpriteBatch batch;
     private BitmapFont font;
     private Texture backgroundTexture;
     private TradeController tradeController;
-
+    private Trade tradeOffer;
+    private String initiatorName;
+    
     // UI Components
     private Table mainTable;
-    private TextButton startTradeButton;
-    private TextButton viewHistoryButton;
-    private TextButton backButton;
     private Label titleLabel;
-
-    public TradeMenuView(Main game) {
+    private Label messageLabel;
+    private Label initiatorLabel;
+    private TextButton acceptButton;
+    private TextButton declineButton;
+    private TextButton ignoreButton;
+    
+    public TradeNotificationView(Main game, Trade tradeOffer, String initiatorName) {
         this.game = game;
+        this.tradeOffer = tradeOffer;
+        this.initiatorName = initiatorName;
         this.batch = new SpriteBatch();
         this.font = new BitmapFont();
-        this.stage = new Stage(new FitViewport(800, 600));
+        this.stage = new Stage(new FitViewport(600, 400));
         this.tradeController = new TradeController(game);
-
+        
         // Load background texture
         try {
             this.backgroundTexture = new Texture("NPC/backGround/chatBack.png");
         } catch (Exception e) {
             System.out.println("Could not load background texture: " + e.getMessage());
         }
-
+        
         setupUI();
         Gdx.input.setInputProcessor(stage);
     }
-
+    
     private void setupUI() {
         // Create skin for UI components
         Skin skin = GameAssetManager.getSkin();
-
+        
         // Main table
         mainTable = new Table();
         mainTable.setFillParent(true);
-        mainTable.pad(50);
-
+        mainTable.pad(30);
+        
         // Title
-        titleLabel = new Label("Trade Menu", skin, "default");
+        titleLabel = new Label("Trade Request", skin, "default");
         titleLabel.setAlignment(Align.center);
-        titleLabel.setFontScale(2.0f);
+        titleLabel.setFontScale(1.8f);
         titleLabel.setColor(Color.GOLD);
-
+        
+        // Message
+        messageLabel = new Label("You have received a trade request", skin);
+        messageLabel.setAlignment(Align.center);
+        messageLabel.setFontScale(1.3f);
+        messageLabel.setColor(Color.WHITE);
+        
+        // Initiator name
+        initiatorLabel = new Label("From: " + initiatorName, skin);
+        initiatorLabel.setAlignment(Align.center);
+        initiatorLabel.setFontScale(1.2f);
+        initiatorLabel.setColor(Color.LIGHT_GRAY);
+        
         // Buttons
-        startTradeButton = new TextButton("Start Trade", skin);
-        startTradeButton.getLabel().setFontScale(1.5f);
-
-        viewHistoryButton = new TextButton("View Trade History", skin);
-        viewHistoryButton.getLabel().setFontScale(1.5f);
-
-        backButton = new TextButton("Back", skin);
-        backButton.getLabel().setFontScale(1.2f);
-
+        acceptButton = new TextButton("Accept", skin);
+        acceptButton.getLabel().setFontScale(1.3f);
+        acceptButton.setColor(Color.GREEN);
+        
+        declineButton = new TextButton("Decline", skin);
+        declineButton.getLabel().setFontScale(1.3f);
+        declineButton.setColor(Color.RED);
+        
+        ignoreButton = new TextButton("Ignore", skin);
+        ignoreButton.getLabel().setFontScale(1.2f);
+        ignoreButton.setColor(Color.GRAY);
+        
         // Add components to table
-        mainTable.add(titleLabel).colspan(2).padBottom(50).row();
-        mainTable.add(startTradeButton).width(300).height(60).padBottom(30).row();
-        mainTable.add(viewHistoryButton).width(300).height(60).padBottom(50).row();
-        mainTable.add(backButton).width(200).height(50);
-
+        mainTable.add(titleLabel).colspan(3).padBottom(30).row();
+        mainTable.add(messageLabel).colspan(3).padBottom(20).row();
+        mainTable.add(initiatorLabel).colspan(3).padBottom(40).row();
+        mainTable.add(acceptButton).width(150).height(50).padRight(10);
+        mainTable.add(declineButton).width(150).height(50).padRight(10);
+        mainTable.add(ignoreButton).width(150).height(50);
+        
         // Add listeners
-        startTradeButton.addListener(new ChangeListener() {
+        acceptButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                System.out.println("[DEBUG] TradeMenuView - Start Trade button clicked");
-                System.out.println("[DEBUG] TradeMenuView - Navigating to TradePlayerSelectionView");
-                game.setScreen(new TradePlayerSelectionView(game));
+                tradeController.acceptTradeRequest(tradeOffer.getTradeId());
+                // Navigate to trade interface
+                game.setScreen(new TradeInterfaceView(game, tradeOffer, initiatorName, false));
             }
         });
-
-        viewHistoryButton.addListener(new ChangeListener() {
+        
+        declineButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new TradeHistoryView(game));
+                tradeController.declineTradeRequest(tradeOffer.getTradeId());
+                // Return to previous screen or main menu
+                game.setScreen(new TradeMenuView(game));
             }
         });
-
-        backButton.addListener(new ChangeListener() {
+        
+        ignoreButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                // Get the current game menu or create a new one with empty player list
-                game.setScreen(new GameMenu(new ArrayList<>()));
+                // Just close the notification without responding
+                game.setScreen(new TradeMenuView(game));
             }
         });
-
+        
         stage.addActor(mainTable);
     }
-
+    
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
     }
-
+    
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0.2f, 0.4f, 0.2f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
+        
         batch.begin();
         if (backgroundTexture != null) {
             batch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         }
         batch.end();
-
+        
         stage.act(delta);
         stage.draw();
     }
-
+    
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
     }
-
+    
     @Override
     public void pause() {}
-
+    
     @Override
     public void resume() {}
-
+    
     @Override
     public void hide() {}
-
+    
     @Override
     public void dispose() {
         stage.dispose();
