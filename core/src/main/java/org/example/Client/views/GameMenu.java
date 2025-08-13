@@ -58,6 +58,7 @@ import org.example.Common.models.RelationShips.Gift;
 import org.example.Client.network.GameWebSocketClient;
 import org.example.Common.models.Reaction;
 import org.example.Common.models.ReactionManager;
+import org.example.Client.views.VotingMenu;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.badlogic.gdx.input.GestureDetector;
@@ -2289,6 +2290,7 @@ public class GameMenu extends InputAdapter implements Screen {
         TextButton socialButton = new TextButton("Social", skin);
         TextButton inventoryButton = new TextButton("Inventory Items", skin);
         TextButton tradeButton = new TextButton("Trade", skin);
+        TextButton votingButton = new TextButton("Voting", skin);
         TextButton closeButton = new TextButton("Close", skin);
 
         inventoryButton.addListener(new ClickListener() {
@@ -2304,6 +2306,14 @@ public class GameMenu extends InputAdapter implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 dialog.hide();
                 tradeMenu();
+            }
+        });
+
+        votingButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+                openVotingMenu();
             }
         });
 
@@ -2347,6 +2357,7 @@ public class GameMenu extends InputAdapter implements Screen {
         Table content = dialog.getContentTable();
         content.add(inventoryButton).pad(5).width(400f).row();
         content.add(tradeButton).pad(5).width(400f).row();
+        content.add(votingButton).pad(5).width(400f).row();
         content.add(socialButton).pad(5).width(400f).row();
         content.add(mapButton).pad(5).width(400f).row();
         content.add(settingsButton).pad(5).width(400f).row();
@@ -6525,5 +6536,12 @@ public class GameMenu extends InputAdapter implements Screen {
     private Texture npcBackgroundTexture = null;
     private Stage npcMenuStage = null;
     private InputProcessor originalNPCInputProcessor = null;
+    
+    public void openVotingMenu() {
+        // Navigate to the voting menu
+        Main game = (Main) Gdx.app.getApplicationListener();
+        VotingMenu votingMenu = new VotingMenu(this);
+        game.setScreen(votingMenu);
+    }
     
 }
