@@ -661,6 +661,10 @@ public class GameWebSocketHandler {
 
     private void handlePing(WsContext ctx, String userId) {
         try {
+            if (ctx == null || ctx.session == null || !ctx.session.isOpen()) {
+                logger.warn("Cannot handle ping: WebSocket session is closed for user: {}", userId);
+                return;
+            }
             Map<String, Object> pongMsg = Map.of(
                 "type", "pong",
                 "timestamp", System.currentTimeMillis(),
@@ -684,15 +688,22 @@ public class GameWebSocketHandler {
             sendToUser(senderId, chatEvent);
             System.out.println("🔴🔴🔴 [SERVER] Private message sent to sender: " + senderId + " 🔴🔴🔴");
             
-            // Find recipient by username and send to them
-            for (String playerId : gameInstance.getConnectedPlayers()) {
-                Player player = gameInstance.getPlayer(playerId);
-                if (player != null && player.getUser() != null) {
-                    String playerUsername = player.getUser().getUserName();
-                    if (recipientUsername.equals(playerUsername)) {
-                        sendToUser(playerId, chatEvent);
-                        System.out.println("🔴🔴🔴 [SERVER] Private message sent to recipient: " + playerId + " (" + playerUsername + ") 🔴🔴🔴");
-                        break;
+            // Prefer direct delivery by username (userId used in WebSocket mapping)
+            // Only deliver if the recipient is actually connected in this game
+            if (gameInstance.getConnectedPlayers().contains(recipientUsername)) {
+                sendToUser(recipientUsername, chatEvent);
+                System.out.println("🔴🔴🔴 [SERVER] Private message sent to recipient via direct mapping: " + recipientUsername + " 🔴🔴🔴");
+            } else {
+                // Fallback: Find recipient by resolving username from Player objects
+                for (String playerId : gameInstance.getConnectedPlayers()) {
+                    Player player = gameInstance.getPlayer(playerId);
+                    if (player != null && player.getUser() != null) {
+                        String playerUsername = player.getUser().getUserName();
+                        if (recipientUsername.equals(playerUsername)) {
+                            sendToUser(playerId, chatEvent);
+                            System.out.println("🔴🔴🔴 [SERVER] Private message sent to recipient via player lookup: " + playerId + " (" + playerUsername + ") 🔴🔴🔴");
+                            break;
+                        }
                     }
                 }
             }
