@@ -6,10 +6,10 @@ import org.example.Client.Main;
 import org.example.Client.network.ServerConnection;
 import org.example.Common.models.Trade;
 import org.example.Common.models.TradeHistory;
-import org.example.Common.network.GameProtocol;
 import org.example.Common.network.NetworkObjectMapper;
 import org.example.Common.network.NetworkResult;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,23 +27,48 @@ public class TradeController {
     }
 
     public void sendTradeRequest(String targetPlayerId, String targetPlayerName) {
+        System.out.println("[DEBUG] TradeController.sendTradeRequest() - Starting trade request");
+        System.out.println("[DEBUG] TradeController.sendTradeRequest() - Target player ID: " + targetPlayerId);
+        System.out.println("[DEBUG] TradeController.sendTradeRequest() - Target player name: " + targetPlayerName);
+        System.out.println("[DEBUG] TradeController.sendTradeRequest() - Current game ID: " + game.getCurrentGameId());
+        
         try {
             Map<String, Object> requestData = new HashMap<>();
             requestData.put("targetPlayerId", targetPlayerId);
             requestData.put("targetPlayerName", targetPlayerName);
+            System.out.println("[DEBUG] TradeController.sendTradeRequest() - Request data: " + requestData);
 
-            String endpoint = GameProtocol.TRADE_CREATE_ENDPOINT.replace("{gameId}", game.getCurrentGameId());
+            String endpoint = "/api/trade/create";
+            System.out.println("[DEBUG] TradeController.sendTradeRequest() - Using endpoint: " + endpoint);
+            
             NetworkResult<String> result = networkClient.sendPostRequest(endpoint, requestData, String.class);
+            System.out.println("[DEBUG] TradeController.sendTradeRequest() - Network result success: " + result.isSuccess());
+            System.out.println("[DEBUG] TradeController.sendTradeRequest() - Network result message: " + result.getMessage());
 
             if (result.isSuccess()) {
-                Trade trade = objectMapper.readValue((String) result.getData(), Trade.class);
-                this.currentTrade = trade;
-                System.out.println("Trade request sent successfully: " + trade.getTradeId());
+                String responseData = (String) result.getData();
+                System.out.println("[DEBUG] TradeController.sendTradeRequest() - Response data: " + responseData);
+                
+                // Parse the NetworkResult response to extract the data field
+                Map<String, Object> response = objectMapper.readValue(responseData, new TypeReference<Map<String, Object>>() {});
+                Object data = response.get("data");
+                
+                if (data != null) {
+                    Trade trade = objectMapper.convertValue(data, Trade.class);
+                    this.currentTrade = trade;
+                    System.out.println("[DEBUG] TradeController.sendTradeRequest() - Trade created successfully with ID: " + trade.getTradeId());
+                    System.out.println("[DEBUG] TradeController.sendTradeRequest() - Trade initiator: " + trade.getInitiatorUsername());
+                    System.out.println("[DEBUG] TradeController.sendTradeRequest() - Trade target: " + trade.getTargetUsername());
+                    System.out.println("[DEBUG] TradeController.sendTradeRequest() - Trade status: " + trade.getStatus());
+                } else {
+                    System.err.println("[ERROR] TradeController.sendTradeRequest() - No data field in response");
+                }
             } else {
-                System.err.println("Failed to send trade request: " + result.getMessage());
+                System.err.println("[ERROR] TradeController.sendTradeRequest() - Failed to send trade request: " + result.getMessage());
             }
         } catch (Exception e) {
-            System.err.println("Error sending trade request: " + e.getMessage());
+            System.err.println("[ERROR] TradeController.sendTradeRequest() - Exception: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -54,7 +79,7 @@ public class TradeController {
                 requestData.put("tradeId", currentTrade.getTradeId());
                 requestData.put("action", "cancel");
 
-                String endpoint = GameProtocol.TRADE_RESPOND_ENDPOINT.replace("{gameId}", game.getCurrentGameId());
+                String endpoint = "/api/trade/respond";
                 NetworkResult<String> result = networkClient.sendPostRequest(endpoint, requestData, String.class);
 
                 if (result.isSuccess()) {
@@ -76,13 +101,22 @@ public class TradeController {
             requestData.put("tradeId", tradeId);
             requestData.put("action", "accept");
 
-            String endpoint = GameProtocol.TRADE_RESPOND_ENDPOINT.replace("{gameId}", game.getCurrentGameId());
+            String endpoint = "/api/trade/respond";
             NetworkResult<String> result = networkClient.sendPostRequest(endpoint, requestData, String.class);
 
             if (result.isSuccess()) {
-                Trade trade = objectMapper.readValue((String) result.getData(), Trade.class);
-                this.currentTrade = trade;
-                System.out.println("Trade accepted successfully");
+                String responseData = (String) result.getData();
+                // Parse the NetworkResult response to extract the data field
+                Map<String, Object> response = objectMapper.readValue(responseData, new TypeReference<Map<String, Object>>() {});
+                Object data = response.get("data");
+                
+                if (data != null) {
+                    Trade trade = objectMapper.convertValue(data, Trade.class);
+                    this.currentTrade = trade;
+                    System.out.println("Trade accepted successfully");
+                } else {
+                    System.err.println("No data field in response");
+                }
             } else {
                 System.err.println("Failed to accept trade: " + result.getMessage());
             }
@@ -97,7 +131,7 @@ public class TradeController {
             requestData.put("tradeId", tradeId);
             requestData.put("action", "decline");
 
-            String endpoint = GameProtocol.TRADE_RESPOND_ENDPOINT.replace("{gameId}", game.getCurrentGameId());
+            String endpoint = "/api/trade/respond";
             NetworkResult<String> result = networkClient.sendPostRequest(endpoint, requestData, String.class);
 
             if (result.isSuccess()) {
@@ -116,7 +150,7 @@ public class TradeController {
             requestData.put("tradeId", tradeId);
             requestData.put("action", "confirm");
 
-            String endpoint = GameProtocol.TRADE_RESPOND_ENDPOINT.replace("{gameId}", game.getCurrentGameId());
+            String endpoint = "/api/trade/respond";
             NetworkResult<String> result = networkClient.sendPostRequest(endpoint, requestData, String.class);
 
             if (result.isSuccess()) {
@@ -136,7 +170,7 @@ public class TradeController {
             requestData.put("tradeId", tradeId);
             requestData.put("action", "accept_confirmed");
 
-            String endpoint = GameProtocol.TRADE_RESPOND_ENDPOINT.replace("{gameId}", game.getCurrentGameId());
+            String endpoint = "/api/trade/respond";
             NetworkResult<String> result = networkClient.sendPostRequest(endpoint, requestData, String.class);
 
             if (result.isSuccess()) {
@@ -157,7 +191,7 @@ public class TradeController {
             requestData.put("tradeId", tradeId);
             requestData.put("action", "cancel");
 
-            String endpoint = GameProtocol.TRADE_RESPOND_ENDPOINT.replace("{gameId}", game.getCurrentGameId());
+            String endpoint = "/api/trade/respond";
             NetworkResult<String> result = networkClient.sendPostRequest(endpoint, requestData, String.class);
 
             if (result.isSuccess()) {
@@ -179,13 +213,20 @@ public class TradeController {
             requestData.put("action", "update_items");
             requestData.put("items", items);
 
-            String endpoint = GameProtocol.TRADE_RESPOND_ENDPOINT.replace("{gameId}", game.getCurrentGameId());
+            String endpoint = "/api/trade/respond";
             NetworkResult<String> result = networkClient.sendPostRequest(endpoint, requestData, String.class);
 
             if (result.isSuccess()) {
-                Trade trade = objectMapper.readValue((String) result.getData(), Trade.class);
-                this.currentTrade = trade;
-                System.out.println("Trade items updated successfully");
+                String responseData = (String) result.getData();
+                Map<String, Object> response = objectMapper.readValue(responseData, new TypeReference<Map<String, Object>>() {});
+                Object data = response.get("data");
+                if (data != null) {
+                    Trade trade = objectMapper.convertValue(data, Trade.class);
+                    this.currentTrade = trade;
+                    System.out.println("Trade items updated successfully");
+                } else {
+                    System.err.println("No data field in response for updateTradeItems");
+                }
             } else {
                 System.err.println("Failed to update trade items: " + result.getMessage());
             }
@@ -196,11 +237,18 @@ public class TradeController {
 
     public TradeHistory getTradeHistory() {
         try {
-            String endpoint = GameProtocol.TRADE_LIST_ENDPOINT.replace("{gameId}", game.getCurrentGameId());
+            String endpoint = "/api/trade/history";
             NetworkResult<String> result = networkClient.sendGetRequest(endpoint, String.class);
 
             if (result.isSuccess()) {
-                return objectMapper.readValue((String) result.getData(), TradeHistory.class);
+                String responseData = (String) result.getData();
+                Map<String, Object> response = objectMapper.readValue(responseData, new TypeReference<Map<String, Object>>() {});
+                Object data = response.get("data");
+                if (data != null) {
+                    return objectMapper.convertValue(data, TradeHistory.class);
+                }
+                System.err.println("No data field in trade history response");
+                return new TradeHistory();
             } else {
                 System.err.println("Failed to get trade history: " + result.getMessage());
                 return new TradeHistory();
@@ -209,6 +257,30 @@ public class TradeController {
             System.err.println("Error getting trade history: " + e.getMessage());
             return new TradeHistory();
         }
+    }
+
+    public List<Trade> getMyTrades() {
+        try {
+            String endpoint = "/api/trade/list";
+            NetworkResult<String> result = networkClient.sendGetRequest(endpoint, String.class);
+            if (result.isSuccess()) {
+                String responseData = (String) result.getData();
+                Map<String, Object> response = objectMapper.readValue(responseData, new TypeReference<Map<String, Object>>() {});
+                Object data = response.get("data");
+                if (data instanceof List) {
+                    @SuppressWarnings("unchecked")
+                    List<Map<String, Object>> raw = (List<Map<String, Object>>) data;
+                    List<Trade> trades = new ArrayList<>();
+                    for (Map<String, Object> t : raw) trades.add(objectMapper.convertValue(t, Trade.class));
+                    return trades;
+                }
+            } else {
+                System.err.println("Failed to get trades: " + result.getMessage());
+            }
+        } catch (Exception e) {
+            System.err.println("Error getting trades: " + e.getMessage());
+        }
+        return new ArrayList<>();
     }
 
 
@@ -285,6 +357,80 @@ public class TradeController {
     public boolean hasPendingTradeRequests() {
         TradeHistory history = getTradeHistory();
         return history.getPendingTradesCount() > 0;
+    }
+
+    public List<Trade> getPendingTradeRequests() {
+        System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Checking for pending trade requests");
+        try {
+            String endpoint = "/api/trade/list";
+            System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Using endpoint: " + endpoint);
+
+            NetworkResult<String> result = networkClient.sendGetRequest(endpoint, String.class);
+            System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Network result success: " + result.isSuccess());
+            System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Network result message: " + result.getMessage());
+
+            if (result.isSuccess()) {
+                String responseData = (String) result.getData();
+                System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Raw response data: " + responseData);
+
+                Map<String, Object> response = objectMapper.readValue(responseData, new TypeReference<Map<String, Object>>() {});
+                System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Parsed response keys: " + response.keySet());
+
+                Object data = response.get("data");
+                System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Response data: " + data);
+
+                if (data != null) {
+                    @SuppressWarnings("unchecked")
+                    List<Map<String, Object>> tradeObjects = (List<Map<String, Object>>) data;
+                    System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Trade objects from response: " + tradeObjects);
+
+                    if (tradeObjects != null) {
+                        String currentPlayerName = game.getCurrentPlayerName();
+                        System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Current player name: " + currentPlayerName);
+
+                        List<Trade> pendingTrades = new ArrayList<>();
+                        for (Map<String, Object> tradeObj : tradeObjects) {
+                            Trade trade = objectMapper.convertValue(tradeObj, Trade.class);
+                            System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Checking trade: " + trade.getTradeId());
+                            System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Trade target: " + trade.getTargetUsername());
+                            System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Trade status: " + trade.getStatus());
+
+                            // Check if this is a pending trade where current player is the target
+                            if (trade.getTargetUsername().equals(currentPlayerName) && 
+                                trade.getStatus() == Trade.TradeStatus.PENDING) {
+                                System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Found pending trade: " + trade.getTradeId());
+                                pendingTrades.add(trade);
+                            }
+                        }
+
+                        System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Found " + pendingTrades.size() + " pending trades");
+                        return pendingTrades;
+                    } else {
+                        System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - No trades found in response");
+                        return List.of();
+                    }
+                } else {
+                    System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - No data field in response");
+                    return List.of();
+                }
+            } else {
+                System.err.println("[ERROR] TradeController.getPendingTradeRequests() - Failed to get pending trade requests: " + result.getMessage());
+                return List.of();
+            }
+        } catch (Exception e) {
+            System.err.println("[ERROR] TradeController.getPendingTradeRequests() - Exception getting pending trade requests: " + e.getMessage());
+            e.printStackTrace();
+            return List.of();
+        }
+    }
+
+    public Trade getLatestPendingTradeRequest() {
+        List<Trade> pendingTrades = getPendingTradeRequests();
+        if (!pendingTrades.isEmpty()) {
+            // Return the most recent pending trade (assuming trades are ordered by creation time)
+            return pendingTrades.get(0);
+        }
+        return null;
     }
 
 

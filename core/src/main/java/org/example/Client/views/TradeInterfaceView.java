@@ -206,7 +206,8 @@ public class TradeInterfaceView implements Screen {
                     statusLabel.setColor(Color.ORANGE);
                     confirmTradeButton.setVisible(false);
                 } else {
-                    tradeController.acceptTrade(currentTrade.getTradeId());
+                    // Accept means we move trade to completed on server per respond 'confirm'
+                    tradeController.confirmTrade(currentTrade.getTradeId());
                     statusLabel.setText("Trade completed!");
                     statusLabel.setColor(Color.GREEN);
                     confirmTradeButton.setVisible(false);

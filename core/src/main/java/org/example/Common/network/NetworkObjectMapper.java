@@ -3,6 +3,8 @@ package org.example.Common.network;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.example.Common.models.Fundementals.Player;
 import org.example.Common.models.Item;
@@ -41,6 +43,10 @@ public class NetworkObjectMapper {
         module.addKeyDeserializer(Player.class, new GenericKeyDeserializer());
 
         mapper.registerModule(module);
+
+        // Java 8 date/time support
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         return mapper;
     }

@@ -33,6 +33,8 @@ public class TradeWaitingView implements Screen {
     private ProgressBar progressBar;
     private TextButton cancelButton;
     private Label titleLabel;
+    private float pollTimer = 0f;
+    private static final float POLL_INTERVAL = 1.5f;
     
     public TradeWaitingView(Main game, String targetPlayerName) {
         this.game = game;
@@ -129,6 +131,34 @@ public class TradeWaitingView implements Screen {
         
         stage.act(delta);
         stage.draw();
+
+        // Poll for trade acceptance to update initiator's screen
+        pollTimer += delta;
+        if (pollTimer >= POLL_INTERVAL) {
+            pollTimer = 0f;
+            try {
+                var trades = tradeController.getMyTrades();
+                for (var t : trades) {
+                    // Find the pending/accepted trade with this target
+                    if (t.getTargetUsername() != null && t.getTargetUsername().equals(targetPlayerName)) {
+                        switch (t.getStatus()) {
+                            case ACCEPTED:
+                                waitingLabel.setText("Accepted by " + targetPlayerName + ". Opening trade...");
+                                waitingLabel.setColor(Color.GREEN);
+                                game.setScreen(new TradeInterfaceView(game, t, targetPlayerName, true));
+                                return;
+                            case DECLINED:
+                                waitingLabel.setText("Declined by " + targetPlayerName);
+                                waitingLabel.setColor(Color.RED);
+                                cancelButton.setText("Close");
+                                return;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
     }
     
     @Override
