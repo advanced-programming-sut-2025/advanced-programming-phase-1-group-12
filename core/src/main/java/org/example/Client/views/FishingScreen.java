@@ -176,6 +176,21 @@ public class FishingScreen extends InputAdapter implements Screen {
         if (perfectFish) {
             message = "you caught it perfect!!!";
         }
+        
+        // Add quest progress for fishing
+        try {
+            // Get the quest controller from the main game menu
+            if (Main.getMain().getScreen() instanceof GameMenu) {
+                GameMenu gameMenu = (GameMenu) Main.getMain().getScreen();
+                if (gameMenu.getQuestController() != null) {
+                    gameMenu.getQuestController().addFishingProgress(1, fishDetail.getName());
+                }
+            }
+        } catch (Exception e) {
+            // Silently handle any quest-related errors to not break fishing
+            System.out.println("Quest progress tracking error: " + e.getMessage());
+        }
+        
         endOneFish();
     }
 

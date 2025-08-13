@@ -24,6 +24,8 @@ public class Game {
     private ArrayList<Farm> farms = new ArrayList<>();
     @JsonIgnore
     private NPCvillage npcVillage;
+    @JsonIgnore
+    private org.example.Common.models.Quest.QuestManager questManager;
 
     private User creator;
 
@@ -33,6 +35,8 @@ public class Game {
     private boolean isTurnBasedMode = false;
 
     public Game() {
+        // Initialize quest manager lazily to avoid circular dependency issues
+        this.questManager = null;
     }
 
     // Network communication
@@ -101,6 +105,17 @@ public class Game {
 
     public void setFarms(ArrayList<Farm> farms) {
         this.farms = farms;
+    }
+    
+    public org.example.Common.models.Quest.QuestManager getQuestManager() {
+        if (questManager == null) {
+            questManager = new org.example.Common.models.Quest.QuestManager();
+        }
+        return questManager;
+    }
+    
+    public void setQuestManager(org.example.Common.models.Quest.QuestManager questManager) {
+        this.questManager = questManager;
     }
 
     public Player getPlayerByName(String playerName) {
@@ -175,6 +190,17 @@ public class Game {
             currentPlayer.setHasCollapsed(false);
         } else {
             System.err.println("ERROR: Current player is null after advancing turn");
+        }
+        
+        // Check quest expiration and refresh available quests
+        if (questManager != null) {
+            try {
+                questManager.checkQuestExpiration();
+                questManager.refreshAvailableQuests();
+            } catch (Exception e) {
+                // Silently handle quest-related errors to not break game flow
+                System.out.println("Quest system error during turn advancement: " + e.getMessage());
+            }
         }
     }
 

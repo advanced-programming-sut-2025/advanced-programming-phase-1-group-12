@@ -122,12 +122,15 @@ public class GameMenu extends InputAdapter implements Screen {
     private TextButton radioButton;
     private TextButton reactionButton;
     private TextButton chatButton;
+    private TextButton questButton;
     private ChatMenu currentChatMenu;
     private Dialog friendsDialog;
     private Table friendsTable;
     private ScrollPane friendsScrollPane;
     private ReactionMenu reactionMenu;
     private ReactionRenderer reactionRenderer;
+    private QuestMenu questMenu;
+    private QuestController questController;
 
     private Map<Player, ProgressBar> energyBars;
     private Map<Craft, ProgressBar> craftBars;
@@ -1127,6 +1130,7 @@ public class GameMenu extends InputAdapter implements Screen {
         initializeRadioButton();
         initializeReactionButton();
         initializeChatButton();
+        initializeQuestButton();
         
         // Initialize reaction system
         reactionRenderer = new ReactionRenderer(batch, font);
@@ -4519,6 +4523,29 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         });
         stage.addActor(chatButton);
+    }
+
+    private void initializeQuestButton() {
+        questController = new QuestController();
+        questMenu = new QuestMenu(stage, questController);
+        
+        questButton = new TextButton("Quests", skin);
+        questButton.setSize(120, 40);
+        questButton.setPosition(20, stage.getHeight() - 320);
+        questButton.getLabel().setFontScale(1.2f);
+        
+        questButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                questMenu.show();
+            }
+        });
+        
+        stage.addActor(questButton);
+    }
+    
+    public QuestController getQuestController() {
+        return questController;
     }
     
     private void openChatMenu() {

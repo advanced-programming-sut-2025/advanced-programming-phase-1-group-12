@@ -90,6 +90,47 @@ public class ItemBuilder {
             backpack.getItemNames().put(item.getName(), item);
 
         }
+        
+        // Add quest progress tracking
+        try {
+            // Get the quest controller from the main game menu
+            if (App.getCurrentGame() != null && App.getCurrentGame().getCurrentPlayer() != null) {
+                // Try to get quest controller from GameMenu if available
+                if (org.example.Client.Main.getMain() != null && 
+                    org.example.Client.Main.getMain().getScreen() instanceof org.example.Client.views.GameMenu) {
+                    org.example.Client.views.GameMenu gameMenu = (org.example.Client.views.GameMenu) org.example.Client.Main.getMain().getScreen();
+                    if (gameMenu.getQuestController() != null) {
+                        // Determine quest type based on item type
+                        String itemName = item.getName().toLowerCase();
+                        
+                        if (item instanceof org.example.Common.models.Animal.Fish) {
+                            gameMenu.getQuestController().addFishingProgress(count, item.getName());
+                        } else if (item instanceof org.example.Common.models.enums.foraging.Plant || 
+                                   itemName.contains("crop") || itemName.contains("vegetable") || 
+                                   itemName.contains("fruit")) {
+                            gameMenu.getQuestController().addFarmingProgress(count, item.getName());
+                        } else if (item instanceof org.example.Common.models.enums.foraging.Stone || 
+                                   itemName.contains("mineral") || itemName.contains("gem") || 
+                                   itemName.contains("ore")) {
+                            gameMenu.getQuestController().addMiningProgress(count, item.getName());
+                        } else if (item instanceof org.example.Common.models.ProductsPackage.AnimalProducts || 
+                                   itemName.contains("milk") || itemName.contains("egg") || 
+                                   itemName.contains("wool")) {
+                            gameMenu.getQuestController().addAnimalProductProgress(count, item.getName());
+                        } else if (item instanceof org.example.Common.models.ToolsPackage.Tools || 
+                                   itemName.contains("crafted") || itemName.contains("artisan")) {
+                            gameMenu.getQuestController().addCraftingProgress(count, item.getName());
+                        } else {
+                            // Default to foraging for other items
+                            gameMenu.getQuestController().addForagingProgress(count, item.getName());
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Silently handle any quest-related errors to not break item addition
+            System.out.println("Quest progress tracking error: " + e.getMessage());
+        }
     }
 
 }
