@@ -79,7 +79,7 @@ public class VotingMenu implements Screen, Disposable {
 
     private void initializeUI() {
         stage = new Stage(new ScreenViewport());
-        skin = new Skin(Gdx.files.internal("uiskin.json"));
+        skin = GameAssetManager.skin;
         batch = new SpriteBatch();
         
         // Load background texture
