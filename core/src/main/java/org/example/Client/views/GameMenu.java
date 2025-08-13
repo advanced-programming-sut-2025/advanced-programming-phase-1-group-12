@@ -131,7 +131,6 @@ public class GameMenu extends InputAdapter implements Screen {
     private ReactionRenderer reactionRenderer;
     private QuestMenu questMenu;
     private QuestController questController;
-    private ScoreboardMenu scoreboardMenu;
 
     private Map<Player, ProgressBar> energyBars;
     private Map<Craft, ProgressBar> craftBars;
@@ -975,17 +974,19 @@ public class GameMenu extends InputAdapter implements Screen {
         try {
             String messageType = (String) messageData.get("type");
             if ("scoreboard_update".equals(messageType)) {
-                @SuppressWarnings("unchecked")
-                List<Map<String, Object>> playerScores = (List<Map<String, Object>>) messageData.get("playerScores");
-                String sortType = (String) messageData.get("sortType");
-                @SuppressWarnings("unchecked")
-                Map<String, Object> stats = (Map<String, Object>) messageData.get("stats");
-                
-                if (scoreboardMenu != null) {
+                // Forward the message to the current screen if it's a ScoreboardMenu
+                if (Main.getMain().getScreen() instanceof ScoreboardMenu) {
+                    ScoreboardMenu scoreboardMenu = (ScoreboardMenu) Main.getMain().getScreen();
+                    @SuppressWarnings("unchecked")
+                    List<Map<String, Object>> playerScores = (List<Map<String, Object>>) messageData.get("playerScores");
+                    String sortType = (String) messageData.get("sortType");
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> stats = (Map<String, Object>) messageData.get("stats");
+                    
                     scoreboardMenu.updateScoreboard(playerScores, sortType, stats);
                     System.out.println("🏆🏆🏆 [GAME_MENU] Scoreboard updated successfully 🏆🏆🏆");
                 } else {
-                    System.out.println("❌❌❌ [GAME_MENU] Scoreboard menu is null ❌❌❌");
+                    System.out.println("🏆🏆🏆 [GAME_MENU] Scoreboard menu is not currently active 🏆🏆🏆");
                 }
             }
         } catch (Exception e) {
@@ -1628,11 +1629,7 @@ public class GameMenu extends InputAdapter implements Screen {
         stage.act(delta);
         stage.draw();
         
-        // Update and render scoreboard menu if visible
-        if (scoreboardMenu != null) {
-            scoreboardMenu.update();
-            scoreboardMenu.render(batch);
-        }
+        // Scoreboard menu is now a separate screen, no need to render here
 
     }
 
@@ -4583,8 +4580,6 @@ public class GameMenu extends InputAdapter implements Screen {
     }
     
     private void initializeScoreboardButton() {
-        scoreboardMenu = new ScoreboardMenu(stage, skin);
-        
         TextButton scoreboardButton = new TextButton("🏆 Scoreboard", skin);
         scoreboardButton.setSize(120, 40);
         scoreboardButton.setPosition(20, stage.getHeight() - 360);
@@ -4593,11 +4588,24 @@ public class GameMenu extends InputAdapter implements Screen {
         scoreboardButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                scoreboardMenu.show();
+                openScoreboardMenu();
             }
         });
         
         stage.addActor(scoreboardButton);
+    }
+    
+    private void openScoreboardMenu() {
+        System.out.println("🏆🏆🏆 [GAME_MENU] openScoreboardMenu() called 🏆🏆🏆");
+        System.out.println("🏆🏆🏆 [GAME_MENU] CurrentGame: " + (App.getCurrentGame() != null ? "available" : "null") + " 🏆🏆🏆");
+        
+        if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
+            System.out.println("🏆🏆🏆 [GAME_MENU] Creating ScoreboardMenu and setting as current screen 🏆🏆🏆");
+            ScoreboardMenu scoreboardMenu = new ScoreboardMenu(this);
+            Main.getMain().setScreen(scoreboardMenu);
+        } else {
+            System.out.println("🏆🏆🏆 [GAME_MENU] Cannot open ScoreboardMenu - not in multiplayer game 🏆🏆🏆");
+        }
     }
     
     private void openChatMenu() {

@@ -1,44 +1,60 @@
 package org.example.Client.views;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import org.example.Common.models.Assets.GameAssetManager;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.enums.ScoreboardSortType;
 import org.example.Client.controllers.ScoreboardController;
+import org.example.Client.Main;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ScoreboardMenu {
+public class ScoreboardMenu implements Screen, Disposable {
     private Stage stage;
+    private Skin skin;
+    private SpriteBatch batch;
+    private Texture backgroundTexture;
+    private Screen parentScreen;
+    
+    // UI Components
     private Table mainTable;
     private Table scoreboardTable;
     private Table statsTable;
     private SelectBox<String> sortTypeSelect;
     private Label titleLabel;
     private Label statsLabel;
+    private TextButton closeButton;
     private List<Label> playerLabels;
     private List<Label> rankLabels;
     private List<Label> moneyLabels;
     private List<Label> missionLabels;
     private List<Label> skillLabels;
     
+    // Controller and state
     private ScoreboardController controller;
-    private boolean isVisible = false;
     private long lastUpdateTime = 0;
     private static final long UPDATE_INTERVAL = 2000; // Update every 2 seconds
     
-    public ScoreboardMenu(Stage stage, Skin skin) {
-        this.stage = stage;
+    public ScoreboardMenu(Screen parentScreen) {
+        this.parentScreen = parentScreen;
+        this.skin = GameAssetManager.skin;
+        this.batch = new SpriteBatch();
         this.controller = new ScoreboardController();
         this.playerLabels = new ArrayList<>();
         this.rankLabels = new ArrayList<>();
@@ -46,10 +62,21 @@ public class ScoreboardMenu {
         this.missionLabels = new ArrayList<>();
         this.skillLabels = new ArrayList<>();
         
-        createUI(skin);
+        // Load background texture
+        try {
+            this.backgroundTexture = new Texture(Gdx.files.internal("NPC/backGround/chatBack.png"));
+        } catch (Exception e) {
+            System.err.println("Failed to load scoreboard background: " + e.getMessage());
+            this.backgroundTexture = null;
+        }
+        
+        initializeUI();
     }
     
-    private void createUI(Skin skin) {
+    private void initializeUI() {
+        stage = new Stage(new ScreenViewport());
+        Gdx.input.setInputProcessor(stage);
+        
         // Create main table
         mainTable = new Table();
         mainTable.setFillParent(true);
@@ -57,8 +84,8 @@ public class ScoreboardMenu {
         
         // Title
         titleLabel = new Label("🏆 Live Scoreboard 🏆", skin);
+        titleLabel.setFontScale(2.0f);
         titleLabel.setColor(Color.GOLD);
-        titleLabel.setFontScale(1.5f);
         titleLabel.setAlignment(Align.center);
         
         // Sort type selector
@@ -98,48 +125,57 @@ public class ScoreboardMenu {
         // Stats table
         statsTable = new Table();
         statsTable.pad(10);
-        // statsTable.setBackground(new Table.Debug(Color.DARK_GRAY));
         
         statsLabel = new Label("Loading statistics...", skin);
         statsLabel.setColor(Color.WHITE);
+        statsLabel.setFontScale(1.2f);
         statsTable.add(statsLabel).expandX().fillX();
         
         // Scoreboard table
         scoreboardTable = new Table();
         scoreboardTable.pad(10);
-        // scoreboardTable.setBackground(new Table.Debug(Color.DARK_GRAY));
         
         // Headers
         Label rankHeader = new Label("Rank", skin);
         rankHeader.setColor(Color.YELLOW);
+        rankHeader.setFontScale(1.2f);
         Label playerHeader = new Label("Player", skin);
         playerHeader.setColor(Color.YELLOW);
+        playerHeader.setFontScale(1.2f);
         Label moneyHeader = new Label("Money", skin);
         moneyHeader.setColor(Color.YELLOW);
+        moneyHeader.setFontScale(1.2f);
         Label missionsHeader = new Label("Missions", skin);
         missionsHeader.setColor(Color.YELLOW);
+        missionsHeader.setFontScale(1.2f);
         Label skillsHeader = new Label("Skills", skin);
         skillsHeader.setColor(Color.YELLOW);
+        skillsHeader.setFontScale(1.2f);
         
-        scoreboardTable.add(rankHeader).width(60);
-        scoreboardTable.add(playerHeader).width(120);
-        scoreboardTable.add(moneyHeader).width(100);
-        scoreboardTable.add(missionsHeader).width(80);
-        scoreboardTable.add(skillsHeader).width(80);
+        scoreboardTable.add(rankHeader).width(80).pad(5);
+        scoreboardTable.add(playerHeader).width(150).pad(5);
+        scoreboardTable.add(moneyHeader).width(120).pad(5);
+        scoreboardTable.add(missionsHeader).width(100).pad(5);
+        scoreboardTable.add(skillsHeader).width(100).pad(5);
         scoreboardTable.row();
         
         // Add placeholder rows
         for (int i = 0; i < 10; i++) {
             Label rankLabel = new Label("-", skin);
             rankLabel.setColor(Color.WHITE);
+            rankLabel.setFontScale(1.1f);
             Label playerLabel = new Label("-", skin);
             playerLabel.setColor(Color.WHITE);
+            playerLabel.setFontScale(1.1f);
             Label moneyLabel = new Label("-", skin);
             moneyLabel.setColor(Color.WHITE);
+            moneyLabel.setFontScale(1.1f);
             Label missionLabel = new Label("-", skin);
             missionLabel.setColor(Color.WHITE);
+            missionLabel.setFontScale(1.1f);
             Label skillLabel = new Label("-", skin);
             skillLabel.setColor(Color.WHITE);
+            skillLabel.setFontScale(1.1f);
             
             rankLabels.add(rankLabel);
             playerLabels.add(playerLabel);
@@ -147,64 +183,55 @@ public class ScoreboardMenu {
             missionLabels.add(missionLabel);
             skillLabels.add(skillLabel);
             
-            scoreboardTable.add(rankLabel).width(60);
-            scoreboardTable.add(playerLabel).width(120);
-            scoreboardTable.add(moneyLabel).width(100);
-            scoreboardTable.add(missionLabel).width(80);
-            scoreboardTable.add(skillLabel).width(80);
+            scoreboardTable.add(rankLabel).width(80).pad(3);
+            scoreboardTable.add(playerLabel).width(150).pad(3);
+            scoreboardTable.add(moneyLabel).width(120).pad(3);
+            scoreboardTable.add(missionLabel).width(100).pad(3);
+            scoreboardTable.add(skillLabel).width(100).pad(3);
             scoreboardTable.row();
         }
         
         // Close button
-        TextButton closeButton = new TextButton("Close", skin);
-        closeButton.addListener(new ChangeListener() {
+        closeButton = new TextButton("Back to Game", skin);
+        closeButton.setSize(200, 60);
+        closeButton.getLabel().setFontScale(1.5f);
+        closeButton.addListener(new ClickListener() {
             @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                hide();
+            public void clicked(InputEvent event, float x, float y) {
+                // Return to the parent screen (GameMenu)
+                Main.getMain().setScreen(parentScreen);
             }
         });
         
         // Layout
-        mainTable.add(titleLabel).colspan(2).expandX().fillX().padBottom(20);
+        mainTable.add(titleLabel).colspan(2).expandX().fillX().padBottom(30);
         mainTable.row();
+        
+        // Sort type row
+        Table sortTable = new Table();
         Label sortByLabel = new Label("Sort by:", skin);
         sortByLabel.setColor(Color.WHITE);
-        mainTable.add(sortByLabel).left();
-        mainTable.add(sortTypeSelect).right().padBottom(10);
+        sortByLabel.setFontScale(1.3f);
+        sortTable.add(sortByLabel).left().padRight(10);
+        sortTable.add(sortTypeSelect).right();
+        mainTable.add(sortTable).colspan(2).expandX().fillX().padBottom(20);
         mainTable.row();
-        mainTable.add(statsTable).colspan(2).expandX().fillX().padBottom(10);
+        
+        mainTable.add(statsTable).colspan(2).expandX().fillX().padBottom(20);
         mainTable.row();
-        mainTable.add(scoreboardTable).colspan(2).expandX().fillX().padBottom(20);
+        mainTable.add(scoreboardTable).colspan(2).expandX().fillX().padBottom(30);
         mainTable.row();
         mainTable.add(closeButton).colspan(2).expandX().fillX();
         
-        // Initially hide the menu
-        mainTable.setVisible(false);
         stage.addActor(mainTable);
-    }
-    
-    public void show() {
-        isVisible = true;
-        mainTable.setVisible(true);
         
         // Request initial scoreboard data
         controller.requestScoreboardUpdate(ScoreboardSortType.MONEY);
     }
     
-    public void hide() {
-        isVisible = false;
-        mainTable.setVisible(false);
-    }
-    
-    public boolean isVisible() {
-        return isVisible;
-    }
-    
     public void updateScoreboard(List<Map<String, Object>> playerScores, 
                                 String sortType, 
                                 Map<String, Object> stats) {
-        if (!isVisible) return;
-        
         // Update stats
         if (stats != null) {
             int totalPlayers = (Integer) stats.getOrDefault("totalPlayers", 0);
@@ -214,8 +241,8 @@ public class ScoreboardMenu {
             String topPlayer = (String) stats.getOrDefault("topPlayer", "None");
             
             statsLabel.setText(String.format(
-                "Players: %d | Avg Money: %d | Avg Missions: %d | Avg Skills: %d | Top Player: %s",
-                totalPlayers, avgMoney, avgMissions, avgSkills, topPlayer
+                "Players: %d | Avg Money: %s | Avg Missions: %d | Avg Skills: %d | Top Player: %s",
+                totalPlayers, formatMoney(avgMoney), avgMissions, avgSkills, topPlayer
             ));
         }
         
@@ -278,42 +305,79 @@ public class ScoreboardMenu {
         }
     }
     
-    public void render(SpriteBatch batch) {
-        if (isVisible) {
-            stage.draw();
-        }
+    @Override
+    public void show() {
+        Gdx.input.setInputProcessor(stage);
+        
+        // Request scoreboard update when shown
+        controller.requestScoreboardUpdate(ScoreboardSortType.MONEY);
     }
     
-    public void update() {
-        if (isVisible) {
-            stage.act(Gdx.graphics.getDeltaTime());
+    @Override
+    public void render(float delta) {
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        
+        // Draw background
+        if (backgroundTexture != null) {
+            batch.begin();
+            batch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            batch.end();
+        }
+        
+        stage.act(delta);
+        stage.draw();
+        
+        // Auto-refresh every few seconds
+        if (System.currentTimeMillis() - lastUpdateTime > UPDATE_INTERVAL) {
+            ScoreboardSortType currentSort = ScoreboardSortType.MONEY;
+            String selected = sortTypeSelect.getSelected();
             
-            // Auto-refresh every few seconds
-            if (System.currentTimeMillis() - lastUpdateTime > UPDATE_INTERVAL) {
-                ScoreboardSortType currentSort = ScoreboardSortType.MONEY;
-                String selected = sortTypeSelect.getSelected();
-                
-                switch (selected) {
-                    case "Money":
-                        currentSort = ScoreboardSortType.MONEY;
-                        break;
-                    case "Completed Missions":
-                        currentSort = ScoreboardSortType.MISSIONS;
-                        break;
-                    case "Total Skills":
-                        currentSort = ScoreboardSortType.SKILLS;
-                        break;
-                    case "Overall Ranking":
-                        currentSort = ScoreboardSortType.OVERALL;
-                        break;
-                }
-                
-                controller.requestScoreboardUpdate(currentSort);
+            switch (selected) {
+                case "Money":
+                    currentSort = ScoreboardSortType.MONEY;
+                    break;
+                case "Completed Missions":
+                    currentSort = ScoreboardSortType.MISSIONS;
+                    break;
+                case "Total Skills":
+                    currentSort = ScoreboardSortType.SKILLS;
+                    break;
+                case "Overall Ranking":
+                    currentSort = ScoreboardSortType.OVERALL;
+                    break;
             }
+            
+            controller.requestScoreboardUpdate(currentSort);
         }
     }
     
+    @Override
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
+    }
+    
+    @Override
+    public void pause() {}
+    
+    @Override
+    public void resume() {}
+    
+    @Override
+    public void hide() {
+        dispose();
+    }
+    
+    @Override
     public void dispose() {
-        // Clean up resources if needed
+        if (stage != null) {
+            stage.dispose();
+        }
+        if (batch != null) {
+            batch.dispose();
+        }
+        if (backgroundTexture != null) {
+            backgroundTexture.dispose();
+        }
     }
 }
