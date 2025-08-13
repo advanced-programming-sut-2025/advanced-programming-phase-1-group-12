@@ -235,6 +235,20 @@ public class GameWebSocketHandler {
                     handleRadioTrackUploaded(ctx, userId, messageData);
                     break;
 
+                // Voting event handlers
+                case GameProtocol.WS_VOTE_STARTED:
+                    handleVoteStarted(ctx, userId, messageData);
+                    break;
+                case GameProtocol.WS_VOTE_UPDATED:
+                    handleVoteUpdated(ctx, userId, messageData);
+                    break;
+                case GameProtocol.WS_VOTE_ENDED:
+                    handleVoteEnded(ctx, userId, messageData);
+                    break;
+                case GameProtocol.WS_VOTE_RESULT:
+                    handleVoteResult(ctx, userId, messageData);
+                    break;
+
                 default:
                     logger.warn("Unknown WebSocket message type: {} from user: {}", messageType, userId);
                     sendError(ctx, "Unknown message type: " + messageType);
@@ -1035,6 +1049,99 @@ public class GameWebSocketHandler {
         } catch (Exception e) {
             System.out.println("💥💥💥 [SERVER] Error handling scoreboard update: " + e.getMessage() + " 💥💥💥");
             logger.error("Error handling scoreboard update", e);
+        }
+    }
+
+    // Voting handlers
+    private void handleVoteStarted(WsContext ctx, String userId, Map<String, Object> messageData) {
+        try {
+            System.out.println("🗳️🗳️🗳️ [SERVER] handleVoteStarted called 🗳️🗳️🗳️");
+            System.out.println("🗳️🗳️🗳️ [SERVER] User: " + userId + " 🗳️🗳️🗳️");
+            System.out.println("🗳️🗳️🗳️ [SERVER] Message data: " + messageData + " 🗳️🗳️🗳️");
+            
+            String gameId = (String) messageData.get("gameId");
+            
+            // Broadcast vote started event to all players in the game
+            GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            if (gameInstance != null) {
+                gameInstance.broadcastToAllPlayers(messageData);
+                System.out.println("🗳️🗳️🗳️ [SERVER] Vote started event broadcasted successfully 🗳️🗳️🗳️");
+            } else {
+                System.out.println("❌❌❌ [SERVER] Game instance not found for gameId: " + gameId + " ❌❌❌");
+            }
+            
+        } catch (Exception e) {
+            System.out.println("💥💥💥 [SERVER] Error handling vote started: " + e.getMessage() + " 💥💥💥");
+            logger.error("Error handling vote started", e);
+        }
+    }
+
+    private void handleVoteUpdated(WsContext ctx, String userId, Map<String, Object> messageData) {
+        try {
+            System.out.println("🗳️🗳️🗳️ [SERVER] handleVoteUpdated called 🗳️🗳️🗳️");
+            System.out.println("🗳️🗳️🗳️ [SERVER] User: " + userId + " 🗳️🗳️🗳️");
+            System.out.println("🗳️🗳️🗳️ [SERVER] Message data: " + messageData + " 🗳️🗳️🗳️");
+            
+            String gameId = (String) messageData.get("gameId");
+            
+            // Broadcast vote updated event to all players in the game
+            GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            if (gameInstance != null) {
+                gameInstance.broadcastToAllPlayers(messageData);
+                System.out.println("🗳️🗳️🗳️ [SERVER] Vote updated event broadcasted successfully 🗳️🗳️🗳️");
+            } else {
+                System.out.println("❌❌❌ [SERVER] Game instance not found for gameId: " + gameId + " ❌❌❌");
+            }
+            
+        } catch (Exception e) {
+            System.out.println("💥💥💥 [SERVER] Error handling vote updated: " + e.getMessage() + " 💥💥💥");
+            logger.error("Error handling vote updated", e);
+        }
+    }
+
+    private void handleVoteEnded(WsContext ctx, String userId, Map<String, Object> messageData) {
+        try {
+            System.out.println("🗳️🗳️🗳️ [SERVER] handleVoteEnded called 🗳️🗳️🗳️");
+            System.out.println("🗳️🗳️🗳️ [SERVER] User: " + userId + " 🗳️🗳️🗳️");
+            System.out.println("🗳️🗳️🗳️ [SERVER] Message data: " + messageData + " 🗳️🗳️🗳️");
+            
+            String gameId = (String) messageData.get("gameId");
+            
+            // Broadcast vote ended event to all players in the game
+            GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            if (gameInstance != null) {
+                gameInstance.broadcastToAllPlayers(messageData);
+                System.out.println("🗳️🗳️🗳️ [SERVER] Vote ended event broadcasted successfully 🗳️🗳️🗳️");
+            } else {
+                System.out.println("❌❌❌ [SERVER] Game instance not found for gameId: " + gameId + " ❌❌❌");
+            }
+            
+        } catch (Exception e) {
+            System.out.println("💥💥💥 [SERVER] Error handling vote ended: " + e.getMessage() + " 💥💥💥");
+            logger.error("Error handling vote ended", e);
+        }
+    }
+
+    private void handleVoteResult(WsContext ctx, String userId, Map<String, Object> messageData) {
+        try {
+            System.out.println("🗳️🗳️🗳️ [SERVER] handleVoteResult called 🗳️🗳️🗳️");
+            System.out.println("🗳️🗳️🗳️ [SERVER] User: " + userId + " 🗳️🗳️🗳️");
+            System.out.println("🗳️🗳️🗳️ [SERVER] Message data: " + messageData + " 🗳️🗳️🗳️");
+            
+            String gameId = (String) messageData.get("gameId");
+            
+            // Broadcast vote result event to all players in the game
+            GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            if (gameInstance != null) {
+                gameInstance.broadcastToAllPlayers(messageData);
+                System.out.println("🗳️🗳️🗳️ [SERVER] Vote result event broadcasted successfully 🗳️🗳️🗳️");
+            } else {
+                System.out.println("❌❌❌ [SERVER] Game instance not found for gameId: " + gameId + " ❌❌❌");
+            }
+            
+        } catch (Exception e) {
+            System.out.println("💥💥💥 [SERVER] Error handling vote result: " + e.getMessage() + " 💥💥💥");
+            logger.error("Error handling vote result", e);
         }
     }
 }

@@ -55,6 +55,12 @@ public class GameProtocol {
     public static final String RADIO_LEAVE_STATION_ENDPOINT = RADIO_BASE + "/station/leave";
     public static final String RADIO_PLAY_TRACK_ENDPOINT = RADIO_BASE + "/station/play";
 
+    // Voting Endpoints
+    public static final String VOTE_BASE = "/vote";
+    public static final String VOTE_START_ENDPOINT = VOTE_BASE + "/start";
+    public static final String VOTE_CAST_ENDPOINT = VOTE_BASE + "/cast";
+    public static final String VOTE_STATUS_ENDPOINT = VOTE_BASE + "/status";
+
     // WebSocket Message Types
     public static final String WS_PLAYER_MOVED = "player_moved";
     public static final String WS_PLAYER_JOINED = "player_joined";
@@ -78,6 +84,10 @@ public class GameProtocol {
     public static final String WS_RADIO_TRACK_PLAYED = "radio_track_played";
     public static final String WS_RADIO_TRACK_PAUSED = "radio_track_paused";
     public static final String WS_RADIO_TRACK_STOPPED = "radio_track_stopped";
+    public static final String WS_VOTE_STARTED = "vote_started";
+    public static final String WS_VOTE_UPDATED = "vote_updated";
+    public static final String WS_VOTE_ENDED = "vote_ended";
+    public static final String WS_VOTE_RESULT = "vote_result";
     public static final String WS_ERROR = "error";
 
     // Network Configuration

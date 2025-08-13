@@ -7,6 +7,7 @@ import org.example.Common.network.NetworkObjectMapper;
 import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.*;
 import org.example.Common.network.responses.*;
+import org.example.Server.network.VoteManager;
 import org.example.Server.LobbyManager;
 import org.example.Server.network.GameStartManager;
 import org.example.Server.network.GameSessionManager;
@@ -145,6 +146,11 @@ public class SimpleNetworkServer {
         app.get("/game/{gameId}/state", this::handleGetGameState);
         app.post("/game/{gameId}/player/walk", this::handlePlayerWalk);
         app.get("/game/active", this::handleGetActiveGames);
+
+        // Voting routes
+        app.post("/vote/start", this::handleStartVote);
+        app.post("/vote/cast", this::handleCastVote);
+        app.get("/vote/status", this::handleGetVoteStatus);
 
         // Test routes
         app.get("/api/test", this::handleTest);
@@ -810,6 +816,121 @@ public class SimpleNetworkServer {
         }
 
         return null;
+    }
+
+    // Voting handlers
+    private void handleStartVote(Context ctx) {
+        try {
+            String username = getUsernameFromContext(ctx);
+            if (username == null) {
+                ctx.status(401).json(NetworkResult.error("Authentication required"));
+                return;
+            }
+
+            StartVoteRequest request = ctx.bodyAsClass(StartVoteRequest.class);
+            request.setInitiatorId(username);
+
+            // Get the game instance for this player
+            String gameId = gameSessionManager.getPlayerGameId(username);
+            if (gameId == null) {
+                ctx.status(400).json(NetworkResult.error("Player is not in a game"));
+                return;
+            }
+
+            GameInstance gameInstance = gameSessionManager.getGameInstance(gameId);
+            if (gameInstance == null) {
+                ctx.status(400).json(NetworkResult.error("Game not found"));
+                return;
+            }
+
+            NetworkResult<VoteResponse> result = gameInstance.getVoteManager().startVote(request);
+            ctx.status(result.getStatusCode()).json(result);
+        } catch (Exception e) {
+            logger.error("Start vote error", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
+        }
+    }
+
+    private void handleCastVote(Context ctx) {
+        try {
+            String username = getUsernameFromContext(ctx);
+            if (username == null) {
+                ctx.status(401).json(NetworkResult.error("Authentication required"));
+                return;
+            }
+
+            VoteRequest request = ctx.bodyAsClass(VoteRequest.class);
+            request.setVoterId(username);
+
+            // Get the game instance for this player
+            String gameId = gameSessionManager.getPlayerGameId(username);
+            if (gameId == null) {
+                ctx.status(400).json(NetworkResult.error("Player is not in a game"));
+                return;
+            }
+
+            GameInstance gameInstance = gameSessionManager.getGameInstance(gameId);
+            if (gameInstance == null) {
+                ctx.status(400).json(NetworkResult.error("Game not found"));
+                return;
+            }
+
+            NetworkResult<VoteResponse> result = gameInstance.getVoteManager().castVote(request);
+            ctx.status(result.getStatusCode()).json(result);
+        } catch (Exception e) {
+            logger.error("Cast vote error", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
+        }
+    }
+
+    private void handleGetVoteStatus(Context ctx) {
+        try {
+            String username = getUsernameFromContext(ctx);
+            if (username == null) {
+                ctx.status(401).json(NetworkResult.error("Authentication required"));
+                return;
+            }
+
+            String gameId = ctx.queryParam("gameId");
+            if (gameId == null) {
+                ctx.status(400).json(NetworkResult.error("Game ID is required"));
+                return;
+            }
+
+            GameInstance gameInstance = gameSessionManager.getGameInstance(gameId);
+            if (gameInstance == null) {
+                ctx.status(400).json(NetworkResult.error("Game not found"));
+                return;
+            }
+
+            VoteManager voteManager = gameInstance.getVoteManager();
+            if (voteManager.hasActiveVote(gameId)) {
+                VoteManager.Vote activeVote = voteManager.getActiveVote(gameId);
+                VoteResponse response = new VoteResponse(
+                    true,
+                    "Active vote found",
+                    activeVote.getVoteId(),
+                    activeVote.getVoteType(),
+                    activeVote.getTargetPlayerId(),
+                    activeVote.getInitiatorId(),
+                    activeVote.getReason(),
+                    activeVote.getStartTime(),
+                    activeVote.getEndTime(),
+                    activeVote.getVotes(),
+                    activeVote.getYesVotes(),
+                    activeVote.getNoVotes(),
+                    activeVote.getTotalVotes(),
+                    activeVote.getRequiredVotes(),
+                    activeVote.isActive()
+                );
+                ctx.json(NetworkResult.success("Vote status retrieved", response));
+            } else {
+                ctx.json(NetworkResult.success("No active vote", null));
+            }
+        } catch (Exception e) {
+            logger.error("Get vote status error", e);
+            ctx.status(500).json(NetworkResult.error("Internal server error"));
+        }
     }
 
     public static void main(String[] args) {

@@ -35,6 +35,7 @@ public class GameInstance {
     private volatile long lastActivity;
     private String gameStatus;
     private final TradeManager tradeManager;
+    private final VoteManager voteManager;
 
     public GameInstance(String gameId, Game game, GameMenuController gameController) {
         this.gameId = gameId;
@@ -47,6 +48,7 @@ public class GameInstance {
         this.lastActivity = System.currentTimeMillis();
         this.gameStatus = "active";
         this.tradeManager = new TradeManager();
+        this.voteManager = new VoteManager(this);
         App.setCurrentGame(this.game);
 
         // Log traceable game instance creation
@@ -909,4 +911,55 @@ public class GameInstance {
             gameLock.readLock().unlock();
         }
     }
+
+    // Voting methods
+    public VoteManager getVoteManager() {
+        return voteManager;
+    }
+
+    public void kickPlayer(String playerId) {
+        gameLock.writeLock().lock();
+        try {
+            if (players.containsKey(playerId)) {
+                // Remove player from the game
+                players.remove(playerId);
+                connectedPlayers.remove(playerId);
+                
+                // Broadcast player kicked event
+                Map<String, Object> kickEvent = new HashMap<>();
+                kickEvent.put("type", "player_kicked");
+                kickEvent.put("gameId", gameId);
+                kickEvent.put("playerId", playerId);
+                kickEvent.put("timestamp", System.currentTimeMillis());
+                
+                broadcastToAllPlayers(kickEvent);
+                
+                logger.info("Player {} kicked from game {}", playerId, gameId);
+            }
+        } finally {
+            gameLock.writeLock().unlock();
+        }
+    }
+
+    public void forceTerminate() {
+        gameLock.writeLock().lock();
+        try {
+            gameStatus = "terminated";
+            
+            // Broadcast game terminated event
+            Map<String, Object> terminateEvent = new HashMap<>();
+            terminateEvent.put("type", "game_terminated");
+            terminateEvent.put("gameId", gameId);
+            terminateEvent.put("reason", "Force terminated by vote");
+            terminateEvent.put("timestamp", System.currentTimeMillis());
+            
+            broadcastToAllPlayers(terminateEvent);
+            
+            logger.info("Game {} force terminated by vote", gameId);
+        } finally {
+            gameLock.writeLock().unlock();
+        }
+    }
+
+
 }
