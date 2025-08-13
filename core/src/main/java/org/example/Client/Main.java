@@ -176,6 +176,16 @@ public class Main extends Game {
         return "default";
     }
 
+    public String getCurrentPlayerName() {
+        if (App.getLoggedInUser() != null) {
+            return App.getLoggedInUser().getUserName();
+        }
+        if (App.getCurrentGame() != null && App.getCurrentGame().getCurrentPlayer() != null) {
+            return App.getCurrentGame().getCurrentPlayer().getUser().getUserName();
+        }
+        return "Unknown";
+    }
+
     public ServerManager getServerManager() {
         return serverManager;
     }

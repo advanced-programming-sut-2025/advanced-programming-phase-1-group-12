@@ -3,6 +3,8 @@ package org.example.Server.network;
 import org.example.Common.models.Trade;
 import org.example.Common.models.TradeHistory;
 import org.example.Common.models.RelatedToUser.User;
+import org.example.Common.models.Item;
+import org.example.Common.models.ProductsPackage.Quality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -136,13 +138,21 @@ public class TradeManager {
             if (trade.getInitiatorUsername().equals(playerUsername)) {
                 // Update initiator items
                 trade.getInitiatorItems().clear();
-                // TODO: Convert string items to Item objects
+                for (Map.Entry<String, Integer> entry : items.entrySet()) {
+                    // Create a sample item (in real implementation, this would be a real Item object)
+                    Item item = new Item(entry.getKey(), Quality.NORMAL, 100);
+                    trade.getInitiatorItems().put(item, entry.getValue());
+                }
                 logger.info("Updated initiator items for trade {}", tradeId);
                 return true;
             } else if (trade.getTargetUsername().equals(playerUsername)) {
                 // Update target items
                 trade.getTargetItems().clear();
-                // TODO: Convert string items to Item objects
+                for (Map.Entry<String, Integer> entry : items.entrySet()) {
+                    // Create a sample item (in real implementation, this would be a real Item object)
+                    Item item = new Item(entry.getKey(), Quality.NORMAL, 100);
+                    trade.getTargetItems().put(item, entry.getValue());
+                }
                 logger.info("Updated target items for trade {}", tradeId);
                 return true;
             }

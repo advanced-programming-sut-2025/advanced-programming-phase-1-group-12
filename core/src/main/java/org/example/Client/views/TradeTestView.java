@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import org.example.Client.Main;
 import org.example.Client.controllers.TradeController;
 import org.example.Common.models.Trade;
+import org.example.Common.models.Assets.GameAssetManager;
 import java.util.ArrayList;
 
 public class TradeTestView implements Screen {
@@ -44,7 +45,7 @@ public class TradeTestView implements Screen {
         
         // Load background texture
         try {
-            this.backgroundTexture = new Texture("assets/background.png");
+            this.backgroundTexture = new Texture("NPC/backGround/chatBack.png");
         } catch (Exception e) {
             System.out.println("Could not load background texture: " + e.getMessage());
         }
@@ -55,7 +56,7 @@ public class TradeTestView implements Screen {
     
     private void setupUI() {
         // Create skin for UI components
-        Skin skin = new Skin(Gdx.files.internal("assets/skin/uiskin.json"));
+        Skin skin = GameAssetManager.getSkin();
         
         // Main table
         mainTable = new Table();
@@ -63,25 +64,25 @@ public class TradeTestView implements Screen {
         mainTable.pad(50);
         
         // Title
-        titleLabel = new Label("تست سیستم داد و ستد", skin, "title");
+        titleLabel = new Label("Trade System Test", skin, "default");
         titleLabel.setAlignment(Align.center);
         titleLabel.setFontScale(2.0f);
         titleLabel.setColor(Color.GOLD);
         
         // Test buttons
-        testTradeMenuButton = new TextButton("تست منوی اصلی داد و ستد", skin);
+        testTradeMenuButton = new TextButton("Test Main Trade Menu", skin);
         testTradeMenuButton.getLabel().setFontScale(1.3f);
         
-        testPlayerSelectionButton = new TextButton("تست انتخاب بازیکن", skin);
+        testPlayerSelectionButton = new TextButton("Test Player Selection", skin);
         testPlayerSelectionButton.getLabel().setFontScale(1.3f);
         
-        testTradeInterfaceButton = new TextButton("تست رابط داد و ستد", skin);
+        testTradeInterfaceButton = new TextButton("Test Trade Interface", skin);
         testTradeInterfaceButton.getLabel().setFontScale(1.3f);
         
-        testHistoryButton = new TextButton("تست تاریخچه", skin);
+        testHistoryButton = new TextButton("Test History", skin);
         testHistoryButton.getLabel().setFontScale(1.3f);
         
-        backButton = new TextButton("بازگشت", skin);
+        backButton = new TextButton("Back", skin);
         backButton.getLabel().setFontScale(1.2f);
         
         // Add components to table

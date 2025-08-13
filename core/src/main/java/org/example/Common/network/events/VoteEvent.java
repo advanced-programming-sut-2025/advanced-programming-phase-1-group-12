@@ -162,3 +162,4 @@ public class VoteEvent {
         this.result = result;
     }
 }
+

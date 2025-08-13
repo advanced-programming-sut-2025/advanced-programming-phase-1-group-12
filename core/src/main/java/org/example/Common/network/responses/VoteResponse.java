@@ -167,3 +167,4 @@ public class VoteResponse {
         isActive = active;
     }
 }
+

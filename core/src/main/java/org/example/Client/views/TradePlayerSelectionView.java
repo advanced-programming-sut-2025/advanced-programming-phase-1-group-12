@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import org.example.Client.Main;
 import org.example.Client.controllers.TradeController;
+import org.example.Common.models.Assets.GameAssetManager;
 
 import java.util.List;
 
@@ -33,6 +34,7 @@ public class TradePlayerSelectionView implements Screen {
     private TextButton backButton;
     private Label titleLabel;
     private Label instructionLabel;
+    private Label loadingLabel;
     
     public TradePlayerSelectionView(Main game) {
         this.game = game;
@@ -43,18 +45,19 @@ public class TradePlayerSelectionView implements Screen {
         
         // Load background texture
         try {
-            this.backgroundTexture = new Texture("assets/background.png");
+            this.backgroundTexture = new Texture("NPC/backGround/chatBack.png");
         } catch (Exception e) {
             System.out.println("Could not load background texture: " + e.getMessage());
         }
         
         setupUI();
+        loadAvailablePlayers();
         Gdx.input.setInputProcessor(stage);
     }
     
     private void setupUI() {
         // Create skin for UI components
-        Skin skin = new Skin(Gdx.files.internal("assets/skin/uiskin.json"));
+        Skin skin = GameAssetManager.getSkin();
         
         // Main table
         mainTable = new Table();
@@ -62,37 +65,39 @@ public class TradePlayerSelectionView implements Screen {
         mainTable.pad(30);
         
         // Title
-        titleLabel = new Label("انتخاب بازیکن برای داد و ستد", skin, "title");
+        titleLabel = new Label("Select Player for Trade", skin, "default");
         titleLabel.setAlignment(Align.center);
         titleLabel.setFontScale(1.8f);
         titleLabel.setColor(Color.GOLD);
         
         // Instruction
-        instructionLabel = new Label("بازیکن مورد نظر خود را انتخاب کنید:", skin);
+        instructionLabel = new Label("Select the player you want to trade with:", skin);
         instructionLabel.setAlignment(Align.center);
         instructionLabel.setFontScale(1.2f);
         instructionLabel.setColor(Color.WHITE);
         
+        // Loading label
+        loadingLabel = new Label("Loading players...", skin);
+        loadingLabel.setAlignment(Align.center);
+        loadingLabel.setFontScale(1.2f);
+        loadingLabel.setColor(Color.YELLOW);
+        
         // Player table
         playerTable = new Table();
         playerTable.pad(10);
-        
-        // Add sample players (in real implementation, this would come from server)
-        addPlayerButton(skin, "Player1", "player1");
-        addPlayerButton(skin, "Player2", "player2");
-        addPlayerButton(skin, "Player3", "player3");
         
         // Scroll pane for players
         playerScrollPane = new ScrollPane(playerTable, skin);
         playerScrollPane.setFadeScrollBars(false);
         
         // Back button
-        backButton = new TextButton("بازگشت", skin);
+        backButton = new TextButton("Back", skin);
         backButton.getLabel().setFontScale(1.2f);
         
         // Add components to table
         mainTable.add(titleLabel).colspan(2).padBottom(20).row();
-        mainTable.add(instructionLabel).colspan(2).padBottom(30).row();
+        mainTable.add(instructionLabel).colspan(2).padBottom(10).row();
+        mainTable.add(loadingLabel).colspan(2).padBottom(30).row();
         mainTable.add(playerScrollPane).width(400).height(300).padBottom(30).row();
         mainTable.add(backButton).width(200).height(50);
         
@@ -107,7 +112,30 @@ public class TradePlayerSelectionView implements Screen {
         stage.addActor(mainTable);
     }
     
-    private void addPlayerButton(Skin skin, String playerName, String playerId) {
+    private void loadAvailablePlayers() {
+        // Get available players from server
+        List<String> availablePlayers = tradeController.getAvailablePlayers();
+        
+        // Remove loading label
+        loadingLabel.remove();
+        
+        if (availablePlayers.isEmpty()) {
+            Label noPlayersLabel = new Label("No online players available for trading", 
+                GameAssetManager.getSkin());
+            noPlayersLabel.setAlignment(Align.center);
+            noPlayersLabel.setFontScale(1.2f);
+            noPlayersLabel.setColor(Color.RED);
+            mainTable.add(noPlayersLabel).colspan(2).padBottom(30).row();
+        } else {
+            // Add player buttons
+            for (String playerName : availablePlayers) {
+                addPlayerButton(playerName);
+            }
+        }
+    }
+    
+    private void addPlayerButton(String playerName) {
+        Skin skin = GameAssetManager.getSkin();
         TextButton playerButton = new TextButton(playerName, skin);
         playerButton.getLabel().setFontScale(1.3f);
         playerButton.setColor(Color.LIGHT_GRAY);
@@ -116,7 +144,7 @@ public class TradePlayerSelectionView implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 // Send trade request to selected player
-                tradeController.sendTradeRequest(playerId, playerName);
+                tradeController.sendTradeRequest(playerName, playerName);
                 game.setScreen(new TradeWaitingView(game, playerName));
             }
         });

@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import org.example.Client.Main;
 import org.example.Client.controllers.TradeController;
+import org.example.Common.models.Assets.GameAssetManager;
 
 public class TradeWaitingView implements Screen {
     private Main game;
@@ -43,7 +44,7 @@ public class TradeWaitingView implements Screen {
         
         // Load background texture
         try {
-            this.backgroundTexture = new Texture("assets/background.png");
+            this.backgroundTexture = new Texture("NPC/backGround/chatBack.png");
         } catch (Exception e) {
             System.out.println("Could not load background texture: " + e.getMessage());
         }
@@ -54,7 +55,7 @@ public class TradeWaitingView implements Screen {
     
     private void setupUI() {
         // Create skin for UI components
-        Skin skin = new Skin(Gdx.files.internal("assets/skin/uiskin.json"));
+        Skin skin = GameAssetManager.getSkin();
         
         // Main table
         mainTable = new Table();
@@ -62,19 +63,19 @@ public class TradeWaitingView implements Screen {
         mainTable.pad(50);
         
         // Title
-        titleLabel = new Label("در انتظار پاسخ", skin, "title");
+        titleLabel = new Label("Waiting for Response", skin, "default");
         titleLabel.setAlignment(Align.center);
         titleLabel.setFontScale(2.0f);
         titleLabel.setColor(Color.GOLD);
         
         // Waiting message
-        waitingLabel = new Label("در حال ارسال درخواست داد و ستد...", skin);
+        waitingLabel = new Label("Sending trade request...", skin);
         waitingLabel.setAlignment(Align.center);
         waitingLabel.setFontScale(1.5f);
         waitingLabel.setColor(Color.WHITE);
         
         // Player name
-        playerNameLabel = new Label("به: " + targetPlayerName, skin);
+        playerNameLabel = new Label("To: " + targetPlayerName, skin);
         playerNameLabel.setAlignment(Align.center);
         playerNameLabel.setFontScale(1.3f);
         playerNameLabel.setColor(Color.LIGHT_GRAY);
@@ -85,7 +86,7 @@ public class TradeWaitingView implements Screen {
         progressBar.setAnimateDuration(2.0f);
         
         // Cancel button
-        cancelButton = new TextButton("لغو", skin);
+        cancelButton = new TextButton("Cancel", skin);
         cancelButton.getLabel().setFontScale(1.2f);
         
         // Add components to table

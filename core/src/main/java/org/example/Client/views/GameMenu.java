@@ -2357,6 +2357,19 @@ public class GameMenu extends InputAdapter implements Screen {
         Table content = dialog.getContentTable();
         content.add(inventoryButton).pad(5).width(400f).row();
         content.add(tradeButton).pad(5).width(400f).row();
+        
+        // Add test trade button for development
+        TextButton testTradeButton = new TextButton("Test Trade System", skin);
+        testTradeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+                Main game = (Main) Gdx.app.getApplicationListener();
+                game.setScreen(new TradeTestView(game));
+            }
+        });
+        content.add(testTradeButton).pad(5).width(400f).row();
+        
         content.add(votingButton).pad(5).width(400f).row();
         content.add(socialButton).pad(5).width(400f).row();
         content.add(mapButton).pad(5).width(400f).row();

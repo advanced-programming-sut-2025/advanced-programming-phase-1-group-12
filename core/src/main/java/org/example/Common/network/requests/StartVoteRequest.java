@@ -57,3 +57,4 @@ public class StartVoteRequest {
         this.reason = reason;
     }
 }
+

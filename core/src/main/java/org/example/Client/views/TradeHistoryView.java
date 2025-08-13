@@ -16,6 +16,8 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import org.example.Client.Main;
 import org.example.Client.controllers.TradeController;
 import org.example.Common.models.Trade;
+import org.example.Common.models.TradeHistory;
+import org.example.Common.models.Assets.GameAssetManager;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -33,8 +35,10 @@ public class TradeHistoryView implements Screen {
     private ScrollPane historyScrollPane;
     private Table historyTable;
     private TextButton backButton;
+    private TextButton refreshButton;
     private Label titleLabel;
     private Label statsLabel;
+    private Label loadingLabel;
     
     public TradeHistoryView(Main game) {
         this.game = game;
@@ -45,18 +49,19 @@ public class TradeHistoryView implements Screen {
         
         // Load background texture
         try {
-            this.backgroundTexture = new Texture("assets/background.png");
+            this.backgroundTexture = new Texture("NPC/backGround/chatBack.png");
         } catch (Exception e) {
             System.out.println("Could not load background texture: " + e.getMessage());
         }
         
         setupUI();
+        loadTradeHistory();
         Gdx.input.setInputProcessor(stage);
     }
     
     private void setupUI() {
         // Create skin for UI components
-        Skin skin = new Skin(Gdx.files.internal("assets/skin/uiskin.json"));
+        Skin skin = GameAssetManager.getSkin();
         
         // Main table
         mainTable = new Table();
@@ -64,41 +69,54 @@ public class TradeHistoryView implements Screen {
         mainTable.pad(30);
         
         // Title
-        titleLabel = new Label("تاریخچه داد و ستد", skin, "title");
+        titleLabel = new Label("Trade History", skin, "default");
         titleLabel.setAlignment(Align.center);
         titleLabel.setFontScale(2.0f);
         titleLabel.setColor(Color.GOLD);
         
         // Stats label
-        statsLabel = new Label("کل معاملات: 0 | تکمیل شده: 0 | در انتظار: 0", skin);
+        statsLabel = new Label("Total Trades: 0 | Completed: 0 | Pending: 0", skin);
         statsLabel.setAlignment(Align.center);
         statsLabel.setFontScale(1.2f);
         statsLabel.setColor(Color.WHITE);
+        
+        // Loading label
+        loadingLabel = new Label("Loading history...", skin);
+        loadingLabel.setAlignment(Align.center);
+        loadingLabel.setFontScale(1.2f);
+        loadingLabel.setColor(Color.YELLOW);
         
         // History table
         historyTable = new Table();
         historyTable.pad(10);
         
-        // Add sample trade history (in real implementation, this would come from server)
-        addTradeHistoryItem(skin, "Player1", "تکمیل شده", "2024-01-15 14:30", "5 آیتم");
-        addTradeHistoryItem(skin, "Player2", "در انتظار", "2024-01-14 10:15", "3 آیتم");
-        addTradeHistoryItem(skin, "Player3", "لغو شده", "2024-01-13 16:45", "2 آیتم");
-        
         // Scroll pane for history
         historyScrollPane = new ScrollPane(historyTable, skin);
         historyScrollPane.setFadeScrollBars(false);
         
-        // Back button
-        backButton = new TextButton("بازگشت", skin);
+        // Buttons
+        refreshButton = new TextButton("Refresh", skin);
+        refreshButton.getLabel().setFontScale(1.2f);
+        
+        backButton = new TextButton("Back", skin);
         backButton.getLabel().setFontScale(1.2f);
         
         // Add components to table
-        mainTable.add(titleLabel).colspan(2).padBottom(20).row();
-        mainTable.add(statsLabel).colspan(2).padBottom(30).row();
-        mainTable.add(historyScrollPane).width(600).height(350).padBottom(30).row();
-        mainTable.add(backButton).width(200).height(50);
+        mainTable.add(titleLabel).colspan(3).padBottom(20).row();
+        mainTable.add(statsLabel).colspan(3).padBottom(10).row();
+        mainTable.add(loadingLabel).colspan(3).padBottom(30).row();
+        mainTable.add(historyScrollPane).width(600).height(350).padBottom(20).row();
+        mainTable.add(refreshButton).width(150).height(50).padRight(20);
+        mainTable.add(backButton).width(150).height(50);
         
         // Add listeners
+        refreshButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                loadTradeHistory();
+            }
+        });
+        
         backButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -109,33 +127,85 @@ public class TradeHistoryView implements Screen {
         stage.addActor(mainTable);
     }
     
-    private void addTradeHistoryItem(Skin skin, String playerName, String status, String date, String items) {
+    private void loadTradeHistory() {
+        // Show loading
+        loadingLabel.setVisible(true);
+        historyTable.clear();
+        
+        // Get trade history from server
+        TradeHistory tradeHistory = tradeController.getTradeHistory();
+        
+        // Hide loading
+        loadingLabel.setVisible(false);
+        
+        // Update stats
+        updateStats(tradeHistory);
+        
+        // Add trade history items
+        List<Trade> trades = tradeHistory.getTrades();
+        if (trades.isEmpty()) {
+            addNoTradesMessage();
+        } else {
+            for (Trade trade : trades) {
+                addTradeHistoryItem(trade);
+            }
+        }
+    }
+    
+    private void updateStats(TradeHistory tradeHistory) {
+        int totalTrades = tradeHistory.getTotalTrades();
+        int completedTrades = tradeHistory.getCompletedTradesCount();
+        int pendingTrades = tradeHistory.getPendingTradesCount();
+        
+        statsLabel.setText(String.format("Total Trades: %d | Completed: %d | Pending: %d", 
+            totalTrades, completedTrades, pendingTrades));
+    }
+    
+    private void addNoTradesMessage() {
+        Skin skin = GameAssetManager.getSkin();
+        Label noTradesLabel = new Label("No trades found in your history", skin);
+        noTradesLabel.setAlignment(Align.center);
+        noTradesLabel.setFontScale(1.3f);
+        noTradesLabel.setColor(Color.LIGHT_GRAY);
+        
+        historyTable.add(noTradesLabel).width(550).height(100).padBottom(20).row();
+    }
+    
+    private void addTradeHistoryItem(Trade trade) {
+        Skin skin = GameAssetManager.getSkin();
         Table itemTable = new Table();
         itemTable.pad(5);
         
+        // Determine player name to show
+        String currentPlayerName = game.getCurrentPlayerName(); // This would need to be implemented
+        String otherPlayerName;
+        if (trade.getInitiatorUsername().equals(currentPlayerName)) {
+            otherPlayerName = trade.getTargetUsername();
+        } else {
+            otherPlayerName = trade.getInitiatorUsername();
+        }
+        
         // Player name
-        Label nameLabel = new Label(playerName, skin);
+        Label nameLabel = new Label(otherPlayerName, skin);
         nameLabel.setFontScale(1.2f);
         nameLabel.setColor(Color.WHITE);
         
         // Status
-        Label statusLabel = new Label(status, skin);
+        String statusText = getStatusText(trade.getStatus());
+        Label statusLabel = new Label(statusText, skin);
         statusLabel.setFontScale(1.1f);
-        if (status.equals("تکمیل شده")) {
-            statusLabel.setColor(Color.GREEN);
-        } else if (status.equals("در انتظار")) {
-            statusLabel.setColor(Color.YELLOW);
-        } else {
-            statusLabel.setColor(Color.RED);
-        }
+        statusLabel.setColor(getStatusColor(trade.getStatus()));
         
         // Date
-        Label dateLabel = new Label(date, skin);
+        String dateText = trade.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        Label dateLabel = new Label(dateText, skin);
         dateLabel.setFontScale(1.0f);
         dateLabel.setColor(Color.LIGHT_GRAY);
         
-        // Items
-        Label itemsLabel = new Label(items, skin);
+        // Items summary
+        int totalItems = trade.getInitiatorItems().size() + trade.getTargetItems().size();
+        String itemsText = totalItems + " items";
+        Label itemsLabel = new Label(itemsText, skin);
         itemsLabel.setFontScale(1.0f);
         itemsLabel.setColor(Color.LIGHT_GRAY);
         
@@ -147,6 +217,40 @@ public class TradeHistoryView implements Screen {
         
         // Add to history table
         historyTable.add(itemTable).width(550).height(40).padBottom(5).row();
+    }
+    
+    private String getStatusText(Trade.TradeStatus status) {
+        switch (status) {
+            case PENDING:
+                return "Pending";
+            case ACCEPTED:
+                return "Accepted";
+            case DECLINED:
+                return "Declined";
+            case CANCELLED:
+                return "Cancelled";
+            case COMPLETED:
+                return "Completed";
+            default:
+                return "Unknown";
+        }
+    }
+    
+    private Color getStatusColor(Trade.TradeStatus status) {
+        switch (status) {
+            case PENDING:
+                return Color.YELLOW;
+            case ACCEPTED:
+                return Color.BLUE;
+            case DECLINED:
+                return Color.RED;
+            case CANCELLED:
+                return Color.GRAY;
+            case COMPLETED:
+                return Color.GREEN;
+            default:
+                return Color.WHITE;
+        }
     }
     
     @Override

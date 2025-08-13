@@ -17,6 +17,8 @@ import org.example.Client.Main;
 import org.example.Client.controllers.TradeController;
 import org.example.Common.models.Item;
 import org.example.Common.models.Trade;
+import org.example.Common.models.ProductsPackage.Quality;
+import org.example.Common.models.Assets.GameAssetManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,10 +48,14 @@ public class TradeInterfaceView implements Screen {
     private Label myItemsLabel;
     private Label otherItemsLabel;
     private Label statusLabel;
+    private Label myTotalLabel;
+    private Label otherTotalLabel;
     
     // Item management
     private Map<Item, Integer> myOfferedItems;
     private Map<Item, Integer> otherOfferedItems;
+    private Table myItemsTable;
+    private Table otherItemsTable;
     
     public TradeInterfaceView(Main game, Trade trade, String otherPlayerName, boolean isInitiator) {
         this.game = game;
@@ -67,7 +73,7 @@ public class TradeInterfaceView implements Screen {
         
         // Load background texture
         try {
-            this.backgroundTexture = new Texture("assets/background.png");
+            this.backgroundTexture = new Texture("NPC/backGround/chatBack.png");
         } catch (Exception e) {
             System.out.println("Could not load background texture: " + e.getMessage());
         }
@@ -78,7 +84,7 @@ public class TradeInterfaceView implements Screen {
     
     private void setupUI() {
         // Create skin for UI components
-        Skin skin = new Skin(Gdx.files.internal("assets/skin/uiskin.json"));
+        Skin skin = GameAssetManager.getSkin();
         
         // Main table
         mainTable = new Table();
@@ -86,13 +92,13 @@ public class TradeInterfaceView implements Screen {
         mainTable.pad(20);
         
         // Title
-        titleLabel = new Label("داد و ستد با " + otherPlayerName, skin, "title");
+        titleLabel = new Label("Trading with " + otherPlayerName, skin, "default");
         titleLabel.setAlignment(Align.center);
         titleLabel.setFontScale(1.8f);
         titleLabel.setColor(Color.GOLD);
         
         // Status label
-        statusLabel = new Label("در حال مذاکره...", skin);
+        statusLabel = new Label("Negotiating...", skin);
         statusLabel.setAlignment(Align.center);
         statusLabel.setFontScale(1.2f);
         statusLabel.setColor(Color.YELLOW);
@@ -101,74 +107,80 @@ public class TradeInterfaceView implements Screen {
         leftPanel = new Table();
         leftPanel.pad(10);
         
-        myItemsLabel = new Label("آیتم های من:", skin);
+        myItemsLabel = new Label("My Items:", skin);
         myItemsLabel.setFontScale(1.3f);
         myItemsLabel.setColor(Color.WHITE);
         
-        Table myItemsTable = new Table();
+        myItemsTable = new Table();
         myItemsTable.pad(5);
         
-        // Add sample items (in real implementation, this would come from player's inventory)
-        addItemToMyList(skin, "Apple", 5);
-        addItemToMyList(skin, "Wheat", 10);
-        addItemToMyList(skin, "Corn", 3);
+        // Add sample items from player's inventory
+        addSampleItemsToMyList(skin);
         
         myItemsScrollPane = new ScrollPane(myItemsTable, skin);
         myItemsScrollPane.setFadeScrollBars(false);
+        
+        myTotalLabel = new Label("Total: 0 items", skin);
+        myTotalLabel.setFontScale(1.1f);
+        myTotalLabel.setColor(Color.LIGHT_GRAY);
         
         // Right panel (Other player's items)
         rightPanel = new Table();
         rightPanel.pad(10);
         
-        otherItemsLabel = new Label("آیتم های " + otherPlayerName + ":", skin);
+        otherItemsLabel = new Label(otherPlayerName + "'s Items:", skin);
         otherItemsLabel.setFontScale(1.3f);
         otherItemsLabel.setColor(Color.WHITE);
         
-        Table otherItemsTable = new Table();
+        otherItemsTable = new Table();
         otherItemsTable.pad(5);
         
         // Add sample items from other player
-        addItemToOtherList(skin, "Potato", 2);
-        addItemToOtherList(skin, "Tomato", 4);
+        addSampleItemsToOtherList(skin);
         
         otherItemsScrollPane = new ScrollPane(otherItemsTable, skin);
         otherItemsScrollPane.setFadeScrollBars(false);
         
+        otherTotalLabel = new Label("Total: 0 items", skin);
+        otherTotalLabel.setFontScale(1.1f);
+        otherTotalLabel.setColor(Color.LIGHT_GRAY);
+        
         // Control buttons
-        addItemButton = new TextButton("افزودن آیتم", skin);
+        addItemButton = new TextButton("Add Item", skin);
         addItemButton.getLabel().setFontScale(1.2f);
         
-        removeItemButton = new TextButton("حذف آیتم", skin);
+        removeItemButton = new TextButton("Remove Item", skin);
         removeItemButton.getLabel().setFontScale(1.2f);
         
-        confirmTradeButton = new TextButton("تایید معامله", skin);
+        confirmTradeButton = new TextButton("Confirm Trade", skin);
         confirmTradeButton.getLabel().setFontScale(1.3f);
         confirmTradeButton.setColor(Color.GREEN);
         
-        cancelTradeButton = new TextButton("لغو", skin);
+        cancelTradeButton = new TextButton("Cancel", skin);
         cancelTradeButton.getLabel().setFontScale(1.2f);
         cancelTradeButton.setColor(Color.RED);
         
-        // Add components to main table
-        mainTable.add(titleLabel).colspan(2).padBottom(20).row();
-        mainTable.add(statusLabel).colspan(2).padBottom(30).row();
+        // Layout
+        mainTable.add(titleLabel).colspan(2).padBottom(10).row();
+        mainTable.add(statusLabel).colspan(2).padBottom(20).row();
         
         // Left panel
-        mainTable.add(myItemsLabel).padBottom(10).row();
-        mainTable.add(myItemsScrollPane).width(500).height(300).padRight(20);
+        mainTable.add(leftPanel).width(500).height(400).padRight(10);
+        leftPanel.add(myItemsLabel).padBottom(10).row();
+        leftPanel.add(myItemsScrollPane).width(480).height(300).padBottom(10).row();
+        leftPanel.add(myTotalLabel).padBottom(10).row();
+        leftPanel.add(addItemButton).width(200).height(40).padRight(10);
+        leftPanel.add(removeItemButton).width(200).height(40);
         
         // Right panel
-        mainTable.add(otherItemsLabel).padBottom(10).row();
-        mainTable.add(otherItemsScrollPane).width(500).height(300).padLeft(20).row();
+        mainTable.add(rightPanel).width(500).height(400).padLeft(10).row();
+        rightPanel.add(otherItemsLabel).padBottom(10).row();
+        rightPanel.add(otherItemsScrollPane).width(480).height(300).padBottom(10).row();
+        rightPanel.add(otherTotalLabel).padBottom(10).row();
         
-        // Control buttons
-        Table buttonTable = new Table();
-        buttonTable.add(addItemButton).width(150).height(40).padRight(10);
-        buttonTable.add(removeItemButton).width(150).height(40).padRight(10);
-        buttonTable.add(confirmTradeButton).width(200).height(50).padRight(20);
-        buttonTable.add(cancelTradeButton).width(150).height(50);
-        
-        mainTable.add(buttonTable).colspan(2).padTop(30);
+        // Bottom buttons
+        mainTable.add(confirmTradeButton).width(250).height(50).padRight(20).padTop(20);
+        mainTable.add(cancelTradeButton).width(200).height(50).padTop(20);
         
         // Add listeners
         addItemButton.addListener(new ChangeListener() {
@@ -188,32 +200,63 @@ public class TradeInterfaceView implements Screen {
         confirmTradeButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                confirmTrade();
+                if (isInitiator) {
+                    tradeController.confirmTrade(currentTrade.getTradeId());
+                    statusLabel.setText("Waiting for other player's confirmation...");
+                    statusLabel.setColor(Color.ORANGE);
+                    confirmTradeButton.setVisible(false);
+                } else {
+                    tradeController.acceptTrade(currentTrade.getTradeId());
+                    statusLabel.setText("Trade completed!");
+                    statusLabel.setColor(Color.GREEN);
+                    confirmTradeButton.setVisible(false);
+                    cancelTradeButton.setText("Close");
+                }
             }
         });
         
         cancelTradeButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                cancelTrade();
+                tradeController.cancelTrade(currentTrade.getTradeId());
+                game.setScreen(new TradeMenuView(game));
             }
         });
         
         stage.addActor(mainTable);
     }
     
+    private void addSampleItemsToMyList(Skin skin) {
+        // Add sample items (in real implementation, this would come from player's inventory)
+        addItemToMyList(skin, "Apple", 5);
+        addItemToMyList(skin, "Wheat", 10);
+        addItemToMyList(skin, "Corn", 3);
+        addItemToMyList(skin, "Potato", 7);
+        addItemToMyList(skin, "Tomato", 4);
+    }
+    
+    private void addSampleItemsToOtherList(Skin skin) {
+        // Add sample items from other player
+        addItemToOtherList(skin, "Carrot", 2);
+        addItemToOtherList(skin, "Onion", 6);
+        addItemToOtherList(skin, "Cabbage", 3);
+    }
+    
     private void addItemToMyList(Skin skin, String itemName, int quantity) {
-        Table itemTable = new Table();
-        itemTable.pad(3);
+        Table itemRow = new Table();
+        itemRow.pad(5);
         
+        // Item name
         Label nameLabel = new Label(itemName, skin);
         nameLabel.setFontScale(1.1f);
         nameLabel.setColor(Color.WHITE);
         
+        // Quantity
         Label quantityLabel = new Label("x" + quantity, skin);
         quantityLabel.setFontScale(1.0f);
         quantityLabel.setColor(Color.LIGHT_GRAY);
         
+        // Add button
         TextButton addButton = new TextButton("+", skin);
         addButton.getLabel().setFontScale(1.2f);
         addButton.setColor(Color.GREEN);
@@ -221,77 +264,143 @@ public class TradeInterfaceView implements Screen {
         addButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                // Add item to trade
-                Item item = new Item(itemName, null, 0);
-                myOfferedItems.put(item, myOfferedItems.getOrDefault(item, 0) + 1);
-                updateTradeStatus();
+                addItemToTrade(itemName, 1);
             }
         });
         
-        itemTable.add(nameLabel).width(200).padRight(10);
-        itemTable.add(quantityLabel).width(80).padRight(10);
-        itemTable.add(addButton).width(40).height(30);
+        itemRow.add(nameLabel).width(200).padRight(10);
+        itemRow.add(quantityLabel).width(80).padRight(10);
+        itemRow.add(addButton).width(40).height(30);
         
-        // Add to scroll pane content
-        ((Table) myItemsScrollPane.getWidget()).add(itemTable).width(480).height(35).padBottom(2).row();
+        myItemsTable.add(itemRow).width(350).height(40).padBottom(5).row();
     }
     
     private void addItemToOtherList(Skin skin, String itemName, int quantity) {
-        Table itemTable = new Table();
-        itemTable.pad(3);
+        Table itemRow = new Table();
+        itemRow.pad(5);
         
+        // Item name
         Label nameLabel = new Label(itemName, skin);
         nameLabel.setFontScale(1.1f);
         nameLabel.setColor(Color.WHITE);
         
+        // Quantity
         Label quantityLabel = new Label("x" + quantity, skin);
         quantityLabel.setFontScale(1.0f);
         quantityLabel.setColor(Color.LIGHT_GRAY);
         
-        itemTable.add(nameLabel).width(200).padRight(10);
-        itemTable.add(quantityLabel).width(80);
+        itemRow.add(nameLabel).width(200).padRight(10);
+        itemRow.add(quantityLabel).width(80);
         
-        // Add to scroll pane content
-        ((Table) otherItemsScrollPane.getWidget()).add(itemTable).width(480).height(35).padBottom(2).row();
+        otherItemsTable.add(itemRow).width(350).height(40).padBottom(5).row();
+    }
+    
+    private void addItemToTrade(String itemName, int quantity) {
+        // Create a sample item (in real implementation, this would be a real Item object)
+        Item item = new Item(itemName, Quality.NORMAL, 100);
+        
+        int currentQuantity = myOfferedItems.getOrDefault(item, 0);
+        myOfferedItems.put(item, currentQuantity + quantity);
+        
+        updateMyTotalLabel();
+        updateTradeItems();
+    }
+    
+    private void updateMyTotalLabel() {
+        int total = myOfferedItems.values().stream().mapToInt(Integer::intValue).sum();
+        myTotalLabel.setText("Total: " + total + " items");
+    }
+    
+    private void updateTradeItems() {
+        // Convert items to string map for network transmission
+        Map<String, Integer> itemsMap = new HashMap<>();
+        for (Map.Entry<Item, Integer> entry : myOfferedItems.entrySet()) {
+            itemsMap.put(entry.getKey().getName(), entry.getValue());
+        }
+        
+        // Send update to server
+        tradeController.updateTradeItems(currentTrade.getTradeId(), itemsMap);
     }
     
     private void showAddItemDialog(Skin skin) {
-        // This would show a dialog to select items from inventory
-        System.out.println("Show add item dialog");
+        Dialog dialog = new Dialog("Add Item", skin);
+        
+        Label label = new Label("Item Name:", skin);
+        TextField itemField = new TextField("", skin);
+        TextButton okButton = new TextButton("Add", skin);
+        TextButton cancelButton = new TextButton("Cancel", skin);
+        
+        okButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                String itemName = itemField.getText().trim();
+                if (!itemName.isEmpty()) {
+                    addItemToTrade(itemName, 1);
+                }
+                dialog.hide();
+            }
+        });
+        
+        cancelButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                dialog.hide();
+            }
+        });
+        
+        dialog.getContentTable().add(label).pad(10).row();
+        dialog.getContentTable().add(itemField).width(200).pad(10).row();
+        dialog.getButtonTable().add(okButton).pad(5);
+        dialog.getButtonTable().add(cancelButton).pad(5);
+        
+        dialog.pack();
+        dialog.show(stage);
     }
     
     private void showRemoveItemDialog(Skin skin) {
-        // This would show a dialog to remove items from trade
-        System.out.println("Show remove item dialog");
-    }
-    
-    private void confirmTrade() {
-        if (isInitiator) {
-            // Initiator can confirm the trade
-            tradeController.confirmTrade(currentTrade.getTradeId());
-            statusLabel.setText("در انتظار تایید طرف مقابل...");
-            statusLabel.setColor(Color.YELLOW);
-            confirmTradeButton.setVisible(false);
-        } else {
-            // Target player accepts the trade
-            tradeController.acceptTrade(currentTrade.getTradeId());
-            statusLabel.setText("معامله تایید شد!");
-            statusLabel.setColor(Color.GREEN);
-            confirmTradeButton.setVisible(false);
-        }
-    }
-    
-    private void cancelTrade() {
-        tradeController.cancelTrade(currentTrade.getTradeId());
-        game.setScreen(new TradeMenuView(game));
-    }
-    
-    private void updateTradeStatus() {
-        // Update the trade status based on current items
-        int myItemCount = myOfferedItems.values().stream().mapToInt(Integer::intValue).sum();
-        int otherItemCount = otherOfferedItems.values().stream().mapToInt(Integer::intValue).sum();
+        Dialog dialog = new Dialog("Remove Item", skin);
         
-        statusLabel.setText("آیتم های شما: " + myItemCount + " | آیتم های طرف مقابل: " + otherItemCount);
+        Label label = new Label("Select item to remove:", skin);
+        SelectBox<String> itemSelect = new SelectBox<>(skin);
+        
+        // Add offered items to select box
+        String[] itemNames = myOfferedItems.keySet().stream()
+            .map(Item::getName)
+            .toArray(String[]::new);
+        itemSelect.setItems(itemNames);
+        
+        TextButton okButton = new TextButton("Remove", skin);
+        TextButton cancelButton = new TextButton("Cancel", skin);
+        
+        okButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                String selectedItem = itemSelect.getSelected();
+                if (selectedItem != null) {
+                    // Remove item from trade
+                    myOfferedItems.entrySet().removeIf(entry -> 
+                        entry.getKey().getName().equals(selectedItem));
+                    updateMyTotalLabel();
+                    updateTradeItems();
+                }
+                dialog.hide();
+            }
+        });
+        
+        cancelButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                dialog.hide();
+            }
+        });
+        
+        dialog.getContentTable().add(label).pad(10).row();
+        dialog.getContentTable().add(itemSelect).width(200).pad(10).row();
+        dialog.getButtonTable().add(okButton).pad(5);
+        dialog.getButtonTable().add(cancelButton).pad(5);
+        
+        dialog.pack();
+        dialog.show(stage);
     }
     
     @Override

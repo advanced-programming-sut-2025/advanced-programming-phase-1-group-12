@@ -47,3 +47,4 @@ public class VoteRequest {
         this.vote = vote;
     }
 }
+

@@ -329,3 +329,4 @@ public class GroupQuest implements Serializable {
         return playerProgress.values().stream().allMatch(PlayerProgress::hasReceivedReward);
     }
 }
+

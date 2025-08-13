@@ -176,6 +176,7 @@ public class TradeController {
         try {
             Map<String, Object> requestData = new HashMap<>();
             requestData.put("tradeId", tradeId);
+            requestData.put("action", "update_items");
             requestData.put("items", items);
 
             String endpoint = GameProtocol.TRADE_RESPOND_ENDPOINT.replace("{gameId}", game.getCurrentGameId());

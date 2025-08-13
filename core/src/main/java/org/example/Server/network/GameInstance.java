@@ -496,6 +496,16 @@ public class GameInstance {
                 case "confirm":
                     success = tradeManager.completeTrade(tradeId);
                     break;
+                case "update_items":
+                    @SuppressWarnings("unchecked")
+                    Map<String, Integer> items = (Map<String, Integer>) actionData.get("items");
+                    if (items != null) {
+                        Player player = players.get(playerId);
+                        if (player != null) {
+                            success = tradeManager.updateTradeItems(tradeId, player.getUser().getUserName(), items);
+                        }
+                    }
+                    break;
                 default:
                     return NetworkResult.error("Invalid action: " + action);
             }
@@ -503,9 +513,9 @@ public class GameInstance {
             if (success) {
                 // If trade was completed, broadcast full player updates for both players
                 if (action.equals("confirm") || action.equals("accept")) {
-                                    // Get both players involved in the trade
-                String requesterId = trade.getInitiatorUsername();
-                String targetId = trade.getTargetUsername();
+                    // Get both players involved in the trade
+                    String requesterId = trade.getInitiatorUsername();
+                    String targetId = trade.getTargetUsername();
                     
                     // Broadcast full player update for requester
                     Player requesterPlayer = players.get(requesterId);
