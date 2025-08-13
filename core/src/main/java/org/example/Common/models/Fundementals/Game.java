@@ -26,6 +26,8 @@ public class Game {
     private NPCvillage npcVillage;
     @JsonIgnore
     private org.example.Common.models.Quest.QuestManager questManager;
+    @JsonIgnore
+    private org.example.Common.models.Scoreboard.ScoreboardManager scoreboardManager;
 
     private User creator;
 
@@ -37,6 +39,7 @@ public class Game {
     public Game() {
         // Initialize quest manager lazily to avoid circular dependency issues
         this.questManager = null;
+        this.scoreboardManager = null;
     }
 
     // Network communication
@@ -116,6 +119,17 @@ public class Game {
     
     public void setQuestManager(org.example.Common.models.Quest.QuestManager questManager) {
         this.questManager = questManager;
+    }
+    
+    public org.example.Common.models.Scoreboard.ScoreboardManager getScoreboardManager() {
+        if (scoreboardManager == null) {
+            scoreboardManager = new org.example.Common.models.Scoreboard.ScoreboardManager();
+        }
+        return scoreboardManager;
+    }
+    
+    public void setScoreboardManager(org.example.Common.models.Scoreboard.ScoreboardManager scoreboardManager) {
+        this.scoreboardManager = scoreboardManager;
     }
 
     public Player getPlayerByName(String playerName) {

@@ -58,6 +58,13 @@ public class Ability {
         if(amount > neededAmount && newLevel <= 4){
             amount -= neededAmount;
             level = newLevel;
+            
+            // Update scoreboard if in multiplayer mode
+            if (org.example.Common.models.Fundementals.App.getCurrentGame() != null && 
+                org.example.Common.models.Fundementals.App.getCurrentGame().isMultiplayer() &&
+                org.example.Common.models.Fundementals.App.getCurrentGame().getScoreboardManager() != null) {
+                org.example.Common.models.Fundementals.App.getCurrentGame().getScoreboardManager().updatePlayerScore(org.example.Common.models.Fundementals.App.getCurrentPlayerLazy());
+            }
         }
     }
 }

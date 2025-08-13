@@ -131,6 +131,7 @@ public class GameMenu extends InputAdapter implements Screen {
     private ReactionRenderer reactionRenderer;
     private QuestMenu questMenu;
     private QuestController questController;
+    private ScoreboardMenu scoreboardMenu;
 
     private Map<Player, ProgressBar> energyBars;
     private Map<Craft, ProgressBar> craftBars;
@@ -966,6 +967,32 @@ public class GameMenu extends InputAdapter implements Screen {
         
         System.out.println("=== DEBUG: GameMenu.handleRadioWebSocketMessage() completed ===");
     }
+    
+    public void handleScoreboardWebSocketMessage(Map<String, Object> messageData) {
+        System.out.println("🏆🏆🏆 [GAME_MENU] handleScoreboardWebSocketMessage called 🏆🏆🏆");
+        System.out.println("🏆🏆🏆 [GAME_MENU] Message data: " + messageData + " 🏆🏆🏆");
+        
+        try {
+            String messageType = (String) messageData.get("type");
+            if ("scoreboard_update".equals(messageType)) {
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> playerScores = (List<Map<String, Object>>) messageData.get("playerScores");
+                String sortType = (String) messageData.get("sortType");
+                @SuppressWarnings("unchecked")
+                Map<String, Object> stats = (Map<String, Object>) messageData.get("stats");
+                
+                if (scoreboardMenu != null) {
+                    scoreboardMenu.updateScoreboard(playerScores, sortType, stats);
+                    System.out.println("🏆🏆🏆 [GAME_MENU] Scoreboard updated successfully 🏆🏆🏆");
+                } else {
+                    System.out.println("❌❌❌ [GAME_MENU] Scoreboard menu is null ❌❌❌");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("💥💥💥 [GAME_MENU] Error handling scoreboard message: " + e.getMessage() + " 💥💥💥");
+            e.printStackTrace();
+        }
+    }
 
     public static class RainDrop {
         public float x, y;
@@ -1131,6 +1158,7 @@ public class GameMenu extends InputAdapter implements Screen {
         initializeReactionButton();
         initializeChatButton();
         initializeQuestButton();
+        initializeScoreboardButton();
         
         // Initialize reaction system
         reactionRenderer = new ReactionRenderer(batch, font);
@@ -1599,6 +1627,12 @@ public class GameMenu extends InputAdapter implements Screen {
         batch.end();
         stage.act(delta);
         stage.draw();
+        
+        // Update and render scoreboard menu if visible
+        if (scoreboardMenu != null) {
+            scoreboardMenu.update();
+            scoreboardMenu.render(batch);
+        }
 
     }
 
@@ -4546,6 +4580,24 @@ public class GameMenu extends InputAdapter implements Screen {
     
     public QuestController getQuestController() {
         return questController;
+    }
+    
+    private void initializeScoreboardButton() {
+        scoreboardMenu = new ScoreboardMenu(stage, skin);
+        
+        TextButton scoreboardButton = new TextButton("🏆 Scoreboard", skin);
+        scoreboardButton.setSize(120, 40);
+        scoreboardButton.setPosition(20, stage.getHeight() - 360);
+        scoreboardButton.getLabel().setFontScale(1.2f);
+        
+        scoreboardButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                scoreboardMenu.show();
+            }
+        });
+        
+        stage.addActor(scoreboardButton);
     }
     
     private void openChatMenu() {

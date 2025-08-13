@@ -211,6 +211,10 @@ public class GameWebSocketHandler {
                     handleGameStateUpdate(ctx, userId, messageData);
                     break;
 
+                case GameProtocol.WS_SCOREBOARD_UPDATE:
+                    handleScoreboardUpdate(ctx, userId, messageData);
+                    break;
+
                 // Radio event handlers
                 case "radio_station_joined":
                     handleRadioStationJoined(ctx, userId, messageData);
@@ -1001,6 +1005,36 @@ public class GameWebSocketHandler {
         } catch (Exception e) {
             System.out.println("💥💥💥 [SERVER] Error handling radio track uploaded: " + e.getMessage() + " 💥💥💥");
             logger.error("Error handling radio track uploaded", e);
+        }
+    }
+
+    private void handleScoreboardUpdate(WsContext ctx, String userId, Map<String, Object> messageData) {
+        try {
+            System.out.println("🏆🏆🏆 [SERVER] handleScoreboardUpdate called 🏆🏆🏆");
+            System.out.println("🏆🏆🏆 [SERVER] User: " + userId + " 🏆🏆🏆");
+            System.out.println("🏆🏆🏆 [SERVER] Message data: " + messageData + " 🏆🏆🏆");
+            
+            String gameId = (String) messageData.get("gameId");
+            String sortType = (String) messageData.get("sortType");
+            
+            System.out.println("🏆🏆🏆 [SERVER] Processing scoreboard update for game: " + gameId + " 🏆🏆🏆");
+            
+            // Get the game instance and update scoreboard
+            GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            if (gameInstance != null) {
+                // Update the scoreboard
+                gameInstance.updateScoreboard(sortType);
+                
+                // Broadcast the updated scoreboard to all players
+                gameInstance.broadcastScoreboardUpdate();
+                System.out.println("🏆🏆🏆 [SERVER] Scoreboard update broadcasted successfully 🏆🏆🏆");
+            } else {
+                System.out.println("❌❌❌ [SERVER] Game instance not found for gameId: " + gameId + " ❌❌❌");
+            }
+            
+        } catch (Exception e) {
+            System.out.println("💥💥💥 [SERVER] Error handling scoreboard update: " + e.getMessage() + " 💥💥💥");
+            logger.error("Error handling scoreboard update", e);
         }
     }
 }

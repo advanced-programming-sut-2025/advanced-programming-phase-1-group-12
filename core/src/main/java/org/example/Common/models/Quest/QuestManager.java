@@ -192,6 +192,18 @@ public class QuestManager implements Serializable {
                 playerQuests.remove(quest.getQuestId());
             }
         }
+        
+        // Update scoreboard for all participating players
+        if (org.example.Common.models.Fundementals.App.getCurrentGame() != null && 
+            org.example.Common.models.Fundementals.App.getCurrentGame().isMultiplayer() &&
+            org.example.Common.models.Fundementals.App.getCurrentGame().getScoreboardManager() != null) {
+            for (String playerId : quest.getParticipatingPlayers()) {
+                Player player = findPlayerById(playerId);
+                if (player != null) {
+                    org.example.Common.models.Fundementals.App.getCurrentGame().getScoreboardManager().updatePlayerScore(player);
+                }
+            }
+        }
     }
     
     private void giveQuestReward(String playerId, GroupQuest quest) {
@@ -268,6 +280,10 @@ public class QuestManager implements Serializable {
     
     public List<GroupQuest> getActiveQuests() {
         return new ArrayList<>(activeQuests.values());
+    }
+    
+    public List<GroupQuest> getCompletedQuests() {
+        return new ArrayList<>(completedQuests.values());
     }
     
     public List<GroupQuest> getPlayerActiveQuests(String playerId) {

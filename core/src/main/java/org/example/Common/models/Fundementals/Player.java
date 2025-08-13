@@ -282,6 +282,13 @@ public class Player {
 
     public void setMoney(int money) {
         this.money = money;
+        
+        // Update scoreboard if in multiplayer mode
+        if (org.example.Common.models.Fundementals.App.getCurrentGame() != null && 
+            org.example.Common.models.Fundementals.App.getCurrentGame().isMultiplayer() &&
+            org.example.Common.models.Fundementals.App.getCurrentGame().getScoreboardManager() != null) {
+            org.example.Common.models.Fundementals.App.getCurrentGame().getScoreboardManager().updatePlayerScore(this);
+        }
     }
 
 

@@ -835,4 +835,78 @@ public class GameInstance {
         return String.format("GameInstance{gameId='%s', players=%d, connected=%d, status='%s'}",
             gameId, getTotalPlayerCount(), getConnectedPlayerCount(), gameStatus);
     }
+
+    /**
+     * Update the scoreboard for this game instance
+     */
+    public void updateScoreboard(String sortType) {
+        try {
+            gameLock.writeLock().lock();
+            
+            if (game != null && game.getScoreboardManager() != null) {
+                // Set the sort type if provided
+                if (sortType != null) {
+                    try {
+                        org.example.Common.models.enums.ScoreboardSortType sortTypeEnum = 
+                            org.example.Common.models.enums.ScoreboardSortType.valueOf(sortType.toUpperCase());
+                        game.getScoreboardManager().setSortType(sortTypeEnum);
+                    } catch (IllegalArgumentException e) {
+                        logger.warn("Invalid sort type: {}, using default", sortType);
+                    }
+                }
+                
+                // Update all player scores
+                game.getScoreboardManager().updateAllScores(game);
+                
+                logger.debug("Scoreboard updated for game {}", gameId);
+            }
+            
+        } finally {
+            gameLock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * Broadcast scoreboard update to all connected players
+     */
+    public void broadcastScoreboardUpdate() {
+        try {
+            gameLock.readLock().lock();
+            
+            if (game != null && game.getScoreboardManager() != null) {
+                Map<String, Object> scoreboardData = new HashMap<>();
+                scoreboardData.put("type", "scoreboard_update");
+                scoreboardData.put("gameId", gameId);
+                scoreboardData.put("timestamp", System.currentTimeMillis());
+                
+                // Add scoreboard data
+                List<Map<String, Object>> playerScores = new ArrayList<>();
+                for (var score : game.getScoreboardManager().getRankedScores()) {
+                    Map<String, Object> playerData = new HashMap<>();
+                    playerData.put("playerId", score.getPlayerId());
+                    playerData.put("playerName", score.getPlayerName());
+                    playerData.put("nickname", score.getNickname());
+                    playerData.put("rank", score.getRank());
+                    playerData.put("money", score.getMoney());
+                    playerData.put("completedMissions", score.getCompletedMissions());
+                    playerData.put("totalSkillLevel", score.getTotalSkillLevel());
+                    playerData.put("lastUpdated", score.getLastUpdated());
+                    playerScores.add(playerData);
+                }
+                
+                scoreboardData.put("playerScores", playerScores);
+                scoreboardData.put("sortType", game.getScoreboardManager().getCurrentSortType().name());
+                scoreboardData.put("stats", game.getScoreboardManager().getScoreboardStats());
+                
+                // Broadcast to all players
+                broadcastToAllPlayers(scoreboardData);
+                
+                logger.debug("Scoreboard broadcasted to {} players in game {}", 
+                           getConnectedPlayerCount(), gameId);
+            }
+            
+        } finally {
+            gameLock.readLock().unlock();
+        }
+    }
 }

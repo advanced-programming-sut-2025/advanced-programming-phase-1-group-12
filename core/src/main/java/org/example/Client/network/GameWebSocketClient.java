@@ -424,6 +424,10 @@ public class GameWebSocketClient {
                     System.out.println("DEBUG: Handling radio track uploaded event");
                     handleRadioTrackUploaded(messageData);
                     break;
+                case "scoreboard_update":
+                    System.out.println("DEBUG: Handling scoreboard update event");
+                    handleScoreboardUpdate(messageData);
+                    break;
                 case "pong":
                     System.out.println("DEBUG: Handling pong response");
                     handlePong(messageData);
@@ -912,6 +916,22 @@ public class GameWebSocketClient {
         } catch (Exception e) {
             System.out.println("DEBUG: [WEBSOCKET_CLIENT] Error handling radio track uploaded: " + e.getMessage());
             logger.error("Error handling radio track uploaded", e);
+        }
+    }
+
+    private void handleScoreboardUpdate(Map<String, Object> messageData) {
+        try {
+            System.out.println("🏆🏆🏆 [WEBSOCKET_CLIENT] handleScoreboardUpdate called 🏆🏆🏆");
+            System.out.println("🏆🏆🏆 [WEBSOCKET_CLIENT] Message data: " + messageData + " 🏆🏆🏆");
+            
+            // Forward to game menu for processing
+            if (gameMenu != null) {
+                gameMenu.handleScoreboardWebSocketMessage(messageData);
+            }
+            
+        } catch (Exception e) {
+            System.out.println("💥💥💥 [WEBSOCKET_CLIENT] Error handling scoreboard update: " + e.getMessage() + " 💥💥💥");
+            logger.error("Error handling scoreboard update", e);
         }
     }
 }
