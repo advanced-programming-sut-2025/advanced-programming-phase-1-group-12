@@ -5,7 +5,11 @@ import io.javalin.websocket.*;
 import org.example.Common.models.Fundementals.Player;
 import org.example.Common.network.GameProtocol;
 import org.example.Common.network.NetworkObjectMapper;
+import org.example.Common.network.NetworkResult;
 import org.example.Common.network.events.*;
+import org.example.Common.network.requests.StartVoteRequest;
+import org.example.Common.network.requests.VoteRequest;
+import org.example.Common.network.responses.VoteResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -247,6 +251,12 @@ public class GameWebSocketHandler {
                     break;
                 case GameProtocol.WS_VOTE_RESULT:
                     handleVoteResult(ctx, userId, messageData);
+                    break;
+                case GameProtocol.WS_VOTE_START:
+                    handleVoteStartCommand(ctx, userId, messageData);
+                    break;
+                case GameProtocol.WS_VOTE_CAST:
+                    handleVoteCastCommand(ctx, userId, messageData);
                     break;
 
                 default:
@@ -1153,6 +1163,75 @@ public class GameWebSocketHandler {
         } catch (Exception e) {
             System.out.println("💥💥💥 [SERVER] Error handling vote result: " + e.getMessage() + " 💥💥💥");
             logger.error("Error handling vote result", e);
+        }
+    }
+
+    private void handleVoteStartCommand(WsContext ctx, String userId, Map<String, Object> messageData) {
+        try {
+            System.out.println("🗳️🗳️🗳️ [SERVER] handleVoteStartCommand called 🗳️🗳️🗳️");
+            String gameId = (String) messageData.get("gameId");
+            String voteType = (String) messageData.get("voteType");
+            String targetPlayerId = (String) messageData.get("targetPlayerId");
+            String reason = (String) messageData.getOrDefault("reason", "");
+
+            GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            if (gameInstance == null || !gameInstance.isPlayerConnected(userId)) {
+                sendError(ctx, "Game not found or user not in game");
+                return;
+            }
+
+            StartVoteRequest req = new StartVoteRequest(gameId, userId, targetPlayerId, voteType, reason);
+            NetworkResult<VoteResponse> result = gameInstance.getVoteManager().startVote(req);
+            if (!result.isSuccess()) {
+                sendError(ctx, result.getMessage());
+                return;
+            }
+
+            // Broadcast vote_started event
+            VoteManager.Vote active = gameInstance.getVoteManager().getActiveVote(gameId);
+            if (active != null) {
+                VoteEvent event = gameInstance.getVoteManager().createVoteEvent(active, GameProtocol.WS_VOTE_STARTED);
+                gameInstance.broadcastToAllPlayers(event);
+            }
+        } catch (Exception e) {
+            logger.error("Error handling vote start command", e);
+            sendError(ctx, "Failed to start vote");
+        }
+    }
+
+    private void handleVoteCastCommand(WsContext ctx, String userId, Map<String, Object> messageData) {
+        try {
+            System.out.println("🗳️🗳️🗳️ [SERVER] handleVoteCastCommand called 🗳️🗳️🗳️");
+            String gameId = (String) messageData.get("gameId");
+            String voteId = (String) messageData.get("voteId");
+            Object voteObj = messageData.get("vote");
+            boolean vote = (voteObj instanceof Boolean) ? (Boolean) voteObj : Boolean.parseBoolean(String.valueOf(voteObj));
+
+            GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            if (gameInstance == null || !gameInstance.isPlayerConnected(userId)) {
+                sendError(ctx, "Game not found or user not in game");
+                return;
+            }
+
+            VoteRequest req = new VoteRequest(gameId, userId, voteId, vote);
+            NetworkResult<VoteResponse> result = gameInstance.getVoteManager().castVote(req);
+            if (!result.isSuccess()) {
+                sendError(ctx, result.getMessage());
+                return;
+            }
+
+            // Broadcast vote_updated event
+            VoteManager.Vote active = gameInstance.getVoteManager().getActiveVote(gameId);
+            if (active != null && active.isActive()) {
+                VoteEvent event = gameInstance.getVoteManager().createVoteEvent(active, GameProtocol.WS_VOTE_UPDATED);
+                gameInstance.broadcastToAllPlayers(event);
+            } else if (active == null) {
+                // Vote may have resolved, broadcast final result
+                // Note: resolveVote already broadcasts via VoteManager
+            }
+        } catch (Exception e) {
+            logger.error("Error handling vote cast command", e);
+            sendError(ctx, "Failed to cast vote");
         }
     }
 }

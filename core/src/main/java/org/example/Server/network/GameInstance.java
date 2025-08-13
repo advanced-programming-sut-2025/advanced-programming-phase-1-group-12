@@ -958,7 +958,8 @@ public class GameInstance {
             
             // Broadcast game terminated event
             Map<String, Object> terminateEvent = new HashMap<>();
-            terminateEvent.put("type", "game_terminated");
+            terminateEvent.put("type", org.example.Common.network.GameProtocol.WS_GAME_STATE_UPDATE);
+            terminateEvent.put("updateType", "game_terminated");
             terminateEvent.put("gameId", gameId);
             terminateEvent.put("reason", "Force terminated by vote");
             terminateEvent.put("timestamp", System.currentTimeMillis());

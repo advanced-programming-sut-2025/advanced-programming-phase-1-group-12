@@ -20,6 +20,7 @@ import org.example.Common.models.Assets.GameAssetManager;
 import org.example.Common.models.Fundementals.App;
 import org.example.Common.models.Fundementals.Player;
 import org.example.Client.network.NetworkCommandSender;
+import org.example.Client.controllers.VotingController;
 import org.example.Common.models.Fundementals.Result;
 import org.example.Client.Main;
 
@@ -75,6 +76,8 @@ public class VotingMenu implements Screen, Disposable {
         this.parentScreen = parentScreen;
         this.networkSender = new NetworkCommandSender(Main.getMain().getServerConnection());
         initializeUI();
+        // Register this menu to receive vote updates
+        VotingController.getInstance().setVotingMenu(this);
     }
 
     private void initializeUI() {
@@ -240,8 +243,8 @@ public class VotingMenu implements Screen, Disposable {
             return;
         }
         
-        // For now, just show a status message
-        setStatus("Kick vote started for " + targetPlayer + " (Network integration pending)", Color.GREEN);
+        VotingController.getInstance().startKickVote(targetPlayer, reason);
+        setStatus("Kick vote requested for " + targetPlayer, Color.GREEN);
     }
 
     private void startForceTerminateVote() {
@@ -252,8 +255,8 @@ public class VotingMenu implements Screen, Disposable {
             return;
         }
         
-        // For now, just show a status message
-        setStatus("Force terminate vote started (Network integration pending)", Color.GREEN);
+        VotingController.getInstance().startForceTerminateVote(reason);
+        setStatus("Force terminate vote requested", Color.GREEN);
     }
 
     private void castVote(boolean vote) {
@@ -262,8 +265,8 @@ public class VotingMenu implements Screen, Disposable {
             return;
         }
         
-        // For now, just show a status message
-        setStatus("Vote cast: " + (vote ? "YES" : "NO") + " (Network integration pending)", Color.GREEN);
+        VotingController.getInstance().castVote(currentVoteId, vote);
+        setStatus("Vote cast: " + (vote ? "YES" : "NO"), Color.GREEN);
         
         // Disable vote buttons after casting
         yesButton.setDisabled(true);
@@ -298,7 +301,7 @@ public class VotingMenu implements Screen, Disposable {
     }
 
     private void showActiveVote() {
-        activeVoteTable.setVisible(true);
+            activeVoteTable.setVisible(true);
         
         // Update vote info
         String voteInfo = String.format("Active Vote: %s", 
@@ -311,8 +314,16 @@ public class VotingMenu implements Screen, Disposable {
         updateVoteProgress();
         
         // Enable vote buttons
-        yesButton.setDisabled(false);
-        noButton.setDisabled(false);
+            yesButton.setDisabled(false);
+            noButton.setDisabled(false);
+            
+            // Auto-cast yes for the initiator if desired? (No) Just display.
+            
+            // Set currentVoteId from existing activeVotes (if controller has it)
+            var info = org.example.Client.controllers.VotingController.getInstance().getActiveVote();
+            if (info != null) {
+                currentVoteId = info.voteId;
+            }
     }
 
     private void hideActiveVote() {

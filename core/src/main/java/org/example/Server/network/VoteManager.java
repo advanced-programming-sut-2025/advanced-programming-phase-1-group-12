@@ -1,5 +1,6 @@
 package org.example.Server.network;
 
+import org.example.Common.network.GameProtocol;
 import org.example.Common.network.NetworkResult;
 import org.example.Common.network.requests.StartVoteRequest;
 import org.example.Common.network.requests.VoteRequest;
@@ -91,6 +92,12 @@ public class VoteManager {
             logger.info("Vote started: {} for {} in game {}", voteType, 
                        targetPlayerId != null ? targetPlayerId : "force_terminate", gameId);
 
+            // Broadcast vote started event to all players immediately
+            VoteEvent startEvent = createVoteEvent(vote, GameProtocol.WS_VOTE_STARTED);
+            // Ensure client can route by type
+            startEvent.setType(GameProtocol.WS_VOTE_STARTED);
+            gameInstance.broadcastToAllPlayers(startEvent);
+
             // Create response
             VoteResponse response = createVoteResponse(vote);
             return NetworkResult.success("Vote started successfully", response);
@@ -129,9 +136,18 @@ public class VoteManager {
 
             logger.info("Vote cast: {} by {} for vote {}", vote ? "YES" : "NO", voterId, voteId);
 
-            // Check if vote can be resolved early
-            if (activeVote.canResolveEarly()) {
-                resolveVote(voteId, activeVote.getResult());
+            // After casting, check result immediately
+            String computedResult = activeVote.getResult();
+            if (computedResult != null) {
+                // All votes are in or threshold reached; resolve now
+                resolveVote(voteId, computedResult);
+            } else {
+                // Still in progress: broadcast intermediate update
+                if (activeVote.isActive()) {
+                    VoteEvent updateEvent = createVoteEvent(activeVote, GameProtocol.WS_VOTE_UPDATED);
+                    updateEvent.setType(GameProtocol.WS_VOTE_UPDATED);
+                    gameInstance.broadcastToAllPlayers(updateEvent);
+                }
             }
 
             // Create response
@@ -173,7 +189,7 @@ public class VoteManager {
             }
         }
 
-        // Broadcast vote result to all players
+        // Broadcast final result to all players
         broadcastVoteResult(vote);
     }
 
@@ -211,6 +227,8 @@ public class VoteManager {
             vote.getResult()
         );
 
+        // Ensure type is set
+        event.setType(GameProtocol.WS_VOTE_RESULT);
         gameInstance.broadcastToAllPlayers(event);
     }
 

@@ -2,7 +2,7 @@ package org.example.Common.network.events;
 
 import java.util.Map;
 
-public class VoteEvent {
+public class VoteEvent extends WebSocketMessage {
     private String eventType; // "vote_started", "vote_updated", "vote_ended", "vote_result"
     private String voteId;
     private String voteType; // "kick" or "force_terminate"
@@ -25,6 +25,8 @@ public class VoteEvent {
                     String initiatorId, String reason, long startTime, long endTime, 
                     Map<String, Boolean> votes, int yesVotes, int noVotes, int totalVotes, 
                     int requiredVotes, boolean isActive, String result) {
+        // Set WebSocketMessage fields: type=eventType, gameId/playerId left null here
+        setType(eventType);
         this.eventType = eventType;
         this.voteId = voteId;
         this.voteType = voteType;

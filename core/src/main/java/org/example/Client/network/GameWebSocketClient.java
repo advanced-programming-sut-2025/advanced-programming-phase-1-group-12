@@ -374,6 +374,13 @@ public class GameWebSocketClient {
                     System.out.println("DEBUG: Handling game state update");
                     handleGameStateUpdate(messageData);
                     break;
+                case "vote_started":
+                case "vote_updated":
+                case "vote_ended":
+                case "vote_result":
+                    System.out.println("DEBUG: Handling vote event: " + messageType);
+                    handleVoteEvent(messageType, messageData);
+                    break;
                 case GameProtocol.WS_PLAYER_MOVED:
                     System.out.println("DEBUG: Handling player movement");
                     handlePlayerMovement(messageData);
@@ -389,6 +396,7 @@ public class GameWebSocketClient {
                     System.out.println("DEBUG: Handling chat message");
                     handleChatMessage(messageData);
                     break;
+                // Removed duplicate GameProtocol vote cases to avoid duplicate labels
                 case GameProtocol.WS_MOVEMENT_NOTIFICATION:
                     System.out.println("DEBUG: Handling movement notification");
                     handleMovementNotification(messageData);
@@ -456,6 +464,18 @@ public class GameWebSocketClient {
                 System.out.println("DEBUG: Unknown plain text message: " + message);
                 logger.debug("Unknown plain text message: {}", message);
             }
+        }
+    }
+
+    private void handleVoteEvent(String messageType, Map<String, Object> messageData) {
+        try {
+            org.example.Common.network.events.VoteEvent event = objectMapper.convertValue(
+                messageData, org.example.Common.network.events.VoteEvent.class);
+            if (Main.getMain() != null && Main.getMain().getScreen() instanceof org.example.Client.views.GameMenu) {
+                org.example.Client.controllers.VotingController.getInstance().handleVoteEvent(event);
+            }
+        } catch (Exception e) {
+            logger.error("Error handling vote event", e);
         }
     }
 

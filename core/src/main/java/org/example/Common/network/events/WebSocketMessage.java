@@ -16,7 +16,11 @@ import org.example.Server.network.MovementNotificationEvent;
     @JsonSubTypes.Type(value = PlayerLeftEvent.class, name = "player_left"),
     @JsonSubTypes.Type(value = GameStateUpdateEvent.class, name = "game_state_update"),
     @JsonSubTypes.Type(value = EnergyUpdateEvent.class, name = "energy_update"),
-    @JsonSubTypes.Type(value = MovementNotificationEvent.class, name = "movement_notification")
+    @JsonSubTypes.Type(value = MovementNotificationEvent.class, name = "movement_notification"),
+    @JsonSubTypes.Type(value = VoteEvent.class, name = "vote_started"),
+    @JsonSubTypes.Type(value = VoteEvent.class, name = "vote_updated"),
+    @JsonSubTypes.Type(value = VoteEvent.class, name = "vote_ended"),
+    @JsonSubTypes.Type(value = VoteEvent.class, name = "vote_result")
 })
 public abstract class WebSocketMessage {
     private String type;

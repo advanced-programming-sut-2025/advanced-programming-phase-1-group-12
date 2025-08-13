@@ -88,6 +88,9 @@ public class GameProtocol {
     public static final String WS_VOTE_UPDATED = "vote_updated";
     public static final String WS_VOTE_ENDED = "vote_ended";
     public static final String WS_VOTE_RESULT = "vote_result";
+    // Voting commands (client -> server)
+    public static final String WS_VOTE_START = "vote_start";
+    public static final String WS_VOTE_CAST = "vote_cast";
     public static final String WS_ERROR = "error";
 
     // Network Configuration

@@ -9,6 +9,8 @@ import org.example.Common.network.requests.VoteRequest;
 import org.example.Common.network.responses.VoteResponse;
 import org.example.Common.network.events.VoteEvent;
 import org.example.Client.views.VotingMenu;
+import org.example.Client.views.GameMenu;
+import org.example.Client.views.MainMenu;
 import org.example.Client.Main;
 
 import java.util.Map;
@@ -113,8 +115,41 @@ public class VotingController {
     }
     
     private void sendVoteRequest(Object request) {
-        // Network integration will be added later
-        System.out.println("Vote request would be sent: " + request);
+        try {
+            if (Main.getMain() == null || Main.getMain().getServerConnection() == null) {
+                System.out.println("Voting: No server connection available");
+                return;
+            }
+
+            var wsClient = App.getWebSocketClient();
+            if (wsClient == null || !wsClient.isConnected()) {
+                System.out.println("Voting: WebSocket not connected");
+                return;
+            }
+
+            if (request instanceof StartVoteRequest) {
+                StartVoteRequest r = (StartVoteRequest) request;
+                Map<String, Object> msg = new java.util.HashMap<>();
+                msg.put("type", org.example.Common.network.GameProtocol.WS_VOTE_START);
+                msg.put("gameId", r.getGameId());
+                msg.put("voteType", r.getVoteType());
+                if (r.getTargetPlayerId() != null) msg.put("targetPlayerId", r.getTargetPlayerId());
+                if (r.getReason() != null) msg.put("reason", r.getReason());
+                msg.put("userId", App.getLoggedInUser().getUserName());
+                wsClient.send(msg);
+            } else if (request instanceof VoteRequest) {
+                VoteRequest r = (VoteRequest) request;
+                Map<String, Object> msg = new java.util.HashMap<>();
+                msg.put("type", org.example.Common.network.GameProtocol.WS_VOTE_CAST);
+                msg.put("gameId", r.getGameId());
+                msg.put("voteId", r.getVoteId());
+                msg.put("vote", r.getVote());
+                msg.put("userId", App.getLoggedInUser().getUserName());
+                wsClient.send(msg);
+            }
+        } catch (Exception e) {
+            System.out.println("Voting: Error sending vote request: " + e.getMessage());
+        }
     }
     
     private String convertToJson(Object request) {
@@ -260,29 +295,27 @@ public class VotingController {
     }
     
     private void handlePlayerKicked(String playerId) {
-        // Handle player being kicked from the game
         if (playerId.equals(App.getLoggedInUser().getUserName())) {
-            // Current player was kicked
-            // This would typically trigger a return to lobby or main menu
-            System.out.println("You have been kicked from the game!");
-        } else {
-            // Another player was kicked
-            System.out.println("Player " + playerId + " has been kicked from the game!");
+            // Navigate away if current user is kicked
+            if (Main.getMain() != null && Main.getMain().getScreen() instanceof GameMenu) {
+                // Return to parent screen or a neutral screen
+                Main.getMain().setScreen(new MainMenu());
+            }
         }
     }
     
     private void handleGameTerminated() {
-        // Handle game being force terminated
-        System.out.println("Game has been force terminated by vote!");
-        // This would typically trigger a return to lobby or main menu
+        if (Main.getMain() != null) {
+            Main.getMain().setScreen(new MainMenu());
+        }
     }
     
     private String getCurrentGameId() {
         Game currentGame = App.getCurrentGame();
         if (currentGame != null) {
-            // This would need to be implemented based on how game ID is stored
-            // For now, return a placeholder
-            return "current_game_id";
+            if (currentGame.getNetworkCommandSender() != null) {
+                return currentGame.getNetworkCommandSender().getCurrentGameId();
+            }
         }
         return null;
     }
