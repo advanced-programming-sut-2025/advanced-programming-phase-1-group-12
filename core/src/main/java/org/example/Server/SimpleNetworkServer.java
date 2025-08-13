@@ -24,6 +24,7 @@ import io.javalin.websocket.WsContext;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.time.Duration;
 import org.example.Server.network.GameWebSocketHandler;
 import org.example.Server.network.GameInstance;
 
@@ -62,7 +63,11 @@ public class SimpleNetworkServer {
                     })
                 );
                 
-                // Note: Using client-side keep-alive mechanism to prevent WebSocket timeouts
+                // Configure WebSocket idle timeout to prevent premature connection closures
+                config.jetty.wsFactoryConfig(wsFactory -> {
+                    wsFactory.setIdleTimeout(Duration.ofMinutes(5)); // 5 minutes
+                    logger.info("WebSocket idle timeout set to 5 minutes");
+                });
             });
 
             setupRoutes();

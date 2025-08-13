@@ -367,6 +367,7 @@ public class NetworkCommandSender {
             // Send via WebSocket for real-time chat
             Map<String, Object> wsMessage = new HashMap<>();
             wsMessage.put("type", GameProtocol.WS_CHAT_MESSAGE);
+            wsMessage.put("userId", App.getLoggedInUser().getUserName()); // Add userId to identify sender
             wsMessage.put("gameId", currentGameId);
             wsMessage.put("message", message);
             wsMessage.put("chatType", chatType);
@@ -417,6 +418,7 @@ public class NetworkCommandSender {
 
             Map<String, Object> wsMessage = new HashMap<>();
             wsMessage.put("type", GameProtocol.WS_PLAYER_MOVED);
+            wsMessage.put("userId", App.getLoggedInUser().getUserName()); // Add userId to identify sender
             wsMessage.put("gameId", gameIdToUse);
             wsMessage.put("x", x);
             wsMessage.put("y", y);
@@ -451,6 +453,7 @@ public class NetworkCommandSender {
 
             Map<String, Object> wsMessage = new HashMap<>();
             wsMessage.put("type", GameProtocol.WS_ENERGY_UPDATE);
+            wsMessage.put("userId", App.getLoggedInUser().getUserName()); // Add userId to identify sender
             wsMessage.put("gameId", gameIdToUse);
             wsMessage.put("playerId", playerId);
             wsMessage.put("currentEnergy", currentEnergy);
