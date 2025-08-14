@@ -237,7 +237,24 @@ public class GameWebSocketClient {
                 System.out.println("DEBUG: No auth token available for reconnection");
             }
 
-            String wsUrl = serverUrl.replace("http", "ws") + "/ws?userId=" + userId + "&token=" + authToken + "&gameId=" + gameId;
+            // Always use the server game ID from NetworkCommandSender in multiplayer mode
+            String gameIdToUse;
+            if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
+                if (App.getCurrentGame().getNetworkCommandSender() != null) {
+                    String serverGameId = App.getCurrentGame().getNetworkCommandSender().getCurrentGameId();
+                    if (serverGameId != null) {
+                        gameIdToUse = serverGameId;
+                    } else {
+                        throw new IllegalStateException("Server game ID is null in multiplayer mode (reconnect)");
+                    }
+                } else {
+                    throw new IllegalStateException("NetworkCommandSender is null in multiplayer mode (reconnect)");
+                }
+            } else {
+                gameIdToUse = gameId;
+            }
+
+            String wsUrl = serverUrl.replace("http", "ws") + "/ws?userId=" + userId + "&token=" + authToken + "&gameId=" + gameIdToUse;
             System.out.println("DEBUG: GameWebSocketClient reconnecting to URL: " + wsUrl);
             
             Request request = new Request.Builder()
@@ -261,6 +278,9 @@ public class GameWebSocketClient {
 
                     // Show success notification
                     gameMenu.showReconnectionSuccessNotification();
+
+                    // Restart keep-alive ping mechanism after reconnection
+                    startKeepAlive();
                 }
 
                 @Override
@@ -433,7 +453,8 @@ public class GameWebSocketClient {
                     handleRadioTrackUploaded(messageData);
                     break;
                 case "scoreboard_update":
-                    System.out.println("DEBUG: Handling scoreboard update event");
+                    System.out.println("**[CLIENT][WS] Handling scoreboard_update message**");
+                    System.out.println("**[CLIENT][WS] Raw payload:** " + messageData);
                     handleScoreboardUpdate(messageData);
                     break;
                 case "pong":
@@ -941,16 +962,17 @@ public class GameWebSocketClient {
 
     private void handleScoreboardUpdate(Map<String, Object> messageData) {
         try {
-            System.out.println("🏆🏆🏆 [WEBSOCKET_CLIENT] handleScoreboardUpdate called 🏆🏆🏆");
-            System.out.println("🏆🏆🏆 [WEBSOCKET_CLIENT] Message data: " + messageData + " 🏆🏆🏆");
+            System.out.println("**[CLIENT][WS] handleScoreboardUpdate called**");
+            System.out.println("**[CLIENT][WS] Parsed data:** " + messageData);
             
             // Forward to game menu for processing
             if (gameMenu != null) {
+                System.out.println("**[CLIENT][WS] Forwarding scoreboard_update to GameMenu**");
                 gameMenu.handleScoreboardWebSocketMessage(messageData);
             }
             
         } catch (Exception e) {
-            System.out.println("💥💥💥 [WEBSOCKET_CLIENT] Error handling scoreboard update: " + e.getMessage() + " 💥💥💥");
+            System.out.println("**[CLIENT][WS] Error handling scoreboard update:** " + e.getMessage());
             logger.error("Error handling scoreboard update", e);
         }
     }
