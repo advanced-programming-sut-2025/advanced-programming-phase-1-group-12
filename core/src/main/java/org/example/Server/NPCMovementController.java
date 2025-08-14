@@ -8,6 +8,7 @@ import org.example.Common.models.Assets.NPCAnimationManager.AnimationType;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Simple NPC Movement Controller
@@ -16,10 +17,16 @@ import java.util.Map;
 public class NPCMovementController {
     private static NPCMovementController instance;
     private Map<String, NPCMovementState> npcMovementStates = new HashMap<>();
+        private final Random random = new Random();
     
     // Movement settings - same as player movement
     private static final float MOVEMENT_INTERVAL = 0.5f; // Move every 0.5 seconds
     private static final int MOVEMENT_SPEED = 1; // Move 1 tile at a time
+        
+        // Random pause settings
+        private static final float MIN_PAUSE_SECONDS = 1.5f;
+        private static final float MAX_PAUSE_SECONDS = 4.0f;
+        private static final float RANDOM_STOP_CHANCE_PER_STEP = 0.12f; // 12% chance to pause after a step
     
     private NPCMovementController() {
         // Don't initialize anything yet
@@ -78,6 +85,19 @@ public class NPCMovementController {
         // Update movement timer
         state.movementTimer += deltaTime;
         
+        // Handle paused state
+        if (state.isPaused) {
+            state.pauseTimer += deltaTime;
+            npc.setCurrentAnimation(AnimationType.IDLE);
+            npc.setMoving(false);
+            if (state.pauseTimer >= state.pauseDuration) {
+                state.isPaused = false;
+                state.pauseTimer = 0f;
+            } else {
+                return; // remain paused
+            }
+        }
+        
         // Get target location for current time
         Location targetLocation = getTargetLocationForTime(npcName, currentHour);
         Location currentLocation = npc.getUserLocation();
@@ -100,6 +120,12 @@ public class NPCMovementController {
             state.isMoving = false;
             npc.setCurrentAnimation(AnimationType.IDLE);
             npc.setMoving(false);
+            // Small dwell pause upon arrival
+            if (!state.isPaused) {
+                state.isPaused = true;
+                state.pauseDuration = MIN_PAUSE_SECONDS + random.nextFloat() * (MAX_PAUSE_SECONDS - MIN_PAUSE_SECONDS);
+                state.pauseTimer = 0f;
+            }
         }
     }
     
@@ -140,6 +166,16 @@ public class NPCMovementController {
         npc.updatePosition(newX, newY);
         npc.setMoving(true);
         
+        // Randomly insert a pause after taking a step
+        if (!state.isPaused && random.nextFloat() < RANDOM_STOP_CHANCE_PER_STEP) {
+            state.isPaused = true;
+            state.pauseDuration = MIN_PAUSE_SECONDS + random.nextFloat() * (MAX_PAUSE_SECONDS - MIN_PAUSE_SECONDS);
+            state.pauseTimer = 0f;
+            state.isMoving = false;
+            npc.setCurrentAnimation(AnimationType.IDLE);
+            npc.setMoving(false);
+        }
+        
     }
     
     /**
@@ -148,10 +184,10 @@ public class NPCMovementController {
     private Location getTargetLocationForTime(String npcName, int hour) {
         NPCController npcController = NPCController.getInstance();
         
-        if (hour >= 6 && hour < 10) {
-            // Early morning: At home (near-home location)
+        if (hour >= 6 && hour < 13) {
+            // Morning until 1 PM: stay at home (near-home location)
             return npcController.getNPCNearHomeLocation(npcName);
-        } else if (hour >= 10 && hour < 17) {
+        } else if (hour >= 13 && hour < 17) {
             // Work hours (10 AM - 5 PM): At workplace
             return npcController.getNPCWorkLocation(npcName);
         } else if (hour >= 17 && hour < 22) {
@@ -238,11 +274,17 @@ public class NPCMovementController {
         public boolean isMoving;
         public float movementTimer;
         public NPC npc;
+        public boolean isPaused;
+        public float pauseTimer;
+        public float pauseDuration;
         
         public NPCMovementState(NPC npc) {
             this.npc = npc;
             this.isMoving = false;
             this.movementTimer = 0f;
+            this.isPaused = false;
+            this.pauseTimer = 0f;
+            this.pauseDuration = 0f;
         }
     }
 }

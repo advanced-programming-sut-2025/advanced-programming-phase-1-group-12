@@ -373,6 +373,11 @@ public class GameMenuController {
             newPlayer.setPlayerTexture(playerTexture);
             newPlayer.setPortraitFrame(portraitFrame);
 
+            // Add a few test items to help with gifting in offline mode
+            if (!forceMultiplayer) {
+                addGiftTestItems(newPlayer);
+            }
+
             players.add(newPlayer);
 
             Farm farm = App.getCurrentGame().getMainMap().getFarms().get(farmId);
@@ -551,6 +556,26 @@ public class GameMenuController {
             System.out.println("Offline game started - GameMenu created");
             System.out.println("isMultiplayer: " + App.getCurrentGame().isMultiplayer());
         } else {
+        }
+    }
+
+    private void addGiftTestItems(Player player) {
+        try {
+            BackPack bp = player.getBackPack();
+            // A mix of food, animal products, and simple items commonly accepted by NPCs
+            Item flower = ItemBuilder.builder("Flower", Quality.NORMAL, 50);
+            Item egg = ItemBuilder.builder("Egg", Quality.NORMAL, 50);
+            Item milk = ItemBuilder.builder("Milk", Quality.NORMAL, 125);
+            Item apple = ItemBuilder.builder("Apple", Quality.NORMAL, 60);
+            Item quartz = ItemBuilder.builder("Quartz", Quality.NORMAL, 80);
+
+            if (flower != null) bp.addItem(flower, 5);
+            if (egg != null) bp.addItem(egg, 5);
+            if (milk != null) bp.addItem(milk, 3);
+            if (apple != null) bp.addItem(apple, 4);
+            if (quartz != null) bp.addItem(quartz, 2);
+        } catch (Exception e) {
+            System.out.println("Failed to add gift test items: " + e.getMessage());
         }
     }
 

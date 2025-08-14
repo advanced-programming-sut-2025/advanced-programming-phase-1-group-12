@@ -464,22 +464,22 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void handleChatMessage(Map<String, Object> data) {
-        
+
         try {
             String playerId = (String) data.get("playerId");
             String username = (String) data.get("username");
             String message = (String) data.get("message");
             String chatType = (String) data.get("chatType");
 
-            
+
 
             // Forward the message to the ChatMenu if it's open
-            
+
             if (currentChatMenu != null) {
                 ChatMenu.ChatType type = "private".equals(chatType) ? ChatMenu.ChatType.PRIVATE : ChatMenu.ChatType.PUBLIC;
                 String recipient = "private".equals(chatType) ? data.get("recipient") != null ? (String) data.get("recipient") : null : null;
-                
-                
+
+
                 currentChatMenu.receiveMessage(username, message, type, recipient);
             } else {
             }
@@ -541,7 +541,7 @@ public class GameMenu extends InputAdapter implements Screen {
                 boolean playerFound = false;
                 for (Player player : App.getCurrentGame().getPlayers()) {
                         if (player.getUser().getUserName().equals(playerId)) {
-                        
+
                         Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
                         player.setUserLocation(newLocation);
 
@@ -612,7 +612,7 @@ public class GameMenu extends InputAdapter implements Screen {
         Integer currentEnergy = (Integer) data.get("currentEnergy");
         Integer maxEnergy = (Integer) data.get("maxEnergy");
         String energyStatus = (String) data.get("energyStatus");
-            
+
 
         if (playerId != null && currentEnergy != null && maxEnergy != null) {
             // Find the player and update their energy
@@ -840,36 +840,36 @@ public class GameMenu extends InputAdapter implements Screen {
      * This method is called by the WebSocket client when radio events are received
      */
     public void handleRadioWebSocketMessage(String messageType, Map<String, Object> messageData) {
-        
+
         // Forward radio events to the radio menu if it's open
         // For now, we'll just log the events since the radio menu is a separate screen
         switch (messageType) {
             case "radio_station_joined":
                 break;
-                
+
             case "radio_station_left":
                 break;
-                
+
             case "radio_track_played":
                 break;
-                
+
             case "radio_track_paused":
                 break;
-                
+
             case "radio_track_stopped":
                 break;
-                
+
             case "radio_track_uploaded":
                 break;
-                
+
             default:
                 break;
         }
-        
+
     }
-    
+
     public void handleScoreboardWebSocketMessage(Map<String, Object> messageData) {
-        
+
         try {
             String messageType = (String) messageData.get("type");
             if ("scoreboard_update".equals(messageType)) {
@@ -885,7 +885,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     Map<String, Object> stats = (Map<String, Object>) messageData.get("stats");
                     System.out.println("**[CLIENT][SCOREBOARD] playerScores.size=" + (playerScores != null ? playerScores.size() : -1) +
                         " | sortType=" + sortType + " | stats=" + stats + "**");
-                    
+
                     scoreboardMenu.updateScoreboard(playerScores, sortType, stats);
                 } else {
                 }
@@ -1001,7 +1001,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Initialize WebSocket client for real-time updates
         initializeWebSocketClient();
-        
+
         // Initialize NPC movement
         initializeNPCMovement();
 
@@ -1049,7 +1049,7 @@ public class GameMenu extends InputAdapter implements Screen {
         initializeChatButton();
         initializeQuestButton();
         initializeScoreboardButton();
-        
+
         // Initialize reaction system
         reactionRenderer = new ReactionRenderer(batch, font);
         // Initialize reaction menu with null player initially, will be updated when needed
@@ -1064,7 +1064,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     reactionRenderer.addReaction(reaction, playerX, playerY);
                 }
             }
-            
+
             @Override
             public void onCustomReactionAdded(Reaction reaction) {
                 // Add custom reaction above current player
@@ -1210,7 +1210,8 @@ public class GameMenu extends InputAdapter implements Screen {
         updateHugAnimation(delta);
         updateFlowerAnimation(delta);
         updateRingAnimation(delta);
-        
+        updateGiftAnimation(delta);
+
         // Disabled NPC movements - waiting for command
         updateNPCMovements(delta);
 
@@ -1495,7 +1496,8 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Render ring animation after lighting overlay to ensure it's visible
         renderRingAnimation(batch);
-        
+        renderGiftAnimation(batch);
+
         // Render reactions
         if (reactionRenderer != null) {
             reactionRenderer.render(delta);
@@ -1512,7 +1514,7 @@ public class GameMenu extends InputAdapter implements Screen {
         batch.end();
         stage.act(delta);
         stage.draw();
-        
+
         // Scoreboard menu is now a separate screen, no need to render here
 
     }
@@ -1623,7 +1625,7 @@ public class GameMenu extends InputAdapter implements Screen {
         if (flowerTexture != null) {
             flowerTexture.dispose();
         }
-        
+
         // Dispose reaction system
         if (reactionMenu != null) {
             reactionMenu.dispose();
@@ -1631,7 +1633,7 @@ public class GameMenu extends InputAdapter implements Screen {
         if (reactionRenderer != null) {
             reactionRenderer.dispose();
         }
-        
+
 
 
         stage.dispose();
@@ -1681,7 +1683,7 @@ public class GameMenu extends InputAdapter implements Screen {
         float clockSize = 100f;
         clockImage.setPosition(stage.getWidth() - clockSize - 20f, stage.getHeight() - clockSize - 20f);
         updateClockDisplay();
-        
+
 
     }
 
@@ -1721,7 +1723,7 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
 
-        // Check if clicked on an NPC's location
+        // Check if clicked on an NPC's location (only on right-click and when adjacent)
         if (App.getCurrentGame().getNPCvillage() == null) {
             App.getCurrentGame().initializeNPCvillage();
         }
@@ -1729,8 +1731,15 @@ public class GameMenu extends InputAdapter implements Screen {
         if (App.getCurrentGame().getNPCvillage() != null) {
             for (org.example.Common.models.NPC.NPC npc : App.getCurrentGame().getNPCvillage().getAllNPCs()) {
                 if (npc.getUserLocation().equals(clickedLocation)) {
-                    showNPCInteractionMenu(npc);
-                    return true;
+                    if (button == Input.Buttons.RIGHT) {
+                        Player cp = App.getCurrentPlayerLazy();
+                        if (cp != null && App.getCurrentGame().getNPCvillage().isPlayerNearNPC(cp, npc)) {
+                            showNPCInteractionMenu(npc);
+                        } else {
+                            showNotification("you must be adjacent", false);
+                        }
+                        return true;
+                    }
                 }
             }
         }
@@ -2290,7 +2299,7 @@ public class GameMenu extends InputAdapter implements Screen {
         Table content = dialog.getContentTable();
         content.add(inventoryButton).pad(5).width(400f).row();
         content.add(tradeButton).pad(5).width(400f).row();
-        
+
         // Add test trade button for development
         TextButton testTradeButton = new TextButton("Test Trade System", skin);
         testTradeButton.addListener(new ClickListener() {
@@ -2302,7 +2311,7 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         });
         content.add(testTradeButton).pad(5).width(400f).row();
-        
+
         content.add(votingButton).pad(5).width(400f).row();
         content.add(socialButton).pad(5).width(400f).row();
         content.add(mapButton).pad(5).width(400f).row();
@@ -4476,7 +4485,7 @@ public class GameMenu extends InputAdapter implements Screen {
 
         stage.addActor(radioButton);
     }
-    
+
     private void initializeReactionButton() {
         reactionButton = new TextButton("Reactions", skin);
         reactionButton.setSize(120, 40);
@@ -4491,7 +4500,7 @@ public class GameMenu extends InputAdapter implements Screen {
         });
         stage.addActor(reactionButton);
     }
-    
+
     private void initializeChatButton() {
         chatButton = new TextButton("Chat", skin);
         chatButton.setSize(120, 40);
@@ -4510,64 +4519,64 @@ public class GameMenu extends InputAdapter implements Screen {
     private void initializeQuestButton() {
         questController = new QuestController();
         questMenu = new QuestMenu(stage, questController);
-        
+
         questButton = new TextButton("Quests", skin);
         questButton.setSize(120, 40);
         questButton.setPosition(20, stage.getHeight() - 320);
         questButton.getLabel().setFontScale(1.2f);
-        
+
         questButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 questMenu.show();
             }
         });
-        
+
         stage.addActor(questButton);
     }
-    
+
     public QuestController getQuestController() {
         return questController;
     }
-    
+
     private void initializeScoreboardButton() {
         TextButton scoreboardButton = new TextButton("🏆 Scoreboard", skin);
         scoreboardButton.setSize(120, 40);
         scoreboardButton.setPosition(20, stage.getHeight() - 360);
         scoreboardButton.getLabel().setFontScale(1.2f);
-        
+
         scoreboardButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 openScoreboardMenu();
             }
         });
-        
+
         stage.addActor(scoreboardButton);
     }
-    
+
     private void openScoreboardMenu() {
-        
+
         if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
             ScoreboardMenu scoreboardMenu = new ScoreboardMenu(this);
             Main.getMain().setScreen(scoreboardMenu);
         } else {
         }
     }
-    
+
     private void openChatMenu() {
-        
+
         if (App.getCurrentGame() != null && App.getCurrentGame().getNetworkCommandSender() != null) {
             currentChatMenu = new ChatMenu(this, App.getCurrentGame().getNetworkCommandSender());
             Main.getMain().setScreen(currentChatMenu);
         } else {
         }
     }
-    
+
     public void clearChatMenuReference() {
         currentChatMenu = null;
     }
-    
+
     private void showReactionMenu() {
         if (reactionMenu != null) {
             Player currentPlayer = getCurrentPlayerCharacter();
@@ -4795,6 +4804,16 @@ public class GameMenu extends InputAdapter implements Screen {
     private float heartEmojiAnimationTimer = 0f;
     private boolean heartEmojiTexturesLoaded = false;
     private final float HEART_EMOJI_FRAME_DURATION = 0.2f; // Time per heart emoji frame
+
+    // Gift animation variables
+    private boolean isGifting = false;
+    private Texture[] giftFrames = new Texture[6];
+    private boolean giftTexturesLoaded = false;
+    private int currentGiftFrame = 0;
+    private float giftAnimationTimer = 0f;
+    private final float GIFT_FRAME_DURATION = 0.12f;
+    private float giftX = 0f;
+    private float giftY = 0f;
 
     public void showFullScreenPlayerInteractionMenu(Player targetPlayer) {
         targetPlayerForMenu = targetPlayer;
@@ -5186,7 +5205,7 @@ public class GameMenu extends InputAdapter implements Screen {
         mainTable.setPosition(0, 0);
 
         Label titleLabel = new Label("Give Gift to " + npc.getName(), skin);
-        titleLabel.setFontScale(2.5f);
+        titleLabel.setFontScale(2.0f);
         titleLabel.setAlignment(Align.center);
         titleLabel.setColor(Color.WHITE);
         mainTable.add(titleLabel).colspan(3).pad(50).row();
@@ -5194,19 +5213,19 @@ public class GameMenu extends InputAdapter implements Screen {
         // Create portrait image
         Actor portraitActor = createNPCPortrait(npc.getName());
         if (portraitActor != null) {
-            portraitActor.setSize(150, 150);
-            mainTable.add(portraitActor).colspan(3).center().pad(20).row();
+            portraitActor.setSize(100, 100);
+            mainTable.add(portraitActor).colspan(3).center().pad(10).row();
         }
 
         Label instructionLabel = new Label("Select an item to gift:", skin);
-        instructionLabel.setFontScale(2.0f);
+        instructionLabel.setFontScale(1.4f);
         instructionLabel.setAlignment(Align.center);
         instructionLabel.setColor(Color.WHITE);
-        mainTable.add(instructionLabel).colspan(3).center().pad(20).row();
+        mainTable.add(instructionLabel).colspan(3).center().pad(10).row();
 
         // Create content table for items
         Table contentTable = new Table();
-        contentTable.pad(20);
+        contentTable.pad(10);
 
         // Get player's inventory items
         Map<Item, Integer> inventoryItems = currentPlayer.getBackPack().getItems();
@@ -5221,8 +5240,8 @@ public class GameMenu extends InputAdapter implements Screen {
                 Item item = entry.getKey();
                 Integer quantity = entry.getValue();
                 TextButton itemButton = new TextButton(item.getName() + " (x" + quantity + ")", skin);
-                itemButton.setSize(400, 60);
-                itemButton.getLabel().setFontScale(1.2f);
+                itemButton.setSize(280, 44);
+                itemButton.getLabel().setFontScale(0.9f);
                 itemButton.addListener(new ClickListener() {
                     @Override
                     public void clicked(InputEvent event, float x, float y) {
@@ -5230,9 +5249,11 @@ public class GameMenu extends InputAdapter implements Screen {
                         NPCcontroller npcController = new NPCcontroller();
                         String result = npcController.giftNPC(npc.getName(), item.getName());
                         showNotification(result, true);
+                        // Start gift animation above current player's head
+                        startGiftAnimation();
                     }
                 });
-                contentTable.add(itemButton).width(400).height(60).pad(10).row();
+                contentTable.add(itemButton).width(280).height(44).pad(6).row();
             }
         }
 
@@ -5241,11 +5262,22 @@ public class GameMenu extends InputAdapter implements Screen {
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFadeScrollBars(false);
 
-        mainTable.add(scrollPane).expand().fill().pad(50).width(600f).height(400f).row();
+        mainTable.add(scrollPane).expand().fill().pad(20).width(520f).height(360f).row();
+
+        TextButton backButton = new TextButton("بازگشت", skin);
+        backButton.setSize(220f, 60f);
+        backButton.getLabel().setFontScale(1.2f);
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                // Return to NPC interaction menu
+                showNPCInteractionMenu(npc);
+            }
+        });
 
         TextButton cancelButton = new TextButton("Cancel", skin);
-        cancelButton.setSize(300f, 80f);
-        cancelButton.getLabel().setFontScale(1.5f);
+        cancelButton.setSize(220f, 60f);
+        cancelButton.getLabel().setFontScale(1.2f);
         cancelButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -5253,7 +5285,11 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         });
 
-        mainTable.add(cancelButton).pad(30);
+        Table buttonsRow = new Table();
+        buttonsRow.add(backButton).pad(10f).width(220f).height(60f);
+        buttonsRow.add(cancelButton).pad(10f).width(220f).height(60f);
+
+        mainTable.add(buttonsRow).pad(30);
         npcMenuStage.addActor(mainTable);
     }
 
@@ -5276,6 +5312,57 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Create the friendship info UI
         createNPCFriendshipInfoUI(npc);
+    }
+
+    private void showNPCQuestList(org.example.Common.models.NPC.NPC npc) {
+        if (npcMenuStage == null) return;
+
+        npcMenuStage.clear();
+
+        Player currentPlayer = App.getCurrentPlayerLazy();
+        if (currentPlayer == null) {
+            closeNPCFullScreenMenu();
+            return;
+        }
+
+        Table mainTable = new Table();
+        mainTable.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        mainTable.setPosition(0, 0);
+
+        Label titleLabel = new Label("quests list" + npc.getName(), skin);
+        titleLabel.setFontScale(2.5f);
+        titleLabel.setAlignment(Align.center);
+        titleLabel.setColor(Color.WHITE);
+        mainTable.add(titleLabel).colspan(3).pad(50).row();
+
+        // Build quest list text using existing controller logic
+        NPCcontroller controller = new NPCcontroller();
+        String questsText = controller.listQuests();
+
+        Label questsLabel = new Label(questsText, skin);
+        questsLabel.setWrap(true);
+        questsLabel.setAlignment(Align.topLeft);
+        questsLabel.setFontScale(1.6f);
+        questsLabel.setColor(Color.WHITE);
+
+        ScrollPane scrollPane = new ScrollPane(questsLabel, skin);
+        scrollPane.setScrollingDisabled(true, false);
+        scrollPane.setFadeScrollBars(false);
+
+        mainTable.add(scrollPane).expand().fill().pad(40).width(900f).height(520f).row();
+
+        TextButton closeButton = new TextButton("close", skin);
+        closeButton.setSize(350f, 90f);
+        closeButton.getLabel().setFontScale(1.8f);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                closeNPCFullScreenMenu();
+            }
+        });
+
+        mainTable.add(closeButton).pad(30);
+        npcMenuStage.addActor(mainTable);
     }
 
     private void createNPCFriendshipInfoUI(org.example.Common.models.NPC.NPC npc) {
@@ -5444,35 +5531,24 @@ public class GameMenu extends InputAdapter implements Screen {
             mainTable.add(portraitActor).colspan(3).center().pad(20).row();
         }
 
-        TextButton talkButton = new TextButton("Talk", skin);
-        TextButton giftButton = new TextButton("Give Gift", skin);
-        TextButton friendshipButton = new TextButton("Friendship", skin);
-        TextButton cancelButton = new TextButton("Cancel", skin);
+        TextButton giftButton = new TextButton("هgift", skin);
+        TextButton questButton = new TextButton("quests list", skin);
+        TextButton friendshipButton = new TextButton("show friendship level", skin);
+        TextButton cancelButton = new TextButton("back", skin);
 
         float buttonWidth = 350f;
         float buttonHeight = 90f;
         float buttonSpacing = 30f;
 
-        talkButton.setSize(buttonWidth, buttonHeight);
         giftButton.setSize(buttonWidth, buttonHeight);
+        questButton.setSize(buttonWidth, buttonHeight);
         friendshipButton.setSize(buttonWidth, buttonHeight);
         cancelButton.setSize(buttonWidth, buttonHeight);
 
-        talkButton.getLabel().setFontScale(1.8f);
         giftButton.getLabel().setFontScale(1.8f);
+        questButton.getLabel().setFontScale(1.8f);
         friendshipButton.getLabel().setFontScale(1.8f);
         cancelButton.getLabel().setFontScale(1.5f);
-
-        // Store the NPC name locally to avoid null pointer issues
-        final String npcName = targetNPCForMenu != null ? targetNPCForMenu.getName() : "Unknown";
-
-        talkButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                closeNPCFullScreenMenu();
-                showNPCChatInterface(npcName);
-            }
-        });
 
         // Store the NPC reference locally to avoid null pointer issues
         final org.example.Common.models.NPC.NPC npcRef = targetNPCForMenu;
@@ -5483,6 +5559,16 @@ public class GameMenu extends InputAdapter implements Screen {
                 if (npcRef != null) {
                     closeNPCFullScreenMenu();
                     showNPCGiftMenu(npcRef);
+                }
+            }
+        });
+
+        questButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (npcRef != null) {
+                    closeNPCFullScreenMenu();
+                    showNPCQuestList(npcRef);
                 }
             }
         });
@@ -5504,8 +5590,8 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         });
 
-        mainTable.add(talkButton).pad(buttonSpacing).row();
         mainTable.add(giftButton).pad(buttonSpacing).row();
+        mainTable.add(questButton).pad(buttonSpacing).row();
         mainTable.add(friendshipButton).pad(buttonSpacing).row();
         mainTable.add(cancelButton).pad(buttonSpacing).row();
 
@@ -6105,7 +6191,7 @@ public class GameMenu extends InputAdapter implements Screen {
             ringAnimationActive = false;
         }
     }
-    
+
     /**
      * Update NPC movements based on current time
      */
@@ -6114,55 +6200,55 @@ public class GameMenu extends InputAdapter implements Screen {
             // Get current game time
             org.example.Common.models.Date currentDate = App.getCurrentGame().getDate();
             int currentHour = currentDate.getHour();
-            
+
             // Update NPC movements using the movement controller
-            org.example.Server.NPCMovementController movementController = 
+            org.example.Server.NPCMovementController movementController =
                 org.example.Server.NPCMovementController.getInstance();
             movementController.updateNPCMovements(delta, currentHour);
-            
+
         } catch (Exception e) {
             // Log error but don't crash the game
             System.err.println("Error updating NPC movements: " + e.getMessage());
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Force NPC movement test - can be called from console
      */
     public void forceNPCMovementTest() {
         try {
-            
+
             // Initialize everything
-            org.example.Server.NPCController npcController = 
+            org.example.Server.NPCController npcController =
                 org.example.Server.NPCController.getInstance();
             npcController.initializeWhenReady();
-            
-            org.example.Server.NPCMovementController movementController = 
+
+            org.example.Server.NPCMovementController movementController =
                 org.example.Server.NPCMovementController.getInstance();
-            
+
             // Force movement to work location (hour 10)
             movementController.forceAllNPCsToMove(10);
-            
-            
+
+
         } catch (Exception e) {
             System.err.println("Error in NPC movement test: " + e.getMessage());
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Simple NPC initialization: Set all NPCs to their home locations with idle animations
      */
     private void initializeNPCMovement() {
         try {
-            
+
             // Simple initialization: Set all NPCs to home with idle animations
-            org.example.Server.NPCController npcController = 
+            org.example.Server.NPCController npcController =
                 org.example.Server.NPCController.getInstance();
             npcController.initializeNPCsToHome();
-            
-            
+
+
         } catch (Exception e) {
             // Log error but don't crash the game
             System.err.println("Error initializing NPCs: " + e.getMessage());
@@ -6309,6 +6395,61 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
+    private void updateGiftAnimation(float delta) {
+        if (!isGifting) return;
+
+        if (!giftTexturesLoaded) {
+            try {
+                for (int i = 0; i < 6; i++) {
+                    giftFrames[i] = new Texture("NPC/RelationShip/gifts/gift_" + i + ".png");
+                }
+                giftTexturesLoaded = true;
+            } catch (Exception e) {
+                isGifting = false;
+                return;
+            }
+        }
+
+        giftAnimationTimer += delta;
+        if (giftAnimationTimer >= GIFT_FRAME_DURATION) {
+            giftAnimationTimer = 0f;
+            currentGiftFrame++;
+            if (currentGiftFrame >= giftFrames.length) {
+                isGifting = false;
+                currentGiftFrame = 0;
+            }
+        }
+    }
+
+    private void renderGiftAnimation(SpriteBatch batch) {
+        if (!isGifting || !giftTexturesLoaded) return;
+
+        Texture frame = giftFrames[Math.max(0, Math.min(currentGiftFrame, giftFrames.length - 1))];
+        if (frame == null) return;
+
+        // Convert world to screen coords similar to other animations
+        float screenX = (giftX - camera.position.x) * camera.zoom + Gdx.graphics.getWidth() / 2f;
+        float screenY = (giftY - camera.position.y) * camera.zoom + Gdx.graphics.getHeight() / 2f;
+
+        float drawSize = 48f;
+        batch.draw(frame, screenX - drawSize / 2f, screenY - drawSize / 2f, drawSize, drawSize);
+    }
+
+    private void startGiftAnimation() {
+        Player currentPlayer = App.getCurrentPlayerLazy();
+        if (currentPlayer == null) return;
+
+        float baseX = currentPlayer.getUserLocation().getxAxis() * 100f;
+        float baseY = currentPlayer.getUserLocation().getyAxis() * 100f;
+
+        giftX = baseX + 50f; // center of tile
+        giftY = baseY + 120f; // above head
+
+        isGifting = true;
+        currentGiftFrame = 0;
+        giftAnimationTimer = 0f;
+    }
+
     public Texture findingMissingTexture(String name) {
         String name1 = name.toLowerCase();
         if(name1.contains("soil")) {
@@ -6437,12 +6578,12 @@ public class GameMenu extends InputAdapter implements Screen {
     private Texture npcBackgroundTexture = null;
     private Stage npcMenuStage = null;
     private InputProcessor originalNPCInputProcessor = null;
-    
+
     public void openVotingMenu() {
         // Navigate to the voting menu
         Main game = (Main) Gdx.app.getApplicationListener();
         VotingMenu votingMenu = new VotingMenu(this);
         game.setScreen(votingMenu);
     }
-    
+
 }
