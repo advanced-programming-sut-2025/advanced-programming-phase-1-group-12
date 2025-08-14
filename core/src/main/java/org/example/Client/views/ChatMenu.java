@@ -41,7 +41,7 @@ public class ChatMenu implements Screen, Disposable {
     private TextButton publicChatButton;
     private TextButton privateChatButton;
     private SelectBox<String> playerSelectBox;
-    private TextArea messageArea;
+    private Table messageListTable;
     private TextField inputField;
     private TextButton sendButton;
     private TextButton clearButton;
@@ -227,14 +227,14 @@ public class ChatMenu implements Screen, Disposable {
     }
 
     private void createMessageArea() {
-        messageArea = new TextArea("", skin);
-        messageArea.setSize(800f, 400f);
-        messageArea.setDisabled(true);
-        messageArea.setColor(Color.WHITE);
+        messageListTable = new Table();
+        messageListTable.top().left();
+        messageListTable.defaults().left().padBottom(4);
 
-        ScrollPane scrollPane = new ScrollPane(messageArea, skin);
+        ScrollPane scrollPane = new ScrollPane(messageListTable, skin);
         scrollPane.setScrollingDisabled(false, true);
         scrollPane.setFadeScrollBars(false);
+        scrollPane.setForceScroll(false, true);
 
         mainTable.add(scrollPane).colspan(3).expand().fill().padBottom(20).row();
     }
@@ -402,22 +402,36 @@ public class ChatMenu implements Screen, Disposable {
     }
 
     private void updateMessageDisplay() {
-        StringBuilder sb = new StringBuilder();
+        messageListTable.clearChildren();
         for (ChatMessage msg : messageHistory) {
+            String text;
             if (msg.getType() == ChatType.PUBLIC) {
-                sb.append(String.format("[%s] %s: %s\n",
-                    msg.getTimestamp(), msg.getSender(), msg.getContent()));
+                text = String.format("[%s] %s: %s", msg.getTimestamp(), msg.getSender(), msg.getContent());
             } else {
-                sb.append(String.format("[%s] %s (to %s): %s\n",
-                    msg.getTimestamp(), msg.getSender(), msg.getRecipient(), msg.getContent()));
+                text = String.format("[%s] %s (to %s): %s", msg.getTimestamp(), msg.getSender(), msg.getRecipient(), msg.getContent());
             }
+
+            Label line = new Label(text, skin);
+            line.setWrap(true);
+
+            // Highlight mentions to current user
+            if (isMentionToCurrentUser(msg.getContent()) && (msg.getType() == ChatType.PUBLIC)) {
+                line.setColor(Color.GOLD);
+            } else if (msg.getType() == ChatType.PRIVATE) {
+                line.setColor(Color.YELLOW);
+            } else {
+                line.setColor(Color.WHITE);
+            }
+
+            messageListTable.add(line).expandX().fillX().row();
         }
-        messageArea.setText(sb.toString());
     }
 
     private void clearMessages() {
         messageHistory.clear();
-        messageArea.setText("");
+        if (messageListTable != null) {
+            messageListTable.clearChildren();
+        }
         statusLabel.setText("Messages cleared");
         statusLabel.setColor(Color.ORANGE);
     }
@@ -433,6 +447,23 @@ public class ChatMenu implements Screen, Disposable {
         addMessage(message);
 
         System.out.println("🔵🔵🔵 [CHAT_MENU] receiveMessage() completed 🔵🔵🔵");
+    }
+
+    private boolean isMentionToCurrentUser(String content) {
+        if (content == null) return false;
+        String currentUsername = null;
+        if (App.getLoggedInUser() != null) {
+            currentUsername = App.getLoggedInUser().getUserName();
+        } else if (App.getCurrentGame() != null && App.getCurrentGame().getCurrentPlayer() != null
+                && App.getCurrentGame().getCurrentPlayer().getUser() != null) {
+            currentUsername = App.getCurrentGame().getCurrentPlayer().getUser().getUserName();
+        }
+        if (currentUsername == null) return false;
+
+        java.util.regex.Pattern p = java.util.regex.Pattern.compile(
+                "(^|\\s|[\\p{Punct}])@" + java.util.regex.Pattern.quote(currentUsername) + "(?=\\s|[\\p{Punct}]|$)",
+                java.util.regex.Pattern.CASE_INSENSITIVE);
+        return p.matcher(content).find();
     }
 
     public void updateOnlinePlayers(List<String> players) {

@@ -484,10 +484,40 @@ public class GameMenu extends InputAdapter implements Screen {
             } else {
             }
 
+            // Mention detection for public chat: show popup if current user is tagged with @username
+            boolean isMentioned = false;
+            try {
+                if ("public".equals(chatType) && message != null) {
+                    String currentUsername = null;
+                    if (org.example.Common.models.Fundementals.App.getLoggedInUser() != null) {
+                        currentUsername = org.example.Common.models.Fundementals.App.getLoggedInUser().getUserName();
+                    } else if (org.example.Common.models.Fundementals.App.getCurrentGame() != null
+                            && org.example.Common.models.Fundementals.App.getCurrentGame().getCurrentPlayer() != null
+                            && org.example.Common.models.Fundementals.App.getCurrentGame().getCurrentPlayer().getUser() != null) {
+                        currentUsername = org.example.Common.models.Fundementals.App.getCurrentGame().getCurrentPlayer().getUser().getUserName();
+                    }
+                    if (currentUsername != null && username != null && !currentUsername.equals(username)) {
+                        java.util.regex.Pattern mentionPattern = java.util.regex.Pattern.compile(
+                            "(^|\\s|[\\p{Punct}])@" + java.util.regex.Pattern.quote(currentUsername) + "(?=\\s|[\\p{Punct}]|$)",
+                            java.util.regex.Pattern.CASE_INSENSITIVE
+                        );
+                        java.util.regex.Matcher matcher = mentionPattern.matcher(message);
+                        if (matcher.find()) {
+                            isMentioned = true;
+                            // Ensure popup shows on UI thread
+                            final String notif = "شما توسط " + username + " در چت منشن شدید: " + message;
+                            com.badlogic.gdx.Gdx.app.postRunnable(() -> showNotification(notif, true));
+                        }
+                    }
+                }
+            } catch (Exception ignore) {
+            }
+
             // Also show a brief notification in the game UI
             if (errorLabel != null) {
                 errorLabel.setText(username + ": " + message);
-                errorLabel.setColor(Color.WHITE);
+                // Highlight quick inline notification if mentioned
+                errorLabel.setColor(isMentioned ? Color.GOLD : Color.WHITE);
                 timeSinceError = 0f;
             } else {
             }
