@@ -682,30 +682,23 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
-    /**
-     * Applies the received player data to the target player object
-     * This method updates all the relevant player properties
-     */
+
     private void applyPlayerDataUpdate(Player targetPlayer, Map<String, Object> playerData) {
         try {
 
-            // Update location and position
             if (playerData.containsKey("x") && playerData.containsKey("y")) {
                 Integer x = (Integer) playerData.get("x");
                 Integer y = (Integer) playerData.get("y");
                 if (x != null && y != null) {
-                    // Find the location object
                     Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
                     if (newLocation != null) {
                         targetPlayer.setUserLocation(newLocation);
-                        // Update sprite position with original coordinates (not scaled)
                         targetPlayer.updatePosition(x, y);
                     } else {
                     }
                 }
             }
 
-            // Update energy
             if (playerData.containsKey("energy")) {
                 Integer energy = (Integer) playerData.get("energy");
                 if (energy != null) {
@@ -786,7 +779,6 @@ public class GameMenu extends InputAdapter implements Screen {
 
         if (npcId != null && x != null && y != null) {
             // Update NPC position and state
-            // This would need to be implemented based on your NPC system
         }
     }
 
@@ -841,14 +833,9 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
-    /**
-     * Handle radio WebSocket messages for audio synchronization
-     * This method is called by the WebSocket client when radio events are received
-     */
+
     public void handleRadioWebSocketMessage(String messageType, Map<String, Object> messageData) {
 
-        // Forward radio events to the radio menu if it's open
-        // For now, we'll just log the events since the radio menu is a separate screen
         switch (messageType) {
             case "radio_station_joined":
                 break;
@@ -881,7 +868,6 @@ public class GameMenu extends InputAdapter implements Screen {
             if ("scoreboard_update".equals(messageType)) {
                 System.out.println("**[CLIENT][SCOREBOARD] GameMenu received scoreboard_update**");
                 System.out.println("**[CLIENT][SCOREBOARD] Payload keys=" + messageData.keySet() + "**");
-                // Forward the message to the current screen if it's a ScoreboardMenu
                 if (Main.getMain().getScreen() instanceof ScoreboardMenu) {
                     ScoreboardMenu scoreboardMenu = (ScoreboardMenu) Main.getMain().getScreen();
                     @SuppressWarnings("unchecked")
@@ -967,13 +953,10 @@ public class GameMenu extends InputAdapter implements Screen {
             if (App.getCurrentGame().getPlayers() != null) {
             }
 
-            // Try to set current player multiple ways
             if (App.getCurrentGame().getCurrentPlayer() == null) {
 
-                // First try setting to logged in user
                 setCurrentPlayerToLoggedInUser();
 
-                // If still null, try setting to first player in list
                 if (App.getCurrentGame().getCurrentPlayer() == null &&
                     App.getCurrentGame().getPlayers() != null &&
                     !App.getCurrentGame().getPlayers().isEmpty()) {
@@ -981,7 +964,6 @@ public class GameMenu extends InputAdapter implements Screen {
                     App.getCurrentGame().setCurrentPlayer(firstPlayer);
                 }
 
-                // If still null, try creating a new player for logged in user
                 if (App.getCurrentGame().getCurrentPlayer() == null && App.getLoggedInUser() != null) {
                     Player newPlayer = new Player(App.getLoggedInUser(), new Location(0, 0), false, new Refrigrator(), new ArrayList<>(), null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
 
@@ -1005,10 +987,8 @@ public class GameMenu extends InputAdapter implements Screen {
         initializeLighting();
         initializeWeatherSystem();
 
-        // Initialize WebSocket client for real-time updates
         initializeWebSocketClient();
 
-        // Initialize NPC movement
         initializeNPCMovement();
 
         float clockSize = 100f;
@@ -1056,9 +1036,7 @@ public class GameMenu extends InputAdapter implements Screen {
         initializeQuestButton();
         initializeScoreboardButton();
 
-        // Initialize reaction system
         reactionRenderer = new ReactionRenderer(batch, font);
-        // Initialize reaction menu with null player initially, will be updated when needed
         reactionMenu = new ReactionMenu(stage, skin, null, new ReactionMenu.ReactionMenuCallback() {
             @Override
             public void onReactionSelected(Reaction reaction) {
@@ -1098,7 +1076,6 @@ public class GameMenu extends InputAdapter implements Screen {
                 smileTexturesLoaded = true; // Mark textures as loaded
             } catch (Exception e) {
                 e.printStackTrace();
-                // Create emergency textures if loading fails
                 try {
                     Pixmap pixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
                     pixmap.setColor(Color.YELLOW);
@@ -1108,7 +1085,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     for (int i = 0; i < smileTextures.length; i++) {
                         smileTextures[i] = emergencyTexture;
                     }
-                    smileTexturesLoaded = true; // Mark textures as loaded even with emergency texture
+                    smileTexturesLoaded = true;
                 } catch (Exception emergencyException) {
                 }
             }
@@ -1138,7 +1115,6 @@ public class GameMenu extends InputAdapter implements Screen {
         energyBars = new HashMap<>();
         craftBars = new IdentityHashMap<>();
 
-        // Initialize talk system
         playerMessages = new HashMap<>();
         messageTimers = new HashMap<>();
 
@@ -1156,12 +1132,11 @@ public class GameMenu extends InputAdapter implements Screen {
             Label nameLabel = new Label(p.getUser().getUserName(), skin);
             nameLabel.setFontScale(1.5f);
 
-            // Add turn indicator for multiplayer
             String turnIndicator = "";
             if (App.getCurrentGame().isMultiplayer() && App.getCurrentGame().getCurrentPlayer() != null) {
                 if (p.equals(App.getCurrentGame().getCurrentPlayer())) {
                     turnIndicator = " (Current Turn)";
-                    nameLabel.setColor(Color.YELLOW); // Highlight current player
+                    nameLabel.setColor(Color.YELLOW);
                 } else {
                     nameLabel.setColor(Color.WHITE);
                 }
@@ -1223,7 +1198,6 @@ public class GameMenu extends InputAdapter implements Screen {
         updateGiftAnimation(delta);
         updateTalkMessages(delta);
 
-        // Disabled NPC movements - waiting for command
         updateNPCMovements(delta);
 
         if (errorLabel.isVisible()) {
@@ -1238,12 +1212,10 @@ public class GameMenu extends InputAdapter implements Screen {
 
         Player player = getCurrentPlayerCharacter();
 
-        // Safety check: if no current player found, use the default current player
         if (player == null) {
             player = App.getCurrentPlayerLazy();
         }
 
-        // Additional safety check: if still no player, skip rendering
         if (player == null) {
             return;
         }
@@ -1259,7 +1231,6 @@ public class GameMenu extends InputAdapter implements Screen {
         float scaledY = py * 100;
 
         if (!showingAllMap) {
-            // Update camera to follow the current player's character
             updateCameraToPlayer();
         }
 
@@ -1268,7 +1239,6 @@ public class GameMenu extends InputAdapter implements Screen {
 
         batch.setProjectionMatrix(camera.combined);
 
-        // Safety check: ensure batch is not already begun
         if (!batch.isDrawing()) {
             batch.begin();
         }
@@ -3756,13 +3726,9 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
 
-        // Update dialog title with friend count
-        // friendsDialog.setTitle("Friends Status (" + friendCount + " friends)");
-
         if (!hasFriends) {
             friendsTable.add(new Label("No friends yet. Start talking to other players!", skin)).colspan(5).pad(10);
 
-            // Add a test button to demonstrate the talk functionality
             friendsTable.row();
             Label testLabel = new Label("Talk Feature:", skin);
             testLabel.setColor(Color.YELLOW);
@@ -5157,17 +5123,13 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void showNPCChatInterface(String npcName) {
-        // Create a full-screen chat interface
         showingNPCFullScreenMenu = true;
 
-        // Try to get the NPC from the village, but create a fallback if needed
         if (App.getCurrentGame().getNPCvillage() != null) {
             targetNPCForMenu = App.getCurrentGame().getNPCvillage().getNPCByName(npcName);
         }
 
-        // If we still don't have an NPC, create a temporary one for display purposes
         if (targetNPCForMenu == null) {
-            // Create a temporary NPC object just for the chat display
             Location tempLocation = new Location(0, 0);
             Shack tempShack = new Shack(new LocationOfRectangle(tempLocation, tempLocation));
             targetNPCForMenu = new org.example.Common.models.NPC.NPC(npcName, "Unknown", "Unknown", tempLocation, tempShack);
@@ -5181,11 +5143,9 @@ public class GameMenu extends InputAdapter implements Screen {
             npcMenuStage = new Stage(new ScreenViewport());
         }
 
-        // Store the original input processor before changing it
         originalNPCInputProcessor = Gdx.input.getInputProcessor();
         Gdx.input.setInputProcessor(npcMenuStage);
 
-        // Create the chat UI
         createNPCChatUI(npcName);
     }
 
@@ -5204,14 +5164,12 @@ public class GameMenu extends InputAdapter implements Screen {
         titleLabel.setColor(Color.WHITE);
         mainTable.add(titleLabel).colspan(3).pad(30).row();
 
-        // Create portrait image
         Actor portraitActor = createNPCPortrait(npcName);
         if (portraitActor != null) {
             portraitActor.setSize(180, 180);
             mainTable.add(portraitActor).colspan(3).center().pad(10).row();
         }
 
-        // Create chat history display
         Label chatHistoryLabel = new Label("", skin);
         chatHistoryLabel.setWrap(true);
         chatHistoryLabel.setAlignment(Align.topLeft);
@@ -5224,24 +5182,20 @@ public class GameMenu extends InputAdapter implements Screen {
 
         mainTable.add(chatScrollPane).expand().fill().pad(20).width(1000f).height(400f).row();
 
-        // Create input field
         TextField inputField = new TextField("", skin);
         inputField.setMessageText("Type your message here...");
         inputField.setSize(800f, 60f);
         inputField.setMaxLength(200);
 
-        // Create send button
         TextButton sendButton = new TextButton("Send", skin);
         sendButton.setSize(200f, 60f);
         sendButton.getLabel().setFontScale(1.5f);
 
-        // Create input row
         Table inputRow = new Table();
         inputRow.add(inputField).padRight(10);
         inputRow.add(sendButton);
         mainTable.add(inputRow).pad(20).row();
 
-        // Create close button
         TextButton closeButton = new TextButton("Close Chat", skin);
         closeButton.setSize(250f, 70f);
         closeButton.getLabel().setFontScale(1.6f);
@@ -5255,47 +5209,38 @@ public class GameMenu extends InputAdapter implements Screen {
         mainTable.add(closeButton).pad(20);
         npcMenuStage.addActor(mainTable);
 
-        // Store references for the send button listener
         final Label finalChatHistoryLabel = chatHistoryLabel;
         final TextField finalInputField = inputField;
         final ScrollPane finalChatScrollPane = chatScrollPane;
 
-        // Add send button listener
         sendButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 String message = finalInputField.getText().trim();
                 if (!message.isEmpty()) {
-                    // Add player message to chat
                     String currentChat = finalChatHistoryLabel.getText().toString();
                     String playerMessage = "You: " + message + "\n";
                     finalChatHistoryLabel.setText(currentChat + playerMessage);
 
-                    // Clear input field
                     finalInputField.setText("");
 
-                    // Generate NPC response
                     generateNPCResponse(npcName, message, finalChatHistoryLabel, finalChatScrollPane);
                 }
             }
         });
 
-        // Add enter key listener to input field
         inputField.addListener(new InputListener() {
             @Override
             public boolean keyDown(InputEvent event, int keycode) {
                 if (keycode == Input.Keys.ENTER) {
                     String message = finalInputField.getText().trim();
                     if (!message.isEmpty()) {
-                        // Add player message to chat
                         String currentChat = finalChatHistoryLabel.getText().toString();
                         String playerMessage = "You: " + message + "\n";
                         finalChatHistoryLabel.setText(currentChat + playerMessage);
 
-                        // Clear input field
                         finalInputField.setText("");
 
-                        // Generate NPC response
                         generateNPCResponse(npcName, message, finalChatHistoryLabel, finalChatScrollPane);
                     }
                     return true;
@@ -5304,35 +5249,28 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         });
 
-        // Set focus to input field
         inputField.setTextFieldListener(new TextField.TextFieldListener() {
             @Override
             public void keyTyped(TextField textField, char c) {
-                // Auto-focus the input field
                 if (!textField.hasKeyboardFocus()) {
                     textField.setCursorPosition(textField.getText().length());
                 }
             }
         });
 
-        // Set initial focus
         inputField.setCursorPosition(0);
     }
 
     private void generateNPCResponse(String npcName, String playerMessage, Label chatHistoryLabel, ScrollPane chatScrollPane) {
-        // Show typing indicator
         String currentChat = chatHistoryLabel.getText().toString();
         chatHistoryLabel.setText(currentChat + npcName + " is typing...\n");
 
-        // Generate response using AI
         new Thread(() -> {
             try {
                 String response = generateAIResponse(npcName, playerMessage);
 
-                // Update UI on the main thread
                 Gdx.app.postRunnable(() -> {
                     String updatedChat = chatHistoryLabel.getText().toString();
-                    // Remove typing indicator and add response
                     updatedChat = updatedChat.replace(npcName + " is typing...\n", "");
                     chatHistoryLabel.setText(updatedChat + npcName + ": " + response + "\n");
 
@@ -5340,7 +5278,6 @@ public class GameMenu extends InputAdapter implements Screen {
                     chatScrollPane.scrollTo(0, 0, 0, 0);
                 });
             } catch (Exception e) {
-                // Handle error on main thread
                 Gdx.app.postRunnable(() -> {
                     String updatedChat = chatHistoryLabel.getText().toString();
                     updatedChat = updatedChat.replace(npcName + " is typing...\n", "");
@@ -5352,7 +5289,6 @@ public class GameMenu extends InputAdapter implements Screen {
 
     private String generateAIResponse(String npcName, String playerMessage) {
         try {
-            // Get NPC details
             org.example.Common.models.NPC.NPC npc = null;
             if (App.getCurrentGame().getNPCvillage() != null) {
                 npc = App.getCurrentGame().getNPCvillage().getNPCByName(npcName);
@@ -5362,19 +5298,16 @@ public class GameMenu extends InputAdapter implements Screen {
                 return "Hello! I'm " + npcName + ". Nice to meet you!";
             }
 
-            // Get current game context
             int hour = App.getCurrentGame().getDate().getHour();
             String season = App.getCurrentGame().getDate().getSeason().name().toLowerCase();
             String weather = App.getCurrentGame().getDate().getWeather().name().toLowerCase();
 
-            // Build context for AI
             String context = String.format(
                 "NPC: %s, Job: %s, Personality: %s, Season: %s, Weather: %s, Hour: %d. " +
                 "Player message: %s",
                 npcName, npc.getJob(), npc.getPersonality(), season, weather, hour, playerMessage
             );
 
-            // Use the existing NpcAI class
             return org.example.Common.models.Utils.NpcAI.generateDialogue(npc, context);
 
         } catch (Exception e) {
@@ -5384,7 +5317,6 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void showNPCGiftMenu(org.example.Common.models.NPC.NPC npc) {
-        // Create a full-screen gift menu
         showingNPCFullScreenMenu = true;
         targetNPCForMenu = npc;
 
@@ -5396,11 +5328,9 @@ public class GameMenu extends InputAdapter implements Screen {
             npcMenuStage = new Stage(new ScreenViewport());
         }
 
-        // Store the original input processor before changing it
         originalNPCInputProcessor = Gdx.input.getInputProcessor();
         Gdx.input.setInputProcessor(npcMenuStage);
 
-        // Create the gift menu UI
         createNPCGiftMenuUI(npc);
     }
 
@@ -5425,7 +5355,6 @@ public class GameMenu extends InputAdapter implements Screen {
         titleLabel.setColor(Color.WHITE);
         mainTable.add(titleLabel).colspan(3).pad(50).row();
 
-        // Create portrait image
         Actor portraitActor = createNPCPortrait(npc.getName());
         if (portraitActor != null) {
             portraitActor.setSize(100, 100);
@@ -5438,11 +5367,9 @@ public class GameMenu extends InputAdapter implements Screen {
         instructionLabel.setColor(Color.WHITE);
         mainTable.add(instructionLabel).colspan(3).center().pad(10).row();
 
-        // Create content table for items
         Table contentTable = new Table();
         contentTable.pad(10);
 
-        // Get player's inventory items
         Map<Item, Integer> inventoryItems = currentPlayer.getBackPack().getItems();
 
         if (inventoryItems.isEmpty()) {
@@ -5464,7 +5391,7 @@ public class GameMenu extends InputAdapter implements Screen {
                         NPCcontroller npcController = new NPCcontroller();
                         String result = npcController.giftNPC(npc.getName(), item.getName());
                         showNotification(result, true);
-                        // Start gift animation above current player's head
+
                         startGiftAnimation();
                     }
                 });
@@ -5472,7 +5399,6 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         }
 
-        // Create scroll pane for items
         ScrollPane scrollPane = new ScrollPane(contentTable, skin);
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFadeScrollBars(false);
@@ -5746,6 +5672,7 @@ public class GameMenu extends InputAdapter implements Screen {
             mainTable.add(portraitActor).colspan(3).center().pad(20).row();
         }
 
+        TextButton talkButton = new TextButton("Talk", skin);
         TextButton giftButton = new TextButton("هgift", skin);
         TextButton questButton = new TextButton("quests list", skin);
         TextButton friendshipButton = new TextButton("show friendship level", skin);
@@ -5755,18 +5682,29 @@ public class GameMenu extends InputAdapter implements Screen {
         float buttonHeight = 90f;
         float buttonSpacing = 30f;
 
+        talkButton.setSize(buttonWidth, buttonHeight);
         giftButton.setSize(buttonWidth, buttonHeight);
         questButton.setSize(buttonWidth, buttonHeight);
         friendshipButton.setSize(buttonWidth, buttonHeight);
         cancelButton.setSize(buttonWidth, buttonHeight);
 
+        talkButton.getLabel().setFontScale(1.8f);
         giftButton.getLabel().setFontScale(1.8f);
         questButton.getLabel().setFontScale(1.8f);
         friendshipButton.getLabel().setFontScale(1.8f);
         cancelButton.getLabel().setFontScale(1.5f);
 
-        // Store the NPC reference locally to avoid null pointer issues
         final org.example.Common.models.NPC.NPC npcRef = targetNPCForMenu;
+
+        talkButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (npcRef != null) {
+                    closeNPCFullScreenMenu();
+                    showNPCChatInterface(npcRef.getName());
+                }
+            }
+        });
 
         giftButton.addListener(new ClickListener() {
             @Override
@@ -5805,6 +5743,7 @@ public class GameMenu extends InputAdapter implements Screen {
             }
         });
 
+        mainTable.add(talkButton).pad(buttonSpacing).row();
         mainTable.add(giftButton).pad(buttonSpacing).row();
         mainTable.add(questButton).pad(buttonSpacing).row();
         mainTable.add(friendshipButton).pad(buttonSpacing).row();
