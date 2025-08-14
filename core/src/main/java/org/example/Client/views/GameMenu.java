@@ -1855,6 +1855,56 @@ public class GameMenu extends InputAdapter implements Screen {
             openChatMenu();
             return true;
         }
+        if (keycode == Input.Keys.Y) { // Unused key for scoreboard stress test
+            try {
+                if (App.getCurrentGame() != null && App.getCurrentGame().getPlayers() != null) {
+                    java.util.Random rand = new java.util.Random();
+                    java.util.List<java.util.Map<String, Object>> updates = new java.util.ArrayList<>();
+                    for (org.example.Common.models.Fundementals.Player p : App.getCurrentGame().getPlayers()) {
+                        // Assign random values
+                        int money = 100 + rand.nextInt(1_000_000);
+                        int missions = rand.nextInt(50);
+                        int skills = rand.nextInt(40);
+                        p.setMoney(money);
+                        p.setMissions(missions);
+                        p.setSkills(skills);
+                        java.util.Map<String, Object> one = new java.util.HashMap<>();
+                        one.put("playerId", p.getUser().getUserName());
+                        one.put("money", money);
+                        one.put("missions", missions);
+                        one.put("skills", skills);
+                        updates.add(one);
+                    }
+                    // Notify server with bulk updates so it becomes the source of truth and broadcasts
+                    try {
+                        if (App.getCurrentGame().getNetworkCommandSender() != null && App.getWebSocketClient() != null) {
+                            String gameId = App.getCurrentGame().getNetworkCommandSender().getCurrentGameId();
+                            java.util.Map<String, Object> message = new java.util.HashMap<>();
+                            message.put("type", "player_fields_update_bulk");
+                            message.put("gameId", gameId);
+                            message.put("updates", updates);
+                            message.put("timestamp", System.currentTimeMillis());
+                            System.out.println("**[CLIENT][SCOREBOARD] Sending player_fields_update_bulk | gameId=" + gameId +
+                                " | updatesSize=" + updates.size() + (updates.isEmpty() ? "" : (" | first=" + updates.get(0))) + "**");
+                            App.getWebSocketClient().send(message);
+                        } else {
+                            System.out.println("**[CLIENT][SCOREBOARD] Cannot send player_fields_update_bulk: missing sender or WS**");
+                        }
+                    } catch (Exception e) {
+                        System.out.println("**[CLIENT][SCOREBOARD] Error sending player_fields_update_bulk: " + e.getMessage() + "**");
+                    }
+                    // Ask server to recompute and broadcast sorted board (if multiplayer)
+                    if (App.getCurrentGame().isMultiplayer()) {
+                        new org.example.Client.controllers.ScoreboardController()
+                            .requestScoreboardUpdate(org.example.Common.models.enums.ScoreboardSortType.MONEY);
+                    }
+                    System.out.println("**[CLIENT][SCOREBOARD] Cheat applied: randomized money/missions/skills for all players**");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return true;
+        }
 //        if (keycode == Input.Keys.N) {
 //            // Test NPC interaction
 //            if (App.getCurrentGame().getNPCvillage() != null && !App.getCurrentGame().getNPCvillage().getAllNPCs().isEmpty()) {

@@ -218,6 +218,10 @@ public class GameWebSocketHandler {
                     handleScoreboardUpdate(ctx, userId, messageData);
                     break;
 
+                case "player_fields_update_bulk":
+                    handlePlayerFieldsUpdateBulk(ctx, userId, messageData);
+                    break;
+
                 // Radio event handlers
                 case "radio_station_joined":
                     handleRadioStationJoined(ctx, userId, messageData);
@@ -1006,6 +1010,52 @@ public class GameWebSocketHandler {
         } catch (Exception e) {
             System.out.println("💥💥💥 [SERVER] Error handling scoreboard update: " + e.getMessage() + " 💥💥💥");
             logger.error("Error handling scoreboard update", e);
+        }
+    }
+
+    private void handlePlayerFieldsUpdateBulk(WsContext ctx, String userId, Map<String, Object> messageData) {
+        try {
+            String gameId = (String) messageData.get("gameId");
+            @SuppressWarnings("unchecked")
+            java.util.List<java.util.Map<String, Object>> updates = (java.util.List<java.util.Map<String, Object>>) messageData.get("updates");
+            System.out.println("**[SERVER][SCOREBOARD] handlePlayerFieldsUpdateBulk | fromUser=" + userId +
+                " | gameId=" + gameId + " | updatesSize=" + (updates != null ? updates.size() : -1) + "**");
+
+            if (gameId == null || updates == null) {
+                sendError(ctx, "gameId and updates are required for player_fields_update_bulk");
+                return;
+            }
+
+            GameInstance gameInstance = sessionManager.getGameInstance(gameId);
+            if (gameInstance == null) {
+                sendError(ctx, "Game not found for player_fields_update_bulk");
+                return;
+            }
+
+            int applied = 0;
+            for (java.util.Map<String, Object> one : updates) {
+                String playerId = (String) one.get("playerId");
+                Number moneyN = (Number) one.get("money");
+                Number missionsN = (Number) one.get("missions");
+                Number skillsN = (Number) one.get("skills");
+                if (playerId == null) continue;
+                Player player = gameInstance.getPlayer(playerId);
+                if (player == null) continue;
+                if (moneyN != null) player.setMoney(moneyN.intValue());
+                if (missionsN != null) player.setMissions(missionsN.intValue());
+                if (skillsN != null) player.setSkills(skillsN.intValue());
+                applied++;
+            }
+
+            System.out.println("**[SERVER][SCOREBOARD] Bulk update applied count=" + applied + "**");
+
+            // Recompute and broadcast scoreboard
+            gameInstance.updateScoreboard(null);
+            gameInstance.broadcastScoreboardUpdate();
+
+        } catch (Exception e) {
+            System.out.println("**[SERVER][SCOREBOARD] Error in handlePlayerFieldsUpdateBulk: " + e.getMessage() + "**");
+            logger.error("Error handling player_fields_update_bulk", e);
         }
     }
 
