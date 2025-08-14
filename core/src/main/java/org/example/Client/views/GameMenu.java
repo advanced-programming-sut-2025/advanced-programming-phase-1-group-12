@@ -47,6 +47,7 @@ import org.example.Common.models.ToolsPackage.Tools;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.List;
+import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.GL20;
@@ -137,6 +138,11 @@ public class GameMenu extends InputAdapter implements Screen {
     private Map<Craft, ProgressBar> craftBars;
     private ProgressBar wateringCanBar;
     private Label wateringCanLabel;
+
+    // Talk system variables
+    private Map<Player, String> playerMessages;
+    private Map<Player, Float> messageTimers;
+    private final float MESSAGE_DISPLAY_TIME = 5.0f; // 5 seconds
 
     private float timeSinceError = 0f;
 
@@ -1132,6 +1138,10 @@ public class GameMenu extends InputAdapter implements Screen {
         energyBars = new HashMap<>();
         craftBars = new IdentityHashMap<>();
 
+        // Initialize talk system
+        playerMessages = new HashMap<>();
+        messageTimers = new HashMap<>();
+
         float barHeight = 20f;
         float yOffset = stage.getHeight() - 40f;
         float spacing = 30f;
@@ -1211,6 +1221,7 @@ public class GameMenu extends InputAdapter implements Screen {
         updateFlowerAnimation(delta);
         updateRingAnimation(delta);
         updateGiftAnimation(delta);
+        updateTalkMessages(delta);
 
         // Disabled NPC movements - waiting for command
         updateNPCMovements(delta);
@@ -1401,6 +1412,39 @@ public class GameMenu extends InputAdapter implements Screen {
                 otherPlayer.getPlayerSprite().getHeight());
             font.draw(batch, otherPlayer.getUser().getUserName(), farmCornerX, farmCornerY + otherPlayer.getPlayerSprite().getHeight() + 10);
 
+            // Render talk messages above player's head
+            if (playerMessages.containsKey(otherPlayer)) {
+                String message = playerMessages.get(otherPlayer);
+                Float timer = messageTimers.get(otherPlayer);
+                if (timer != null && timer > 0) {
+                    // Calculate alpha based on remaining time
+                    float alpha = Math.min(1.0f, timer / MESSAGE_DISPLAY_TIME);
+
+                    // Save current font color and scale
+                    Color originalColor = font.getColor();
+                    float originalScale = font.getData().scaleX;
+
+                    // Set font color with alpha and larger scale for better visibility
+                    font.setColor(1f, 1f, 0f, alpha); // Yellow color for messages
+                    font.getData().setScale(0.9f);
+
+                    // Draw message above player name with some padding
+                    float messageY = farmCornerY + otherPlayer.getPlayerSprite().getHeight() + 35;
+                    float messageX = farmCornerX;
+
+                    // Draw text shadow for better visibility
+                    font.setColor(0f, 0f, 0f, alpha * 0.7f);
+                    font.draw(batch, message, messageX + 1, messageY + 1);
+
+                    // Draw main text
+                    font.setColor(1f, 1f, 0f, alpha);
+                    font.draw(batch, message, messageX, messageY);
+
+                    // Restore original font color and scale
+                    font.setColor(originalColor);
+                    font.getData().setScale(originalScale);
+                }
+            }
         }
         if (showingAllMap) {
             for (Player otherPlayer : App.getCurrentGame().getPlayers()) {
@@ -3622,12 +3666,13 @@ public class GameMenu extends InputAdapter implements Screen {
 
 
     public void showFriendsWindow() {
+        System.out.println("showFriendsWindow() called");
         Skin skin = GameAssetManager.skin;
         friendsDialog = new Dialog("Friends Status", skin);
         friendsDialog.setModal(true);
         friendsDialog.setMovable(true);
         friendsDialog.setResizable(true);
-        friendsDialog.setSize(600, 500);
+        friendsDialog.setSize(700, 500);
 
         // Create main content table
         Table mainTable = new Table();
@@ -3646,12 +3691,15 @@ public class GameMenu extends InputAdapter implements Screen {
         friendsTable.add(new Label("Friend", skin)).width(150).pad(5);
         friendsTable.add(new Label("Level", skin)).width(80).pad(5);
         friendsTable.add(new Label("XP Progress", skin)).width(120).pad(5);
-        friendsTable.add(new Label("Actions", skin)).width(200).pad(5);
+        friendsTable.add(new Label("Actions", skin)).width(160).pad(5);
         friendsTable.row();
 
         // Get current player's relationships
         Player currentPlayer = App.getCurrentPlayerLazy();
         GameMenuController controller = new GameMenuController();
+
+        System.out.println("Current player: " + (currentPlayer != null ? currentPlayer.getUser().getUserName() : "null"));
+        System.out.println("Number of relationships: " + (currentPlayer != null ? currentPlayer.getRelationShips().size() : 0));
 
         boolean hasFriends = false;
         int friendCount = 0;
@@ -3690,7 +3738,19 @@ public class GameMenu extends InputAdapter implements Screen {
                         showGiftMenu(otherPlayer.getUser().getUserName());
                     }
                 });
-                friendsTable.add(giftButton).width(100).pad(5);
+                friendsTable.add(giftButton).width(70).pad(3);
+
+                // Talk button
+                TextButton talkButton = new TextButton("Talk", skin);
+                talkButton.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        System.out.println("Talk button clicked for: " + otherPlayer.getUser().getUserName());
+                        showTalkDialog(otherPlayer.getUser().getUserName());
+                    }
+                });
+                friendsTable.add(talkButton).width(70).pad(3);
+                System.out.println("Added Talk button for: " + otherPlayer.getUser().getUserName());
 
                 friendsTable.row();
             }
@@ -3700,7 +3760,22 @@ public class GameMenu extends InputAdapter implements Screen {
         // friendsDialog.setTitle("Friends Status (" + friendCount + " friends)");
 
         if (!hasFriends) {
-            friendsTable.add(new Label("No friends yet. Start talking to other players!", skin)).colspan(4).pad(10);
+            friendsTable.add(new Label("No friends yet. Start talking to other players!", skin)).colspan(5).pad(10);
+
+            // Add a test button to demonstrate the talk functionality
+            friendsTable.row();
+            Label testLabel = new Label("Talk Feature:", skin);
+            testLabel.setColor(Color.YELLOW);
+            friendsTable.add(testLabel).colspan(5).pad(10).row();
+
+            TextButton testTalkButton = new TextButton("Talk", skin);
+            testTalkButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    showTalkDialog("TestPlayer");
+                }
+            });
+            friendsTable.add(testTalkButton).colspan(5).pad(10);
         }
 
         // Create scroll pane for friends list
@@ -3788,6 +3863,146 @@ public class GameMenu extends InputAdapter implements Screen {
 
         giftDialog.getContentTable().add(content);
         giftDialog.show(stage);
+    }
+
+    private void showTalkDialog(String friendUsername) {
+        Skin skin = GameAssetManager.skin;
+        Dialog talkDialog = new Dialog("Talk to " + friendUsername, skin);
+        talkDialog.setModal(true);
+        talkDialog.setSize(500, 300);
+
+        Table content = new Table();
+        content.pad(15);
+
+        // Message input
+        Label messageLabel = new Label("Type your message:", skin);
+        content.add(messageLabel).pad(5).row();
+
+        TextField messageField = new TextField("", skin);
+        messageField.setMessageText("Enter your message here... (max 50 characters)");
+        messageField.setSize(400, 40);
+        messageField.setMaxLength(50); // Limit message length
+        content.add(messageField).width(400).height(40).pad(5).row();
+
+        // Buttons
+        Table buttonTable = new Table();
+
+        TextButton sendButton = new TextButton("Send", skin);
+        sendButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                String message = messageField.getText().trim();
+                if (!message.isEmpty()) {
+                    sendTalkMessage(friendUsername, message);
+                    talkDialog.hide();
+                }
+            }
+        });
+
+        TextButton cancelButton = new TextButton("Cancel", skin);
+        cancelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                talkDialog.hide();
+            }
+        });
+
+        buttonTable.add(sendButton).width(120).height(40).pad(10);
+        buttonTable.add(cancelButton).width(120).height(40).pad(10);
+
+        content.add(buttonTable).pad(10);
+
+        talkDialog.getContentTable().add(content);
+        talkDialog.show(stage);
+
+        // Set focus to message field
+        messageField.setCursorPosition(0);
+
+        // Add enter key listener
+        messageField.addListener(new InputListener() {
+            @Override
+            public boolean keyDown(InputEvent event, int keycode) {
+                if (keycode == Input.Keys.ENTER) {
+                    String message = messageField.getText().trim();
+                    if (!message.isEmpty()) {
+                        sendTalkMessage(friendUsername, message);
+                        talkDialog.hide();
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+    }
+
+    private void sendTalkMessage(String targetUsername, String message) {
+        Player currentPlayer = App.getCurrentPlayerLazy();
+        Player targetPlayer = App.getCurrentGame().getPlayerByName(targetUsername);
+
+        // Handle test case
+        if (targetUsername.equals("TestPlayer")) {
+            // Check if there are other players in the game
+            List<Player> allPlayers = App.getCurrentGame().getPlayers();
+            Player currentPlayerForTest = App.getCurrentPlayerLazy();
+
+            if (allPlayers.size() <= 1) {
+                showNotification("No other players in the game to talk to!", false);
+                return;
+            }
+
+            // Find the closest other player
+            Player closestPlayer = null;
+            float minDistance = Float.MAX_VALUE;
+
+            for (Player otherPlayer : allPlayers) {
+                if (!otherPlayer.equals(currentPlayerForTest)) {
+                    float distance = Math.abs(currentPlayerForTest.getUserLocation().getxAxis() - otherPlayer.getUserLocation().getxAxis()) +
+                        Math.abs(currentPlayerForTest.getUserLocation().getyAxis() - otherPlayer.getUserLocation().getyAxis());
+
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestPlayer = otherPlayer;
+                    }
+                }
+            }
+
+            // Check if the closest player is adjacent
+            if (minDistance > 2) {
+                showNotification("Players must be adjacent to talk! Closest player is " + minDistance + " tiles away.", false);
+                return;
+            }
+
+            // Display the message above the closest player's head
+            String senderName = currentPlayerForTest.getUser().getUserName();
+            String displayMessage = senderName + ": " + message;
+            playerMessages.put(closestPlayer, displayMessage);
+            messageTimers.put(closestPlayer, MESSAGE_DISPLAY_TIME);
+
+            showNotification("Message sent to " + closestPlayer.getUser().getUserName() + "!", true);
+            return;
+        }
+
+        if (targetPlayer == null) {
+            showNotification("Player not found!", false);
+            return;
+        }
+
+        // Check if players are adjacent
+        float distance = Math.abs(currentPlayer.getUserLocation().getxAxis() - targetPlayer.getUserLocation().getxAxis()) +
+            Math.abs(currentPlayer.getUserLocation().getyAxis() - targetPlayer.getUserLocation().getyAxis());
+
+        if (distance > 2) {
+            showNotification("Players must be adjacent to talk!", false);
+            return;
+        }
+
+        // Display the message above the target player's head
+        String senderName = currentPlayer.getUser().getUserName();
+        String displayMessage = senderName + ": " + message;
+        playerMessages.put(targetPlayer, displayMessage);
+        messageTimers.put(targetPlayer, MESSAGE_DISPLAY_TIME);
+
+        showNotification("Message sent to " + targetUsername + "!", true);
     }
 
     private void showSendGiftDialog(String friendUsername) {
@@ -6418,6 +6633,27 @@ public class GameMenu extends InputAdapter implements Screen {
                 isGifting = false;
                 currentGiftFrame = 0;
             }
+        }
+    }
+
+    private void updateTalkMessages(float delta) {
+        // Update message timers and remove expired messages
+        List<Player> playersToRemove = new ArrayList<>();
+        for (Map.Entry<Player, Float> entry : messageTimers.entrySet()) {
+            Player player = entry.getKey();
+            Float timer = entry.getValue();
+
+            if (timer > 0) {
+                messageTimers.put(player, timer - delta);
+            } else {
+                playersToRemove.add(player);
+            }
+        }
+
+        // Remove expired messages
+        for (Player player : playersToRemove) {
+            playerMessages.remove(player);
+            messageTimers.remove(player);
         }
     }
 
