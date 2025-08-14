@@ -13,6 +13,7 @@ public class PlayerScore implements Serializable, Comparable<PlayerScore> {
     private int money;
     private int completedMissions;
     private int totalSkillLevel;
+    private int score;
     private int rank;
     private long lastUpdated;
 
@@ -27,6 +28,7 @@ public class PlayerScore implements Serializable, Comparable<PlayerScore> {
         this.money = player.getMoney();
         this.completedMissions = getPlayerCompletedMissions(player);
         this.totalSkillLevel = getPlayerTotalSkills(player);
+        this.score = player.getScore();
         this.rank = 0; // Will be set by scoreboard manager
         this.lastUpdated = System.currentTimeMillis();
     }
@@ -43,6 +45,7 @@ public class PlayerScore implements Serializable, Comparable<PlayerScore> {
         this.money = player.getMoney();
         this.completedMissions = getPlayerCompletedMissions(player);
         this.totalSkillLevel = getPlayerTotalSkills(player);
+        this.score = player.getScore();
         this.lastUpdated = System.currentTimeMillis();
     }
 
@@ -89,6 +92,13 @@ public class PlayerScore implements Serializable, Comparable<PlayerScore> {
 
     public int getTotalSkillLevel() {
         return totalSkillLevel;
+    }
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
     }
 
     public void setTotalSkillLevel(int totalSkillLevel) {

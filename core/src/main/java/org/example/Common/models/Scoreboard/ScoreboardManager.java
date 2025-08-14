@@ -107,7 +107,8 @@ public class ScoreboardManager implements Serializable {
                 rankedScores.sort((a, b) -> Integer.compare(b.getTotalSkillLevel(), a.getTotalSkillLevel()));
                 break;
             case OVERALL:
-                rankedScores.sort(PlayerScore::compareTo);
+                // Overall ranking should be based on total score
+                rankedScores.sort((a, b) -> Integer.compare(b.getScore(), a.getScore()));
                 break;
         }
         

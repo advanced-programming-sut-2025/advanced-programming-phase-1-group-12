@@ -61,6 +61,7 @@ public class Player {
     private ArrayList<Craft>crafts = new ArrayList<>();
     private int missions;
     private int skills;
+    private int score;
 
     protected Player() {
         // For Jackson deserialization only
@@ -94,6 +95,7 @@ public class Player {
         this.money = 1_000_000;
         this.missions =0;
         this.skills = 0;
+        this.score = 0;
         this.partner = null;
         this.recepies = new HashMap<>();
         this.cookingRecepies = new HashMap<>();
@@ -275,6 +277,7 @@ public class Player {
 
     public void setMoney(int money) {
         this.money = money;
+        recalculateScoreFromAttributes();
 
         // Update scoreboard if in multiplayer mode
         if (org.example.Common.models.Fundementals.App.getCurrentGame() != null &&
@@ -556,6 +559,7 @@ public class Player {
 
     public void setSkills(int skills) {
         this.skills = skills;
+        recalculateScoreFromAttributes();
         if (org.example.Common.models.Fundementals.App.getCurrentGame() != null &&
             org.example.Common.models.Fundementals.App.getCurrentGame().isMultiplayer() &&
             org.example.Common.models.Fundementals.App.getCurrentGame().getScoreboardManager() != null) {
@@ -569,5 +573,17 @@ public class Player {
             total += ability.getLevel();
         }
         setSkills(total);
+    }
+
+
+
+    private void recalculateScoreFromAttributes() {
+        // score = money/1000 + skills*100
+        int computed = (this.money / 1000) + (this.skills * 100);
+        this.score = computed;
+    }
+
+    public int getScore() {
+        return score;
     }
 }

@@ -912,6 +912,7 @@ public class GameInstance {
                     playerData.put("money", score.getMoney());
                     playerData.put("completedMissions", score.getCompletedMissions());
                     playerData.put("totalSkillLevel", score.getTotalSkillLevel());
+                    playerData.put("score", score.getScore());
                     playerData.put("lastUpdated", score.getLastUpdated());
                     playerScores.add(playerData);
                 }

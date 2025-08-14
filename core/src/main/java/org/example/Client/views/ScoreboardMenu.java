@@ -151,12 +151,16 @@ public class ScoreboardMenu implements Screen, Disposable {
         Label skillsHeader = new Label("Skills", skin);
         skillsHeader.setColor(Color.YELLOW);
         skillsHeader.setFontScale(1.2f);
+        Label totalScoreHeader = new Label("Score", skin);
+        totalScoreHeader.setColor(Color.YELLOW);
+        totalScoreHeader.setFontScale(1.2f);
 
         scoreboardTable.add(rankHeader).width(80).pad(5);
         scoreboardTable.add(playerHeader).width(150).pad(5);
         scoreboardTable.add(moneyHeader).width(120).pad(5);
         scoreboardTable.add(missionsHeader).width(100).pad(5);
         scoreboardTable.add(skillsHeader).width(100).pad(5);
+        scoreboardTable.add(totalScoreHeader).width(120).pad(5);
         scoreboardTable.row();
 
 
@@ -245,12 +249,16 @@ public class ScoreboardMenu implements Screen, Disposable {
         Label skillsHeader = new Label("Skills", skin);
         skillsHeader.setColor(Color.YELLOW);
         skillsHeader.setFontScale(1.2f);
+        Label totalScoreHeader2 = new Label("Score", skin);
+        totalScoreHeader2.setColor(Color.YELLOW);
+        totalScoreHeader2.setFontScale(1.2f);
 
         scoreboardTable.add(rankHeader).width(80).pad(5);
         scoreboardTable.add(playerHeader).width(150).pad(5);
         scoreboardTable.add(moneyHeader).width(120).pad(5);
         scoreboardTable.add(missionsHeader).width(100).pad(5);
         scoreboardTable.add(skillsHeader).width(100).pad(5);
+        scoreboardTable.add(totalScoreHeader2).width(120).pad(5);
         scoreboardTable.row();
 
         // Populate rows
@@ -262,6 +270,7 @@ public class ScoreboardMenu implements Screen, Disposable {
                 int money = (Integer) playerData.getOrDefault("money", 0);
                 int missions = (Integer) playerData.getOrDefault("completedMissions", 0);
                 int skills = (Integer) playerData.getOrDefault("totalSkillLevel", 0);
+                int totalScore = (Integer) playerData.getOrDefault("score", 0);
                 System.out.println("**[CLIENT][SCOREBOARD] Row -> rank=" + rank + " name=" + playerName + " nick=" + nickname +
                     " money=" + money + " missions=" + missions + " skills=" + skills + "**");
 
@@ -279,12 +288,14 @@ public class ScoreboardMenu implements Screen, Disposable {
                 Label moneyLabel = new Label(formatMoney(money), skin);
                 Label missionsLabel = new Label(String.valueOf(missions), skin);
                 Label skillsLabel = new Label(String.valueOf(skills), skin);
+                Label scoreLabel = new Label(String.valueOf(totalScore), skin);
 
                 rankLabel.setColor(textColor);
                 nameLabel.setColor(textColor);
                 moneyLabel.setColor(textColor);
                 missionsLabel.setColor(textColor);
                 skillsLabel.setColor(textColor);
+                scoreLabel.setColor(textColor);
 
                 // Track labels if needed for future updates
                 rankLabels.add(rankLabel);
@@ -298,6 +309,7 @@ public class ScoreboardMenu implements Screen, Disposable {
                 scoreboardTable.add(moneyLabel).width(120).pad(5);
                 scoreboardTable.add(missionsLabel).width(100).pad(5);
                 scoreboardTable.add(skillsLabel).width(100).pad(5);
+                scoreboardTable.add(scoreLabel).width(120).pad(5);
                 scoreboardTable.row();
             }
         }
