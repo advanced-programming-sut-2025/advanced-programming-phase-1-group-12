@@ -48,12 +48,9 @@ public class NPCController {
      * Initialize NPC locations when game is ready
      */
     public void initializeWhenReady() {
-        System.out.println("DEBUG: NPCController.initializeWhenReady() called");
         if (App.getCurrentGame() != null && App.getCurrentGame().getNPCvillage() != null) {
-            System.out.println("DEBUG: Game and NPCvillage are ready, initializing locations...");
             initializeLocations();
         } else {
-            System.out.println("DEBUG: Game or NPCvillage not ready yet");
         }
     }
 
@@ -77,7 +74,6 @@ public class NPCController {
         NPCvillage npcVillage = App.getCurrentGame().getNPCvillage();
         if (npcVillage == null) return;
 
-        System.out.println("DEBUG: Initializing NPC locations...");
 
         for (NPC npc : npcVillage.getAllNPCs()) {
             String npcName = npc.getName();
@@ -102,12 +98,9 @@ public class NPCController {
                 npcWorkLocations.put(npcName, workLocation);
             }
 
-            System.out.println("DEBUG: NPC " + npcName + " - Home: (" + homeLocation.getxAxis() + "," + homeLocation.getyAxis() +
-                ") Work: (" + workLocation.getxAxis() + "," + workLocation.getyAxis() +
-                ") Public: (" + publicLocation.getxAxis() + "," + publicLocation.getyAxis() + ")");
+            
         }
 
-        System.out.println("DEBUG: NPC locations initialized.");
     }
 
     /**
@@ -120,7 +113,6 @@ public class NPCController {
             return;
         }
 
-        System.out.println("DEBUG: Initializing all NPCs to their near-home locations...");
 
         for (NPC npc : npcVillage.getAllNPCs()) {
             String npcName = npc.getName();
@@ -140,13 +132,9 @@ public class NPCController {
             // Set to idle animation (morning state)
             npc.setCurrentAnimation(NPCAnimationManager.AnimationType.IDLE);
             npc.setMoving(false);
-
-            System.out.println("DEBUG: Set NPC " + npcName + " to near-home location (" +
-                nearHomeLocation.getxAxis() + "," + nearHomeLocation.getyAxis() + 
-                ") - home is at (" + homeLocation.getxAxis() + "," + homeLocation.getyAxis() + ")");
+            
         }
 
-        System.out.println("DEBUG: All NPCs initialized to near-home locations with idle animations.");
     }
 
     /**
@@ -183,7 +171,6 @@ public class NPCController {
     public void updateNPCLocations(int currentHour) {
         // Ensure initialization is done
         if (npcHomeLocations.isEmpty()) {
-            System.out.println("DEBUG: NPC locations not initialized, initializing now...");
             initializeWhenReady();
         }
         

@@ -397,9 +397,6 @@ public class NetworkCommandSender {
     public void sendPlayerMovementWebSocket(int x, int y) {
         try {
             if (currentGameId == null) {
-                System.out.println("DEBUG: [NETWORK_SENDER] CRITICAL: Cannot send movement update - currentGameId is NULL!");
-                System.out.println("DEBUG: [NETWORK_SENDER] This indicates the NetworkCommandSender was not properly initialized with a game ID");
-                System.out.println("DEBUG: [NETWORK_SENDER] Player trying to move to: (" + x + ", " + y + ")");
                 logger.warn("Cannot send movement update: not in a game (currentGameId is null)");
                 return;
             }
@@ -410,11 +407,9 @@ public class NetworkCommandSender {
                 String wsGameId = App.getWebSocketClient().getGameId();
                 if (wsGameId != null) {
                     gameIdToUse = wsGameId;
-                    System.out.println("DEBUG: [NETWORK_SENDER] Using WebSocket client gameId: " + gameIdToUse);
                 }
             }
 
-            System.out.println("DEBUG: [NETWORK_SENDER] Sending movement update for game: " + gameIdToUse + " to (" + x + ", " + y + ")");
 
             Map<String, Object> wsMessage = new HashMap<>();
             wsMessage.put("type", GameProtocol.WS_PLAYER_MOVED);
@@ -425,18 +420,14 @@ public class NetworkCommandSender {
             wsMessage.put("timestamp", System.currentTimeMillis());
 
             serverConnection.sendWebSocketMessage(wsMessage);
-            logger.debug("Sent player movement WebSocket message: ({}, {}) for game {}", x, y, gameIdToUse);
         } catch (Exception e) {
-            System.out.println("DEBUG: [NETWORK_SENDER] ERROR sending movement WebSocket message: " + e.getMessage());
             logger.error("Error sending movement WebSocket message", e);
         }
     }
 
     public void sendEnergyUpdateWebSocket(String playerId, int currentEnergy, int maxEnergy) {
         try {
-            System.out.println("DEBUG: sendEnergyUpdateWebSocket called with playerId=" + playerId + ", currentEnergy=" + currentEnergy + ", maxEnergy=" + maxEnergy);
             if (currentGameId == null) {
-                System.out.println("DEBUG: Cannot send energy update: not in a game");
                 logger.warn("Cannot send energy update: not in a game");
                 return;
             }
@@ -447,7 +438,6 @@ public class NetworkCommandSender {
                 String wsGameId = App.getWebSocketClient().getGameId();
                 if (wsGameId != null) {
                     gameIdToUse = wsGameId;
-                    System.out.println("DEBUG: [NETWORK_SENDER] Using WebSocket client gameId for energy update: " + gameIdToUse);
                 }
             }
 
@@ -461,13 +451,8 @@ public class NetworkCommandSender {
             wsMessage.put("energyStatus", getEnergyStatus(currentEnergy, maxEnergy));
             wsMessage.put("timestamp", System.currentTimeMillis());
 
-            System.out.println("DEBUG: Sending WebSocket energy update message: " + wsMessage);
             serverConnection.sendWebSocketMessage(wsMessage);
-            System.out.println("DEBUG: Energy update WebSocket message sent successfully");
-            logger.debug("Sent energy update WebSocket message: playerId={}, energy={}/{} for game {}",
-                playerId, currentEnergy, maxEnergy, gameIdToUse);
         } catch (Exception e) {
-            System.out.println("DEBUG: Error sending energy update WebSocket message: " + e.getMessage());
             logger.error("Error sending energy update WebSocket message", e);
             e.printStackTrace();
         }
@@ -496,7 +481,6 @@ public class NetworkCommandSender {
 
     private void handleWebSocketMessage(String message) {
         try {
-            logger.debug("WebSocket message received: {}", message);
 
         } catch (Exception e) {
             logger.error("Error handling WebSocket message", e);
@@ -519,16 +503,13 @@ public class NetworkCommandSender {
     }
 
     public void setCurrentGameId(String gameId) {
-        System.out.println("DEBUG: [NETWORK_SENDER] setCurrentGameId called - Old ID: " + this.currentGameId + ", New ID: " + gameId);
 
         if (gameId == null) {
-            System.out.println("DEBUG: [NETWORK_SENDER] WARNING: Setting game ID to NULL!");
             // Print stack trace to see where this is being called from
             Thread.dumpStack();
         }
 
         this.currentGameId = gameId;
-        System.out.println("DEBUG: [NETWORK_SENDER] Game ID successfully set to: " + this.currentGameId);
     }
 
     public ServerConnection getServerConnection() {

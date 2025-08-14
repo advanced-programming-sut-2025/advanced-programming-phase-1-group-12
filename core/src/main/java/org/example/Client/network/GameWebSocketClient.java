@@ -62,25 +62,20 @@ public class GameWebSocketClient {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
 
         try {
-            System.out.println("DEBUG: GameWebSocketClient.connect() called");
-            System.out.println("DEBUG: Original gameId parameter: " + gameId);
 
             // Get auth token from the ServerConnection (set during login in MultiplayerMenu)
             String authToken = null;
             if (Main.getMain() != null && Main.getMain().getServerConnection() != null) {
                 authToken = Main.getMain().getServerConnection().getAuthToken();
-                System.out.println("DEBUG: Got auth token from ServerConnection: " + authToken);
             }
 
             // Fallback to user token if available
             if (authToken == null && App.getLoggedInUser() != null) {
                 authToken = App.getLoggedInUser().getToken();
-                System.out.println("DEBUG: Fallback to user token: " + authToken);
             }
 
             // Use null instead of dummy_token for better debugging
             if (authToken == null) {
-                System.out.println("DEBUG: No auth token available");
             }
 
             // Always use the server game ID from NetworkCommandSender in multiplayer mode
@@ -88,10 +83,8 @@ public class GameWebSocketClient {
             if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
                 if (App.getCurrentGame().getNetworkCommandSender() != null) {
                     String serverGameId = App.getCurrentGame().getNetworkCommandSender().getCurrentGameId();
-                    System.out.println("DEBUG: Found NetworkCommandSender, server game ID: " + serverGameId);
                     if (serverGameId != null) {
                         gameIdToUse = serverGameId;
-                        System.out.println("DEBUG: GameWebSocketClient using server game ID: " + gameIdToUse);
                     } else {
                         throw new IllegalStateException("Server game ID is null in multiplayer mode");
                     }
@@ -101,11 +94,9 @@ public class GameWebSocketClient {
             } else {
                 // For non-multiplayer games, use the provided game ID
                 gameIdToUse = gameId;
-                System.out.println("DEBUG: Non-multiplayer game, using provided game ID: " + gameIdToUse);
             }
 
             String wsUrl = serverUrl.replace("http", "ws") + "/ws?userId=" + userId + "&token=" + authToken + "&gameId=" + gameIdToUse;
-            System.out.println("DEBUG: GameWebSocketClient connecting to URL: " + wsUrl);
 
             Request request = new Request.Builder()
                 .url(wsUrl)
@@ -173,7 +164,6 @@ public class GameWebSocketClient {
 
     private void startReconnectionProcess() {
         if (isReconnecting) {
-            logger.debug("Reconnection already in progress, skipping");
             return;
         }
 
@@ -188,7 +178,6 @@ public class GameWebSocketClient {
 
         reconnectionFuture = reconnectionExecutor.scheduleAtFixedRate(() -> {
             if (isConnected) {
-                logger.debug("Connection restored, stopping reconnection attempts");
                 return;
             }
 
@@ -234,7 +223,6 @@ public class GameWebSocketClient {
 
             // Use null instead of dummy_token for better debugging
             if (authToken == null) {
-                System.out.println("DEBUG: No auth token available for reconnection");
             }
 
             // Always use the server game ID from NetworkCommandSender in multiplayer mode
@@ -255,7 +243,6 @@ public class GameWebSocketClient {
             }
 
             String wsUrl = serverUrl.replace("http", "ws") + "/ws?userId=" + userId + "&token=" + authToken + "&gameId=" + gameIdToUse;
-            System.out.println("DEBUG: GameWebSocketClient reconnecting to URL: " + wsUrl);
             
             Request request = new Request.Builder()
                 .url(wsUrl)
@@ -296,13 +283,11 @@ public class GameWebSocketClient {
 
                 @Override
                 public void onFailure(WebSocket webSocket, Throwable t, Response response) {
-                    logger.debug("Reconnection attempt failed: {}", t.getMessage());
                     // Don't call handleDisconnection here to avoid restarting the process
                 }
             });
 
         } catch (Exception e) {
-            logger.debug("Failed to create reconnection WebSocket: {}", e.getMessage());
         }
     }
 
@@ -345,7 +330,6 @@ public class GameWebSocketClient {
                 boolean sent = webSocket.send(pingJson);
                 
                 if (sent) {
-                    logger.debug("Keep-alive ping sent successfully");
                 } else {
                     logger.warn("Failed to send keep-alive ping");
                 }
@@ -371,7 +355,6 @@ public class GameWebSocketClient {
             
             if (timestamp != null && pongUserId != null && pongUserId.equals(userId)) {
                 long latency = System.currentTimeMillis() - timestamp;
-                logger.debug("Received pong response (latency: {}ms)", latency);
             }
         } catch (Exception e) {
             logger.warn("Error handling pong response: {}", e.getMessage());
@@ -380,76 +363,60 @@ public class GameWebSocketClient {
 
     private void handleMessage(String message) {
         try {
-            System.out.println("DEBUG: GameWebSocketClient received message: " + message);
-            logger.debug("Received WebSocket message: {}", message);
 
             // Try to parse as JSON first
             Map<String, Object> messageData = objectMapper.readValue(message, Map.class);
             String messageType = (String) messageData.get("type");
 
-            System.out.println("DEBUG: Parsed message type: " + messageType);
 
             switch (messageType) {
                 case GameProtocol.WS_GAME_STATE_UPDATE:
-                    System.out.println("DEBUG: Handling game state update");
                     handleGameStateUpdate(messageData);
                     break;
                 case "vote_started":
                 case "vote_updated":
                 case "vote_ended":
                 case "vote_result":
-                    System.out.println("DEBUG: Handling vote event: " + messageType);
                     handleVoteEvent(messageType, messageData);
                     break;
                 case GameProtocol.WS_PLAYER_MOVED:
-                    System.out.println("DEBUG: Handling player movement");
                     handlePlayerMovement(messageData);
                     break;
                 case GameProtocol.WS_ENERGY_UPDATE:
                     handleEnergyUpdate(messageData);
                     break;
                 case GameProtocol.WS_PLAYER_FULL_UPDATE:
-                    System.out.println("DEBUG: Handling full player update");
                     handleFullPlayerUpdate(messageData);
                     break;
                 case GameProtocol.WS_CHAT_MESSAGE:
-                    System.out.println("DEBUG: Handling chat message");
                     handleChatMessage(messageData);
                     break;
                 // Removed duplicate GameProtocol vote cases to avoid duplicate labels
                 case GameProtocol.WS_MOVEMENT_NOTIFICATION:
-                    System.out.println("DEBUG: Handling movement notification");
                     handleMovementNotification(messageData);
                     break;
 
                 case "connection_established":
-                    System.out.println("DEBUG: Handling connection established");
                     handleConnectionEstablished(messageData);
                     break;
                     
                 // Radio event handlers
                 case "radio_station_joined":
-                    System.out.println("DEBUG: Handling radio station joined event");
                     handleRadioStationJoined(messageData);
                     break;
                 case "radio_station_left":
-                    System.out.println("DEBUG: Handling radio station left event");
                     handleRadioStationLeft(messageData);
                     break;
                 case "radio_track_played":
-                    System.out.println("DEBUG: Handling radio track played event");
                     handleRadioTrackPlayed(messageData);
                     break;
                 case "radio_track_paused":
-                    System.out.println("DEBUG: Handling radio track paused event");
                     handleRadioTrackPaused(messageData);
                     break;
                 case "radio_track_stopped":
-                    System.out.println("DEBUG: Handling radio track stopped event");
                     handleRadioTrackStopped(messageData);
                     break;
                 case "radio_track_uploaded":
-                    System.out.println("DEBUG: Handling radio track uploaded event");
                     handleRadioTrackUploaded(messageData);
                     break;
                 case "scoreboard_update":
@@ -458,32 +425,23 @@ public class GameWebSocketClient {
                     handleScoreboardUpdate(messageData);
                     break;
                 case "pong":
-                    System.out.println("DEBUG: Handling pong response");
                     handlePong(messageData);
                     break;
                     
                 default:
-                    System.out.println("DEBUG: Unknown message type: " + messageType);
-                    logger.debug("Received unknown message type: {}", messageType);
                     break;
             }
 
         } catch (Exception e) {
             // If JSON parsing fails, handle as plain text message
-            System.out.println("DEBUG: Failed to parse message as JSON, treating as plain text: " + message);
-            logger.debug("Received plain text message: {}", message);
 
             // Handle plain text messages
             if (message.contains("Authentication required")) {
-                System.out.println("DEBUG: Authentication failed - reconnecting...");
                 logger.warn("Authentication failed, attempting to reconnect");
                 // Could trigger reconnection logic here if needed
             } else if (message.contains("Connected successfully")) {
-                System.out.println("DEBUG: WebSocket connection established successfully");
                 logger.info("WebSocket connection confirmed");
             } else {
-                System.out.println("DEBUG: Unknown plain text message: " + message);
-                logger.debug("Unknown plain text message: {}", message);
             }
         }
     }
@@ -517,34 +475,25 @@ public class GameWebSocketClient {
 
     private void handlePlayerMovement(Map<String, Object> messageData) {
         try {
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] handlePlayerMovement called with data: " + messageData);
             
             // PlayerMovedEvent uses 'username' field, but we need 'playerId' for consistency
             String playerId = (String) messageData.get("playerId");
             if (playerId == null) {
                 // Fallback to username if playerId is not available
                 playerId = (String) messageData.get("username");
-                System.out.println("DEBUG: [WEBSOCKET_CLIENT] Using username as playerId: " + playerId);
             }
             Integer x = (Integer) messageData.get("x");
             Integer y = (Integer) messageData.get("y");
 
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Parsed movement data - playerId: " + playerId + ", x: " + x + ", y: " + y);
-            logger.debug("Received player movement: playerId={}, x={}, y={}", playerId, x, y);
 
             if (playerId != null && x != null && y != null) {
-                System.out.println("DEBUG: [WEBSOCKET_CLIENT] Valid movement data, calling gameMenu.handleGameStateUpdate");
                 Map<String, Object> data = Map.of("playerId", playerId, "x", x, "y", y);
                 gameMenu.handleGameStateUpdate("player_moved", data);
-                System.out.println("DEBUG: [WEBSOCKET_CLIENT] Movement update sent to GameMenu for player: " + playerId);
-                logger.debug("Processed player movement update for player: {}", playerId);
             } else {
-                System.out.println("DEBUG: [WEBSOCKET_CLIENT] Invalid movement data - playerId: " + playerId + ", x: " + x + ", y: " + y);
                 logger.warn("Invalid player movement data: playerId={}, x={}, y={}", playerId, x, y);
             }
 
         } catch (Exception e) {
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Error handling player movement: " + e.getMessage());
             logger.error("Error handling player movement", e);
         }
     }
@@ -560,15 +509,7 @@ public class GameWebSocketClient {
             String chatType = (String) messageData.get("chatType");
             String recipient = (String) messageData.get("recipient");
             
-            System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT] Parsed values: 🟢🟢🟢");
-            System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT]   playerId: " + playerId + " 🟢🟢🟢");
-            System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT]   senderUsername: " + senderUsername + " 🟢🟢🟢");
-            System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT]   message: '" + message + "' 🟢🟢🟢");
-            System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT]   chatType: " + chatType + " 🟢🟢🟢");
-            System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT]   recipient: " + recipient + " 🟢🟢🟢");
             
-            logger.debug("Received chat message: playerId={}, senderUsername={}, message={}, chatType={}, recipient={}", 
-                playerId, senderUsername, message, chatType, recipient);
             
             if (playerId != null && senderUsername != null && message != null) {
                 // Forward the chat message to the game menu for processing
@@ -581,23 +522,16 @@ public class GameWebSocketClient {
                     data.put("recipient", recipient);
                 }
                 
-                System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT] Forwarding to GameMenu with data: " + data + " 🟢🟢🟢");
-                System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT] GameMenu: " + (gameMenu != null ? "available" : "null") + " 🟢🟢🟢");
-                
                 gameMenu.handleGameStateUpdate("chat_message", data);
-                System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT] Chat message forwarded to GameMenu successfully 🟢🟢🟢");
-                logger.debug("Chat message forwarded to GameMenu for processing");
+            
             } else {
-                System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT] Invalid chat message data: 🟢🟢🟢");
-                System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT]   playerId: " + playerId + " 🟢🟢🟢");
-                System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT]   senderUsername: " + senderUsername + " 🟢🟢🟢");
-                System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT]   message: " + message + " 🟢🟢🟢");
+            
                 logger.warn("Invalid chat message data: playerId={}, senderUsername={}, message={}", 
                     playerId, senderUsername, message);
             }
             
         } catch (Exception e) {
-            System.out.println("🟢🟢🟢 [WEBSOCKET_CLIENT] Error handling chat message: " + e.getMessage() + " 🟢🟢🟢");
+            
             logger.error("Error handling chat message", e);
             e.printStackTrace();
         }
@@ -612,12 +546,10 @@ public class GameWebSocketClient {
             Integer x = (Integer) messageData.get("x");
             Integer y = (Integer) messageData.get("y");
 
-            logger.debug("Received movement notification: playerId={}, x={}, y={}", playerId, x, y);
 
             if (playerId != null && x != null && y != null) {
                 Map<String, Object> data = Map.of("playerId", playerId, "x", x, "y", y);
                 gameMenu.handleGameStateUpdate("player_moved", data);
-                logger.debug("Processed movement notification for player: {}", playerId);
             } else {
                 logger.warn("Invalid movement notification data: playerId={}, x={}, y={}", playerId, x, y);
             }
@@ -628,7 +560,6 @@ public class GameWebSocketClient {
 
     private void handleEnergyUpdate(Map<String, Object> messageData) {
         try {
-            System.out.println("DEBUG: Client received energy update message: " + messageData);
             String playerId = (String) messageData.get("playerId");
             if (playerId == null) {
                 // Fallback to username if playerId is not available
@@ -638,10 +569,7 @@ public class GameWebSocketClient {
             Integer maxEnergy = (Integer) messageData.get("maxEnergy");
             String energyStatus = (String) messageData.get("energyStatus");
 
-            System.out.println("DEBUG: Parsed energy update - playerId: " + playerId + ", currentEnergy: " + currentEnergy + ", maxEnergy: " + maxEnergy + ", status: " + energyStatus);
 
-            logger.debug("Received energy update: playerId={}, currentEnergy={}, maxEnergy={}, status={}",
-                playerId, currentEnergy, maxEnergy, energyStatus);
 
             if (playerId != null && currentEnergy != null && maxEnergy != null) {
                 Map<String, Object> data = Map.of(
@@ -650,18 +578,13 @@ public class GameWebSocketClient {
                     "maxEnergy", maxEnergy,
                     "energyStatus", energyStatus != null ? energyStatus : "normal"
                 );
-                System.out.println("DEBUG: Calling gameMenu.handleGameStateUpdate with energy_updated and data: " + data);
                 gameMenu.handleGameStateUpdate("energy_updated", data);
-                System.out.println("DEBUG: Energy update processed successfully for player: " + playerId);
-                logger.debug("Processed energy update for player: {}", playerId);
             } else {
-                System.out.println("DEBUG: Invalid energy update data - playerId: " + playerId + ", currentEnergy: " + currentEnergy + ", maxEnergy: " + maxEnergy);
                 logger.warn("Invalid energy update data: playerId={}, currentEnergy={}, maxEnergy={}",
                     playerId, currentEnergy, maxEnergy);
             }
 
         } catch (Exception e) {
-            System.out.println("DEBUG: Error handling energy update: " + e.getMessage());
             logger.error("Error handling energy update", e);
             e.printStackTrace();
         }
@@ -673,21 +596,16 @@ public class GameWebSocketClient {
      */
     private void handleFullPlayerUpdate(Map<String, Object> messageData) {
         try {
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] handleFullPlayerUpdate called with data: " + messageData);
             
             String playerId = (String) messageData.get("playerId");
             Map<String, Object> playerData = (Map<String, Object>) messageData.get("playerData");
             
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Parsed full player update - playerId: " + playerId + ", playerData: " + playerData);
             
             if (playerId == null || playerData == null) {
-                System.out.println("DEBUG: [WEBSOCKET_CLIENT] Invalid full player update data - playerId: " + playerId + ", playerData: " + playerData);
                 logger.warn("Invalid full player update data: playerId={}, playerData={}", playerId, playerData);
                 return;
             }
             
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Valid full player data, calling gameMenu.handleGameStateUpdate");
-            logger.debug("Processing full player update for player: {}", playerId);
             
             // Forward the full player update to the game menu for processing
             gameMenu.handleGameStateUpdate("player_full_update", Map.of(
@@ -695,11 +613,8 @@ public class GameWebSocketClient {
                 "playerData", playerData
             ));
             
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Full player update sent to GameMenu for player: " + playerId);
-            logger.debug("Full player update processed for player: {}", playerId);
             
         } catch (Exception e) {
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Error handling full player update: " + e.getMessage());
             logger.error("Error handling full player update", e);
             e.printStackTrace();
         }
@@ -782,9 +697,6 @@ public class GameWebSocketClient {
             String message = (String) messageData.get("message");
             Long timestamp = (Long) messageData.get("timestamp");
 
-            System.out.println("DEBUG: Connection established for user: " + userId);
-            System.out.println("DEBUG: Message: " + message);
-            System.out.println("DEBUG: Timestamp: " + timestamp);
 
             // Update connection status
             isConnected = true;
@@ -804,14 +716,12 @@ public class GameWebSocketClient {
     // Radio event handlers
     private void handleRadioStationJoined(Map<String, Object> messageData) {
         try {
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] handleRadioStationJoined called with data: " + messageData);
             
             String stationId = (String) messageData.get("stationId");
             String stationName = (String) messageData.get("stationName");
             String stationOwner = (String) messageData.get("stationOwner");
             String playerId = (String) messageData.get("playerId");
             
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Player " + playerId + " joined station " + stationName + " owned by " + stationOwner);
             
             // Forward to game menu for processing
             if (gameMenu != null) {
@@ -825,21 +735,18 @@ public class GameWebSocketClient {
             }
             
         } catch (Exception e) {
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Error handling radio station joined: " + e.getMessage());
             logger.error("Error handling radio station joined", e);
         }
     }
 
     private void handleRadioStationLeft(Map<String, Object> messageData) {
         try {
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] handleRadioStationLeft called with data: " + messageData);
             
             String stationId = (String) messageData.get("stationId");
             String stationName = (String) messageData.get("stationName");
             String stationOwner = (String) messageData.get("stationOwner");
             String playerId = (String) messageData.get("playerId");
             
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Player " + playerId + " left station " + stationName + " owned by " + stationOwner);
             
             // Forward to game menu for processing
             if (gameMenu != null) {
@@ -853,23 +760,18 @@ public class GameWebSocketClient {
             }
             
         } catch (Exception e) {
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Error handling radio station left: " + e.getMessage());
             logger.error("Error handling radio station left", e);
         }
     }
 
     private void handleRadioTrackPlayed(Map<String, Object> messageData) {
         try {
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] handleRadioTrackPlayed called with data: " + messageData);
             
             String trackName = (String) messageData.get("trackName");
             String trackFile = (String) messageData.get("trackFile");
             String stationOwner = (String) messageData.get("stationOwner");
             String playerId = (String) messageData.get("playerId");
             
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Player " + playerId + " started playing track: " + trackName);
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Track file: " + trackFile);
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Station owner: " + stationOwner);
             
             // Forward to game menu for processing
             if (gameMenu != null) {
@@ -883,14 +785,12 @@ public class GameWebSocketClient {
             }
             
         } catch (Exception e) {
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Error handling radio track played: " + e.getMessage());
             logger.error("Error handling radio track played", e);
         }
     }
 
     private void handleRadioTrackPaused(Map<String, Object> messageData) {
         try {
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] handleRadioTrackPaused called with data: " + messageData);
             
             // Forward to game menu for processing
             if (gameMenu != null) {
@@ -904,14 +804,12 @@ public class GameWebSocketClient {
             }
             
         } catch (Exception e) {
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Error handling radio track paused: " + e.getMessage());
             logger.error("Error handling radio track paused", e);
         }
     }
 
     private void handleRadioTrackStopped(Map<String, Object> messageData) {
         try {
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] handleRadioTrackStopped called with data: " + messageData);
             
             // Forward to game menu for processing
             if (gameMenu != null) {
@@ -925,23 +823,18 @@ public class GameWebSocketClient {
             }
             
         } catch (Exception e) {
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Error handling radio track stopped: " + e.getMessage());
             logger.error("Error handling radio track stopped", e);
         }
     }
 
     private void handleRadioTrackUploaded(Map<String, Object> messageData) {
         try {
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] handleRadioTrackUploaded called with data: " + messageData);
             
             String trackName = (String) messageData.get("trackName");
             String trackFile = (String) messageData.get("trackFile");
             String stationOwner = (String) messageData.get("stationOwner");
             String playerId = (String) messageData.get("playerId");
             
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Player " + playerId + " uploaded track: " + trackName);
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Track file: " + trackFile);
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Station owner: " + stationOwner);
             
             // Forward to game menu for processing
             if (gameMenu != null) {
@@ -955,7 +848,6 @@ public class GameWebSocketClient {
             }
             
         } catch (Exception e) {
-            System.out.println("DEBUG: [WEBSOCKET_CLIENT] Error handling radio track uploaded: " + e.getMessage());
             logger.error("Error handling radio track uploaded", e);
         }
     }

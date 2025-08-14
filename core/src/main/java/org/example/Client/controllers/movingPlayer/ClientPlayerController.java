@@ -36,15 +36,11 @@ public class ClientPlayerController extends PlayerController {
 
     public ClientPlayerController(Player player, List<String> players) {
         super(player, null, players);
-        System.out.println("DEBUG: ClientPlayerController constructor called for player: " + player.getUser().getUserName());
 
         // Initialize network command sender for multiplayer movement updates
-        System.out.println("DEBUG: Checking multiplayer conditions - App.getCurrentGame(): " + (App.getCurrentGame() != null));
         if (App.getCurrentGame() != null) {
-            System.out.println("DEBUG: isMultiplayer(): " + App.getCurrentGame().isMultiplayer());
         }
         // Don't initialize NetworkCommandSender here - it will be initialized lazily when needed
-        System.out.println("DEBUG: NetworkCommandSender will be initialized lazily when needed");
 
         // Initialize animations
         Texture sheet = player.getPlayerTexture();
@@ -74,9 +70,7 @@ public class ClientPlayerController extends PlayerController {
     // Initialize NetworkCommandSender lazily when needed
     private void initializeNetworkCommandSender() {
         if (networkCommandSender == null && App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
-            System.out.println("DEBUG: Lazy initializing NetworkCommandSender for multiplayer game");
             this.networkCommandSender = new NetworkCommandSender(Main.getMain().getServerConnection());
-            System.out.println("DEBUG: NetworkCommandSender created: " + (this.networkCommandSender != null));
         }
     }
 

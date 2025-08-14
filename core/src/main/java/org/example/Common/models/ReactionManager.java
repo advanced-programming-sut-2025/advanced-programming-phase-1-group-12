@@ -95,26 +95,20 @@ public class ReactionManager {
     
     public void updateActiveReactions(float deltaTime) {
         try {
-            System.out.println("DEBUG: updateActiveReactions() called with deltaTime: " + deltaTime);
-            System.out.println("DEBUG: Current active reactions count: " + activeReactions.size());
             
             Iterator<Reaction> iterator = activeReactions.iterator();
             while (iterator.hasNext()) {
                 Reaction reaction = iterator.next();
-                System.out.println("DEBUG: Updating reaction: " + reaction.getId() + ", displayTime: " + reaction.getDisplayTime());
                 
                 reaction.update(deltaTime);
                 
                 if (reaction.isExpired()) {
-                    System.out.println("DEBUG: Reaction " + reaction.getId() + " has expired, disposing and removing");
                     reaction.dispose();
                     iterator.remove();
                 } else {
-                    System.out.println("DEBUG: Reaction " + reaction.getId() + " still active, displayTime: " + reaction.getDisplayTime());
                 }
             }
             
-            System.out.println("DEBUG: updateActiveReactions() completed, remaining reactions: " + activeReactions.size());
         } catch (Exception e) {
             System.err.println("ERROR: Exception in updateActiveReactions(): " + e.getMessage());
             e.printStackTrace();

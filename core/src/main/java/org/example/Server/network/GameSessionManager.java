@@ -80,14 +80,12 @@ public class GameSessionManager {
     public void removePlayerFromGame(String playerId) {
         String gameId = playerToGameMapping.remove(playerId);
         if (gameId != null) {
-            System.out.println("DEBUG: Removed player " + playerId + " from game " + gameId);
 
             // Check if the game has no more players and remove it if empty
             boolean hasPlayers = playerToGameMapping.values().contains(gameId);
             if (!hasPlayers) {
                 GameInstance removedGame = activeGames.remove(gameId);
                 if (removedGame != null) {
-                    System.out.println("DEBUG: Removed empty game " + gameId);
                 }
             }
         }
@@ -102,13 +100,11 @@ public class GameSessionManager {
 
             // Validate request
             if (request.getUsernames() == null || request.getUsernames().isEmpty()) {
-                System.out.println("DEBUG: No players specified");
                 return NetworkResult.error("No players specified");
             }
 
             if (request.getUsernames().size() < GameProtocol.MIN_PLAYERS_PER_GAME ||
                 request.getUsernames().size() > GameProtocol.MAX_PLAYERS_PER_GAME) {
-                System.out.println("DEBUG: Invalid number of players: " + request.getUsernames().size());
                 return NetworkResult.error("Invalid number of players. Must be between " +
                     GameProtocol.MIN_PLAYERS_PER_GAME + " and " + GameProtocol.MAX_PLAYERS_PER_GAME);
             }
@@ -118,7 +114,6 @@ public class GameSessionManager {
             for (String username : request.getUsernames()) {
                 String existingGameId = playerToGameMapping.get(username);
                 if (existingGameId != null) {
-                    System.out.println("DEBUG: Player " + username + " was in game " + existingGameId + ", clearing...");
                     removePlayerFromGame(username);
                 }
             }
@@ -164,12 +159,10 @@ public class GameSessionManager {
 
                 // Add game to active games first
                 activeGames.put(gameId, gameInstance);
-                System.out.println("DEBUG: Added game to active games. Total active games: " + activeGames.size());
 
                 // Then add players to mapping and game instance
                 for (String username : request.getUsernames()) {
                     playerToGameMapping.put(username, gameId);
-                    System.out.println("DEBUG: Mapped player " + username + " to game " + gameId);
                     
                     // Create a basic player object and add it to the game instance
                     // This ensures the player exists in the GameInstance for connection validation
@@ -181,7 +174,6 @@ public class GameSessionManager {
                     
                     Player player = new Player(user, new Location(0, 0), false, null, new ArrayList<>(), null, null, false, false, new ArrayList<>());
                     gameInstance.addPlayer(username, player);
-                    System.out.println("DEBUG: Added player " + username + " to GameInstance " + gameId);
                 }
 
                 logger.info("Game created with traceable ID: {} for {} players (creator: {})",
@@ -197,11 +189,9 @@ public class GameSessionManager {
             response.setCurrentPlayer(null); // Explicitly set to null to avoid serialization issues
             response.setGameStatus("active");
 
-            System.out.println("DEBUG: Returning success response with traceable game ID: " + gameId);
             return NetworkResult.success("Game session created successfully", response);
 
         } catch (Exception e) {
-            System.out.println("DEBUG: Exception in createGame: " + e.getMessage());
             logger.error("Error creating game", e);
             return NetworkResult.error("Failed to create game: " + e.getMessage());
         }
@@ -346,9 +336,7 @@ public class GameSessionManager {
         if (instance != null) {
             String clientInfo = instance.getClientInfo();
             if (clientInfo != null) {
-                logger.debug("Accessed game instance: {} - {}", gameId, clientInfo);
             } else {
-                logger.debug("Accessed game instance: {}", gameId);
             }
         }
         return instance;

@@ -145,7 +145,6 @@ public class GameWebSocketHandler {
 
         try {
             String message = ctx.message();
-            logger.debug("WebSocket message received from {}: {}", userId, message);
 
             // Check if we have a valid userId for this connection
             if (userId == null) {
@@ -339,9 +338,6 @@ public class GameWebSocketHandler {
     }
 
     private void handleChatMessage(WsContext ctx, String userId, Map<String, Object> messageData) {
-        System.out.println("🔴🔴🔴 [SERVER] handleChatMessage() called 🔴🔴🔴");
-        System.out.println("🔴🔴🔴 [SERVER] User ID: " + userId + " 🔴🔴🔴");
-        System.out.println("🔴🔴🔴 [SERVER] Message data: " + messageData + " 🔴🔴🔴");
         
         try {
             // Handle gameId as either String or Integer
@@ -352,32 +348,24 @@ public class GameWebSocketHandler {
             } else if (gameIdObj instanceof Integer) {
                 gameId = gameIdObj.toString();
             }
-            System.out.println("🔴🔴🔴 [SERVER] Parsed game ID: " + gameId + " 🔴🔴🔴");
 
             String message = (String) messageData.get("message");
             String chatType = (String) messageData.getOrDefault("chatType", "public");
             String recipient = (String) messageData.get("recipient");
-            System.out.println("🔴🔴🔴 [SERVER] Message: '" + message + "' 🔴🔴🔴");
-            System.out.println("🔴🔴🔴 [SERVER] Chat type: " + chatType + " 🔴🔴🔴");
-            System.out.println("🔴🔴🔴 [SERVER] Recipient: '" + recipient + "' 🔴🔴🔴");
 
             if (gameId == null || message == null) {
-                System.out.println("🔴🔴🔴 [SERVER] Missing gameId or message, sending error 🔴🔴🔴");
                 sendError(ctx, "gameId and message are required for chat");
                 return;
             }
 
             GameInstance gameInstance = sessionManager.getGameInstance(gameId);
-            System.out.println("🔴🔴🔴 [SERVER] Game instance: " + (gameInstance != null ? "found" : "not found") + " 🔴🔴🔴");
             
             if (gameInstance == null) {
-                System.out.println("🔴🔴🔴 [SERVER] Game not found, sending error 🔴🔴🔴");
                 sendError(ctx, "Game not found 2");
                 return;
             }
 
             if (!gameInstance.isPlayerConnected(userId)) {
-                System.out.println("🔴🔴🔴 [SERVER] Player not connected to game, sending error 🔴🔴🔴");
                 sendError(ctx, "You are not connected to this game 1");
                 return;
             }
@@ -388,41 +376,30 @@ public class GameWebSocketHandler {
                 // Try to get the actual username from the game instance
                 if (gameInstance != null) {
                     Player player = gameInstance.getPlayer(userId);
-                    System.out.println("🔴🔴🔴 [SERVER] Player object: " + (player != null ? "found" : "not found") + " 🔴🔴🔴");
                     
                     if (player != null && player.getUser() != null) {
                         senderUsername = player.getUser().getUserName();
-                        System.out.println("🔴🔴🔴 [SERVER] Actual username: " + senderUsername + " 🔴🔴🔴");
                     } else {
-                        System.out.println("🔴🔴🔴 [SERVER] Player or User object is null, using userId 🔴🔴🔴");
                     }
                 }
             } catch (Exception e) {
-                System.out.println("🔴🔴🔴 [SERVER] Error getting username: " + e.getMessage() + " 🔴🔴🔴");
                 logger.warn("Could not get actual username for user {}, using userId", userId);
             }
             
             // Create and broadcast chat message event
-            System.out.println("🔴🔴🔴 [SERVER] Creating ChatMessageEvent with senderUsername: " + senderUsername + " 🔴🔴🔴");
             ChatMessageEvent chatEvent = new ChatMessageEvent(gameId, userId, senderUsername, message, chatType, recipient);
-            System.out.println("🔴🔴🔴 [SERVER] Broadcasting chat message to game 🔴🔴🔴");
             
             // Handle private vs public messages
             if ("private".equals(chatType) && recipient != null) {
                 // For private messages, send only to the sender and recipient
-                System.out.println("🔴🔴🔴 [SERVER] Sending private message to sender and recipient 🔴🔴🔴");
                 sendPrivateChatMessage(gameId, chatEvent, userId, recipient);
             } else {
                 // For public messages, broadcast to all players
-                System.out.println("🔴🔴🔴 [SERVER] Broadcasting public message to all players 🔴🔴🔴");
                 broadcastToGame(gameId, chatEvent);
             }
 
-            System.out.println("🔴🔴🔴 [SERVER] Chat message broadcast completed 🔴🔴🔴");
-            logger.debug("Chat message from {} in game {}: {}", userId, gameId, message);
 
         } catch (Exception e) {
-            System.out.println("🔴🔴🔴 [SERVER] Error handling chat message: " + e.getMessage() + " 🔴🔴🔴");
             logger.error("Error handling chat message", e);
             sendError(ctx, "Failed to send chat message");
         }
@@ -438,17 +415,14 @@ public class GameWebSocketHandler {
 
             // Get the correct game ID from the WebSocket query parameters
             String gameId = ctx.queryParam("gameId");
-            logger.debug("WebSocket gameId from query params: {}", gameId);
 
             // Fallback: Handle gameId from message data if query param is null
             if (gameId == null) {
                 Object gameIdObj = messageData.get("gameId");
                 if (gameIdObj instanceof String) {
                     gameId = (String) gameIdObj;
-                    logger.debug("Using gameId from message data: {}", gameId);
                 } else if (gameIdObj instanceof Integer) {
                     gameId = gameIdObj.toString();
-                    logger.debug("Using gameId from message data (converted): {}", gameId);
                 }
             }
 
@@ -467,12 +441,10 @@ public class GameWebSocketHandler {
             int y = yObj instanceof Integer ? (Integer) yObj : Integer.parseInt(yObj.toString());
 
             GameInstance gameInstance = sessionManager.getGameInstance(gameId);
-            logger.debug("Looking for game instance with gameId: {}", gameId);
             
             // If game instance is null, try to find it by user mapping
             if (gameInstance == null) {
                 String userGameId = sessionManager.getPlayerGameId(userId);
-                logger.debug("Game instance not found for gameId: {}, trying user mapping: {}", gameId, userGameId);
                 if (userGameId != null) {
                     gameInstance = sessionManager.getGameInstance(userGameId);
                     // Update gameId to the correct one for consistent messaging
@@ -499,7 +471,6 @@ public class GameWebSocketHandler {
                 return;
             }
 
-            logger.debug("Processing movement for user: {} in game: {} to position: ({}, {})", userId, gameId, x, y);
 
             // Create movement update event
             Map<String, Object> movementData = new HashMap<>();
@@ -522,7 +493,6 @@ public class GameWebSocketHandler {
             PlayerMovedEvent moveEvent = new PlayerMovedEvent(gameId, userId, userId, x, y, direction);
             broadcastToGame(gameId, moveEvent);
 
-            logger.debug("Player movement from {} in game {}: ({}, {}) - broadcasted to all players", userId, gameId, x, y);
 
         } catch (Exception e) {
             logger.error("Error handling player movement", e);
@@ -598,7 +568,6 @@ public class GameWebSocketHandler {
             EnergyUpdateEvent energyEvent = new EnergyUpdateEvent(gameId, playerId, playerId, currentEnergy, maxEnergy);
             broadcastToGame(gameId, energyEvent);
 
-            logger.debug("Energy update from {} in game {}: {}/{}", playerId, gameId, currentEnergy, maxEnergy);
 
         } catch (Exception e) {
             logger.error("Error handling energy update", e);
@@ -661,7 +630,6 @@ public class GameWebSocketHandler {
             MovementNotificationEvent moveEvent = new MovementNotificationEvent(gameId, username, username, posX, posY, "UNKNOWN");
             broadcastToGame(gameId, moveEvent);
 
-            logger.debug("Movement notification from {} in game {}: ({}, {})", username, gameId, posX, posY);
 
         } catch (Exception e) {
             logger.error("Error handling movement notification", e);
@@ -696,13 +664,11 @@ public class GameWebSocketHandler {
             
             // Send to sender
             sendToUser(senderId, chatEvent);
-            System.out.println("🔴🔴🔴 [SERVER] Private message sent to sender: " + senderId + " 🔴🔴🔴");
             
             // Prefer direct delivery by username (userId used in WebSocket mapping)
             // Only deliver if the recipient is actually connected in this game
             if (gameInstance.getConnectedPlayers().contains(recipientUsername)) {
                 sendToUser(recipientUsername, chatEvent);
-                System.out.println("🔴🔴🔴 [SERVER] Private message sent to recipient via direct mapping: " + recipientUsername + " 🔴🔴🔴");
             } else {
                 // Fallback: Find recipient by resolving username from Player objects
                 for (String playerId : gameInstance.getConnectedPlayers()) {
@@ -711,14 +677,12 @@ public class GameWebSocketHandler {
                         String playerUsername = player.getUser().getUserName();
                         if (recipientUsername.equals(playerUsername)) {
                             sendToUser(playerId, chatEvent);
-                            System.out.println("🔴🔴🔴 [SERVER] Private message sent to recipient via player lookup: " + playerId + " (" + playerUsername + ") 🔴🔴🔴");
                             break;
                         }
                     }
                 }
             }
             
-            logger.debug("Private chat message sent from {} to {} in game {}", senderId, recipientUsername, gameId);
         } catch (Exception e) {
             logger.error("Error sending private chat message", e);
         }
@@ -792,7 +756,6 @@ public class GameWebSocketHandler {
             );
             broadcastToGame(gameId, updateEvent);
 
-            logger.debug("Game state update broadcasted: {} - {} from user: {}", updateType, data, userId);
 
         } catch (Exception e) {
             logger.error("Error handling game state update", e);
@@ -897,37 +860,27 @@ public class GameWebSocketHandler {
     // Radio event handlers
     private void handleRadioStationJoined(WsContext ctx, String userId, Map<String, Object> messageData) {
         try {
-            System.out.println("DEBUG: [SERVER] handleRadioStationJoined called");
-            System.out.println("DEBUG: [SERVER] User: " + userId);
-            System.out.println("DEBUG: [SERVER] Message data: " + messageData);
             
             String gameId = (String) messageData.get("gameId");
             String stationId = (String) messageData.get("stationId");
             String stationName = (String) messageData.get("stationName");
             String stationOwner = (String) messageData.get("stationOwner");
             
-            System.out.println("DEBUG: [SERVER] Broadcasting radio station joined event to game: " + gameId);
             
             // Broadcast to all players in the game
             GameInstance gameInstance = sessionManager.getGameInstance(gameId);
             if (gameInstance != null) {
                 gameInstance.broadcastToAllPlayers(messageData);
-                System.out.println("DEBUG: [SERVER] Radio station joined event broadcasted successfully");
             } else {
-                System.out.println("DEBUG: [SERVER] Game instance not found for gameId: " + gameId);
             }
             
         } catch (Exception e) {
-            System.out.println("DEBUG: [SERVER] Error handling radio station joined: " + e.getMessage());
             logger.error("Error handling radio station joined", e);
         }
     }
 
     private void handleRadioStationLeft(WsContext ctx, String userId, Map<String, Object> messageData) {
         try {
-            System.out.println("DEBUG: [SERVER] handleRadioStationLeft called");
-            System.out.println("DEBUG: [SERVER] User: " + userId);
-            System.out.println("DEBUG: [SERVER] Message data: " + messageData);
             
             String gameId = (String) messageData.get("gameId");
             
@@ -935,49 +888,36 @@ public class GameWebSocketHandler {
             GameInstance gameInstance = sessionManager.getGameInstance(gameId);
             if (gameInstance != null) {
                 gameInstance.broadcastToAllPlayers(messageData);
-                System.out.println("DEBUG: [SERVER] Radio station left event broadcasted successfully");
             }
             
         } catch (Exception e) {
-            System.out.println("DEBUG: [SERVER] Error handling radio station left: " + e.getMessage());
             logger.error("Error handling radio station left", e);
         }
     }
 
     private void handleRadioTrackPlayed(WsContext ctx, String userId, Map<String, Object> messageData) {
         try {
-            System.out.println("DEBUG: [SERVER] handleRadioTrackPlayed called");
-            System.out.println("DEBUG: [SERVER] User: " + userId);
-            System.out.println("DEBUG: [SERVER] Message data: " + messageData);
             
             String gameId = (String) messageData.get("gameId");
             String trackName = (String) messageData.get("trackName");
             String trackFile = (String) messageData.get("trackFile");
             String stationOwner = (String) messageData.get("stationOwner");
             
-            System.out.println("DEBUG: [SERVER] Broadcasting radio track played event to game: " + gameId);
-            System.out.println("DEBUG: [SERVER] Track: " + trackName + " (" + trackFile + ")");
-            System.out.println("DEBUG: [SERVER] Station owner: " + stationOwner);
             
             // Broadcast to all players in the game
             GameInstance gameInstance = sessionManager.getGameInstance(gameId);
             if (gameInstance != null) {
                 gameInstance.broadcastToAllPlayers(messageData);
-                System.out.println("DEBUG: [SERVER] Radio track played event broadcasted successfully");
             } else {
-                System.out.println("DEBUG: [SERVER] Game instance not found for gameId: " + gameId);
             }
             
         } catch (Exception e) {
-            System.out.println("DEBUG: [SERVER] Error handling radio track played: " + e.getMessage());
             logger.error("Error handling radio track played", e);
         }
     }
 
     private void handleRadioTrackPaused(WsContext ctx, String userId, Map<String, Object> messageData) {
         try {
-            System.out.println("DEBUG: [SERVER] handleRadioTrackPaused called");
-            System.out.println("DEBUG: [SERVER] User: " + userId);
             
             String gameId = (String) messageData.get("gameId");
             
@@ -988,15 +928,12 @@ public class GameWebSocketHandler {
             }
             
         } catch (Exception e) {
-            System.out.println("DEBUG: [SERVER] Error handling radio track paused: " + e.getMessage());
             logger.error("Error handling radio track paused", e);
         }
     }
 
     private void handleRadioTrackStopped(WsContext ctx, String userId, Map<String, Object> messageData) {
         try {
-            System.out.println("DEBUG: [SERVER] handleRadioTrackStopped called");
-            System.out.println("DEBUG: [SERVER] User: " + userId);
             
             String gameId = (String) messageData.get("gameId");
             
@@ -1007,7 +944,6 @@ public class GameWebSocketHandler {
             }
             
         } catch (Exception e) {
-            System.out.println("DEBUG: [SERVER] Error handling radio track stopped: " + e.getMessage());
             logger.error("Error handling radio track stopped", e);
         }
     }

@@ -57,15 +57,13 @@ public class NPCMovementController {
         NPCvillage npcVillage = App.getCurrentGame().getNPCvillage();
         if (npcVillage == null) return;
         
-        System.out.println("DEBUG: Initializing NPC movement states...");
         
         for (NPC npc : npcVillage.getAllNPCs()) {
             String npcName = npc.getName();
             NPCMovementState state = new NPCMovementState(npc);
             npcMovementStates.put(npcName, state);
             
-            System.out.println("DEBUG: Initialized NPC " + npcName + " at location (" + 
-                npc.getUserLocation().getxAxis() + "," + npc.getUserLocation().getyAxis() + ")");
+                
         }
     }
     
@@ -86,9 +84,7 @@ public class NPCMovementController {
         
         // Check if we need to start moving
         if (!state.isMoving && !currentLocation.equals(targetLocation)) {
-            System.out.println("DEBUG: NPC " + npcName + " starting to move from (" + 
-                currentLocation.getxAxis() + "," + currentLocation.getyAxis() + 
-                ") to (" + targetLocation.getxAxis() + "," + targetLocation.getyAxis() + ")");
+                
             state.isMoving = true;
             state.movementTimer = 0f;
         }
@@ -101,7 +97,6 @@ public class NPCMovementController {
         
         // Check if we've arrived
         if (state.isMoving && currentLocation.equals(targetLocation)) {
-            System.out.println("DEBUG: NPC " + npcName + " arrived at destination");
             state.isMoving = false;
             npc.setCurrentAnimation(AnimationType.IDLE);
             npc.setMoving(false);
@@ -145,7 +140,6 @@ public class NPCMovementController {
         npc.updatePosition(newX, newY);
         npc.setMoving(true);
         
-        System.out.println("DEBUG: NPC " + npc.getName() + " moved to (" + newX + "," + newY + ")");
     }
     
     /**
@@ -202,7 +196,6 @@ public class NPCMovementController {
         NPCvillage npcVillage = App.getCurrentGame().getNPCvillage();
         if (npcVillage == null) return;
         
-        System.out.println("DEBUG: Resetting all NPCs to near-home locations...");
         
         for (NPC npc : npcVillage.getAllNPCs()) {
             String npcName = npc.getName();
@@ -214,8 +207,6 @@ public class NPCMovementController {
                 state.isMoving = false;
                 state.movementTimer = 0f;
                 
-                System.out.println("DEBUG: Reset NPC " + npcName + " to near-home location (" + 
-                    nearHomeLocation.getxAxis() + "," + nearHomeLocation.getyAxis() + ")");
             }
         }
     }
@@ -227,7 +218,6 @@ public class NPCMovementController {
         NPCvillage npcVillage = App.getCurrentGame().getNPCvillage();
         if (npcVillage == null) return;
         
-        System.out.println("DEBUG: Forcing all NPCs to move to their destinations for hour " + currentHour);
         
         for (NPC npc : npcVillage.getAllNPCs()) {
             String npcName = npc.getName();
@@ -237,7 +227,6 @@ public class NPCMovementController {
                 state.isMoving = true;
                 state.movementTimer = 0f;
                 
-                System.out.println("DEBUG: Forced NPC " + npcName + " to start moving");
             }
         }
     }

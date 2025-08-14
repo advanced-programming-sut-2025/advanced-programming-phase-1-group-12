@@ -103,7 +103,6 @@ public class SimpleNetworkServer {
                     // Clean up disconnected players from lobbies
                     lobbyManager.cleanupDisconnectedPlayers(connectedPlayers);
 
-                    logger.debug("Cleanup task completed - {} connected players", connectedPlayers.size());
                 } catch (Exception e) {
                     logger.error("Error in cleanup task", e);
                 }
@@ -801,7 +800,6 @@ public class SimpleNetworkServer {
                 // For now, we'll extract the username from a simple token format
                 if (token.startsWith("test-token-")) {
                     // For test tokens, accept them as valid authentication
-                    logger.debug("Test token detected: " + token);
                     
                     // Try to get username from request body first (for trade requests)
                     try {
@@ -812,7 +810,6 @@ public class SimpleNetworkServer {
                             if (!users.isEmpty()) {
                                 for (String username : users.keySet()) {
                                     if (!username.equals(targetPlayerName)) {
-                                        logger.debug("Identified initiator as: " + username + " (target was: " + targetPlayerName + ")");
                                         return username;
                                     }
                                 }
@@ -831,7 +828,6 @@ public class SimpleNetworkServer {
                     return "test-user";
                 }
             } catch (Exception e) {
-                logger.debug("Failed to validate JWT token", e);
             }
 
             // Fallback: look up the token in our simple logged-in users map

@@ -304,38 +304,26 @@ public class LobbyMenu implements Screen {
         String username = App.getLoggedInUser() != null ? App.getLoggedInUser().getUserName() : "anonymous";
         CreateLobbyRequest request = new CreateLobbyRequest(username, name, isPrivate, password, isVisible);
 
-        System.out.println("DEBUG: Creating lobby with request: " + request);
 
         CompletableFuture.supplyAsync(() -> {
             try {
-                System.out.println("DEBUG: Starting async lobby creation...");
                 ServerConnection connection = Main.getMain().getServerConnection();
-                System.out.println("DEBUG: Got server connection: " + connection);
 
-                System.out.println("DEBUG: Sending POST request to /lobby/create");
                 NetworkResult<LobbyResponse> result = connection.sendPostRequest(
                     "/lobby/create", request, LobbyResponse.class
                 );
-                System.out.println("DEBUG: Got result: " + result);
-                System.out.println("DEBUG: Result success: " + result.isSuccess());
-                System.out.println("DEBUG: Result message: " + result.getMessage());
                 if (!result.isSuccess()) {
-                    System.out.println("DEBUG: Result error: " + result.getErrorCode());
                 }
                 return result;
             } catch (Exception e) {
-                System.out.println("DEBUG: Exception in createLobby: " + e.getMessage());
                 e.printStackTrace();
                 return NetworkResult.error("Failed to create lobby: " + e.getMessage());
             }
         }).thenAccept(result -> {
-            System.out.println("DEBUG: Processing result in thenAccept...");
             Gdx.app.postRunnable(() -> {
-                System.out.println("DEBUG: In postRunnable, result success: " + result.isSuccess());
                 if (result.isSuccess()) {
                     @SuppressWarnings("unchecked")
                     LobbyResponse response = (LobbyResponse) result.getData();
-                    System.out.println("DEBUG: Got response: " + response);
                     currentLobby = response.getLobby();
                     isInLobby = true;
                     isAdmin = response.isAdmin();
@@ -343,7 +331,6 @@ public class LobbyMenu implements Screen {
                     updateCurrentLobbyDisplay();
                     refreshLobbyList();
                 } else {
-                    System.out.println("DEBUG: Failed to create lobby, message: " + result.getMessage());
                     updateStatus("Failed to create lobby: " + result.getMessage(), false);
                 }
             });

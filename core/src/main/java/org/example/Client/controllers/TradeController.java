@@ -27,27 +27,18 @@ public class TradeController {
     }
 
     public void sendTradeRequest(String targetPlayerId, String targetPlayerName) {
-        System.out.println("[DEBUG] TradeController.sendTradeRequest() - Starting trade request");
-        System.out.println("[DEBUG] TradeController.sendTradeRequest() - Target player ID: " + targetPlayerId);
-        System.out.println("[DEBUG] TradeController.sendTradeRequest() - Target player name: " + targetPlayerName);
-        System.out.println("[DEBUG] TradeController.sendTradeRequest() - Current game ID: " + game.getCurrentGameId());
         
         try {
             Map<String, Object> requestData = new HashMap<>();
             requestData.put("targetPlayerId", targetPlayerId);
             requestData.put("targetPlayerName", targetPlayerName);
-            System.out.println("[DEBUG] TradeController.sendTradeRequest() - Request data: " + requestData);
 
             String endpoint = "/api/trade/create";
-            System.out.println("[DEBUG] TradeController.sendTradeRequest() - Using endpoint: " + endpoint);
             
             NetworkResult<String> result = networkClient.sendPostRequest(endpoint, requestData, String.class);
-            System.out.println("[DEBUG] TradeController.sendTradeRequest() - Network result success: " + result.isSuccess());
-            System.out.println("[DEBUG] TradeController.sendTradeRequest() - Network result message: " + result.getMessage());
 
             if (result.isSuccess()) {
                 String responseData = (String) result.getData();
-                System.out.println("[DEBUG] TradeController.sendTradeRequest() - Response data: " + responseData);
                 
                 // Parse the NetworkResult response to extract the data field
                 Map<String, Object> response = objectMapper.readValue(responseData, new TypeReference<Map<String, Object>>() {});
@@ -56,10 +47,6 @@ public class TradeController {
                 if (data != null) {
                     Trade trade = objectMapper.convertValue(data, Trade.class);
                     this.currentTrade = trade;
-                    System.out.println("[DEBUG] TradeController.sendTradeRequest() - Trade created successfully with ID: " + trade.getTradeId());
-                    System.out.println("[DEBUG] TradeController.sendTradeRequest() - Trade initiator: " + trade.getInitiatorUsername());
-                    System.out.println("[DEBUG] TradeController.sendTradeRequest() - Trade target: " + trade.getTargetUsername());
-                    System.out.println("[DEBUG] TradeController.sendTradeRequest() - Trade status: " + trade.getStatus());
                 } else {
                     System.err.println("[ERROR] TradeController.sendTradeRequest() - No data field in response");
                 }
@@ -285,36 +272,27 @@ public class TradeController {
 
 
     public List<String> getAvailablePlayers() {
-        System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Starting to fetch available players");
         try {
             // Use the dedicated online players endpoint instead of game state
             String endpoint = "/api/players/online";
-            System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Using endpoint: " + endpoint);
             
             NetworkResult<String> result = networkClient.sendGetRequest(endpoint, String.class);
-            System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Network result success: " + result.isSuccess());
-            System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Network result message: " + result.getMessage());
             
             if (result.isSuccess()) {
                 String responseData = (String) result.getData();
-                System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Raw response data: " + responseData);
                 
                 // Parse the response to get the online players
                 Map<String, Object> response = objectMapper.readValue(responseData, new TypeReference<Map<String, Object>>() {});
-                System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Parsed response keys: " + response.keySet());
                 
                 // Get the data field which contains the OnlinePlayersResponse
                 Object data = response.get("data");
-                System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Response data: " + data);
                 
                 if (data != null) {
                     Map<String, Object> onlinePlayersData = objectMapper.convertValue(data, new TypeReference<Map<String, Object>>() {});
-                    System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Online players data keys: " + onlinePlayersData.keySet());
                     
                     // Get the players list - it's a list of player objects, not strings
                     @SuppressWarnings("unchecked")
                     List<Map<String, Object>> playerObjects = (List<Map<String, Object>>) onlinePlayersData.get("players");
-                    System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Player objects from response: " + playerObjects);
                     
                     if (playerObjects != null) {
                         // Extract usernames from player objects
@@ -322,24 +300,19 @@ public class TradeController {
                             .map(playerObj -> (String) playerObj.get("username"))
                             .collect(java.util.stream.Collectors.toList());
                         
-                        System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Extracted usernames: " + onlinePlayers);
                         
                         // Filter out the current player from the list
                         String currentPlayerName = game.getCurrentPlayerName();
-                        System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Current player name: " + currentPlayerName);
                         
                         List<String> filteredPlayers = onlinePlayers.stream()
                             .filter(playerName -> !playerName.equals(currentPlayerName))
                             .collect(java.util.stream.Collectors.toList());
                         
-                        System.out.println("[DEBUG] TradeController.getAvailablePlayers() - Filtered players (excluding self): " + filteredPlayers);
                         return filteredPlayers;
                     } else {
-                        System.out.println("[DEBUG] TradeController.getAvailablePlayers() - No players found in response");
                         return List.of();
                     }
                 } else {
-                    System.out.println("[DEBUG] TradeController.getAvailablePlayers() - No data field in response");
                     return List.of();
                 }
             } else {
@@ -360,57 +333,41 @@ public class TradeController {
     }
 
     public List<Trade> getPendingTradeRequests() {
-        System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Checking for pending trade requests");
         try {
             String endpoint = "/api/trade/list";
-            System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Using endpoint: " + endpoint);
 
             NetworkResult<String> result = networkClient.sendGetRequest(endpoint, String.class);
-            System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Network result success: " + result.isSuccess());
-            System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Network result message: " + result.getMessage());
 
             if (result.isSuccess()) {
                 String responseData = (String) result.getData();
-                System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Raw response data: " + responseData);
 
                 Map<String, Object> response = objectMapper.readValue(responseData, new TypeReference<Map<String, Object>>() {});
-                System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Parsed response keys: " + response.keySet());
 
                 Object data = response.get("data");
-                System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Response data: " + data);
 
                 if (data != null) {
                     @SuppressWarnings("unchecked")
                     List<Map<String, Object>> tradeObjects = (List<Map<String, Object>>) data;
-                    System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Trade objects from response: " + tradeObjects);
 
                     if (tradeObjects != null) {
                         String currentPlayerName = game.getCurrentPlayerName();
-                        System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Current player name: " + currentPlayerName);
 
                         List<Trade> pendingTrades = new ArrayList<>();
                         for (Map<String, Object> tradeObj : tradeObjects) {
                             Trade trade = objectMapper.convertValue(tradeObj, Trade.class);
-                            System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Checking trade: " + trade.getTradeId());
-                            System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Trade target: " + trade.getTargetUsername());
-                            System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Trade status: " + trade.getStatus());
 
                             // Check if this is a pending trade where current player is the target
                             if (trade.getTargetUsername().equals(currentPlayerName) && 
                                 trade.getStatus() == Trade.TradeStatus.PENDING) {
-                                System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Found pending trade: " + trade.getTradeId());
                                 pendingTrades.add(trade);
                             }
                         }
 
-                        System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - Found " + pendingTrades.size() + " pending trades");
                         return pendingTrades;
                     } else {
-                        System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - No trades found in response");
                         return List.of();
                     }
                 } else {
-                    System.out.println("[DEBUG] TradeController.getPendingTradeRequests() - No data field in response");
                     return List.of();
                 }
             } else {

@@ -314,7 +314,6 @@ public class MultiplayerMenu implements Screen {
                         serverConnection.setAuthToken(authToken);
                         // Set the current user in ServerConnection
                         serverConnection.setCurrentUser(App.getLoggedInUser());
-                        System.out.println("DEBUG: Set auth token and user in ServerConnection for game creation");
                     }
                 }
 

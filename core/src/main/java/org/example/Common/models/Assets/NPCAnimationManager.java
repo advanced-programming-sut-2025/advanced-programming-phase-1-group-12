@@ -129,13 +129,11 @@ public class NPCAnimationManager {
             try {
                 Texture texture = new Texture("NPC/" + npcName + "/" + fileName);
                 frames.add(new TextureRegion(texture));
-                System.out.println("DEBUG: Loaded animation frame " + fileName + " for " + npcName);
             } catch (Exception e) {
                 // Try to find an alternative file or use a fallback
                 Texture fallbackTexture = getFallbackTexture(npcName, animationType, i);
                 if (fallbackTexture != null) {
                     frames.add(new TextureRegion(fallbackTexture));
-                    System.out.println("DEBUG: Used fallback texture for " + fileName + " for " + npcName);
                 } else {
                     // If even fallback fails, skip this frame
                     System.err.println("Warning: Could not load animation frame " + fileName + " for " + npcName);
@@ -151,7 +149,6 @@ public class NPCAnimationManager {
             }
             if (defaultTexture != null) {
                 frames.add(new TextureRegion(defaultTexture));
-                System.out.println("DEBUG: Used default texture for " + npcName);
             }
         }
 

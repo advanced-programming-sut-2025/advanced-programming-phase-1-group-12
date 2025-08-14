@@ -211,7 +211,6 @@ public class GameStartManager {
             boolean shouldRemove = session.gameStarted || sessionAge > 30 * 60 * 1000;
             
             if (shouldRemove) {
-                logger.debug("Cleaning up farm selection session for lobby {}", entry.getKey());
             }
             
             return shouldRemove;

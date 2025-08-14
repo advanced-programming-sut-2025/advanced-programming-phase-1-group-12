@@ -97,8 +97,6 @@ public class TradeMenuView implements Screen {
         startTradeButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                System.out.println("[DEBUG] TradeMenuView - Start Trade button clicked");
-                System.out.println("[DEBUG] TradeMenuView - Navigating to TradePlayerSelectionView");
                 game.setScreen(new TradePlayerSelectionView(game));
             }
         });
@@ -106,7 +104,6 @@ public class TradeMenuView implements Screen {
         viewHistoryButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                System.out.println("[DEBUG] TradeMenuView - View History button clicked");
                 game.setScreen(new TradeHistoryView(game));
             }
         });
@@ -114,7 +111,6 @@ public class TradeMenuView implements Screen {
         backButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                System.out.println("[DEBUG] TradeMenuView - Back button clicked");
                 game.setScreen(new GameMenu(new ArrayList<>()));
             }
         });
@@ -123,17 +119,13 @@ public class TradeMenuView implements Screen {
     }
 
     private void checkForTradeRequests() {
-        System.out.println("[DEBUG] TradeMenuView.checkForTradeRequests() - Checking for new trade requests");
         Trade latestPendingTrade = tradeController.getLatestPendingTradeRequest();
 
         if (latestPendingTrade != null) {
             String currentTradeId = latestPendingTrade.getTradeId();
-            System.out.println("[DEBUG] TradeMenuView.checkForTradeRequests() - Found pending trade: " + currentTradeId);
-            System.out.println("[DEBUG] TradeMenuView.checkForTradeRequests() - Last checked trade ID: " + lastCheckedTradeId);
 
             // Check if this is a new trade request we haven't seen before
             if (!currentTradeId.equals(lastCheckedTradeId)) {
-                System.out.println("[DEBUG] TradeMenuView.checkForTradeRequests() - New trade request found! Showing notification");
                 lastCheckedTradeId = currentTradeId;
 
                 // Show the trade notification view

@@ -60,10 +60,8 @@ public class GameInstance {
                 logger.info("GameInstance created with traceable ID: {} (creator: {}, timestamp: {})",
                     gameId, creatorId, timestamp);
             } else {
-                logger.debug("GameInstance created with ID: {}", gameId);
             }
         } else {
-            logger.debug("GameInstance created with ID: {}", gameId);
         }
     }
 
@@ -74,7 +72,6 @@ public class GameInstance {
             connectedPlayers.put(playerId, false); // Not connected by default
             updateActivity();
 
-            logger.debug("Player {} added to game {}", playerId, gameId);
         } finally {
             gameLock.writeLock().unlock();
         }
@@ -87,7 +84,6 @@ public class GameInstance {
                 connectedPlayers.put(playerId, true);
                 updateActivity();
 
-                logger.debug("Player {} connected to game {}", playerId, gameId);
             }
         } finally {
             gameLock.writeLock().unlock();
@@ -100,7 +96,6 @@ public class GameInstance {
             connectedPlayers.put(playerId, false);
             updateActivity();
 
-            logger.debug("Player {} disconnected from game {}", playerId, gameId);
         } finally {
             gameLock.writeLock().unlock();
         }
@@ -219,25 +214,20 @@ public class GameInstance {
 
     private NetworkResult<String> handleWalkAction(String playerId, WalkRequest walkRequest) {
         try {
-            System.out.println("DEBUG: [SERVER] handleWalkAction called for player: " + playerId + " to (" + walkRequest.getX() + ", " + walkRequest.getY() + ")");
             
             // Use existing UserLocationController logic
             Result walkResult = UserLocationController.walkPlayer(walkRequest.getX(), walkRequest.getY());
 
-            System.out.println("DEBUG: [SERVER] Walk result: " + (walkResult.isSuccessful() ? "SUCCESS" : "FAILED") + " - " + walkResult.getMessage());
 
             if (walkResult.isSuccessful()) {
                 // Get the updated player object
                 Player updatedPlayer = players.get(playerId);
                 if (updatedPlayer != null) {
-                    System.out.println("DEBUG: [SERVER] Found updated player, broadcasting full player update");
                     // Broadcast full player object to all players
                     broadcastFullPlayerUpdate(playerId, updatedPlayer);
                 } else {
-                    System.out.println("DEBUG: [SERVER] ERROR: Updated player not found for playerId: " + playerId);
                 }
             } else {
-                System.out.println("DEBUG: [SERVER] Walk action failed, not broadcasting update");
             }
 
             return NetworkResult.fromResult(walkResult);
@@ -256,7 +246,6 @@ public class GameInstance {
      */
     private void broadcastFullPlayerUpdate(String playerId, Player player) {
         try {
-            System.out.println("DEBUG: [SERVER] broadcastFullPlayerUpdate called for player: " + playerId);
             
             Map<String, Object> playerUpdate = new HashMap<>();
             playerUpdate.put("type", GameProtocol.WS_PLAYER_FULL_UPDATE);
@@ -327,7 +316,6 @@ public class GameInstance {
             // Broadcast to all players
             broadcastToAllPlayers(playerUpdate);
             
-            logger.debug("Broadcasted full player update for player: {} in game: {}", playerId, gameId);
             
         } catch (Exception e) {
             logger.error("Error broadcasting full player update for player: {}", playerId, e);
@@ -595,21 +583,15 @@ public class GameInstance {
         webSocketConnections.add(wsContext);
         updateActivity();
 
-        logger.debug("WebSocket connection added to game {}", gameId);
     }
 
     public void removeWebSocketConnection(WsContext wsContext) {
         webSocketConnections.remove(wsContext);
         updateActivity();
 
-        logger.debug("WebSocket connection removed from game {}", gameId);
     }
 
     public void broadcastToAllPlayers(Object message) {
-        System.out.println("🔴🔴🔴 [GAME_INSTANCE] broadcastToAllPlayers() called 🔴🔴🔴");
-        System.out.println("🔴🔴🔴 [GAME_INSTANCE] Message type: " + message.getClass().getSimpleName() + " 🔴🔴🔴");
-        System.out.println("🔴🔴🔴 [GAME_INSTANCE] Message content: " + message + " 🔴🔴🔴");
-        System.out.println("🔴🔴🔴 [GAME_INSTANCE] Number of WebSocket connections: " + webSocketConnections.size() + " 🔴🔴🔴");
         
         Set<WsContext> deadConnections = new HashSet<>();
         int messagesSent = 0;
@@ -617,22 +599,17 @@ public class GameInstance {
         for (WsContext wsContext : webSocketConnections) {
             try {
                 if (wsContext.session.isOpen()) {
-                    System.out.println("🔴🔴🔴 [GAME_INSTANCE] Sending message to WebSocket connection " + (messagesSent + 1) + " 🔴🔴🔴");
                     wsContext.send(message);
                     messagesSent++;
-                    System.out.println("🔴🔴🔴 [GAME_INSTANCE] Message sent successfully to connection " + messagesSent + " 🔴🔴🔴");
                 } else {
-                    System.out.println("🔴🔴🔴 [GAME_INSTANCE] Found dead WebSocket connection, marking for cleanup 🔴🔴🔴");
                     deadConnections.add(wsContext);
                 }
             } catch (Exception e) {
-                System.out.println("🔴🔴🔴 [GAME_INSTANCE] Failed to send message to WebSocket connection: " + e.getMessage() + " 🔴🔴🔴");
                 logger.warn("Failed to send message to WebSocket connection", e);
                 deadConnections.add(wsContext);
             }
         }
 
-        System.out.println("🔴🔴🔴 [GAME_INSTANCE] Broadcast completed - " + messagesSent + " messages sent, " + deadConnections.size() + " dead connections found 🔴🔴🔴");
 
         // Clean up dead connections
         webSocketConnections.removeAll(deadConnections);
@@ -870,7 +847,6 @@ public class GameInstance {
                 // Update all player scores
                 game.getScoreboardManager().updateAllScores(game);
                 
-                logger.debug("Scoreboard updated for game {}", gameId);
             }
             
         } finally {
@@ -913,8 +889,6 @@ public class GameInstance {
                 // Broadcast to all players
                 broadcastToAllPlayers(scoreboardData);
                 
-                logger.debug("Scoreboard broadcasted to {} players in game {}", 
-                           getConnectedPlayerCount(), gameId);
             }
             
         } finally {

@@ -63,6 +63,8 @@ public class Player {
     @JsonIgnore
     private transient Texture portraitFrame;
     private ArrayList<Craft>crafts = new ArrayList<>();
+    private int questNumber;
+    private int totalLevel;
 
     protected Player() {
         // For Jackson deserialization only
@@ -95,6 +97,8 @@ public class Player {
         this.ownedFarm = ownedFarm;
         this.backPack = backPack;
         this.money = 1_000_000;
+        this.questNumber =0;
+        this.totalLevel = 0;
         this.partner = null;
         this.recepies = new HashMap<>();
         this.cookingRecepies = new HashMap<>();
@@ -122,13 +126,10 @@ public class Player {
     }
 
     public void updatePosition(int posX, int posY) {
-        System.out.println("DEBUG: [PLAYER] updatePosition called for player " + (user != null ? user.getUserName() : "unknown") + " to (" + posX + ", " + posY + ")");
 
         Location newLocation = App.getCurrentGame().getMainMap().findLocation(posX, posY);
-        System.out.println("DEBUG: [PLAYER] findLocation returned: " + newLocation + " for coordinates (" + posX + ", " + posY + ")");
 
         setUserLocation(newLocation);
-        System.out.println("DEBUG: [PLAYER] setUserLocation called with: " + newLocation);
 
         rect.move(posX, posY);
 
@@ -137,7 +138,6 @@ public class Player {
             playerSprite.setPosition(posX, posY);
         }
 
-        System.out.println("DEBUG: [PLAYER] updatePosition completed. Final userLocation: " + this.userLocation);
     }
 
     public User getUser() {
@@ -161,7 +161,6 @@ public class Player {
     }
 
     public void setUserLocation(Location userLocation) {
-        System.out.println("DEBUG: [PLAYER] setUserLocation called for player " + (user != null ? user.getUserName() : "unknown") + " from " + this.userLocation + " to " + userLocation);
         this.userLocation = userLocation;
     }
 
@@ -203,7 +202,6 @@ public class Player {
                 e.printStackTrace();
             }
         } else {
-            System.out.println("DEBUG: Game is not multiplayer or App.getCurrentGame() is null");
         }
     }
 
@@ -282,9 +280,9 @@ public class Player {
 
     public void setMoney(int money) {
         this.money = money;
-        
+
         // Update scoreboard if in multiplayer mode
-        if (org.example.Common.models.Fundementals.App.getCurrentGame() != null && 
+        if (org.example.Common.models.Fundementals.App.getCurrentGame() != null &&
             org.example.Common.models.Fundementals.App.getCurrentGame().isMultiplayer() &&
             org.example.Common.models.Fundementals.App.getCurrentGame().getScoreboardManager() != null) {
             org.example.Common.models.Fundementals.App.getCurrentGame().getScoreboardManager().updatePlayerScore(this);
@@ -438,7 +436,6 @@ public class Player {
     }
 
     public void setPlayerController(PlayerController playerController) {
-        System.out.println("DEBUG: setPlayerController called for player " + this.getUser().getUserName() + " with controller type: " + (playerController != null ? playerController.getClass().getSimpleName() : "null"));
         this.playerController = playerController;
     }
 

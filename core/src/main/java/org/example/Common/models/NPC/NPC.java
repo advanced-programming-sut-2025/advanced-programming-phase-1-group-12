@@ -157,15 +157,11 @@ public class NPC {
      * This method updates both the location and handles sprite positioning
      */
     public void updatePosition(int posX, int posY) {
-        System.out.println("DEBUG: [NPC] updatePosition called for NPC " + name + " to (" + posX + ", " + posY + ")");
 
         Location newLocation = App.getCurrentGame().getMainMap().findLocation(posX, posY);
-        System.out.println("DEBUG: [NPC] findLocation returned: " + newLocation + " for coordinates (" + posX + ", " + posY + ")");
 
         setUserLocation(newLocation);
-        System.out.println("DEBUG: [NPC] setUserLocation called with: " + newLocation);
 
-        System.out.println("DEBUG: [NPC] updatePosition completed. Final userLocation: " + this.userLocation);
     }
 
     public Shack getShack() {

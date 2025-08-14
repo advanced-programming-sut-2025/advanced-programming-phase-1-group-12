@@ -71,9 +71,7 @@ public class Reaction implements Serializable {
     
     public void update(float deltaTime) {
         try {
-            System.out.println("DEBUG: Reaction.update() called for " + id + ", deltaTime: " + deltaTime + ", current displayTime: " + displayTime);
             displayTime += deltaTime;
-            System.out.println("DEBUG: Reaction.update() completed, new displayTime: " + displayTime);
         } catch (Exception e) {
             System.err.println("ERROR: Exception in Reaction.update() for " + id + ": " + e.getMessage());
             e.printStackTrace();
@@ -83,7 +81,6 @@ public class Reaction implements Serializable {
     public boolean isExpired() {
         try {
             boolean expired = displayTime >= maxDisplayTime;
-            System.out.println("DEBUG: Reaction.isExpired() for " + id + ": " + expired + " (displayTime: " + displayTime + ", maxDisplayTime: " + maxDisplayTime + ")");
             return expired;
         } catch (Exception e) {
             System.err.println("ERROR: Exception in Reaction.isExpired() for " + id + ": " + e.getMessage());
@@ -106,14 +103,10 @@ public class Reaction implements Serializable {
     
     public void dispose() {
         try {
-            System.out.println("DEBUG: Reaction.dispose() called for " + id);
             if (emojiTexture != null) {
-                System.out.println("DEBUG: Disposing emoji texture for reaction " + id);
                 emojiTexture.dispose();
                 emojiTexture = null;
-                System.out.println("DEBUG: Emoji texture disposed successfully for reaction " + id);
             } else {
-                System.out.println("DEBUG: No emoji texture to dispose for reaction " + id);
             }
         } catch (Exception e) {
             System.err.println("ERROR: Exception in Reaction.dispose() for " + id + ": " + e.getMessage());

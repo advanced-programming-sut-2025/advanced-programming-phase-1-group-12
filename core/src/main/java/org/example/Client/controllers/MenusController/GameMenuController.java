@@ -369,8 +369,6 @@ public class GameMenuController {
             }
 
             Player newPlayer = new Player(user, new Location(0, 0), false, new Refrigrator(), new ArrayList<>(), null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
-            System.out.println("DEBUG: [GAME_MENU_CONTROLLER] Created new player: " + user.getUserName());
-            System.out.println("DEBUG: [GAME_MENU_CONTROLLER] Initial player location: " + newPlayer.getUserLocation());
 
             newPlayer.setPlayerTexture(playerTexture);
             newPlayer.setPortraitFrame(portraitFrame);
@@ -383,10 +381,8 @@ public class GameMenuController {
 
             // Set player's initial location to their farm
             Location farmLocation = farm.getLocation().getTopLeftCorner();
-            System.out.println("DEBUG: [GAME_MENU_CONTROLLER] Farm location: " + farmLocation);
 
             Location playerLocation = App.getCurrentGame().getMainMap().findLocation(farmLocation.getxAxis(), farmLocation.getyAxis());
-            System.out.println("DEBUG: [GAME_MENU_CONTROLLER] Found player location from map: " + playerLocation);
 
             if (playerLocation == null) {
                 System.err.println("ERROR: findLocation returned null for player farm location (" + farmLocation.getxAxis() + ", " + farmLocation.getyAxis() + ")");
@@ -394,12 +390,9 @@ public class GameMenuController {
                 playerLocation = new Location(farmLocation.getxAxis(), farmLocation.getyAxis());
                 playerLocation.setTypeOfTile(TypeOfTile.GROUND);
                 App.getCurrentGame().getMainMap().getTilesOfMap().add(playerLocation);
-                System.out.println("DEBUG: [GAME_MENU_CONTROLLER] Created fallback player location: " + playerLocation);
             }
 
-            System.out.println("DEBUG: [GAME_MENU_CONTROLLER] Setting player location to: " + playerLocation);
             newPlayer.setUserLocation(playerLocation);
-            System.out.println("DEBUG: [GAME_MENU_CONTROLLER] Player location after setting: " + newPlayer.getUserLocation());
 
             // Initialize Refrigrator with proper location
             Location shackLocation = farm.getShack().getLocation().getTopLeftCorner();
@@ -450,31 +443,21 @@ public class GameMenuController {
 
             // Create game on server and get the server-provided game ID
             try {
-                System.out.println("DEBUG: Creating game on server with usernames: " + usernames);
                 NetworkResult<org.example.Common.network.responses.GameStateResponse> createResult =
                     networkSender.createGame(usernames, farmSelections);
 
                 if (createResult.isSuccess()) {
                     org.example.Common.network.responses.GameStateResponse gameData = createResult.getData();
-                    System.out.println("DEBUG: [GAME_CREATION] Game creation successful");
-                    System.out.println("DEBUG: [GAME_CREATION] Response data: " + gameData);
-                    System.out.println("DEBUG: [GAME_CREATION] GameData is null: " + (gameData == null));
 
                     if (gameData != null) {
                         String serverGameId = gameData.getGameId();
-                        System.out.println("DEBUG: [GAME_CREATION] Extracted server game ID: " + serverGameId);
 
                         networkSender.setCurrentGameId(serverGameId);
-                        System.out.println("DEBUG: [GAME_CREATION] Set server game ID in NetworkCommandSender: " + serverGameId);
 
                         // Verify it was set correctly
                         String verifyId = networkSender.getCurrentGameId();
-                        System.out.println("DEBUG: [GAME_CREATION] Verified NetworkCommandSender game ID: " + verifyId);
 
                         // Sync local game state with server response
-                        System.out.println("DEBUG: [GAME_CREATION] Syncing local game state with server data");
-                        System.out.println("DEBUG: [GAME_CREATION] Server connectedPlayers: " + gameData.getConnectedPlayers());
-                        System.out.println("DEBUG: [GAME_CREATION] Local players before sync: " + App.getCurrentGame().getPlayers().size());
 
                         // Ensure the local players list matches the server's connected players
                         if (gameData.getConnectedPlayers() != null && !gameData.getConnectedPlayers().isEmpty()) {
@@ -511,7 +494,6 @@ public class GameMenuController {
 
                             // Update the game's players list
                             App.getCurrentGame().setPlayers(syncedPlayers);
-                            System.out.println("DEBUG: [GAME_CREATION] Synced players list size: " + syncedPlayers.size());
 
                             // Set current player to logged-in user
                             String loggedInUsername = App.getLoggedInUser().getUserName();
@@ -525,33 +507,27 @@ public class GameMenuController {
 
                             if (currentPlayer != null) {
                                 App.getCurrentGame().setCurrentPlayer(currentPlayer);
-                                System.out.println("DEBUG: [GAME_CREATION] Set current player to: " + loggedInUsername);
                             } else if (!syncedPlayers.isEmpty()) {
                                 App.getCurrentGame().setCurrentPlayer(syncedPlayers.get(0));
-                                System.out.println("DEBUG: [GAME_CREATION] Set current player to first player: " + syncedPlayers.get(0).getUser().getUserName());
                             }
                         }
 
                         // Connect to WebSocket for this game
                         networkSender.connectToGameWebSocket(serverGameId);
-                        System.out.println("DEBUG: [GAME_CREATION] Connected to WebSocket for game: " + serverGameId);
 
                         // Create GameMenu - server game ID will be retrieved from NetworkCommandSender
                         GameMenu gameMenu = new GameMenu(usernames);
                         Main.getMain().setScreen(gameMenu);
                         return; // Exit early since we've set the screen
                     } else {
-                        System.out.println("DEBUG: [GAME_CREATION] GameData is null, falling back to local game");
                         // Switch to single player mode since server game creation failed
                         App.getCurrentGame().setMultiplayer(false);
                     }
                 } else {
-                    System.out.println("DEBUG: [GAME_CREATION] Failed to create game on server: " + createResult.getMessage()); // moshkel ine
                     // Fall back to local game
                     App.getCurrentGame().setMultiplayer(false);
                 }
             } catch (Exception e) {
-                System.out.println("DEBUG: Exception creating game on server: " + e.getMessage()); // pleye
                 // Fall back to local game
                 App.getCurrentGame().setMultiplayer(false);
             }
@@ -575,7 +551,6 @@ public class GameMenuController {
             System.out.println("Offline game started - GameMenu created");
             System.out.println("isMultiplayer: " + App.getCurrentGame().isMultiplayer());
         } else {
-            System.out.println("DEBUG: Multiplayer game - GameMenu should already be created with server game ID");
         }
     }
 

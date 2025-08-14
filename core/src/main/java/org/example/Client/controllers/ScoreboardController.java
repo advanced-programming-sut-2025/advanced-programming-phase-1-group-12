@@ -19,13 +19,11 @@ public class ScoreboardController {
     public void requestScoreboardUpdate(ScoreboardSortType sortType) {
         try {
             if (App.getCurrentGame() == null || !App.getCurrentGame().isMultiplayer()) {
-                System.out.println("DEBUG: Cannot request scoreboard update - not in multiplayer game");
                 return;
             }
             
             NetworkCommandSender sender = App.getCurrentGame().getNetworkCommandSender();
             if (sender == null) {
-                System.out.println("DEBUG: Cannot request scoreboard update - no network sender");
                 return;
             }
             
@@ -39,9 +37,7 @@ public class ScoreboardController {
             // Send via WebSocket
             if (App.getWebSocketClient() != null) {
                 App.getWebSocketClient().send(scoreboardData);
-                System.out.println("DEBUG: Scoreboard update request sent for sort type: " + sortType.name());
             } else {
-                System.out.println("DEBUG: Cannot send scoreboard update - WebSocket client not available");
             }
             
         } catch (Exception e) {
@@ -57,7 +53,6 @@ public class ScoreboardController {
         try {
             if (App.getCurrentGame() != null && App.getCurrentGame().getScoreboardManager() != null) {
                 App.getCurrentGame().getScoreboardManager().initializeScoreboard(App.getCurrentGame());
-                System.out.println("DEBUG: Scoreboard initialized for current game");
             }
         } catch (Exception e) {
             System.err.println("Error initializing scoreboard: " + e.getMessage());
@@ -72,7 +67,6 @@ public class ScoreboardController {
         try {
             if (App.getCurrentGame() != null && App.getCurrentGame().getScoreboardManager() != null) {
                 App.getCurrentGame().getScoreboardManager().updatePlayerScore(App.getCurrentPlayerLazy());
-                System.out.println("DEBUG: Player score updated");
             }
         } catch (Exception e) {
             System.err.println("Error updating player score: " + e.getMessage());

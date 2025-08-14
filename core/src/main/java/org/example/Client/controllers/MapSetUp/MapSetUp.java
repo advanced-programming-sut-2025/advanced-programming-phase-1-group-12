@@ -17,8 +17,6 @@ public class MapSetUp {
     static FarmSetUp newFarmSetUp = new FarmSetUp();
 
     public static void initializeFarms() {
-        System.out.println("DEBUG: Starting initializeFarms()");
-        System.out.println("DEBUG: App.getCurrentGame(): " + App.getCurrentGame());
 
         if (App.getCurrentGame() == null) {
             System.err.println("ERROR: App.getCurrentGame() is null in initializeFarms()");
@@ -30,7 +28,6 @@ public class MapSetUp {
             return;
         }
 
-        System.out.println("DEBUG: Creating 400x400 map tiles...");
         for (int i = 0; i < 400; i++) {
             for (int j = 0; j < 400; j++) {
                 Location location = new Location(i, j);
@@ -38,7 +35,6 @@ public class MapSetUp {
                 App.getCurrentGame().getMainMap().getTilesOfMap().add(location);
             }
         }
-        System.out.println("DEBUG: Map tiles created. Total tiles: " + App.getCurrentGame().getMainMap().getTilesOfMap().size());
 
         ArrayList<Farm> farms = new ArrayList<>();
         int farmWidth = 30;
@@ -62,7 +58,6 @@ public class MapSetUp {
             id++;
         }
         App.getCurrentGame().getMainMap().setFarms(farms);
-        System.out.println("DEBUG: Farms initialized. Total farms: " + farms.size());
     }
 
     public static void showMapWithFarms(map newMap) {
@@ -94,7 +89,6 @@ public class MapSetUp {
             return;
         }
 
-        System.out.println("DEBUG: Map tiles count: " + App.getCurrentGame().getMainMap().getTilesOfMap().size());
 
         //in case we may want to make it rectangle instead of square
         int storeWidth = 20;
@@ -119,7 +113,6 @@ public class MapSetUp {
                         location = new Location(x, y);
                         location.setTypeOfTile(TypeOfTile.GROUND);
                         App.getCurrentGame().getMainMap().getTilesOfMap().add(location);
-                        System.out.println("DEBUG: Created missing location at (" + x + ", " + y + ") in storesSetUp");
                     }
                     location.setTypeOfTile(TypeOfTile.STORE);
                 }
@@ -192,7 +185,6 @@ public class MapSetUp {
             return;
         }
 
-        System.out.println("DEBUG: NPCsetUp - Map tiles count: " + App.getCurrentGame().getMainMap().getTilesOfMap().size());
 
         int npcWidth = 40;
         int npcHeight = 40;
@@ -210,7 +202,6 @@ public class MapSetUp {
                     location = new Location(x, y);
                     location.setTypeOfTile(TypeOfTile.GROUND);
                     App.getCurrentGame().getMainMap().getTilesOfMap().add(location);
-                    System.out.println("DEBUG: Created missing location at (" + x + ", " + y + ") in NPCsetUp");
                 }
                 location.setTypeOfTile(TypeOfTile.NPC_VILLAGE);
             }

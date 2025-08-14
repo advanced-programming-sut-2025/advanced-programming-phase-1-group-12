@@ -287,22 +287,15 @@ public class GameMenu extends InputAdapter implements Screen {
         if (App.getCurrentGame() != null && App.getCurrentGame().getNetworkCommandSender() != null) {
             String serverGameId = App.getCurrentGame().getNetworkCommandSender().getCurrentGameId();
             if (serverGameId != null) {
-                System.out.println("DEBUG: [GAME_MENU] GameMenu initialized with server game ID from NetworkCommandSender: " + serverGameId);
             } else {
-                System.out.println("DEBUG: [GAME_MENU] NetworkCommandSender exists but server game ID is NULL");
 
                 // Check if this is a multiplayer game that should have a server game ID
                 if (App.getCurrentGame().isMultiplayer()) {
-                    System.out.println("DEBUG: [GAME_MENU] ERROR: This is a multiplayer game but server game ID is NULL!");
-                    System.out.println("DEBUG: [GAME_MENU] Game state - Players: " + (App.getCurrentGame().getPlayers() != null ? App.getCurrentGame().getPlayers().size() : "NULL"));
                 }
             }
         } else {
-            System.out.println("DEBUG: [GAME_MENU] No NetworkCommandSender available or current game is null");
             if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
-                System.out.println("DEBUG: [GAME_MENU] ERROR: Multiplayer game detected but no NetworkCommandSender!");
             } else {
-                System.out.println("DEBUG: [GAME_MENU] Single-player game mode detected");
             }
         }
     }
@@ -316,41 +309,29 @@ public class GameMenu extends InputAdapter implements Screen {
     public void setServerGameId(String serverGameId) {
         if (App.getCurrentGame() != null && App.getCurrentGame().getNetworkCommandSender() != null) {
             App.getCurrentGame().getNetworkCommandSender().setCurrentGameId(serverGameId);
-            System.out.println("DEBUG: [GAME_MENU] Set server game ID in NetworkCommandSender: " + serverGameId);
 
             // Verify it was set
             String verifyId = App.getCurrentGame().getNetworkCommandSender().getCurrentGameId();
-            System.out.println("DEBUG: [GAME_MENU] Verified server game ID in NetworkCommandSender: " + verifyId);
         } else {
-            System.out.println("DEBUG: [GAME_MENU] Cannot set server game ID - App.getCurrentGame() is " + App.getCurrentGame() +
-                ", NetworkCommandSender is " + (App.getCurrentGame() != null ? App.getCurrentGame().getNetworkCommandSender() : "N/A"));
         }
     }
 
 
     private void setCurrentPlayerToLoggedInUser() {
-        System.out.println("DEBUG: setCurrentPlayerToLoggedInUser() called");
-        System.out.println("DEBUG: App.getLoggedInUser(): " + App.getLoggedInUser());
-        System.out.println("DEBUG: App.getCurrentGame(): " + App.getCurrentGame());
 
         if (App.getCurrentGame() != null) {
-            System.out.println("DEBUG: App.getCurrentGame().getPlayers(): " + App.getCurrentGame().getPlayers());
             if (App.getCurrentGame().getPlayers() != null) {
-                System.out.println("DEBUG: Number of players: " + App.getCurrentGame().getPlayers().size());
             }
         }
 
         if (App.getLoggedInUser() != null) {
             String loggedInUsername = App.getLoggedInUser().getUserName();
-            System.out.println("DEBUG: Logged in username: " + loggedInUsername);
 
             // Find the player object for the logged-in user
             if (App.getCurrentGame() != null && App.getCurrentGame().getPlayers() != null) {
                 for (Player player : App.getCurrentGame().getPlayers()) {
                     if (player.getUser().getUserName().equals(loggedInUsername)) {
                         App.getCurrentGame().setCurrentPlayer(player);
-                        System.out.println("DEBUG: Set current player to logged-in user: " + loggedInUsername);
-                        logger.debug("Set current player to logged-in user: {}", loggedInUsername);
                         return;
                     }
                 }
@@ -358,22 +339,16 @@ public class GameMenu extends InputAdapter implements Screen {
                 // If logged-in user not found, fall back to first player
                 if (!App.getCurrentGame().getPlayers().isEmpty()) {
                     App.getCurrentGame().setCurrentPlayer(App.getCurrentGame().getPlayers().get(0));
-                    System.out.println("DEBUG: Logged-in user " + loggedInUsername + " not found in game, using first player");
                     logger.warn("Logged-in user {} not found in game, using first player", loggedInUsername);
                 } else {
-                    System.out.println("DEBUG: No players available in game");
                 }
             } else {
-                System.out.println("DEBUG: Game or players list is null");
             }
         } else {
             // No logged-in user, use first player
             if (App.getCurrentGame() != null && App.getCurrentGame().getPlayers() != null && !App.getCurrentGame().getPlayers().isEmpty()) {
                 App.getCurrentGame().setCurrentPlayer(App.getCurrentGame().getPlayers().get(0));
-                System.out.println("DEBUG: No logged-in user, using first player");
-                logger.debug("No logged-in user, using first player");
             } else {
-                System.out.println("DEBUG: No logged-in user and no players available");
             }
         }
     }
@@ -381,7 +356,6 @@ public class GameMenu extends InputAdapter implements Screen {
     // Real-time map update handler
     public void handleGameStateUpdate(String updateType, Map<String, Object> data) {
         try {
-            System.out.println("DEBUG: GameMenu.handleGameStateUpdate called with updateType: " + updateType + ", data: " + data);
 
             switch (updateType) {
                 case "player_moved":
@@ -421,20 +395,16 @@ public class GameMenu extends InputAdapter implements Screen {
                     handleObjectInteraction(data);
                     break;
                 default:
-                    System.out.println("DEBUG: Unknown game state update type: " + updateType);
-                    logger.debug("Unknown game state update type: {}", updateType);
                     break;
             }
 
         } catch (Exception e) {
-            System.out.println("DEBUG: Error handling game state update: " + e.getMessage());
             logger.error("Error handling game state update", e);
         }
     }
 
     public void onWebSocketConnected() {
         try {
-            System.out.println("DEBUG: GameMenu.onWebSocketConnected called");
             logger.info("WebSocket connection established for game menu");
 
             // Update UI to show connection status
@@ -448,7 +418,6 @@ public class GameMenu extends InputAdapter implements Screen {
             // For example, send initial game state or player information
 
         } catch (Exception e) {
-            System.out.println("DEBUG: Error in onWebSocketConnected: " + e.getMessage());
             logger.error("Error handling WebSocket connection", e);
         }
     }
@@ -459,7 +428,6 @@ public class GameMenu extends InputAdapter implements Screen {
             String username = (String) data.get("username");
             Integer playerCount = (Integer) data.get("playerCount");
 
-            System.out.println("DEBUG: Player joined - playerId: " + playerId + ", username: " + username + ", count: " + playerCount);
             logger.info("Player joined: {} (total players: {})", username, playerCount);
 
             // Update UI to show new player joined
@@ -470,7 +438,6 @@ public class GameMenu extends InputAdapter implements Screen {
             }
 
         } catch (Exception e) {
-            System.out.println("DEBUG: Error handling player joined: " + e.getMessage());
             logger.error("Error handling player joined", e);
         }
     }
@@ -482,7 +449,6 @@ public class GameMenu extends InputAdapter implements Screen {
             Integer playerCount = (Integer) data.get("playerCount");
             String reason = (String) data.get("reason");
 
-            System.out.println("DEBUG: Player left - playerId: " + playerId + ", username: " + username + ", count: " + playerCount + ", reason: " + reason);
             logger.info("Player left: {} (total players: {}) - reason: {}", username, playerCount, reason);
 
             // Update UI to show player left
@@ -493,14 +459,11 @@ public class GameMenu extends InputAdapter implements Screen {
             }
 
         } catch (Exception e) {
-            System.out.println("DEBUG: Error handling player left: " + e.getMessage());
             logger.error("Error handling player left", e);
         }
     }
 
     private void handleChatMessage(Map<String, Object> data) {
-        System.out.println("🟣🟣🟣 [GAME_MENU] handleChatMessage() called 🟣🟣🟣");
-        System.out.println("🟣🟣🟣 [GAME_MENU] Received data: " + data + " 🟣🟣🟣");
         
         try {
             String playerId = (String) data.get("playerId");
@@ -508,29 +471,17 @@ public class GameMenu extends InputAdapter implements Screen {
             String message = (String) data.get("message");
             String chatType = (String) data.get("chatType");
 
-            System.out.println("🟣🟣🟣 [GAME_MENU] Parsed values: 🟣🟣🟣");
-            System.out.println("🟣🟣🟣 [GAME_MENU]   playerId: " + playerId + " 🟣🟣🟣");
-            System.out.println("🟣🟣🟣 [GAME_MENU]   username: " + username + " 🟣🟣🟣");
-            System.out.println("🟣🟣🟣 [GAME_MENU]   message: '" + message + "' 🟣🟣🟣");
-            System.out.println("🟣🟣🟣 [GAME_MENU]   chatType: " + chatType + " 🟣🟣🟣");
             
-            logger.debug("Chat message from {}: {}", username, message);
 
             // Forward the message to the ChatMenu if it's open
-            System.out.println("🟣🟣🟣 [GAME_MENU] CurrentChatMenu: " + (currentChatMenu != null ? "available" : "null") + " 🟣🟣🟣");
             
             if (currentChatMenu != null) {
                 ChatMenu.ChatType type = "private".equals(chatType) ? ChatMenu.ChatType.PRIVATE : ChatMenu.ChatType.PUBLIC;
                 String recipient = "private".equals(chatType) ? data.get("recipient") != null ? (String) data.get("recipient") : null : null;
                 
-                System.out.println("🟣🟣🟣 [GAME_MENU] Forwarding to ChatMenu: 🟣🟣🟣");
-                System.out.println("🟣🟣🟣 [GAME_MENU]   type: " + type + " 🟣🟣🟣");
-                System.out.println("🟣🟣🟣 [GAME_MENU]   recipient: " + recipient + " 🟣🟣🟣");
                 
                 currentChatMenu.receiveMessage(username, message, type, recipient);
-                System.out.println("🟣🟣🟣 [GAME_MENU] Message forwarded to ChatMenu successfully 🟣🟣🟣");
             } else {
-                System.out.println("🟣🟣🟣 [GAME_MENU] ChatMenu is not open, skipping forward 🟣🟣🟣");
             }
 
             // Also show a brief notification in the game UI
@@ -538,55 +489,39 @@ public class GameMenu extends InputAdapter implements Screen {
                 errorLabel.setText(username + ": " + message);
                 errorLabel.setColor(Color.WHITE);
                 timeSinceError = 0f;
-                System.out.println("🟣🟣🟣 [GAME_MENU] Updated error label with message 🟣🟣🟣");
             } else {
-                System.out.println("🟣🟣🟣 [GAME_MENU] Error label is null, cannot show notification 🟣🟣🟣");
             }
 
         } catch (Exception e) {
-            System.out.println("🟣🟣🟣 [GAME_MENU] Error handling chat message: " + e.getMessage() + " 🟣🟣🟣");
             logger.error("Error handling chat message", e);
         }
     }
 
     private void handlePlayerMovementUpdate(Map<String, Object> data) {
         try {
-            System.out.println("DEBUG: [GAME_MENU] handlePlayerMovementUpdate called with data: " + data);
 
             String playerId = (String) data.get("playerId");
             Integer x = (Integer) data.get("x");
             Integer y = (Integer) data.get("y");
 
-            System.out.println("DEBUG: [GAME_MENU] Parsed movement data - playerId: " + playerId + ", x: " + x + ", y: " + y);
-            logger.debug("Player movement update: playerId={}, x={}, y={}", playerId, x, y);
 
             if (playerId != null && x != null && y != null) {
-                System.out.println("DEBUG: [GAME_MENU] Valid movement data, looking for player: " + playerId);
-                System.out.println("DEBUG: [GAME_MENU] Available players in game: " + App.getCurrentGame().getPlayers().size());
 
                 // Find the player and update their position
                 boolean playerFound = false;
                 for (Player player : App.getCurrentGame().getPlayers()) {
-                    System.out.println("DEBUG: [GAME_MENU] Checking player: " + player.getUser().getUserName());
-                    if (player.getUser().getUserName().equals(playerId)) {
-                        System.out.println("DEBUG: [GAME_MENU] Found player, updating position from (" +
-                            player.getUserLocation().getxAxis() + ", " + player.getUserLocation().getyAxis() +
-                            ") to (" + x + ", " + y + ")");
-
+                        if (player.getUser().getUserName().equals(playerId)) {
+                        
                         Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
                         player.setUserLocation(newLocation);
 
                         // Update sprite position with original coordinates (not scaled)
-                        System.out.println("DEBUG: [GAME_MENU] Calling player.updatePosition with original coordinates: (" + x + ", " + y + ")");
                         player.updatePosition(x, y); // Update sprite position with original coordinates
 
-                        System.out.println("DEBUG: [GAME_MENU] Player position update completed for: " + playerId);
-                        logger.debug("Updated player {} position to ({}, {})", playerId, x, y);
                         playerFound = true;
 
                         // If we're showing the full map, update camera position for smooth following
                         if (showingAllMap) {
-                            System.out.println("DEBUG: [GAME_MENU] Updating camera position for full map view");
                             updateCameraToPlayer();
                         }
                         break;
@@ -594,16 +529,13 @@ public class GameMenu extends InputAdapter implements Screen {
                 }
 
                 if (!playerFound) {
-                    System.out.println("DEBUG: [GAME_MENU] Player " + playerId + " not found in current game");
                     logger.warn("Player {} not found in current game", playerId);
                 }
             } else {
-                System.out.println("DEBUG: [GAME_MENU] Invalid player movement data - playerId: " + playerId + ", x: " + x + ", y: " + y);
                 logger.warn("Invalid player movement data: playerId={}, x={}, y={}", playerId, x, y);
             }
 
         } catch (Exception e) {
-            System.out.println("DEBUG: [GAME_MENU] Error handling player movement update: " + e.getMessage());
             logger.error("Error handling player movement update", e);
         }
     }
@@ -613,28 +545,20 @@ public class GameMenu extends InputAdapter implements Screen {
         Integer x = (Integer) data.get("x");
         Integer y = (Integer) data.get("y");
 
-        logger.debug("Handling player position update: playerId={}, x={}, y={}", playerId, x, y);
-        System.out.println("DEBUG: [GAME_MENU] Handling player position update: playerId=" + playerId + ", x=" + x + ", y=" + y);
 
         if (playerId != null && x != null && y != null) {
             // Find the player and update their position
             boolean playerFound = false;
             for (Player player : App.getCurrentGame().getPlayers()) {
                 if (player.getUser().getUserName().equals(playerId)) {
-                    System.out.println("DEBUG: [GAME_MENU] Found player: " + playerId);
-                    System.out.println("DEBUG: [GAME_MENU] Current player location before update: " + player.getUserLocation());
 
                     Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
-                    System.out.println("DEBUG: [GAME_MENU] New location from map: " + newLocation);
 
                     player.setUserLocation(newLocation);
-                    System.out.println("DEBUG: [GAME_MENU] Player location after setUserLocation: " + player.getUserLocation());
 
                     // Update sprite position with original coordinates (not scaled)
                     player.updatePosition(x, y); // Update sprite position with original coordinates
-                    System.out.println("DEBUG: [GAME_MENU] Player location after updatePosition: " + player.getUserLocation());
 
-                    logger.debug("Updated player {} position to ({}, {})", playerId, x, y);
                     playerFound = true;
 
                     // If we're showing the full map, update camera position for smooth following
@@ -647,11 +571,9 @@ public class GameMenu extends InputAdapter implements Screen {
 
             if (!playerFound) {
                 logger.warn("Player {} not found in current game", playerId);
-                System.out.println("DEBUG: [GAME_MENU] Player " + playerId + " not found in current game");
             }
         } else {
             logger.warn("Invalid player position data: playerId={}, x={}, y={}", playerId, x, y);
-            System.out.println("DEBUG: [GAME_MENU] Invalid player position data: playerId=" + playerId + ", x=" + x + ", y=" + y);
         }
     }
 
@@ -660,9 +582,7 @@ public class GameMenu extends InputAdapter implements Screen {
         Integer currentEnergy = (Integer) data.get("currentEnergy");
         Integer maxEnergy = (Integer) data.get("maxEnergy");
         String energyStatus = (String) data.get("energyStatus");
-
-        logger.debug("Handling energy update: playerId={}, currentEnergy={}, maxEnergy={}, status={}",
-            playerId, currentEnergy, maxEnergy, energyStatus);
+            
 
         if (playerId != null && currentEnergy != null && maxEnergy != null) {
             // Find the player and update their energy
@@ -672,7 +592,6 @@ public class GameMenu extends InputAdapter implements Screen {
                 if (player.getUser().getUserName().equals(playerId)) {
                     // Update the player's energy (without triggering another broadcast)
                     player.setEnergyInternal(currentEnergy);
-                    logger.debug("Updated player {} energy to {}/{}", playerId, currentEnergy, maxEnergy);
                     playerFound = true;
                     break;
                 }
@@ -693,19 +612,15 @@ public class GameMenu extends InputAdapter implements Screen {
      */
     private void handleFullPlayerUpdate(Map<String, Object> data) {
         try {
-            System.out.println("DEBUG: GameMenu.handleFullPlayerUpdate called with data: " + data);
 
             String playerId = (String) data.get("playerId");
             Map<String, Object> playerData = (Map<String, Object>) data.get("playerData");
 
             if (playerId == null || playerData == null) {
-                System.out.println("DEBUG: Invalid full player update data - playerId: " + playerId + ", playerData: " + playerData);
                 logger.warn("Invalid full player update data: playerId={}, playerData={}", playerId, playerData);
                 return;
             }
 
-            System.out.println("DEBUG: Processing full player update for player: " + playerId);
-            logger.debug("Processing full player update for player: {}", playerId);
 
             // Find the player in the current game
             Player targetPlayer = null;
@@ -717,7 +632,6 @@ public class GameMenu extends InputAdapter implements Screen {
             }
 
             if (targetPlayer == null) {
-                System.out.println("DEBUG: Player " + playerId + " not found in current game");
                 logger.warn("Player {} not found in current game", playerId);
                 return;
             }
@@ -725,11 +639,8 @@ public class GameMenu extends InputAdapter implements Screen {
             // Apply all the player data updates
             applyPlayerDataUpdate(targetPlayer, playerData);
 
-            System.out.println("DEBUG: Full player update processed successfully for player: " + playerId);
-            logger.debug("Full player update processed for player: {}", playerId);
 
         } catch (Exception e) {
-            System.out.println("DEBUG: Error handling full player update: " + e.getMessage());
             logger.error("Error handling full player update", e);
             e.printStackTrace();
         }
@@ -741,27 +652,19 @@ public class GameMenu extends InputAdapter implements Screen {
      */
     private void applyPlayerDataUpdate(Player targetPlayer, Map<String, Object> playerData) {
         try {
-            System.out.println("DEBUG: [GAME_MENU] Applying player data update to player: " + targetPlayer.getUser().getUserName());
-            System.out.println("DEBUG: [GAME_MENU] Current player location before update: " + targetPlayer.getUserLocation());
 
             // Update location and position
             if (playerData.containsKey("x") && playerData.containsKey("y")) {
                 Integer x = (Integer) playerData.get("x");
                 Integer y = (Integer) playerData.get("y");
                 if (x != null && y != null) {
-                    System.out.println("DEBUG: [GAME_MENU] Updating player position to (" + x + ", " + y + ")");
                     // Find the location object
                     Location newLocation = App.getCurrentGame().getMainMap().findLocation(x, y);
-                    System.out.println("DEBUG: [GAME_MENU] Found location from map: " + newLocation);
                     if (newLocation != null) {
                         targetPlayer.setUserLocation(newLocation);
-                        System.out.println("DEBUG: [GAME_MENU] Player location after setUserLocation: " + targetPlayer.getUserLocation());
                         // Update sprite position with original coordinates (not scaled)
                         targetPlayer.updatePosition(x, y);
-                        System.out.println("DEBUG: [GAME_MENU] Player location after updatePosition: " + targetPlayer.getUserLocation());
-                        System.out.println("DEBUG: [GAME_MENU] Updated player position to (" + x + ", " + y + ")");
                     } else {
-                        System.out.println("DEBUG: [GAME_MENU] WARNING: Could not find location for coordinates (" + x + ", " + y + ")");
                     }
                 }
             }
@@ -771,7 +674,6 @@ public class GameMenu extends InputAdapter implements Screen {
                 Integer energy = (Integer) playerData.get("energy");
                 if (energy != null) {
                     targetPlayer.setEnergyInternal(energy);
-                    System.out.println("DEBUG: Updated player energy to " + energy);
                 }
             }
 
@@ -780,7 +682,6 @@ public class GameMenu extends InputAdapter implements Screen {
                 Integer money = (Integer) playerData.get("money");
                 if (money != null) {
                     targetPlayer.setMoney(money);
-                    System.out.println("DEBUG: Updated player money to " + money);
                 }
             }
 
@@ -814,7 +715,6 @@ public class GameMenu extends InputAdapter implements Screen {
                             ability.setLevel(entry.getValue());
                         }
                     }
-                    System.out.println("DEBUG: Updated player abilities");
                 }
             }
 
@@ -835,11 +735,8 @@ public class GameMenu extends InputAdapter implements Screen {
                 targetPlayer.setSkillBuffEaten((Boolean) playerData.get("isSkillBuffEaten"));
             }
 
-            System.out.println("DEBUG: Successfully applied all player data updates");
-            logger.debug("Applied full player data update for player: {}", targetPlayer.getUser().getUserName());
 
         } catch (Exception e) {
-            System.out.println("DEBUG: Error applying player data update: " + e.getMessage());
             logger.error("Error applying player data update", e);
             e.printStackTrace();
         }
@@ -854,7 +751,6 @@ public class GameMenu extends InputAdapter implements Screen {
         if (npcId != null && x != null && y != null) {
             // Update NPC position and state
             // This would need to be implemented based on your NPC system
-            logger.debug("NPC {} moved to ({}, {}) with state: {}", npcId, x, y, state);
         }
     }
 
@@ -863,7 +759,6 @@ public class GameMenu extends InputAdapter implements Screen {
         if (weather != null) {
             // Update weather state
             App.getCurrentGame().getDate().setWeather(Weather.valueOf(weather.toUpperCase()));
-            logger.debug("Weather changed to: {}", weather);
         }
     }
 
@@ -877,7 +772,6 @@ public class GameMenu extends InputAdapter implements Screen {
             App.getCurrentGame().getDate().setHour(hour);
             App.getCurrentGame().getDate().setDayOfMonth(day);
             App.getCurrentGame().getDate().setSeason(org.example.Common.models.enums.Season.valueOf(season.toUpperCase()));
-            logger.debug("Time changed to: Day {} Hour {} Season {}", day, hour, season);
         }
     }
 
@@ -888,7 +782,6 @@ public class GameMenu extends InputAdapter implements Screen {
 
         if (missionId != null && status != null) {
             // Update mission state
-            logger.debug("Mission {} updated: {} - {}", missionId, status, description);
         }
     }
 
@@ -899,7 +792,6 @@ public class GameMenu extends InputAdapter implements Screen {
 
         if (buildingId != null && state != null) {
             // Update building state
-            logger.debug("Building {} state changed to: {} with properties: {}", buildingId, state, properties);
         }
     }
 
@@ -910,7 +802,6 @@ public class GameMenu extends InputAdapter implements Screen {
 
         if (objectId != null && interactionType != null) {
             // Handle object interaction
-            logger.debug("Object {} interacted with by {}: {}", objectId, playerId, interactionType);
         }
     }
 
@@ -919,58 +810,35 @@ public class GameMenu extends InputAdapter implements Screen {
      * This method is called by the WebSocket client when radio events are received
      */
     public void handleRadioWebSocketMessage(String messageType, Map<String, Object> messageData) {
-        System.out.println("=== DEBUG: GameMenu.handleRadioWebSocketMessage() called ===");
-        System.out.println("DEBUG: Message type: " + messageType);
-        System.out.println("DEBUG: Message data: " + messageData);
         
         // Forward radio events to the radio menu if it's open
         // For now, we'll just log the events since the radio menu is a separate screen
         switch (messageType) {
             case "radio_station_joined":
-                System.out.println("DEBUG: Radio station joined event received");
-                System.out.println("DEBUG: Station: " + messageData.get("stationName"));
-                System.out.println("DEBUG: Player: " + messageData.get("playerId"));
                 break;
                 
             case "radio_station_left":
-                System.out.println("DEBUG: Radio station left event received");
-                System.out.println("DEBUG: Station: " + messageData.get("stationName"));
-                System.out.println("DEBUG: Player: " + messageData.get("playerId"));
                 break;
                 
             case "radio_track_played":
-                System.out.println("DEBUG: Radio track played event received");
-                System.out.println("DEBUG: Track: " + messageData.get("trackName"));
-                System.out.println("DEBUG: Station owner: " + messageData.get("stationOwner"));
-                System.out.println("DEBUG: Player: " + messageData.get("playerId"));
                 break;
                 
             case "radio_track_paused":
-                System.out.println("DEBUG: Radio track paused event received");
                 break;
                 
             case "radio_track_stopped":
-                System.out.println("DEBUG: Radio track stopped event received");
                 break;
                 
             case "radio_track_uploaded":
-                System.out.println("DEBUG: Radio track uploaded event received");
-                System.out.println("DEBUG: Track: " + messageData.get("trackName"));
-                System.out.println("DEBUG: Station owner: " + messageData.get("stationOwner"));
-                System.out.println("DEBUG: Player: " + messageData.get("playerId"));
                 break;
                 
             default:
-                System.out.println("DEBUG: Unknown radio message type: " + messageType);
                 break;
         }
         
-        System.out.println("=== DEBUG: GameMenu.handleRadioWebSocketMessage() completed ===");
     }
     
     public void handleScoreboardWebSocketMessage(Map<String, Object> messageData) {
-        System.out.println("🏆🏆🏆 [GAME_MENU] handleScoreboardWebSocketMessage called 🏆🏆🏆");
-        System.out.println("🏆🏆🏆 [GAME_MENU] Message data: " + messageData + " 🏆🏆🏆");
         
         try {
             String messageType = (String) messageData.get("type");
@@ -985,13 +853,10 @@ public class GameMenu extends InputAdapter implements Screen {
                     Map<String, Object> stats = (Map<String, Object>) messageData.get("stats");
                     
                     scoreboardMenu.updateScoreboard(playerScores, sortType, stats);
-                    System.out.println("🏆🏆🏆 [GAME_MENU] Scoreboard updated successfully 🏆🏆🏆");
                 } else {
-                    System.out.println("🏆🏆🏆 [GAME_MENU] Scoreboard menu is not currently active 🏆🏆🏆");
                 }
             }
         } catch (Exception e) {
-            System.out.println("💥💥💥 [GAME_MENU] Error handling scoreboard message: " + e.getMessage() + " 💥💥💥");
             e.printStackTrace();
         }
     }
@@ -1057,19 +922,13 @@ public class GameMenu extends InputAdapter implements Screen {
 
     @Override
     public void show() {
-        System.out.println("DEBUG: GameMenu.show() called");
-        System.out.println("DEBUG: App.getCurrentGame(): " + App.getCurrentGame());
 
         if (App.getCurrentGame() != null) {
-            System.out.println("DEBUG: App.getCurrentGame().getCurrentPlayer(): " + App.getCurrentGame().getCurrentPlayer());
-            System.out.println("DEBUG: App.getCurrentGame().getPlayers(): " + App.getCurrentGame().getPlayers());
             if (App.getCurrentGame().getPlayers() != null) {
-                System.out.println("DEBUG: Number of players: " + App.getCurrentGame().getPlayers().size());
             }
 
             // Try to set current player multiple ways
             if (App.getCurrentGame().getCurrentPlayer() == null) {
-                System.out.println("DEBUG: Current player is null, trying to set it");
 
                 // First try setting to logged in user
                 setCurrentPlayerToLoggedInUser();
@@ -1080,22 +939,17 @@ public class GameMenu extends InputAdapter implements Screen {
                     !App.getCurrentGame().getPlayers().isEmpty()) {
                     Player firstPlayer = App.getCurrentGame().getPlayers().get(0);
                     App.getCurrentGame().setCurrentPlayer(firstPlayer);
-                    System.out.println("DEBUG: Set current player to first player: " + firstPlayer.getUser().getUserName());
                 }
 
                 // If still null, try creating a new player for logged in user
                 if (App.getCurrentGame().getCurrentPlayer() == null && App.getLoggedInUser() != null) {
-                    System.out.println("DEBUG: [GAME_MENU] Creating new player for logged in user: " + App.getLoggedInUser().getUserName());
                     Player newPlayer = new Player(App.getLoggedInUser(), new Location(0, 0), false, new Refrigrator(), new ArrayList<>(), null, new BackPack(BackPackTypes.PRIMARY), false, false, new ArrayList<>());
-                    System.out.println("DEBUG: [GAME_MENU] New player created with location: " + newPlayer.getUserLocation());
 
                     if (App.getCurrentGame().getPlayers() == null) {
                         App.getCurrentGame().setPlayers(new ArrayList<>());
                     }
                     App.getCurrentGame().getPlayers().add(newPlayer);
                     App.getCurrentGame().setCurrentPlayer(newPlayer);
-                    System.out.println("DEBUG: [GAME_MENU] Created and set new player for: " + App.getLoggedInUser().getUserName());
-                    System.out.println("DEBUG: [GAME_MENU] Current player location after setting: " + App.getCurrentGame().getCurrentPlayer().getUserLocation());
                 }
             }
         }
@@ -1202,9 +1056,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     }
                 }
                 smileTexturesLoaded = true; // Mark textures as loaded
-                System.out.println("DEBUG: Smile textures loaded successfully - frame 0: " + (smileTextures[0] != null) + ", width: " + (smileTextures[0] != null ? smileTextures[0].getWidth() : "null"));
             } catch (Exception e) {
-                System.out.println("DEBUG: Error loading smile textures: " + e.getMessage());
                 e.printStackTrace();
                 // Create emergency textures if loading fails
                 try {
@@ -1217,9 +1069,7 @@ public class GameMenu extends InputAdapter implements Screen {
                         smileTextures[i] = emergencyTexture;
                     }
                     smileTexturesLoaded = true; // Mark textures as loaded even with emergency texture
-                    System.out.println("DEBUG: Using emergency yellow texture for smile frames in show()");
                 } catch (Exception emergencyException) {
-                    System.out.println("DEBUG: Emergency texture creation failed in show(): " + emergencyException.getMessage());
                 }
             }
         }
@@ -1293,7 +1143,6 @@ public class GameMenu extends InputAdapter implements Screen {
 
         Player player = App.getCurrentPlayerLazy();
 
-        System.out.println("DEBUG: Player from App.getCurrentPlayerLazy(): " + player);
 
         if (player == null) {
             System.err.println("ERROR: Player is null in GameMenu.show()");
@@ -3213,17 +3062,12 @@ public class GameMenu extends InputAdapter implements Screen {
 
                 // Use server game ID if available, otherwise fall back to local game ID
                 String gameId;
-                System.out.println("DEBUG: [WEBSOCKET_INIT] Starting WebSocket initialization");
-                System.out.println("DEBUG: [WEBSOCKET_INIT] App.getCurrentGame(): " + App.getCurrentGame());
 
                 if (App.getCurrentGame().getNetworkCommandSender() != null) {
-                    System.out.println("DEBUG: [WEBSOCKET_INIT] NetworkCommandSender exists");
                     String serverGameId = App.getCurrentGame().getNetworkCommandSender().getCurrentGameId();
-                    System.out.println("DEBUG: [WEBSOCKET_INIT] NetworkCommandSender.getCurrentGameId(): " + serverGameId);
 
                     if (serverGameId != null) {
                         gameId = serverGameId;
-                        System.out.println("DEBUG: [WEBSOCKET_INIT] Using server game ID for WebSocket: " + gameId);
                     } else {
                         throw new IllegalStateException("Server game ID is null in multiplayer mode");
                     }
@@ -3248,7 +3092,6 @@ public class GameMenu extends InputAdapter implements Screen {
                     return null;
                 });
             } else {
-                logger.debug("Skipping WebSocket client initialization - not in multiplayer mode or missing user/game");
             }
         } catch (Exception e) {
             logger.error("Failed to initialize WebSocket client", e);
@@ -4620,36 +4463,25 @@ public class GameMenu extends InputAdapter implements Screen {
     }
     
     private void openScoreboardMenu() {
-        System.out.println("🏆🏆🏆 [GAME_MENU] openScoreboardMenu() called 🏆🏆🏆");
-        System.out.println("🏆🏆🏆 [GAME_MENU] CurrentGame: " + (App.getCurrentGame() != null ? "available" : "null") + " 🏆🏆🏆");
         
         if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
-            System.out.println("🏆🏆🏆 [GAME_MENU] Creating ScoreboardMenu and setting as current screen 🏆🏆🏆");
             ScoreboardMenu scoreboardMenu = new ScoreboardMenu(this);
             Main.getMain().setScreen(scoreboardMenu);
         } else {
-            System.out.println("🏆🏆🏆 [GAME_MENU] Cannot open ScoreboardMenu - not in multiplayer game 🏆🏆🏆");
         }
     }
     
     private void openChatMenu() {
-        System.out.println("🟣🟣🟣 [GAME_MENU] openChatMenu() called 🟣🟣🟣");
-        System.out.println("🟣🟣🟣 [GAME_MENU] CurrentGame: " + (App.getCurrentGame() != null ? "available" : "null") + " 🟣🟣🟣");
         
         if (App.getCurrentGame() != null && App.getCurrentGame().getNetworkCommandSender() != null) {
-            System.out.println("🟣🟣🟣 [GAME_MENU] NetworkCommandSender: " + (App.getCurrentGame().getNetworkCommandSender() != null ? "available" : "null") + " 🟣🟣🟣");
             currentChatMenu = new ChatMenu(this, App.getCurrentGame().getNetworkCommandSender());
-            System.out.println("🟣🟣🟣 [GAME_MENU] ChatMenu created, setting as current screen 🟣🟣🟣");
             Main.getMain().setScreen(currentChatMenu);
         } else {
-            System.out.println("🟣🟣🟣 [GAME_MENU] Cannot open ChatMenu - missing game or network sender 🟣🟣🟣");
         }
     }
     
     public void clearChatMenuReference() {
-        System.out.println("🟣🟣🟣 [GAME_MENU] clearChatMenuReference() called 🟣🟣🟣");
         currentChatMenu = null;
-        System.out.println("🟣🟣🟣 [GAME_MENU] ChatMenu reference cleared 🟣🟣🟣");
     }
     
     private void showReactionMenu() {
@@ -5675,10 +5507,8 @@ public class GameMenu extends InputAdapter implements Screen {
     }
 
     private void startHugAnimation(Player targetPlayer) {
-        System.out.println("DEBUG: startHugAnimation called");
         Player currentPlayer = App.getCurrentPlayerLazy();
         if (currentPlayer == null || targetPlayer == null) {
-            System.out.println("DEBUG: One of the players is null - currentPlayer: " + (currentPlayer != null) + ", targetPlayer: " + (targetPlayer != null));
             return;
         }
 
@@ -5773,16 +5603,13 @@ public class GameMenu extends InputAdapter implements Screen {
         heartAnimationProgress = 0f;
         heartAnimationActive = false; // Don't start yet
 
-        System.out.println("DEBUG: Hug animation started - isHugging: " + isHugging + ", player1: " + currentPlayer.getUser().getUserName() + ", player2: " + targetPlayer.getUser().getUserName());
 
         makePlayersFaceEachOther(currentPlayer, targetPlayer);
     }
 
     private void startRingAnimation(Player targetPlayer) {
-        System.out.println("DEBUG: startRingAnimation called");
         Player currentPlayer = App.getCurrentPlayerLazy();
         if (currentPlayer == null || targetPlayer == null) {
-            System.out.println("DEBUG: One of the players is null - currentPlayer: " + (currentPlayer != null) + ", targetPlayer: " + (targetPlayer != null));
             return;
         }
 
@@ -5876,16 +5703,13 @@ public class GameMenu extends InputAdapter implements Screen {
             ringTextureLoadingDelay = 0f;
         }
 
-        System.out.println("DEBUG: Ring animation started - isRinging: " + isRinging + ", player1: " + currentPlayer.getUser().getUserName() + ", player2: " + targetPlayer.getUser().getUserName());
 
         makePlayersFaceEachOther(currentPlayer, targetPlayer);
     }
 
     private void startFlowerAnimation(Player targetPlayer) {
-        System.out.println("DEBUG: startFlowerAnimation called");
         Player currentPlayer = App.getCurrentPlayerLazy();
         if (currentPlayer == null || targetPlayer == null) {
-            System.out.println("DEBUG: One of the players is null - currentPlayer: " + (currentPlayer != null) + ", targetPlayer: " + (targetPlayer != null));
             return;
         }
 
@@ -5915,9 +5739,7 @@ public class GameMenu extends InputAdapter implements Screen {
             try {
                 flowerTexture = new Texture(Gdx.files.internal("assets/NPC/RelationShip/Bouquet.png"));
                 flowerTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-                System.out.println("DEBUG: Flower texture loaded successfully");
             } catch (Exception e) {
-                System.out.println("DEBUG: Failed to load flower texture: " + e.getMessage());
                 // Create emergency flower texture
                 try {
                     Pixmap pixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
@@ -5925,9 +5747,7 @@ public class GameMenu extends InputAdapter implements Screen {
                     pixmap.fill();
                     flowerTexture = new Texture(pixmap);
                     pixmap.dispose();
-                    System.out.println("DEBUG: Using emergency pink texture for flower");
                 } catch (Exception emergencyException) {
-                    System.out.println("DEBUG: Emergency flower texture creation failed: " + emergencyException.getMessage());
                     return; // Don't start animation if we can't load any texture
                 }
             }
@@ -5935,7 +5755,6 @@ public class GameMenu extends InputAdapter implements Screen {
 
         // Ensure smile textures are loaded before starting any animation
         if (!smileTexturesLoaded) {
-            System.out.println("DEBUG: Loading smile textures for flower animation...");
             try {
                 smileTextures[0] = new Texture(Gdx.files.internal("assets/NPC/RelationShip/SmileQ_1.png"));
                 smileTextures[1] = new Texture(Gdx.files.internal("assets/NPC/RelationShip/SmileQ_2.png"));
@@ -5950,9 +5769,7 @@ public class GameMenu extends InputAdapter implements Screen {
                 }
 
                 smileTexturesLoaded = true; // Mark textures as loaded
-                System.out.println("DEBUG: Successfully loaded all smile textures for flower animation");
             } catch (Exception e) {
-                System.out.println("DEBUG: Failed to load smile textures for flower animation: " + e.getMessage());
                 // Create a fallback texture to prevent null rendering
                 try {
                     Texture fallbackTexture = new Texture(Gdx.files.internal("assets/NPC/RelationShip/SmileQ_1.png"));
@@ -5961,9 +5778,7 @@ public class GameMenu extends InputAdapter implements Screen {
                         smileTextures[i] = fallbackTexture;
                     }
                     smileTexturesLoaded = true; // Mark textures as loaded
-                    System.out.println("DEBUG: Using fallback texture for all smile frames in flower animation");
                 } catch (Exception fallbackException) {
-                    System.out.println("DEBUG: Even fallback texture failed for flower animation: " + fallbackException.getMessage());
                     // Create a simple colored rectangle as last resort
                     try {
                         Pixmap pixmap = new Pixmap(32, 32, Pixmap.Format.RGBA8888);
@@ -5975,14 +5790,11 @@ public class GameMenu extends InputAdapter implements Screen {
                             smileTextures[i] = emergencyTexture;
                         }
                         smileTexturesLoaded = true; // Mark textures as loaded
-                        System.out.println("DEBUG: Using emergency yellow texture for flower animation");
                     } catch (Exception emergencyException) {
-                        System.out.println("DEBUG: Emergency texture creation failed for flower: " + emergencyException.getMessage());
                     }
                 }
             }
         } else {
-            System.out.println("DEBUG: Smile textures already loaded, skipping loading for flower animation");
         }
 
         // Calculate flower animation positions
@@ -5996,7 +5808,6 @@ public class GameMenu extends InputAdapter implements Screen {
         flowerAnimationProgress = 0f;
         flowerAnimationActive = false; // Don't start yet
 
-        System.out.println("DEBUG: Flower animation started - isFlowering: " + isFlowering + ", player1: " + currentPlayer.getUser().getUserName() + ", player2: " + targetPlayer.getUser().getUserName());
 
         makePlayersFaceEachOther(currentPlayer, targetPlayer);
     }
@@ -6043,7 +5854,6 @@ public class GameMenu extends InputAdapter implements Screen {
         if (!smileTexturesLoaded) {
             hugTextureLoadingDelay += delta;
             if (hugTextureLoadingDelay >= TEXTURE_LOADING_DELAY) {
-                System.out.println("DEBUG: Hug texture loading delay completed, textures should be ready");
             }
             return;
         }
@@ -6095,7 +5905,6 @@ public class GameMenu extends InputAdapter implements Screen {
         if (!smileTexturesLoaded) {
             flowerTextureLoadingDelay += delta;
             if (flowerTextureLoadingDelay >= TEXTURE_LOADING_DELAY) {
-                System.out.println("DEBUG: Flower texture loading delay completed, textures should be ready");
             }
             return;
         }
@@ -6157,7 +5966,6 @@ public class GameMenu extends InputAdapter implements Screen {
         if (!heartEmojiTexturesLoaded || ringTexture == null) {
             ringTextureLoadingDelay += delta;
             if (ringTextureLoadingDelay >= TEXTURE_LOADING_DELAY) {
-                System.out.println("DEBUG: Ring texture loading delay completed, textures should be ready");
                 // If textures are still not ready after delay, skip this frame
                 if (!heartEmojiTexturesLoaded || ringTexture == null) {
                     return;
@@ -6240,7 +6048,6 @@ public class GameMenu extends InputAdapter implements Screen {
      */
     public void forceNPCMovementTest() {
         try {
-            System.out.println("DEBUG: Force NPC movement test called");
             
             // Initialize everything
             org.example.Server.NPCController npcController = 
@@ -6253,7 +6060,6 @@ public class GameMenu extends InputAdapter implements Screen {
             // Force movement to work location (hour 10)
             movementController.forceAllNPCsToMove(10);
             
-            System.out.println("DEBUG: NPC movement test completed");
             
         } catch (Exception e) {
             System.err.println("Error in NPC movement test: " + e.getMessage());
@@ -6266,14 +6072,12 @@ public class GameMenu extends InputAdapter implements Screen {
      */
     private void initializeNPCMovement() {
         try {
-            System.out.println("DEBUG: GameMenu.initializeNPCMovement() called");
             
             // Simple initialization: Set all NPCs to home with idle animations
             org.example.Server.NPCController npcController = 
                 org.example.Server.NPCController.getInstance();
             npcController.initializeNPCsToHome();
             
-            System.out.println("DEBUG: NPCs initialized to home locations with idle animations");
             
         } catch (Exception e) {
             // Log error but don't crash the game

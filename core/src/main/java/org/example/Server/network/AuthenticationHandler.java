@@ -224,7 +224,6 @@ public class AuthenticationHandler {
                 user.getTokenExpiration() > System.currentTimeMillis();
 
         } catch (Exception e) {
-            logger.debug("Token validation failed", e);
             return false;
         }
     }
@@ -247,7 +246,6 @@ public class AuthenticationHandler {
 
             return user;
         } catch (Exception e) {
-            logger.debug("Failed to get user by token", e);
             return null;
         }
     }

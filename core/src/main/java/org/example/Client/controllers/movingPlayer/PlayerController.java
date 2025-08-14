@@ -74,11 +74,8 @@ public class PlayerController {
 
         // Get network command sender from the game for multiplayer movement updates
         if (App.getCurrentGame() != null && App.getCurrentGame().isMultiplayer()) {
-            System.out.println("DEBUG: Initializing NetworkCommandSender for multiplayer game");
             this.networkCommandSender = App.getCurrentGame().getNetworkCommandSender();
-            System.out.println("DEBUG: NetworkCommandSender created: " + (this.networkCommandSender != null));
         } else {
-            System.out.println("DEBUG: Not initializing NetworkCommandSender - game is null or not multiplayer");
         }
 
         // TODO: Fix PlayerController type mismatch - need to create a common interface
@@ -314,9 +311,7 @@ public class PlayerController {
                     try {
                         // Send the actual tile coordinates (no division by 100 needed)
                         networkCommandSender.sendPlayerMovementWebSocket(newX, newY);
-                        System.out.println("DEBUG: Sent movement update for UP: " + player.getUser().getUserName() + " to (" + newX + ", " + newY + ")");
                     } catch (Exception e) {
-                        System.out.println("DEBUG: Failed to send movement update: " + e.getMessage());
                     }
                 }
 
@@ -343,9 +338,7 @@ public class PlayerController {
                     try {
                         // Send the actual tile coordinates (no division by 100 needed)
                         networkCommandSender.sendPlayerMovementWebSocket(newX, newY);
-                        System.out.println("DEBUG: Sent movement update for DOWN: " + player.getUser().getUserName() + " to (" + newX + ", " + newY + ")");
                     } catch (Exception e) {
-                        System.out.println("DEBUG: Failed to send movement update: " + e.getMessage());
                     }
                 }
 
@@ -372,9 +365,7 @@ public class PlayerController {
                     try {
                         // Send the actual tile coordinates (no division by 100 needed)
                         networkCommandSender.sendPlayerMovementWebSocket(newX, newY);
-                        System.out.println("DEBUG: Sent movement update for LEFT: " + player.getUser().getUserName() + " to (" + newX + ", " + newY + ")");
                     } catch (Exception e) {
-                        System.out.println("DEBUG: Failed to send movement update: " + e.getMessage());
                     }
                 }
 
@@ -403,9 +394,7 @@ public class PlayerController {
                     try {
                         // Send the actual tile coordinates (no division by 100 needed)
                         networkCommandSender.sendPlayerMovementWebSocket(newX, newY);
-                        System.out.println("DEBUG: Sent movement update for RIGHT: " + player.getUser().getUserName() + " to (" + newX + ", " + newY + ")");
                     } catch (Exception e) {
-                        System.out.println("DEBUG: Failed to send movement update: " + e.getMessage());
                     }
                 }
 

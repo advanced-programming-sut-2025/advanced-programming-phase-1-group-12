@@ -137,8 +137,6 @@ public class DateManager {
         synchronized (lock) {
             if (isInitialized && gameDate != null) {
                 gameDate.changeAdvancedTime(hours);
-                logger.debug("Advanced time by {} hours. Current time: {}h, Day {}", 
-                    hours, gameDate.getHour(), gameDate.getDayOfMonth());
             }
         }
     }
@@ -150,8 +148,6 @@ public class DateManager {
         synchronized (lock) {
             if (isInitialized && gameDate != null) {
                 gameDate.changeAdvancedDay(days);
-                logger.debug("Advanced {} days. Current: Day {}, {}, Year {}", 
-                    days, gameDate.getDayOfMonth(), gameDate.getSeason(), gameDate.getYear());
             }
         }
     }
