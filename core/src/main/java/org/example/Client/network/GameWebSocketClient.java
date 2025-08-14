@@ -856,6 +856,9 @@ public class GameWebSocketClient {
         try {
             System.out.println("**[CLIENT][WS] handleScoreboardUpdate called**");
             System.out.println("**[CLIENT][WS] Parsed data:** " + messageData);
+            Object ps = messageData.get("playerScores");
+            System.out.println("**[CLIENT][WS] playerScores type=" + (ps != null ? ps.getClass().getName() : "null") +
+                " size=" + (ps instanceof java.util.List ? ((java.util.List) ps).size() : -1) + "**");
             
             // Forward to game menu for processing
             if (gameMenu != null) {

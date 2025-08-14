@@ -843,6 +843,8 @@ public class GameMenu extends InputAdapter implements Screen {
         try {
             String messageType = (String) messageData.get("type");
             if ("scoreboard_update".equals(messageType)) {
+                System.out.println("**[CLIENT][SCOREBOARD] GameMenu received scoreboard_update**");
+                System.out.println("**[CLIENT][SCOREBOARD] Payload keys=" + messageData.keySet() + "**");
                 // Forward the message to the current screen if it's a ScoreboardMenu
                 if (Main.getMain().getScreen() instanceof ScoreboardMenu) {
                     ScoreboardMenu scoreboardMenu = (ScoreboardMenu) Main.getMain().getScreen();
@@ -851,6 +853,8 @@ public class GameMenu extends InputAdapter implements Screen {
                     String sortType = (String) messageData.get("sortType");
                     @SuppressWarnings("unchecked")
                     Map<String, Object> stats = (Map<String, Object>) messageData.get("stats");
+                    System.out.println("**[CLIENT][SCOREBOARD] playerScores.size=" + (playerScores != null ? playerScores.size() : -1) +
+                        " | sortType=" + sortType + " | stats=" + stats + "**");
                     
                     scoreboardMenu.updateScoreboard(playerScores, sortType, stats);
                 } else {

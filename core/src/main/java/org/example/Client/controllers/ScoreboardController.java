@@ -33,6 +33,8 @@ public class ScoreboardController {
             scoreboardData.put("gameId", sender.getCurrentGameId());
             scoreboardData.put("sortType", sortType.name());
             scoreboardData.put("timestamp", System.currentTimeMillis());
+            System.out.println("**[CLIENT][SCOREBOARD] Sending scoreboard_update | gameId=" + sender.getCurrentGameId()
+                + " | sortType=" + sortType.name() + "**");
             
             // Send via WebSocket
             if (App.getWebSocketClient() != null) {

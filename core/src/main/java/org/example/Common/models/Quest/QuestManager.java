@@ -185,6 +185,17 @@ public class QuestManager implements Serializable {
             giveQuestReward(playerId, quest);
         }
         
+        // Increment each participating player's completed missions count
+        for (String playerId : quest.getParticipatingPlayers()) {
+            Player player = findPlayerById(playerId);
+            if (player != null) {
+                try {
+                    player.increaseMissions(1);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        
         // Remove from all players' active quest lists
         for (String playerId : quest.getParticipatingPlayers()) {
             List<String> playerQuests = playerActiveQuests.get(playerId);

@@ -16,11 +16,7 @@ import org.example.Common.models.RelationShips.Trade;
 import org.example.Common.models.ToolsPackage.Tools;
 import org.example.Common.models.enums.Types.Cooking;
 import org.example.Common.models.enums.Types.CraftingRecipe;
-import org.example.Common.network.events.EnergyUpdateEvent;
-import org.example.Server.network.GameSessionManager;
-import org.example.Client.network.NetworkCommandSender;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,14 +59,13 @@ public class Player {
     @JsonIgnore
     private transient Texture portraitFrame;
     private ArrayList<Craft>crafts = new ArrayList<>();
-    private int questNumber;
-    private int totalLevel;
+    private int missions;
+    private int skills;
 
     protected Player() {
         // For Jackson deserialization only
     }
 
-    // Check if we're running in a LibGDX context (client-side)
     private static boolean isLibGDXAvailable() {
         try {
             return com.badlogic.gdx.Gdx.files != null;
@@ -97,8 +92,8 @@ public class Player {
         this.ownedFarm = ownedFarm;
         this.backPack = backPack;
         this.money = 1_000_000;
-        this.questNumber =0;
-        this.totalLevel = 0;
+        this.missions =0;
+        this.skills = 0;
         this.partner = null;
         this.recepies = new HashMap<>();
         this.cookingRecepies = new HashMap<>();
@@ -533,5 +528,46 @@ public class Player {
 
     public void setRect(CollisionRect rect) {
         this.rect = rect;
+    }
+
+    public int getMissions() {
+        return missions;
+    }
+
+    public int getSkills() {
+        return skills;
+    }
+
+    public void setMissions(int missions) {
+        this.missions = missions;
+        if (org.example.Common.models.Fundementals.App.getCurrentGame() != null &&
+            org.example.Common.models.Fundementals.App.getCurrentGame().isMultiplayer() &&
+            org.example.Common.models.Fundementals.App.getCurrentGame().getScoreboardManager() != null) {
+            org.example.Common.models.Fundementals.App.getCurrentGame().getScoreboardManager().updatePlayerScore(this);
+        }
+    }
+
+    public void increaseMissions(int delta) {
+        if (delta == 0) {
+            return;
+        }
+        setMissions(this.missions + delta);
+    }
+
+    public void setSkills(int skills) {
+        this.skills = skills;
+        if (org.example.Common.models.Fundementals.App.getCurrentGame() != null &&
+            org.example.Common.models.Fundementals.App.getCurrentGame().isMultiplayer() &&
+            org.example.Common.models.Fundementals.App.getCurrentGame().getScoreboardManager() != null) {
+            org.example.Common.models.Fundementals.App.getCurrentGame().getScoreboardManager().updatePlayerScore(this);
+        }
+    }
+
+    public void recalculateSkillsFromAbilities() {
+        int total = 0;
+        for (Ability ability : abilitis) {
+            total += ability.getLevel();
+        }
+        setSkills(total);
     }
 }

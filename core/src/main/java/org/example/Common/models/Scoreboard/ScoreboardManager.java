@@ -33,9 +33,16 @@ public class ScoreboardManager implements Serializable {
         playerScores.clear();
         rankedScores.clear();
         
-        for (Player player : game.getPlayers()) {
-            PlayerScore score = new PlayerScore(player);
-            playerScores.put(player.getUser().getUserName(), score);
+        if (game.getPlayers() != null) {
+            System.out.println("**[SCOREBOARD] initializeScoreboard() players=" + game.getPlayers().size() + "**");
+            for (Player player : game.getPlayers()) {
+                PlayerScore score = new PlayerScore(player);
+                playerScores.put(player.getUser().getUserName(), score);
+                System.out.println("**[SCOREBOARD] init added " + player.getUser().getUserName() +
+                    " money=" + player.getMoney() + " missions=" + player.getMissions() + " skills=" + player.getSkills() + "**");
+            }
+        } else {
+            System.out.println("**[SCOREBOARD] initializeScoreboard() players list is null**");
         }
         
         updateRankings();
@@ -51,9 +58,12 @@ public class ScoreboardManager implements Serializable {
         
         if (score != null) {
             score.updateFromPlayer(player);
+            System.out.println("**[SCOREBOARD] updatePlayerScore updated " + playerId + " money=" + player.getMoney()
+                + " missions=" + player.getMissions() + " skills=" + player.getSkills() + "**");
         } else {
             score = new PlayerScore(player);
             playerScores.put(playerId, score);
+            System.out.println("**[SCOREBOARD] updatePlayerScore created " + playerId + "**");
         }
         
         needsUpdate = true;
@@ -64,8 +74,13 @@ public class ScoreboardManager implements Serializable {
      * Update all player scores and recalculate rankings
      */
     public void updateAllScores(Game game) {
-        for (Player player : game.getPlayers()) {
-            updatePlayerScore(player);
+        if (game.getPlayers() != null) {
+            System.out.println("**[SCOREBOARD] updateAllScores() players=" + game.getPlayers().size() + "**");
+            for (Player player : game.getPlayers()) {
+                updatePlayerScore(player);
+            }
+        } else {
+            System.out.println("**[SCOREBOARD] updateAllScores() players list is null**");
         }
         
         updateRankings();
@@ -77,6 +92,8 @@ public class ScoreboardManager implements Serializable {
     public void updateRankings() {
         rankedScores.clear();
         rankedScores.addAll(playerScores.values());
+        System.out.println("**[SCOREBOARD] updateRankings() candidateCount=" + rankedScores.size() +
+            " | sortType=" + currentSortType + "**");
         
         // Sort based on current sort type
         switch (currentSortType) {

@@ -58,6 +58,12 @@ public class Ability {
         if(amount > neededAmount && newLevel <= 4){
             amount -= neededAmount;
             level = newLevel;
+            try {
+                if (App.getCurrentPlayerLazy() != null) {
+                    App.getCurrentPlayerLazy().recalculateSkillsFromAbilities();
+                }
+            } catch (Exception ignored) {
+            }
             
             // Update scoreboard if in multiplayer mode
             if (org.example.Common.models.Fundementals.App.getCurrentGame() != null && 

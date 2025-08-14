@@ -124,6 +124,7 @@ public class Game {
     public org.example.Common.models.Scoreboard.ScoreboardManager getScoreboardManager() {
         if (scoreboardManager == null) {
             scoreboardManager = new org.example.Common.models.Scoreboard.ScoreboardManager();
+            System.out.println("**[GAME] Created ScoreboardManager for gameId=" + gameId + "**");
         }
         return scoreboardManager;
     }

@@ -70,6 +70,24 @@ public class GameInstance {
         try {
             players.put(playerId, player);
             connectedPlayers.put(playerId, false); // Not connected by default
+            // Also keep the Game's player list in sync (scoreboard reads from Game.getPlayers())
+            if (game.getPlayers() == null) {
+                game.setPlayers(new ArrayList<>());
+            }
+            boolean existsInGameList = false;
+            for (Player p : game.getPlayers()) {
+                if (p.getUser() != null && p.getUser().getUserName().equals(playerId)) {
+                    existsInGameList = true;
+                    break;
+                }
+            }
+            if (!existsInGameList) {
+                game.getPlayers().add(player);
+                System.out.println("**[SERVER][GAME_PLAYERS] Added to Game.getPlayers(): " + playerId +
+                    " | totalGamePlayers=" + game.getPlayers().size() + "**");
+            } else {
+                System.out.println("**[SERVER][GAME_PLAYERS] Already in Game.getPlayers(): " + playerId + "**");
+            }
             updateActivity();
 
         } finally {
@@ -833,6 +851,18 @@ public class GameInstance {
             gameLock.writeLock().lock();
             
             if (game != null && game.getScoreboardManager() != null) {
+                System.out.println("**[SERVER][SCOREBOARD] updateScoreboard() called | gameId=" + gameId
+                    + " | sortType=" + sortType
+                    + " | playersInGame=" + (game.getPlayers() != null ? game.getPlayers().size() : -1) + "**");
+                if (game.getPlayers() != null) {
+                    StringBuilder ids = new StringBuilder();
+                    for (var p : game.getPlayers()) {
+                        ids.append(p.getUser().getUserName()).append("(money=").append(p.getMoney())
+                           .append(", missions=").append(p.getMissions())
+                           .append(", skills=").append(p.getSkills()).append(") ");
+                    }
+                    System.out.println("**[SERVER][SCOREBOARD] Players: " + ids.toString().trim() + "**");
+                }
                 // Set the sort type if provided
                 if (sortType != null) {
                     try {
@@ -846,6 +876,8 @@ public class GameInstance {
                 
                 // Update all player scores
                 game.getScoreboardManager().updateAllScores(game);
+                int rankedCount = game.getScoreboardManager().getRankedScores().size();
+                System.out.println("**[SERVER][SCOREBOARD] After updateAllScores | rankedCount=" + rankedCount + "**");
                 
             }
             
@@ -862,6 +894,8 @@ public class GameInstance {
             gameLock.readLock().lock();
             
             if (game != null && game.getScoreboardManager() != null) {
+                System.out.println("**[SERVER][SCOREBOARD] broadcastScoreboardUpdate() | gameId=" + gameId
+                    + " | rankedCount=" + game.getScoreboardManager().getRankedScores().size() + "**");
                 Map<String, Object> scoreboardData = new HashMap<>();
                 scoreboardData.put("type", "scoreboard_update");
                 scoreboardData.put("gameId", gameId);
@@ -885,6 +919,10 @@ public class GameInstance {
                 scoreboardData.put("playerScores", playerScores);
                 scoreboardData.put("sortType", game.getScoreboardManager().getCurrentSortType().name());
                 scoreboardData.put("stats", game.getScoreboardManager().getScoreboardStats());
+                System.out.println("**[SERVER][SCOREBOARD] Broadcasting playerScores.size=" + playerScores.size() + "**");
+                if (!playerScores.isEmpty()) {
+                    System.out.println("**[SERVER][SCOREBOARD] First entry: " + playerScores.get(0) + "**");
+                }
                 
                 // Broadcast to all players
                 broadcastToAllPlayers(scoreboardData);

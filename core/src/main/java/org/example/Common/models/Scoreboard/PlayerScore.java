@@ -25,51 +25,24 @@ public class PlayerScore implements Serializable, Comparable<PlayerScore> {
         this.playerName = player.getUser().getUserName();
         this.nickname = player.getUser().getNickname();
         this.money = player.getMoney();
-        this.completedMissions = calculateCompletedMissions(player);
-        this.totalSkillLevel = calculateTotalSkillLevel(player);
+        this.completedMissions = getPlayerCompletedMissions(player);
+        this.totalSkillLevel = getPlayerTotalSkills(player);
         this.rank = 0; // Will be set by scoreboard manager
         this.lastUpdated = System.currentTimeMillis();
     }
 
-    private int calculateCompletedMissions(Player player) {
-        int completedCount = 0;
-        
-        // Count completed group quests
-        if (org.example.Common.models.Fundementals.App.getCurrentGame() != null && 
-            org.example.Common.models.Fundementals.App.getCurrentGame().getQuestManager() != null) {
-            completedCount += org.example.Common.models.Fundementals.App.getCurrentGame().getQuestManager().getCompletedQuests().size();
-        }
-        
-        // Count completed NPC quests
-        if (org.example.Common.models.Fundementals.App.getCurrentGame() != null && 
-            org.example.Common.models.Fundementals.App.getCurrentGame().getNPCvillage() != null) {
-            for (var npc : org.example.Common.models.Fundementals.App.getCurrentGame().getNPCvillage().getAllNPCs()) {
-                for (var quest : npc.getQuests()) {
-                    if (quest.isCompleted()) {
-                        completedCount++;
-                    }
-                }
-            }
-        }
-        
-        return completedCount;
+    private int getPlayerCompletedMissions(Player player) {
+        return player.getMissions();
     }
 
-    private int calculateTotalSkillLevel(Player player) {
-        int totalLevel = 0;
-        
-        // Sum up all ability levels
-        for (var ability : player.getAbilitis()) {
-            totalLevel += ability.getLevel();
-        }
-        
-        return totalLevel;
+    private int getPlayerTotalSkills(Player player) {
+        return player.getSkills();
     }
 
     public void updateFromPlayer(Player player) {
         this.money = player.getMoney();
-        this.completedMissions = calculateCompletedMissions(player);
-        this.totalSkillLevel = calculateTotalSkillLevel(player);
+        this.completedMissions = getPlayerCompletedMissions(player);
+        this.totalSkillLevel = getPlayerTotalSkills(player);
         this.lastUpdated = System.currentTimeMillis();
     }
 
