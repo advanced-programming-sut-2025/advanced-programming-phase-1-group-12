@@ -496,40 +496,10 @@ public class GameMenu extends InputAdapter implements Screen {
             } else {
             }
 
-            // Mention detection for public chat: show popup if current user is tagged with @username
-            boolean isMentioned = false;
-            try {
-                if ("public".equals(chatType) && message != null) {
-                    String currentUsername = null;
-                    if (org.example.Common.models.Fundementals.App.getLoggedInUser() != null) {
-                        currentUsername = org.example.Common.models.Fundementals.App.getLoggedInUser().getUserName();
-                    } else if (org.example.Common.models.Fundementals.App.getCurrentGame() != null
-                            && org.example.Common.models.Fundementals.App.getCurrentGame().getCurrentPlayer() != null
-                            && org.example.Common.models.Fundementals.App.getCurrentGame().getCurrentPlayer().getUser() != null) {
-                        currentUsername = org.example.Common.models.Fundementals.App.getCurrentGame().getCurrentPlayer().getUser().getUserName();
-                    }
-                    if (currentUsername != null && username != null && !currentUsername.equals(username)) {
-                        java.util.regex.Pattern mentionPattern = java.util.regex.Pattern.compile(
-                            "(^|\\s|[\\p{Punct}])@" + java.util.regex.Pattern.quote(currentUsername) + "(?=\\s|[\\p{Punct}]|$)",
-                            java.util.regex.Pattern.CASE_INSENSITIVE
-                        );
-                        java.util.regex.Matcher matcher = mentionPattern.matcher(message);
-                        if (matcher.find()) {
-                            isMentioned = true;
-                            // Ensure popup shows on UI thread
-                            final String notif = "شما توسط " + username + " در چت منشن شدید: " + message;
-                            com.badlogic.gdx.Gdx.app.postRunnable(() -> showNotification(notif, true));
-                        }
-                    }
-                }
-            } catch (Exception ignore) {
-            }
-
             // Also show a brief notification in the game UI
             if (errorLabel != null) {
                 errorLabel.setText(username + ": " + message);
-                // Highlight quick inline notification if mentioned
-                errorLabel.setColor(isMentioned ? Color.GOLD : Color.WHITE);
+                errorLabel.setColor(Color.WHITE);
                 timeSinceError = 0f;
             } else {
             }
@@ -1203,6 +1173,8 @@ public class GameMenu extends InputAdapter implements Screen {
         updateRingAnimation(delta);
         updateGiftAnimation(delta);
         updateTalkMessages(delta);
+        updateMentionNotification(delta);
+        updateEmojiNotification(delta);
 
         updateNPCMovements(delta);
 
@@ -1534,6 +1506,21 @@ public class GameMenu extends InputAdapter implements Screen {
         batch.end();
         stage.act(delta);
         stage.draw();
+
+        // Render notifications AFTER stage.draw() to ensure they appear on top of all UI elements
+        batch.begin();
+        // Use screen coordinates for UI elements
+        batch.setProjectionMatrix(new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()).combined);
+        
+        // Render mention notification on top of everything
+        System.out.println("🔴🔴🔴 [GAME_MENU] About to call renderMentionNotification() 🔴🔴🔴");
+        renderMentionNotification(batch);
+
+        // Render emoji notification on top of everything
+        System.out.println("🔴🔴🔴 [GAME_MENU] About to call renderEmojiNotification() 🔴🔴🔴");
+        renderEmojiNotification(batch);
+        
+        batch.end();
 
         // Scoreboard menu is now a separate screen, no need to render here
 
@@ -4200,6 +4187,61 @@ public class GameMenu extends InputAdapter implements Screen {
         notificationDialog.show(stage);
     }
 
+    public void showMentionNotification(String sender, String message) {
+        System.out.println("🔴🔴🔴 [GAME_MENU] showMentionNotification() called - Sender: '" + sender + "', Message: '" + message + "' 🔴🔴🔴");
+        
+        mentionNotificationSender = sender;
+        mentionNotificationText = message;
+        showingMentionNotification = true;
+        mentionNotificationTimer = 0f;
+        mentionNotificationAlpha = 1f; // Force visible immediately
+        mentionNotificationFadingIn = false;
+        mentionNotificationFadingOut = false;
+        mentionNotificationSoundPlayed = false;
+        
+        System.out.println("🔴🔴🔴 [GAME_MENU] Notification state set - showingMentionNotification: " + showingMentionNotification + " 🔴🔴🔴");
+        
+        // Also show emoji notification
+        System.out.println("🔴🔴🔴 [GAME_MENU] Triggering emoji notification for mention 🔴🔴🔴");
+        showEmojiNotification();
+        
+        // Sound effect removed as requested
+    }
+
+    // Test method to manually trigger mention notification (for testing purposes)
+    public void testMentionNotification() {
+        showMentionNotification("TestPlayer", "This is a test mention notification!");
+    }
+
+    // Test method to manually trigger emoji notification (for testing purposes)
+    public void testEmojiNotification() {
+        showEmojiNotification();
+    }
+
+    public void showEmojiNotification() {
+        System.out.println("🔴🔴🔴 [GAME_MENU] showEmojiNotification() called 🔴🔴🔴");
+        
+        // Calculate emoji position (center of screen)
+        float screenWidth = Gdx.graphics.getWidth();
+        float screenHeight = Gdx.graphics.getHeight();
+        emojiX = screenWidth / 2f;
+        emojiY = screenHeight / 2f;
+        
+        System.out.println("🔴🔴🔴 [GAME_MENU] Emoji position calculated - X: " + emojiX + ", Y: " + emojiY + " 🔴🔴🔴");
+        
+        // Set emoji animation state
+        showingEmojiNotification = true;
+        emojiNotificationTimer = 0f;
+        emojiNotificationAlpha = 1f; // Force visible immediately
+        emojiNotificationFadingIn = false;
+        emojiNotificationFadingOut = false;
+        emojiScale = 1.0f; // Full size immediately
+        emojiRotation = 0f;
+        
+        System.out.println("🔴🔴🔴 [GAME_MENU] Emoji notification state set - showingEmojiNotification: " + showingEmojiNotification + " 🔴🔴🔴");
+        System.out.println("🔴🔴🔴 [GAME_MENU] Texture will be loaded on first render call 🔴🔴🔴");
+    }
+
     private void checkForNewGifts() {
         giftCheckTimer += Gdx.graphics.getDeltaTime();
 
@@ -5001,6 +5043,34 @@ public class GameMenu extends InputAdapter implements Screen {
     private final float GIFT_FRAME_DURATION = 0.12f;
     private float giftX = 0f;
     private float giftY = 0f;
+
+    // Chat mention notification variables
+    private boolean showingMentionNotification = false;
+    private float mentionNotificationTimer = 0f;
+    private final float MENTION_NOTIFICATION_DURATION = 5.0f; // Duration to show the notification
+    private String mentionNotificationText = "";
+    private String mentionNotificationSender = "";
+    private float mentionNotificationAlpha = 0f;
+    private final float MENTION_NOTIFICATION_FADE_IN_TIME = 0.5f;
+    private final float MENTION_NOTIFICATION_FADE_OUT_TIME = 1.0f;
+    private boolean mentionNotificationFadingIn = false;
+    private boolean mentionNotificationFadingOut = false;
+    private boolean mentionNotificationSoundPlayed = false;
+    
+    // Emoji notification variables
+    private boolean showingEmojiNotification = false;
+    private float emojiNotificationTimer = 0f;
+    private final float EMOJI_NOTIFICATION_DURATION = 3.0f; // Duration to show the emoji
+    private float emojiNotificationAlpha = 0f;
+    private final float EMOJI_NOTIFICATION_FADE_IN_TIME = 0.3f;
+    private final float EMOJI_NOTIFICATION_FADE_OUT_TIME = 0.8f;
+    private boolean emojiNotificationFadingIn = false;
+    private boolean emojiNotificationFadingOut = false;
+    private Texture emojiTexture = null;
+    private float emojiX = 0f;
+    private float emojiY = 0f;
+    private float emojiScale = 1.0f;
+    private float emojiRotation = 0f;
 
     public void showFullScreenPlayerInteractionMenu(Player targetPlayer) {
         targetPlayerForMenu = targetPlayer;
@@ -6581,6 +6651,84 @@ public class GameMenu extends InputAdapter implements Screen {
         }
     }
 
+    private void updateMentionNotification(float delta) {
+        if (!showingMentionNotification) return;
+        
+        System.out.println("🔴🔴🔴 [GAME_MENU] updateMentionNotification() - Timer: " + mentionNotificationTimer + ", Alpha: " + mentionNotificationAlpha + ", FadingIn: " + mentionNotificationFadingIn + ", FadingOut: " + mentionNotificationFadingOut + " 🔴🔴🔴");
+        
+        mentionNotificationTimer += delta;
+        
+        // Handle fade in
+        if (mentionNotificationFadingIn) {
+            mentionNotificationAlpha += delta / MENTION_NOTIFICATION_FADE_IN_TIME;
+            if (mentionNotificationAlpha >= 1f) {
+                mentionNotificationAlpha = 1f;
+                mentionNotificationFadingIn = false;
+                System.out.println("🔴🔴🔴 [GAME_MENU] Mention notification fade in completed 🔴🔴🔴");
+            }
+        }
+        
+        // Check if it's time to fade out
+        if (!mentionNotificationFadingIn && mentionNotificationTimer >= MENTION_NOTIFICATION_DURATION) {
+            mentionNotificationFadingOut = true;
+            System.out.println("🔴🔴🔴 [GAME_MENU] Starting mention notification fade out 🔴🔴🔴");
+        }
+        
+        // Handle fade out
+        if (mentionNotificationFadingOut) {
+            mentionNotificationAlpha -= delta / MENTION_NOTIFICATION_FADE_OUT_TIME;
+            if (mentionNotificationAlpha <= 0f) {
+                mentionNotificationAlpha = 0f;
+                showingMentionNotification = false;
+                mentionNotificationFadingOut = false;
+                System.out.println("🔴🔴🔴 [GAME_MENU] Mention notification completed and hidden 🔴🔴🔴");
+            }
+        }
+    }
+
+    private void updateEmojiNotification(float delta) {
+        if (!showingEmojiNotification) return;
+        
+        System.out.println("🔴🔴🔴 [GAME_MENU] updateEmojiNotification() - Timer: " + emojiNotificationTimer + ", Alpha: " + emojiNotificationAlpha + " 🔴🔴🔴");
+        
+        emojiNotificationTimer += delta;
+        
+        // Handle fade in
+        if (emojiNotificationFadingIn) {
+            emojiNotificationAlpha += delta / EMOJI_NOTIFICATION_FADE_IN_TIME;
+            emojiScale += delta * 2f; // Scale up during fade in
+            emojiRotation += delta * 360f; // Rotate during fade in
+            
+            if (emojiNotificationAlpha >= 1f) {
+                emojiNotificationAlpha = 1f;
+                emojiScale = 1.0f;
+                emojiRotation = 0f;
+                emojiNotificationFadingIn = false;
+                System.out.println("🔴🔴🔴 [GAME_MENU] Emoji fade in completed 🔴🔴🔴");
+            }
+        }
+        
+        // Check if it's time to fade out
+        if (!emojiNotificationFadingIn && emojiNotificationTimer >= EMOJI_NOTIFICATION_DURATION) {
+            emojiNotificationFadingOut = true;
+            System.out.println("🔴🔴🔴 [GAME_MENU] Starting emoji fade out 🔴🔴🔴");
+        }
+        
+        // Handle fade out
+        if (emojiNotificationFadingOut) {
+            emojiNotificationAlpha -= delta / EMOJI_NOTIFICATION_FADE_OUT_TIME;
+            emojiScale -= delta * 0.5f; // Scale down during fade out
+            
+            if (emojiNotificationAlpha <= 0f) {
+                emojiNotificationAlpha = 0f;
+                emojiScale = 0f;
+                showingEmojiNotification = false;
+                emojiNotificationFadingOut = false;
+                System.out.println("🔴🔴🔴 [GAME_MENU] Emoji notification completed and hidden 🔴🔴🔴");
+            }
+        }
+    }
+
     private void updateTalkMessages(float delta) {
         // Update message timers and remove expired messages
         List<Player> playersToRemove = new ArrayList<>();
@@ -6614,6 +6762,136 @@ public class GameMenu extends InputAdapter implements Screen {
 
         float drawSize = 48f;
         batch.draw(frame, screenX - drawSize / 2f, screenY - drawSize / 2f, drawSize, drawSize);
+    }
+
+    private void renderMentionNotification(SpriteBatch batch) {
+        System.out.println("🔴🔴🔴 [GAME_MENU] renderMentionNotification() called - showingMentionNotification: " + showingMentionNotification + ", alpha: " + mentionNotificationAlpha + " 🔴🔴🔴");
+        
+        if (!showingMentionNotification || mentionNotificationAlpha <= 0f) {
+            System.out.println("🔴🔴🔴 [GAME_MENU] renderMentionNotification() - Not rendering, returning early 🔴🔴🔴");
+            return;
+        }
+        
+        System.out.println("🔴🔴🔴 [GAME_MENU] renderMentionNotification() - Rendering notification with alpha: " + mentionNotificationAlpha + " 🔴🔴🔴");
+
+        // Create a BitmapFont for rendering text
+        BitmapFont font = new BitmapFont();
+        font.getData().setScale(1.5f);
+
+        // Calculate notification position (top center of screen)
+        float screenWidth = Gdx.graphics.getWidth();
+        float screenHeight = Gdx.graphics.getHeight();
+        float notificationY = screenHeight - 100f; // 100 pixels from top
+        float notificationX = screenWidth / 2f;
+
+        // Create notification text
+        String notificationText = "📢 " + mentionNotificationSender + " mentioned you in chat!";
+        String messageText = mentionNotificationText;
+
+        // Estimate text dimensions (approximate based on character count and font scale)
+        float estimatedTextWidth = Math.max(notificationText.length(), messageText.length()) * 12f * 1.5f; // 12 pixels per character * scale
+        float estimatedTextHeight = 20f * 1.5f; // 20 pixels per line * scale
+        float totalHeight = estimatedTextHeight * 2 + 20f; // 2 lines + padding
+
+        // Draw background rectangle using a simple texture
+        float bgWidth = estimatedTextWidth + 40f; // 20f padding on each side
+        float bgHeight = totalHeight + 20f; // 10f padding on top and bottom
+        float bgX = notificationX - bgWidth / 2f;
+        float bgY = notificationY - totalHeight - 10f;
+
+        // Use a simple texture for the background (using an existing texture as a white pixel)
+        Texture backgroundTexture = GameAssetManager.getGameAssetManager().getGROUND();
+        
+        // Draw semi-transparent background with rounded corners effect
+        batch.setColor(0.1f, 0.1f, 0.1f, mentionNotificationAlpha * 0.9f);
+        batch.draw(backgroundTexture, bgX, bgY, bgWidth, bgHeight);
+        batch.setColor(1f, 1f, 1f, 1f);
+
+        // Draw gradient border effect
+        batch.setColor(1f, 0.8f, 0f, mentionNotificationAlpha); // Gold border
+        float borderThickness = 4f;
+        batch.draw(backgroundTexture, bgX - borderThickness, bgY - borderThickness, 
+                   bgWidth + borderThickness * 2, borderThickness); // Top border
+        batch.draw(backgroundTexture, bgX - borderThickness, bgY + bgHeight, 
+                   bgWidth + borderThickness * 2, borderThickness); // Bottom border
+        batch.draw(backgroundTexture, bgX - borderThickness, bgY, 
+                   borderThickness, bgHeight); // Left border
+        batch.draw(backgroundTexture, bgX + bgWidth, bgY, 
+                   borderThickness, bgHeight); // Right border
+        batch.setColor(1f, 1f, 1f, 1f);
+
+        // Add a subtle glow effect
+        batch.setColor(1f, 0.8f, 0f, mentionNotificationAlpha * 0.3f);
+        float glowSize = 8f;
+        batch.draw(backgroundTexture, bgX - glowSize, bgY - glowSize, 
+                   bgWidth + glowSize * 2, glowSize); // Top glow
+        batch.draw(backgroundTexture, bgX - glowSize, bgY + bgHeight, 
+                   bgWidth + glowSize * 2, glowSize); // Bottom glow
+        batch.draw(backgroundTexture, bgX - glowSize, bgY, 
+                   glowSize, bgHeight); // Left glow
+        batch.draw(backgroundTexture, bgX + bgWidth, bgY, 
+                   glowSize, bgHeight); // Right glow
+        batch.setColor(1f, 1f, 1f, 1f);
+
+        // Draw text with shadow for better readability
+        font.setColor(0f, 0f, 0f, mentionNotificationAlpha * 0.7f); // Shadow
+        font.draw(batch, notificationText, notificationX - estimatedTextWidth / 2f + 2f, notificationY - 2f);
+        font.draw(batch, messageText, notificationX - estimatedTextWidth / 2f + 2f, notificationY - estimatedTextHeight - 20f - 2f);
+        
+        // Draw main text
+        font.setColor(1f, 1f, 0f, mentionNotificationAlpha); // Gold text
+        font.draw(batch, notificationText, notificationX - estimatedTextWidth / 2f, notificationY);
+        font.draw(batch, messageText, notificationX - estimatedTextWidth / 2f, notificationY - estimatedTextHeight - 20f);
+
+        // Dispose font to prevent memory leaks
+        font.dispose();
+    }
+
+    private void renderEmojiNotification(SpriteBatch batch) {
+        System.out.println("🔴🔴🔴 [GAME_MENU] renderEmojiNotification() called - showingEmojiNotification: " + showingEmojiNotification + ", alpha: " + emojiNotificationAlpha + " 🔴🔴🔴");
+        
+        if (!showingEmojiNotification || emojiNotificationAlpha <= 0f) {
+            System.out.println("🔴🔴🔴 [GAME_MENU] renderEmojiNotification() - Not rendering, returning early 🔴🔴🔴");
+            return;
+        }
+        
+        // Load emoji texture if not already loaded (this will happen on the main render thread)
+        if (emojiTexture == null) {
+            try {
+                System.out.println("🔴🔴🔴 [GAME_MENU] Loading emoji texture from Emoji/Emojis038.png (on render thread) 🔴🔴🔴");
+                emojiTexture = new Texture("Emoji/Emojis038.png");
+                System.out.println("🔴🔴🔴 [GAME_MENU] Emoji texture loaded successfully - Size: " + emojiTexture.getWidth() + "x" + emojiTexture.getHeight() + " 🔴🔴🔴");
+            } catch (Exception e) {
+                System.out.println("🔴🔴🔴 [GAME_MENU] Failed to load emoji texture: " + e.getMessage() + " 🔴🔴🔴");
+                showingEmojiNotification = false; // Disable emoji if texture fails to load
+                return;
+            }
+        }
+        
+        System.out.println("🔴🔴🔴 [GAME_MENU] renderEmojiNotification() - Rendering emoji with alpha: " + emojiNotificationAlpha + ", scale: " + emojiScale + ", rotation: " + emojiRotation + " 🔴🔴🔴");
+        
+        // Save current batch state
+        batch.setColor(1f, 1f, 1f, emojiNotificationAlpha);
+        
+        // Calculate emoji size
+        float emojiSize = 128f * emojiScale; // Base size 128 pixels
+        float halfSize = emojiSize / 2f;
+        
+        // Draw the emoji with rotation
+        batch.draw(emojiTexture, 
+                   emojiX - halfSize, emojiY - halfSize, // Position
+                   halfSize, halfSize, // Origin for rotation
+                   emojiSize, emojiSize, // Size
+                   1f, 1f, // Scale
+                   emojiRotation, // Rotation
+                   0, 0, // Source position
+                   emojiTexture.getWidth(), emojiTexture.getHeight(), // Source size
+                   false, false); // Flip flags
+        
+        // Restore batch color
+        batch.setColor(1f, 1f, 1f, 1f);
+        
+        System.out.println("🔴🔴🔴 [GAME_MENU] renderEmojiNotification() - Emoji drawn at position (" + emojiX + ", " + emojiY + ") with size " + emojiSize + " 🔴🔴🔴");
     }
 
     private void startGiftAnimation() {

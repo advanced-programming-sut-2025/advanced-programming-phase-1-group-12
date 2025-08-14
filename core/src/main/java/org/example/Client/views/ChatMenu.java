@@ -56,6 +56,21 @@ public class ChatMenu implements Screen, Disposable {
     private List<ChatMessage> messageHistory = new ArrayList<>();
     private NetworkCommandSender networkSender;
 
+    // Emoji notification state
+    private boolean showingEmojiNotification = false;
+    private float emojiNotificationTimer = 0f;
+    private final float EMOJI_NOTIFICATION_DURATION = 3.0f;
+    private float emojiNotificationAlpha = 0f;
+    private final float EMOJI_NOTIFICATION_FADE_IN_TIME = 0.3f;
+    private final float EMOJI_NOTIFICATION_FADE_OUT_TIME = 0.8f;
+    private boolean emojiNotificationFadingIn = false;
+    private boolean emojiNotificationFadingOut = false;
+    private Texture emojiTexture = null;
+    private float emojiX = 0f;
+    private float emojiY = 0f;
+    private float emojiScale = 1.0f;
+    private float emojiRotation = 0f;
+
     // Constants
     private static final int MAX_MESSAGES = 100;
     private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm");
@@ -368,7 +383,7 @@ public class ChatMenu implements Screen, Disposable {
         // Send via network
         if (networkSender != null) {
             System.out.println("🔵🔵🔵 [CHAT_MENU] NetworkSender is available, sending message 🔵🔵🔵");
-            
+
             String chatTypeStr = (currentChatType == ChatType.PRIVATE) ? "private" : "public";
             Result result = networkSender.sendChatMessage(message, chatTypeStr, selectedPlayer);
             System.out.println("🔵🔵🔵 [CHAT_MENU] Network send result: " + result.isSuccessful() + " - " + result.getMessage() + " 🔵🔵🔵");
@@ -446,6 +461,27 @@ public class ChatMenu implements Screen, Disposable {
         ChatMessage message = new ChatMessage(sender, content, type, recipient);
         addMessage(message);
 
+        System.out.println("🔵🔵🔵 [CHAT_MENU] Checking for mentions - Type: " + type + ", Content: '" + content + "' 🔵🔵🔵");
+
+        if (type == ChatType.PUBLIC && isMentionToCurrentUser(content)) {
+            System.out.println("🔵🔵🔵 [CHAT_MENU] Mention detected! Triggering notification... 🔵🔵🔵");
+
+                                System.out.println("🔵🔵🔵 [CHAT_MENU] Mention detected! Showing emoji notification on chat screen 🔵🔵🔵");
+                    showEmojiNotification();
+
+                    // Also notify parent screen if it's GameMenu
+                    if (parentScreen instanceof GameMenu) {
+                        System.out.println("🔵🔵🔵 [CHAT_MENU] Parent screen is GameMenu, calling showMentionNotification() 🔵🔵🔵");
+                        GameMenu gameMenu = (GameMenu) parentScreen;
+                        gameMenu.showMentionNotification(sender, content);
+                        System.out.println("🔵🔵🔵 [CHAT_MENU] showMentionNotification() called successfully 🔵🔵🔵");
+                    } else {
+                        System.out.println("🔵🔵🔵 [CHAT_MENU] Parent screen is not GameMenu: " + (parentScreen != null ? parentScreen.getClass().getSimpleName() : "null") + " 🔵🔵🔵");
+                    }
+        } else {
+            System.out.println("🔵🔵🔵 [CHAT_MENU] No mention detected or not public chat 🔵🔵🔵");
+        }
+
         System.out.println("🔵🔵🔵 [CHAT_MENU] receiveMessage() completed 🔵🔵🔵");
     }
 
@@ -460,10 +496,110 @@ public class ChatMenu implements Screen, Disposable {
         }
         if (currentUsername == null) return false;
 
+        System.out.println("🔵🔵🔵 [CHAT_MENU] Checking mention - Current user: '" + currentUsername + "', Content: '" + content + "' 🔵🔵🔵");
+
         java.util.regex.Pattern p = java.util.regex.Pattern.compile(
                 "(^|\\s|[\\p{Punct}])@" + java.util.regex.Pattern.quote(currentUsername) + "(?=\\s|[\\p{Punct}]|$)",
                 java.util.regex.Pattern.CASE_INSENSITIVE);
-        return p.matcher(content).find();
+        boolean isMentioned = p.matcher(content).find();
+
+        System.out.println("🔵🔵🔵 [CHAT_MENU] Mention check result: " + isMentioned + " 🔵🔵🔵");
+        return isMentioned;
+    }
+
+    public void showEmojiNotification() {
+        System.out.println("🔵🔵🔵 [CHAT_MENU] showEmojiNotification() called 🔵🔵🔵");
+
+        // Calculate emoji position (center of chat screen)
+        float screenWidth = Gdx.graphics.getWidth();
+        float screenHeight = Gdx.graphics.getHeight();
+        emojiX = screenWidth / 2f;
+        emojiY = screenHeight / 2f;
+
+        System.out.println("🔵🔵🔵 [CHAT_MENU] Emoji position calculated - X: " + emojiX + ", Y: " + emojiY + " 🔵🔵🔵");
+
+        // Set emoji animation state
+        showingEmojiNotification = true;
+        emojiNotificationTimer = 0f;
+        emojiNotificationAlpha = 1f; // Force visible immediately
+        emojiNotificationFadingIn = false;
+        emojiNotificationFadingOut = false;
+        emojiScale = 1.0f; // Full size immediately
+        emojiRotation = 0f;
+
+        System.out.println("🔵🔵🔵 [CHAT_MENU] Emoji notification state set - showingEmojiNotification: " + showingEmojiNotification + " 🔵🔵🔵");
+    }
+
+    private void updateEmojiNotification(float delta) {
+        if (!showingEmojiNotification) return;
+
+        System.out.println("🔵🔵🔵 [CHAT_MENU] updateEmojiNotification() - Timer: " + emojiNotificationTimer + ", Alpha: " + emojiNotificationAlpha + " 🔵🔵🔵");
+
+        emojiNotificationTimer += delta;
+
+        // Check if it's time to fade out
+        if (emojiNotificationTimer >= EMOJI_NOTIFICATION_DURATION) {
+            emojiNotificationFadingOut = true;
+            System.out.println("🔵🔵🔵 [CHAT_MENU] Starting emoji fade out 🔵🔵🔵");
+        }
+
+        // Handle fade out
+        if (emojiNotificationFadingOut) {
+            emojiNotificationAlpha -= delta / EMOJI_NOTIFICATION_FADE_OUT_TIME;
+            emojiScale -= delta * 0.5f; // Scale down during fade out
+
+            if (emojiNotificationAlpha <= 0f) {
+                emojiNotificationAlpha = 0f;
+                emojiScale = 0f;
+                showingEmojiNotification = false;
+                emojiNotificationFadingOut = false;
+                System.out.println("🔵🔵🔵 [CHAT_MENU] Emoji notification completed and hidden 🔵🔵🔵");
+            }
+        }
+    }
+
+    private void renderEmojiNotification(SpriteBatch batch) {
+        if (!showingEmojiNotification || emojiNotificationAlpha <= 0f) {
+            return;
+        }
+
+        // Load emoji texture if not already loaded
+        if (emojiTexture == null) {
+            try {
+                System.out.println("🔵🔵🔵 [CHAT_MENU] Loading emoji texture from Emoji/Emojis038.png 🔵🔵🔵");
+                emojiTexture = new Texture("Emoji/Emojis038.png");
+                System.out.println("🔵🔵🔵 [CHAT_MENU] Emoji texture loaded successfully - Size: " + emojiTexture.getWidth() + "x" + emojiTexture.getHeight() + " 🔵🔵🔵");
+            } catch (Exception e) {
+                System.out.println("🔵🔵🔵 [CHAT_MENU] Failed to load emoji texture: " + e.getMessage() + " 🔵🔵🔵");
+                showingEmojiNotification = false; // Disable emoji if texture fails to load
+                return;
+            }
+        }
+
+        System.out.println("🔵🔵🔵 [CHAT_MENU] renderEmojiNotification() - Rendering emoji with alpha: " + emojiNotificationAlpha + ", scale: " + emojiScale + ", rotation: " + emojiRotation + " 🔵🔵🔵");
+
+        // Save current batch state
+        batch.setColor(1f, 1f, 1f, emojiNotificationAlpha);
+
+        // Calculate emoji size
+        float emojiSize = 128f * emojiScale; // Base size 128 pixels
+        float halfSize = emojiSize / 2f;
+
+        // Draw the emoji with rotation
+        batch.draw(emojiTexture,
+                   emojiX - halfSize, emojiY - halfSize, // Position
+                   halfSize, halfSize, // Origin for rotation
+                   emojiSize, emojiSize, // Size
+                   1f, 1f, // Scale
+                   emojiRotation, // Rotation
+                   0, 0, // Source position
+                   emojiTexture.getWidth(), emojiTexture.getHeight(), // Source size
+                   false, false); // Flip flags
+
+        // Restore batch color
+        batch.setColor(1f, 1f, 1f, 1f);
+
+        System.out.println("🔵🔵🔵 [CHAT_MENU] renderEmojiNotification() - Emoji drawn at position (" + emojiX + ", " + emojiY + ") with size " + emojiSize + " 🔵🔵🔵");
     }
 
     public void updateOnlinePlayers(List<String> players) {
@@ -477,12 +613,12 @@ public class ChatMenu implements Screen, Disposable {
         }
         playerSelectBox.setItems(playerArray);
     }
-    
+
     private void updateOnlinePlayersFromGame() {
         if (App.getCurrentGame() != null && App.getCurrentGame().getPlayers() != null) {
             List<String> playerNames = new ArrayList<>();
             String currentUser = App.getLoggedInUser() != null ? App.getLoggedInUser().getUserName() : null;
-            
+
             for (Player player : App.getCurrentGame().getPlayers()) {
                 if (player.getUser() != null) {
                     String playerName = player.getUser().getUserName();
@@ -492,7 +628,7 @@ public class ChatMenu implements Screen, Disposable {
                     }
                 }
             }
-            
+
             updateOnlinePlayers(playerNames);
             System.out.println("🔵🔵🔵 [CHAT_MENU] Updated online players: " + playerNames + " 🔵🔵🔵");
         } else {
@@ -514,6 +650,9 @@ public class ChatMenu implements Screen, Disposable {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        // Update emoji notification
+        updateEmojiNotification(delta);
+
         // Draw background
         if (backgroundTexture != null) {
             batch.begin();
@@ -523,6 +662,13 @@ public class ChatMenu implements Screen, Disposable {
 
         stage.act(delta);
         stage.draw();
+
+        // Render emoji notification on top of everything
+        if (showingEmojiNotification) {
+            batch.begin();
+            renderEmojiNotification(batch);
+            batch.end();
+        }
     }
 
     @Override
