@@ -100,6 +100,12 @@ public class GameMenu extends InputAdapter implements Screen {
     private Label dayLabel;
     private Label timeLabel;
     private Label goldLabel;
+
+    // Custom position offsets for time and day labels
+    private static final float DAY_LABEL_X_OFFSET = 0f;  // Horizontal offset from clock center
+    private static final float DAY_LABEL_Y_OFFSET = 5f;  // Vertical offset above clock
+    private static final float TIME_LABEL_X_OFFSET = 0f; // Horizontal offset from clock center
+    private static final float TIME_LABEL_Y_OFFSET = -25f; // Vertical offset below clock
     private ShapeRenderer shapeRenderer;
     private float lightingAlpha = 0f;
     private List<RainDrop> rainDrops;
@@ -1021,9 +1027,9 @@ public class GameMenu extends InputAdapter implements Screen {
         float clockX = stage.getWidth() - clockSize - 20f;
         float clockY = stage.getHeight() - clockSize - 20f;
 
-        dayLabel.setPosition(clockX + clockSize / 2 - dayLabel.getWidth() / 2, clockY + clockSize + 5f);
+        dayLabel.setPosition(clockX + clockSize / 2 - dayLabel.getWidth() / 2 + DAY_LABEL_X_OFFSET, clockY + clockSize + DAY_LABEL_Y_OFFSET);
 
-        timeLabel.setPosition(clockX + clockSize / 2 - timeLabel.getWidth() / 2, clockY - 25f);
+        timeLabel.setPosition(clockX + clockSize / 2 - timeLabel.getWidth() / 2 + TIME_LABEL_X_OFFSET, clockY + TIME_LABEL_Y_OFFSET);
 
         stage.addActor(dayLabel);
         stage.addActor(timeLabel);
@@ -1561,8 +1567,8 @@ public class GameMenu extends InputAdapter implements Screen {
         float clockX = stage.getWidth() - clockSize - 20f;
         float clockY = stage.getHeight() - clockSize - 20f;
 
-        dayLabel.setPosition(clockX + clockSize / 2 - dayLabel.getWidth() / 2 - 3f, clockY + clockSize + 5f);
-        timeLabel.setPosition(clockX + clockSize / 2 - timeLabel.getWidth() / 2 - 3f, clockY - 25f);
+        dayLabel.setPosition(clockX + clockSize / 2 - dayLabel.getWidth() / 2 - 3f, clockY + clockSize - 13f);
+        timeLabel.setPosition(clockX + clockSize / 2 - timeLabel.getWidth() / 2 - 3f, clockY + 43f);
         goldLabel.setPosition(clockX + clockSize / 2 + goldLabel.getWidth() / 2 - 20f, clockY + 12f);
     }
 
