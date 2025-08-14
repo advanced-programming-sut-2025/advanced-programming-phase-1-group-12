@@ -7,6 +7,8 @@ import org.example.Common.models.Quest.QuestManager;
 import org.example.Common.models.enums.Types.CraftingRecipe;
 import org.example.Common.models.enums.Animal;
 import org.example.Common.models.enums.foraging.Plant;
+import org.example.Common.models.NPC.NPC;
+import org.example.Common.models.NPC.NPCvillage;
 
 import java.util.List;
 
@@ -28,6 +30,21 @@ public class QuestController {
         }
     }
     
+    /**
+     * Simple view model for showing NPC quests in UI
+     */
+    public static class NpcQuestDisplay {
+        public final String npcName;
+        public final String description;
+        public final boolean completed;
+
+        public NpcQuestDisplay(String npcName, String description, boolean completed) {
+            this.npcName = npcName;
+            this.description = description;
+            this.completed = completed;
+        }
+    }
+
     public QuestManager getQuestManager() {
         return questManager;
     }
@@ -203,6 +220,48 @@ public class QuestController {
         return list.toString();
     }
     
+    /**
+     * Return a flat list of NPC quests with completion status for current player
+     * This uses NPC and NPCdetails as the source of quests.
+     */
+    public List<NpcQuestDisplay> getNpcQuestDisplays() {
+        if (App.getCurrentGame() == null || App.getCurrentGame().getCurrentPlayer() == null) {
+            return List.of();
+        }
+
+        NPCvillage village = App.getCurrentGame().getNPCvillage();
+        if (village == null) {
+            return List.of();
+        }
+
+        Player currentPlayer = App.getCurrentGame().getCurrentPlayer();
+        java.util.ArrayList<NpcQuestDisplay> result = new java.util.ArrayList<>();
+
+        for (NPC npc : village.getAllNPCs()) {
+            java.util.List<NPC.Quest> npcQuests = npc.getQuests();
+            for (NPC.Quest q : npcQuests) {
+                result.add(new NpcQuestDisplay(npc.getName(), q.getDescription(), q.isCompleted()));
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Helper to detect if a completed group quest was effectively finished without the current player's contribution
+     */
+    public boolean isCompletedByOthers(GroupQuest quest) {
+        if (App.getCurrentGame() == null || App.getCurrentGame().getCurrentPlayer() == null || quest == null) {
+            return false;
+        }
+        if (quest.getStatus() != GroupQuest.QuestStatus.COMPLETED) {
+            return false;
+        }
+        String playerId = App.getCurrentGame().getCurrentPlayer().getUser().getUserName();
+        GroupQuest.PlayerProgress progress = quest.getPlayerProgress(playerId);
+        return progress == null || progress.getContribution() == 0;
+    }
+
     /**
      * Add progress to quests based on player actions
      * This should be called when the player performs relevant actions
