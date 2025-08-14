@@ -1,5 +1,6 @@
 package org.example.views;
 
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import org.example.controllers.*;
 import org.example.controllers.MenusController.GameMenuController;
 import org.example.controllers.ToolsController;
@@ -24,6 +25,7 @@ public class GameConsoleCommandHandler {
     private final StoreController storeController;
     private final CraftingController craftingController;
     private final ArtisanController artisanController;
+    private static Stage stage;
 
     public GameConsoleCommandHandler(GameMenuController controller,
                                      FarmingController farmingController,
@@ -40,6 +42,10 @@ public class GameConsoleCommandHandler {
         this.storeController = storeController;
         this.craftingController = craftingController;
         this.artisanController = artisanController;
+    }
+
+    public static void setStage(Stage stage) {
+        GameConsoleCommandHandler.stage = stage;
     }
 
     public String handle(String inputLine) {
@@ -295,7 +301,7 @@ public class GameConsoleCommandHandler {
         } else if ((matcher = GameMenuCommands.SHOW_RECIPES_CRAFTING.getMather(input)) != null) {
             System.out.println(craftingController.showRecipesCrafting());
         } else if ((matcher = GameMenuCommands.THOR.getMather(input)) != null) {
-            System.out.println(controller.Thor(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y"))));
+            System.out.println(controller.Thor(Integer.parseInt(matcher.group("X")), Integer.parseInt(matcher.group("Y")), stage));
         } else if ((matcher = GameMenuCommands.TakeFromGround.getMather(input)) != null) {
             System.out.println(craftingController.TakeFromGround(matcher.group("itemName"), Integer.parseInt(matcher.group("direction"))));
         } else if ((matcher = GameMenuCommands.MEET_NPC.getMather(input)) != null) {

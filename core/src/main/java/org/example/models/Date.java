@@ -134,9 +134,9 @@ public class Date implements Runnable {
                     Plant plant = (Plant) location.getObjectInTile();
                     plant.setHasBeenWatering(true);
                 }
-            }
-            if (location.getTypeOfTile().equals(TypeOfTile.BURNED_GROUND)) {
-                location.setTypeOfTile(TypeOfTile.GROUND);
+                if (location.getTypeOfTile().equals(TypeOfTile.BURNED_GROUND)) {
+                    location.setTypeOfTile(TypeOfTile.GROUND);
+                }
             }
         }
         for (Farm farm : App.getCurrentGame().getMainMap().getFarms()) {

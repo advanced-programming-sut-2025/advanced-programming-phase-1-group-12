@@ -197,6 +197,8 @@ public class GameMenu extends InputAdapter implements Screen {
     public void show() {
         batch = Main.getMain().getBatch();
         stage = new Stage(new ScreenViewport());
+        GameMenuController.setStage(this.stage);
+        GameConsoleCommandHandler.setStage(stage);
         font = new BitmapFont(Gdx.files.internal("fonts/new.fnt"));
         clockTexture = new Texture(Gdx.files.internal("Clock/clock.png"));
         clockImage = new Image(clockTexture);
@@ -849,6 +851,17 @@ public class GameMenu extends InputAdapter implements Screen {
 
         if (keycode == Input.Keys.M) {
             showAllMap();
+            return true;
+        }
+        if(keycode == Input.Keys.P){
+            Location mainLocation = App.getCurrentPlayerLazy().getUserLocation();
+            mainLocation.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
+            Location northLocation = App.getCurrentGame().getMainMap().findLocation(mainLocation.getxAxis() + 1, mainLocation.getyAxis());
+            northLocation.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
+            Location westLocation = App.getCurrentGame().getMainMap().findLocation(mainLocation.getxAxis(), mainLocation.getyAxis() + 1);
+            westLocation.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
+            Location upLocation = App.getCurrentGame().getMainMap().findLocation(mainLocation.getxAxis() + 1, mainLocation.getyAxis() + 1);
+            upLocation.setTypeOfTile(TypeOfTile.PLOUGHED_LAND);
             return true;
         }
         if (keycode == Input.Keys.B) {
